@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public class GroundController implements Controller {
+    private static final double TARGET_EPSILON = 0.0001;
     private static final double ENTITY_COLLISION_FACTOR = 10;
 
     private final LivingEntity entity;
@@ -122,7 +123,7 @@ public class GroundController implements Controller {
     public void advance(@NotNull Node current, @NotNull Node target, @Nullable Entity targetEntity) {
         Pos entityPos = entity.getPosition();
 
-        double exactTargetY = target.y + target.blockOffset + target.jumpOffset;
+        double exactTargetY = target.y + target.blockOffset + target.jumpOffset + TARGET_EPSILON;
 
         double dX = (target.x + 0.5) - entityPos.x();
         double dZ = (target.z + 0.5) - entityPos.z();
@@ -197,11 +198,10 @@ public class GroundController implements Controller {
 
             Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
 
-            double currentTarget = current.y + current.blockOffset;
-            if ((entityPos.y() < exactTargetY - Vec.EPSILON || entityPos.y() < currentTarget - Vec.EPSILON) &&
-                    physicsResult.hasCollision()) {
+            double currentTarget = current.y + current.blockOffset + TARGET_EPSILON;
+            if ((entityPos.y() < exactTargetY || entityPos.y() < currentTarget) && physicsResult.hasCollision()) {
                 double actualDiff = Double.NEGATIVE_INFINITY;
-                if (currentTarget - Vec.EPSILON > entityPos.y()) {
+                if (currentTarget > entityPos.y()) {
                     actualDiff = currentTarget - entityPos.y();
                     jumpTargetHeight = currentTarget;
                 }
@@ -245,14 +245,14 @@ public class GroundController implements Controller {
 
     private void stepUp(Instance instance, Vec deltaMove, double nodeDiff, Pos pos, double speedX, double speedZ) {
         PhysicsResult canStep = CollisionUtils.handlePhysics(instance, entity.getChunk(), entity.getBoundingBox(),
-                entity.getPosition().add(0, nodeDiff + Vec.EPSILON, 0), deltaMove, null);
+                entity.getPosition().add(0, nodeDiff, 0), deltaMove, null);
 
         if (canStep.hasCollision()) {
             entity.refreshPosition(pos);
             return;
         }
 
-        entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff + Vec.EPSILON, speedZ));
+        entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
     }
 
     @Override

@@ -39,7 +39,7 @@ public class SelectionGroupInteractor implements ShopInteractor {
 
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
-        if (active) {
+        if (!active) {
             for (ShopInteractor inactiveInteractor : inactiveInteractors) {
                 inactiveInteractor.handleInteraction(interaction);
             }
@@ -59,6 +59,10 @@ public class SelectionGroupInteractor implements ShopInteractor {
     public void initialize(@NotNull Shop shop) {
         this.shop = shop;
 
+        for (ShopInteractor activeInteractor : activeInteractors) {
+            activeInteractor.initialize(shop);
+        }
+
         for (ShopInteractor inactiveInteractor : inactiveInteractors) {
             inactiveInteractor.initialize(shop);
         }
@@ -75,6 +79,17 @@ public class SelectionGroupInteractor implements ShopInteractor {
         }
 
         interactors.get(random.nextInt(interactors.size())).setActive(true);
+    }
+
+    @Override
+    public void tick(long time) {
+        for (ShopInteractor interactor : activeInteractors) {
+            interactor.tick(time);
+        }
+
+        for (ShopInteractor interactor : inactiveInteractors) {
+            interactor.tick(time);
+        }
     }
 
     public void setActive(boolean active) {

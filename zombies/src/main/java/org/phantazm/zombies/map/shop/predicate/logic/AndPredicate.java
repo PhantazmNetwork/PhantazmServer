@@ -6,6 +6,7 @@ import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.predicate.PredicateBase;
 import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 
@@ -22,10 +23,10 @@ public class AndPredicate extends PredicateBase<AndPredicate.Data> {
     }
 
     @Override
-    public boolean canInteract(@NotNull PlayerInteraction interaction) {
+    public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
         boolean failed = false;
         for (ShopPredicate predicate : predicates) {
-            if (!predicate.canInteract(interaction)) {
+            if (!predicate.canInteract(interaction, shop)) {
                 failed = true;
 
                 if (data.shortCircuit) {

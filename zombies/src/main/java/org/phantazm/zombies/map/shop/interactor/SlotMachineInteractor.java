@@ -1,6 +1,7 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.*;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -11,6 +12,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.item.ItemEntityMeta;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
 import org.phantazm.core.time.TickFormatter;
@@ -133,6 +135,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         }
 
         rolling = true;
+        shop.flags().setFlag(data.rollingFlag);
 
         Collections.shuffle(frames, random);
 
@@ -145,7 +148,7 @@ public class SlotMachineInteractor implements ShopInteractor {
             interactor.handleInteraction(interaction);
         }
 
-        return false;
+        return true;
     }
 
     @Override
@@ -188,8 +191,9 @@ public class SlotMachineInteractor implements ShopInteractor {
 
         if (ticksSinceDoneRolling < data.gracePeriodTicks) {
             String timeString = tickFormatter.format(data.gracePeriodTicks - ticksSinceDoneRolling);
-            TagResolver[] tags = getTagsForFrame(frames.get((currentFrameIndex - 1) % frames.size()),
-                    Placeholder.unparsed("time_left", timeString));
+            TagResolver[] tags =
+                    getTagsForFrame(frames.isEmpty() ? null : frames.get((currentFrameIndex - 1) % frames.size()),
+                            Placeholder.unparsed("time_left", timeString));
 
             List<Component> newComponents = new ArrayList<>(data.gracePeriodFormats.size());
             for (String formatString : data.gracePeriodFormats) {
@@ -216,6 +220,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         hologram.clear();
         rollInteraction = null;
         rolling = false;
+        shop.flags().clearFlag(data.rollingFlag);
         doneRolling = false;
         rollFinishTime = 0L;
         lastFrameTime = 0L;
@@ -224,6 +229,10 @@ public class SlotMachineInteractor implements ShopInteractor {
     }
 
     private void displayRollFrame(int index) {
+        if (frames.isEmpty()) {
+            return;
+        }
+
         SlotMachineFrame frame = frames.get(index % frames.size());
 
         if (item != null) {
@@ -246,13 +255,19 @@ public class SlotMachineInteractor implements ShopInteractor {
         updateHologram(newComponents);
     }
 
-    private TagResolver[] getTagsForFrame(SlotMachineFrame frame, TagResolver... additionalTags) {
+    private TagResolver[] getTagsForFrame(@Nullable SlotMachineFrame frame, TagResolver... additionalTags) {
         TagResolver rollingPlayerTag = Placeholder.component("rolling_player",
                 rollInteraction.player().module().getPlayerView().getDisplayNameIfPresent());
 
-        Component displayName = frame.getVisual().getDisplayName();
-        if (displayName == null) {
-            displayName = Component.translatable(frame.getVisual().material().registry().translationKey());
+        Component displayName;
+        if (frame != null) {
+            displayName = frame.getVisual().getDisplayName();
+            if (displayName == null) {
+                displayName = Component.translatable(frame.getVisual().material().registry().translationKey());
+            }
+        }
+        else {
+            displayName = Component.empty();
         }
 
         TagResolver itemName = Placeholder.component("item_name", displayName);
@@ -275,6 +290,11 @@ public class SlotMachineInteractor implements ShopInteractor {
             Component oldComponent = i < hologram.size() ? hologram.get(i) : null;
 
             if (!newComponent.equals(oldComponent)) {
+                if (oldComponent == null) {
+                    hologram.add(newComponent);
+                    continue;
+                }
+
                 hologram.set(i, newComponent);
             }
         }
@@ -373,6 +393,7 @@ public class SlotMachineInteractor implements ShopInteractor {
                        double hologramOffset,
                        double itemOffset,
                        int gracePeriodTicks,
+                       @NotNull Key rollingFlag,
                        @NotNull List<String> gracePeriodFormats,
                        @NotNull @ChildPath("tick_formatter") String tickFormatter,
                        @NotNull @ChildPath("delay_formula") String delayFormula,

@@ -3,6 +3,7 @@ package org.phantazm.zombies.map.shop.predicate.logic;
 import com.github.steanky.element.core.annotation.*;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.predicate.PredicateBase;
 import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 
@@ -19,8 +20,8 @@ public class NotPredicate extends PredicateBase<NotPredicate.Data> {
     }
 
     @Override
-    public boolean canInteract(@NotNull PlayerInteraction interaction) {
-        return !predicate.canInteract(interaction);
+    public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
+        return !predicate.canInteract(interaction, shop);
     }
 
     @DataObject

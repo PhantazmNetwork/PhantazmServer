@@ -7,6 +7,7 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 
 import java.util.Objects;
 
@@ -21,7 +22,7 @@ public class MapFlagPredicate extends PredicateBase<MapFlagPredicate.Data> {
     }
 
     @Override
-    public boolean canInteract(@NotNull PlayerInteraction interaction) {
+    public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
         return flaggable.hasFlag(data.flag) != data.requireAbsent;
     }
 

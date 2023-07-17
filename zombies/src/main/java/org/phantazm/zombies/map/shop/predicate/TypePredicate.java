@@ -6,6 +6,7 @@ import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 
 import java.util.Set;
 
@@ -17,7 +18,7 @@ public class TypePredicate extends PredicateBase<TypePredicate.Data> {
     }
 
     @Override
-    public boolean canInteract(@NotNull PlayerInteraction interaction) {
+    public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
         return data.types.contains(interaction.key()) != data.blacklist;
     }
 

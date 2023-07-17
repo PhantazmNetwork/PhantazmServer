@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 
 @Model("zombies.map.shop.predicate.in_game")
 public class PlayerInGamePredicate extends PredicateBase<PlayerInGamePredicate.Data> {
@@ -14,7 +15,7 @@ public class PlayerInGamePredicate extends PredicateBase<PlayerInGamePredicate.D
     }
 
     @Override
-    public boolean canInteract(@NotNull PlayerInteraction interaction) {
+    public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
         return interaction.player().module().getMeta().isInGame();
     }
 

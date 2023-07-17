@@ -3,6 +3,7 @@ package org.phantazm.zombies.map.shop.predicate;
 import com.github.steanky.element.core.annotation.*;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.interactor.ShopInteractor;
 
 import java.util.List;
@@ -22,8 +23,8 @@ public class InteractingPredicate implements ShopPredicate {
     }
 
     @Override
-    public boolean canInteract(@NotNull PlayerInteraction interaction) {
-        if (delegate.canInteract(interaction)) {
+    public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
+        if (delegate.canInteract(interaction, shop)) {
             for (ShopInteractor interactor : interactors) {
                 interactor.handleInteraction(interaction);
             }

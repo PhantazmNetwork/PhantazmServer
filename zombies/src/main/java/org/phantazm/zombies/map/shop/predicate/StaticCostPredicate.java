@@ -9,6 +9,7 @@ import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 
 import java.util.Objects;
 
@@ -23,7 +24,7 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
     }
 
     @Override
-    public boolean canInteract(@NotNull PlayerInteraction interaction) {
+    public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
         PlayerCoins coins = interaction.player().module().getCoins();
         return coins.runTransaction(new Transaction(transactionModifierSource.modifiers(data.modifierType), -data.cost))
                 .isAffordable(coins);

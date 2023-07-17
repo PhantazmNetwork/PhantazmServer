@@ -32,7 +32,7 @@ public class ChangeSelectionGroupInteractor implements ShopInteractor {
 
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
-        List<SelectionGroupInteractor> interactors = groupHandler.interactors(data.groupKey);
+        List<SelectionGroupInteractor> interactors = groupHandler.interactors(data.group);
         if (interactors.isEmpty()) {
             return false;
         }
@@ -80,7 +80,7 @@ public class ChangeSelectionGroupInteractor implements ShopInteractor {
     }
 
     @DataObject
-    public record Data(@NotNull Key groupKey, boolean excludeCurrent) {
+    public record Data(@NotNull Key group, boolean excludeCurrent) {
         @Default("excludeCurrent")
         public static @NotNull ConfigElement defaultExcludeCurrent() {
             return ConfigPrimitive.of(true);

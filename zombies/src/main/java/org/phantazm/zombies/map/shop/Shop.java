@@ -111,7 +111,7 @@ public class Shop extends BoundedBase implements Tickable {
             }
         }
 
-        boolean success = shopInfo.predicateEvaluation().evaluate(predicates, interaction);
+        boolean success = shopInfo.predicateEvaluation().evaluate(predicates, interaction, this);
         List<ShopInteractor> interactorsToCall = success ? successInteractors : failureInteractors;
 
         for (ShopInteractor interactor : interactorsToCall) {

@@ -93,7 +93,7 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
                        @NotNull @ChildPath("failure") List<String> failureInteractors) {
         @Default("reset")
         public static @NotNull ConfigElement resetDefault() {
-            return ConfigPrimitive.of(true);
+            return ConfigPrimitive.of(false);
         }
     }
 }
