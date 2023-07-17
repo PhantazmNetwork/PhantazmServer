@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.fabric.loom)
 }
 
-version = "0.2.0+1.20.1"
+version = "0.2.1+1.20.1"
 
 base {
     archivesName.set("zombies-autosplits")
@@ -38,6 +38,8 @@ dependencies {
     include(projects.phantazmCommons)
     include(projects.phantazmMessaging)
     include(libs.adventure.key)
+    include(libs.examination.api)
+    include(libs.examination.string)
     include(libs.ethylene.core)
     include(libs.ethylene.yaml)
     include(libs.toolkit.collection)
