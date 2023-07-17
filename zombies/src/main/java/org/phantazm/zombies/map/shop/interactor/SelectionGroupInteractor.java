@@ -83,12 +83,15 @@ public class SelectionGroupInteractor implements ShopInteractor {
 
     @Override
     public void tick(long time) {
-        for (ShopInteractor interactor : activeInteractors) {
-            interactor.tick(time);
+        if (isActive()) {
+            for (ShopInteractor interactor : activeInteractors) {
+                interactor.tick(time);
+            }
         }
-
-        for (ShopInteractor interactor : inactiveInteractors) {
-            interactor.tick(time);
+        else {
+            for (ShopInteractor interactor : inactiveInteractors) {
+                interactor.tick(time);
+            }
         }
     }
 
