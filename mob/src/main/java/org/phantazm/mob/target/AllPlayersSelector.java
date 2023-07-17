@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Model("mob.selector.all_players")
-@Cache
+@Cache(false)
 public class AllPlayersSelector implements TargetSelector<List<Player>> {
     private final TargetValidator targetValidator;
 
