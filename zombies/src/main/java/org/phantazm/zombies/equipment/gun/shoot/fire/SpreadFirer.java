@@ -54,17 +54,14 @@ public class SpreadFirer implements Firer {
             return;
         }
 
-        Vec direction = start.direction();
-        double yaw = Math.atan2(direction.z(), direction.x());
-        double noYMagnitude = Math.sqrt(direction.x() * direction.x() + direction.z() * direction.z());
-        double pitch = Math.atan2(direction.y(), noYMagnitude);
+        double yaw = start.yaw();
+        double pitch = start.pitch();
 
         for (int i = 0; i < Math.max(subFirers.size(), data.amount); i++) {
             double newYaw = yaw + data.angleVariance() * (2 * random.nextDouble() - 1);
             double newPitch = pitch + data.angleVariance() * (2 * random.nextDouble() - 1);
 
-            Vec newDirection = new Vec(Math.cos(newYaw) * Math.cos(newPitch), Math.sin(newPitch),
-                    Math.sin(newYaw) * Math.cos(newPitch));
+            Vec newDirection = start.withView((float)newYaw, (float)newPitch).direction();
             subFirers.get(i % subFirers.size()).fire(gun, state, start.withDirection(newDirection), previousHits);
         }
     }
