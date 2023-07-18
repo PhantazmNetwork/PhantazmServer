@@ -33,36 +33,20 @@ public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         boolean success = data.evaluation.evaluate(predicates, interaction, shop);
         List<ShopInteractor> interactors = success ? successInteractors : failureInteractors;
-
-        for (ShopInteractor interactor : interactors) {
-            success &= interactor.handleInteraction(interaction);
-        }
-
-        return success;
+        return success && ShopInteractor.handle(interactors, interaction);
     }
 
     @Override
     public void tick(long time) {
-        for (ShopInteractor interactor : successInteractors) {
-            interactor.tick(time);
-        }
-
-        for (ShopInteractor interactor : failureInteractors) {
-            interactor.tick(time);
-        }
+        ShopInteractor.tick(successInteractors, time);
+        ShopInteractor.tick(failureInteractors, time);
     }
 
     @Override
     public void initialize(@NotNull Shop shop) {
-        for (ShopInteractor interactor : successInteractors) {
-            interactor.initialize(shop);
-        }
-
-        for (ShopInteractor interactor : failureInteractors) {
-            interactor.initialize(shop);
-        }
-
         this.shop = shop;
+        ShopInteractor.initialize(successInteractors, shop);
+        ShopInteractor.initialize(failureInteractors, shop);
     }
 
     @DataObject

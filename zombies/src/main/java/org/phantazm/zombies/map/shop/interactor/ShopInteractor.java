@@ -15,4 +15,26 @@ public interface ShopInteractor extends Tickable {
 
     default void initialize(@NotNull Shop shop) {
     }
+
+    static boolean handle(@NotNull Iterable<? extends ShopInteractor> interactors,
+            @NotNull PlayerInteraction interaction) {
+        boolean res = true;
+        for (ShopInteractor interactor : interactors) {
+            res &= interactor.handleInteraction(interaction);
+        }
+
+        return res;
+    }
+
+    static void tick(@NotNull Iterable<? extends ShopInteractor> interactors, long time) {
+        for (ShopInteractor interactor : interactors) {
+            interactor.tick(time);
+        }
+    }
+
+    static void initialize(@NotNull Iterable<? extends ShopInteractor> interactors, @NotNull Shop shop) {
+        for (ShopInteractor interactor : interactors) {
+            interactor.initialize(shop);
+        }
+    }
 }

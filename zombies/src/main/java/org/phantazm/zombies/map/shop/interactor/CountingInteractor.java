@@ -28,13 +28,8 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
 
     @Override
     public void initialize(@NotNull Shop shop) {
-        for (ShopInteractor interactor : successInteractors) {
-            interactor.initialize(shop);
-        }
-
-        for (ShopInteractor interactor : failureInteractors) {
-            interactor.initialize(shop);
-        }
+        ShopInteractor.initialize(successInteractors, shop);
+        ShopInteractor.initialize(failureInteractors, shop);
     }
 
     @Override
@@ -42,9 +37,7 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
         int uses = this.uses;
 
         if (uses < data.maxUses) {
-            for (ShopInteractor interactor : successInteractors) {
-                interactor.handleInteraction(interaction);
-            }
+            ShopInteractor.handle(successInteractors, interaction);
         }
 
         boolean success = true;
@@ -52,9 +45,7 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
             int nextUse = ++uses % data.maxUses;
             if (nextUse < uses) {
                 success = false;
-                for (ShopInteractor interactor : failureInteractors) {
-                    interactor.handleInteraction(interaction);
-                }
+                ShopInteractor.handle(failureInteractors, interaction);
             }
 
             this.uses = nextUse;
@@ -64,9 +55,7 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
         int nextUse = ++uses;
         if (nextUse >= data.maxUses) {
             success = false;
-            for (ShopInteractor interactor : failureInteractors) {
-                interactor.handleInteraction(interaction);
-            }
+            ShopInteractor.handle(failureInteractors, interaction);
         }
         else {
             this.uses = nextUse;
@@ -77,13 +66,8 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
 
     @Override
     public void tick(long time) {
-        for (ShopInteractor interactor : successInteractors) {
-            interactor.tick(time);
-        }
-
-        for (ShopInteractor interactor : failureInteractors) {
-            interactor.tick(time);
-        }
+        ShopInteractor.tick(successInteractors, time);
+        ShopInteractor.tick(failureInteractors, time);
     }
 
     @DataObject

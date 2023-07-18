@@ -75,33 +75,21 @@ public class SlotMachineInteractor implements ShopInteractor {
         this.random = random;
     }
 
-    private void initializeInteractors(Iterable<ShopInteractor> interactors, Shop shop) {
-        for (ShopInteractor interactor : interactors) {
-            interactor.initialize(shop);
-        }
-    }
-
-    private void tickInteractors(Iterable<ShopInteractor> interactors, long time) {
-        for (ShopInteractor interactor : interactors) {
-            interactor.tick(time);
-        }
-    }
-
     @Override
     public void initialize(@NotNull Shop shop) {
         this.shop = shop;
         this.hologram = new InstanceHologram(shop.center().add(0, data.hologramOffset, 0), 0);
         this.hologram.setInstance(shop.instance());
 
-        initializeInteractors(rollStartInteractors, shop);
-        initializeInteractors(mismatchedPlayerInteractors, shop);
-        initializeInteractors(whileRollingInteractors, shop);
-        initializeInteractors(timeoutExpiredInteractors, shop);
-        initializeInteractors(itemClaimedInteractors, shop);
-        initializeInteractors(endInteractors, shop);
+        ShopInteractor.initialize(rollStartInteractors, shop);
+        ShopInteractor.initialize(mismatchedPlayerInteractors, shop);
+        ShopInteractor.initialize(whileRollingInteractors, shop);
+        ShopInteractor.initialize(timeoutExpiredInteractors, shop);
+        ShopInteractor.initialize(itemClaimedInteractors, shop);
+        ShopInteractor.initialize(endInteractors, shop);
 
         for (SlotMachineFrame frame : frames) {
-            initializeInteractors(frame.interactors(), shop);
+            ShopInteractor.initialize(frame.interactors(), shop);
         }
     }
 
@@ -109,32 +97,21 @@ public class SlotMachineInteractor implements ShopInteractor {
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         if (rolling) {
             if (interaction.player() != rollInteraction.player()) {
-                for (ShopInteractor interactor : mismatchedPlayerInteractors) {
-                    interactor.handleInteraction(interaction);
-                }
-
+                ShopInteractor.handle(mismatchedPlayerInteractors, interaction);
                 return false;
             }
 
             if (!doneRolling) {
-                for (ShopInteractor interactor : whileRollingInteractors) {
-                    interactor.handleInteraction(interaction);
-                }
-
+                ShopInteractor.handle(whileRollingInteractors, interaction);
                 return false;
             }
 
             if (!frames.isEmpty()) {
                 SlotMachineFrame currentFrame = frames.get((currentFrameIndex - 1) % frames.size());
-                for (ShopInteractor interactor : currentFrame.interactors()) {
-                    interactor.handleInteraction(rollInteraction);
-                }
+                ShopInteractor.handle(currentFrame.interactors(), rollInteraction);
             }
 
-            for (ShopInteractor interactor : itemClaimedInteractors) {
-                interactor.handleInteraction(rollInteraction);
-            }
-
+            ShopInteractor.handle(itemClaimedInteractors, rollInteraction);
             reset();
             return true;
         }
@@ -149,24 +126,21 @@ public class SlotMachineInteractor implements ShopInteractor {
         currentFrameIndex = 0;
         ticksUntilNextFrame = delayFormula.delay(data.frameCount, currentFrameIndex);
 
-        for (ShopInteractor interactor : rollStartInteractors) {
-            interactor.handleInteraction(interaction);
-        }
-
+        ShopInteractor.handle(rollStartInteractors, interaction);
         return true;
     }
 
     @Override
     public void tick(long time) {
-        tickInteractors(rollStartInteractors, time);
-        tickInteractors(mismatchedPlayerInteractors, time);
-        tickInteractors(whileRollingInteractors, time);
-        tickInteractors(timeoutExpiredInteractors, time);
-        tickInteractors(itemClaimedInteractors, time);
-        tickInteractors(endInteractors, time);
+        ShopInteractor.tick(rollStartInteractors, time);
+        ShopInteractor.tick(mismatchedPlayerInteractors, time);
+        ShopInteractor.tick(whileRollingInteractors, time);
+        ShopInteractor.tick(timeoutExpiredInteractors, time);
+        ShopInteractor.tick(itemClaimedInteractors, time);
+        ShopInteractor.tick(endInteractors, time);
 
         for (SlotMachineFrame frame : frames) {
-            tickInteractors(frame.interactors(), time);
+            ShopInteractor.tick(frame.interactors(), time);
         }
 
         if (!rolling) {
@@ -210,17 +184,12 @@ public class SlotMachineInteractor implements ShopInteractor {
             return;
         }
 
-        for (ShopInteractor interactor : timeoutExpiredInteractors) {
-            interactor.handleInteraction(rollInteraction);
-        }
-
+        ShopInteractor.handle(timeoutExpiredInteractors, rollInteraction);
         reset();
     }
 
     private void reset() {
-        for (ShopInteractor interactor : endInteractors) {
-            interactor.handleInteraction(rollInteraction);
-        }
+        ShopInteractor.handle(endInteractors, rollInteraction);
 
         if (item != null) {
             item.remove();

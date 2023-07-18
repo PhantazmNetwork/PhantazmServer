@@ -40,32 +40,19 @@ public class SelectionGroupInteractor implements ShopInteractor {
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         if (!active) {
-            for (ShopInteractor inactiveInteractor : inactiveInteractors) {
-                inactiveInteractor.handleInteraction(interaction);
-            }
-
+            ShopInteractor.handle(inactiveInteractors, interaction);
             return false;
         }
 
-        boolean res = true;
-        for (ShopInteractor activeInteractor : activeInteractors) {
-            res &= activeInteractor.handleInteraction(interaction);
-        }
-
-        return res;
+        return ShopInteractor.handle(activeInteractors, interaction);
     }
 
     @Override
     public void initialize(@NotNull Shop shop) {
         this.shop = shop;
 
-        for (ShopInteractor activeInteractor : activeInteractors) {
-            activeInteractor.initialize(shop);
-        }
-
-        for (ShopInteractor inactiveInteractor : inactiveInteractors) {
-            inactiveInteractor.initialize(shop);
-        }
+        ShopInteractor.initialize(activeInteractors, shop);
+        ShopInteractor.initialize(inactiveInteractors, shop);
 
         if (handler.isChosen(data.group)) {
             return;
@@ -83,16 +70,8 @@ public class SelectionGroupInteractor implements ShopInteractor {
 
     @Override
     public void tick(long time) {
-        if (isActive()) {
-            for (ShopInteractor interactor : activeInteractors) {
-                interactor.tick(time);
-            }
-        }
-        else {
-            for (ShopInteractor interactor : inactiveInteractors) {
-                interactor.tick(time);
-            }
-        }
+        ShopInteractor.tick(activeInteractors, time);
+        ShopInteractor.tick(inactiveInteractors, time);
     }
 
     public void setActive(boolean active) {

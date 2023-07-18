@@ -11,13 +11,14 @@ import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryObjectGroup;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.List;
 import java.util.Optional;
 
 @Model("zombies.map.shop.interactor.add_equipment")
-@Cache
+@Cache(false)
 public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteractor.Data> {
     private final List<ShopInteractor> successInteractors;
     private final List<ShopInteractor> failureInteractors;
@@ -32,8 +33,20 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
     }
 
     @Override
+    public void initialize(@NotNull Shop shop) {
+        ShopInteractor.initialize(successInteractors, shop);
+        ShopInteractor.initialize(failureInteractors, shop);
+    }
+
+    @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         return addEquipment(interaction);
+    }
+
+    @Override
+    public void tick(long time) {
+        ShopInteractor.tick(successInteractors, time);
+        ShopInteractor.tick(failureInteractors, time);
     }
 
     private boolean addEquipment(PlayerInteraction interaction) {
@@ -92,17 +105,10 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
 
         boolean success = wrapper.get();
         if (success) {
-            for (ShopInteractor interactor : successInteractors) {
-                success &= interactor.handleInteraction(interaction);
-            }
-
-            return success;
+            return ShopInteractor.handle(successInteractors, interaction);
         }
 
-        for (ShopInteractor interactor : failureInteractors) {
-            interactor.handleInteraction(interaction);
-        }
-
+        ShopInteractor.handle(failureInteractors, interaction);
         return false;
     }
 
