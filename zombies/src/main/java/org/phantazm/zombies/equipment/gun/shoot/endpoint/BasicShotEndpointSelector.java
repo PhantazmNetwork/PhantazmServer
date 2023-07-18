@@ -88,11 +88,12 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
                 }
             }
 
+            Pos limit = start.add(start.direction().mul(data.maxDistance));
             if (block != null) {
-                return RayUtils.rayTrace(block.registry().collisionShape(), blockLocation, start).orElse(null);
+                return RayUtils.rayTrace(block.registry().collisionShape(), blockLocation, start).orElse(limit.asVec());
             }
 
-            return null;
+            return limit;
         });
     }
 
