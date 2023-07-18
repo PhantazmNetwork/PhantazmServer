@@ -5,7 +5,6 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
@@ -60,9 +59,8 @@ public class SpreadFirer implements Firer {
         for (int i = 0; i < Math.max(subFirers.size(), data.amount); i++) {
             double newYaw = yaw + data.angleVariance() * (2 * random.nextDouble() - 1);
             double newPitch = pitch + data.angleVariance() * (2 * random.nextDouble() - 1);
-
-            Vec newDirection = start.withView((float)newYaw, (float)newPitch).direction();
-            subFirers.get(i % subFirers.size()).fire(gun, state, start.withDirection(newDirection), previousHits);
+            subFirers.get(i % subFirers.size())
+                    .fire(gun, state, start.withView((float)newYaw, (float)newPitch), previousHits);
         }
     }
 

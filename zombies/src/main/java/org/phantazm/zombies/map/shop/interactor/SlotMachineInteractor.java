@@ -16,8 +16,10 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.zombies.map.Evaluation;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
+import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 
 import java.util.*;
 
@@ -25,9 +27,11 @@ import java.util.*;
 @Cache(false)
 public class SlotMachineInteractor implements ShopInteractor {
     private final Data data;
+    private final List<ShopPredicate> rollPredicates;
     private final TickFormatter tickFormatter;
     private final DelayFormula delayFormula;
     private final List<SlotMachineFrame> frames;
+    private final List<ShopInteractor> rollFailInteractors;
     private final List<ShopInteractor> rollStartInteractors;
     private final List<ShopInteractor> mismatchedPlayerInteractors;
     private final List<ShopInteractor> whileRollingInteractors;
@@ -53,9 +57,11 @@ public class SlotMachineInteractor implements ShopInteractor {
     private int ticksUntilNextFrame;
 
     @FactoryMethod
-    public SlotMachineInteractor(Data data, @NotNull @Child("tick_formatter") TickFormatter tickFormatter,
+    public SlotMachineInteractor(Data data, @NotNull @Child("roll_predicates") List<ShopPredicate> rollPredicates,
+            @NotNull @Child("tick_formatter") TickFormatter tickFormatter,
             @NotNull @Child("delay_formula") DelayFormula delayFormula,
             @NotNull @Child("frames") List<SlotMachineFrame> frames,
+            @NotNull @Child("roll_fail_interactors") List<ShopInteractor> rollFailInteractors,
             @NotNull @Child("roll_start_interactors") List<ShopInteractor> rollStartInteractors,
             @NotNull @Child("mismatched_player_interactors") List<ShopInteractor> mismatchedPlayerInteractors,
             @NotNull @Child("while_rolling_interactors") List<ShopInteractor> whileRollingInteractors,
@@ -63,9 +69,11 @@ public class SlotMachineInteractor implements ShopInteractor {
             @NotNull @Child("item_claimed_interactors") List<ShopInteractor> itemClaimedInteractors,
             @NotNull @Child("end_interactors") List<ShopInteractor> endInteractors, @NotNull Random random) {
         this.data = data;
+        this.rollPredicates = rollPredicates;
         this.tickFormatter = tickFormatter;
         this.delayFormula = delayFormula;
         this.frames = new ArrayList<>(frames);
+        this.rollFailInteractors = rollFailInteractors;
         this.rollStartInteractors = rollStartInteractors;
         this.mismatchedPlayerInteractors = mismatchedPlayerInteractors;
         this.whileRollingInteractors = whileRollingInteractors;
@@ -114,6 +122,11 @@ public class SlotMachineInteractor implements ShopInteractor {
             ShopInteractor.handle(itemClaimedInteractors, rollInteraction);
             reset();
             return true;
+        }
+
+        if (!data.evaluation.evaluate(rollPredicates, interaction, shop)) {
+            ShopInteractor.handle(rollFailInteractors, interaction);
+            return false;
         }
 
         rolling = true;
@@ -375,9 +388,12 @@ public class SlotMachineInteractor implements ShopInteractor {
                        int gracePeriodTicks,
                        @NotNull Key rollingFlag,
                        @NotNull List<String> gracePeriodFormats,
+                       @NotNull Evaluation evaluation,
+                       @NotNull @ChildPath("roll_predicates") List<String> rollPredicates,
                        @NotNull @ChildPath("tick_formatter") String tickFormatter,
                        @NotNull @ChildPath("delay_formula") String delayFormula,
                        @NotNull @ChildPath("frames") List<String> frames,
+                       @NotNull @ChildPath("roll_fail_interactors") List<String> rollFailInteractors,
                        @NotNull @ChildPath("roll_start_interactors") List<String> rollStartInteractors,
                        @NotNull @ChildPath("mismatched_player_interactors") List<String> mismatchedPlayerInteractors,
                        @NotNull @ChildPath("while_rolling_interactors") List<String> whileRollingInteractors,
