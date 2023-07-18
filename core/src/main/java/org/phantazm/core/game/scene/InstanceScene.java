@@ -104,12 +104,8 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         player.setInstanceAddCallback(
                 () -> Utils.handleInstanceTransfer(oldInstance, instance, player, newInstancePlayer -> true,
                         this::hasGhost));
-        player.setInstance(instance, spawnPoint).whenComplete((ignored, err) -> {
-            if (err != null) {
-                player.setGameMode(GameMode.SPECTATOR);
-            }
-        });
-
+        player.setGameMode(GameMode.SPECTATOR);
+        player.setInstance(instance, spawnPoint);
         return true;
     }
 
