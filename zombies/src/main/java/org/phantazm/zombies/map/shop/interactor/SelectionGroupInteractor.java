@@ -74,6 +74,10 @@ public class SelectionGroupInteractor implements ShopInteractor {
         ShopInteractor.tick(inactiveInteractors, time);
     }
 
+    public Shop shop() {
+        return shop;
+    }
+
     public void setActive(boolean active) {
         boolean currentlyActive = this.active;
         if (currentlyActive == active) {
