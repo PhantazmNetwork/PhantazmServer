@@ -1,6 +1,9 @@
 package org.phantazm.zombies.equipment.gun.shoot.fire;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +22,7 @@ public class SpreadFirer implements Firer {
 
     private final Data data;
     private final Random random;
-    private final Collection<Firer> subFirers;
+    private final List<Firer> subFirers;
 
     /**
      * Creates a {@link SpreadFirer}.
@@ -39,10 +42,15 @@ public class SpreadFirer implements Firer {
     @Override
     public void fire(@NotNull Gun gun, @NotNull GunState state, @NotNull Pos start,
             @NotNull Collection<UUID> previousHits) {
+        if (subFirers.isEmpty()) {
+            return;
+        }
+
         if (data.angleVariance() == 0) {
-            for (Firer subFirer : subFirers) {
-                subFirer.fire(gun, state, start, previousHits);
+            for (int i = 0; i < Math.max(subFirers.size(), data.amount); i++) {
+                subFirers.get(i % subFirers.size()).fire(gun, state, start, previousHits);
             }
+
             return;
         }
 
@@ -51,13 +59,13 @@ public class SpreadFirer implements Firer {
         double noYMagnitude = Math.sqrt(direction.x() * direction.x() + direction.z() * direction.z());
         double pitch = Math.atan2(direction.y(), noYMagnitude);
 
-        for (Firer subFirer : subFirers) {
+        for (int i = 0; i < Math.max(subFirers.size(), data.amount); i++) {
             double newYaw = yaw + data.angleVariance() * (2 * random.nextDouble() - 1);
             double newPitch = pitch + data.angleVariance() * (2 * random.nextDouble() - 1);
 
             Vec newDirection = new Vec(Math.cos(newYaw) * Math.cos(newPitch), Math.sin(newPitch),
                     Math.sin(newYaw) * Math.cos(newPitch));
-            subFirer.fire(gun, state, start.withDirection(newDirection), previousHits);
+            subFirers.get(i % subFirers.size()).fire(gun, state, start.withDirection(newDirection), previousHits);
         }
     }
 
@@ -75,8 +83,13 @@ public class SpreadFirer implements Firer {
      * @param angleVariance The maximum angle variance for each sub-{@link Firer}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("sub_firers") Collection<String> subFirers, float angleVariance) {
-
+    public record Data(@NotNull @ChildPath("sub_firers") Collection<String> subFirers,
+                       int amount,
+                       float angleVariance) {
+        @Default("amount")
+        public static @NotNull ConfigElement defaultAmount() {
+            return ConfigPrimitive.of(-1);
+        }
     }
 
 }
