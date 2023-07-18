@@ -33,7 +33,7 @@ public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         boolean success = data.evaluation.evaluate(predicates, interaction, shop);
         List<ShopInteractor> interactors = success ? successInteractors : failureInteractors;
-        return success && ShopInteractor.handle(interactors, interaction);
+        return success & ShopInteractor.handle(interactors, interaction);
     }
 
     @Override
