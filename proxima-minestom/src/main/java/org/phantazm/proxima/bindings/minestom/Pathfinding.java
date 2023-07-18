@@ -122,7 +122,7 @@ public class Pathfinding {
 
     public @NotNull Controller getController(@NotNull LivingEntity livingEntity) {
         return Objects.requireNonNullElseGet(controller,
-                () -> controller = new GroundController(livingEntity, stepHeight()));
+                () -> controller = new GroundController(livingEntity, stepHeight(), jumpHeight()));
     }
 
     public @NotNull PositionResolver positionResolverForTarget(@NotNull Entity entity) {

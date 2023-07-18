@@ -28,7 +28,8 @@ public class GroundController implements Controller {
     private static final double ENTITY_COLLISION_FACTOR = 10;
 
     private final LivingEntity entity;
-    private final double step;
+    private final double stepHeight;
+    private final double jumpHeight;
     private final TrackerPredicate trackerPredicate;
 
     private boolean jumping;
@@ -45,12 +46,13 @@ public class GroundController implements Controller {
     /**
      * Creates a new GroundController managing the provided entity, using the given step distance and walk speed.
      *
-     * @param entity the entity managed by this controller
-     * @param step   the maximum distance the entity may "step up" blocks
+     * @param entity     the entity managed by this controller
+     * @param stepHeight the maximum distance the entity may "step up" blocks
      */
-    public GroundController(@NotNull LivingEntity entity, float step) {
+    public GroundController(@NotNull LivingEntity entity, float stepHeight, float jumpHeight) {
         this.entity = Objects.requireNonNull(entity, "entity");
-        this.step = step;
+        this.stepHeight = stepHeight;
+        this.jumpHeight = jumpHeight;
         this.trackerPredicate = new TrackerPredicate();
     }
 
@@ -201,19 +203,24 @@ public class GroundController implements Controller {
             double currentTarget = current.y + current.blockOffset + TARGET_EPSILON;
             if ((entityPos.y() < exactTargetY || entityPos.y() < currentTarget) && physicsResult.hasCollision()) {
                 double actualDiff = Double.NEGATIVE_INFINITY;
+
+                double targetHeight = Double.NaN;
                 if (currentTarget > entityPos.y()) {
                     actualDiff = currentTarget - entityPos.y();
-                    jumpTargetHeight = currentTarget;
+                    targetHeight = currentTarget;
                 }
 
                 double targetDiff = exactTargetY - entityPos.y();
                 if (targetDiff > actualDiff) {
                     actualDiff = targetDiff;
-                    jumpTargetHeight = exactTargetY;
+                    targetHeight = exactTargetY;
                 }
 
-                stepOrJump(actualDiff, speedX, speedZ, instance, deltaMove, pos);
-                return;
+                if ((actualDiff < stepHeight || actualDiff < jumpHeight) && Double.isFinite(targetHeight)) {
+                    jumpTargetHeight = targetHeight;
+                    stepOrJump(actualDiff, speedX, speedZ, instance, deltaMove, pos);
+                    return;
+                }
             }
 
             entity.refreshPosition(pos);
@@ -221,13 +228,13 @@ public class GroundController implements Controller {
     }
 
     private void stepOrJump(double nodeDiff, double speedX, double speedZ, Instance instance, Vec deltaMove, Pos pos) {
-        if (nodeDiff > step) {
+        if (nodeDiff > stepHeight) {
             Chunk chunk = entity.getChunk();
             assert chunk != null;
 
             Pos entityPos = entity.getPosition();
             PhysicsResult physicsResult = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
-                    new Pos(entityPos.x(), entityPos.y() + Vec.EPSILON + step, entityPos.z()),
+                    new Pos(entityPos.x(), entityPos.y() + Vec.EPSILON + stepHeight, entityPos.z()),
                     new Vec(speedX, 0, speedZ), null);
             if (!physicsResult.hasCollision()) {
                 entity.refreshPosition(physicsResult.newPosition());
@@ -238,7 +245,7 @@ public class GroundController implements Controller {
                     new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer.TICK_PER_SECOND));
             jumping = true;
         }
-        else if (nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
+        else if (nodeDiff > -Vec.EPSILON && nodeDiff < stepHeight + Vec.EPSILON) {
             stepUp(instance, deltaMove, nodeDiff, pos, speedX, speedZ);
         }
     }
