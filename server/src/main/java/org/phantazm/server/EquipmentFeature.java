@@ -188,6 +188,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(ZombiesPlayerActionBarSender.class);
         contextManager.registerElementClass(AlertNoAmmoEffect.class);
         contextManager.registerElementClass(AmmoLevelEffect.class);
+        contextManager.registerElementClass(RecoilEffect.class);
         contextManager.registerElementClass(PlaySoundEffect.class);
         contextManager.registerElementClass(ReloadActionBarEffect.class);
         contextManager.registerElementClass(SendMessageEffect.class);
