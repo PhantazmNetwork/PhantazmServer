@@ -3,6 +3,7 @@ package org.phantazm.zombies.listener;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.handler.DoorHandler;
 import org.phantazm.zombies.map.handler.ShopHandler;
@@ -33,7 +34,10 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
     @Override
     public void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerBlockInteractEvent event) {
         event.setCancelled(true);
-        event.setBlockingItemUse(true);
+
+        if (event.getBlock().registry().material() != Material.CHEST) {
+            event.setBlockingItemUse(true);
+        }
 
         if (event.getHand() == Player.Hand.MAIN) {
             if (shopHandler.handleInteraction(zombiesPlayer, event.getBlockPosition(),
