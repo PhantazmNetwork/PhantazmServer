@@ -116,7 +116,10 @@ public class SlotMachineInteractor implements ShopInteractor {
 
             if (!frames.isEmpty()) {
                 SlotMachineFrame currentFrame = frames.get((currentFrameIndex - 1) % frames.size());
-                ShopInteractor.handle(currentFrame.interactors(), rollInteraction);
+
+                if (!ShopInteractor.handle(currentFrame.interactors(), rollInteraction)) {
+                    return false;
+                }
             }
 
             ShopInteractor.handle(itemClaimedInteractors, rollInteraction);
