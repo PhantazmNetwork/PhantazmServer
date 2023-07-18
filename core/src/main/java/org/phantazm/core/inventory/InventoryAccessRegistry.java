@@ -45,7 +45,7 @@ public interface InventoryAccessRegistry {
 
     boolean canPushTo(@NotNull Key groupKey);
 
-    void replaceObject(int slot, @NotNull InventoryObject newObject);
+    @Nullable InventoryObject replaceObject(int slot, @NotNull InventoryObject newObject);
 
     void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object);
 }

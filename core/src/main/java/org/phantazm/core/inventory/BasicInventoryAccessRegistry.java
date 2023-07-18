@@ -92,17 +92,20 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     }
 
     @Override
-    public void replaceObject(int slot, @NotNull InventoryObject newObject) {
+    public @Nullable InventoryObject replaceObject(int slot, @NotNull InventoryObject newObject) {
         InventoryAccess access = getAccess();
 
         InventoryProfile profile = access.profile();
+        InventoryObject old = null;
         if (profile.hasInventoryObject(slot)) {
-            InventoryObject old = profile.removeInventoryObject(slot);
+            old = profile.removeInventoryObject(slot);
             old.end();
         }
-        
+
         profile.setInventoryObject(slot, newObject);
         onAdd(slot, newObject);
+
+        return old;
     }
 
     @Override

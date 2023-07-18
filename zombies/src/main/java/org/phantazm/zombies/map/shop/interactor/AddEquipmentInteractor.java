@@ -41,7 +41,7 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
                 .addOrReplaceEquipment(data.groupKey, data.equipmentKey, data.allowReplace, data.specificSlot,
                         data.allowDuplicate,
                         () -> interaction.player().module().getEquipmentCreator().createEquipment(data.equipmentKey),
-                        interaction.player().getPlayer().orElse(null));
+                        interaction.player().getPlayer().orElse(null)).success();
     }
 
     @Override
