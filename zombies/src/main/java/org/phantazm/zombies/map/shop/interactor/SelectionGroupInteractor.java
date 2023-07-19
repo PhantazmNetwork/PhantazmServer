@@ -7,8 +7,10 @@ import org.phantazm.zombies.map.shop.InteractorGroupHandler;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Consumer;
 
 @Model("zombies.map.shop.interactor.selection_group")
 @Cache(false)
@@ -19,6 +21,7 @@ public class SelectionGroupInteractor implements ShopInteractor {
 
     private final InteractorGroupHandler handler;
     private final Random random;
+    private final List<Consumer<? super SelectionGroupInteractor>> initializationCallbacks;
 
     private boolean active;
     private Shop shop;
@@ -33,6 +36,7 @@ public class SelectionGroupInteractor implements ShopInteractor {
         this.inactiveInteractors = inactiveInteractors;
         this.handler = handler;
         this.random = random;
+        this.initializationCallbacks = new ArrayList<>();
 
         handler.subscribe(data.group, this);
     }
@@ -54,6 +58,12 @@ public class SelectionGroupInteractor implements ShopInteractor {
         ShopInteractor.initialize(activeInteractors, shop);
         ShopInteractor.initialize(inactiveInteractors, shop);
 
+        for (Consumer<? super SelectionGroupInteractor> consumer : initializationCallbacks) {
+            consumer.accept(this);
+        }
+
+        initializationCallbacks.clear();
+
         if (handler.isChosen(data.group)) {
             return;
         }
@@ -65,7 +75,8 @@ public class SelectionGroupInteractor implements ShopInteractor {
             return;
         }
 
-        interactors.get(random.nextInt(interactors.size())).setActive(true);
+        interactors.get(random.nextInt(interactors.size()))
+                .addInitializationCallback(interactor -> interactor.setActive(true));
     }
 
     @Override
@@ -76,6 +87,15 @@ public class SelectionGroupInteractor implements ShopInteractor {
 
     public Shop shop() {
         return shop;
+    }
+
+    private void addInitializationCallback(@NotNull Consumer<? super SelectionGroupInteractor> consumer) {
+        if (this.shop == null) {
+            initializationCallbacks.add(consumer);
+        }
+        else {
+            consumer.accept(this);
+        }
     }
 
     public void setActive(boolean active) {
