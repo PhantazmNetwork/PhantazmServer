@@ -14,6 +14,7 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEve
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.event.entity.projectile.ProjectileUncollideEvent;
 import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -21,11 +22,8 @@ import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ProjectileMovementGoal implements ProximaGoal {
     private static final int COLLISION_TICK_THRESHOLD = 3;
@@ -173,28 +171,31 @@ public class ProjectileMovementGoal implements ProximaGoal {
             }
             if (entity.getChunk() != chunk) {
                 chunk = entity.getChunk();
-                entities = instance.getChunkEntities(chunk).stream().filter(entity -> entity instanceof LivingEntity)
-                        .map(entity -> (LivingEntity)entity).collect(Collectors.toSet());
+                if (chunk == null) {
+                    return false;
+                }
+
+                entities = instance.getEntityTracker()
+                        .chunkEntities(chunk.getChunkX(), chunk.getChunkZ(), EntityTracker.Target.LIVING_ENTITIES);
             }
             if (entities == null) {
                 return false; // should never happen
             }
-            Point finalPreviousPos = previousPos;
-            Stream<LivingEntity> victimsStream = entities.stream()
-                    .filter(entity -> bb.intersectEntity(finalPreviousPos, entity) && entity != this.entity);
 
-            if (aliveTicks < COLLISION_TICK_THRESHOLD) {
-                victimsStream = victimsStream.filter(entity -> entity != shooter);
-            }
-            final Optional<LivingEntity> victimOptional = victimsStream.findAny();
-            if (victimOptional.isPresent()) {
-                final LivingEntity target = victimOptional.get();
+            Point finalPreviousPos = previousPos;
+            for (Entity victim : entities) {
+                if (victim == this.entity || entity == shooter || bb.intersectEntity(finalPreviousPos, victim)) {
+                    continue;
+                }
+
                 final ProjectileCollideWithEntityEvent event =
-                        new ProjectileCollideWithEntityEvent(entity, previousPos, target);
+                        new ProjectileCollideWithEntityEvent(entity, previousPos, victim);
                 EventDispatcher.call(event);
                 if (!event.isCancelled()) {
                     return collided || entity.isOnGround();
                 }
+
+                return false;
             }
         }
         return false;
