@@ -105,6 +105,8 @@ public class RandomTimerSkill implements Skill {
         entity.removeTag(useCountTag);
         entity.removeTag(startedTag);
         entity.removeTag(intervalTag);
+
+        delegate.end(self);
     }
 
     private void manageState(PhantazmMob self, int lastUseCount) {

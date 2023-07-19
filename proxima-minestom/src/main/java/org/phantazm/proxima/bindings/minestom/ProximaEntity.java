@@ -336,7 +336,6 @@ public class ProximaEntity extends LivingEntity {
                 lastMoved = time;
             }
 
-
             lastX = currentX;
             lastY = currentY;
             lastZ = currentZ;
