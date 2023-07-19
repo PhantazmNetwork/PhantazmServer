@@ -258,9 +258,8 @@ public class SlotMachineInteractor implements ShopInteractor {
         item.setInstance(shop.instance(), shop.center().add(0, data.itemOffset, 0));
 
         TagResolver[] tags = getTagsForFrame(frame);
-
-        List<Component> newComponents = new ArrayList<>(frame.hologramFormats().size());
-        for (String formatString : frame.hologramFormats()) {
+        List<Component> newComponents = new ArrayList<>(data.frameHologramFormats.size());
+        for (String formatString : data.frameHologramFormats) {
             newComponents.add(MiniMessage.miniMessage().deserialize(formatString, tags));
         }
 
@@ -315,8 +314,6 @@ public class SlotMachineInteractor implements ShopInteractor {
         @NotNull ItemStack getVisual();
 
         @NotNull List<ShopInteractor> interactors();
-
-        @NotNull List<String> hologramFormats();
     }
 
     public interface DelayFormula {
@@ -387,15 +384,8 @@ public class SlotMachineInteractor implements ShopInteractor {
             return interactors;
         }
 
-        @Override
-        public @NotNull List<String> hologramFormats() {
-            return data.hologramFormats;
-        }
-
         @DataObject
-        public record Data(@NotNull ItemStack itemStack,
-                           @NotNull List<String> hologramFormats,
-                           @NotNull @ChildPath("interactors") List<String> interactors) {
+        public record Data(@NotNull ItemStack itemStack, @NotNull @ChildPath("interactors") List<String> interactors) {
         }
     }
 
@@ -406,6 +396,7 @@ public class SlotMachineInteractor implements ShopInteractor {
                        int gracePeriodTicks,
                        @NotNull String itemRolledFormat,
                        @NotNull String itemClaimedFormat,
+                       @NotNull List<String> frameHologramFormats,
                        @NotNull Key rollingFlag,
                        @NotNull List<String> gracePeriodFormats,
                        @NotNull Evaluation evaluation,
