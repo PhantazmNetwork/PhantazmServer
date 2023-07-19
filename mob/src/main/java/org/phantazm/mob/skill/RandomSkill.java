@@ -37,6 +37,11 @@ public class RandomSkill implements Skill {
         }
     }
 
+    @Override
+    public void end(@NotNull PhantazmMob self) {
+        delegate.end(self);
+    }
+
     @DataObject
     public record Data(@Description("Chance that this skill will call its delegate") double chance,
                        @Description("The delegate to call on a successful roll") @NotNull @ChildPath(
