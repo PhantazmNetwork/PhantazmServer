@@ -214,7 +214,7 @@ public class ProximaEntity extends LivingEntity {
         }
 
         if (currentPath != null && current != null) {
-            if (moveAlongPath(time) == MoveResult.CANCEL) {
+            if (moveAlongPath(time) != MoveResult.CONTINUE) {
                 resetPath();
             }
         }
