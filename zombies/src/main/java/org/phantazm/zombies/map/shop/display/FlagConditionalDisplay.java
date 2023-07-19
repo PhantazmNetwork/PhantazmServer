@@ -81,7 +81,7 @@ public class FlagConditionalDisplay implements ShopDisplay {
             return;
         }
 
-        if (ticks++ % 20 == 0) {
+        if (ticks++ % 4 == 0) {
             List<ShopDisplay> oldCurrent = current;
             List<ShopDisplay> newCurrent = hasFlag() ? success : failure;
 
