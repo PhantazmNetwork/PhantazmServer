@@ -39,8 +39,6 @@ public class ProximaEntity extends LivingEntity {
     protected final Pathfinding pathfinding;
     protected final List<GoalGroup> goalGroups;
 
-    private Entity targetEntity;
-
     private PathTarget destination;
     private PathResult currentPath;
 
@@ -61,6 +59,7 @@ public class ProximaEntity extends LivingEntity {
         super(entityType, uuid);
         this.pathfinding = Objects.requireNonNull(pathfinding, "pathfinding");
         this.goalGroups = new ArrayList<>(5);
+        pathfinding.setSelf(this);
     }
 
     public @NotNull Pathfinding pathfinding() {
@@ -91,7 +90,7 @@ public class ProximaEntity extends LivingEntity {
     private void destroyPath() {
         resetPath();
         this.destination = null;
-        this.targetEntity = null;
+        pathfinding.target = null;
     }
 
     public void setDestination(@Nullable PathTarget destination) {
@@ -105,12 +104,12 @@ public class ProximaEntity extends LivingEntity {
         }
 
         resetPath();
-        this.targetEntity = null;
+        pathfinding.target = null;
         this.destination = destination;
     }
 
     public <T extends Entity> void setDestination(@Nullable T targetEntity) {
-        if (this.targetEntity == targetEntity) {
+        if (pathfinding.target == targetEntity) {
             return;
         }
 
@@ -120,7 +119,7 @@ public class ProximaEntity extends LivingEntity {
         }
 
         resetPath();
-        this.targetEntity = targetEntity;
+        pathfinding.target = targetEntity;
         this.destination = PathTarget.resolving(() -> {
             if (!pathfinding.isValidTarget(targetEntity)) {
                 return null;
@@ -131,7 +130,7 @@ public class ProximaEntity extends LivingEntity {
     }
 
     public @Nullable Entity getTargetEntity() {
-        return targetEntity;
+        return pathfinding.target;
     }
 
     public void attack(@NotNull Entity target, boolean swingHand) {
@@ -193,13 +192,13 @@ public class ProximaEntity extends LivingEntity {
 
         Navigator navigator = pathfinding.getNavigator(getBoundingBox());
 
-        if (targetEntity != null && !pathfinding.isValidTarget(targetEntity)) {
+        if (pathfinding.target != null && !pathfinding.isValidTarget(pathfinding.target)) {
             destroyPath();
             return;
         }
 
-        if (targetEntity != null && getDistanceSquared(targetEntity) < ENTITY_LOOK_DISTANCE_SQ) {
-            lookAt(targetEntity);
+        if (pathfinding.target != null && getDistanceSquared(pathfinding.target) < ENTITY_LOOK_DISTANCE_SQ) {
+            lookAt(pathfinding.target);
         }
 
         if (navigator.navigationComplete()) {
@@ -303,13 +302,14 @@ public class ProximaEntity extends LivingEntity {
         }
 
         Node target = this.target;
-        if (target == null && targetEntity != null && currentPath != null && currentPath.isSuccessful()) {
-            Vec3I synthetic = PositionResolver.FLOORED.resolve(VecUtils.toDouble(targetEntity.getPosition()));
+        if (target == null && pathfinding.target != null && currentPath != null && currentPath.isSuccessful() &&
+                pathfinding.useSynthetic()) {
+            Vec3I synthetic = PositionResolver.FLOORED.resolve(VecUtils.toDouble(pathfinding.target.getPosition()));
 
             if (!pathfinding.getSettings(getBoundingBox()).successPredicate()
                     .test(synthetic.x(), synthetic.y(), synthetic.z(), current.x, current.y, current.z)) {
                 target = new Node(synthetic.x(), synthetic.y(), synthetic.z(), 0, 0,
-                        (float)(targetEntity.getPosition().y() - targetEntity.getPosition().blockY()));
+                        (float)(pathfinding.target.getPosition().y() - pathfinding.target.getPosition().blockY()));
             }
         }
 
@@ -318,7 +318,7 @@ public class ProximaEntity extends LivingEntity {
             double currentY = pos.y();
             double currentZ = pos.z();
 
-            controller.advance(current, target, targetEntity);
+            controller.advance(current, target, pathfinding.target);
 
             if (!controller.hasControl()) {
                 if (!(MathUtils.fuzzyEquals(currentX, lastX, Pathfinding.MOB_PATH_EPSILON) &&

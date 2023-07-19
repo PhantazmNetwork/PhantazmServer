@@ -20,6 +20,7 @@ import com.github.steanky.vector.Vec3IBiPredicate;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
 import org.phantazm.proxima.bindings.minestom.controller.GroundController;
 
@@ -47,9 +48,11 @@ public class Pathfinding {
     protected final ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal;
     protected final InstanceSpaceHandler spaceHandler;
 
+    protected Entity self;
+    protected Entity target;
     protected Penalty penalty;
-    protected BoundingBox lastBoundingBox;
 
+    protected BoundingBox lastBoundingBox;
     protected Vec3IBiPredicate successPredicate;
     protected NodeSnapper nodeSnapper;
     protected PathLimiter pathLimiter;
@@ -90,6 +93,14 @@ public class Pathfinding {
 
         clearState();
         this.penalty = penalty;
+    }
+
+    public void setSelf(@NotNull Entity self) {
+        this.self = self;
+    }
+
+    public void setTarget(@Nullable Entity target) {
+        this.target = target;
     }
 
     public void cancel() {
@@ -211,6 +222,10 @@ public class Pathfinding {
 
     public boolean canPathfind(@NotNull ProximaEntity proximaEntity) {
         return proximaEntity.isOnGround();
+    }
+
+    public boolean useSynthetic() {
+        return true;
     }
 
     protected @NotNull NodeProcessor nodeProcessor() {
