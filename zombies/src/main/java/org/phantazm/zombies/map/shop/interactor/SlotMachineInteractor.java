@@ -184,14 +184,10 @@ public class SlotMachineInteractor implements ShopInteractor {
         if (!doneRolling) {
             rollFinishTime = time;
 
-            if (!frames.isEmpty()) {
-                SlotMachineFrame frame = frames.get((currentFrameIndex - 1) % frames.size());
-                Component component = MiniMessage.miniMessage().deserialize(data.itemRolledFormat,
-                        Placeholder.component("rolled_item", getItemName(frame.getVisual())));
-
-                if (!rollInteraction.player().hasQuit()) {
-                    rollInteraction.player().getPlayer().ifPresent(player -> player.sendMessage(component));
-                }
+            if (!frames.isEmpty() && !rollInteraction.player().hasQuit()) {
+                rollInteraction.player().getPlayer().ifPresent(player -> player.sendMessage(MiniMessage.miniMessage()
+                        .deserialize(data.itemRolledFormat, Placeholder.component("rolled_item",
+                                getItemName(frames.get((currentFrameIndex - 1) % frames.size()).getVisual())))));
             }
         }
 
