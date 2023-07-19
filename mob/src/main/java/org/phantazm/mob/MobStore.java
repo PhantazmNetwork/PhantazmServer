@@ -49,6 +49,7 @@ public class MobStore implements Tickable {
     public void onMobDeath(@NotNull EntityDeathEvent event) {
         UUID uuid = event.getEntity().getUuid();
 
+        tickableSkills.remove(uuid);
         PhantazmMob mob = uuidToMob.remove(uuid);
         if (mob != null) {
             Collection<Skill> deathSkills = mob.triggers().get(DEATH_KEY);
@@ -64,8 +65,6 @@ public class MobStore implements Tickable {
                 }
             }
         }
-
-        tickableSkills.remove(uuid);
     }
 
     /**

@@ -71,6 +71,11 @@ public class TemporalSkill implements Skill {
     }
 
     @Override
+    public void end(@NotNull PhantazmMob self) {
+        delegate.end(self);
+    }
+
+    @Override
     public boolean needsTicking() {
         return true;
     }
