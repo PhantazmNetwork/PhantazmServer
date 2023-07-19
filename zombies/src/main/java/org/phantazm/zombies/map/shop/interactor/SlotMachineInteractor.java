@@ -116,10 +116,13 @@ public class SlotMachineInteractor implements ShopInteractor {
 
             if (!frames.isEmpty()) {
                 SlotMachineFrame currentFrame = frames.get((currentFrameIndex - 1) % frames.size());
-
                 if (!ShopInteractor.handle(currentFrame.interactors(), rollInteraction)) {
                     return false;
                 }
+
+                rollInteraction.player().getPlayer().ifPresent(player -> player.sendMessage(MiniMessage.miniMessage()
+                        .deserialize(data.itemClaimedFormat,
+                                Placeholder.component("claimed_item", getItemName(currentFrame.getVisual())))));
             }
 
             ShopInteractor.handle(itemClaimedInteractors, rollInteraction);
@@ -180,6 +183,16 @@ public class SlotMachineInteractor implements ShopInteractor {
 
         if (!doneRolling) {
             rollFinishTime = time;
+
+            if (!frames.isEmpty()) {
+                SlotMachineFrame frame = frames.get((currentFrameIndex - 1) % frames.size());
+                Component component = MiniMessage.miniMessage().deserialize(data.itemRolledFormat,
+                        Placeholder.component("rolled_item", getItemName(frame.getVisual())));
+
+                if (!rollInteraction.player().hasQuit()) {
+                    rollInteraction.player().getPlayer().ifPresent(player -> player.sendMessage(component));
+                }
+            }
         }
 
         doneRolling = true;
@@ -200,7 +213,10 @@ public class SlotMachineInteractor implements ShopInteractor {
             return;
         }
 
-        ShopInteractor.handle(timeoutExpiredInteractors, rollInteraction);
+        if (!rollInteraction.player().hasQuit()) {
+            ShopInteractor.handle(timeoutExpiredInteractors, rollInteraction);
+        }
+
         reset();
     }
 
@@ -255,17 +271,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         TagResolver rollingPlayerTag = Placeholder.component("rolling_player",
                 rollInteraction.player().module().getPlayerView().getDisplayNameIfPresent());
 
-        Component displayName;
-        if (frame != null) {
-            displayName = frame.getVisual().getDisplayName();
-            if (displayName == null) {
-                displayName = Component.translatable(frame.getVisual().material().registry().translationKey());
-            }
-        }
-        else {
-            displayName = Component.empty();
-        }
-
+        Component displayName = frame != null ? getItemName(frame.getVisual()) : Component.empty();
         TagResolver itemName = Placeholder.component("item_name", displayName);
 
         TagResolver[] tags = new TagResolver[additionalTags.length + 2];
@@ -274,6 +280,15 @@ public class SlotMachineInteractor implements ShopInteractor {
 
         System.arraycopy(additionalTags, 0, tags, 2, additionalTags.length);
         return tags;
+    }
+
+    private Component getItemName(ItemStack itemStack) {
+        Component displayName = itemStack.getDisplayName();
+        if (displayName == null) {
+            displayName = Component.translatable(itemStack.material().registry().translationKey());
+        }
+
+        return displayName;
     }
 
     private void updateHologram(List<Component> newComponents) {
@@ -389,6 +404,8 @@ public class SlotMachineInteractor implements ShopInteractor {
                        double hologramOffset,
                        double itemOffset,
                        int gracePeriodTicks,
+                       @NotNull String itemRolledFormat,
+                       @NotNull String itemClaimedFormat,
                        @NotNull Key rollingFlag,
                        @NotNull List<String> gracePeriodFormats,
                        @NotNull Evaluation evaluation,
