@@ -138,6 +138,7 @@ public final class MobFeature {
         contextManager.registerElementClass(DamageEntitySkill.class);
         contextManager.registerElementClass(KnockbackEntitySkill.class);
         contextManager.registerElementClass(PlaySoundSkill.class);
+        contextManager.registerElementClass(PushEntitySkill.class);
         contextManager.registerElementClass(SendMessageSkill.class);
         contextManager.registerElementClass(JumpTowardsTargetSkill.class);
         contextManager.registerElementClass(SpawnParticleSkill.class);

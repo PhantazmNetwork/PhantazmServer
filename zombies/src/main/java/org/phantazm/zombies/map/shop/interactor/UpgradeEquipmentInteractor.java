@@ -84,7 +84,7 @@ public class UpgradeEquipmentInteractor implements ShopInteractor {
 
     @DataObject
     public record Data(@NotNull @ChildPath("upgrade_path") String upgradePath,
-                       @NotNull @ChildPath("not_upgradable_interactors") List<String> notUpgradeableInteractors,
+                       @NotNull @ChildPath("not_upgradable_interactors") List<String> notUpgradableInteractors,
                        @NotNull @ChildPath("no_held_equipment_interactors") List<String> noHeldEquipmentInteractors,
                        @NotNull @ChildPath("no_upgrade_interactors") List<String> noUpgradeInteractors,
                        @NotNull @ChildPath("upgrade_interactors") List<String> upgradeInteractors) {
