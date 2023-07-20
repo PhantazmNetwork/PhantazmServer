@@ -26,9 +26,10 @@ public class PushEntitySkill implements Skill {
     public void use(@NotNull PhantazmMob self) {
         selector.selectTarget(self).ifPresent(livingEntity -> {
             if (livingEntity instanceof Iterable<?> iterable) {
-                Iterable<LivingEntity> entityIterable = (Iterable<LivingEntity>)iterable;
-                for (LivingEntity entity : entityIterable) {
-                    setVelocity(entity, self.entity());
+                for (Object object : iterable) {
+                    if (object instanceof Entity entity) {
+                        setVelocity(entity, self.entity());
+                    }
                 }
             }
             else if (livingEntity instanceof LivingEntity living) {
@@ -38,11 +39,11 @@ public class PushEntitySkill implements Skill {
     }
 
     private void setVelocity(Entity target, Entity self) {
-        Vec diff = target.getPosition().sub(self.getPosition()).direction();
-        target.setVelocity(target.getVelocity().add(diff.mul(data.power)));
+        Vec diff = target.getPosition().sub(self.getPosition()).asVec().normalize();
+        target.setVelocity(diff.mul(data.power).add(0, data.vertical, 0));
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector, double power) {
+    public record Data(@NotNull @ChildPath("selector") String selector, double power, double vertical) {
     }
 }
