@@ -277,7 +277,7 @@ public class ProximaEntity extends LivingEntity {
 
         Pos position = getPosition();
         return position.distanceSquared(new Vec(node.x + 0.5, node.y + node.blockOffset, node.z + 0.5)) <
-                NODE_REACH_DISTANCE_SQ;
+                NODE_REACH_DISTANCE_SQ && (int)Math.floor(position.y()) == node.y;
     }
 
     private enum MoveResult {
