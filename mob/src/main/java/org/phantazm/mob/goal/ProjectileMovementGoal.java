@@ -54,7 +54,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
 
         //power is in blocks/s
         this.collisionTickThreshold = (int)Math.ceil(
-                (Math.max(entity.getBoundingBox().width(), shooter.getBoundingBox().width()) / power) *
+                ((entity.getBoundingBox().width() / 2) + (shooter.getBoundingBox().width() / 2) / power) *
                         MinecraftServer.TICK_PER_SECOND);
     }
 
