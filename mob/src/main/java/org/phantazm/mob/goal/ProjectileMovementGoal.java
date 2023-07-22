@@ -52,8 +52,9 @@ public class ProjectileMovementGoal implements ProximaGoal {
         this.power = power;
         this.spread = spread;
 
-        //power is in blocks/tick
-        this.collisionTickThreshold = (int)Math.ceil(entity.getBoundingBox().width() / power);
+        //power is in blocks/s
+        this.collisionTickThreshold =
+                (int)Math.ceil((entity.getBoundingBox().width() / power) * MinecraftServer.TICK_PER_SECOND);
     }
 
     @Override
@@ -107,12 +108,8 @@ public class ProjectileMovementGoal implements ProximaGoal {
 
     @Override
     public void tick(long time) {
-        if (previousPos == null) {
-            return;
-        }
-
         Pos currentPos = entity.getPosition();
-        if (checkStuck(previousPos, currentPos)) {
+        if (checkStuck(previousPos == null ? currentPos : previousPos, currentPos)) {
             if (collided) {
                 return;
             }
@@ -125,6 +122,8 @@ public class ProjectileMovementGoal implements ProximaGoal {
             entity.setNoGravity(false);
             EventDispatcher.call(new ProjectileUncollideEvent(entity));
         }
+
+        this.previousPos = currentPos;
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -133,6 +132,12 @@ public class ProjectileMovementGoal implements ProximaGoal {
         if (instance == null) {
             return false;
         }
+
+        Chunk chunk = entity.getChunk();
+        if (chunk == null) {
+            return false;
+        }
+
         final long aliveTicks = entity.getAliveTicks();
         if (previousPos.samePoint(currentPos)) {
             Block block = instance.getBlock(previousPos);
@@ -142,8 +147,6 @@ public class ProjectileMovementGoal implements ProximaGoal {
                             entity.getBoundingBox());
         }
 
-        Chunk chunk = null;
-        Collection<LivingEntity> entities = null;
         final BoundingBox bb = entity.getBoundingBox();
 
         final double part = bb.width() / 2;
@@ -173,21 +176,12 @@ public class ProjectileMovementGoal implements ProximaGoal {
                     return true;
                 }
             }
-            if (entity.getChunk() != chunk) {
-                chunk = entity.getChunk();
-                if (chunk == null) {
-                    return false;
-                }
 
-                entities = instance.getEntityTracker()
-                        .chunkEntities(chunk.getChunkX(), chunk.getChunkZ(), EntityTracker.Target.LIVING_ENTITIES);
-            }
-            if (entities == null) {
-                return false; // should never happen
-            }
+            Collection<LivingEntity> entities = instance.getEntityTracker()
+                    .chunkEntities(chunk.getChunkX(), chunk.getChunkZ(), EntityTracker.Target.LIVING_ENTITIES);
 
             for (Entity victim : entities) {
-                if (victim == this.entity || (entity == shooter && aliveTicks < collisionTickThreshold) ||
+                if (victim == this.entity || (victim == shooter && aliveTicks < collisionTickThreshold) ||
                         !bb.intersectEntity(previousPos, victim)) {
                     continue;
                 }
@@ -198,8 +192,6 @@ public class ProjectileMovementGoal implements ProximaGoal {
                 if (!event.isCancelled()) {
                     return collided || entity.isOnGround();
                 }
-
-                return false;
             }
         }
         return false;
