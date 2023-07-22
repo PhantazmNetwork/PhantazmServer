@@ -35,7 +35,7 @@ public class EquipmentTierPredicate implements ShopPredicate {
         PlayerInventory inventory = player.getInventory();
         ItemStack stack = data.slot == -1 ? inventory.getItemInMainHand() : inventory.getItemStack(data.slot);
         int existingTier = stack.getTag(Tags.ARMOR_TIER);
-        return existingTier < data.tier;
+        return existingTier <= data.tier;
     }
 
     @DataObject
