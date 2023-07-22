@@ -42,7 +42,8 @@ public class ProjectileMovementGoal implements ProximaGoal {
 
     private boolean collided = false;
 
-    private final int collisionTickThreshold;
+    private final int selfCollisionTickThreshold;
+    private final int blockCollisionTickThreshold;
 
     public ProjectileMovementGoal(@NotNull Entity entity, @NotNull Entity shooter, @NotNull Point to, double power,
             double spread) {
@@ -53,9 +54,12 @@ public class ProjectileMovementGoal implements ProximaGoal {
         this.spread = spread;
 
         //power is in blocks/s
-        this.collisionTickThreshold = (int)Math.ceil(
+        this.selfCollisionTickThreshold = (int)Math.ceil(
                 ((entity.getBoundingBox().width() / 2) + (shooter.getBoundingBox().width() / 2) / power) *
                         MinecraftServer.TICK_PER_SECOND);
+
+        this.blockCollisionTickThreshold =
+                (int)Math.ceil(((entity.getBoundingBox().width() / 2) / power) * MinecraftServer.TICK_PER_SECOND);
     }
 
     @Override
@@ -142,7 +146,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
         final long aliveTicks = entity.getAliveTicks();
         if (previousPos.samePoint(currentPos)) {
             Block block = instance.getBlock(previousPos);
-            return block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= collisionTickThreshold &&
+            return block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= blockCollisionTickThreshold &&
                     block.registry().collisionShape().intersectBox(
                             previousPos.sub(previousPos.blockX(), previousPos.blockY(), previousPos.blockZ()),
                             entity.getBoundingBox());
@@ -164,7 +168,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
                 block = instance.getBlock(previousPos);
                 blockPos = previousPos;
             }
-            if (block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= collisionTickThreshold &&
+            if (block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= blockCollisionTickThreshold &&
                     block.registry().collisionShape()
                             .intersectBox(previousPos.sub(blockPos.blockX(), blockPos.blockY(), blockPos.blockZ()),
                                     entity.getBoundingBox())) {
@@ -182,7 +186,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
                     .chunkEntities(chunk.getChunkX(), chunk.getChunkZ(), EntityTracker.Target.LIVING_ENTITIES);
 
             for (Entity victim : entities) {
-                if (victim == this.entity || (victim == shooter && aliveTicks < collisionTickThreshold) ||
+                if (victim == this.entity || (victim == shooter && aliveTicks < selfCollisionTickThreshold) ||
                         !bb.intersectEntity(previousPos, victim)) {
                     continue;
                 }
