@@ -254,6 +254,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(PlaySongInteractor.class);
         contextManager.registerElementClass(ChangeSelectionGroupInteractor.class);
         contextManager.registerElementClass(SelectionGroupInteractor.class);
+        contextManager.registerElementClass(AnnounceActiveSelectionGroup.class);
         contextManager.registerElementClass(UpgradeEquipmentInteractor.class);
         contextManager.registerElementClass(ChestStateInteractor.class);
 

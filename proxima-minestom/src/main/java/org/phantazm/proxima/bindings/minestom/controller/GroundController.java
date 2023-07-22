@@ -180,6 +180,10 @@ public class GroundController implements Controller {
                     entity.refreshPosition(physics.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
                     jumping = false;
                 }
+                else if (entity.isOnGround()) {
+                    jumping = false;
+                }
+
                 return;
             }
             else if (entity.isOnGround()) {
