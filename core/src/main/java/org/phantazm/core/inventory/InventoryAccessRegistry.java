@@ -48,4 +48,6 @@ public interface InventoryAccessRegistry {
     @Nullable InventoryObject replaceObject(int slot, @NotNull InventoryObject newObject);
 
     void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object);
+
+    @NotNull InventoryAccess getAccess(@NotNull Key profileKey);
 }

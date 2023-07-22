@@ -117,6 +117,11 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         onAdd(slot, object);
     }
 
+    @Override
+    public @NotNull InventoryAccess getAccess(@NotNull Key profileKey) {
+        return Objects.requireNonNull(accessMap.get(profileKey), "no access named " + profileKey);
+    }
+
     private void onAdd(int slot, InventoryObject object) {
         object.start();
         playerView.getPlayer().ifPresent(player -> {

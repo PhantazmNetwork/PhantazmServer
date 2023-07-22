@@ -235,6 +235,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(PlayerFlaggingInteractor.class);
         contextManager.registerElementClass(MessagingInteractor.class);
         contextManager.registerElementClass(PlaySoundInteractor.class);
+        contextManager.registerElementClass(RefillAllAmmoInteractor.class);
         contextManager.registerElementClass(DelayedInteractor.class);
         contextManager.registerElementClass(ConditionalInteractor.class);
         contextManager.registerElementClass(CountingInteractor.class);

@@ -5,24 +5,31 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.inventory.InventoryType;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.gui.Gui;
-import org.phantazm.core.gui.GuiItem;
 import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
+import org.phantazm.zombies.map.shop.gui.ClickHandlerBase;
 
 import java.util.List;
 import java.util.Objects;
 
 @Model("zombies.map.shop.interactor.open_gui")
+@Cache(false)
 public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     private final SlotDistributor slotDistributor;
-    private final List<GuiItem> guiItems;
+    private final List<ClickHandlerBase<?>> guiItems;
 
     @FactoryMethod
     public OpenGuiInteractor(@NotNull Data data, @NotNull SlotDistributor slotDistributor,
-            @NotNull @Child("items") List<GuiItem> guiItems) {
+            @NotNull @Child("items") List<ClickHandlerBase<?>> guiItems) {
         super(data);
         this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
         this.guiItems = Objects.requireNonNull(guiItems, "guiItems");
+    }
+
+    @Override
+    public void initialize(@NotNull Shop shop) {
+        ShopInteractor.initialize(guiItems, shop);
     }
 
     @Override
