@@ -228,6 +228,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(EquipmentCostPredicate.class);
         contextManager.registerElementClass(EquipmentSpacePredicate.class);
         contextManager.registerElementClass(EquipmentPresentPredicate.class);
+        contextManager.registerElementClass(EquipmentTierPredicate.class);
 
         //ShopInteractor
         contextManager.registerElementClass(MapFlaggingInteractor.class);
