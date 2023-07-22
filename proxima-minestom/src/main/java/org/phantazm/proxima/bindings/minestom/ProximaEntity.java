@@ -5,6 +5,7 @@ import com.github.steanky.proxima.node.Node;
 import com.github.steanky.proxima.path.PathResult;
 import com.github.steanky.proxima.path.PathTarget;
 import com.github.steanky.proxima.resolver.PositionResolver;
+import com.github.steanky.vector.Vec3D;
 import com.github.steanky.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -245,15 +246,15 @@ public class ProximaEntity extends LivingEntity {
         Node closestNode = null;
 
         while (node != null) {
-            double thisDistance =
-                    currentPosition.distanceSquared(node.x + 0.5, node.y + node.blockOffset, node.z + 0.5);
+            double flatDistance =
+                    Vec3D.distanceSquared(node.x + 0.5, 0, node.z + 0.5, currentPosition.x(), 0, currentPosition.z());
 
-            if (thisDistance < closestNodeDistance) {
-                closestNodeDistance = thisDistance;
+            if (flatDistance < closestNodeDistance) {
+                closestNodeDistance = flatDistance;
                 closestNode = node;
             }
 
-            if (thisDistance < 1) {
+            if (flatDistance < 1) {
                 break;
             }
 

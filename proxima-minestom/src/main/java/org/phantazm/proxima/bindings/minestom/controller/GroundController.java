@@ -228,7 +228,7 @@ public class GroundController implements Controller {
     }
 
     private boolean canReach(double diff) {
-        return diff < stepHeight || diff < jumpHeight;
+        return diff < stepHeight + TARGET_EPSILON || diff < jumpHeight + TARGET_EPSILON;
     }
 
     private void stepOrJump(double nodeDiff, double target, double speedX, double speedZ, Chunk chunk,
