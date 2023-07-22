@@ -60,20 +60,23 @@ public class UpgradeEquipmentInteractor implements ShopInteractor {
         }
 
         Equipment equipment = heldEquipmentOptional.get();
-
-        Optional<Key> upgradeKeyOptional = upgradePath.nextUpgrade(equipment.key());
-        if (!(equipment instanceof Upgradable upgradable) || (upgradeKeyOptional.isPresent() &&
-                !upgradable.getSuggestedUpgrades().contains(upgradeKeyOptional.get()))) {
+        if (!(equipment instanceof Upgradable upgradable)) {
             ShopInteractor.handle(notUpgradableInteractors, interaction);
             return false;
         }
 
+        Optional<Key> upgradeKeyOptional = upgradePath.nextUpgrade(upgradable.currentLevel());
         if (upgradeKeyOptional.isEmpty()) {
             ShopInteractor.handle(noUpgradeInteractors, interaction);
             return false;
         }
 
         Key upgradeKey = upgradeKeyOptional.get();
+        if (!upgradable.getSuggestedUpgrades().contains(upgradeKey)) {
+            ShopInteractor.handle(notUpgradableInteractors, interaction);
+            return false;
+        }
+
         upgradable.setLevel(upgradeKey);
 
         ItemStack itemStack = equipment.getItemStack();
