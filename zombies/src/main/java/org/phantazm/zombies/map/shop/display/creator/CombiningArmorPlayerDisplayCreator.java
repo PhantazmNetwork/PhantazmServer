@@ -7,21 +7,17 @@ import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.vector.Vec3D;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.EquipmentSlot;
-import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.*;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.display.ShopDisplay;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Model("zombies.map.shop.display.player.combining_armor")
 @Cache(false)
@@ -37,8 +33,6 @@ public class CombiningArmorPlayerDisplayCreator implements PlayerDisplayCreator 
     public @NotNull ShopDisplay forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
         return new Display(data, zombiesPlayer);
     }
-
-    private static final TieredStack AIR = new TieredStack(ItemStack.AIR, -1);
 
     public record TieredStack(@NotNull ItemStack stack, int tier) {
     }
@@ -69,28 +63,21 @@ public class CombiningArmorPlayerDisplayCreator implements PlayerDisplayCreator 
                 return;
             }
 
-            if (ticks++ % 10 == 0) {
-                zombiesPlayer.getPlayer().ifPresent(player -> {
-                    Map<EquipmentSlot, ItemStack> itemsToDisplay = new HashMap<>(4);
-                    for (EquipmentSlot slot : EquipmentSlot.armors()) {
-                        ItemStack existingStack = player.getEquipment(slot);
-                        TieredStack ourStack = data.items.getOrDefault(slot, AIR);
+            if (ticks++ % 10 != 0) {
+                return;
+            }
 
-                        int existingTier = existingStack.getTag(Tags.ARMOR_TIER);
-                        int ourTier = ourStack.tier;
+            Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+            if (playerOptional.isEmpty()) {
+                return;
+            }
 
-                        if (existingTier > ourTier) {
-                            itemsToDisplay.put(slot, existingStack);
-                        }
-                        else {
-                            itemsToDisplay.put(slot, ourStack.stack);
-                        }
-                    }
+            Player player = playerOptional.get();
+            for (EquipmentSlot slot : EquipmentSlot.armors()) {
+                ItemStack existingStack = player.getEquipment(slot);
+                TieredStack ourStack = data.items.get(slot);
 
-                    for (Map.Entry<EquipmentSlot, ItemStack> entry : itemsToDisplay.entrySet()) {
-                        armorStand.setEquipment(entry.getKey(), entry.getValue());
-                    }
-                });
+                armorStand.setEquipment(slot, ourStack == null ? existingStack : ourStack.stack);
             }
         }
 
