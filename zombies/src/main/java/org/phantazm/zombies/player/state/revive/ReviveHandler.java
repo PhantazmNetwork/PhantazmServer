@@ -47,6 +47,10 @@ public class ReviveHandler implements Activable {
         this.ticksUntilDeath = deathTime;
     }
 
+    public @NotNull KnockedPlayerStateContext context() {
+        return context;
+    }
+
     public @NotNull Optional<ZombiesPlayerState> getSuggestedState() {
         if (cachedDeathState != null) {
             return Optional.of(cachedDeathState);
@@ -78,7 +82,8 @@ public class ReviveHandler implements Activable {
                 if (reviver != null) {
                     reviverName = reviver.module().getPlayerView().getDisplayNameIfCached().orElse(null);
                 }
-                cachedDefaultState = defaultStateCreator.apply(AlivePlayerStateContext.revive(reviverName, context.getKnockLocation()));
+                cachedDefaultState = defaultStateCreator.apply(
+                        AlivePlayerStateContext.revive(reviverName, context.getKnockLocation()));
             }
 
             if (reviver != null) {

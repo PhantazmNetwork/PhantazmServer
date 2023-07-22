@@ -246,6 +246,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(ChangeDoorStateInteractor.class);
         contextManager.registerElementClass(DeductCoinsInteractor.class);
         contextManager.registerElementClass(RefillAmmoInteractor.class);
+        contextManager.registerElementClass(ReviveAllInteractor.class);
         contextManager.registerElementClass(UpdateBlockPropertiesInteractor.class);
         contextManager.registerElementClass(SubstitutedTitleInteractor.class);
         contextManager.registerElementClass(TitleInteractor.class);

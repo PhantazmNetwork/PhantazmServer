@@ -78,6 +78,11 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     @SuppressWarnings("unchecked")
     default <TContext> boolean setState(@NotNull PlayerStateKey<TContext> stateKey, @NotNull TContext context) {
+        ZombiesPlayerState currentState = module().getStateSwitcher().getState();
+        if (currentState != null && currentState.key().equals(stateKey.key())) {
+            return false;
+        }
+
         Function<TContext, ZombiesPlayerState> stateFunction =
                 (Function<TContext, ZombiesPlayerState>)module().getStateFunctions().get(stateKey);
         if (stateFunction != null) {

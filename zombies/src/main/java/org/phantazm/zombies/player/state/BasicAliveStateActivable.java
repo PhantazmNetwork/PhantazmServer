@@ -8,6 +8,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -67,17 +68,21 @@ public class BasicAliveStateActivable implements Activable {
 
             playerView.getDisplayName().thenAccept(displayName -> {
                 TagResolver[] tagResolvers = getTagResolvers(displayName);
-                playerView.getPlayer().ifPresent(player -> {
-                    player.sendMessage(miniMessage.deserialize(settings.reviveMessageToRevivedFormat(), tagResolvers));
-                });
+                playerView.getPlayer().ifPresent(player -> player.sendMessage(
+                        miniMessage.deserialize(settings.reviveMessageToRevivedFormat(), tagResolvers)));
                 instanceAudience.sendMessage(
                         miniMessage.deserialize(settings.reviveMessageToOthersFormat(), tagResolvers));
             });
 
-            Point knockLocation = context.reviveLocation();
-            if (knockLocation != null) {
-                instanceAudience.playSound(settings.reviveSound(), knockLocation.x(), knockLocation.y(),
-                        knockLocation.z());
+            Point point = context.reviveLocation();
+            if (point != null) {
+                instanceAudience.playSound(settings.reviveSound(), point.x(), point.y(), point.z());
+            }
+            else {
+                playerView.getPlayer().ifPresent(player -> {
+                    Pos location = player.getPosition();
+                    instanceAudience.playSound(settings.reviveSound(), location.x(), location.y(), location.z());
+                });
             }
         }
 
