@@ -237,24 +237,23 @@ public class GroundController implements Controller {
 
     private void stepOrJump(double nodeDiff, double target, double speedX, double speedZ, Chunk chunk,
             Instance instance, Vec deltaMove, Pos pos) {
-        if (nodeDiff > stepHeight) {
-            Pos entityPos = entity.getPosition();
-            PhysicsResult physicsResult = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
-                    new Pos(entityPos.x(), entityPos.y() + Vec.EPSILON + stepHeight, entityPos.z()),
-                    new Vec(speedX, 0, speedZ), null);
-            if (!physicsResult.hasCollision()) {
-                entity.refreshPosition(physicsResult.newPosition().withView(pos.yaw(), pos.pitch()));
-                return;
-            }
-
-            entity.setVelocity(
-                    new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer.TICK_PER_SECOND));
-            jumpTargetHeight = target;
-            jumping = true;
-        }
-        else if (nodeDiff > -Vec.EPSILON && nodeDiff < stepHeight + Vec.EPSILON) {
+        if (nodeDiff - TARGET_EPSILON < stepHeight && nodeDiff - TARGET_EPSILON < jumpHeight) {
             stepUp(instance, deltaMove, nodeDiff, pos, speedX, speedZ);
+            return;
         }
+
+        Pos entityPos = entity.getPosition();
+        PhysicsResult physicsResult = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
+                new Pos(entityPos.x(), entityPos.y() + Vec.EPSILON + stepHeight, entityPos.z()),
+                new Vec(speedX, 0, speedZ), null);
+        if (!physicsResult.hasCollision()) {
+            entity.refreshPosition(physicsResult.newPosition().withView(pos.yaw(), pos.pitch()));
+            return;
+        }
+
+        entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer.TICK_PER_SECOND));
+        jumpTargetHeight = target;
+        jumping = true;
     }
 
     private void stepUp(Instance instance, Vec deltaMove, double nodeDiff, Pos pos, double speedX, double speedZ) {
