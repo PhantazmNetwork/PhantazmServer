@@ -7,7 +7,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.player.PlayerHandAnimationEvent;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
@@ -94,6 +93,10 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
             ClosestHit closestHit = new ClosestHit(start);
             instance.getEntityTracker()
                     .raytraceCandidates(start, end, EntityTracker.Target.LIVING_ENTITIES, closestHit);
+
+            if (closestHit.closest > punchRange) {
+                return;
+            }
 
             PhantazmMob hit = closestHit.closestMob;
             if (hit != null) {
