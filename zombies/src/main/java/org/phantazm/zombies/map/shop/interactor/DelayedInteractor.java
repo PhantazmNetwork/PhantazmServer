@@ -11,7 +11,7 @@ import java.util.*;
 @Model("zombies.map.shop.interactor.delayed")
 @Cache(false)
 public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
-    private final ShopInteractor target;
+    private final List<ShopInteractor> interactors;
 
     private final Deque<Interaction> interactions;
 
@@ -19,15 +19,15 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
     }
 
     @FactoryMethod
-    public DelayedInteractor(@NotNull Data data, @NotNull @Child("target") ShopInteractor target) {
+    public DelayedInteractor(@NotNull Data data, @NotNull @Child("target") List<ShopInteractor> interactors) {
         super(data);
-        this.target = Objects.requireNonNull(target, "target");
+        this.interactors = Objects.requireNonNull(interactors, "interactors");
         this.interactions = new ArrayDeque<>();
     }
 
     @Override
     public void initialize(@NotNull Shop shop) {
-        target.initialize(shop);
+        ShopInteractor.initialize(interactors, shop);
     }
 
     @Override
@@ -46,16 +46,18 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
 
             long elapsedTicks = (currentTime - interaction.startTime) / MinecraftServer.TICK_MS;
             if (elapsedTicks > data.delayTicks) {
-                return;
+                break;
             }
 
-            target.handleInteraction(interaction.interaction);
+            ShopInteractor.handle(interactors, interaction.interaction);
             interactionIterator.remove();
         }
+
+        ShopInteractor.tick(interactors, time);
     }
 
     @DataObject
-    record Data(@ChildPath("target") String targetPath, int delayTicks) {
+    record Data(@ChildPath("target") List<String> interactors, int delayTicks) {
 
     }
 }

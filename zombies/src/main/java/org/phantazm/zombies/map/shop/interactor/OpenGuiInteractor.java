@@ -35,16 +35,20 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         interaction.player().module().getPlayerView().getPlayer().ifPresent(player -> player.openInventory(
-                Gui.builder(data.inventoryType, slotDistributor).setDynamic(data.dynamic).withItems(guiItems)
+                Gui.builder(data.inventoryType, slotDistributor).setDynamic(false).withItems(guiItems)
                         .withTitle(data.title).build()));
         return true;
+    }
+
+    @Override
+    public void tick(long time) {
+        ShopInteractor.tick(guiItems, time);
     }
 
     @DataObject
     public record Data(@NotNull Component title,
                        @NotNull InventoryType inventoryType,
-                       @NotNull @ChildPath("items") List<String> guiItems,
-                       boolean dynamic) {
+                       @NotNull @ChildPath("items") List<String> guiItems) {
 
     }
 }
