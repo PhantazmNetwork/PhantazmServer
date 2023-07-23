@@ -45,7 +45,7 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
             Interaction interaction = interactionIterator.next();
 
             long elapsedTicks = (currentTime - interaction.startTime) / MinecraftServer.TICK_MS;
-            if (elapsedTicks > data.delayTicks) {
+            if (elapsedTicks < data.delayTicks) {
                 break;
             }
 
@@ -57,7 +57,7 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
     }
 
     @DataObject
-    record Data(@ChildPath("target") List<String> interactors, int delayTicks) {
+    public record Data(@ChildPath("target") List<String> interactors, int delayTicks) {
 
     }
 }

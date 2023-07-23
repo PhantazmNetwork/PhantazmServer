@@ -20,7 +20,7 @@ import org.phantazm.zombies.map.shop.Shop;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-@Model("zombies.map.shop.interactor.delayed")
+@Model("zombies.map.shop.interactor.dragons_wrath")
 @Cache(false)
 public class DragonsWrathInteractor implements ShopInteractor {
     private final Data data;
