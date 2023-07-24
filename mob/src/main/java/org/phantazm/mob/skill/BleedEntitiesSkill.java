@@ -6,6 +6,7 @@ import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.target.TargetSelector;
+import org.phantazm.mob.validator.TargetValidator;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -19,11 +20,14 @@ public class BleedEntitiesSkill implements Skill {
     private final Collection<BleedContext> bleeding = new LinkedList<>();
     private final Data data;
     private final TargetSelector<?> selector;
+    private final TargetValidator validator;
 
     @FactoryMethod
-    public BleedEntitiesSkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<?> selector) {
+    public BleedEntitiesSkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<?> selector,
+            @NotNull @Child("validator") TargetValidator validator) {
         this.data = Objects.requireNonNull(data, "data");
         this.selector = Objects.requireNonNull(selector, "selector");
+        this.validator = Objects.requireNonNull(validator, "validator");
     }
 
     @Override
@@ -57,6 +61,11 @@ public class BleedEntitiesSkill implements Skill {
                 continue;
             }
 
+            if (validator.valid(self.entity(), livingEntity)) {
+                contextIterator.remove();
+                continue;
+            }
+
             long ticksSinceStart = bleedContext.ticksSinceStart();
             bleedContext.setTicksSinceStart(ticksSinceStart + 1);
             if (ticksSinceStart % data.bleedInterval() == 0) {
@@ -81,6 +90,7 @@ public class BleedEntitiesSkill implements Skill {
 
     @DataObject
     public record Data(@NotNull @ChildPath("selector") String selector,
+                       @NotNull @ChildPath("validator") String validator,
                        float bleedDamage,
                        boolean bypassArmor,
                        long bleedInterval,
