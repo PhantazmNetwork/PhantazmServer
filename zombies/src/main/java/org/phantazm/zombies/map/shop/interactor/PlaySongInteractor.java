@@ -54,10 +54,10 @@ public class PlaySongInteractor implements ShopInteractor {
                 Instance instance = player.getInstance();
                 if (instance != null) {
                     if (data.atLocation) {
-                        songPlayer.play(instance, shop.center(), notes);
+                        songPlayer.play(instance, data.source, shop.center(), notes, data.volume);
                     }
                     else {
-                        songPlayer.play(instance, Sound.Emitter.self(), notes);
+                        songPlayer.play(instance, data.source, Sound.Emitter.self(), notes, data.volume);
                     }
                 }
             });
@@ -66,17 +66,22 @@ public class PlaySongInteractor implements ShopInteractor {
         }
 
         if (data.atLocation) {
-            playerOptional.ifPresent(player -> songPlayer.play(player, shop.center(), notes));
+            playerOptional.ifPresent(player -> songPlayer.play(player, data.source, shop.center(), notes, data.volume));
         }
         else {
-            playerOptional.ifPresent(player -> songPlayer.play(player, Sound.Emitter.self(), notes));
+            playerOptional.ifPresent(
+                    player -> songPlayer.play(player, data.source, Sound.Emitter.self(), notes, data.volume));
         }
 
         return true;
     }
 
     @DataObject
-    public record Data(@NotNull Key songKey, boolean broadcast, boolean atLocation) {
+    public record Data(@NotNull Key songKey,
+                       boolean broadcast,
+                       boolean atLocation,
+                       float volume,
+                       @NotNull Sound.Source source) {
         @Default("broadcast")
         public static @NotNull ConfigElement broadcastDefault() {
             return ConfigPrimitive.of(false);
@@ -85,6 +90,16 @@ public class PlaySongInteractor implements ShopInteractor {
         @Default("atLocation")
         public static @NotNull ConfigElement atLocationDefault() {
             return ConfigPrimitive.of(true);
+        }
+
+        @Default("volume")
+        public static @NotNull ConfigElement volumeDefault() {
+            return ConfigPrimitive.of(10F);
+        }
+
+        @Default("source")
+        public static @NotNull ConfigElement sourceDefault() {
+            return ConfigPrimitive.of("MASTER");
         }
     }
 }

@@ -3,7 +3,6 @@ package org.phantazm.core.sound;
 import com.github.steanky.element.core.key.Constants;
 import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.sound.Sound;
 import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
@@ -267,8 +266,7 @@ public class NBSSongLoader implements SongLoader {
                         instrumentKey = customInstrumentKeys[index];
                     }
 
-                    Sound sound = Sound.sound(instrumentKey, Sound.Source.MUSIC, 10, nbsNote.normalizedPitch);
-                    actualNotes.add(new SongPlayer.Note(sound, nbsNote.delayTick));
+                    actualNotes.add(new SongPlayer.Note(instrumentKey, nbsNote.normalizedPitch, nbsNote.delayTick));
                 }
 
                 return Optional.of(List.copyOf(actualNotes));
