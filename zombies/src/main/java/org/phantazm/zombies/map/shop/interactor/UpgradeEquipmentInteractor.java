@@ -77,6 +77,13 @@ public class UpgradeEquipmentInteractor implements ShopInteractor {
             return false;
         }
 
+        ItemStack previousItemStack = equipment.getItemStack();
+        Component previousComponent = previousItemStack.getDisplayName();
+        if (previousComponent == null) {
+            previousComponent = Component.translatable(previousItemStack.material().registry().translationKey());
+        }
+        TagResolver previousTag = Placeholder.component("previous_item", previousComponent);
+
         upgradable.setLevel(upgradeKey);
 
         ItemStack itemStack = equipment.getItemStack();
@@ -84,10 +91,10 @@ public class UpgradeEquipmentInteractor implements ShopInteractor {
         if (component == null) {
             component = Component.translatable(itemStack.material().registry().translationKey());
         }
+        TagResolver upgradedTag = Placeholder.component("upgraded_item", component);
 
-        TagResolver tag = Placeholder.component("upgraded_item", component);
-        zombiesPlayer.getPlayer().ifPresent(
-                player -> player.sendMessage(MiniMessage.miniMessage().deserialize(data.upgradeFormatMessage, tag)));
+        zombiesPlayer.getPlayer().ifPresent(player -> player.sendMessage(
+                MiniMessage.miniMessage().deserialize(data.upgradeFormatMessage, previousTag, upgradedTag)));
 
         ShopInteractor.handle(upgradeInteractors, interaction);
         return true;
