@@ -14,7 +14,6 @@ pluginManagement {
             name = "Fabric"
         }
 
-
         maven("https://dl.cloudsmith.io/public/steanky/element/maven/")
         mavenCentral()
         gradlePluginPortal()
