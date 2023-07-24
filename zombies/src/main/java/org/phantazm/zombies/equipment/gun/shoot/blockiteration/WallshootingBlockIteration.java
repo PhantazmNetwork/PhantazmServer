@@ -21,7 +21,7 @@ import java.util.Set;
  * a {@link BasicBlockIteration}.
  */
 @Model("zombies.gun.block_iteration.wallshot")
-@Cache
+@Cache(false)
 public class WallshootingBlockIteration implements BlockIteration {
 
     private final Data data;
