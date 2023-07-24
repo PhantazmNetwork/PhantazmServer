@@ -81,7 +81,7 @@ public final class LobbyFeature {
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
                 new BasicLobbyProvider(ExecutorFeature.getExecutor(), mainLobbyConfig.maxLobbies(),
                         -mainLobbyConfig.maxPlayers(), instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback,
-                        mainLobbyConfig.instanceConfig(), contextManager, mainLobbyConfig.npcs(), false);
+                        mainLobbyConfig.instanceConfig(), contextManager, mainLobbyConfig.npcs(), false, node);
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
         fallback = new LobbyRouterFallback(LobbyFeature.getLobbyRouter(), lobbiesConfig.mainLobbyName());
@@ -93,7 +93,7 @@ public final class LobbyFeature {
                         new BasicLobbyProvider(ExecutorFeature.getExecutor(), lobby.getValue().maxLobbies(),
                                 -lobby.getValue().maxPlayers(), instanceLoader, lobby.getValue().lobbyPaths(),
                                 regularFallback, lobby.getValue().instanceConfig(), contextManager,
-                                mainLobbyConfig.npcs(), true));
+                                mainLobbyConfig.npcs(), true, node));
             }
         }
 

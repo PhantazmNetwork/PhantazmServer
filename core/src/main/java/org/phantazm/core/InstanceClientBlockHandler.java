@@ -44,18 +44,18 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
      * @param instance   the instance this handler is bound to
      * @param chunkFloor the minimum y-coordinate of chunks in this instance
      */
-    public InstanceClientBlockHandler(@NotNull Instance instance, int chunkFloor, int chunkHeight) {
+    public InstanceClientBlockHandler(@NotNull Instance instance, int chunkFloor, int chunkHeight,
+            @NotNull EventNode<InstanceEvent> instanceNode) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.clientData = new Long2ObjectOpenHashMap<>();
         this.chunkFloor = chunkFloor;
         this.chunkHeight = chunkHeight;
 
-        EventNode<InstanceEvent> node = instance.eventNode();
-        node.addListener(PreBlockChangeEvent.class, this::onPreBlockChange);
-        node.addListener(PlayerBlockBreakEvent.class, this::onPlayerBlockBreak);
-        node.addListener(PrePlayerStartDiggingEvent.class, this::onPrePlayerStartDigging);
-        node.addListener(PreSendChunkEvent.class, this::onPreSendChunk);
-        node.addListener(InstanceChunkUnloadEvent.class, this::onChunkUnload);
+        instanceNode.addListener(PreBlockChangeEvent.class, this::onPreBlockChange);
+        instanceNode.addListener(PlayerBlockBreakEvent.class, this::onPlayerBlockBreak);
+        instanceNode.addListener(PrePlayerStartDiggingEvent.class, this::onPrePlayerStartDigging);
+        instanceNode.addListener(PreSendChunkEvent.class, this::onPreSendChunk);
+        instanceNode.addListener(InstanceChunkUnloadEvent.class, this::onChunkUnload);
     }
 
     @Override

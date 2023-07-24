@@ -15,12 +15,11 @@ import java.util.Objects;
 public class BasicInstanceSpaceHandler implements InstanceSpaceHandler {
     private final InstanceSpace space;
 
-    public BasicInstanceSpaceHandler(@NotNull InstanceSpace instanceSpace) {
-        this.space = Objects.requireNonNull(instanceSpace, "instanceSpace");
+    public BasicInstanceSpaceHandler(@NotNull InstanceSpace space, @NotNull EventNode<InstanceEvent> instanceNode) {
+        this.space = Objects.requireNonNull(space, "space");
 
-        EventNode<InstanceEvent> node = instanceSpace.instance().eventNode();
-        node.addListener(InstanceChunkUnloadEvent.class, this::chunkUnload);
-        node.addListener(BlockChangeEvent.class, this::blockChange);
+        instanceNode.addListener(InstanceChunkUnloadEvent.class, this::chunkUnload);
+        instanceNode.addListener(BlockChangeEvent.class, this::blockChange);
     }
 
     private void chunkUnload(InstanceChunkUnloadEvent event) {

@@ -2,7 +2,6 @@ package org.phantazm.core.npc;
 
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.event.trait.InstanceEvent;
@@ -14,21 +13,17 @@ import java.util.List;
 import java.util.Objects;
 
 public class NPCHandler implements Tickable {
-    private final Instance instance;
     private final List<NPC> npcs;
-    private final EventNode<InstanceEvent> instanceEventNode;
-    private final EventNode<InstanceEvent> handlerNode;
+    private final Instance instance;
+    private final EventNode<InstanceEvent> instanceNode;
 
-    public NPCHandler(@NotNull List<NPC> npcs, @NotNull Instance instance) {
-        this.instance = Objects.requireNonNull(instance, "instance");
+    public NPCHandler(@NotNull List<NPC> npcs, @NotNull Instance instance,
+            @NotNull EventNode<InstanceEvent> instanceNode) {
         this.npcs = List.copyOf(npcs);
-        this.instanceEventNode = instance.eventNode();
+        this.instance = Objects.requireNonNull(instance, "instance");
+        this.instanceNode = Objects.requireNonNull(instanceNode, "instanceNode");
 
-        this.handlerNode = EventNode.event("npc_handler_{" + instance.getUniqueId() + "}",
-                EventFilter.from(InstanceEvent.class, Instance.class, InstanceEvent::getInstance), event -> true);
-
-        handlerNode.addListener(PlayerEntityInteractEvent.class, this::entityInteractEvent);
-        instanceEventNode.addChild(handlerNode);
+        instanceNode.addListener(PlayerEntityInteractEvent.class, this::entityInteractEvent);
     }
 
     private void entityInteractEvent(PlayerEntityInteractEvent event) {
@@ -58,8 +53,6 @@ public class NPCHandler implements Tickable {
         for (NPC npc : npcs) {
             npc.despawn();
         }
-
-        instanceEventNode.removeChild(handlerNode);
     }
 
     @Override
@@ -67,5 +60,9 @@ public class NPCHandler implements Tickable {
         for (NPC npc : npcs) {
             npc.tick(time);
         }
+    }
+
+    public @NotNull EventNode<InstanceEvent> instanceNode() {
+        return instanceNode;
     }
 }

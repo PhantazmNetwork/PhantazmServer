@@ -132,12 +132,12 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         super.shutdown();
     }
 
-    public void cleanup() {
-        this.npcHandler.end();
-    }
-
     @Override
     public void tick(long time) {
         this.npcHandler.tick(time);
+    }
+
+    public @NotNull NPCHandler handler() {
+        return this.npcHandler;
     }
 }

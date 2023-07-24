@@ -19,11 +19,9 @@ import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.Team;
 import net.minestom.server.scoreboard.TeamManager;
 import net.minestom.server.timer.TaskSchedule;
-import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.BasicClientBlockHandlerSource;
-import org.phantazm.core.InstanceClientBlockHandler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
@@ -175,15 +173,13 @@ public final class ZombiesFeature {
                     new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
                             instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
                             ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(),
-                            new BasicClientBlockHandlerSource(instance -> {
-                                DimensionType dimensionType = instance.getDimensionType();
-                                return new InstanceClientBlockHandler(instance, dimensionType.getMinY(),
-                                        dimensionType.getHeight());
-                            }, globalEventNode), contextManager, keyParser, mobNoPushTeam, corpseTeam, database,
-                            ZombiesFeature.powerups(), new BasicZombiesPlayerSource(database, viewProvider,
-                            EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
-                            keyParser), mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
-                            .provide(mapDependencyProvider), songLoader);
+                            new BasicClientBlockHandlerSource(globalEventNode), contextManager, keyParser,
+                            mobNoPushTeam, corpseTeam, database, ZombiesFeature.powerups(),
+                            new BasicZombiesPlayerSource(database, viewProvider,
+                                    EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
+                                    keyParser),
+                            mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
+                                    .provide(mapDependencyProvider), songLoader);
             providers.put(entry.getKey(), provider);
         }
 

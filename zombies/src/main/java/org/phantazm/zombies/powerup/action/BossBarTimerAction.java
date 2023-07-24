@@ -93,14 +93,16 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
         @Override
         public void deactivate(@NotNull ZombiesPlayer player) {
             BossBar bossBar = this.bossBar;
-            if (bossBar != null) {
-                for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                    zombiesPlayer.removeCancellable(id);
-                }
-
-                MinecraftServer.getBossBarManager().destroyBossBar(bossBar);
-                this.bossBar = null;
+            if (bossBar == null) {
+                return;
             }
+
+            for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                zombiesPlayer.removeCancellable(id);
+            }
+
+            MinecraftServer.getBossBarManager().destroyBossBar(bossBar);
+            this.bossBar = null;
         }
 
         @Override

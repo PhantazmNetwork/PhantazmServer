@@ -5,6 +5,8 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigList;
+import net.minestom.server.event.Event;
+import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
@@ -42,6 +44,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     private final InstanceConfig instanceConfig;
     private final List<ElementContext> npcContexts;
     private final boolean quittable;
+    private final EventNode<Event> rootNode;
 
     /**
      * Creates a basic implementation of a {@link SceneProviderAbstract}.
@@ -55,9 +58,9 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
      * @param instanceConfig    The {@link InstanceConfig} for the {@link Lobby}s
      */
     public BasicLobbyProvider(@NotNull Executor executor, int maximumLobbies, int newLobbyThreshold,
-            @NotNull InstanceLoader instanceLoader,
-            @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback, @NotNull InstanceConfig instanceConfig,
-            @NotNull ContextManager contextManager, @NotNull ConfigList npcConfigs, boolean quittable) {
+            @NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback,
+            @NotNull InstanceConfig instanceConfig, @NotNull ContextManager contextManager,
+            @NotNull ConfigList npcConfigs, boolean quittable, @NotNull EventNode<Event> rootNode) {
         super(executor, maximumLobbies, newLobbyThreshold);
 
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
@@ -75,6 +78,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
 
         this.npcContexts = List.copyOf(npcContexts);
         this.quittable = quittable;
+        this.rootNode = rootNode;
     }
 
     @Override
@@ -83,20 +87,22 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
             instance.setTime(instanceConfig.time());
             instance.setTimeRate(instanceConfig.timeRate());
 
-            EventNode<? super InstanceEvent> eventNode = instance.eventNode();
-            eventNode.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
-            eventNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
-            eventNode.addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true));
-            eventNode.addListener(PlayerPreEatEvent.class, event -> event.setCancelled(true));
-            eventNode.addListener(PickupItemEvent.class, event -> event.setCancelled(true));
-            eventNode.addListener(PickupExperienceEvent.class, event -> event.setCancelled(true));
-            eventNode.addListener(PrePlayerStartDiggingEvent.class, event -> event.setCancelled(true));
-            eventNode.addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true));
-            eventNode.addListener(PlayerBlockInteractEvent.class, event -> {
+            EventNode<InstanceEvent> instanceNode =
+                    EventNode.type("instance_npc_node_" + instance.getUniqueId(), EventFilter.INSTANCE);
+
+            instanceNode.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
+            instanceNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
+            instanceNode.addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true));
+            instanceNode.addListener(PlayerPreEatEvent.class, event -> event.setCancelled(true));
+            instanceNode.addListener(PickupItemEvent.class, event -> event.setCancelled(true));
+            instanceNode.addListener(PickupExperienceEvent.class, event -> event.setCancelled(true));
+            instanceNode.addListener(PrePlayerStartDiggingEvent.class, event -> event.setCancelled(true));
+            instanceNode.addListener(PlayerBlockPlaceEvent.class, event -> event.setCancelled(true));
+            instanceNode.addListener(PlayerBlockInteractEvent.class, event -> {
                 event.setCancelled(true);
                 event.setBlockingItemUse(true);
             });
-            eventNode.addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true));
+            instanceNode.addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true));
 
             List<NPC> npcs = new ArrayList<>(npcContexts.size());
             for (ElementContext context : npcContexts) {
@@ -107,17 +113,19 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
             }
 
             Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
-                    new NPCHandler(List.copyOf(npcs), instance), quittable);
-            eventNode.addListener(PlayerDisconnectEvent.class,
+                    new NPCHandler(List.copyOf(npcs), instance, instanceNode), quittable);
+            instanceNode.addListener(PlayerDisconnectEvent.class,
                     event -> lobby.leave(Collections.singleton(event.getPlayer().getUuid())).executor()
                             .ifPresent(Runnable::run));
-
+            rootNode.addChild(instanceNode);
             return lobby;
         });
     }
 
     @Override
     protected void cleanupScene(@NotNull Lobby scene) {
-        scene.cleanup();
+        NPCHandler handler = scene.handler();
+        handler.end();
+        rootNode.removeChild(handler.instanceNode());
     }
 }

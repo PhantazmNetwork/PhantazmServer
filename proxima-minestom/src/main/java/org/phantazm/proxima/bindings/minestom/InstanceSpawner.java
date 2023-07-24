@@ -5,6 +5,8 @@ import com.github.steanky.proxima.path.Pathfinder;
 import com.github.steanky.vector.Vec3I2ObjectMap;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +17,7 @@ import java.util.function.Function;
 
 public class InstanceSpawner implements Spawner {
     public record InstanceSettings(@NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeLocal,
+                                   @NotNull EventNode<InstanceEvent> instanceNode,
                                    @NotNull InstanceSpaceHandler spaceHandler) {
 
     }
