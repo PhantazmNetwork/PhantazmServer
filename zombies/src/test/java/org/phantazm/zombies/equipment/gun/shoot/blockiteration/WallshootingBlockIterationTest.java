@@ -3,6 +3,7 @@ package org.phantazm.zombies.equipment.gun.shoot.blockiteration;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import org.junit.jupiter.api.Test;
+import org.phantazm.zombies.equipment.gun.shoot.wallshooting.WallshootingChecker;
 
 import java.util.Collections;
 import java.util.Set;
@@ -10,11 +11,13 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class WallshotBlockIterationTest {
+public class WallshootingBlockIterationTest {
 
     @Test
     public void testAirDoesNotEndIteration() {
-        BlockIteration blockIteration = new WallshotBlockIteration(new WallshotBlockIteration.Data(Set.of()));
+        WallshootingChecker wallshootingChecker = () -> true;
+        BlockIteration blockIteration =
+                new WallshootingBlockIteration(new WallshootingBlockIteration.Data("", Set.of()), wallshootingChecker);
         BlockIteration.Context context = blockIteration.createContext();
 
         assertFalse(context.acceptRaytracedBlock(Vec.ZERO, Block.AIR));
@@ -22,7 +25,9 @@ public class WallshotBlockIterationTest {
 
     @Test
     public void testStoneIsInitiallyValidEndpoint() {
-        BlockIteration blockIteration = new WallshotBlockIteration(new WallshotBlockIteration.Data(Set.of()));
+        WallshootingChecker wallshootingChecker = () -> true;
+        BlockIteration blockIteration =
+                new WallshootingBlockIteration(new WallshootingBlockIteration.Data("", Set.of()), wallshootingChecker);
         BlockIteration.Context context = blockIteration.createContext();
 
         assertTrue(context.isValidEndpoint(Vec.ZERO, Block.STONE));
@@ -31,8 +36,9 @@ public class WallshotBlockIterationTest {
     @Test
     public void testStoneIsInvalidEndpointAfterWallshot() {
         Block passable = Block.BARRIER;
-        BlockIteration blockIteration =
-                new WallshotBlockIteration(new WallshotBlockIteration.Data(Collections.singleton(passable.key())));
+        WallshootingChecker wallshootingChecker = () -> true;
+        BlockIteration blockIteration = new WallshootingBlockIteration(
+                new WallshootingBlockIteration.Data("", Collections.singleton(passable.key())), wallshootingChecker);
         BlockIteration.Context context = blockIteration.createContext();
 
         context.acceptRaytracedBlock(Vec.ZERO, passable);

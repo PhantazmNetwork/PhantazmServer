@@ -31,7 +31,7 @@ import org.phantazm.zombies.equipment.gun.reload.actionbar.GradientActionBarChoo
 import org.phantazm.zombies.equipment.gun.reload.actionbar.StaticActionBarChooser;
 import org.phantazm.zombies.equipment.gun.shoot.StateShootTester;
 import org.phantazm.zombies.equipment.gun.shoot.blockiteration.BasicBlockIteration;
-import org.phantazm.zombies.equipment.gun.shoot.blockiteration.WallshotBlockIteration;
+import org.phantazm.zombies.equipment.gun.shoot.blockiteration.WallshootingBlockIteration;
 import org.phantazm.zombies.equipment.gun.shoot.blockiteration.WindowBlockIteration;
 import org.phantazm.zombies.equipment.gun.shoot.endpoint.BasicShotEndpointSelector;
 import org.phantazm.zombies.equipment.gun.shoot.fire.HitScanFirer;
@@ -39,6 +39,7 @@ import org.phantazm.zombies.equipment.gun.shoot.fire.SpreadFirer;
 import org.phantazm.zombies.equipment.gun.shoot.fire.projectile.PhantazmMobProjectileCollisionFilter;
 import org.phantazm.zombies.equipment.gun.shoot.fire.projectile.ProjectileFirer;
 import org.phantazm.zombies.equipment.gun.shoot.handler.*;
+import org.phantazm.zombies.equipment.gun.shoot.wallshooting.MapObjectsWallshootingChecker;
 import org.phantazm.zombies.equipment.gun.target.BasicTargetFinder;
 import org.phantazm.zombies.equipment.gun.target.entityfinder.directional.AroundEndFinder;
 import org.phantazm.zombies.equipment.gun.target.entityfinder.directional.BetweenPointsFinder;
@@ -198,7 +199,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(StateReloadTester.class);
         contextManager.registerElementClass(BasicShotEndpointSelector.class);
         contextManager.registerElementClass(BasicBlockIteration.class);
-        contextManager.registerElementClass(WallshotBlockIteration.class);
+        contextManager.registerElementClass(WallshootingBlockIteration.class);
         contextManager.registerElementClass(WindowBlockIteration.class);
         contextManager.registerElementClass(PhantazmMobProjectileCollisionFilter.class);
         contextManager.registerElementClass(ProjectileFirer.class);
@@ -217,6 +218,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(PotionShotHandler.class);
         contextManager.registerElementClass(SlowDownShotHandler.class);
         contextManager.registerElementClass(SoundShotHandler.class);
+        contextManager.registerElementClass(MapObjectsWallshootingChecker.class);
         contextManager.registerElementClass(StateShootTester.class);
         contextManager.registerElementClass(AroundEndFinder.class);
         contextManager.registerElementClass(BetweenPointsFinder.class);

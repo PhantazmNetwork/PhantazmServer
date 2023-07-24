@@ -35,6 +35,7 @@ import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.spawner.MobSpawner;
+import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.coin.BasicTransactionModifierSource;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.map.*;
@@ -97,6 +98,9 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                 new BasicSpawnDistributor(mobModels::get, random, playerMap.values(), mobNoPushTeam);
 
         Flaggable flaggable = new BasicFlaggable();
+        if (mapInfo.settings().canWallshoot()) {
+            flaggable.setFlag(Flags.WALLSHOOTING_ENABLED);
+        }
         TransactionModifierSource transactionModifierSource = new BasicTransactionModifierSource();
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
 

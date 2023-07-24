@@ -1,17 +1,14 @@
 package org.phantazm.zombies.equipment.gun.shoot.blockiteration;
 
-import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.collision.Shape;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.gun.shoot.wallshooting.WallshootingChecker;
 
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
@@ -25,13 +22,17 @@ import java.util.Set;
  */
 @Model("zombies.gun.block_iteration.wallshot")
 @Cache
-public class WallshotBlockIteration implements BlockIteration {
+public class WallshootingBlockIteration implements BlockIteration {
 
     private final Data data;
 
+    private final WallshootingChecker wallshootingChecker;
+
     @FactoryMethod
-    public WallshotBlockIteration(@NotNull Data data) {
+    public WallshootingBlockIteration(@NotNull Data data,
+            @NotNull @Child("wallshooting_checker") WallshootingChecker wallshootingChecker) {
         this.data = Objects.requireNonNull(data, "data");
+        this.wallshootingChecker = Objects.requireNonNull(wallshootingChecker, "wallshootingChecker");
     }
 
     @Override
@@ -42,15 +43,19 @@ public class WallshotBlockIteration implements BlockIteration {
 
             @Override
             public boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Block block) {
-                return !wallshot;
+                if (wallshootingChecker.canWallshoot()) {
+                    return !wallshot;
+                }
+
+                return false;
             }
 
             @SuppressWarnings("UnstableApiUsage")
             @Override
             public boolean acceptRaytracedBlock(@NotNull Vec intersection, @NotNull Block block) {
                 Shape blockShape = block.registry().collisionShape();
-                if ((!blockShape.isFullBlock() && !blockShape.isEmpty()) ||
-                        data.passableBlocks().contains(block.key())) {
+                if (wallshootingChecker.canWallshoot() && ((!blockShape.isFullBlock() && !blockShape.isEmpty()) ||
+                        data.passableBlocks().contains(block.key()))) {
                     wallshot = true;
                     return false;
                 }
@@ -62,6 +67,7 @@ public class WallshotBlockIteration implements BlockIteration {
     }
 
     @DataObject
-    public record Data(@NotNull Set<Key> passableBlocks) {
+    public record Data(@NotNull @ChildPath("wallshooting_checker") String wallshootingChecker,
+                       @NotNull Set<Key> passableBlocks) {
     }
 }

@@ -381,6 +381,7 @@ public final class MapProcessors {
             long corpseDeathTicks = element.getNumberOrThrow("corpseDeathTicks").longValue();
             long healTicks = element.getNumberOrThrow("healTicks").longValue();
             double reviveRadius = element.getNumberOrThrow("reviveRadius").doubleValue();
+            boolean canWallshoot = element.getBooleanOrThrow("canWallshoot");
             boolean perksLostOnDeath = element.getBooleanOrThrow("perksLostOnDeath");
             long baseReviveTicks = element.getNumberOrThrow("baseReviveTicks").longValue();
             int rollsPerChest = element.getNumberOrThrow("rollsPerChest").intValue();
@@ -430,15 +431,15 @@ public final class MapProcessors {
                     introMessages, countdownTicks, countdownAlertTicks, countdownTickSound, countdownTimeFormat,
                     endTicks, endGameStatsFormat, scoreboardHeader, worldTime, maxPlayers, minPlayers, startingCoins,
                     repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks, corpseDeathTicks,
-                    healTicks, reviveRadius, perksLostOnDeath, baseReviveTicks, rollsPerChest, punchDamage, punchRange,
-                    punchKnockback, punchCooldown, mobPlayerCollisions, defaultEquipment, equipmentGroups,
-                    winTitleFormat, winSubtitleFormat, lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat,
-                    reviveStatusToKnockedFormat, dyingStatusFormat, reviveMessageToRevivedFormat,
-                    reviveMessageToOthersFormat, reviveSound, knockedMessageToKnockedFormat,
-                    knockedMessageToOthersFormat, knockedTitleFormat, knockedSubtitleFormat, knockedSound,
-                    deathMessageToKilledFormat, deathMessageToOthersFormat, deathSound, rejoinMessageFormat,
-                    quitMessageFormat, nearWindowMessage, startRepairingMessage, stopRepairingMessage,
-                    finishRepairingMessage, enemiesNearbyMessage);
+                    healTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks, rollsPerChest,
+                    punchDamage, punchRange, punchKnockback, punchCooldown, mobPlayerCollisions, defaultEquipment,
+                    equipmentGroups, winTitleFormat, winSubtitleFormat, lossTitleFormat, lossSubtitleFormat,
+                    reviveStatusToReviverFormat, reviveStatusToKnockedFormat, dyingStatusFormat,
+                    reviveMessageToRevivedFormat, reviveMessageToOthersFormat, reviveSound,
+                    knockedMessageToKnockedFormat, knockedMessageToOthersFormat, knockedTitleFormat,
+                    knockedSubtitleFormat, knockedSound, deathMessageToKilledFormat, deathMessageToOthersFormat,
+                    deathSound, rejoinMessageFormat, quitMessageFormat, nearWindowMessage, startRepairingMessage,
+                    stopRepairingMessage, finishRepairingMessage, enemiesNearbyMessage);
         }
 
         @Override
@@ -477,6 +478,7 @@ public final class MapProcessors {
             node.putNumber("corpseDeathTicks", mapConfig.corpseDeathTicks());
             node.putNumber("healTicks", mapConfig.healTicks());
             node.putNumber("reviveRadius", mapConfig.reviveRadius());
+            node.putBoolean("canWallshoot", mapConfig.canWallshoot());
             node.putBoolean("perksLostOnDeath", mapConfig.perksLostOnDeath());
             node.putNumber("baseReviveTicks", mapConfig.baseReviveTicks());
             node.putNumber("rollsPerChest", mapConfig.rollsPerChest());

@@ -75,17 +75,19 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
 
                 Shape shape = block.registry().collisionShape();
                 Optional<Vec> intersectionOptional = RayUtils.getIntersectionPosition(shape, blockLocation, start);
-                if (intersectionOptional.isPresent()) {
-                    Vec intersection = intersectionOptional.get();
-                    for (BlockIteration.Context context : contexts) {
-                        if (!context.acceptRaytracedBlock(intersection, block)) {
-                            block = null;
-                            continue blockLoop;
-                        }
+                if (intersectionOptional.isEmpty()) {
+                    continue;
+                }
 
-                        return intersection;
+                Vec intersection = intersectionOptional.get();
+                for (BlockIteration.Context context : contexts) {
+                    if (!context.acceptRaytracedBlock(intersection, block)) {
+                        block = null;
+                        continue blockLoop;
                     }
                 }
+
+                return intersection;
             }
 
             Pos limit = start.add(start.direction().mul(data.maxDistance));
