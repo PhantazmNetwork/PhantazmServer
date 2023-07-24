@@ -252,7 +252,7 @@ public class GroundController implements Controller {
         }
 
         entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer.TICK_PER_SECOND));
-        jumpTargetHeight = target;
+        jumpTargetHeight = target + TARGET_EPSILON;
         jumping = true;
     }
 

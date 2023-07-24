@@ -94,7 +94,7 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
             instance.getEntityTracker()
                     .raytraceCandidates(start, end, EntityTracker.Target.LIVING_ENTITIES, closestHit);
 
-            if (closestHit.closest > punchRange) {
+            if (closestHit.closest > punchRange * punchRange) {
                 return;
             }
 
