@@ -94,8 +94,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
             @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull Team mobNoPushTeam,
-            @NotNull Team corpseTeam, @NotNull ZombiesDatabase database, @NotNull Map<Key, PowerupInfo> powerups, @NotNull ZombiesPlayer.Source zombiesPlayerSource,
-            @NotNull CorpseCreator.Source corpseCreatorSource, @NotNull SongLoader songLoader) {
+            @NotNull Team corpseTeam, @NotNull ZombiesDatabase database, @NotNull Map<Key, PowerupInfo> powerups,
+            @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource,
+            @NotNull SongLoader songLoader) {
         super(executor, maximumScenes);
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
@@ -307,7 +308,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull DoorHandler doorHandler, @NotNull BoundedTracker<Room> roomTracker,
             @NotNull BoundedTracker<Window> windowTracker, @NotNull PowerupHandler powerupHandler,
             @NotNull MobStore mobStore, @NotNull LeaveHandler leaveHandler) {
-        EventNode<Event> node = EventNode.all("phantazm_zombies_instance_{" + instance.getUniqueId() + "}");
+        EventNode<Event> node = EventNode.all("phantazm_zombies_instance_" + instance.getUniqueId());
         MapSettingsInfo settings = mapInfo.settings();
 
         //entity events
