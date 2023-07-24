@@ -280,7 +280,7 @@ public class NBSSongLoader implements SongLoader {
     }
 
     private static float normalizeKey(int key, float detune) {
-        float uses = (key + detune) - MIN_KEY;
+        double uses = (key + (double)detune) - MIN_KEY;
         return (float)Math.pow(2, (uses - 12) / 12D);
     }
 
