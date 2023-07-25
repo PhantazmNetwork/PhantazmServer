@@ -90,6 +90,8 @@ final class EquipmentFeature {
     private static Map<Key, Pair<EquipmentData, List<ElementContext>>> equipmentLevelMap;
     private static KeyParser keyParser = null;
 
+    private static final Object equipmentSync = new Object();
+
     private EquipmentFeature() {
         throw new UnsupportedOperationException();
     }
@@ -272,31 +274,34 @@ final class EquipmentFeature {
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, equipmentModule);
 
         Map<Key, PerkCreator> perkCreatorMap = new HashMap<>();
-        for (Map.Entry<Key, Pair<EquipmentData, List<ElementContext>>> equipmentEntry : equipmentLevelMap.entrySet()) {
-            Pair<EquipmentData, List<ElementContext>> pair = equipmentEntry.getValue();
-            EquipmentData data = pair.first();
 
-            if (!EquipmentTypes.PERK.equals(pair.left().type())) {
-                continue;
-            }
+        synchronized (equipmentSync) {
+            for (Map.Entry<Key, Pair<EquipmentData, List<ElementContext>>> equipmentEntry : equipmentLevelMap.entrySet()) {
+                Pair<EquipmentData, List<ElementContext>> pair = equipmentEntry.getValue();
+                EquipmentData data = pair.first();
 
-            Map<Key, PerkLevelCreator> perkLevels = new HashMap<>(pair.right().size());
-            for (ElementContext context : pair.right()) {
-                PerkLevelCreator perkLevelCreator = context.provide(provider, HANDLER.andThen(exception -> {
-                    LOGGER.warn("Erroring perk: " + data.name());
-                }), () -> null);
-                if (perkLevelCreator != null) {
-                    perkLevels.put(perkLevelCreator.levelKey(), perkLevelCreator);
+                if (!EquipmentTypes.PERK.equals(pair.left().type())) {
+                    continue;
                 }
-            }
 
-            if (!perkLevels.containsKey(data.rootLevel())) {
-                LOGGER.warn("Perk {} does not contain root level {}", data.name(), data.rootLevel());
-                continue;
-            }
+                Map<Key, PerkLevelCreator> perkLevels = new HashMap<>(pair.right().size());
+                for (ElementContext context : pair.right()) {
+                    PerkLevelCreator perkLevelCreator = context.provide(provider, HANDLER.andThen(exception -> {
+                        LOGGER.warn("Erroring perk: " + data.name());
+                    }), () -> null);
+                    if (perkLevelCreator != null) {
+                        perkLevels.put(perkLevelCreator.levelKey(), perkLevelCreator);
+                    }
+                }
 
-            Key equipmentName = data.name();
-            perkCreatorMap.put(equipmentName, new BasicPerkCreator(equipmentName, data.rootLevel(), perkLevels));
+                if (!perkLevels.containsKey(data.rootLevel())) {
+                    LOGGER.warn("Perk {} does not contain root level {}", data.name(), data.rootLevel());
+                    continue;
+                }
+
+                Key equipmentName = data.name();
+                perkCreatorMap.put(equipmentName, new BasicPerkCreator(equipmentName, data.rootLevel(), perkLevels));
+            }
         }
 
         Map<Key, PerkCreator> perkMap = Map.copyOf(perkCreatorMap);
