@@ -17,6 +17,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
@@ -175,6 +176,15 @@ public final class PhantazmServer {
         }));
 
         MinecraftServer.setBrandName(BRAND_NAME);
+
+        node.addListener(PlayerChatEvent.class, event -> {
+            String message = event.getMessage();
+            if (!message.startsWith("/")) {
+                return;
+            }
+
+            MinecraftServer.getCommandManager().execute(event.getPlayer(), message.substring(1));
+        });
 
         try {
             startServer(node, minecraftServer, serverConfig);
