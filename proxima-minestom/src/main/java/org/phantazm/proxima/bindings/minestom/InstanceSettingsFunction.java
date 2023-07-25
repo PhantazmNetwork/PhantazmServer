@@ -54,7 +54,8 @@ public class InstanceSettingsFunction implements Function<Instance, InstanceSpaw
             ThreadLocal<Vec3I2ObjectMap<Node>> local = ThreadLocal.withInitial(() -> new HashVec3I2ObjectMap<>(bounds));
 
             EventNode<InstanceEvent> node =
-                    EventNode.type("pathfinding_node_" + instance.getUniqueId(), EventFilter.INSTANCE);
+                    EventNode.type("pathfinding_node_" + instance.getUniqueId(), EventFilter.INSTANCE,
+                            (e, v) -> v == instance);
             rootNode.addChild(node);
 
             BasicInstanceSpaceHandler instanceSpaceHandler = new BasicInstanceSpaceHandler(instanceSpace, node);

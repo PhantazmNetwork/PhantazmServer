@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.ElementUtils;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.SceneProviderAbstract;
+import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.npc.NPC;
@@ -88,7 +89,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
             instance.setTimeRate(instanceConfig.timeRate());
 
             EventNode<InstanceEvent> instanceNode =
-                    EventNode.type("instance_npc_node_" + instance.getUniqueId(), EventFilter.INSTANCE);
+                    EventNode.type("instance_npc_node_" + instance.getUniqueId(), EventFilter.INSTANCE,
+                            (e, v) -> v == instance);
 
             instanceNode.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
             instanceNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
@@ -114,9 +116,11 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
 
             Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
                     new NPCHandler(List.copyOf(npcs), instance, instanceNode), quittable);
-            instanceNode.addListener(PlayerDisconnectEvent.class,
-                    event -> lobby.leave(Collections.singleton(event.getPlayer().getUuid())).executor()
-                            .ifPresent(Runnable::run));
+            instanceNode.addListener(PlayerDisconnectEvent.class, event -> {
+                try (TransferResult result = lobby.leave(Collections.singleton(event.getPlayer().getUuid()))) {
+                    result.executor().ifPresent(Runnable::run);
+                }
+            });
             rootNode.addChild(instanceNode);
             return lobby;
         });

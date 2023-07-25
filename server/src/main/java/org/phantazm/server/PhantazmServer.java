@@ -17,7 +17,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
@@ -159,16 +158,6 @@ public final class PhantazmServer {
                 new BasicLoginValidator(serverConfig.serverInfoConfig().whitelist(), WHITELIST_FILE, BANS_FILE);
 
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
-        node.addListener(PlayerChatEvent.class, event -> {
-            String message = event.getMessage();
-            if (!message.startsWith("/")) {
-                return;
-            }
-
-            MinecraftServer.getCommandManager().execute(event.getPlayer(), message.substring(1));
-            event.setCancelled(true);
-        });
-
         try {
             LOGGER.info("Initializing features.");
             initializeFeatures(keyParser, node, serverConfig, shutdownConfig, pathfinderConfig, lobbiesConfig,
