@@ -22,6 +22,7 @@ import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.BasicClientBlockHandlerSource;
+import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
@@ -168,13 +169,14 @@ public final class ZombiesFeature {
 
         ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
         database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource(), sqlFetcher);
+
+        ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource(globalEventNode);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
                             instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
-                            ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(),
-                            new BasicClientBlockHandlerSource(globalEventNode), contextManager, keyParser,
-                            mobNoPushTeam, corpseTeam, database, ZombiesFeature.powerups(),
+                            ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(), clientBlockHandlerSource,
+                            contextManager, keyParser, mobNoPushTeam, corpseTeam, database, ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(database, viewProvider,
                                     EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
                                     keyParser),
