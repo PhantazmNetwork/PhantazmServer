@@ -4,8 +4,12 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.kyori.adventure.key.Key;
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.EntityTracker;
@@ -53,8 +57,8 @@ public class DragonsWrathInteractor implements ShopInteractor {
             return false;
         }
 
-
         Round currentRound = currentRoundOptional.get();
+        Wrapper<Integer> killCount = Wrapper.of(0);
         instance.getEntityTracker()
                 .nearbyEntities(shop.center(), data.radius, EntityTracker.Target.LIVING_ENTITIES, entity -> {
                     if (!currentRound.hasMob(entity.getUuid())) {
@@ -71,17 +75,24 @@ public class DragonsWrathInteractor implements ShopInteractor {
                     lightningBolt.setInstance(instance, entity.getPosition());
                     lightningBolt.scheduleRemove(20, TimeUnit.SERVER_TICK);
 
-                    instance.playSound(
-                            Sound.sound(Key.key("minecraft:entity.lightning_bolt.thunder"), Sound.Source.PLAYER, 20,
-                                    1));
+                    instance.playSound(data.sound());
 
                     entity.kill();
+                    killCount.set(killCount.get() + 1);
                 });
+
+        TagResolver killCountPlaceholder = Placeholder.component("kill_count", Component.text(killCount.get()));
+        Component message = MiniMessage.miniMessage().deserialize(data.messageFormat(), killCountPlaceholder);
+        if (data.broadcast()) {
+            instance.sendMessage(message);
+        } else {
+            interaction.player().getPlayer().ifPresent(player -> player.sendMessage(message));
+        }
 
         return true;
     }
 
     @DataObject
-    public record Data(double radius) {
+    public record Data(@NotNull Sound sound, @NotNull String messageFormat, boolean broadcast, double radius) {
     }
 }
