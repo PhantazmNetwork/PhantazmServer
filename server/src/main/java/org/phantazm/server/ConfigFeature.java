@@ -20,7 +20,7 @@ import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.server.PathfinderConfig;
 import org.phantazm.server.config.server.ServerConfig;
 import org.phantazm.server.config.server.ShutdownConfig;
-import org.phantazm.server.config.server.ZombiesGamereportConfig;
+import org.phantazm.server.config.server.StartupConfig;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 
 import java.nio.file.Path;
@@ -47,6 +47,8 @@ public final class ConfigFeature {
      * The location of the shutdown configuration file.
      */
     public static final Path SHUTDOWN_CONFIG_PATH = Path.of("./shutdown-config.toml");
+
+    public static final Path STARTUP_CONFIG_PATH = Path.of("./startup-config.toml");
 
     public static final Path PARTY_CONFIG_PATH = Path.of("./party-config.toml");
 
@@ -78,6 +80,9 @@ public final class ConfigFeature {
      */
     public static final ConfigHandler.ConfigKey<ShutdownConfig> SHUTDOWN_CONFIG_KEY =
             new ConfigHandler.ConfigKey<>(ShutdownConfig.class, "shutdown_config");
+
+    public static final ConfigHandler.ConfigKey<StartupConfig> STARTUP_CONFIG_KEY =
+            new ConfigHandler.ConfigKey<>(StartupConfig.class, "startup_config");
 
     public static final ConfigHandler.ConfigKey<PartyConfig> PARTY_CONFIG_KEY =
             new ConfigHandler.ConfigKey<>(PartyConfig.class, "party_config");
@@ -120,6 +125,10 @@ public final class ConfigFeature {
         handler.registerLoader(SHUTDOWN_CONFIG_KEY,
                 new SyncFileConfigLoader<>(new ShutdownConfigProcessor(), ShutdownConfig.DEFAULT, SHUTDOWN_CONFIG_PATH,
                         tomlCodec));
+
+        handler.registerLoader(STARTUP_CONFIG_KEY,
+                new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(StartupConfig.class)),
+                        StartupConfig.DEFAULT, STARTUP_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(PARTY_CONFIG_KEY,
                 new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(PartyConfig.class)),

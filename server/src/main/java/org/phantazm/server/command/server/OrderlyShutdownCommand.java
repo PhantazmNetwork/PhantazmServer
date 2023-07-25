@@ -1,16 +1,22 @@
 package org.phantazm.server.command.server;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.permission.Permission;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.game.scene.event.SceneShutdownEvent;
+import org.phantazm.core.game.scene.lobby.Lobby;
+import org.phantazm.core.player.PlayerView;
+import org.phantazm.server.RouterKeys;
 import org.phantazm.server.config.server.ShutdownConfig;
 
 import java.util.Objects;
@@ -42,6 +48,13 @@ public class OrderlyShutdownCommand extends Command {
                     router.setJoinable(false);
                 }
             }
+            for (Lobby lobby : routerStore.getRouter(RouterKeys.LOBBY_SCENE_ROUTER).getScenes()) {
+                for (PlayerView playerView : lobby.getPlayers().values()) {
+                    playerView.getPlayer().ifPresent(player -> {
+                        player.kick(Component.text("Server is shutting down", NamedTextColor.RED));
+                    });
+                }
+            }
 
             MinecraftServer.getSchedulerManager().scheduleTask(() -> {
                 long elapsedMs = System.currentTimeMillis() - shutdownStart;
@@ -66,6 +79,9 @@ public class OrderlyShutdownCommand extends Command {
             }, TaskSchedule.immediate(), TaskSchedule.tick(20));
 
             globalNode.addListener(SceneShutdownEvent.class, this::onSceneShutdown);
+            globalNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
+                event.getPlayer().kick(Component.text("Server is not joinable", NamedTextColor.RED));
+            });
 
             if (noGamesActive()) {
                 System.exit(0);

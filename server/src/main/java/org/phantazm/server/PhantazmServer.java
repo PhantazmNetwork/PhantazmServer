@@ -35,10 +35,7 @@ import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.command.whisper.WhisperConfig;
 import org.phantazm.server.config.lobby.LobbiesConfig;
-import org.phantazm.server.config.server.PathfinderConfig;
-import org.phantazm.server.config.server.ServerConfig;
-import org.phantazm.server.config.server.ServerInfoConfig;
-import org.phantazm.server.config.server.ShutdownConfig;
+import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.server.player.BasicLoginValidator;
 import org.phantazm.server.player.LoginValidator;
@@ -51,6 +48,7 @@ import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -87,6 +85,7 @@ public final class PhantazmServer {
         LobbiesConfig lobbiesConfig;
         PathfinderConfig pathfinderConfig;
         ShutdownConfig shutdownConfig;
+        StartupConfig startupConfig;
         PartyConfig partyConfig;
         WhisperConfig whisperConfig;
         ChatConfig chatConfig;
@@ -142,6 +141,7 @@ public final class PhantazmServer {
             lobbiesConfig = handler.loadDataNow(ConfigFeature.LOBBIES_CONFIG_KEY);
             pathfinderConfig = handler.loadDataNow(ConfigFeature.PATHFINDER_CONFIG_KEY);
             shutdownConfig = handler.loadDataNow(ConfigFeature.SHUTDOWN_CONFIG_KEY);
+            startupConfig = handler.loadDataNow(ConfigFeature.STARTUP_CONFIG_KEY);
             partyConfig = handler.loadDataNow(ConfigFeature.PARTY_CONFIG_KEY);
             whisperConfig = handler.loadDataNow(ConfigFeature.WHISPER_CONFIG_KEY);
             chatConfig = handler.loadDataNow(ConfigFeature.CHAT_CONFIG_KEY);
@@ -177,7 +177,7 @@ public final class PhantazmServer {
         MinecraftServer.setBrandName(BRAND_NAME);
 
         try {
-            startServer(node, minecraftServer, serverConfig);
+            startServer(node, minecraftServer, serverConfig, startupConfig);
         }
         catch (Exception exception) {
             LOGGER.error("Fatal error during server startup", exception);
@@ -274,7 +274,8 @@ public final class PhantazmServer {
         routerStore.putRouter(RouterKeys.LOBBY_SCENE_ROUTER, LobbyFeature.getLobbyRouter());
     }
 
-    private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
+    private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig,
+            StartupConfig startupConfig) {
         ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
 
         switch (infoConfig.authType()) {
@@ -290,6 +291,17 @@ public final class PhantazmServer {
                 event -> event.getResponseData().setDescription(serverConfig.pingListConfig().description()));
 
         server.start(infoConfig.serverIP(), infoConfig.port());
+
+        if (startupConfig.hasCommand()) {
+            ProcessBuilder processBuilder = new ProcessBuilder(startupConfig.command());
+            try {
+                processBuilder.start();
+            }
+            catch (IOException e) {
+                LOGGER.warn("Failed to run startup command", e);
+            }
+        }
+
         LOGGER.info("serverIP: " + infoConfig.serverIP() + ", port: " + infoConfig.port());
     }
 }
