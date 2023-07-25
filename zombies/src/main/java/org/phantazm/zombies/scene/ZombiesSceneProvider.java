@@ -181,7 +181,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             instance.setTime(settings.worldTime());
             instance.setTimeRate(0);
 
-            //LinkedHashMap for better value iteration performance
             Map<UUID, ZombiesPlayer> zombiesPlayers = new ConcurrentHashMap<>(settings.maxPlayers());
 
             MobStore mobStore = new MobStore();
