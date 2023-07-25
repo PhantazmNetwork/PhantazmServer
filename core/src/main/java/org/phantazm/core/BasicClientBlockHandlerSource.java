@@ -40,6 +40,7 @@ public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
                     EventNode.type("client_block_handler_" + instance.getUniqueId(), EventFilter.INSTANCE,
                             (e, v) -> v == instance);
             DimensionType type = instance.getDimensionType();
+            rootNode.addChild(instanceNode);
 
             return new Node(new InstanceClientBlockHandler(instance, type.getMinY(), type.getHeight(), instanceNode),
                     instanceNode);
