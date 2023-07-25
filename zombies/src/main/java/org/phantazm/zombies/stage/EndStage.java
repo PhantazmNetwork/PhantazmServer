@@ -27,16 +27,12 @@ import org.phantazm.zombies.sidebar.SidebarUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.net.*;
+import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.text.MessageFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -132,6 +128,16 @@ public class EndStage implements Stage {
             }
         }
 
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            zombiesPlayer.module().getMeta().setInGame(false);
+
+            if (zombiesPlayer.isState(ZombiesPlayerStateKeys.KNOCKED)) {
+                Point deathLocation = zombiesPlayer.getPlayer().map(Player::getPosition).orElse(null);
+                zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD,
+                        DeadPlayerStateContext.killed(deathLocation, null, null));
+            }
+        }
+
         String timeString = tickFormatter.format(ticksSinceStart.get());
         Component finalTime = Component.text(timeString);
         int bestRound = roundHandler.currentRoundIndex();
@@ -194,16 +200,6 @@ public class EndStage implements Stage {
                     Placeholder.component("revives", Component.text(stats.getRevives()))};
 
             zombiesPlayer.sendMessage(MINI_MESSAGE.deserialize(settings.endGameStatsFormat(), tagResolvers));
-        }
-
-        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            zombiesPlayer.module().getMeta().setInGame(false);
-
-            if (zombiesPlayer.isState(ZombiesPlayerStateKeys.KNOCKED)) {
-                Point deathLocation = zombiesPlayer.getPlayer().map(Player::getPosition).orElse(null);
-                zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD,
-                        DeadPlayerStateContext.killed(deathLocation, null, null));
-            }
         }
     }
 
