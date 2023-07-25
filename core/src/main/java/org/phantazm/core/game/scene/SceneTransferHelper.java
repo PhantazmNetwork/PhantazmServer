@@ -33,14 +33,15 @@ public class SceneTransferHelper {
             leaveExecutor.run();
         }
 
-        TransferResult joinResult = to.join(joinRequest);
-        if (joinResult.executor().isPresent()) {
-            joinResult.executor().get().run();
-        }
-        else if (joinResult.message().isPresent()) {
-            leader.getPlayer().ifPresent(leaderPlayer -> {
-                leaderPlayer.sendMessage(joinResult.message().get());
-            });
+        try (TransferResult joinResult = to.join(joinRequest)) {
+            if (joinResult.executor().isPresent()) {
+                joinResult.executor().get().run();
+            }
+            else if (joinResult.message().isPresent()) {
+                leader.getPlayer().ifPresent(leaderPlayer -> {
+                    leaderPlayer.sendMessage(joinResult.message().get());
+                });
+            }
         }
     }
 
@@ -59,15 +60,16 @@ public class SceneTransferHelper {
                 continue;
             }
 
-            TransferResult leaveResult = oldScene.leave(Collections.singleton(leaver.getUUID()));
-            if (leaveResult.executor().isPresent()) {
-                leaveExecutors.add(leaveResult.executor().get());
-            }
-            else {
-                anyFailures = true;
-                leaveResult.message().ifPresent(message -> {
-                    leaver.getPlayer().ifPresent(player -> player.sendMessage(message));
-                });
+            try (TransferResult leaveResult = oldScene.leave(Collections.singleton(leaver.getUUID()))) {
+                if (leaveResult.executor().isPresent()) {
+                    leaveExecutors.add(leaveResult.executor().get());
+                }
+                else {
+                    anyFailures = true;
+                    leaveResult.message().ifPresent(message -> {
+                        leaver.getPlayer().ifPresent(player -> player.sendMessage(message));
+                    });
+                }
             }
         }
 

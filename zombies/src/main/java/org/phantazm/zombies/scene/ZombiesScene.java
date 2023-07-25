@@ -226,7 +226,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         LOGGER.warn("Failed to finish player join", throwable);
                     }
                 }).join();
-
+            }, () -> {
                 synchronized (joinLock) {
                     pendingPlayers -= newPlayers.size();
                 }

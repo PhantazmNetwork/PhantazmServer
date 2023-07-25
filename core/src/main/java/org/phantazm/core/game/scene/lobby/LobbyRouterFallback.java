@@ -39,13 +39,14 @@ public class LobbyRouterFallback implements SceneFallback {
             }
 
             Lobby lobby = routeResult.scene().get();
-            TransferResult result = lobby.join(joinRequest);
-            if (result.executor().isEmpty()) {
-                return false;
-            }
+            try (TransferResult result = lobby.join(joinRequest)) {
+                if (result.executor().isEmpty()) {
+                    return false;
+                }
 
-            result.executor().get().run();
-            return true;
+                result.executor().get().run();
+                return true;
+            }
         });
     }
 

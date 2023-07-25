@@ -107,11 +107,12 @@ public final class LobbyFeature {
             boolean success = false;
             if (routeResult.scene().isPresent()) {
                 Lobby lobby = routeResult.scene().get();
-                TransferResult transferResult = lobby.join(joinRequest);
-                if (transferResult.executor().isPresent()) {
-                    transferResult.executor().get().run();
-                    loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);
-                    success = true;
+                try (TransferResult transferResult = lobby.join(joinRequest)) {
+                    if (transferResult.executor().isPresent()) {
+                        transferResult.executor().get().run();
+                        loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);
+                        success = true;
+                    }
                 }
             }
 
