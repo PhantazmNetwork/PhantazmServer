@@ -159,6 +159,16 @@ public final class PhantazmServer {
                 new BasicLoginValidator(serverConfig.serverInfoConfig().whitelist(), WHITELIST_FILE, BANS_FILE);
 
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
+        node.addListener(PlayerChatEvent.class, event -> {
+            String message = event.getMessage();
+            if (!message.startsWith("/")) {
+                return;
+            }
+
+            MinecraftServer.getCommandManager().execute(event.getPlayer(), message.substring(1));
+            event.setCancelled(true);
+        });
+
         try {
             LOGGER.info("Initializing features.");
             initializeFeatures(keyParser, node, serverConfig, shutdownConfig, pathfinderConfig, lobbiesConfig,
@@ -176,15 +186,6 @@ public final class PhantazmServer {
         }));
 
         MinecraftServer.setBrandName(BRAND_NAME);
-
-        node.addListener(PlayerChatEvent.class, event -> {
-            String message = event.getMessage();
-            if (!message.startsWith("/")) {
-                return;
-            }
-
-            MinecraftServer.getCommandManager().execute(event.getPlayer(), message.substring(1));
-        });
 
         try {
             startServer(node, minecraftServer, serverConfig);
