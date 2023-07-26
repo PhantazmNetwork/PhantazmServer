@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.Tags;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.skill.Skill;
-import org.phantazm.mob.target.LastHitSelector;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
@@ -26,35 +25,29 @@ import java.util.Objects;
 public class MeleeAttackGoal implements GoalCreator {
     private final Data data;
     private final Collection<Skill> skills;
-    private final LastHitSelector<LivingEntity> lastHitSelector;
 
     @FactoryMethod
-    public MeleeAttackGoal(@NotNull Data data, @NotNull @Child("skills") Collection<Skill> skills,
-            @NotNull @Child("last_hit_selector") LastHitSelector<LivingEntity> lastHitSelector) {
+    public MeleeAttackGoal(@NotNull Data data, @NotNull @Child("skills") Collection<Skill> skills) {
         this.data = Objects.requireNonNull(data, "data");
         this.skills = Objects.requireNonNull(skills, "skills");
-        this.lastHitSelector = Objects.requireNonNull(lastHitSelector, "lastHitSelector");
     }
 
     @Override
     public @NotNull ProximaGoal create(@NotNull PhantazmMob mob) {
-        return new Goal(data, skills, lastHitSelector, mob);
+        return new Goal(data, skills, mob);
     }
 
     private static class Goal implements ProximaGoal {
         private final Data data;
         private final Collection<Skill> skills;
-        private final LastHitSelector<LivingEntity> lastHitSelector;
         private final PhantazmMob mob;
 
         private long lastAttackTime;
 
         @FactoryMethod
-        public Goal(@NotNull Data data, @NotNull Collection<Skill> skills,
-                @NotNull LastHitSelector<LivingEntity> lastHitSelector, @NotNull PhantazmMob mob) {
+        public Goal(@NotNull Data data, @NotNull Collection<Skill> skills, @NotNull PhantazmMob mob) {
             this.data = Objects.requireNonNull(data, "data");
             this.skills = Objects.requireNonNull(skills, "skills");
-            this.lastHitSelector = Objects.requireNonNull(lastHitSelector, "lastHitSelector");
             this.mob = Objects.requireNonNull(mob, "mob");
         }
 
@@ -127,13 +120,7 @@ public class MeleeAttackGoal implements GoalCreator {
                        boolean swingHand,
                        boolean bypassArmor,
                        boolean horizontal,
-                       @NotNull @ChildPath("skills") Collection<String> skillPaths,
-                       @NotNull @ChildPath("last_hit_selector") String lastHitSelectorPath) {
-
-        public Data {
-            Objects.requireNonNull(lastHitSelectorPath, "lastHitSelectorPath");
-        }
-
+                       @NotNull @ChildPath("skills") Collection<String> skillPaths) {
         @Default("swingHand")
         public static @NotNull ConfigElement defaultSwingHand() {
             return ConfigPrimitive.of(true);
