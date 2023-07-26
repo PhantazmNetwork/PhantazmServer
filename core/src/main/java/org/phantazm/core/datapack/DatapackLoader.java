@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Stream;
 
 public class DatapackLoader {
 
@@ -59,7 +58,7 @@ public class DatapackLoader {
                 .name(name)
                 .temperature(rootJson.get("temperature").getAsFloat())
                 .downfall(rootJson.get("downfall").getAsFloat())
-                .precipitation(Biome.Precipitation.valueOf(rootJson.get("precipitation").getAsString().toUpperCase()));
+                .hasPrecipitation(rootJson.get("has_precipitation").getAsBoolean());
         if (rootJson.has("temperature_modifier")) {
             biomeBuilder.temperatureModifier(Biome.TemperatureModifier.valueOf(rootJson.get("temperature_modifier").getAsString().toUpperCase()));
         }
