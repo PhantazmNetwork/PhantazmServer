@@ -15,6 +15,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.ScoreboardObjectivePacket;
+import net.minestom.server.scoreboard.BelowNameTag;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
@@ -105,7 +106,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
             @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-            @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator) {
+            @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
+            @NotNull BelowNameTag belowNameTag) {
         TransactionModifierSource playerTransactionModifierSource = new BasicTransactionModifierSource();
 
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
@@ -171,14 +173,14 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         Function<AlivePlayerStateContext, ZombiesPlayerState> aliveStateCreator = context -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE"), ZombiesPlayerStateKeys.ALIVE.key(),
                     List.of(new BasicAliveStateActivable(context, instance, accessRegistry, playerView, mapSettingsInfo,
-                            sidebar, tabList)));
+                            sidebar, tabList, belowNameTag)));
         };
         BiFunction<DeadPlayerStateContext, Collection<Activable>, ZombiesPlayerState> deadStateCreator =
                 (context, activables) -> {
                     List<Activable> combinedActivables = new ArrayList<>(activables);
                     combinedActivables.add(
                             new BasicDeadStateActivable(accessRegistry, context, instance, playerView, mapSettingsInfo,
-                                    sidebar, tabList, stats));
+                                    sidebar, tabList, belowNameTag, stats));
                     return new BasicZombiesPlayerState(Component.text("DEAD").color(NamedTextColor.RED),
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };
@@ -210,8 +212,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             corpseWrapper.set(corpse);
             return new KnockedPlayerState(reviveHandler,
                     List.of(new BasicKnockedStateActivable(context, instance, playerView, actionBar, mapSettingsInfo,
-                                    reviveHandler, tickFormatter, sidebar, tabList, stats), corpse.asKnockActivable(),
-                            new Activable() {
+                                    reviveHandler, tickFormatter, sidebar, tabList, belowNameTag, stats),
+                            corpse.asKnockActivable(), new Activable() {
                                 @Override
                                 public void start() {
                                     meta.setCorpse(corpse);
@@ -224,7 +226,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             return new BasicZombiesPlayerState(Component.text("QUIT").color(NamedTextColor.RED),
                     ZombiesPlayerStateKeys.QUIT.key(),
                     List.of(new BasicQuitStateActivable(instance, playerView, mapSettingsInfo, sidebar, tabList,
-                            stateMap, taskScheduler)));
+                            belowNameTag, stateMap, taskScheduler)));
         };
 
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =

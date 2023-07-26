@@ -1,7 +1,6 @@
 package org.phantazm.zombies.player.state;
 
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -11,6 +10,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.scoreboard.BelowNameTag;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
@@ -33,13 +33,14 @@ public class BasicDeadStateActivable implements Activable {
     private final MapSettingsInfo settings;
     private final Sidebar sidebar;
     private final TabList tabList;
+    private final BelowNameTag belowNameTag;
     private final ZombiesPlayerMapStats stats;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public BasicDeadStateActivable(@NotNull InventoryAccessRegistry accessRegistry,
             @NotNull DeadPlayerStateContext context, @NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList,
-            @NotNull ZombiesPlayerMapStats stats) {
+            @NotNull BelowNameTag belowNameTag, @NotNull ZombiesPlayerMapStats stats) {
         this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
@@ -47,6 +48,7 @@ public class BasicDeadStateActivable implements Activable {
         this.settings = Objects.requireNonNull(settings, "settings");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
+        this.belowNameTag = Objects.requireNonNull(belowNameTag, "belowNameTag");
         this.stats = Objects.requireNonNull(stats, "stats");
     }
 
@@ -57,6 +59,7 @@ public class BasicDeadStateActivable implements Activable {
             player.setGameMode(GameMode.SPECTATOR);
             sidebar.addViewer(player);
             tabList.addViewer(player);
+            belowNameTag.addViewer(player);
         });
 
         Set<Player> players = new HashSet<>(instance.getPlayers());
@@ -79,8 +82,7 @@ public class BasicDeadStateActivable implements Activable {
 
         Point deathLocation = context.getDeathLocation();
         if (deathLocation != null) {
-            instanceAudience.playSound(settings.deathSound(), deathLocation.x(), deathLocation.y(),
-                    deathLocation.z());
+            instanceAudience.playSound(settings.deathSound(), deathLocation.x(), deathLocation.y(), deathLocation.z());
         }
 
         stats.setDeaths(stats.getDeaths() + 1);
@@ -94,6 +96,7 @@ public class BasicDeadStateActivable implements Activable {
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
             tabList.addViewer(player);
+            belowNameTag.addViewer(player);
         });
 
         accessRegistry.switchAccess(null);

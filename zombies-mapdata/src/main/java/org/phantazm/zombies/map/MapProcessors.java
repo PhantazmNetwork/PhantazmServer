@@ -425,6 +425,8 @@ public final class MapProcessors {
                     ConfigProcessors.component().dataFromElement(element.getElementOrThrow("finishRepairingMessage"));
             Component enemiesNearbyMessage =
                     ConfigProcessors.component().dataFromElement(element.getElementOrThrow("enemiesNearbyMessage"));
+            Component healthDisplay =
+                    ConfigProcessors.component().dataFromElement(element.getElementOrThrow("healthDisplay"));
 
             return new MapSettingsInfo(mapDataVersion, chunkLoadRange, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, idleRevertTicks,
@@ -439,7 +441,7 @@ public final class MapProcessors {
                     knockedMessageToKnockedFormat, knockedMessageToOthersFormat, knockedTitleFormat,
                     knockedSubtitleFormat, knockedSound, deathMessageToKilledFormat, deathMessageToOthersFormat,
                     deathSound, rejoinMessageFormat, quitMessageFormat, nearWindowMessage, startRepairingMessage,
-                    stopRepairingMessage, finishRepairingMessage, enemiesNearbyMessage);
+                    stopRepairingMessage, finishRepairingMessage, enemiesNearbyMessage, healthDisplay);
         }
 
         @Override
@@ -518,6 +520,7 @@ public final class MapProcessors {
                     ConfigProcessors.component().elementFromData(mapConfig.finishRepairingMessage()));
             node.put("enemiesNearbyMessage",
                     ConfigProcessors.component().elementFromData(mapConfig.enemiesNearbyMessage()));
+            node.put("healthDisplay", ConfigProcessors.component().elementFromData(mapConfig.healthDisplay()));
             return node;
         }
     };

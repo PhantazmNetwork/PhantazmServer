@@ -14,6 +14,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.scoreboard.BelowNameTag;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
@@ -53,16 +54,17 @@ public class BasicKnockedStateActivable implements Activable {
 
     private final TabList tabList;
 
+    private final BelowNameTag belowNameTag;
+
     private final ZombiesPlayerMapStats stats;
 
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public BasicKnockedStateActivable(@NotNull KnockedPlayerStateContext context, @NotNull Instance instance,
             @NotNull PlayerView playerView, @NotNull ZombiesPlayerActionBar actionBar,
-            @NotNull MapSettingsInfo settings,
-            @NotNull ReviveHandler reviveHandler,
+            @NotNull MapSettingsInfo settings, @NotNull ReviveHandler reviveHandler,
             @NotNull TickFormatter tickFormatter, @NotNull Sidebar sidebar, @NotNull TabList tabList,
-            @NotNull ZombiesPlayerMapStats stats) {
+            @NotNull BelowNameTag belowNameTag, @NotNull ZombiesPlayerMapStats stats) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
@@ -72,6 +74,7 @@ public class BasicKnockedStateActivable implements Activable {
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
+        this.belowNameTag = Objects.requireNonNull(belowNameTag, "belowNameTag");
         this.stats = Objects.requireNonNull(stats, "stats");
     }
 
@@ -86,6 +89,7 @@ public class BasicKnockedStateActivable implements Activable {
             player.setGameMode(GameMode.SPECTATOR);
             sidebar.addViewer(player);
             tabList.addViewer(player);
+            belowNameTag.addViewer(player);
             context.getVehicle().addPassenger(player);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
@@ -137,6 +141,7 @@ public class BasicKnockedStateActivable implements Activable {
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
             tabList.addViewer(player);
+            belowNameTag.addViewer(player);
             context.getVehicle().remove();
             player.teleport(Pos.fromPoint(context.getKnockLocation()));
         });
@@ -167,7 +172,8 @@ public class BasicKnockedStateActivable implements Activable {
         playerView.getPlayer().ifPresent(player -> {
             TagResolver timePlaceholder = Placeholder.component("time",
                     Component.text(tickFormatter.format(Math.max(reviveHandler.getTicksUntilDeath(), 0))));
-            actionBar.sendActionBar(miniMessage.deserialize(settings.dyingStatusFormat(), timePlaceholder), ZombiesPlayerActionBar.REVIVE_MESSAGE_PRIORITY);
+            actionBar.sendActionBar(miniMessage.deserialize(settings.dyingStatusFormat(), timePlaceholder),
+                    ZombiesPlayerActionBar.REVIVE_MESSAGE_PRIORITY);
         });
     }
 

@@ -19,6 +19,7 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.scoreboard.BelowNameTag;
 import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.BasicTickTaskScheduler;
@@ -229,8 +230,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             eventNodeWrapper.set(childNode);
 
             CorpseCreator corpseCreator = createCorpseCreator(mapObjects.mapDependencyProvider());
-
-
+            BelowNameTag belowNameTag = new BelowNameTag(UUID.randomUUID().toString(), settings.healthDisplay());
             Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
                 playerView.getPlayer().ifPresent(player -> {
                     player.getAttribute(Attributes.HEAL_TICKS).setBaseValue(settings.healTicks());
@@ -240,7 +240,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings,
                         mapInfo.playerCoins(), mapInfo.leaderboard(), instance, playerView,
                         mapObjects.module().modifierSource(), new BasicFlaggable(), childNode,
-                        mapObjects.module().random(), mapObjects, mobStore, mapObjects.mobSpawner(), corpseCreator);
+                        mapObjects.module().random(), mapObjects, mobStore, mapObjects.mobSpawner(), corpseCreator,
+                        belowNameTag);
             };
 
             UUID allowedRequestUUID = request.isRestricted() ? request.getUUID() : null;

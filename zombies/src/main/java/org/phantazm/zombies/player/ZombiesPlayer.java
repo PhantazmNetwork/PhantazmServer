@@ -9,6 +9,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.scoreboard.BelowNameTag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.commons.CancellableState;
@@ -191,7 +192,8 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
                 @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
                 @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
                 @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-                @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator);
+                @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
+                @NotNull BelowNameTag belowNameTag);
 
     }
 

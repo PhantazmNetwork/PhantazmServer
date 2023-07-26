@@ -263,6 +263,8 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         for (GunEffect effect : level.activateEffects()) {
             effect.apply(state);
         }
+
+        setDirty();
     }
 
     @Override
