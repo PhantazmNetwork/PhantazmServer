@@ -10,6 +10,8 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
+import net.minestom.server.timer.ExecutionType;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.Tags;
 import org.phantazm.mob.PhantazmMob;
@@ -49,6 +51,18 @@ public class MeleeAttackGoal implements GoalCreator {
             this.data = Objects.requireNonNull(data, "data");
             this.skills = Objects.requireNonNull(skills, "skills");
             this.mob = Objects.requireNonNull(mob, "mob");
+
+            Skill[] tickableSkills = skills.stream().filter(Skill::needsTicking).toArray(Skill[]::new);
+            if (tickableSkills.length == 0) {
+                return;
+            }
+
+            mob.entity().scheduler().scheduleTask(() -> {
+                long time = System.currentTimeMillis();
+                for (Skill skill : tickableSkills) {
+                    skill.tick(time, mob);
+                }
+            }, TaskSchedule.immediate(), TaskSchedule.nextTick(), ExecutionType.SYNC);
         }
 
         @Override

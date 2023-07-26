@@ -16,7 +16,6 @@ import java.util.Objects;
 @Model("mob.skill.bleed")
 @Cache(false)
 public class BleedEntitiesSkill implements Skill {
-
     private final Collection<BleedContext> bleeding = new LinkedList<>();
     private final Data data;
     private final TargetSelector<?> selector;
@@ -61,13 +60,13 @@ public class BleedEntitiesSkill implements Skill {
                 continue;
             }
 
-            if (validator.valid(self.entity(), livingEntity)) {
+            if (!validator.valid(self.entity(), livingEntity)) {
                 contextIterator.remove();
                 continue;
             }
 
             long ticksSinceStart = bleedContext.ticksSinceStart();
-            bleedContext.setTicksSinceStart(ticksSinceStart + 1);
+            bleedContext.incrementTicks();
             if (ticksSinceStart % data.bleedInterval() == 0) {
                 livingEntity.damage(Damage.fromEntity(self.entity(), data.bleedDamage()), data.bypassArmor);
             }
@@ -105,25 +104,25 @@ public class BleedEntitiesSkill implements Skill {
     private static final class BleedContext {
         private final PhantazmMob self;
         private final LivingEntity target;
+
         private long ticksSinceStart;
 
-
-        public BleedContext(@NotNull PhantazmMob self, @NotNull LivingEntity target, long ticksSinceStart) {
+        private BleedContext(@NotNull PhantazmMob self, @NotNull LivingEntity target, long ticksSinceStart) {
             this.self = self;
-            this.target = Objects.requireNonNull(target, "target");
+            this.target = target;
             this.ticksSinceStart = ticksSinceStart;
         }
 
-        public @NotNull LivingEntity target() {
+        private LivingEntity target() {
             return target;
         }
 
-        public long ticksSinceStart() {
+        private long ticksSinceStart() {
             return ticksSinceStart;
         }
 
-        public void setTicksSinceStart(long ticksSinceStart) {
-            this.ticksSinceStart = ticksSinceStart;
+        private void incrementTicks() {
+            ticksSinceStart++;
         }
 
     }
