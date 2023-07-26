@@ -11,6 +11,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.Tags;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.mob.skill.Skill;
 import org.phantazm.mob.target.LastHitSelector;
@@ -103,7 +104,7 @@ public class MeleeAttackGoal implements GoalCreator {
                     livingEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));
                 }
 
-                lastHitSelector.setLastHit(livingEntity);
+                self.setTag(Tags.LAST_MELEE_HIT_TAG, livingEntity.getUuid());
 
                 for (Skill skill : skills) {
                     skill.use(mob);
