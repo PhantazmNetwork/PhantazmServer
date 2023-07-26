@@ -103,9 +103,8 @@ public class BossBarTimerAction implements Supplier<PowerupAction> {
         }
 
         private Component createBossBarName(long time) {
-            long delta = time - startTime;
-            long asTicks = delta * MinecraftServer.TICK_MS;
-            long remainingTicks = data.duration - asTicks;
+            long delta = (time - startTime) / MinecraftServer.TICK_MS;
+            long remainingTicks = data.duration - delta;
 
             TagResolver timePlaceholder = Placeholder.unparsed("time", tickFormatter.format(remainingTicks));
             return MiniMessage.miniMessage().deserialize(data.format, timePlaceholder);

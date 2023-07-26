@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class Shop extends BoundedBase implements Tickable {
-    public static final long SHOP_ACTIVATION_DELAY = 1000L;
+    public static final long SHOP_ACTIVATION_DELAY = 750L;
 
     private final Point mapOrigin;
     private final Instance instance;
