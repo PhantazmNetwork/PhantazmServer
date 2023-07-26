@@ -100,10 +100,11 @@ public class MeleeAttackGoal implements GoalCreator {
                 double angle = pos.yaw() * (Math.PI / 180);
                 boolean damaged = livingEntity.damage(Damage.fromEntity(self, damageAmount), data.bypassArmor);
 
-                if (damaged) {
-                    livingEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));
+                if (!damaged) {
+                    return;
                 }
 
+                livingEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));
                 self.setTag(Tags.LAST_MELEE_HIT_TAG, livingEntity.getUuid());
 
                 for (Skill skill : skills) {
