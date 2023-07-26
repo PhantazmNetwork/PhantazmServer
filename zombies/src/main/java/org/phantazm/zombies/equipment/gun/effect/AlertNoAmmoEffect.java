@@ -11,6 +11,7 @@ import org.phantazm.zombies.equipment.gun.audience.AudienceProvider;
 import java.util.Objects;
 
 @Model("zombies.gun.effect.alert_no_ammo")
+@Cache(false)
 public class AlertNoAmmoEffect implements GunEffect {
 
     private final Data data;
@@ -30,41 +31,30 @@ public class AlertNoAmmoEffect implements GunEffect {
     public void apply(@NotNull GunState state) {
         if (state.isMainEquipment()) {
             if (state.ammo() == 0) {
-                audienceProvider.provideAudience().ifPresent(audience -> {
-                    switch (data.message().destination()) {
-                        case TITLE -> audience.sendTitlePart(TitlePart.TITLE, data.message().component());
-                        case SUBTITLE -> audience.sendTitlePart(TitlePart.SUBTITLE, data.message().component());
-                        case CHAT -> audience.sendMessage(data.message().component());
-                        case ACTION_BAR -> audience.sendActionBar(data.message().component());
-                    }
-                });
-
+                displayMessage(data.message.component());
                 hadNoAmmo = true;
             }
-        } else {
-            audienceProvider.provideAudience().ifPresent(audience -> {
-                switch (data.message().destination()) {
-                    case TITLE -> audience.sendTitlePart(TitlePart.TITLE, Component.empty());
-                    case SUBTITLE -> audience.sendTitlePart(TitlePart.SUBTITLE, Component.empty());
-                    case ACTION_BAR -> audience.sendActionBar(Component.empty());
-                }
-            });
-
+        }
+        else {
+            displayMessage(Component.empty());
             hadNoAmmo = false;
         }
+    }
+
+    private void displayMessage(Component component) {
+        audienceProvider.provideAudience().ifPresent(audience -> {
+            switch (data.message().destination()) {
+                case TITLE -> audience.sendTitlePart(TitlePart.TITLE, component);
+                case SUBTITLE -> audience.sendTitlePart(TitlePart.SUBTITLE, component);
+                case ACTION_BAR -> audience.sendActionBar(component);
+            }
+        });
     }
 
     @Override
     public void tick(@NotNull GunState state, long time) {
         if (state.isMainEquipment() && hadNoAmmo && state.ammo() > 0) {
-            audienceProvider.provideAudience().ifPresent(audience -> {
-                switch (data.message().destination()) {
-                    case TITLE -> audience.sendTitlePart(TitlePart.TITLE, Component.empty());
-                    case SUBTITLE -> audience.sendTitlePart(TitlePart.SUBTITLE, Component.empty());
-                    case ACTION_BAR -> audience.sendActionBar(Component.empty());
-                }
-            });
-
+            displayMessage(Component.empty());
             hadNoAmmo = false;
         }
     }
