@@ -10,6 +10,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
+import net.minestom.server.event.entity.EntityDeathEvent;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -63,6 +64,12 @@ public class MeleeAttackGoal implements GoalCreator {
                     skill.tick(time, mob);
                 }
             }, TaskSchedule.immediate(), TaskSchedule.nextTick(), ExecutionType.SYNC);
+
+            mob.entity().eventNode().addListener(EntityDeathEvent.class, event -> {
+                for (Skill skill : skills) {
+                    skill.end(mob);
+                }
+            });
         }
 
         @Override
