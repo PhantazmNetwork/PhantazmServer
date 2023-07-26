@@ -12,6 +12,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.scoreboard.BelowNameTag;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
@@ -34,13 +35,15 @@ public class BasicAliveStateActivable implements Activable {
     private final MapSettingsInfo settings;
     private final Sidebar sidebar;
     private final TabList tabList;
+    private final BelowNameTag belowNameTag;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     private long lastHeal;
 
     public BasicAliveStateActivable(@NotNull AlivePlayerStateContext context, @NotNull Instance instance,
             @NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
-            @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList) {
+            @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList,
+            @NotNull BelowNameTag belowNameTag) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
@@ -48,6 +51,7 @@ public class BasicAliveStateActivable implements Activable {
         this.settings = Objects.requireNonNull(settings, "settings");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
+        this.belowNameTag = Objects.requireNonNull(belowNameTag, "belowNameTag");
     }
 
     @Override
@@ -59,6 +63,7 @@ public class BasicAliveStateActivable implements Activable {
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
             tabList.addViewer(player);
+            belowNameTag.addViewer(player);
         });
 
         if (context.isRevive()) {
@@ -96,6 +101,8 @@ public class BasicAliveStateActivable implements Activable {
                 player.setHealth(player.getHealth() + 1F);
                 lastHeal = time;
             }
+
+            belowNameTag.updateScore(player, (int) Math.floor(player.getHealth()));
         });
     }
 
@@ -109,6 +116,7 @@ public class BasicAliveStateActivable implements Activable {
             player.clearEffects();
             sidebar.addViewer(player);
             tabList.addViewer(player);
+            belowNameTag.addViewer(player);
         });
 
         accessRegistry.switchAccess(null);
