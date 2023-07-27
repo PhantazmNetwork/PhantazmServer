@@ -47,7 +47,7 @@ public class WallshootingBlockIteration implements BlockIteration {
                     return !wallshot;
                 }
 
-                return false;
+                return true;
             }
 
             @SuppressWarnings("UnstableApiUsage")
