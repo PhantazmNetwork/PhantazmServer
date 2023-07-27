@@ -10,6 +10,7 @@ import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.Attributes;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
@@ -59,6 +60,7 @@ public class DamageShotHandler implements ShotHandler {
             }
 
             if (event.isInstakill()) {
+                targetEntity.setTag(Tags.LAST_HIT_BY, attacker.getUuid());
                 targetEntity.kill();
                 continue;
             }
