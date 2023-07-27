@@ -10,6 +10,7 @@ import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 import java.util.Objects;
 
 @Model("zombies.map.shop.predicate.not")
+@Cache(false)
 public class NotPredicate extends PredicateBase<NotPredicate.Data> {
     private final ShopPredicate predicate;
 

@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.action.wave;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -12,6 +13,7 @@ import org.phantazm.zombies.map.action.Action;
 import java.util.*;
 
 @Model("zombies.map.wave.action.select_powerup")
+@Cache(false)
 public class SelectPowerupZombieAction implements Action<List<PhantazmMob>> {
     private final Data data;
     private final Random random;

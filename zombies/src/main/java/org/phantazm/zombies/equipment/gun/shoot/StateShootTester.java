@@ -2,9 +2,7 @@ package org.phantazm.zombies.equipment.gun.shoot;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.GunStats;
 import org.phantazm.zombies.equipment.gun.GunUtils;
@@ -18,6 +16,7 @@ import java.util.function.Supplier;
  * A {@link ShootTester} based solely on {@link GunState}.
  */
 @Model("zombies.gun.shoot_tester.state")
+@Cache(false)
 public class StateShootTester implements ShootTester {
 
     private final GunStats stats;

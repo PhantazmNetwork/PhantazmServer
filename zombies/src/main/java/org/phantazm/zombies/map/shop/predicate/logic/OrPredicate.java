@@ -13,6 +13,7 @@ import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 import java.util.List;
 
 @Model("zombies.map.shop.predicate.or")
+@Cache(false)
 public class OrPredicate extends PredicateBase<OrPredicate.Data> {
     private final List<ShopPredicate> predicates;
 

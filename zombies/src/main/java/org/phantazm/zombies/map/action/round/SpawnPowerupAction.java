@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.action.round;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -17,6 +18,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.map.room.action.spawn_powerup")
+@Cache(false)
 public class SpawnPowerupAction implements Action<Round> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpawnPowerupAction.class);
 

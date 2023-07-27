@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.map_flagging")
+@Cache(false)
 public class MapFlaggingAction implements Supplier<PowerupAction> {
     private final Data data;
     private final Supplier<DeactivationPredicate> deactivationPredicate;

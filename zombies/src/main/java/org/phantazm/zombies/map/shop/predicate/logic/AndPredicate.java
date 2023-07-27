@@ -13,6 +13,7 @@ import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 import java.util.List;
 
 @Model("zombies.map.shop.predicate.and")
+@Cache(false)
 public class AndPredicate extends PredicateBase<AndPredicate.Data> {
     private final List<ShopPredicate> predicates;
 

@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.shop.interactor;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -12,6 +13,7 @@ import org.phantazm.zombies.map.shop.PlayerInteraction;
 import java.util.Objects;
 
 @Model("zombies.map.shop.interactor.map_flagging")
+@Cache(false)
 public class MapFlaggingInteractor extends InteractorBase<MapFlaggingInteractor.Data> {
     private final Flaggable flaggable;
 

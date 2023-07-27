@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.shop.predicate;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -12,6 +13,7 @@ import org.phantazm.zombies.map.shop.Shop;
 import java.util.Objects;
 
 @Model("zombies.map.shop.predicate.map_flag")
+@Cache(false)
 public class MapFlagPredicate extends PredicateBase<MapFlagPredicate.Data> {
     private final Flaggable flaggable;
 

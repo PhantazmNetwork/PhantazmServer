@@ -1,5 +1,6 @@
 package org.phantazm.zombies.equipment.gun.action_bar;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -10,6 +11,7 @@ import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import java.util.Objects;
 
 @Model("zombies.gun.action_bar.zombies_player_sender")
+@Cache(false)
 public class ZombiesPlayerActionBarSender implements ActionBarSender {
 
     private final Data data;

@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.action.door;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -27,6 +28,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 @Model("zombies.map.door.action.send_opened_rooms")
+@Cache(false)
 public class DoorSendOpenedRoomsAction implements Action<Door> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DoorSendOpenedRoomsAction.class);
     private static final Component UNKNOWN_COMPONENT = Component.text("...");

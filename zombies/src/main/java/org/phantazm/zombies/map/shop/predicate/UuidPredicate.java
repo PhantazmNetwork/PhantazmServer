@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.shop.predicate;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -11,6 +12,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Model("zombies.map.shop.predicate.uuid")
+@Cache(false)
 public class UuidPredicate extends PredicateBase<UuidPredicate.Data> {
     @FactoryMethod
     public UuidPredicate(@NotNull Data data) {

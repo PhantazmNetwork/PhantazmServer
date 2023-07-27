@@ -1,5 +1,6 @@
 package org.phantazm.zombies.sidebar.lineupdater;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @Model("zombies.sidebar.line_updater.remaining_zombies")
+@Cache(false)
 public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
     private final Data data;
     private final Supplier<Optional<Round>> roundSupplier;

@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.shop.predicate;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -14,6 +15,7 @@ import org.phantazm.zombies.map.shop.Shop;
 import java.util.Objects;
 
 @Model("zombies.map.shop.predicate.static_cost")
+@Cache(false)
 public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data> {
     private final TransactionModifierSource transactionModifierSource;
 

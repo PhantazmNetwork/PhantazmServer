@@ -1,5 +1,6 @@
 package org.phantazm.mob.goal;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.sound.Sound;
@@ -21,6 +22,7 @@ import java.util.function.Consumer;
 
 // TODO: this naively tracks movement, whereas vanilla MC is handling velocity changes. Find a better way to do this
 @Model("mob.goal.play_step_sound")
+@Cache(false)
 public class PlayStepSoundGoal implements GoalCreator {
 
     private final Random random;

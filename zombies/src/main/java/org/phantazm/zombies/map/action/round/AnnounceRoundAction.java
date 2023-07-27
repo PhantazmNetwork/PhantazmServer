@@ -20,6 +20,7 @@ import java.util.Objects;
  * An {@link Action} that announces the current round.
  */
 @Model("zombies.map.round.action.announce")
+@Cache(false)
 public class AnnounceRoundAction implements Action<Round> {
     private final Data data;
     private final Instance instance;

@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.player_flagging")
+@Cache(false)
 public class PlayerFlaggingAction implements Supplier<PowerupAction> {
     private final Data data;
     private final Supplier<DeactivationPredicate> deactivationPredicate;

@@ -13,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Model("zombies.sidebar.updater")
+@Cache(false)
 public class SidebarUpdater implements Activable {
     public static final int MAX_SIDEBAR_ROWS = 15;
 

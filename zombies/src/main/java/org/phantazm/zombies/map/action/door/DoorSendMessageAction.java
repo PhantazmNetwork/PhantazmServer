@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.action.door;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -15,6 +16,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Model("zombies.map.door.action.send_message")
+@Cache(false)
 public class DoorSendMessageAction implements Action<Door> {
     private final Data data;
     private final Instance instance;

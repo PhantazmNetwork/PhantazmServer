@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 @Model("zombies.leaderboard.best_time")
+@Cache(false)
 public class BestTimeLeaderboard {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BestTimeLeaderboard.class);
