@@ -21,6 +21,7 @@ import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Flags;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
@@ -112,6 +113,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
                         (hitMob != null && !hitMob.model().getExtraNode()
                                 .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
+                    hit.entity.setTag(Tags.LAST_HIT_BY, player.getUuid());
                     hit.entity.kill();
                 }
                 else {

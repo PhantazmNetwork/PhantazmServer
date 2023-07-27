@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.ExtraNodeKeys;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
@@ -77,6 +78,7 @@ public class DragonsWrathInteractor implements ShopInteractor {
 
                     instance.playSound(data.sound());
 
+                    entity.setTag(Tags.LAST_HIT_BY, interaction.player().module().getPlayerView().getUUID());
                     entity.kill();
                     killCount.set(killCount.get() + 1);
                 });
