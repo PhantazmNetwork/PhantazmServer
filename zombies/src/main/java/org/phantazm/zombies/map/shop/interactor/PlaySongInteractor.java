@@ -94,7 +94,7 @@ public class PlaySongInteractor implements ShopInteractor {
 
         @Default("volume")
         public static @NotNull ConfigElement volumeDefault() {
-            return ConfigPrimitive.of(10F);
+            return ConfigPrimitive.of(2F);
         }
 
         @Default("source")
