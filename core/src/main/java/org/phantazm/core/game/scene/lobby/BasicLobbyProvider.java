@@ -6,6 +6,7 @@ import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -17,6 +18,8 @@ import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.server.play.OpenBookPacket;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.ElementUtils;
 import org.phantazm.core.config.InstanceConfig;
@@ -116,6 +119,11 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
                 event.setBlockingItemUse(true);
             });
             instanceNode.addListener(PlayerBlockBreakEvent.class, event -> event.setCancelled(true));
+            instanceNode.addListener(PlayerUseItemEvent.class, event -> {
+                if (event.getPlayer().getItemInMainHand().material().equals(Material.WRITTEN_BOOK)) {
+                    event.getPlayer().sendPacket(new OpenBookPacket(Player.Hand.MAIN));
+                }
+            });
 
             List<NPC> npcs = new ArrayList<>(npcContexts.size());
             for (ElementContext context : npcContexts) {
