@@ -22,6 +22,7 @@ import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.map.MapSettingsInfo;
+import org.phantazm.zombies.player.ZombiesPlayerMeta;
 import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 
 import java.util.*;
@@ -32,6 +33,7 @@ public class BasicAliveStateActivable implements Activable {
     private final Instance instance;
     private final InventoryAccessRegistry accessRegistry;
     private final PlayerView playerView;
+    private final ZombiesPlayerMeta meta;
     private final MapSettingsInfo settings;
     private final Sidebar sidebar;
     private final TabList tabList;
@@ -42,12 +44,13 @@ public class BasicAliveStateActivable implements Activable {
 
     public BasicAliveStateActivable(@NotNull AlivePlayerStateContext context, @NotNull Instance instance,
             @NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
-            @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList,
-            @NotNull BelowNameTag belowNameTag) {
+            @NotNull ZombiesPlayerMeta meta, @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar,
+            @NotNull TabList tabList, @NotNull BelowNameTag belowNameTag) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.meta = Objects.requireNonNull(meta, "meta");
         this.settings = Objects.requireNonNull(settings, "settings");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
@@ -67,26 +70,31 @@ public class BasicAliveStateActivable implements Activable {
         });
 
         if (context.isRevive()) {
-            Set<Player> players = new HashSet<>(instance.getPlayers());
-            playerView.getPlayer().ifPresent(players::remove);
-            Audience instanceAudience = PacketGroupingAudience.of(players);
-
+            // TODO: theoretical memleaks here
             playerView.getDisplayName().thenAccept(displayName -> {
                 TagResolver[] tagResolvers = getTagResolvers(displayName);
-                playerView.getPlayer().ifPresent(player -> player.sendMessage(
-                        miniMessage.deserialize(settings.reviveMessageToRevivedFormat(), tagResolvers)));
-                instanceAudience.sendMessage(
+
+                if (meta.isInGame()) {
+                    playerView.getPlayer().ifPresent(player -> player.sendMessage(
+                            miniMessage.deserialize(settings.reviveMessageToRevivedFormat(), tagResolvers)));
+                }
+
+                Set<Player> players = new HashSet<>(instance.getPlayers());
+                playerView.getPlayer().ifPresent(players::remove);
+                Audience filteredAudience = PacketGroupingAudience.of(players);
+
+                filteredAudience.sendMessage(
                         miniMessage.deserialize(settings.reviveMessageToOthersFormat(), tagResolvers));
             });
 
             Point point = context.reviveLocation();
             if (point != null) {
-                instanceAudience.playSound(settings.reviveSound(), point.x(), point.y(), point.z());
+                instance.playSound(settings.reviveSound(), point.x(), point.y(), point.z());
             }
             else {
                 playerView.getPlayer().ifPresent(player -> {
                     Pos location = player.getPosition();
-                    instanceAudience.playSound(settings.reviveSound(), location.x(), location.y(), location.z());
+                    instance.playSound(settings.reviveSound(), location.x(), location.y(), location.z());
                 });
             }
         }
@@ -102,7 +110,7 @@ public class BasicAliveStateActivable implements Activable {
                 lastHeal = time;
             }
 
-            belowNameTag.updateScore(player, (int) Math.floor(player.getHealth()));
+            belowNameTag.updateScore(player, (int)Math.floor(player.getHealth()));
         });
     }
 

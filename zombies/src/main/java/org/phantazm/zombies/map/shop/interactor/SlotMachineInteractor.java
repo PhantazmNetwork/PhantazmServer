@@ -1,6 +1,7 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.*;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -9,6 +10,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.item.ItemEntityMeta;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -184,10 +186,27 @@ public class SlotMachineInteractor implements ShopInteractor {
         if (!doneRolling) {
             rollFinishTime = time;
 
-            if (!frames.isEmpty() && !rollInteraction.player().hasQuit()) {
-                rollInteraction.player().getPlayer().ifPresent(player -> player.sendMessage(MiniMessage.miniMessage()
-                        .deserialize(data.itemRolledFormat, Placeholder.component("rolled_item",
-                                getItemName(frames.get((currentFrameIndex - 1) % frames.size()).getVisual())))));
+            TagResolver rolledItemPlaceholder = Placeholder.component("rolled_item",
+                    getItemName(frames.get((currentFrameIndex - 1) % frames.size()).getVisual()));
+            if (!frames.isEmpty()) {
+                if (!rollInteraction.player().hasQuit()) {
+                    rollInteraction.player().getPlayer().ifPresent(player -> {
+                        Component message =
+                                MiniMessage.miniMessage().deserialize(data.itemRolledToSelfFormat, rolledItemPlaceholder);
+                        player.sendMessage(message);
+                    });
+                }
+
+                rollInteraction.player().module().getPlayerView().getDisplayName().thenAccept(displayName -> {
+                    Set<Player> players = shop.instance().getPlayers();
+                    rollInteraction.player().module().getPlayerView().getPlayer().ifPresent(players::remove);
+                    Audience filteredAudience = Audience.audience(players);
+
+                    TagResolver rollerPlaceholder = Placeholder.component("roller", displayName);
+                    Component message = MiniMessage.miniMessage()
+                            .deserialize(data.itemRolledToOthersFormat, rollerPlaceholder, rolledItemPlaceholder);
+                    filteredAudience.sendMessage(message);
+                });
             }
         }
 
@@ -390,7 +409,8 @@ public class SlotMachineInteractor implements ShopInteractor {
                        double hologramOffset,
                        double itemOffset,
                        int gracePeriodTicks,
-                       @NotNull String itemRolledFormat,
+                       @NotNull String itemRolledToSelfFormat,
+                       @NotNull String itemRolledToOthersFormat,
                        @NotNull String itemClaimedFormat,
                        @NotNull List<String> frameHologramFormats,
                        @NotNull Key rollingFlag,

@@ -172,15 +172,15 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         Function<AlivePlayerStateContext, ZombiesPlayerState> aliveStateCreator = context -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE"), ZombiesPlayerStateKeys.ALIVE.key(),
-                    List.of(new BasicAliveStateActivable(context, instance, accessRegistry, playerView, mapSettingsInfo,
-                            sidebar, tabList, belowNameTag)));
+                    List.of(new BasicAliveStateActivable(context, instance, accessRegistry, playerView, meta,
+                            mapSettingsInfo, sidebar, tabList, belowNameTag)));
         };
         BiFunction<DeadPlayerStateContext, Collection<Activable>, ZombiesPlayerState> deadStateCreator =
                 (context, activables) -> {
                     List<Activable> combinedActivables = new ArrayList<>(activables);
                     combinedActivables.add(
-                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, mapSettingsInfo,
-                                    sidebar, tabList, belowNameTag, stats));
+                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, meta,
+                                    mapSettingsInfo, sidebar, tabList, belowNameTag, stats));
                     return new BasicZombiesPlayerState(Component.text("DEAD").color(NamedTextColor.RED),
                             ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
                 };
@@ -211,8 +211,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
             corpseWrapper.set(corpse);
             return new KnockedPlayerState(reviveHandler,
-                    List.of(new BasicKnockedStateActivable(context, instance, playerView, actionBar, mapSettingsInfo,
-                                    reviveHandler, tickFormatter, sidebar, tabList, belowNameTag, stats),
+                    List.of(new BasicKnockedStateActivable(context, instance, playerView, meta, actionBar,
+                                    mapSettingsInfo, reviveHandler, tickFormatter, sidebar, tabList, belowNameTag, stats),
                             corpse.asKnockActivable(), new Activable() {
                                 @Override
                                 public void start() {

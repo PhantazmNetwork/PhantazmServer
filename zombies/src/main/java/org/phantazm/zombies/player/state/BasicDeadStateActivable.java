@@ -20,6 +20,7 @@ import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
+import org.phantazm.zombies.player.ZombiesPlayerMeta;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 
 import java.util.*;
@@ -30,6 +31,7 @@ public class BasicDeadStateActivable implements Activable {
     private final DeadPlayerStateContext context;
     private final Instance instance;
     private final PlayerView playerView;
+    private final ZombiesPlayerMeta meta;
     private final MapSettingsInfo settings;
     private final Sidebar sidebar;
     private final TabList tabList;
@@ -39,12 +41,13 @@ public class BasicDeadStateActivable implements Activable {
 
     public BasicDeadStateActivable(@NotNull InventoryAccessRegistry accessRegistry,
             @NotNull DeadPlayerStateContext context, @NotNull Instance instance, @NotNull PlayerView playerView,
-            @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList,
-            @NotNull BelowNameTag belowNameTag, @NotNull ZombiesPlayerMapStats stats) {
+            @NotNull ZombiesPlayerMeta meta, @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar,
+            @NotNull TabList tabList, @NotNull BelowNameTag belowNameTag, @NotNull ZombiesPlayerMapStats stats) {
         this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.meta = Objects.requireNonNull(meta, "meta");
         this.settings = Objects.requireNonNull(settings, "settings");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
@@ -62,9 +65,6 @@ public class BasicDeadStateActivable implements Activable {
             belowNameTag.addViewer(player);
         });
 
-        Set<Player> players = new HashSet<>(instance.getPlayers());
-        playerView.getPlayer().ifPresent(players::remove);
-        Audience instanceAudience = PacketGroupingAudience.of(players);
 
         playerView.getDisplayName().thenAccept(displayName -> {
             if (context.isRejoin()) {
@@ -74,15 +74,21 @@ public class BasicDeadStateActivable implements Activable {
             }
 
             TagResolver[] tagResolvers = getTagResolvers(displayName);
-            playerView.getPlayer().ifPresent(player -> {
-                player.sendMessage(miniMessage.deserialize(settings.deathMessageToKilledFormat(), tagResolvers));
-            });
+            if (meta.isInGame()) {
+                playerView.getPlayer().ifPresent(player -> {
+                    player.sendMessage(miniMessage.deserialize(settings.deathMessageToKilledFormat(), tagResolvers));
+                });
+            }
+
+            Set<Player> players = new HashSet<>(instance.getPlayers());
+            playerView.getPlayer().ifPresent(players::remove);
+            Audience instanceAudience = PacketGroupingAudience.of(players);
             instanceAudience.sendMessage(miniMessage.deserialize(settings.deathMessageToOthersFormat(), tagResolvers));
         });
 
         Point deathLocation = context.getDeathLocation();
         if (deathLocation != null) {
-            instanceAudience.playSound(settings.deathSound(), deathLocation.x(), deathLocation.y(), deathLocation.z());
+            instance.playSound(settings.deathSound(), deathLocation.x(), deathLocation.y(), deathLocation.z());
         }
 
         stats.setDeaths(stats.getDeaths() + 1);
