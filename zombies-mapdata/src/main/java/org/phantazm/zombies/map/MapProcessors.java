@@ -427,6 +427,7 @@ public final class MapProcessors {
                     ConfigProcessors.component().dataFromElement(element.getElementOrThrow("enemiesNearbyMessage"));
             Component healthDisplay =
                     ConfigProcessors.component().dataFromElement(element.getElementOrThrow("healthDisplay"));
+            String gameJoinFormat = element.getStringOrDefault("gameJoinFormat");
 
             return new MapSettingsInfo(mapDataVersion, chunkLoadRange, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, idleRevertTicks,
@@ -441,7 +442,7 @@ public final class MapProcessors {
                     knockedMessageToKnockedFormat, knockedMessageToOthersFormat, knockedTitleFormat,
                     knockedSubtitleFormat, knockedSound, deathMessageToKilledFormat, deathMessageToOthersFormat,
                     deathSound, rejoinMessageFormat, quitMessageFormat, nearWindowMessage, startRepairingMessage,
-                    stopRepairingMessage, finishRepairingMessage, enemiesNearbyMessage, healthDisplay);
+                    stopRepairingMessage, finishRepairingMessage, enemiesNearbyMessage, healthDisplay, gameJoinFormat);
         }
 
         @Override
@@ -521,6 +522,7 @@ public final class MapProcessors {
             node.put("enemiesNearbyMessage",
                     ConfigProcessors.component().elementFromData(mapConfig.enemiesNearbyMessage()));
             node.put("healthDisplay", ConfigProcessors.component().elementFromData(mapConfig.healthDisplay()));
+            node.putString("gameJoinFormat", mapConfig.gameJoinFormat());
             return node;
         }
     };

@@ -2,6 +2,9 @@ package org.phantazm.core.game.scene.lobby;
 
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +28,8 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     private final InstanceConfig instanceConfig;
     private final Map<UUID, PlayerView> players;
     private final NPCHandler npcHandler;
+    private final MiniMessage miniMessage;
+    private final String lobbyJoinFormat;
     private final boolean quittable;
 
     private boolean joinable = true;
@@ -37,12 +42,15 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
      * @param fallback       A fallback for the lobby
      */
     public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
-            @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler, boolean quittable) {
+            @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler, @NotNull MiniMessage miniMessage,
+            @NotNull String lobbyJoinFormat, boolean quittable) {
         super(uuid, instance, fallback, instanceConfig.spawnPoint());
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
         this.players = new HashMap<>();
         this.npcHandler = Objects.requireNonNull(npcHandler, "npcHandler");
         this.npcHandler.spawnAll();
+        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+        this.lobbyJoinFormat = Objects.requireNonNull(lobbyJoinFormat, "lobbyJoinFormat");
         this.quittable = quittable;
     }
 
@@ -75,6 +83,13 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
             }
 
             joinRequest.handleJoin(this, instance, instanceConfig);
+            for (Pair<PlayerView, Player> player : joiners) {
+                player.left().getDisplayName().thenAccept(joiner -> {
+                    TagResolver joinerPlaceholder = Placeholder.component("joiner", joiner);
+                    Component message = miniMessage.deserialize(lobbyJoinFormat, joinerPlaceholder);
+                    instance.sendMessage(message);
+                });
+            }
         });
     }
 

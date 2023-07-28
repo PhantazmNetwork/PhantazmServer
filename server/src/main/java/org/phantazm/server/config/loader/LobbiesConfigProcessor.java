@@ -67,9 +67,12 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
                 int maxPlayers = lobby.getValue().getNumberOrThrow("maxPlayers").intValue();
                 int maxLobbies = lobby.getValue().getNumberOrThrow("maxLobbies").intValue();
 
+                String lobbyJoinFormat = lobby.getValue().getStringOrThrow("lobbyJoinFormat");
+
                 ConfigList npcs = lobby.getValue().getListOrDefault(ConfigList::of, "npcs");
 
-                lobbies.put(lobby.getKey(), new LobbyConfig(instanceConfig, lobbyPaths, maxPlayers, maxLobbies, npcs));
+                lobbies.put(lobby.getKey(),
+                        new LobbyConfig(instanceConfig, lobbyPaths, maxPlayers, maxLobbies, lobbyJoinFormat, npcs));
             }
 
             return new LobbiesConfig(instancesPath, kickMessage, mainLobbyName, lobbies);
@@ -107,6 +110,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
             lobbyNode.put("lobbyPaths", lobbyPathsList);
             lobbyNode.putNumber("maxPlayers", lobby.getValue().maxPlayers());
             lobbyNode.putNumber("maxLobbies", lobby.getValue().maxLobbies());
+            lobbyNode.putString("lobbyJoinFormat", lobby.getValue().lobbyJoinFormat());
             lobbyNode.put("npcs", lobby.getValue().npcs());
 
             lobbiesNode.put(lobby.getKey(), lobbyNode);

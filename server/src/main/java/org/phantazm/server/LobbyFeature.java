@@ -2,6 +2,7 @@ package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -81,7 +82,8 @@ public final class LobbyFeature {
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
                 new BasicLobbyProvider(ExecutorFeature.getExecutor(), mainLobbyConfig.maxLobbies(),
                         -mainLobbyConfig.maxPlayers(), instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback,
-                        mainLobbyConfig.instanceConfig(), contextManager, mainLobbyConfig.npcs(), false, node);
+                        mainLobbyConfig.instanceConfig(), contextManager, mainLobbyConfig.npcs(),
+                        MiniMessage.miniMessage(), mainLobbyConfig.lobbyJoinFormat(), false, node);
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
         fallback = new LobbyRouterFallback(LobbyFeature.getLobbyRouter(), lobbiesConfig.mainLobbyName());
@@ -93,7 +95,8 @@ public final class LobbyFeature {
                         new BasicLobbyProvider(ExecutorFeature.getExecutor(), lobby.getValue().maxLobbies(),
                                 -lobby.getValue().maxPlayers(), instanceLoader, lobby.getValue().lobbyPaths(),
                                 regularFallback, lobby.getValue().instanceConfig(), contextManager,
-                                mainLobbyConfig.npcs(), true, node));
+                                mainLobbyConfig.npcs(), MiniMessage.miniMessage(), lobby.getValue().lobbyJoinFormat(),
+                                true, node));
             }
         }
 

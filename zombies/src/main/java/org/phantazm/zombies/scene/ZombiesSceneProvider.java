@@ -364,8 +364,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler) {
         MapSettingsInfo settings = mapInfo.settings();
 
-        Stage idle = new IdleStage(zombiesPlayers, newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")),
-                settings.idleRevertTicks());
+        Stage idle = new IdleStage(instance, settings, zombiesPlayers,
+                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")), settings.idleRevertTicks());
 
         LongList countdownAlertTicks = new LongArrayList(settings.countdownAlertTicks());
 

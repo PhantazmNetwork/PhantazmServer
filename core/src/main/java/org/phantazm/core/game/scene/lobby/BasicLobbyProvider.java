@@ -5,6 +5,7 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigList;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -44,6 +45,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     private final SceneFallback fallback;
     private final InstanceConfig instanceConfig;
     private final List<ElementContext> npcContexts;
+    private final MiniMessage miniMessage;
+    private final String lobbyJoinFormat;
     private final boolean quittable;
     private final EventNode<Event> rootNode;
 
@@ -61,7 +64,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     public BasicLobbyProvider(@NotNull Executor executor, int maximumLobbies, int newLobbyThreshold,
             @NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback,
             @NotNull InstanceConfig instanceConfig, @NotNull ContextManager contextManager,
-            @NotNull ConfigList npcConfigs, boolean quittable, @NotNull EventNode<Event> rootNode) {
+            @NotNull ConfigList npcConfigs, @NotNull MiniMessage miniMessage, @NotNull String lobbyJoinFormat,
+            boolean quittable, @NotNull EventNode<Event> rootNode) {
         super(executor, maximumLobbies, newLobbyThreshold);
 
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
@@ -78,6 +82,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         }
 
         this.npcContexts = List.copyOf(npcContexts);
+        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+        this.lobbyJoinFormat = Objects.requireNonNull(lobbyJoinFormat, "lobbyJoinFormat");
         this.quittable = quittable;
         this.rootNode = rootNode;
     }
@@ -115,7 +121,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
             }
 
             Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
-                    new NPCHandler(List.copyOf(npcs), instance, instanceNode), quittable);
+                    new NPCHandler(List.copyOf(npcs), instance, instanceNode), miniMessage, lobbyJoinFormat, quittable);
             instanceNode.addListener(PlayerDisconnectEvent.class, event -> {
                 try (TransferResult result = lobby.leave(Collections.singleton(event.getPlayer().getUuid()))) {
                     result.executor().ifPresent(Runnable::run);

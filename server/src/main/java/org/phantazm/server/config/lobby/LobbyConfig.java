@@ -21,6 +21,7 @@ public record LobbyConfig(@NotNull InstanceConfig instanceConfig,
                           @NotNull List<String> lobbyPaths,
                           int maxPlayers,
                           int maxLobbies,
+                          @NotNull String lobbyJoinFormat,
                           @NotNull ConfigList npcs) {
 
     /**

@@ -3,14 +3,12 @@ package org.phantazm.zombies.stage;
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.chat.MessageWithDestination;
 import org.phantazm.core.time.TickFormatter;
@@ -101,6 +99,15 @@ public class CountdownStage implements Stage {
         });
 
         zombiesPlayer.module().getLeaderboard().startIfNotActive();
+        int count = zombiesPlayers.size(), maxPlayers = settings.maxPlayers();
+        TagResolver countPlaceholder = Placeholder.component("count", Component.text(count));
+        TagResolver maxPlayersPlaceholder = Placeholder.component("max_players", Component.text(maxPlayers));
+        zombiesPlayer.module().getPlayerView().getDisplayName().thenAccept(displayName -> {
+            TagResolver joinerPlaceholder = Placeholder.component("joiner", displayName);
+            Component message = MiniMessage.miniMessage()
+                    .deserialize(settings.gameJoinFormat(), joinerPlaceholder, countPlaceholder, maxPlayersPlaceholder);
+            instance.sendMessage(message);
+        });
     }
 
     @Override

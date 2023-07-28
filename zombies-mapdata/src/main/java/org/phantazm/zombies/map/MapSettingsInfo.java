@@ -81,7 +81,8 @@ public record MapSettingsInfo(int mapDataVersion,
                               @NotNull Component stopRepairingMessage,
                               @NotNull Component finishRepairingMessage,
                               @NotNull Component enemiesNearbyMessage,
-                              @NotNull Component healthDisplay) {
+                              @NotNull Component healthDisplay,
+                              @NotNull String gameJoinFormat) {
 
     public static final int MAP_DATA_VERSION = 1;
 
@@ -147,6 +148,6 @@ public record MapSettingsInfo(int mapDataVersion,
                 Component.text("Stopped repairing.", NamedTextColor.RED),
                 Component.text("Fully repaired!", NamedTextColor.GREEN),
                 Component.text("You cannot repair that window while enemies are nearby!", NamedTextColor.RED),
-                Component.text("❤", NamedTextColor.RED));
+                Component.text("❤", NamedTextColor.RED), "");
     }
 }
