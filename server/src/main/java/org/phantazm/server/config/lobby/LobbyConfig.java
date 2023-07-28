@@ -2,10 +2,12 @@ package org.phantazm.server.config.lobby;
 
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.lobby.Lobby;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,6 +23,7 @@ public record LobbyConfig(@NotNull InstanceConfig instanceConfig,
                           @NotNull List<String> lobbyPaths,
                           int maxPlayers,
                           int maxLobbies,
+                          @NotNull Collection<ItemStack> defaultItems,
                           @NotNull String lobbyJoinFormat,
                           @NotNull ConfigList npcs) {
 

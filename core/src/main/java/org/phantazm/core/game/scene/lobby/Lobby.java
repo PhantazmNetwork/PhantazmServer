@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
@@ -28,6 +29,7 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     private final InstanceConfig instanceConfig;
     private final Map<UUID, PlayerView> players;
     private final NPCHandler npcHandler;
+    private final Collection<ItemStack> defaultItems;
     private final MiniMessage miniMessage;
     private final String lobbyJoinFormat;
     private final boolean quittable;
@@ -42,13 +44,15 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
      * @param fallback       A fallback for the lobby
      */
     public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
-            @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler, @NotNull MiniMessage miniMessage,
+            @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler,
+            @NotNull Collection<ItemStack> defaultItems, @NotNull MiniMessage miniMessage,
             @NotNull String lobbyJoinFormat, boolean quittable) {
         super(uuid, instance, fallback, instanceConfig.spawnPoint());
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
         this.players = new HashMap<>();
         this.npcHandler = Objects.requireNonNull(npcHandler, "npcHandler");
         this.npcHandler.spawnAll();
+        this.defaultItems = Objects.requireNonNull(defaultItems, "defaultItems");
         this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
         this.lobbyJoinFormat = Objects.requireNonNull(lobbyJoinFormat, "lobbyJoinFormat");
         this.quittable = quittable;
@@ -89,6 +93,10 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
                     Component message = miniMessage.deserialize(lobbyJoinFormat, joinerPlaceholder);
                     instance.sendMessage(message);
                 });
+
+                for (ItemStack stack : defaultItems) {
+                    player.right().getInventory().addItemStack(stack);
+                }
             }
         });
     }

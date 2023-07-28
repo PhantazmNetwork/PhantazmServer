@@ -83,7 +83,8 @@ public final class LobbyFeature {
                 new BasicLobbyProvider(ExecutorFeature.getExecutor(), mainLobbyConfig.maxLobbies(),
                         -mainLobbyConfig.maxPlayers(), instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback,
                         mainLobbyConfig.instanceConfig(), contextManager, mainLobbyConfig.npcs(),
-                        MiniMessage.miniMessage(), mainLobbyConfig.lobbyJoinFormat(), false, node);
+                        mainLobbyConfig.defaultItems(), MiniMessage.miniMessage(), mainLobbyConfig.lobbyJoinFormat(),
+                        false, node);
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
         fallback = new LobbyRouterFallback(LobbyFeature.getLobbyRouter(), lobbiesConfig.mainLobbyName());
@@ -95,8 +96,8 @@ public final class LobbyFeature {
                         new BasicLobbyProvider(ExecutorFeature.getExecutor(), lobby.getValue().maxLobbies(),
                                 -lobby.getValue().maxPlayers(), instanceLoader, lobby.getValue().lobbyPaths(),
                                 regularFallback, lobby.getValue().instanceConfig(), contextManager,
-                                mainLobbyConfig.npcs(), MiniMessage.miniMessage(), lobby.getValue().lobbyJoinFormat(),
-                                true, node));
+                                mainLobbyConfig.npcs(), mainLobbyConfig.defaultItems(), MiniMessage.miniMessage(),
+                                lobby.getValue().lobbyJoinFormat(), true, node));
             }
         }
 

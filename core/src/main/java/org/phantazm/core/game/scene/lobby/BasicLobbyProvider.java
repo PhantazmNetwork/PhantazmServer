@@ -16,6 +16,7 @@ import net.minestom.server.event.item.PickupItemEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.ElementUtils;
 import org.phantazm.core.config.InstanceConfig;
@@ -45,6 +46,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     private final SceneFallback fallback;
     private final InstanceConfig instanceConfig;
     private final List<ElementContext> npcContexts;
+    private final Collection<ItemStack> defaultItems;
     private final MiniMessage miniMessage;
     private final String lobbyJoinFormat;
     private final boolean quittable;
@@ -64,7 +66,9 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     public BasicLobbyProvider(@NotNull Executor executor, int maximumLobbies, int newLobbyThreshold,
             @NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback,
             @NotNull InstanceConfig instanceConfig, @NotNull ContextManager contextManager,
-            @NotNull ConfigList npcConfigs, @NotNull MiniMessage miniMessage, @NotNull String lobbyJoinFormat,
+            @NotNull ConfigList npcConfigs,
+            @NotNull Collection<ItemStack> defaultItems, @NotNull MiniMessage miniMessage,
+            @NotNull String lobbyJoinFormat,
             boolean quittable, @NotNull EventNode<Event> rootNode) {
         super(executor, maximumLobbies, newLobbyThreshold);
 
@@ -82,6 +86,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         }
 
         this.npcContexts = List.copyOf(npcContexts);
+        this.defaultItems = Objects.requireNonNull(defaultItems, "defaultItems");
         this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
         this.lobbyJoinFormat = Objects.requireNonNull(lobbyJoinFormat, "lobbyJoinFormat");
         this.quittable = quittable;
@@ -121,7 +126,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
             }
 
             Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
-                    new NPCHandler(List.copyOf(npcs), instance, instanceNode), miniMessage, lobbyJoinFormat, quittable);
+                    new NPCHandler(List.copyOf(npcs), instance, instanceNode), defaultItems, miniMessage,
+                    lobbyJoinFormat, quittable);
             instanceNode.addListener(PlayerDisconnectEvent.class, event -> {
                 try (TransferResult result = lobby.leave(Collections.singleton(event.getPlayer().getUuid()))) {
                     result.executor().ifPresent(Runnable::run);

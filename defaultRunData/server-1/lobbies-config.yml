@@ -8,6 +8,7 @@ lobbies:
         maxPlayers: 10
         maxLobbies: 10
         lobbyJoinFormat: <#fffa9e>»</#fffa9e> <green><joiner></green> <yellow>joined the lobby</yellow>
+        defaultItems: []
 
         instanceConfig:
             time: 18000
