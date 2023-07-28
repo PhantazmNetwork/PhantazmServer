@@ -427,7 +427,7 @@ public final class MapProcessors {
                     ConfigProcessors.component().dataFromElement(element.getElementOrThrow("enemiesNearbyMessage"));
             Component healthDisplay =
                     ConfigProcessors.component().dataFromElement(element.getElementOrThrow("healthDisplay"));
-            String gameJoinFormat = element.getStringOrDefault("gameJoinFormat");
+            String gameJoinFormat = element.getStringOrThrow("gameJoinFormat");
 
             return new MapSettingsInfo(mapDataVersion, chunkLoadRange, id, instancePath, origin, minimumProtocolVersion,
                     maximumProtocolVersion, spawn, pitch, yaw, displayName, displayItemTag, idleRevertTicks,
