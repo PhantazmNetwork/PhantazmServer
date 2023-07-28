@@ -198,7 +198,7 @@ public class SlotMachineInteractor implements ShopInteractor {
                 }
 
                 rollInteraction.player().module().getPlayerView().getDisplayName().thenAccept(displayName -> {
-                    Set<Player> players = shop.instance().getPlayers();
+                    Set<Player> players = new HashSet<>(shop.instance().getPlayers());
                     rollInteraction.player().module().getPlayerView().getPlayer().ifPresent(players::remove);
                     Audience filteredAudience = Audience.audience(players);
 
