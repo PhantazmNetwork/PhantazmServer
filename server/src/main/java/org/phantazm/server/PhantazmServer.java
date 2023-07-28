@@ -35,6 +35,7 @@ import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.command.whisper.WhisperConfig;
 import org.phantazm.server.config.lobby.LobbiesConfig;
+import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.server.player.BasicLoginValidator;
@@ -81,6 +82,7 @@ public final class PhantazmServer {
     public static void main(String[] args) {
         MinecraftServer minecraftServer = MinecraftServer.init();
 
+        PlayerConfig playerConfig;
         ServerConfig serverConfig;
         LobbiesConfig lobbiesConfig;
         PathfinderConfig pathfinderConfig;
@@ -138,6 +140,7 @@ public final class PhantazmServer {
                 return;
             }
 
+            playerConfig = handler.loadDataNow(ConfigFeature.PLAYER_CONFIG_KEY);
             lobbiesConfig = handler.loadDataNow(ConfigFeature.LOBBIES_CONFIG_KEY);
             pathfinderConfig = handler.loadDataNow(ConfigFeature.PATHFINDER_CONFIG_KEY);
             shutdownConfig = handler.loadDataNow(ConfigFeature.SHUTDOWN_CONFIG_KEY);
@@ -160,8 +163,8 @@ public final class PhantazmServer {
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         try {
             LOGGER.info("Initializing features.");
-            initializeFeatures(keyParser, node, serverConfig, shutdownConfig, pathfinderConfig, lobbiesConfig,
-                    partyConfig, whisperConfig, chatConfig, zombiesConfig, loginValidator);
+            initializeFeatures(keyParser, node, playerConfig, serverConfig, shutdownConfig, pathfinderConfig,
+                    lobbiesConfig, partyConfig, whisperConfig, chatConfig, zombiesConfig, loginValidator);
             LOGGER.info("Features initialized successfully.");
         }
         catch (Exception exception) {
@@ -208,11 +211,12 @@ public final class PhantazmServer {
         return false;
     }
 
-    private static void initializeFeatures(KeyParser keyParser, EventNode<Event> global, ServerConfig serverConfig,
-            ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
-            PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, ZombiesConfig zombiesConfig,
-            LoginValidator loginValidator) throws Exception {
+    private static void initializeFeatures(KeyParser keyParser, EventNode<Event> global, PlayerConfig playerConfig,
+            ServerConfig serverConfig, ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig,
+            LobbiesConfig lobbiesConfig, PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig,
+            ZombiesConfig zombiesConfig, LoginValidator loginValidator) throws Exception {
         DatapackFeature.initialize(MinecraftServer.getBiomeManager());
+        PlayerFeature.initialize(playerConfig, global, MiniMessage.miniMessage());
 
         RouterStore routerStore = new BasicRouterStore();
         ExecutorFeature.initialize();

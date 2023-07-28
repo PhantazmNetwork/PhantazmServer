@@ -17,6 +17,7 @@ import org.phantazm.server.config.loader.PathfinderConfigProcessor;
 import org.phantazm.server.config.loader.ServerConfigProcessor;
 import org.phantazm.server.config.loader.ShutdownConfigProcessor;
 import org.phantazm.server.config.lobby.LobbiesConfig;
+import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.PathfinderConfig;
 import org.phantazm.server.config.server.ServerConfig;
 import org.phantazm.server.config.server.ShutdownConfig;
@@ -29,6 +30,8 @@ import java.nio.file.Path;
  * Entrypoint for configuration-related features.
  */
 public final class ConfigFeature {
+
+    public static final Path PLAYER_CONFIG_PATH = Path.of("./player-config.toml");
     /**
      * The location of the server configuration file.
      */
@@ -57,6 +60,9 @@ public final class ConfigFeature {
     public static final Path CHAT_CONFIG_PATH = Path.of("./chat-config.yml");
 
     public static final Path ZOMBIES_CONFIG_PATH = Path.of("./zombies-config.toml");
+
+    public static final ConfigHandler.ConfigKey<PlayerConfig> PLAYER_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
+            PlayerConfig.class, "player_config");
 
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link ServerConfig} loader.
@@ -110,6 +116,10 @@ public final class ConfigFeature {
 
         ConfigCodec tomlCodec = new TomlCodec();
         ConfigCodec yamlCodec = new YamlCodec();
+        handler.registerLoader(PLAYER_CONFIG_KEY,
+                new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(PlayerConfig.class)),
+                        PlayerConfig.DEFAULT, PLAYER_CONFIG_PATH, tomlCodec));
+
         handler.registerLoader(SERVER_CONFIG_KEY,
                 new SyncFileConfigLoader<>(new ServerConfigProcessor(), ServerConfig.DEFAULT, SERVER_CONFIG_PATH,
                         tomlCodec));
