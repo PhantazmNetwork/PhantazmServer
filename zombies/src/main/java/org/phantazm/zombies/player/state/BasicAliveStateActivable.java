@@ -126,6 +126,8 @@ public class BasicAliveStateActivable implements Activable {
             tabList.addViewer(player);
             belowNameTag.addViewer(player);
         });
+
+        accessRegistry.switchAccess(null);
     }
 
     private TagResolver[] getTagResolvers(@NotNull Component displayName) {
