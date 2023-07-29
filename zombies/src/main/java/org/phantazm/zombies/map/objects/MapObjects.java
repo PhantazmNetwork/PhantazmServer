@@ -59,6 +59,10 @@ public interface MapObjects {
 
     @NotNull TickTaskScheduler taskScheduler();
 
+    @Nullable Team mobNoPushTeam();
+
+    @NotNull Team corpseTeam();
+
     @NotNull interface Source {
         @NotNull MapObjects make(@NotNull Instance instance,
                 @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,

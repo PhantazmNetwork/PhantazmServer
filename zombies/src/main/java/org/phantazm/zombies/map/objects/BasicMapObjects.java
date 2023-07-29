@@ -3,7 +3,9 @@ package org.phantazm.zombies.map.objects;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.tracker.BoundedTracker;
@@ -31,11 +33,15 @@ public final class BasicMapObjects implements MapObjects {
 
     private final TickTaskScheduler taskScheduler;
 
+    private final Team mobNoPushTeam;
+    private final Team corpseTeam;
+
     public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull BoundedTracker<Window> windows,
             @NotNull BoundedTracker<Shop> shops, @NotNull BoundedTracker<Door> doors,
             @NotNull BoundedTracker<Room> rooms, @NotNull List<Round> rounds,
             @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Point mapOrigin,
-            @NotNull Module module, @NotNull TickTaskScheduler taskScheduler) {
+            @NotNull Module module, @NotNull TickTaskScheduler taskScheduler, @Nullable Team mobNoPushTeam,
+            @NotNull Team corpseTeam) {
         this.spawnpoints = List.copyOf(spawnpoints);
         this.rounds = List.copyOf(rounds);
 
@@ -57,6 +63,8 @@ public final class BasicMapObjects implements MapObjects {
         this.roomMap = Map.copyOf(map);
         this.mapOrigin = mapOrigin;
         this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
+        this.mobNoPushTeam = mobNoPushTeam;
+        this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
     }
 
     @Override
@@ -117,5 +125,15 @@ public final class BasicMapObjects implements MapObjects {
     @Override
     public @NotNull TickTaskScheduler taskScheduler() {
         return taskScheduler;
+    }
+
+    @Override
+    public @Nullable Team mobNoPushTeam() {
+        return mobNoPushTeam;
+    }
+
+    @Override
+    public @NotNull Team corpseTeam() {
+        return corpseTeam;
     }
 }

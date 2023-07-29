@@ -15,9 +15,6 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.packet.server.play.TeamsPacket;
-import net.minestom.server.scoreboard.Team;
-import net.minestom.server.scoreboard.TeamManager;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -158,14 +155,6 @@ public final class ZombiesFeature {
         CompletableFuture.allOf(loadFutures.toArray(CompletableFuture[]::new)).join();
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
-        TeamManager teamManager = MinecraftServer.getTeamManager();
-
-        // https://bugs.mojang.com/browse/MC-87984
-        Team mobNoPushTeam =
-                teamManager.createBuilder("mobNoPush").collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS)
-                        .build();
-        Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
-                .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
 
         ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
         database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource(), sqlFetcher);
@@ -176,7 +165,7 @@ public final class ZombiesFeature {
                     new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
                             instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
                             ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(), clientBlockHandlerSource,
-                            contextManager, keyParser, mobNoPushTeam, corpseTeam, database, ZombiesFeature.powerups(),
+                            contextManager, keyParser, database, ZombiesFeature.powerups(),
                             new BasicZombiesPlayerSource(database, viewProvider,
                                     EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
                                     keyParser),

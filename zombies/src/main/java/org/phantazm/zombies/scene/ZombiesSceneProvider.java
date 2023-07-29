@@ -10,6 +10,7 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -19,8 +20,10 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.BelowNameTag;
 import net.minestom.server.scoreboard.Team;
+import net.minestom.server.scoreboard.TeamManager;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.BasicTickTaskScheduler;
 import org.phantazm.commons.TickTaskScheduler;
@@ -76,8 +79,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final EventNode<Event> rootNode;
     private final ContextManager contextManager;
     private final KeyParser keyParser;
-    private final Team mobNoPushTeam;
-    private final Team corpseTeam;
     private final ZombiesDatabase database;
 
     private final MapObjects.Source mapObjectSource;
@@ -94,10 +95,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull MapInfo mapInfo, @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
             @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
-            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull Team mobNoPushTeam,
-            @NotNull Team corpseTeam, @NotNull ZombiesDatabase database, @NotNull Map<Key, PowerupInfo> powerups,
-            @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource,
-            @NotNull SongLoader songLoader) {
+            @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull ZombiesDatabase database,
+            @NotNull Map<Key, PowerupInfo> powerups, @NotNull ZombiesPlayer.Source zombiesPlayerSource,
+            @NotNull CorpseCreator.Source corpseCreatorSource, @NotNull SongLoader songLoader) {
         super(executor, maximumScenes);
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
@@ -110,8 +110,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Objects.requireNonNull(powerups, "powerups");
 
         MapSettingsInfo settingsInfo = mapInfo.settings();
-        this.mobNoPushTeam = settingsInfo.mobPlayerCollisions() ? null : mobNoPushTeam;
-        this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
 
         this.mapObjectSource = new BasicMapObjectsSource(mapInfo, contextManager, mobSpawnerSource, mobModels,
                 clientBlockHandlerSource, keyParser);
@@ -188,6 +186,15 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             TickTaskScheduler tickTaskScheduler = new BasicTickTaskScheduler();
 
             SongPlayer songPlayer = new BasicSongPlayer();
+
+            TeamManager teamManager = MinecraftServer.getTeamManager();
+            Team mobNoPushTeam =
+                    !settings.mobPlayerCollisions() ? teamManager.createBuilder(UUID.randomUUID().toString())
+                            .collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS).build() : null;
+            Team corpseTeam = teamManager.createBuilder(UUID.randomUUID().toString())
+                    .collisionRule(TeamsPacket.CollisionRule.NEVER)
+                    .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
+
             MapObjects mapObjects =
                     createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, mobNoPushTeam, corpseTeam,
                             powerupHandlerWrapper, windowHandlerWrapper, eventNodeWrapper, songPlayer, songLoader,
@@ -210,7 +217,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             ZombiesMap map =
                     new ZombiesMap(mapObjects, songPlayer, powerupHandler, roundHandler, shopHandler, windowHandler,
                             doorHandler, mobStore);
-
 
             SidebarModule sidebarModule =
                     new SidebarModule(zombiesPlayers, zombiesPlayers.values(), roundHandler, ticksSinceStart,
@@ -268,6 +274,17 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     @Override
     protected void cleanupScene(@NotNull ZombiesScene scene) {
         rootNode.removeChild(scene.getSceneNode());
+        MapObjects mapObjects = scene.getMap().mapObjects();
+
+        Team mobNoPush = mapObjects.mobNoPushTeam();
+        Team corpseTeam = mapObjects.corpseTeam();
+
+        TeamManager manager = MinecraftServer.getTeamManager();
+        if (mobNoPush != null) {
+            manager.deleteTeam(mobNoPush);
+        }
+
+        manager.deleteTeam(corpseTeam);
     }
 
     private CorpseCreator createCorpseCreator(DependencyProvider mapDependencyProvider) {
