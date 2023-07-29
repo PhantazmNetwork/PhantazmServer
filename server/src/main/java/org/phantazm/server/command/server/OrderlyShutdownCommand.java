@@ -11,6 +11,7 @@ import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.permission.Permission;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.event.PlayerJoinLobbyEvent;
 import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.game.scene.event.SceneShutdownEvent;
@@ -81,6 +82,9 @@ public class OrderlyShutdownCommand extends Command {
             globalNode.addListener(SceneShutdownEvent.class, this::onSceneShutdown);
             globalNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
                 event.getPlayer().kick(Component.text("Server is not joinable", NamedTextColor.RED));
+            });
+            globalNode.addListener(PlayerJoinLobbyEvent.class, event -> {
+                event.getPlayer().kick(Component.text("Routing to fresh instance...", NamedTextColor.RED));
             });
 
             if (noGamesActive()) {

@@ -17,7 +17,6 @@ import org.phantazm.core.chat.command.ChatChannelSendCommand;
 import org.phantazm.core.chat.command.ChatCommand;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyChatChannel;
-import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 

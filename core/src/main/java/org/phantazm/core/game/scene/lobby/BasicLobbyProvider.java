@@ -69,10 +69,9 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     public BasicLobbyProvider(@NotNull Executor executor, int maximumLobbies, int newLobbyThreshold,
             @NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback,
             @NotNull InstanceConfig instanceConfig, @NotNull ContextManager contextManager,
-            @NotNull ConfigList npcConfigs,
-            @NotNull Collection<ItemStack> defaultItems, @NotNull MiniMessage miniMessage,
-            @NotNull String lobbyJoinFormat,
-            boolean quittable, @NotNull EventNode<Event> rootNode) {
+            @NotNull ConfigList npcConfigs, @NotNull Collection<ItemStack> defaultItems,
+            @NotNull MiniMessage miniMessage, @NotNull String lobbyJoinFormat, boolean quittable,
+            @NotNull EventNode<Event> rootNode) {
         super(executor, maximumLobbies, newLobbyThreshold);
 
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");

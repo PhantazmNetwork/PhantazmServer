@@ -6,11 +6,13 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
+import org.phantazm.core.event.PlayerJoinLobbyEvent;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
@@ -97,6 +99,8 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
                 for (ItemStack stack : defaultItems) {
                     player.right().getInventory().addItemStack(stack);
                 }
+
+                EventDispatcher.call(new PlayerJoinLobbyEvent(player.right()));
             }
         });
     }
