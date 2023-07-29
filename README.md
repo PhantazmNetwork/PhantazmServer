@@ -10,6 +10,8 @@ This repository contains:
 2. Supporting libraries such as `phantazm-commons`
 3. Advanced utilities for creating games, such as `phantazm-zombies-mapeditor`
 
+If you want to join our Discord, please join https://discord.gg/Rb6NkK4EQ8.
+
 ## Table of Contents
 
 - [Background](#background)
