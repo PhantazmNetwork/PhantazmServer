@@ -8,23 +8,16 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
-import org.jglrxavpok.hephaistos.nbt.NBTException;
-import org.jglrxavpok.hephaistos.parser.SNBTParser;
+import org.phantazm.core.ItemStackUtils;
 import org.phantazm.core.item.UpdatingItem;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
 
 @Model("item.updating.cost_substituting")
@@ -67,29 +60,8 @@ public class CostSubstitutingItem implements UpdatingItem {
     }
 
     private ItemStack computeItemStack(int cost) {
-        ItemStack.Builder builder = ItemStack.builder(data.material);
-        if (data.tag != null) {
-            try {
-                builder.meta((NBTCompound)new SNBTParser(new StringReader(data.tag)).parse());
-            }
-            catch (NBTException ignored1) {
-            }
-        }
-
-        TagResolver costTag = Placeholder.unparsed("cost", Integer.toString(cost));
-        if (data.displayName != null) {
-            builder.displayName(MiniMessage.miniMessage().deserialize(data.displayName, costTag));
-        }
-
-        if (data.lore != null) {
-            List<Component> components = new ArrayList<>(data.lore.size());
-            for (String format : data.lore) {
-                components.add(MiniMessage.miniMessage().deserialize(format, costTag));
-            }
-            builder.lore(components);
-        }
-
-        return builder.build();
+        return ItemStackUtils.buildItem(data.material, data.tag, data.displayName, data.lore,
+                Placeholder.unparsed("cost", Integer.toString(cost)));
     }
 
     private int cost() {
