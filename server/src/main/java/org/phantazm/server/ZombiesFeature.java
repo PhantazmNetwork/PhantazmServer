@@ -240,6 +240,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(CountingInteractor.class);
         contextManager.registerElementClass(OpenGuiInteractor.class);
         contextManager.registerElementClass(CloseGuiInteractor.class);
+        contextManager.registerElementClass(CostSubstitutingItem.class);
         contextManager.registerElementClass(AddEquipmentInteractor.class);
         contextManager.registerElementClass(EquipmentStationInteractor.class);
         contextManager.registerElementClass(ChangeDoorStateInteractor.class);
