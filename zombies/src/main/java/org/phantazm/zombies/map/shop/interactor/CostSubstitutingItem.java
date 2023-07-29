@@ -27,7 +27,7 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-@Model("item.cost_substituting")
+@Model("item.updating.cost_substituting")
 @Cache(false)
 public class CostSubstitutingItem implements UpdatingItem {
     private static final int UPDATE_INTERVAL = 10;

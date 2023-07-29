@@ -37,7 +37,11 @@ public class AdditiveTransactionModifierInteractor implements ShopInteractor {
 
             @Override
             public int modify(int coins) {
-                return coins + data.amount;
+                return switch (data.modifierAction) {
+                    case ADD -> (int)Math.rint(coins + data.amount);
+                    case ABS_ADD -> (int)Math.rint(coins + (coins < 0 ? -data.amount : data.amount));
+                    case MULTIPLY -> (int)Math.rint(coins + (data.amount * coins));
+                };
             }
 
             @Override
@@ -49,8 +53,18 @@ public class AdditiveTransactionModifierInteractor implements ShopInteractor {
         return true;
     }
 
+    public enum ModifierAction {
+        ADD,
+        ABS_ADD,
+        MULTIPLY
+    }
+
     @DataObject
-    public record Data(@NotNull Key modifierGroup, @NotNull Component displayName, int amount, int priority) {
+    public record Data(@NotNull Key modifierGroup,
+                       @NotNull ModifierAction modifierAction,
+                       @NotNull Component displayName,
+                       double amount,
+                       int priority) {
         @Default("displayName")
         public static @NotNull ConfigElement defaultDisplayName() {
             return ConfigPrimitive.of("");
