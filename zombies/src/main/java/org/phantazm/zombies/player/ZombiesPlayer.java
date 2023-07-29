@@ -138,6 +138,10 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
         return canDoGenericActions();
     }
 
+    default boolean canUseEquipment() {
+        return !isKnocked() && !hasQuit();
+    }
+
     default boolean canBeTargeted() {
         return canDoGenericActions() && getPlayer().map(player -> {
             GameMode mode = player.getGameMode();
