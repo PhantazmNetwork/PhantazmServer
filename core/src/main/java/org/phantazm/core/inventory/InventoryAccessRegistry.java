@@ -35,14 +35,6 @@ public interface InventoryAccessRegistry {
      */
     void registerAccess(@NotNull Key key, @NotNull InventoryAccess profile);
 
-    /**
-     * Unregisters a {@link InventoryProfile} from the view.
-     *
-     * @param key The {@link Key} of the {@link InventoryProfile} to unregister
-     * @throws IllegalArgumentException If no {@link InventoryProfile} is registered with the {@link Key}
-     */
-    void unregisterAccess(@NotNull Key key);
-
     default boolean canPushTo(@NotNull Key groupKey) {
         return getCurrentAccess().filter(access -> canPushTo(access, groupKey)).isPresent();
     }
