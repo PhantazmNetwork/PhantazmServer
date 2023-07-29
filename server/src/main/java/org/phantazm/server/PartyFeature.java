@@ -4,9 +4,6 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.Configuration;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import com.github.steanky.ethylene.mapper.MappingProcessorSource;
-import com.github.steanky.ethylene.mapper.type.Token;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.builder.Command;
@@ -22,7 +19,6 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.TickFormatter;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.*;
 
 public class PartyFeature {
@@ -55,6 +51,8 @@ public class PartyFeature {
         commandManager.register(partyCommand);
 
         schedulerManager.scheduleTask(() -> {
+            partyHolder.guilds().removeIf(party -> party.getMemberManager().getMembers().isEmpty());
+
             Set<Party> ticked = Collections.newSetFromMap(new IdentityHashMap<>());
             long time = System.currentTimeMillis();
             for (Party party : partyHolder.guilds()) {
