@@ -1,9 +1,13 @@
 package org.phantazm.zombies.listener;
 
+import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.EntityInstanceEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.state.ZombiesPlayerState;
+import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 
 import java.util.Map;
 import java.util.Objects;
@@ -31,6 +35,16 @@ public abstract class ZombiesPlayerEventListener<TEvent extends EntityInstanceEv
 
         ZombiesPlayer zombiesPlayer = zombiesPlayers.get(event.getEntity().getUuid());
         if (zombiesPlayer != null) {
+            ZombiesPlayerState state = zombiesPlayer.module().getStateSwitcher().getState();
+            if ((state == null || state.key().equals(ZombiesPlayerStateKeys.KNOCKED.key())) &&
+                    !(event instanceof PlayerDisconnectEvent)) {
+                if (event instanceof CancellableEvent cancellableEvent) {
+                    cancellableEvent.setCancelled(true);
+                }
+
+                return;
+            }
+
             accept(zombiesPlayer, event);
         }
     }
