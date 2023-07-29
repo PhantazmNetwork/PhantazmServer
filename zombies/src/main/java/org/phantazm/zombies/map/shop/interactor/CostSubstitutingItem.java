@@ -58,7 +58,7 @@ public class CostSubstitutingItem implements UpdatingItem {
 
     @Override
     public boolean hasUpdate(long time, @NotNull ItemStack current) {
-        return (ticks++ % UPDATE_INTERVAL == 0 && (hasOldCost && cost() != oldCost));
+        return (ticks++ % UPDATE_INTERVAL == 0 && (!hasOldCost || cost() != oldCost));
     }
 
     @Override
