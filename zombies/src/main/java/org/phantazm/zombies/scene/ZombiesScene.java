@@ -115,7 +115,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             if (!isJoinable()) {
                 return TransferResult.failure(Component.text("Game is not joinable."));
             }
-            if (allowedRequestUUID != null && !joinRequest.getUUID().equals(allowedRequestUUID)) {
+            if (false && allowedRequestUUID != null && !joinRequest.getUUID().equals(allowedRequestUUID)) {
                 return TransferResult.failure(Component.text("You aren't allowed to join this game."));
             }
 
