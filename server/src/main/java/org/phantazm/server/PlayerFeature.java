@@ -28,6 +28,8 @@ public final class PlayerFeature {
             event.getPlayer().setDisplayName(newName);
             event.getPlayer().setCustomName(newName);
             event.getPlayer().setCustomNameVisible(true);
+
+            event.getPlayer().sendMessage(playerConfig.joinMessage());
         });
     }
 
