@@ -142,15 +142,6 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         });
     }
 
-    private InventoryAccess getAccess() {
-        Optional<InventoryAccess> accessOptional = getCurrentAccess();
-        if (accessOptional.isEmpty()) {
-            throw new IllegalArgumentException("No current access");
-        }
-
-        return accessOptional.get();
-    }
-
     private InventoryObjectGroup getGroup(InventoryAccess access, Key groupKey) {
         InventoryObjectGroup group = access.groups().get(groupKey);
         if (group == null) {
