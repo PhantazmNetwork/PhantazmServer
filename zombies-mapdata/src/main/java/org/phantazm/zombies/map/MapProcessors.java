@@ -101,7 +101,7 @@ public final class MapProcessors {
         }
     };
 
-    private static final ConfigProcessor<WebhookInfo> webhookInfo = new ConfigProcessor<WebhookInfo>() {
+    private static final ConfigProcessor<WebhookInfo> webhookInfo = new ConfigProcessor<>() {
         @Override
         public WebhookInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             String webhookURL = element.getStringOrThrow("webhookURL");
@@ -382,7 +382,7 @@ public final class MapProcessors {
             long healTicks = element.getNumberOrThrow("healTicks").longValue();
             double reviveRadius = element.getNumberOrThrow("reviveRadius").doubleValue();
             boolean canWallshoot = element.getBooleanOrThrow("canWallshoot");
-            boolean perksLostOnDeath = element.getBooleanOrThrow("perksLostOnDeath");
+            List<Key> lostOnDeath = keyList.dataFromElement(element.getElementOrThrow("lostOnDeath"));
             long baseReviveTicks = element.getNumberOrThrow("baseReviveTicks").longValue();
             int rollsPerChest = element.getNumberOrThrow("rollsPerChest").intValue();
             float punchDamage = element.getNumberOrThrow("punchDamage").floatValue();
@@ -434,15 +434,15 @@ public final class MapProcessors {
                     introMessages, countdownTicks, countdownAlertTicks, countdownTickSound, countdownTimeFormat,
                     endTicks, endGameStatsFormat, scoreboardHeader, worldTime, maxPlayers, minPlayers, startingCoins,
                     repairCoins, windowRepairRadius, powerupPickupRadius, windowRepairTicks, corpseDeathTicks,
-                    healTicks, reviveRadius, canWallshoot, perksLostOnDeath, baseReviveTicks, rollsPerChest,
-                    punchDamage, punchRange, punchKnockback, punchCooldown, mobPlayerCollisions, defaultEquipment,
-                    equipmentGroups, winTitleFormat, winSubtitleFormat, lossTitleFormat, lossSubtitleFormat,
-                    reviveStatusToReviverFormat, reviveStatusToKnockedFormat, dyingStatusFormat,
-                    reviveMessageToRevivedFormat, reviveMessageToOthersFormat, reviveSound,
-                    knockedMessageToKnockedFormat, knockedMessageToOthersFormat, knockedTitleFormat,
-                    knockedSubtitleFormat, knockedSound, deathMessageToKilledFormat, deathMessageToOthersFormat,
-                    deathSound, rejoinMessageFormat, quitMessageFormat, nearWindowMessage, startRepairingMessage,
-                    stopRepairingMessage, finishRepairingMessage, enemiesNearbyMessage, healthDisplay, gameJoinFormat);
+                    healTicks, reviveRadius, canWallshoot, lostOnDeath, baseReviveTicks, rollsPerChest, punchDamage,
+                    punchRange, punchKnockback, punchCooldown, mobPlayerCollisions, defaultEquipment, equipmentGroups,
+                    winTitleFormat, winSubtitleFormat, lossTitleFormat, lossSubtitleFormat, reviveStatusToReviverFormat,
+                    reviveStatusToKnockedFormat, dyingStatusFormat, reviveMessageToRevivedFormat,
+                    reviveMessageToOthersFormat, reviveSound, knockedMessageToKnockedFormat,
+                    knockedMessageToOthersFormat, knockedTitleFormat, knockedSubtitleFormat, knockedSound,
+                    deathMessageToKilledFormat, deathMessageToOthersFormat, deathSound, rejoinMessageFormat,
+                    quitMessageFormat, nearWindowMessage, startRepairingMessage, stopRepairingMessage,
+                    finishRepairingMessage, enemiesNearbyMessage, healthDisplay, gameJoinFormat);
         }
 
         @Override
@@ -482,7 +482,7 @@ public final class MapProcessors {
             node.putNumber("healTicks", mapConfig.healTicks());
             node.putNumber("reviveRadius", mapConfig.reviveRadius());
             node.putBoolean("canWallshoot", mapConfig.canWallshoot());
-            node.putBoolean("perksLostOnDeath", mapConfig.perksLostOnDeath());
+            node.put("lostOnDeath", keyList.elementFromData(mapConfig.lostOnDeath()));
             node.putNumber("baseReviveTicks", mapConfig.baseReviveTicks());
             node.putNumber("rollsPerChest", mapConfig.rollsPerChest());
             node.putNumber("punchDamage", mapConfig.punchDamage());

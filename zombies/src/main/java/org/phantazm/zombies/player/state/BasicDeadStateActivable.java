@@ -1,6 +1,7 @@
 package org.phantazm.zombies.player.state;
 
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -16,7 +17,7 @@ import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
 import org.phantazm.commons.MiniMessageUtils;
-import org.phantazm.core.inventory.InventoryAccessRegistry;
+import org.phantazm.core.inventory.*;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
@@ -89,6 +90,27 @@ public class BasicDeadStateActivable implements Activable {
         Point deathLocation = context.getDeathLocation();
         if (deathLocation != null) {
             instance.playSound(settings.deathSound(), deathLocation.x(), deathLocation.y(), deathLocation.z());
+        }
+
+        if (!context.isRejoin()) {
+            InventoryAccess aliveAccess = accessRegistry.getAccess(InventoryKeys.ALIVE_ACCESS);
+
+            for (Key key : settings.lostOnDeath()) {
+                InventoryObjectGroup group = aliveAccess.groups().get(key);
+                if (group == null) {
+                    continue;
+                }
+
+                InventoryObject defaultObject = group.defaultObject();
+                for (int slot : group.getSlots()) {
+                    if (defaultObject == null) {
+                        accessRegistry.removeObject(aliveAccess, slot);
+                    }
+                    else {
+                        accessRegistry.replaceObject(aliveAccess, slot, defaultObject);
+                    }
+                }
+            }
         }
 
         stats.setDeaths(stats.getDeaths() + 1);

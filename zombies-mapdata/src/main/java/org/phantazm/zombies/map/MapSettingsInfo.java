@@ -46,7 +46,7 @@ public record MapSettingsInfo(int mapDataVersion,
                               long healTicks,
                               double reviveRadius,
                               boolean canWallshoot,
-                              boolean perksLostOnDeath,
+                              @NotNull List<Key> lostOnDeath,
                               long baseReviveTicks,
                               int rollsPerChest,
                               float punchDamage,
@@ -110,7 +110,7 @@ public record MapSettingsInfo(int mapDataVersion,
      * @param windowRepairTicks      the number of ticks between each consecutive "repair tick"
      * @param corpseDeathTicks       the number of ticks it takes for a downed player to fully die if they are not revived
      * @param reviveRadius           the maximum distance away players can be from a corpse and still revive it
-     * @param perksLostOnDeath       true if perks are lost on death, false otherwise
+     * @param lostOnDeath            object groups that are deleted on death
      * @param baseReviveTicks        the base number of ticks it takes to revive a player
      * @param rollsPerChest          the number of rolls a lucky chest can have before it moves to another location
      * @param defaultEquipment       the initial equipment players receive when the game starts; the keys correspond to
@@ -138,8 +138,9 @@ public record MapSettingsInfo(int mapDataVersion,
         this(MAP_DATA_VERSION, 10, id, List.of(), origin, 47, -1, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
                 "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", 12000L, new ArrayList<>(0), 400L,
                 new ArrayList<>(0), Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F),
-                "", 200L, "", Component.text(id.value()), 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false, false, 30, 5, 0,
-                4.5F, 0.4F, 20, false, new HashMap<>(0), new HashMap<>(), "", "", "", "", "", "", "", "", "",
+                "", 200L, "", Component.text(id.value()), 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false,
+                new ArrayList<>(), 30, 5, 0, 4.5F, 0.4F, 20, false, new HashMap<>(0), new HashMap<>(), "", "", "", "",
+                "", "", "", "", "",
                 Sound.sound(Key.key("minecraft:block.brewing_stand.brew"), Sound.Source.MASTER, 1.0F, 1.0F), "", "", "",
                 "", Sound.sound(Key.key("minecraft:entity.ender_dragon.growl"), Sound.Source.MASTER, 1.0F, 0.5F), "",
                 "", Sound.sound(Key.key("minecraft:entity.player.hurt"), Sound.Source.MASTER, 1.0F, 1.0F), "", "",

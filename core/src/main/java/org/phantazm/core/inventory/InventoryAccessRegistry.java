@@ -43,11 +43,31 @@ public interface InventoryAccessRegistry {
      */
     void unregisterAccess(@NotNull Key key);
 
-    boolean canPushTo(@NotNull Key groupKey);
+    default boolean canPushTo(@NotNull Key groupKey) {
+        return getCurrentAccess().filter(access -> canPushTo(access, groupKey)).isPresent();
+    }
 
-    @Nullable InventoryObject replaceObject(int slot, @NotNull InventoryObject newObject);
+    boolean canPushTo(@NotNull InventoryAccess currentAccess, @NotNull Key groupKey);
 
-    void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object);
+    default @Nullable InventoryObject replaceObject(int slot, @NotNull InventoryObject newObject) {
+        return getCurrentAccess().map(access -> replaceObject(access, slot, newObject)).orElse(null);
+
+    }
+
+    @Nullable InventoryObject replaceObject(@NotNull InventoryAccess currentAccess, int slot,
+            @NotNull InventoryObject newObject);
+
+    default @Nullable InventoryObject removeObject(int slot) {
+        return getCurrentAccess().map(access -> removeObject(access, slot)).orElse(null);
+    }
+
+    @Nullable InventoryObject removeObject(@NotNull InventoryAccess currentAccess, int slot);
+
+    default void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object) {
+        getCurrentAccess().ifPresent(access -> pushObject(access, groupKey, object));
+    }
+
+    void pushObject(@NotNull InventoryAccess currentAccess, @NotNull Key groupKey, @NotNull InventoryObject object);
 
     @NotNull InventoryAccess getAccess(@NotNull Key profileKey);
 }

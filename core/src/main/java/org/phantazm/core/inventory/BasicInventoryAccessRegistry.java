@@ -1,6 +1,7 @@
 package org.phantazm.core.inventory;
 
 import net.kyori.adventure.key.Key;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.equipment.Equipment;
@@ -35,20 +36,20 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
             if (key == null) {
                 applyTo(null);
                 currentAccess = null;
+                return;
             }
-            else {
-                InventoryAccess access = accessMap.get(key);
-                if (access == null) {
-                    throw new IllegalArgumentException("No matching inventory access found");
-                }
 
-                if (access == currentAccess) {
-                    return;
-                }
-
-                currentAccess = access;
-                applyTo(access);
+            InventoryAccess access = accessMap.get(key);
+            if (access == null) {
+                throw new IllegalArgumentException("No matching inventory access found");
             }
+
+            if (access == currentAccess) {
+                return;
+            }
+
+            currentAccess = access;
+            applyTo(access);
         }
     }
 
@@ -80,22 +81,15 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     }
 
     @Override
-    public boolean canPushTo(@NotNull Key groupKey) {
-        Optional<InventoryAccess> accessOptional = getCurrentAccess();
-        if (accessOptional.isPresent()) {
-            InventoryAccess inventoryAccess = accessOptional.get();
-            InventoryObjectGroup group = inventoryAccess.groups().get(groupKey);
-            return group != null && !group.isFull();
-        }
-
-        return false;
+    public boolean canPushTo(@NotNull InventoryAccess currentAccess, @NotNull Key groupKey) {
+        InventoryObjectGroup group = currentAccess.groups().get(groupKey);
+        return group != null && !group.isFull();
     }
 
     @Override
-    public @Nullable InventoryObject replaceObject(int slot, @NotNull InventoryObject newObject) {
-        InventoryAccess access = getAccess();
-
-        InventoryProfile profile = access.profile();
+    public @Nullable InventoryObject replaceObject(@NotNull InventoryAccess currentAccess, int slot,
+            @NotNull InventoryObject newObject) {
+        InventoryProfile profile = currentAccess.profile();
         InventoryObject old = null;
         if (profile.hasInventoryObject(slot)) {
             old = profile.removeInventoryObject(slot);
@@ -109,9 +103,26 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     }
 
     @Override
-    public void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object) {
-        InventoryAccess access = getAccess();
-        InventoryObjectGroup group = getGroup(access, groupKey);
+    public @Nullable InventoryObject removeObject(@NotNull InventoryAccess currentAccess, int slot) {
+        InventoryProfile profile = currentAccess.profile();
+
+        InventoryObject old = null;
+        if (profile.hasInventoryObject(slot)) {
+            old = profile.removeInventoryObject(slot);
+            old.end();
+
+            if (currentAccess == this.currentAccess) {
+                playerView.getPlayer().ifPresent(player -> player.getInventory().setItemStack(slot, ItemStack.AIR));
+            }
+        }
+
+        return old;
+    }
+
+    @Override
+    public void pushObject(@NotNull InventoryAccess currentAccess, @NotNull Key groupKey,
+            @NotNull InventoryObject object) {
+        InventoryObjectGroup group = getGroup(currentAccess, groupKey);
 
         int slot = group.pushInventoryObject(object);
         onAdd(slot, object);
