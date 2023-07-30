@@ -5,8 +5,9 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -38,7 +39,7 @@ public class StateUpdaterCreator implements PlayerUpdaterCreator {
         private final PlayerView playerView;
         private final PlayerStateSwitcher stateSwitcher;
 
-        private CompletableFuture<? extends String> playerNameFuture;
+        private CompletableFuture<? extends Component> playerNameFuture;
         private ZombiesPlayerState lastState;
         private boolean cacheInvalidated;
 
@@ -59,14 +60,14 @@ public class StateUpdaterCreator implements PlayerUpdaterCreator {
         @Override
         public @NotNull Optional<Component> tick(long time) {
             if (playerNameFuture == null) {
-                playerNameFuture = playerView.getUsername();
+                playerNameFuture = playerView.getDisplayName();
             }
 
             if (!playerNameFuture.isDone()) {
                 return Optional.empty();
             }
 
-            String playerName = playerNameFuture.getNow(null);
+            Component playerName = playerNameFuture.getNow(null);
             if (playerName == null) {
                 return Optional.empty();
             }
@@ -76,9 +77,10 @@ public class StateUpdaterCreator implements PlayerUpdaterCreator {
                 this.lastState = currentState;
                 this.cacheInvalidated = false;
 
-                Component first = MiniMessage.miniMessage().deserialize(String.format(data.formatString, playerName));
-                return Optional.of(
-                        Component.join(JoinConfiguration.noSeparators(), first, currentState.getDisplayName()));
+                TagResolver playerPlaceholder = Placeholder.component("player", playerName);
+                TagResolver statePlaceholder = Placeholder.component("state", currentState.getDisplayName());
+                Component message = MiniMessage.miniMessage().deserialize(data.format, playerPlaceholder, statePlaceholder);
+                return Optional.of(message);
             }
 
             return Optional.empty();
@@ -86,6 +88,6 @@ public class StateUpdaterCreator implements PlayerUpdaterCreator {
     }
 
     @DataObject
-    public record Data(@NotNull String formatString) {
+    public record Data(@NotNull String format) {
     }
 }

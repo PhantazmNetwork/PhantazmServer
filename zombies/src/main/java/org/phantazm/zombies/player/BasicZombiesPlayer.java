@@ -85,6 +85,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
         module.getStateSwitcher().tick(time);
         taskScheduler.tick(time);
+        module.getCoins().tick(time);
+        module.getActionBar().tick(time);
     }
 
     @Override
@@ -93,6 +95,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
             setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(false));
         }
         module.getStateSwitcher().end();
+        module.getEquipmentHandler().accessRegistry().switchAccess(null);
     }
 
     private void inventoryTick(Player player, long time) {

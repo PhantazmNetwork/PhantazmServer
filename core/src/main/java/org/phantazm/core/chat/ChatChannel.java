@@ -3,6 +3,7 @@ package org.phantazm.core.chat;
 import it.unimi.dsi.fastutil.objects.ObjectBooleanPair;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerChatEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,9 +29,8 @@ public interface ChatChannel {
     /**
      * Formats a message. Channels may add custom style or formatting.
      *
-     * @param chatEvent The {@link PlayerChatEvent} that is being formatted
      * @return The formatted {@link Component} message
      */
-    @NotNull Component formatMessage(@NotNull PlayerChatEvent chatEvent);
+    @NotNull Component formatMessage(@NotNull Player player, @NotNull String message);
 
 }

@@ -9,13 +9,11 @@ import java.util.Objects;
  *
  * @param serverIP        The IP to run the server on
  * @param port            The port to run the server on
- * @param optifineEnabled Whether optifine support is enabled
  * @param authType        The type of authentication the server will use
  * @param proxySecret     The secret used for authentication
  */
 public record ServerInfoConfig(@NotNull String serverIP,
                                int port,
-                               boolean optifineEnabled,
                                boolean whitelist,
                                @NotNull AuthType authType,
                                @NotNull String proxySecret) {
@@ -28,11 +26,6 @@ public record ServerInfoConfig(@NotNull String serverIP,
      * The default port to bind to.
      */
     public static final int DEFAULT_PORT = 25565;
-
-    /**
-     * The default Optifine patch status.
-     */
-    public static final boolean DEFAULT_OPTIFINE_ENABLED = true;
 
     /**
      * Whether this server should whitelist players, by default.
@@ -54,7 +47,7 @@ public record ServerInfoConfig(@NotNull String serverIP,
      * The default ServerInfoConfig instance.
      */
     public static final ServerInfoConfig DEFAULT =
-            new ServerInfoConfig(DEFAULT_SERVER_ADDRESS, DEFAULT_PORT, DEFAULT_OPTIFINE_ENABLED, DEFAULT_WHITELIST,
+            new ServerInfoConfig(DEFAULT_SERVER_ADDRESS, DEFAULT_PORT, DEFAULT_WHITELIST,
                     DEFAULT_AUTH_TYPE, DEFAULT_PROXY_SECRET);
 
     /**
@@ -62,7 +55,6 @@ public record ServerInfoConfig(@NotNull String serverIP,
      *
      * @param serverIP        The IP to run the server on
      * @param port            The port to run the server on
-     * @param optifineEnabled Whether optifine support is enabled
      * @param authType        The type of authentication the server will use
      * @param proxySecret     The secret used for authentication
      */

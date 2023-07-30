@@ -1,11 +1,9 @@
 package org.phantazm.core.game.scene.lobby;
 
-import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.Player;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.EnvTest;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.TransferResult;
@@ -15,11 +13,11 @@ import org.phantazm.core.player.PlayerView;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 @EnvTest
@@ -32,16 +30,16 @@ public class LobbyIntegrationTest {
         Instance instance = env.createFlatInstance();
         InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME,
                 InstanceConfig.DEFAULT_TIME_RATE, InstanceConfig.DEFAULT_CHUNK_LOAD_RANGE);
-        SceneFallback sceneFallback = (ignored) -> true;
+        SceneFallback sceneFallback = (ignored) -> CompletableFuture.completedFuture(true);
         Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback,
-                new NPCHandler(List.of(), instance), true);
+                new NPCHandler(List.of(), instance, instance.eventNode()), Collections.emptyList(),
+                MiniMessage.miniMessage(), "", true);
         PlayerView playerView = mock(PlayerView.class);
 
         lobby.shutdown();
         assertTrue(lobby.isShutdown());
 
-        TransferResult result =
-                lobby.join(new BasicLobbyJoinRequest(env.process().connection(), Collections.singleton(playerView)));
+        TransferResult result = lobby.join(new BasicLobbyJoinRequest(Collections.singleton(playerView)));
         assertFalse(result.executor().isPresent());
     }
 

@@ -20,13 +20,15 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
 
     private Long bestTime;
 
+    private int bestRound;
+
     private int roundsSurvived;
 
     private int kills;
 
-    private int coinsGained;
+    private long coinsGained;
 
-    private int coinsSpent;
+    private long coinsSpent;
 
     private int knocks;
 
@@ -41,13 +43,14 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     private int headshotHits;
 
     public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey, int gamesPlayed, int wins,
-            @Nullable Long bestTime, int roundsSurvived, int kills, int knocks, int coinsGained, int coinsSpent,
-            int deaths, int revives, int shots, int regularHits, int headshotHits) {
+            @Nullable Long bestTime, int bestRound, int roundsSurvived, int kills, int knocks, long coinsGained,
+            long coinsSpent, int deaths, int revives, int shots, int regularHits, int headshotHits) {
         this.playerUUID = Objects.requireNonNull(playerUUID, "playerUUID");
         this.mapKey = Objects.requireNonNull(mapKey, "mapKey");
         this.gamesPlayed = gamesPlayed;
         this.wins = wins;
         this.bestTime = bestTime;
+        this.bestRound = bestRound;
         this.roundsSurvived = roundsSurvived;
         this.kills = kills;
         this.coinsGained = coinsGained;
@@ -61,7 +64,7 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     }
 
     public static ZombiesPlayerMapStats createBasicStats(@NotNull UUID playerUUID, @NotNull Key mapKey) {
-        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     @Override
@@ -105,6 +108,16 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     }
 
     @Override
+    public int getBestRound() {
+        return bestRound;
+    }
+
+    @Override
+    public void setBestRound(int bestRound) {
+        this.bestRound = bestRound;
+    }
+
+    @Override
     public int getRoundsSurvived() {
         return roundsSurvived;
     }
@@ -125,22 +138,22 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     }
 
     @Override
-    public int getCoinsGained() {
+    public long getCoinsGained() {
         return coinsGained;
     }
 
     @Override
-    public void setCoinsGained(int coinsGained) {
+    public void setCoinsGained(long coinsGained) {
         this.coinsGained = coinsGained;
     }
 
     @Override
-    public int getCoinsSpent() {
+    public long getCoinsSpent() {
         return coinsSpent;
     }
 
     @Override
-    public void setCoinsSpent(int coinsSpent) {
+    public void setCoinsSpent(long coinsSpent) {
         this.coinsSpent = coinsSpent;
     }
 

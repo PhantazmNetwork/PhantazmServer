@@ -6,16 +6,20 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.Team;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
-import org.phantazm.core.ComponentUtils;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
@@ -24,7 +28,6 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 
 import java.util.List;
-import java.util.UUID;
 
 @Model("zombies.corpse")
 @Cache(false)
@@ -32,6 +35,8 @@ public class CorpseCreator {
     public interface Source {
         @NotNull CorpseCreator make(@NotNull DependencyProvider mapDependencyProvider);
     }
+
+    private static final String POSSIBLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
     private final Data data;
     private final List<CorpseLine> idleLines;
@@ -50,9 +55,14 @@ public class CorpseCreator {
     public @NotNull CorpseCreator.Corpse forPlayer(@NotNull Instance instance, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull Point deathLocation, @NotNull ReviveHandler reviveHandler) {
         PlayerSkin skin = zombiesPlayer.getPlayer().map(Player::getSkin).orElse(null);
-        String corpseUsername = UUID.randomUUID().toString().substring(0, 16);
+        String corpseUsername = RandomStringUtils.random(16, POSSIBLE_CHARACTERS);
         MinimalFakePlayer corpseEntity =
                 new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
+        zombiesPlayer.getPlayer().ifPresent(player -> {
+            for (EquipmentSlot slot : EquipmentSlot.values()) {
+                corpseEntity.setEquipment(slot, player.getEquipment(slot));
+            }
+        });
 
         Hologram hologram = new InstanceHologram(deathLocation.add(0, data.hologramHeightOffset, 0), data.hologramGap);
 
@@ -114,6 +124,7 @@ public class CorpseCreator {
     public static class TimeLine implements CorpseLine {
         private final Data data;
         private final TickFormatter tickFormatter;
+        private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
         @FactoryMethod
         public TimeLine(@NotNull Data data, @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
@@ -123,15 +134,15 @@ public class CorpseCreator {
 
         @Override
         public @NotNull Component update(@NotNull Corpse corpse, long time) {
-            return ComponentUtils.tryFormat(data.formatString, tickFormatter.format(data.ticksUntilRevive
-                                                                                    ? corpse.reviveHandler.getTicksUntilRevive()
-                                                                                    : corpse.reviveHandler.getTicksUntilDeath()));
+            TagResolver ticksUntilRevivePlaceholder = Placeholder.unparsed("time_until_revive",
+                    tickFormatter.format(corpse.reviveHandler.getTicksUntilRevive()));
+            TagResolver ticksUntilDeathPlaceholder = Placeholder.unparsed("time_until_death",
+                    tickFormatter.format(corpse.reviveHandler.getTicksUntilDeath()));
+            return miniMessage.deserialize(data.format, ticksUntilRevivePlaceholder, ticksUntilDeathPlaceholder);
         }
 
         @DataObject
-        public record Data(@NotNull String formatString,
-                           boolean ticksUntilRevive,
-                           @NotNull @ChildPath("tick_formatter") String tickFormatter) {
+        public record Data(@NotNull String format, @NotNull @ChildPath("tick_formatter") String tickFormatter) {
         }
     }
 

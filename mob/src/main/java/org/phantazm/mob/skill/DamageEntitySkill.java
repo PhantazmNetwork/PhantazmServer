@@ -2,6 +2,7 @@ package org.phantazm.mob.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
@@ -29,11 +30,11 @@ public class DamageEntitySkill implements Skill {
             if (livingEntity instanceof Iterable<?> iterable) {
                 Iterable<LivingEntity> entityIterable = (Iterable<LivingEntity>)iterable;
                 for (LivingEntity entity : entityIterable) {
-                    entity.damage(DamageType.fromEntity(self.entity()), data.damage(), data.bypassArmor);
+                    entity.damage(Damage.fromEntity(self.entity(), data.damage()), data.bypassArmor);
                 }
             }
             else if (livingEntity instanceof LivingEntity living) {
-                living.damage(DamageType.fromEntity(self.entity()), data.damage(), data.bypassArmor);
+                living.damage(Damage.fromEntity(self.entity(), data.damage()), data.bypassArmor);
             }
         });
     }

@@ -1,6 +1,7 @@
 package org.phantazm.velocity.packet;
 
 import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.messaging.serialization.DataWriter;
 
@@ -20,6 +21,10 @@ public class ByteArrayOutputDataWriter implements DataWriter {
      */
     public ByteArrayOutputDataWriter(@NotNull ByteArrayDataOutput output) {
         this.output = Objects.requireNonNull(output, "output");
+    }
+
+    public ByteArrayOutputDataWriter() {
+        this(ByteStreams.newDataOutput());
     }
 
     @Override

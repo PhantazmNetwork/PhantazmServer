@@ -85,8 +85,7 @@ public class PartyCreator {
 
     public static class Builder {
 
-        private PartyNotificationConfig notificationConfig =
-                new PartyNotificationConfig("", "", "", "", "", "", "", "", "", "", "", "");
+        private PartyNotificationConfig notificationConfig = PartyNotificationConfig.DEFAULT;
 
         private TickFormatter tickFormatter = new AnalogTickFormatter(new AnalogTickFormatter.Data(false));
 

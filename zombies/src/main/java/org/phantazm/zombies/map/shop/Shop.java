@@ -3,11 +3,13 @@ package org.phantazm.zombies.map.shop;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Tickable;
 import org.phantazm.core.tracker.BoundedBase;
-import org.phantazm.zombies.Tags;
+import org.phantazm.zombies.map.BasicFlaggable;
+import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.map.ShopInfo;
 import org.phantazm.zombies.map.shop.display.ShopDisplay;
 import org.phantazm.zombies.map.shop.interactor.ShopInteractor;
@@ -16,9 +18,10 @@ import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 public class Shop extends BoundedBase implements Tickable {
-    public static final long SHOP_ACTIVATION_DELAY = 500L;
+    public static final long SHOP_ACTIVATION_DELAY = 750L;
 
     private final Point mapOrigin;
     private final Instance instance;
@@ -28,6 +31,10 @@ public class Shop extends BoundedBase implements Tickable {
     private final List<ShopInteractor> successInteractors;
     private final List<ShopInteractor> failureInteractors;
     private final List<ShopDisplay> displays;
+
+    private final Tag<Long> lastActivationTag;
+
+    private final Flaggable flaggable;
 
     public Shop(@NotNull Point mapOrigin, @NotNull ShopInfo shopInfo, @NotNull Instance instance,
             @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> successInteractors,
@@ -42,6 +49,9 @@ public class Shop extends BoundedBase implements Tickable {
         this.successInteractors = List.copyOf(successInteractors);
         this.failureInteractors = List.copyOf(failureInteractors);
         this.displays = List.copyOf(displays);
+
+        this.lastActivationTag = Tag.Long(UUID.randomUUID().toString()).defaultValue(-1L);
+        this.flaggable = new BasicFlaggable();
     }
 
     public @NotNull Point mapOrigin() {
@@ -86,18 +96,22 @@ public class Shop extends BoundedBase implements Tickable {
         }
     }
 
+    public @NotNull Flaggable flags() {
+        return flaggable;
+    }
+
     public void handleInteraction(@NotNull PlayerInteraction interaction) {
         Optional<Player> playerOptional = interaction.player().getPlayer();
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
 
-            long lastActivate = player.getTag(Tags.LAST_SHOP_ACTIVATE);
+            long lastActivate = player.getTag(lastActivationTag);
             if (lastActivate != -1 && System.currentTimeMillis() - lastActivate < SHOP_ACTIVATION_DELAY) {
                 return;
             }
         }
 
-        boolean success = shopInfo.predicateEvaluation().evaluate(predicates, interaction);
+        boolean success = shopInfo.predicateEvaluation().evaluate(predicates, interaction, this);
         List<ShopInteractor> interactorsToCall = success ? successInteractors : failureInteractors;
 
         for (ShopInteractor interactor : interactorsToCall) {
@@ -108,7 +122,7 @@ public class Shop extends BoundedBase implements Tickable {
             display.update(this, interaction, success);
         }
 
-        playerOptional.ifPresent(player -> player.setTag(Tags.LAST_SHOP_ACTIVATE, System.currentTimeMillis()));
+        playerOptional.ifPresent(player -> player.setTag(lastActivationTag, System.currentTimeMillis()));
     }
 
     @Override

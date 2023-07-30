@@ -2,16 +2,24 @@ package org.phantazm.core.game.scene.lobby;
 
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
+import org.phantazm.core.event.PlayerJoinLobbyEvent;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -19,9 +27,13 @@ import java.util.*;
  * Represents a lobby. Most basic scene which contains {@link Player}s.
  */
 public class Lobby extends InstanceScene<LobbyJoinRequest> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Lobby.class);
     private final InstanceConfig instanceConfig;
     private final Map<UUID, PlayerView> players;
     private final NPCHandler npcHandler;
+    private final Collection<ItemStack> defaultItems;
+    private final MiniMessage miniMessage;
+    private final String lobbyJoinFormat;
     private final boolean quittable;
 
     private boolean joinable = true;
@@ -34,12 +46,17 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
      * @param fallback       A fallback for the lobby
      */
     public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
-            @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler, boolean quittable) {
-        super(uuid, instance, fallback);
+            @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler,
+            @NotNull Collection<ItemStack> defaultItems, @NotNull MiniMessage miniMessage,
+            @NotNull String lobbyJoinFormat, boolean quittable) {
+        super(uuid, instance, fallback, instanceConfig.spawnPoint());
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
         this.players = new HashMap<>();
         this.npcHandler = Objects.requireNonNull(npcHandler, "npcHandler");
         this.npcHandler.spawnAll();
+        this.defaultItems = Objects.requireNonNull(defaultItems, "defaultItems");
+        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+        this.lobbyJoinFormat = Objects.requireNonNull(lobbyJoinFormat, "lobbyJoinFormat");
         this.quittable = quittable;
     }
 
@@ -71,7 +88,20 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
                 players.put(player.first().getUUID(), player.first());
             }
 
-            joinRequest.handleJoin(instance, instanceConfig);
+            joinRequest.handleJoin(this, instance, instanceConfig);
+            for (Pair<PlayerView, Player> player : joiners) {
+                player.left().getDisplayName().thenAccept(joiner -> {
+                    TagResolver joinerPlaceholder = Placeholder.component("joiner", joiner);
+                    Component message = miniMessage.deserialize(lobbyJoinFormat, joinerPlaceholder);
+                    instance.sendMessage(message);
+                });
+
+                for (ItemStack stack : defaultItems) {
+                    player.right().getInventory().addItemStack(stack);
+                }
+
+                EventDispatcher.call(new PlayerJoinLobbyEvent(player.right()));
+            }
         });
     }
 
@@ -119,18 +149,22 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     @Override
     public void shutdown() {
         for (PlayerView player : players.values()) {
-            fallback.fallback(player);
+            fallback.fallback(player).whenComplete((fallbackResult, throwable) -> {
+                if (throwable != null) {
+                    LOGGER.warn("Failed to fallback {}", player.getUUID(), throwable);
+                }
+            });
         }
 
         super.shutdown();
     }
 
-    public void cleanup() {
-        this.npcHandler.end();
-    }
-
     @Override
     public void tick(long time) {
         this.npcHandler.tick(time);
+    }
+
+    public @NotNull NPCHandler handler() {
+        return this.npcHandler;
     }
 }

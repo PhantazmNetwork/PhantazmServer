@@ -1,11 +1,8 @@
 package org.phantazm.core.guild.party.command;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
 
@@ -18,7 +15,7 @@ public class PartyLeaveCommand {
     }
 
     public static @NotNull Command leaveCommand(@NotNull PartyCommandConfig config,
-            @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull Random random) {
+            @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull Random random, int creatorRank) {
         Objects.requireNonNull(config, "config");
         Objects.requireNonNull(partyMap, "partyMap");
         Objects.requireNonNull(random, "random");
@@ -72,6 +69,7 @@ public class PartyLeaveCommand {
                     }
 
                     party.getOwner().set(newOwner);
+                    newOwner.setRank(creatorRank);
                     party.getNotification().notifyTransfer(oldMember, newOwner);
                 }
             }

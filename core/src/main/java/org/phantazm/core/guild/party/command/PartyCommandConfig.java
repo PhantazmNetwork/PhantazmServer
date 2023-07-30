@@ -22,4 +22,11 @@ public record PartyCommandConfig(@NotNull Component notInParty,
                                  @NotNull String listFormat,
                                  @NotNull String onlineMemberFormat,
                                  @NotNull String offlineMemberFormat) {
+
+    public static final PartyCommandConfig DEFAULT =
+            new PartyCommandConfig(Component.empty(), Component.empty(), Component.empty(), "",
+                    "", Component.empty(), Component.empty(), Component.empty(), Component.empty(),
+                    "", "", Component.empty(), Component.empty(), "",
+                    Component.empty(), "", "", "", "");
+
 }

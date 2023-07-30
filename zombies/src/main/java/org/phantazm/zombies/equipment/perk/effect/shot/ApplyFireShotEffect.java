@@ -8,10 +8,14 @@ import com.github.steanky.element.core.annotation.document.Description;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
+import org.phantazm.mob.MobStore;
+import org.phantazm.mob.PhantazmMob;
+import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -29,24 +33,31 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     private final Data data;
     private final Tag<Long> lastDamageTime;
     private final Deque<DamageTarget> activeEntities;
+    private final MobStore mobStore;
 
     private record DamageTarget(UUID damager, LivingEntity target) {
     }
 
     @FactoryMethod
-    public ApplyFireShotEffect(@NotNull Data data) {
+    public ApplyFireShotEffect(@NotNull Data data, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data, "data");
 
         UUID uuid = UUID.randomUUID();
         this.lastDamageTime = Tag.Long("last_fire_damage_time_" + uuid).defaultValue(-1L);
 
         this.activeEntities = new ConcurrentLinkedDeque<>();
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 
     @Override
     public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer) {
         if (!(entity instanceof LivingEntity livingEntity)) {
             //can't set non-LivingEntity on fire as they have no health
+            return;
+        }
+
+        PhantazmMob mob = mobStore.getMob(entity.getUuid());
+        if (mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_FIRE)) {
             return;
         }
 
@@ -81,10 +92,10 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     }
 
     private void doDamage(LivingEntity entity, UUID damager) {
-        DamageType damageType = new DamageType(DamageType.ON_FIRE.getIdentifier());
-        damageType.setTag(Tags.LAST_HIT_BY, damager);
+        Damage damage = new Damage(DamageType.ON_FIRE, null, null, null, data.damage);
+        damage.setTag(Tags.LAST_HIT_BY, damager);
 
-        entity.damage(damageType, data.damage, data.bypassArmor);
+        entity.damage(damage, data.bypassArmor);
     }
 
     private void stopFire(Entity entity) {

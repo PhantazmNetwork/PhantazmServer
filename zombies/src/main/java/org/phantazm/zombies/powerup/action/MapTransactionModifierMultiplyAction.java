@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.map_transaction_modifier.multiply")
+@Cache(false)
 public class MapTransactionModifierMultiplyAction implements Supplier<PowerupAction> {
     private final Data data;
     private final TransactionModifierSource transactionModifierSource;

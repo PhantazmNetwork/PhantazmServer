@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.Flags;
@@ -17,10 +18,7 @@ import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Model("zombies.gun.shot_handler.give_coins")
 @Cache(false)
@@ -54,18 +52,27 @@ public class GiveCoinsShotHandler implements ShotHandler {
         boolean isInstaKill = mapObjects.module().flags().hasFlag(Flags.INSTA_KILL);
 
         PlayerCoins coins = player.module().getCoins();
+        Collection<Transaction.Modifier> modifiers =
+                player.module().compositeTransactionModifiers().modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
 
-        for (GunHit ignored : shot.regularTargets()) {
-            coins.runTransaction(new Transaction(
-                    player.module().compositeTransactionModifiers().modifiers(ModifierSourceGroups.MOB_COIN_GAIN),
-                    isInstaKill ? data.instaKillCoins : data.normalCoins)).applyIfAffordable(coins);
+        int change = 0;
+
+        Collection<Component> displays = new ArrayList<>(2);
+        if (!shot.regularTargets().isEmpty()) {
+            displays.add(Component.text((isInstaKill ? "Insta Kill " : "") + shot.regularTargets().size() + "x"));
+            for (GunHit ignored : shot.regularTargets()) {
+                change += isInstaKill ? data.instaKillCoins : data.normalCoins;
+            }
         }
 
-        for (GunHit ignored : shot.headshotTargets()) {
-            coins.runTransaction(new Transaction(
-                    player.module().compositeTransactionModifiers().modifiers(ModifierSourceGroups.MOB_COIN_GAIN),
-                    isInstaKill ? data.instaKillCoins : data.headshotCoins)).applyIfAffordable(coins);
+        if (!shot.headshotTargets().isEmpty()) {
+            displays.add(Component.text((isInstaKill ? "Insta Kill " : "Critical Hit ") + shot.headshotTargets().size() + "x"));
+            for (GunHit ignored : shot.headshotTargets()) {
+                change += isInstaKill ? data.instaKillCoins : data.headshotCoins;
+            }
         }
+
+        coins.runTransaction(new Transaction(modifiers, displays, change)).applyIfAffordable(coins);
     }
 
     @DataObject

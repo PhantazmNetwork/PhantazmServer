@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.EquipmentHandler;
+import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObjectGroup;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -64,7 +65,9 @@ public class AddGroupSlotsCreator implements PerkEffectCreator {
 
         @Override
         public void end() {
-            handler.accessRegistry().getCurrentAccess().ifPresent(access -> {
+            InventoryAccessRegistry accessRegistry = handler.accessRegistry();
+
+            accessRegistry.getCurrentAccess().ifPresent(access -> {
                 InventoryObjectGroup group = access.groups().get(data.group);
                 if (group == null) {
                     return;
@@ -74,6 +77,7 @@ public class AddGroupSlotsCreator implements PerkEffectCreator {
                 for (int slot : data.additionalSlots) {
                     if (existingSlots.contains(slot)) {
                         group.removeSlot(slot);
+                        accessRegistry.removeObject(access, slot);
                     }
                 }
             });

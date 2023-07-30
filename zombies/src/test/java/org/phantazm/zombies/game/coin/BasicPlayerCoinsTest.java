@@ -2,18 +2,21 @@ package org.phantazm.zombies.game.coin;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
-import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.coin.BasicPlayerCoins;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
-import org.phantazm.zombies.coin.component.BasicTransactionComponentCreator;
-import org.phantazm.zombies.coin.component.TransactionComponentCreator;
+import org.phantazm.zombies.coin.component.BasicTransactionMessager;
+import org.phantazm.zombies.coin.component.TransactionMessager;
+import org.phantazm.zombies.map.PlayerCoinsInfo;
+import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,9 +35,12 @@ public class BasicPlayerCoinsTest {
         PlayerView playerView = mock(PlayerView.class);
         Player player = mock(Player.class);
         when(playerView.getPlayer()).thenReturn(Optional.of(player));
-        TransactionComponentCreator componentCreator = new BasicTransactionComponentCreator();
+        ZombiesPlayerActionBar actionBar = new ZombiesPlayerActionBar(playerView);
+        TransactionMessager componentCreator =
+                new BasicTransactionMessager(actionBar, MiniMessage.miniMessage(), new PlayerCoinsInfo("", "",
+                        NamedTextColor.WHITE, NamedTextColor.WHITE, 20L));
 
-        coins = new BasicPlayerCoins(playerView,
+        coins = new BasicPlayerCoins(
                 BasicZombiesPlayerMapStats.createBasicStats(UUID.randomUUID(), Key.key("phantazm:test")),
                 componentCreator, initialCoins);
     }
@@ -124,7 +130,8 @@ public class BasicPlayerCoinsTest {
                 return 1;
             }
         };
-        TransactionResult result = coins.runTransaction(new Transaction(List.of(modifier1, modifier2), delta));
+        TransactionResult result =
+                coins.runTransaction(new Transaction(List.of(modifier1, modifier2), delta));
         assertEquals(changedValue + delta, result.change());
     }
 

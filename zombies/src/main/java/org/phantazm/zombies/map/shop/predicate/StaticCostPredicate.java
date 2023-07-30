@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.shop.predicate;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -9,10 +10,12 @@ import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 
 import java.util.Objects;
 
 @Model("zombies.map.shop.predicate.static_cost")
+@Cache(false)
 public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data> {
     private final TransactionModifierSource transactionModifierSource;
 
@@ -23,7 +26,7 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
     }
 
     @Override
-    public boolean canInteract(@NotNull PlayerInteraction interaction) {
+    public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
         PlayerCoins coins = interaction.player().module().getCoins();
         return coins.runTransaction(new Transaction(transactionModifierSource.modifiers(data.modifierType), -data.cost))
                 .isAffordable(coins);

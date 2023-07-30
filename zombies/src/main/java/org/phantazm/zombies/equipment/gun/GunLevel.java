@@ -32,6 +32,7 @@ import java.util.Set;
  * @param gunStackMappers The gun's {@link GunStackMapper}s that produce the visual {@link ItemStack} representation of the gun
  */
 @Model("zombies.gun.level")
+@Cache(false)
 public record GunLevel(@NotNull Data data,
                        @NotNull @Child("stats") GunStats stats,
                        @NotNull @Child("shoot_tester") ShootTester shootTester,

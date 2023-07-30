@@ -3,6 +3,8 @@ package org.phantazm.core.game.scene.fallback;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * A fallback for scenes to route players to when necessary.
  */
@@ -15,6 +17,6 @@ public interface SceneFallback {
      * @param player The {@link PlayerView} to handle
      * @return Whether the fallback was successful
      */
-    boolean fallback(@NotNull PlayerView player);
+    CompletableFuture<Boolean> fallback(@NotNull PlayerView player);
 
 }

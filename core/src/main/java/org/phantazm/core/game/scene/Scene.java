@@ -1,5 +1,6 @@
 package org.phantazm.core.game.scene;
 
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.Tickable;
@@ -79,4 +80,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
 
     boolean isQuittable();
 
+    boolean acceptGhost(@NotNull PlayerView playerView);
+
+    boolean hasGhost(@NotNull Player player);
 }

@@ -7,6 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.mob.validator.TargetValidator;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -27,7 +28,7 @@ public class ZombiesPlayerValidator implements TargetValidator {
     }
 
     @Override
-    public boolean valid(@NotNull Entity targeter, @NotNull Entity entity) {
+    public boolean valid(@Nullable Entity targeter, @NotNull Entity entity) {
         MapObjects mapObjects = this.mapObjects.get();
         ZombiesPlayer player = mapObjects.module().playerMap().get(entity.getUuid());
         if (player != null) {

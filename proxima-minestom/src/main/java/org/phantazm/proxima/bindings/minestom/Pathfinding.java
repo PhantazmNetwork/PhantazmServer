@@ -17,8 +17,10 @@ import com.github.steanky.proxima.snapper.NodeSnapper;
 import com.github.steanky.vector.Vec3D;
 import com.github.steanky.vector.Vec3I2ObjectMap;
 import com.github.steanky.vector.Vec3IBiPredicate;
+import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
 import org.phantazm.proxima.bindings.minestom.controller.GroundController;
 
@@ -27,19 +29,30 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiPredicate;
 
 public class Pathfinding {
-    public static final double PATH_EPSILON = 1E-3;
+    public interface Penalty {
+        Penalty NONE = (x, y, z, h) -> h;
+
+        float calculate(int x, int y, int z, float h);
+    }
+
+    public static final double PLAYER_PATH_EPSILON = 0.0005;
+    public static final double MOB_PATH_EPSILON = 1E-6;
+    public static final double PLAYER_PATH_EPSILON_DOWNWARDS = MOB_PATH_EPSILON;
 
     public interface Factory {
         @NotNull Pathfinding make(@NotNull Pathfinder pathfinder,
-                @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler,
-                @NotNull EntityType entityType);
+                @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler);
     }
 
     protected final Pathfinder pathfinder;
     protected final ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal;
     protected final InstanceSpaceHandler spaceHandler;
-    protected final EntityType entityType;
 
+    protected Entity self;
+    protected Entity target;
+    protected Penalty penalty;
+
+    protected BoundingBox lastBoundingBox;
     protected Vec3IBiPredicate successPredicate;
     protected NodeSnapper nodeSnapper;
     protected PathLimiter pathLimiter;
@@ -52,32 +65,82 @@ public class Pathfinding {
     protected Controller controller;
 
     public Pathfinding(@NotNull Pathfinder pathfinder, @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal,
-            @NotNull InstanceSpaceHandler spaceHandler, @NotNull EntityType entityType) {
+            @NotNull InstanceSpaceHandler spaceHandler) {
         this.pathfinder = Objects.requireNonNull(pathfinder, "pathfinder");
         this.nodeMapLocal = Objects.requireNonNull(nodeMapLocal, "nodeMapLocal");
         this.spaceHandler = Objects.requireNonNull(spaceHandler, "spaceHandler");
-        this.entityType = Objects.requireNonNull(entityType, "entityType");
+        this.penalty = Penalty.NONE;
     }
 
-    public @NotNull Navigator getNavigator() {
-        return Objects.requireNonNullElseGet(navigator,
-                () -> navigator = new BasicNavigator(pathfinder, getSettings()));
+    private void clearState() {
+        this.lastBoundingBox = null;
+        this.successPredicate = null;
+        this.nodeSnapper = null;
+        this.pathLimiter = null;
+        this.explorer = null;
+        this.heuristic = null;
+        this.nodeProcessor = null;
+        this.navigator = null;
+        this.pathSettings = null;
+        this.controller = null;
     }
 
-    public @NotNull PathSettings getSettings() {
-        return Objects.requireNonNullElseGet(pathSettings, () -> pathSettings = generateSettings());
+    public void setPenalty(@NotNull Penalty penalty) {
+        Objects.requireNonNull(penalty, "penalty");
+        if (penalty == this.penalty) {
+            return;
+        }
+
+        clearState();
+        this.penalty = penalty;
+    }
+
+    public void setSelf(@NotNull Entity self) {
+        this.self = self;
+    }
+
+    public void setTarget(@Nullable Entity target) {
+        this.target = target;
+    }
+
+    public void cancel() {
+        Navigator navigator = this.navigator;
+        if (navigator != null) {
+            navigator.cancel();
+        }
+    }
+
+    public @NotNull Navigator getNavigator(@NotNull BoundingBox boundingBox) {
+        if (lastBoundingBox != null && !boundingBox.equals(lastBoundingBox)) {
+            cancel();
+            return navigator =
+                    new BasicNavigator(pathfinder, pathSettings = generateSettings(this.lastBoundingBox = boundingBox));
+        }
+
+        return Objects.requireNonNullElseGet(navigator, () -> navigator =
+                new BasicNavigator(pathfinder, pathSettings = generateSettings(this.lastBoundingBox = boundingBox)));
+    }
+
+    public @NotNull PathSettings getSettings(@NotNull BoundingBox boundingBox) {
+        if (lastBoundingBox != null && !boundingBox.equals(lastBoundingBox)) {
+            cancel();
+            return pathSettings = generateSettings(this.lastBoundingBox = boundingBox);
+        }
+
+        return Objects.requireNonNullElseGet(pathSettings,
+                () -> pathSettings = generateSettings(this.lastBoundingBox = boundingBox));
     }
 
     public @NotNull Controller getController(@NotNull LivingEntity livingEntity) {
         return Objects.requireNonNullElseGet(controller,
-                () -> controller = new GroundController(livingEntity, stepHeight()));
+                () -> controller = new GroundController(livingEntity, stepHeight(), jumpHeight()));
     }
 
     public @NotNull PositionResolver positionResolverForTarget(@NotNull Entity entity) {
-        EntityType type = entity.getEntityType();
+        BoundingBox boundingBox = entity.getBoundingBox();
         return PositionResolver.asIfByInitial(
-                new BasicNodeSnapper(spaceHandler.space(), type.width(), type.height(), fallTolerance(), jumpHeight(),
-                        PATH_EPSILON), 16, type.width(), PATH_EPSILON);
+                new BasicNodeSnapper(spaceHandler.space(), boundingBox.width(), boundingBox.height(), fallTolerance(),
+                        jumpHeight(), PLAYER_PATH_EPSILON), 16, boundingBox.width(), PLAYER_PATH_EPSILON_DOWNWARDS);
     }
 
     public @NotNull BiPredicate<Vec3D, Vec3D> targetChangePredicate(@NotNull Entity entity) {
@@ -88,16 +151,16 @@ public class Pathfinding {
         boolean entityValid = !targetEntity.isRemoved() && targetEntity.getInstance() == spaceHandler.instance();
         if (entityValid && targetEntity instanceof Player player) {
             GameMode mode = player.getGameMode();
-            return !(mode == GameMode.CREATIVE || mode == GameMode.SPECTATOR);
+            return mode != GameMode.SPECTATOR;
         }
 
         return entityValid;
     }
 
-    protected @NotNull PathSettings generateSettings() {
+    protected @NotNull PathSettings generateSettings(@NotNull BoundingBox boundingBox) {
         Vec3IBiPredicate successPredicate =
                 this.successPredicate = Objects.requireNonNull(successPredicate(), "successPredicate");
-        this.nodeSnapper = Objects.requireNonNull(nodeSnapper(), "nodeSnapper");
+        this.nodeSnapper = Objects.requireNonNull(nodeSnapper(boundingBox), "nodeSnapper");
         this.pathLimiter = Objects.requireNonNull(pathLimiter(), "pathLimiter");
 
         Explorer explorer = this.explorer = Objects.requireNonNull(explorer(), "explorer");
@@ -137,9 +200,9 @@ public class Pathfinding {
         return (x1, y1, z1, x2, y2, z2) -> x1 == x2 && y1 == y2 && z1 == z2;
     }
 
-    protected @NotNull NodeSnapper nodeSnapper() {
-        return new BasicNodeSnapper(spaceHandler.space(), entityType.width(), entityType.height(), fallTolerance(),
-                jumpHeight(), PATH_EPSILON);
+    protected @NotNull NodeSnapper nodeSnapper(@NotNull BoundingBox boundingBox) {
+        return new BasicNodeSnapper(spaceHandler.space(), boundingBox.width(), boundingBox.height(), fallTolerance(),
+                jumpHeight(), MOB_PATH_EPSILON);
     }
 
     protected @NotNull Explorer explorer() {
@@ -151,11 +214,18 @@ public class Pathfinding {
     }
 
     protected @NotNull Heuristic heuristic() {
-        return Heuristic.DISTANCE_SQUARED;
+        return (fromX, fromY, fromZ, toX, toY, toZ) -> {
+            float h = Heuristic.DISTANCE_SQUARED.heuristic(fromX, fromY, fromZ, toX, toY, toZ);
+            return penalty.calculate(fromX, fromY, fromZ, h);
+        };
     }
 
     public boolean canPathfind(@NotNull ProximaEntity proximaEntity) {
         return proximaEntity.isOnGround();
+    }
+
+    public boolean useSynthetic() {
+        return true;
     }
 
     protected @NotNull NodeProcessor nodeProcessor() {

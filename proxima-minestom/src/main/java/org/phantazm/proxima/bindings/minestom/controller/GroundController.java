@@ -24,10 +24,12 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public class GroundController implements Controller {
+    private static final double TARGET_EPSILON = 0.0001;
     private static final double ENTITY_COLLISION_FACTOR = 10;
 
     private final LivingEntity entity;
-    private final double step;
+    private final double stepHeight;
+    private final double jumpHeight;
     private final TrackerPredicate trackerPredicate;
 
     private boolean jumping;
@@ -44,12 +46,13 @@ public class GroundController implements Controller {
     /**
      * Creates a new GroundController managing the provided entity, using the given step distance and walk speed.
      *
-     * @param entity the entity managed by this controller
-     * @param step   the maximum distance the entity may "step up" blocks
+     * @param entity     the entity managed by this controller
+     * @param stepHeight the maximum distance the entity may "step up" blocks
      */
-    public GroundController(@NotNull LivingEntity entity, float step) {
+    public GroundController(@NotNull LivingEntity entity, float stepHeight, float jumpHeight) {
         this.entity = Objects.requireNonNull(entity, "entity");
-        this.step = step;
+        this.stepHeight = stepHeight;
+        this.jumpHeight = jumpHeight;
         this.trackerPredicate = new TrackerPredicate();
     }
 
@@ -120,9 +123,12 @@ public class GroundController implements Controller {
 
     @Override
     public void advance(@NotNull Node current, @NotNull Node target, @Nullable Entity targetEntity) {
-        Pos entityPos = entity.getPosition();
+        Chunk chunk = entity.getChunk();
+        if (chunk == null) {
+            return;
+        }
 
-        double exactTargetY = target.y + target.blockOffset + target.jumpOffset;
+        Pos entityPos = entity.getPosition();
 
         double dX = (target.x + 0.5) - entityPos.x();
         double dZ = (target.z + 0.5) - entityPos.z();
@@ -164,19 +170,20 @@ public class GroundController implements Controller {
         double speedX = Math.copySign(Math.min(Math.abs(vX), Math.abs(dX)), dX);
         double speedZ = Math.copySign(Math.min(Math.abs(vZ), Math.abs(dZ)), dZ);
 
-        Chunk chunk = entity.getChunk();
-        assert chunk != null;
-
         if (jumping) {
             if (entityPos.y() > jumpTargetHeight + Vec.EPSILON) {
                 PhysicsResult physics = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
-                        new Pos(entityPos.x(), jumpTargetHeight + Vec.EPSILON, entityPos.z()),
+                        new Pos(entityPos.x(), jumpTargetHeight + TARGET_EPSILON, entityPos.z()),
                         new Vec(speedX, 0, speedZ), null);
 
                 if (!physics.hasCollision()) {
                     entity.refreshPosition(physics.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0));
                     jumping = false;
                 }
+                else if (entity.isOnGround()) {
+                    jumping = false;
+                }
+
                 return;
             }
             else if (entity.isOnGround()) {
@@ -189,58 +196,76 @@ public class GroundController implements Controller {
             }
         }
 
-        if (entity.isOnGround()) {
-            Vec deltaMove = new Vec(speedX, 0, speedZ);
-            PhysicsResult physicsResult = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
-                    new Pos(entityPos.x(), entityPos.y() + Vec.EPSILON, entityPos.z()), new Vec(speedX, 0, speedZ),
-                    null);
+        if (!entity.isOnGround()) {
+            return;
+        }
 
-            Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
+        Vec deltaMove = new Vec(speedX, 0, speedZ);
+        PhysicsResult physicsResult = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
+                new Pos(entityPos.x(), entityPos.y() + Vec.EPSILON, entityPos.z()), new Vec(speedX, 0, speedZ), null);
 
-            double currentTarget = current.y + current.blockOffset;
-            if ((entityPos.y() < exactTargetY - Vec.EPSILON || entityPos.y() < currentTarget - Vec.EPSILON) &&
-                    physicsResult.hasCollision()) {
-                double actualDiff = Double.NEGATIVE_INFINITY;
-                if (currentTarget - Vec.EPSILON > entityPos.y()) {
-                    actualDiff = currentTarget - entityPos.y();
-                    jumpTargetHeight = currentTarget;
+        Pos pos = physicsResult.newPosition().withView(PositionUtils.getLookYaw(dX, dZ), 0);
+
+        double currentTarget = current.y + current.blockOffset;
+        double exactTargetY = target.y + target.blockOffset + target.jumpOffset;
+        if ((entityPos.y() < currentTarget || entityPos.y() < exactTargetY) && physicsResult.hasCollision()) {
+            double currentDiff = currentTarget - entityPos.y() + TARGET_EPSILON;
+            double targetDiff = exactTargetY - entityPos.y() + TARGET_EPSILON;
+
+            boolean canReachCurrent = canReach(currentDiff);
+            boolean canReachTarget = canReach(targetDiff);
+
+            if (canReachTarget) {
+                if (targetDiff > currentDiff) {
+                    stepOrJump(targetDiff, exactTargetY, speedX, speedZ, chunk, instance, deltaMove, pos);
+                    return;
                 }
-
-                double targetDiff = exactTargetY - entityPos.y();
-                if (targetDiff > actualDiff) {
-                    actualDiff = targetDiff;
-                    jumpTargetHeight = exactTargetY;
-                }
-
-                stepOrJump(actualDiff, speedX, speedZ, instance, deltaMove, pos);
-                return;
             }
 
-            entity.refreshPosition(pos);
+            if (canReachCurrent) {
+                stepOrJump(currentDiff, currentTarget, speedX, speedZ, chunk, instance, deltaMove, pos);
+                return;
+            }
         }
+
+        entity.refreshPosition(pos);
     }
 
-    private void stepOrJump(double nodeDiff, double speedX, double speedZ, Instance instance, Vec deltaMove, Pos pos) {
-        if (nodeDiff > step) {
-            entity.setVelocity(
-                    new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer.TICK_PER_SECOND));
-            jumping = true;
-        }
-        else if (nodeDiff > -Vec.EPSILON && nodeDiff < step + Vec.EPSILON) {
+    private boolean canReach(double diff) {
+        return diff < stepHeight + TARGET_EPSILON || diff < jumpHeight + TARGET_EPSILON;
+    }
+
+    private void stepOrJump(double nodeDiff, double target, double speedX, double speedZ, Chunk chunk,
+            Instance instance, Vec deltaMove, Pos pos) {
+        if (nodeDiff - TARGET_EPSILON < stepHeight && nodeDiff - TARGET_EPSILON < jumpHeight) {
             stepUp(instance, deltaMove, nodeDiff, pos, speedX, speedZ);
+            return;
         }
+
+        Pos entityPos = entity.getPosition();
+        PhysicsResult physicsResult = CollisionUtils.handlePhysics(instance, chunk, entity.getBoundingBox(),
+                new Pos(entityPos.x(), entityPos.y() + Vec.EPSILON + stepHeight, entityPos.z()),
+                new Vec(speedX, 0, speedZ), null);
+        if (!physicsResult.hasCollision()) {
+            entity.refreshPosition(physicsResult.newPosition().withView(pos.yaw(), pos.pitch()));
+            return;
+        }
+
+        entity.setVelocity(new Vec(speedX, computeJumpVelocity(nodeDiff), speedZ).mul(MinecraftServer.TICK_PER_SECOND));
+        jumpTargetHeight = target + TARGET_EPSILON;
+        jumping = true;
     }
 
     private void stepUp(Instance instance, Vec deltaMove, double nodeDiff, Pos pos, double speedX, double speedZ) {
         PhysicsResult canStep = CollisionUtils.handlePhysics(instance, entity.getChunk(), entity.getBoundingBox(),
-                entity.getPosition().add(0, nodeDiff + Vec.EPSILON, 0), deltaMove, null);
+                entity.getPosition().add(0, nodeDiff, 0), deltaMove, null);
 
         if (canStep.hasCollision()) {
             entity.refreshPosition(pos);
             return;
         }
 
-        entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff + Vec.EPSILON, speedZ));
+        entity.refreshPosition(entity.getPosition().add(speedX, nodeDiff, speedZ));
     }
 
     @Override

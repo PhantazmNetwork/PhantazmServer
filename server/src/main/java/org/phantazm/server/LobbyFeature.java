@@ -2,6 +2,7 @@ package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -59,7 +60,8 @@ public final class LobbyFeature {
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         FileUtils.createDirectories(lobbiesConfig.instancesPath());
         InstanceLoader instanceLoader =
-                new AnvilFileSystemInstanceLoader(instanceManager, lobbiesConfig.instancesPath(), DynamicChunk::new);
+                new AnvilFileSystemInstanceLoader(instanceManager, lobbiesConfig.instancesPath(), DynamicChunk::new,
+                        ExecutorFeature.getExecutor());
         SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
 
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders =
@@ -78,21 +80,24 @@ public final class LobbyFeature {
         }
 
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
-                new BasicLobbyProvider(mainLobbyConfig.maxLobbies(), -mainLobbyConfig.maxPlayers(), instanceLoader,
-                        mainLobbyConfig.lobbyPaths(), finalFallback, mainLobbyConfig.instanceConfig(), contextManager,
-                        mainLobbyConfig.npcs(), false);
+                new BasicLobbyProvider(ExecutorFeature.getExecutor(), mainLobbyConfig.maxLobbies(),
+                        -mainLobbyConfig.maxPlayers(), instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback,
+                        mainLobbyConfig.instanceConfig(), contextManager, mainLobbyConfig.npcs(),
+                        mainLobbyConfig.defaultItems(), MiniMessage.miniMessage(), mainLobbyConfig.lobbyJoinFormat(),
+                        false, node);
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
-        fallback = new LobbyRouterFallback(MinecraftServer.getConnectionManager(), LobbyFeature.getLobbyRouter(),
-                lobbiesConfig.mainLobbyName());
+        fallback = new LobbyRouterFallback(LobbyFeature.getLobbyRouter(), lobbiesConfig.mainLobbyName());
         SceneFallback regularFallback = new CompositeFallback(List.of(fallback, finalFallback));
 
         for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
             if (!lobby.getKey().equals(lobbiesConfig.mainLobbyName())) {
                 lobbyProviders.put(lobby.getKey(),
-                        new BasicLobbyProvider(lobby.getValue().maxLobbies(), -lobby.getValue().maxPlayers(),
-                                instanceLoader, lobby.getValue().lobbyPaths(), regularFallback,
-                                lobby.getValue().instanceConfig(), contextManager, mainLobbyConfig.npcs(), true));
+                        new BasicLobbyProvider(ExecutorFeature.getExecutor(), lobby.getValue().maxLobbies(),
+                                -lobby.getValue().maxPlayers(), instanceLoader, lobby.getValue().lobbyPaths(),
+                                regularFallback, lobby.getValue().instanceConfig(), contextManager,
+                                mainLobbyConfig.npcs(), mainLobbyConfig.defaultItems(), MiniMessage.miniMessage(),
+                                lobby.getValue().lobbyJoinFormat(), true, node));
             }
         }
 
@@ -102,20 +107,23 @@ public final class LobbyFeature {
             LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
-            RouteResult<Lobby> routeResult = lobbyRouter.findScene(routeRequest);
+            RouteResult<Lobby> routeResult = lobbyRouter.findScene(routeRequest).join();
             boolean success = false;
             if (routeResult.scene().isPresent()) {
                 Lobby lobby = routeResult.scene().get();
-                TransferResult transferResult = lobby.join(joinRequest);
-                if (transferResult.executor().isPresent()) {
-                    transferResult.executor().get().run();
-                    loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);
-                    success = true;
+                try (TransferResult transferResult = lobby.join(joinRequest)) {
+                    if (transferResult.executor().isPresent()) {
+                        transferResult.executor().get().run();
+                        loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);
+                        success = true;
+                    }
                 }
             }
 
             if (!success) {
-                finalFallback.fallback(playerViewProvider.fromPlayer(event.getPlayer()));
+                LOGGER.warn("Kicking player {} because we weren't able to find a lobby for them to join",
+                        event.getPlayer().getUuid());
+                event.setCancelled(true);
             }
         });
 

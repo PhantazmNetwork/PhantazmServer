@@ -14,22 +14,24 @@ import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.Utils;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
+import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
-import org.phantazm.zombies.player.state.context.NoContext;
 import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageTransition;
-import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +42,6 @@ import java.util.stream.Collectors;
 
 public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesScene.class);
-    private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
     private final ZombiesMap map;
     private final Map<UUID, ZombiesPlayer> zombiesPlayers;
     private final MapSettingsInfo mapSettingsInfo;
@@ -50,16 +51,21 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private final TickTaskScheduler taskScheduler;
     private final ZombiesDatabase database;
     private final EventNode<Event> sceneNode;
+    private final UUID allowedRequestUUID;
 
     private boolean joinable = true;
+
+    private final Object joinLock = new Object();
+
+    private volatile int pendingPlayers = 0;
 
     public ZombiesScene(@NotNull UUID uuid, @NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
             @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
             @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
-            @NotNull EventNode<Event> sceneNode) {
-        super(uuid, instance, fallback);
+            @NotNull EventNode<Event> sceneNode, @Nullable UUID allowedRequestUUID) {
+        super(uuid, instance, fallback, VecUtils.toPoint(mapSettingsInfo.spawn()));
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
@@ -69,6 +75,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
         this.database = Objects.requireNonNull(database, "database");
         this.sceneNode = Objects.requireNonNull(sceneNode, "sceneNode");
+        this.allowedRequestUUID = allowedRequestUUID;
     }
 
     public @NotNull EventNode<Event> getSceneNode() {
@@ -101,105 +108,130 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public @NotNull TransferResult join(@NotNull ZombiesJoinRequest joinRequest) {
-        if (isShutdown()) {
-            return TransferResult.failure(Component.text("Game is shutdown."));
-        }
-        if (!isJoinable()) {
-            return TransferResult.failure(Component.text("Game is not joinable."));
-        }
+        synchronized (joinLock) {
+            if (isShutdown()) {
+                return TransferResult.failure(Component.text("Game is shutdown."));
+            }
+            if (!isJoinable()) {
+                return TransferResult.failure(Component.text("Game is not joinable."));
+            }
+            if (false && allowedRequestUUID != null && !joinRequest.getUUID().equals(allowedRequestUUID)) {
+                return TransferResult.failure(Component.text("You aren't allowed to join this game."));
+            }
 
-        Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
-        Collection<PlayerView> newPlayers = new ArrayList<>(joinRequest.getPlayers().size());
-        for (PlayerView player : joinRequest.getPlayers()) {
-            ZombiesPlayer zombiesPlayer = zombiesPlayers.get(player.getUUID());
-            if (zombiesPlayer != null) {
-                if (zombiesPlayer.hasQuit()) {
-                    oldPlayers.add(zombiesPlayer);
+            Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
+            Collection<PlayerView> newPlayers = new ArrayList<>(joinRequest.getPlayers().size());
+            for (PlayerView player : joinRequest.getPlayers()) {
+                ZombiesPlayer zombiesPlayer = zombiesPlayers.get(player.getUUID());
+                if (zombiesPlayer != null) {
+                    if (zombiesPlayer.hasQuit()) {
+                        oldPlayers.add(zombiesPlayer);
+                    }
+                }
+                else {
+                    newPlayers.add(player);
                 }
             }
-            else {
-                newPlayers.add(player);
+
+            Stage stage = getCurrentStage();
+            if (stage == null) {
+                return TransferResult.failure(Component.text("The game is not currently running.", NamedTextColor.RED));
             }
-        }
-
-        Stage stage = getCurrentStage();
-        if (stage == null) {
-            return TransferResult.failure(Component.text("The game is not currently running.", NamedTextColor.RED));
-        }
-        if (stage.hasPermanentPlayers() && !newPlayers.isEmpty()) {
-            return TransferResult.failure(Component.text("The game is not accepting new players.", NamedTextColor.RED));
-        }
-
-        if (zombiesPlayers.size() + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
-            return TransferResult.failure(Component.text("Too many players!", NamedTextColor.RED));
-        }
-
-        TransferResult protocolResult = checkWithinProtocolVersionBounds(newPlayers);
-        if (protocolResult != null) {
-            return protocolResult;
-        }
-
-        return TransferResult.success(() -> {
-            Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
-            Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
-            List<Pair<Player, Instance>> teleportedPlayers = new ArrayList<>(oldPlayers.size() + newPlayers.size());
-            List<CompletableFuture<?>> futures = new ArrayList<>(oldPlayers.size() + newPlayers.size());
-            List<Runnable> runnables = new ArrayList<>(oldPlayers.size() + newPlayers.size());
-            for (ZombiesPlayer zombiesPlayer : oldPlayers) {
-                zombiesPlayer.getPlayer().ifPresent(player -> {
-                    teleportedPlayers.add(Pair.of(player, player.getInstance()));
-                    if (player.getInstance() == instance) {
-                        futures.add(player.teleport(pos));
-                    }
-                    else {
-                        futures.add(player.setInstance(instance, pos));
-                    }
-                    runnables.add(() -> {
-                        zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
-                    });
-                });
+            if (stage.hasPermanentPlayers() && !newPlayers.isEmpty()) {
+                return TransferResult.failure(
+                        Component.text("The game is not accepting new players.", NamedTextColor.RED));
             }
-            for (PlayerView view : newPlayers) {
-                view.getPlayer().ifPresent(player -> {
-                    teleportedPlayers.add(Pair.of(player, player.getInstance()));
-                    if (player.getInstance() == instance) {
-                        futures.add(player.teleport(pos));
-                    }
-                    else {
-                        futures.add(player.setInstance(instance, pos));
-                    }
-                    runnables.add(() -> {
-                        ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
-                        zombiesPlayer.start();
-                        zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, NoContext.INSTANCE);
-                        zombiesPlayers.put(view.getUUID(), zombiesPlayer);
-                    });
-                });
+            if (!stage.canRejoin() && !oldPlayers.isEmpty()) {
+                return TransferResult.failure(
+                        Component.text("The game is not accepting rejoining players.", NamedTextColor.RED));
             }
 
-            CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).whenComplete((ignored, error) -> {
-                for (int i = 0; i < futures.size(); i++) {
-                    Pair<Player, Instance> pair = teleportedPlayers.get(i);
-                    Player teleportedPlayer = pair.first();
-                    Instance oldInstance = pair.second();
+            if (zombiesPlayers.size() + pendingPlayers + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
+                return TransferResult.failure(Component.text("Too many players!", NamedTextColor.RED));
+            }
 
-                    CompletableFuture<?> future = futures.get(i);
-                    Runnable runnable = runnables.get(i);
+            TransferResult protocolResult = checkWithinProtocolVersionBounds(newPlayers);
+            if (protocolResult != null) {
+                return protocolResult;
+            }
 
-                    if (future.isCompletedExceptionally()) {
-                        future.whenComplete((ignored1, throwable) -> {
-                            LOGGER.warn("Failed to send {} to an instance", teleportedPlayer.getUuid(), throwable);
+            pendingPlayers += newPlayers.size();
+
+            return TransferResult.success(() -> {
+                Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
+                Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
+                List<Pair<Player, Instance>> teleportedPlayers = new ArrayList<>(oldPlayers.size() + newPlayers.size());
+                List<CompletableFuture<?>> futures = new ArrayList<>(oldPlayers.size() + newPlayers.size());
+                List<Runnable> runnables = new ArrayList<>(oldPlayers.size() + newPlayers.size());
+                for (ZombiesPlayer zombiesPlayer : oldPlayers) {
+                    zombiesPlayer.getPlayer().ifPresent(player -> {
+                        teleportedPlayers.add(Pair.of(player, player.getInstance()));
+                        if (player.getInstance() == instance) {
+                            futures.add(player.teleport(pos));
+                        }
+                        else {
+                            Instance oldInstance = player.getInstance();
+                            player.setInstanceAddCallback(
+                                    () -> Utils.handleInstanceTransfer(oldInstance, instance, player,
+                                            newInstancePlayer -> !super.hasGhost(newInstancePlayer)));
+                            futures.add(player.setInstance(instance, pos));
+                        }
+                        runnables.add(() -> {
+                            zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
                         });
-                        continue;
-                    }
-
-                    Utils.handleInstanceTransfer(oldInstance, teleportedPlayer);
-
-                    runnable.run();
-                    stage.onJoin(zombiesPlayers.get(teleportedPlayer.getUuid()));
+                    });
                 }
-            }).join();
-        });
+                for (PlayerView view : newPlayers) {
+                    view.getPlayer().ifPresent(player -> {
+                        teleportedPlayers.add(Pair.of(player, player.getInstance()));
+                        if (player.getInstance() == instance) {
+                            futures.add(player.teleport(pos));
+                        }
+                        else {
+                            Instance oldInstance = player.getInstance();
+                            player.setInstanceAddCallback(
+                                    () -> Utils.handleInstanceTransfer(oldInstance, instance, player,
+                                            newInstancePlayer -> !super.hasGhost(newInstancePlayer)));
+                            futures.add(player.setInstance(instance, pos));
+                        }
+                        runnables.add(() -> {
+                            ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
+                            zombiesPlayer.start();
+                            zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, AlivePlayerStateContext.regular());
+                            zombiesPlayers.put(view.getUUID(), zombiesPlayer);
+                        });
+                    });
+                }
+
+                CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).whenComplete((ignored, error) -> {
+                    for (int i = 0; i < futures.size(); i++) {
+                        Pair<Player, Instance> pair = teleportedPlayers.get(i);
+                        Player teleportedPlayer = pair.first();
+
+                        CompletableFuture<?> future = futures.get(i);
+                        Runnable runnable = runnables.get(i);
+
+                        if (future.isCompletedExceptionally()) {
+                            future.whenComplete((ignored1, throwable) -> {
+                                LOGGER.warn("Failed to send {} to an instance", teleportedPlayer.getUuid(), throwable);
+                            });
+                            continue;
+                        }
+
+                        runnable.run();
+                        stage.onJoin(zombiesPlayers.get(teleportedPlayer.getUuid()));
+                    }
+                }).whenComplete((ignored, throwable) -> {
+                    if (throwable != null) {
+                        LOGGER.warn("Failed to finish player join", throwable);
+                    }
+                }).join();
+            }, () -> {
+                synchronized (joinLock) {
+                    pendingPlayers -= newPlayers.size();
+                }
+            });
+        }
     }
 
     @Override
@@ -291,18 +323,35 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public void shutdown() {
+        stageTransition.end();
         taskScheduler.end();
+
+        List<CompletableFuture<Boolean>> fallbackFutures = new ArrayList<>(zombiesPlayers.size());
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
             database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
 
             if (!zombiesPlayer.hasQuit()) {
-                fallback.fallback(zombiesPlayer.module().getPlayerView());
+                fallbackFutures.add(fallback.fallback(zombiesPlayer.module().getPlayerView())
+                        .whenComplete((fallbackResult, throwable) -> {
+                            if (throwable != null) {
+                                LOGGER.warn("Failed to fallback {}", zombiesPlayer.getUUID(), throwable);
+                            }
+                        }));
             }
 
             zombiesPlayer.end();
         }
 
-        super.shutdown();
+        super.shutdown = true;
+
+        //wait for all players to fallback before we actually shut down the scene
+        CompletableFuture.allOf(fallbackFutures.toArray(CompletableFuture[]::new)).whenComplete((ignored, error) -> {
+            if (error != null) {
+                LOGGER.warn("Error when waiting on player fallback", error);
+            }
+
+            super.shutdown();
+        });
     }
 
     @Override

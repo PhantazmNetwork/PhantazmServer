@@ -4,6 +4,9 @@ import com.github.steanky.proxima.Navigator;
 import com.github.steanky.proxima.node.Node;
 import com.github.steanky.proxima.path.PathResult;
 import com.github.steanky.proxima.path.PathTarget;
+import com.github.steanky.proxima.resolver.PositionResolver;
+import com.github.steanky.vector.Vec3D;
+import com.github.steanky.vector.Vec3I;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -15,26 +18,25 @@ import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.commons.MathUtils;
 import org.phantazm.core.VecUtils;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
 import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * An entity with navigation capabilities based on the Proxima library.
  */
 public class ProximaEntity extends LivingEntity {
-    private static final double NODE_REACH_DISTANCE = 0.4;
+    private static final double NODE_REACH_DISTANCE_SQ = 0.2;
+    private static final double NODE_DEVIATION_DISTANCE_SQ = 2.5;
+    private static final double ENTITY_LOOK_DISTANCE_SQ = 100;
 
     protected final Pathfinding pathfinding;
     protected final List<GoalGroup> goalGroups;
-
-    private Entity targetEntity;
 
     private PathTarget destination;
     private PathResult currentPath;
@@ -56,6 +58,7 @@ public class ProximaEntity extends LivingEntity {
         super(entityType, uuid);
         this.pathfinding = Objects.requireNonNull(pathfinding, "pathfinding");
         this.goalGroups = new ArrayList<>(5);
+        pathfinding.setSelf(this);
     }
 
     public @NotNull Pathfinding pathfinding() {
@@ -66,12 +69,9 @@ public class ProximaEntity extends LivingEntity {
         this.removalAnimationDelay = delay;
     }
 
-    private void cancelPath() {
-        this.destination = null;
-        pathfinding.getNavigator().cancel();
+    private void resetPath() {
+        pathfinding.cancel();
 
-        targetEntity = null;
-        destination = null;
         currentPath = null;
 
         current = null;
@@ -86,9 +86,15 @@ public class ProximaEntity extends LivingEntity {
         lastZ = 0;
     }
 
+    private void destroyPath() {
+        resetPath();
+        this.destination = null;
+        pathfinding.target = null;
+    }
+
     public void setDestination(@Nullable PathTarget destination) {
         if (destination == null && this.destination != null) {
-            cancelPath();
+            destroyPath();
             return;
         }
 
@@ -96,23 +102,23 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
+        resetPath();
+        pathfinding.target = null;
         this.destination = destination;
     }
 
     public <T extends Entity> void setDestination(@Nullable T targetEntity) {
-        if (this.targetEntity == targetEntity) {
+        if (pathfinding.target == targetEntity) {
             return;
         }
 
-        if (targetEntity == null || !targetEntity.isRemoved()) {
-            this.targetEntity = targetEntity;
-        }
-
-        if (targetEntity == null) {
-            cancelPath();
+        if (targetEntity == null || targetEntity.isRemoved()) {
+            destroyPath();
             return;
         }
 
+        resetPath();
+        pathfinding.target = targetEntity;
         this.destination = PathTarget.resolving(() -> {
             if (!pathfinding.isValidTarget(targetEntity)) {
                 return null;
@@ -123,7 +129,7 @@ public class ProximaEntity extends LivingEntity {
     }
 
     public @Nullable Entity getTargetEntity() {
-        return targetEntity;
+        return pathfinding.target;
     }
 
     public void attack(@NotNull Entity target, boolean swingHand) {
@@ -146,6 +152,10 @@ public class ProximaEntity extends LivingEntity {
     public void addGoalGroup(@NotNull GoalGroup group) {
         Objects.requireNonNull(group, "group");
         goalGroups.add(group);
+    }
+
+    public @NotNull @Unmodifiable List<GoalGroup> goalGroups() {
+        return Collections.unmodifiableList(goalGroups);
     }
 
     @Override
@@ -171,7 +181,7 @@ public class ProximaEntity extends LivingEntity {
     @Override
     public void remove() {
         super.remove();
-        cancelPath();
+        destroyPath();
     }
 
     protected boolean canNavigate() {
@@ -183,16 +193,15 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
-        Navigator navigator = pathfinding.getNavigator();
+        Navigator navigator = pathfinding.getNavigator(getBoundingBox());
 
-        if (targetEntity != null && !pathfinding.isValidTarget(targetEntity)) {
-            targetEntity = null;
-            cancelPath();
+        if (pathfinding.target != null && !pathfinding.isValidTarget(pathfinding.target)) {
+            destroyPath();
             return;
         }
 
-        if (targetEntity != null && getDistanceSquared(targetEntity) < 100) {
-            lookAt(targetEntity);
+        if (pathfinding.target != null && getDistanceSquared(pathfinding.target) < ENTITY_LOOK_DISTANCE_SQ) {
+            lookAt(pathfinding.target);
         }
 
         if (navigator.navigationComplete()) {
@@ -201,18 +210,24 @@ public class ProximaEntity extends LivingEntity {
                 currentPath = null;
             }
         }
-        else if (destination != null && pathfinding.canPathfind(this) &&
-                (time - lastPathfind > recalculationDelay && destination.hasChanged())) {
+        else if (destination != null && pathfinding.canPathfind(this) && (time - lastPathfind > recalculationDelay &&
+                (destination.hasChanged() || (currentPath == null || !currentPath.isSuccessful())))) {
             navigator.navigate(position.x(), position.y(), position.z(), destination);
             this.lastPathfind = time;
         }
 
-        if (currentPath != null && current != null && moveAlongPath(time)) {
-            cancelPath();
+        if (currentPath != null && current != null) {
+            if (moveAlongPath(time) != MoveResult.CONTINUE) {
+                resetPath();
+            }
         }
     }
 
     protected void aiTick(long time) {
+        if (isDead()) {
+            return;
+        }
+
         for (GoalGroup group : goalGroups) {
             group.tick(time);
         }
@@ -233,15 +248,15 @@ public class ProximaEntity extends LivingEntity {
         Node closestNode = null;
 
         while (node != null) {
-            double thisDistance =
-                    currentPosition.distanceSquared(node.x + 0.5, node.y + node.blockOffset, node.z + 0.5);
+            double flatDistance =
+                    Vec3D.distanceSquared(node.x + 0.5, 0, node.z + 0.5, currentPosition.x(), 0, currentPosition.z());
 
-            if (thisDistance < closestNodeDistance) {
-                closestNodeDistance = thisDistance;
+            if (flatDistance < closestNodeDistance) {
+                closestNodeDistance = flatDistance;
                 closestNode = node;
             }
 
-            if (thisDistance < 1) {
+            if (flatDistance < 1) {
                 break;
             }
 
@@ -258,13 +273,30 @@ public class ProximaEntity extends LivingEntity {
         return true;
     }
 
-    protected boolean withinDistance(@NotNull Node node) {
+    protected boolean withinDistance(@Nullable Node node) {
+        if (node == null) {
+            return false;
+        }
+
         Pos position = getPosition();
         return position.distanceSquared(new Vec(node.x + 0.5, node.y + node.blockOffset, node.z + 0.5)) <
-                NODE_REACH_DISTANCE;
+                NODE_REACH_DISTANCE_SQ && (int)Math.floor(position.y()) == node.y;
     }
 
-    protected boolean moveAlongPath(long time) {
+    private enum MoveResult {
+        CONTINUE,
+        CANCEL,
+        KEEP_DESTINATION
+    }
+
+    protected MoveResult moveAlongPath(long time) {
+        Point pos = getPosition();
+
+        if (pos.distanceSquared(current.x + 0.5, current.y + current.blockOffset, current.z + 0.5) >
+                NODE_DEVIATION_DISTANCE_SQ && (current.parent != null && !current.equals(currentPath.head()))) {
+            return MoveResult.CANCEL;
+        }
+
         Controller controller = pathfinding.getController(this);
 
         if (withinDistance(target)) {
@@ -272,20 +304,34 @@ public class ProximaEntity extends LivingEntity {
             target = current.parent;
         }
 
-        if (target != null) {
-            Point pos = getPosition();
+        Node target = this.target;
+        if (target == null && pathfinding.target != null && currentPath != null && currentPath.isSuccessful() &&
+                pathfinding.useSynthetic()) {
+            Vec3I synthetic = PositionResolver.FLOORED.resolve(VecUtils.toDouble(pathfinding.target.getPosition()));
 
+            if (!pathfinding.getSettings(getBoundingBox()).successPredicate()
+                    .test(synthetic.x(), synthetic.y(), synthetic.z(), current.x, current.y, current.z)) {
+                target = new Node(synthetic.x(), synthetic.y(), synthetic.z(), 0, 0,
+                        (float)(pathfinding.target.getPosition().y() - pathfinding.target.getPosition().blockY()));
+            }
+        }
+
+        if (target != null) {
             double currentX = pos.x();
             double currentY = pos.y();
             double currentZ = pos.z();
 
+            controller.advance(current, target, pathfinding.target);
+
             if (!controller.hasControl()) {
-                if (!(currentX == lastX && currentY == lastY && currentZ == lastZ)) {
+                if (!(MathUtils.fuzzyEquals(currentX, lastX, Pathfinding.MOB_PATH_EPSILON) &&
+                        MathUtils.fuzzyEquals(currentY, lastY, Pathfinding.MOB_PATH_EPSILON) &&
+                        MathUtils.fuzzyEquals(currentZ, lastZ, Pathfinding.MOB_PATH_EPSILON))) {
                     lastMoved = time;
                 }
                 else if (time - lastMoved > pathfinding.immobileThreshold()) {
                     //if we don't have any movement, stop moving along this path
-                    return true;
+                    return MoveResult.CANCEL;
                 }
             }
             else {
@@ -293,14 +339,12 @@ public class ProximaEntity extends LivingEntity {
                 lastMoved = time;
             }
 
-            controller.advance(current, target, targetEntity);
-
             lastX = currentX;
             lastY = currentY;
             lastZ = currentZ;
-            return false;
+            return MoveResult.CONTINUE;
         }
 
-        return true;
+        return MoveResult.KEEP_DESTINATION;
     }
 }

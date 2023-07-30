@@ -1,6 +1,7 @@
 package org.phantazm.core.inventory;
 
 import net.kyori.adventure.key.Key;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.equipment.Equipment;
@@ -35,20 +36,20 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
             if (key == null) {
                 applyTo(null);
                 currentAccess = null;
+                return;
             }
-            else {
-                InventoryAccess access = accessMap.get(key);
-                if (access == null) {
-                    throw new IllegalArgumentException("No matching inventory access found");
-                }
 
-                if (access == currentAccess) {
-                    return;
-                }
-
-                currentAccess = access;
-                applyTo(access);
+            InventoryAccess access = accessMap.get(key);
+            if (access == null) {
+                throw new IllegalArgumentException("No matching inventory access found");
             }
+
+            if (access == currentAccess) {
+                return;
+            }
+            
+            applyTo(access);
+            currentAccess = access;
         }
     }
 
@@ -67,51 +68,63 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     }
 
     @Override
-    public void unregisterAccess(@NotNull Key key) {
-        Objects.requireNonNull(key, "key");
-
-        synchronized (sync) {
-            if (!accessMap.containsKey(key)) {
-                throw new IllegalArgumentException("Inventory profile not yet registered");
-            }
-
-            accessMap.remove(key);
-        }
+    public boolean canPushTo(@NotNull InventoryAccess currentAccess, @NotNull Key groupKey) {
+        InventoryObjectGroup group = currentAccess.groups().get(groupKey);
+        return group != null && !group.isFull();
     }
 
     @Override
-    public boolean canPushTo(@NotNull Key groupKey) {
-        Optional<InventoryAccess> accessOptional = getCurrentAccess();
-        if (accessOptional.isPresent()) {
-            InventoryAccess inventoryAccess = accessOptional.get();
-            InventoryObjectGroup group = inventoryAccess.groups().get(groupKey);
-            return group != null && !group.isFull();
-        }
-
-        return false;
-    }
-
-    @Override
-    public void replaceObject(int slot, @NotNull InventoryObject newObject) {
-        InventoryAccess access = getAccess();
-
+    public @Nullable InventoryObject replaceObject(@NotNull InventoryAccess access, int slot,
+            @NotNull InventoryObject newObject) {
         InventoryProfile profile = access.profile();
+        InventoryObject old = null;
         if (profile.hasInventoryObject(slot)) {
-            InventoryObject old = profile.removeInventoryObject(slot);
-            old.end();
+            old = profile.removeInventoryObject(slot);
+
+            if (access == currentAccess) {
+                old.end();
+            }
         }
-        
+
         profile.setInventoryObject(slot, newObject);
-        onAdd(slot, newObject);
+
+        if (access == currentAccess) {
+            onAdd(slot, newObject);
+        }
+
+        return old;
     }
 
     @Override
-    public void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object) {
-        InventoryAccess access = getAccess();
+    public @Nullable InventoryObject removeObject(@NotNull InventoryAccess access, int slot) {
+        InventoryProfile profile = access.profile();
+
+        InventoryObject old = null;
+        if (profile.hasInventoryObject(slot)) {
+            old = profile.removeInventoryObject(slot);
+
+            if (access == this.currentAccess) {
+                old.end();
+                playerView.getPlayer().ifPresent(player -> player.getInventory().setItemStack(slot, ItemStack.AIR));
+            }
+        }
+
+        return old;
+    }
+
+    @Override
+    public void pushObject(@NotNull InventoryAccess access, @NotNull Key groupKey, @NotNull InventoryObject object) {
         InventoryObjectGroup group = getGroup(access, groupKey);
 
         int slot = group.pushInventoryObject(object);
-        onAdd(slot, object);
+        if (access == currentAccess) {
+            onAdd(slot, object);
+        }
+    }
+
+    @Override
+    public @NotNull InventoryAccess getAccess(@NotNull Key profileKey) {
+        return Objects.requireNonNull(accessMap.get(profileKey), "no access named " + profileKey);
     }
 
     private void onAdd(int slot, InventoryObject object) {
@@ -121,15 +134,6 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
                 equipment.setSelected(true);
             }
         });
-    }
-
-    private InventoryAccess getAccess() {
-        Optional<InventoryAccess> accessOptional = getCurrentAccess();
-        if (accessOptional.isEmpty()) {
-            throw new IllegalArgumentException("No current access");
-        }
-
-        return accessOptional.get();
     }
 
     private InventoryObjectGroup getGroup(InventoryAccess access, Key groupKey) {
@@ -145,18 +149,22 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         playerView.getPlayer().ifPresent(player -> {
             player.getInventory().clear();
 
-            InventoryProfile oldProfile = this.currentAccess.profile();
-            for (int slot = 0; slot < oldProfile.getSlotCount(); slot++) {
-                if (!oldProfile.hasInventoryObject(slot)) {
-                    continue;
-                }
+            InventoryAccess oldAccess = this.currentAccess;
 
-                InventoryObject object = oldProfile.getInventoryObject(slot);
-                if (slot == player.getHeldSlot() && object instanceof Equipment equipment) {
-                    equipment.setSelected(false);
-                }
+            if (oldAccess != null) {
+                InventoryProfile oldProfile = oldAccess.profile();
+                for (int slot = 0; slot < oldProfile.getSlotCount(); slot++) {
+                    if (!oldProfile.hasInventoryObject(slot)) {
+                        continue;
+                    }
 
-                object.end();
+                    InventoryObject object = oldProfile.getInventoryObject(slot);
+                    if (slot == player.getHeldSlot() && object instanceof Equipment equipment) {
+                        equipment.setSelected(false);
+                    }
+
+                    object.end();
+                }
             }
 
             if (newAccess != null) {

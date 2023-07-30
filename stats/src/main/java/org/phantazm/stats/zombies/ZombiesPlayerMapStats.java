@@ -25,6 +25,10 @@ public interface ZombiesPlayerMapStats {
 
     void setBestTime(@Nullable Long bestTime);
 
+    int getBestRound();
+
+    void setBestRound(int bestRound);
+
     int getRoundsSurvived();
 
     void setRoundsSurvived(int roundsSurvived);
@@ -33,13 +37,13 @@ public interface ZombiesPlayerMapStats {
 
     void setKills(int kills);
 
-    int getCoinsGained();
+    long getCoinsGained();
 
-    void setCoinsGained(int goldGained);
+    void setCoinsGained(long goldGained);
 
-    int getCoinsSpent();
+    long getCoinsSpent();
 
-    void setCoinsSpent(int goldSpent);
+    void setCoinsSpent(long goldSpent);
 
     int getKnocks();
 

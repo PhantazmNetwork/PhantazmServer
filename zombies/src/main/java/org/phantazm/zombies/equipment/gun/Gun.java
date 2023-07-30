@@ -31,7 +31,6 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
     private Key levelKey;
     private GunLevel level;
     private GunState state;
-    private boolean reloadComplete = false;
 
     /**
      * Creates a new gun.
@@ -50,7 +49,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         tickingLevels.add(level);
 
         GunStats stats = level.stats();
-        this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats.reloadSpeed(), stats.maxAmmo(),
+        this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats.reloadSpeed(), false, stats.maxAmmo(),
                 stats.maxClip(), false, 0);
     }
 
@@ -115,8 +114,10 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
      */
     public void reload() {
         if (level.reloadTester().shouldReload(state)) {
-            modifyState(builder -> builder.setTicksSinceLastReload(0L));
-            reloadComplete = false;
+            modifyState(builder -> {
+                builder.setTicksSinceLastReload(0L);
+                builder.setReloadComplete(false);
+            });
             for (GunEffect reloadEffect : level.reloadEffects()) {
                 reloadEffect.apply(state);
             }
@@ -186,9 +187,9 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             if (level.reloadTester().isReloading(state)) {
                 builder.setTicksSinceLastReload(builder.getTicksSinceLastReload() + 1);
             }
-            else if (!reloadComplete) {
+            else if (!builder.isReloadComplete()) {
                 builder.setClip(Math.min(level.stats().maxClip(), getState().ammo()));
-                reloadComplete = true;
+                builder.setReloadComplete(true);
             }
         });
 
@@ -262,6 +263,8 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         for (GunEffect effect : level.activateEffects()) {
             effect.apply(state);
         }
+
+        setDirty();
     }
 
     @Override

@@ -37,7 +37,7 @@ public class PlayerStateSwitcher implements Activable {
         state.end();
     }
 
-    public @NotNull ZombiesPlayerState getState() {
+    public ZombiesPlayerState getState() {
         return state;
     }
 

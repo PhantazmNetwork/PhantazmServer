@@ -1,7 +1,7 @@
 package org.phantazm.core.guild.invite;
 
-import it.unimi.dsi.fastutil.objects.Object2LongArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 import org.phantazm.core.guild.GuildMember;
@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 public class InvitationManager<TMember extends GuildMember> implements Tickable {
 
-    private final Object2LongMap<UUID> latestInviteTimes = new Object2LongArrayMap<>();
+    private final Object2LongMap<UUID> latestInviteTimes = new Object2LongOpenHashMap<>();
 
     private final Queue<Invitation> invitations = new LinkedList<>();
 

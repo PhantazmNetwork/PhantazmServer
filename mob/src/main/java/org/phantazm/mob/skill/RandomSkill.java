@@ -18,12 +18,14 @@ public class RandomSkill implements Skill {
     private final Data data;
     private final Skill delegate;
     private final Random random;
+    private final boolean needsTicking;
 
     @FactoryMethod
     public RandomSkill(@NotNull Data data, @NotNull @Child("delegate") Skill delegate) {
         this.data = data;
         this.delegate = delegate;
         this.random = new Random();
+        this.needsTicking = delegate.needsTicking();
     }
 
     @Override
@@ -35,6 +37,21 @@ public class RandomSkill implements Skill {
         if (data.chance >= 1 || random.nextDouble() < data.chance) {
             delegate.use(self);
         }
+    }
+
+    @Override
+    public void end(@NotNull PhantazmMob self) {
+        delegate.end(self);
+    }
+
+    @Override
+    public boolean needsTicking() {
+        return needsTicking;
+    }
+
+    @Override
+    public void tick(long time, @NotNull PhantazmMob self) {
+        delegate.tick(time, self);
     }
 
     @DataObject

@@ -14,6 +14,7 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEve
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.event.entity.projectile.ProjectileUncollideEvent;
 import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -21,14 +22,10 @@ import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ProjectileMovementGoal implements ProximaGoal {
-    private static final int COLLISION_TICK_THRESHOLD = 3;
     private static final double MAGIC = 0.007499999832361937D; //what is this? nobody knows...
 
     private final Entity entity;
@@ -45,6 +42,9 @@ public class ProjectileMovementGoal implements ProximaGoal {
 
     private boolean collided = false;
 
+    private final int selfCollisionTickThreshold;
+    private final int blockCollisionTickThreshold;
+
     public ProjectileMovementGoal(@NotNull Entity entity, @NotNull Entity shooter, @NotNull Point to, double power,
             double spread) {
         this.entity = Objects.requireNonNull(entity, "entity");
@@ -52,6 +52,14 @@ public class ProjectileMovementGoal implements ProximaGoal {
         this.to = Objects.requireNonNull(to, "to");
         this.power = power;
         this.spread = spread;
+
+        //power is in blocks/s
+        this.selfCollisionTickThreshold = (int)Math.ceil(
+                ((entity.getBoundingBox().width() / 2) + (shooter.getBoundingBox().width() / 2) / power) *
+                        MinecraftServer.TICK_PER_SECOND);
+
+        this.blockCollisionTickThreshold =
+                (int)Math.ceil(((entity.getBoundingBox().width() / 2) / power) * MinecraftServer.TICK_PER_SECOND);
     }
 
     @Override
@@ -105,12 +113,8 @@ public class ProjectileMovementGoal implements ProximaGoal {
 
     @Override
     public void tick(long time) {
-        if (previousPos == null) {
-            return;
-        }
-
         Pos currentPos = entity.getPosition();
-        if (checkStuck(previousPos, currentPos)) {
+        if (checkStuck(previousPos == null ? currentPos : previousPos, currentPos)) {
             if (collided) {
                 return;
             }
@@ -123,6 +127,8 @@ public class ProjectileMovementGoal implements ProximaGoal {
             entity.setNoGravity(false);
             EventDispatcher.call(new ProjectileUncollideEvent(entity));
         }
+
+        this.previousPos = currentPos;
     }
 
     @SuppressWarnings("UnstableApiUsage")
@@ -131,17 +137,21 @@ public class ProjectileMovementGoal implements ProximaGoal {
         if (instance == null) {
             return false;
         }
+
+        Chunk chunk = entity.getChunk();
+        if (chunk == null) {
+            return false;
+        }
+
         final long aliveTicks = entity.getAliveTicks();
         if (previousPos.samePoint(currentPos)) {
             Block block = instance.getBlock(previousPos);
-            return block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= COLLISION_TICK_THRESHOLD &&
+            return block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= blockCollisionTickThreshold &&
                     block.registry().collisionShape().intersectBox(
                             previousPos.sub(previousPos.blockX(), previousPos.blockY(), previousPos.blockZ()),
                             entity.getBoundingBox());
         }
 
-        Chunk chunk = null;
-        Collection<LivingEntity> entities = null;
         final BoundingBox bb = entity.getBoundingBox();
 
         final double part = bb.width() / 2;
@@ -158,7 +168,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
                 block = instance.getBlock(previousPos);
                 blockPos = previousPos;
             }
-            if (block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= COLLISION_TICK_THRESHOLD &&
+            if (block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= blockCollisionTickThreshold &&
                     block.registry().collisionShape()
                             .intersectBox(previousPos.sub(blockPos.blockX(), blockPos.blockY(), blockPos.blockZ()),
                                     entity.getBoundingBox())) {
@@ -171,26 +181,18 @@ public class ProjectileMovementGoal implements ProximaGoal {
                     return true;
                 }
             }
-            if (entity.getChunk() != chunk) {
-                chunk = entity.getChunk();
-                entities = instance.getChunkEntities(chunk).stream().filter(entity -> entity instanceof LivingEntity)
-                        .map(entity -> (LivingEntity)entity).collect(Collectors.toSet());
-            }
-            if (entities == null) {
-                return false; // should never happen
-            }
-            Point finalPreviousPos = previousPos;
-            Stream<LivingEntity> victimsStream = entities.stream()
-                    .filter(entity -> bb.intersectEntity(finalPreviousPos, entity) && entity != this.entity);
 
-            if (aliveTicks < COLLISION_TICK_THRESHOLD) {
-                victimsStream = victimsStream.filter(entity -> entity != shooter);
-            }
-            final Optional<LivingEntity> victimOptional = victimsStream.findAny();
-            if (victimOptional.isPresent()) {
-                final LivingEntity target = victimOptional.get();
+            Collection<LivingEntity> entities = instance.getEntityTracker()
+                    .chunkEntities(chunk.getChunkX(), chunk.getChunkZ(), EntityTracker.Target.LIVING_ENTITIES);
+
+            for (Entity victim : entities) {
+                if (victim == this.entity || (victim == shooter && aliveTicks < selfCollisionTickThreshold) ||
+                        !bb.intersectEntity(previousPos, victim)) {
+                    continue;
+                }
+
                 final ProjectileCollideWithEntityEvent event =
-                        new ProjectileCollideWithEntityEvent(entity, previousPos, target);
+                        new ProjectileCollideWithEntityEvent(entity, previousPos, victim);
                 EventDispatcher.call(event);
                 if (!event.isCancelled()) {
                     return collided || entity.isOnGround();

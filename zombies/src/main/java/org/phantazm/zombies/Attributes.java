@@ -9,7 +9,7 @@ public final class Attributes {
     /**
      * Expansion applied to the hitbox of entities. Used to make things easier (or harder) to hit with bullets.
      */
-    public static final Attribute HITBOX_EXPANSION = new Attribute("phantazm.hitbox_expand", 0.25F, 2048F);
+    public static final Attribute HITBOX_EXPANSION = new Attribute("phantazm.hitbox_expand", 0.35F, 2048F);
 
     /**
      * Multiplier applied to the fire rate when shooting guns.
@@ -27,6 +27,22 @@ public final class Attributes {
     public static final Attribute HEAL_TICKS = new Attribute("phantazm.heal_rate", 20F, 2048F);
 
     /**
+     * Damage multiplier for the player.
+     */
+    public static final Attribute DAMAGE_MULTIPLIER = new Attribute("phantazm.damage_multiplier", 1F, 2048F);
+
+    /**
+     * Attack speed multiplier for mobs.
+     */
+    public static final Attribute ATTACK_SPEED_MULTIPLIER =
+            new Attribute("phantazm.attack_speed_multiplier", 1F, 2048F);
+
+    /**
+     * When applied to a mob, modifies any headshot damage received.
+     */
+    public static final Attribute HEADSHOT_DAMAGE_MULTIPLIER = new Attribute("phantazm.headshot_multiplier", 1F, 2048F);
+
+    /**
      * The "nil" attribute. Used as a fallback when the desired attribute cannot be found.
      */
     public static final Attribute NIL = new Attribute("phantazm.nil", 0F, 0F);
@@ -36,6 +52,9 @@ public final class Attributes {
         FIRE_RATE_MULTIPLIER.register();
         REVIVE_TICKS.register();
         HEAL_TICKS.register();
+        DAMAGE_MULTIPLIER.register();
+        ATTACK_SPEED_MULTIPLIER.register();
+        HEADSHOT_DAMAGE_MULTIPLIER.register();
         NIL.register();
     }
 }

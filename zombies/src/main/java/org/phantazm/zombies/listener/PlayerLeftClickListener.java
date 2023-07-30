@@ -1,14 +1,16 @@
 package org.phantazm.zombies.listener;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.damage.DamageType;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.event.player.PlayerHandAnimationEvent;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.RayUtils;
 import org.phantazm.core.equipment.Equipment;
@@ -27,19 +29,30 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
     private final MobStore mobStore;
     private final float punchDamage;
     private final float punchRange;
+    private final int punchCooldown;
+    private final float punchKnockback;
+
+    private final Tag<Long> lastPunchTag;
 
     public PlayerLeftClickListener(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MobStore mobStore,
-            float punchDamage, float punchRange) {
+            float punchDamage, float punchRange, int punchCooldown, float punchKnockback) {
         super(instance, zombiesPlayers);
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.punchDamage = punchDamage;
         this.punchRange = punchRange;
+        this.lastPunchTag = Tag.Long("last_punch").defaultValue(0L);
+        this.punchCooldown = punchCooldown;
+        this.punchKnockback = punchKnockback;
     }
 
     @Override
     protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerHandAnimationEvent event) {
         if (event.getHand() != Player.Hand.MAIN) {
+            return;
+        }
+
+        if (!zombiesPlayer.canUseEquipment()) {
             return;
         }
 
@@ -66,7 +79,17 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
             Instance instance = player.getInstance();
             assert instance != null;
 
+            if (!zombiesPlayer.canDoGenericActions()) {
+                return;
+            }
+
             boolean godmode = zombiesPlayer.flags().hasFlag(Flags.GODMODE);
+
+            long currentTime = 0L;
+            if (!godmode && ((currentTime = System.currentTimeMillis()) - player.getTag(lastPunchTag)) /
+                    MinecraftServer.TICK_MS < punchCooldown) {
+                return;
+            }
 
             Pos start = player.getPosition().add(0, player.getEyeHeight(), 0);
             Vec end = start.direction().mul(godmode ? 20 : punchRange);
@@ -74,6 +97,10 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
             ClosestHit closestHit = new ClosestHit(start);
             instance.getEntityTracker()
                     .raytraceCandidates(start, end, EntityTracker.Target.LIVING_ENTITIES, closestHit);
+
+            if (closestHit.closest > punchRange * punchRange) {
+                return;
+            }
 
             PhantazmMob hit = closestHit.closestMob;
             if (hit != null) {
@@ -83,7 +110,11 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
                     entity.kill();
                 }
                 else {
-                    entity.damage(DamageType.fromPlayer(player), punchDamage, false);
+                    double angle = player.getPosition().yaw() * (Math.PI / 180);
+
+                    entity.damage(Damage.fromPlayer(player, punchDamage), false);
+                    entity.takeKnockback(punchKnockback, Math.sin(angle), -Math.cos(angle));
+                    player.setTag(lastPunchTag, currentTime);
                 }
             }
         });

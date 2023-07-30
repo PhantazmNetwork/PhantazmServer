@@ -28,6 +28,7 @@ public class ZombiesJoinCommand extends Command {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.String("map-key");
+        Argument<Boolean> restrictedArgument = ArgumentType.Boolean("restricted").setDefaultValue(false);
 
         Objects.requireNonNull(partyMap, "partyMap");
         Objects.requireNonNull(viewProvider, "viewProvider");
@@ -89,8 +90,8 @@ public class ZombiesJoinCommand extends Command {
                 }
             }
 
-            joinHelper.joinGame(joiner, playerViews, targetMap);
-        }, mapKeyArgument);
+            joinHelper.joinGame(joiner, playerViews, targetMap, context.get(restrictedArgument));
+        }, mapKeyArgument, restrictedArgument);
     }
 
 }

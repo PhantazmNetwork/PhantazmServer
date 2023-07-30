@@ -20,22 +20,24 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
-import net.minestom.server.extras.optifine.OptifineSupport;
 import net.minestom.server.extras.velocity.VelocityProxy;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Namespaces;
+import org.phantazm.core.chat.ChatConfig;
 import org.phantazm.core.game.scene.BasicRouterStore;
 import org.phantazm.core.game.scene.RouterStore;
+import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.game.scene.fallback.CompositeFallback;
 import org.phantazm.core.game.scene.fallback.KickFallback;
+import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.server.command.whisper.WhisperConfig;
 import org.phantazm.server.config.lobby.LobbiesConfig;
-import org.phantazm.server.config.server.PathfinderConfig;
-import org.phantazm.server.config.server.ServerConfig;
-import org.phantazm.server.config.server.ServerInfoConfig;
-import org.phantazm.server.config.server.ShutdownConfig;
+import org.phantazm.server.config.player.PlayerConfig;
+import org.phantazm.server.config.server.*;
+import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.server.player.BasicLoginValidator;
 import org.phantazm.server.player.LoginValidator;
 import org.phantazm.zombies.equipment.EquipmentData;
@@ -47,6 +49,7 @@ import org.snakeyaml.engine.v2.api.Load;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
@@ -79,13 +82,23 @@ public final class PhantazmServer {
     public static void main(String[] args) {
         MinecraftServer minecraftServer = MinecraftServer.init();
 
+        PlayerConfig playerConfig;
         ServerConfig serverConfig;
         LobbiesConfig lobbiesConfig;
         PathfinderConfig pathfinderConfig;
         ShutdownConfig shutdownConfig;
+        StartupConfig startupConfig;
+        PartyConfig partyConfig;
+        WhisperConfig whisperConfig;
+        ChatConfig chatConfig;
+        ZombiesConfig zombiesConfig;
+
+        KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
+        EthyleneFeature.initialize(keyParser);
+
         try {
             LOGGER.info("Loading server configuration data.");
-            ConfigFeature.initialize();
+            ConfigFeature.initialize(EthyleneFeature.getMappingProcessorSource());
             ConfigHandler handler = ConfigFeature.getHandler();
             handler.writeDefaultsAndGet();
 
@@ -127,9 +140,15 @@ public final class PhantazmServer {
                 return;
             }
 
+            playerConfig = handler.loadDataNow(ConfigFeature.PLAYER_CONFIG_KEY);
             lobbiesConfig = handler.loadDataNow(ConfigFeature.LOBBIES_CONFIG_KEY);
             pathfinderConfig = handler.loadDataNow(ConfigFeature.PATHFINDER_CONFIG_KEY);
             shutdownConfig = handler.loadDataNow(ConfigFeature.SHUTDOWN_CONFIG_KEY);
+            startupConfig = handler.loadDataNow(ConfigFeature.STARTUP_CONFIG_KEY);
+            partyConfig = handler.loadDataNow(ConfigFeature.PARTY_CONFIG_KEY);
+            whisperConfig = handler.loadDataNow(ConfigFeature.WHISPER_CONFIG_KEY);
+            chatConfig = handler.loadDataNow(ConfigFeature.CHAT_CONFIG_KEY);
+            zombiesConfig = handler.loadDataNow(ConfigFeature.ZOMBIES_CONFIG_KEY);
             LOGGER.info("Server configuration loaded successfully.");
         }
         catch (ConfigProcessException e) {
@@ -144,7 +163,8 @@ public final class PhantazmServer {
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         try {
             LOGGER.info("Initializing features.");
-            initializeFeatures(node, serverConfig, shutdownConfig, pathfinderConfig, lobbiesConfig, loginValidator);
+            initializeFeatures(keyParser, node, playerConfig, serverConfig, shutdownConfig, pathfinderConfig,
+                    lobbiesConfig, partyConfig, whisperConfig, chatConfig, zombiesConfig, loginValidator);
             LOGGER.info("Features initialized successfully.");
         }
         catch (Exception exception) {
@@ -160,7 +180,7 @@ public final class PhantazmServer {
         MinecraftServer.setBrandName(BRAND_NAME);
 
         try {
-            startServer(node, minecraftServer, serverConfig);
+            startServer(node, minecraftServer, serverConfig, startupConfig);
         }
         catch (Exception exception) {
             LOGGER.error("Fatal error during server startup", exception);
@@ -171,9 +191,12 @@ public final class PhantazmServer {
     public static void shutdown(@Nullable String reason) {
         LOGGER.info("Shutting down server. Reason: " + reason);
 
-        ZombiesFeature.end();
-        loginValidator.flush();
+        HikariFeature.end();
+        if (loginValidator != null) {
+            loginValidator.flush();
+        }
 
+        ExecutorFeature.shutdown();
         MinecraftServer.stopCleanly();
         ServerCommandFeature.flushPermissions();
     }
@@ -188,23 +211,27 @@ public final class PhantazmServer {
         return false;
     }
 
-    private static void initializeFeatures(EventNode<Event> global, ServerConfig serverConfig,
-            ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
-            LoginValidator loginValidator) throws Exception {
+    private static void initializeFeatures(KeyParser keyParser, EventNode<Event> global, PlayerConfig playerConfig,
+            ServerConfig serverConfig, ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig,
+            LobbiesConfig lobbiesConfig, PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig,
+            ZombiesConfig zombiesConfig, LoginValidator loginValidator) throws Exception {
+        DatapackFeature.initialize(MinecraftServer.getBiomeManager());
+        PlayerFeature.initialize(playerConfig, global, MiniMessage.miniMessage());
+
         RouterStore routerStore = new BasicRouterStore();
+        ExecutorFeature.initialize();
+        HikariFeature.initialize();
+        GeneralStatsFeature.initialize(global);
         BlockHandlerFeature.initialize(MinecraftServer.getBlockManager());
 
-        KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
-
         SongFeature.initialize(keyParser);
-        EthyleneFeature.initialize(keyParser);
 
         MappingProcessorSource mappingProcessorSource = EthyleneFeature.getMappingProcessorSource();
         ElementFeature.initialize(mappingProcessorSource, keyParser);
 
         ConfigCodec tomlCodec = new TomlCodec();
         WhisperCommandFeature.initialize(MinecraftServer.getCommandManager(), MinecraftServer.getConnectionManager(),
-                mappingProcessorSource, tomlCodec);
+                whisperConfig);
 
         ContextManager contextManager = ElementFeature.getContextManager();
 
@@ -214,15 +241,15 @@ public final class PhantazmServer {
         PlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
-        CommandFeature.initialize(MinecraftServer.getCommandManager(), routerStore, viewProvider);
 
         PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
-                MinecraftServer.getSchedulerManager(), mappingProcessorSource, contextManager, tomlCodec,
+                MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec,
                 MiniMessage.miniMessage());
         LobbyFeature.initialize(global, viewProvider, lobbiesConfig, contextManager);
-        ChatFeature.initialize(global, viewProvider, PartyFeature.getPartyHolder().uuidToGuild(),
+        ChatFeature.initialize(global, viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
                 MinecraftServer.getCommandManager());
-        MessagingFeature.initialize(global, serverConfig.serverInfoConfig().authType());
+        CommandFeature.initialize(MinecraftServer.getCommandManager(), routerStore, viewProvider,
+                LobbyFeature.getFallback());
 
         ProximaFeature.initialize(global, contextManager, pathfinderConfig);
 
@@ -234,26 +261,26 @@ public final class PhantazmServer {
                 mappingProcessorSource.processorFor(Token.ofClass(EquipmentData.class)));
 
         CommandManager commandManager = MinecraftServer.getCommandManager();
+
+        SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
         ZombiesFeature.initialize(global, contextManager, MobFeature.getProcessorMap(), ProximaFeature.getSpawner(),
                 keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, commandManager,
                 new CompositeFallback(List.of(LobbyFeature.getFallback(),
                         new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))),
-                PartyFeature.getPartyHolder().uuidToGuild(), routerStore);
+                PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(), zombiesConfig);
 
         ServerCommandFeature.initialize(commandManager, loginValidator, serverConfig.serverInfoConfig().whitelist(),
-                mappingProcessorSource, codec, routerStore, shutdownConfig);
+                mappingProcessorSource, codec, routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),
+                viewProvider, transferHelper);
         ValidationFeature.initialize(global, loginValidator, ServerCommandFeature.permissionHandler());
 
         routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
         routerStore.putRouter(RouterKeys.LOBBY_SCENE_ROUTER, LobbyFeature.getLobbyRouter());
     }
 
-    private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
+    private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig,
+            StartupConfig startupConfig) {
         ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
-
-        if (infoConfig.optifineEnabled()) {
-            OptifineSupport.enable();
-        }
 
         switch (infoConfig.authType()) {
             case MOJANG -> MojangAuth.init();
@@ -268,6 +295,17 @@ public final class PhantazmServer {
                 event -> event.getResponseData().setDescription(serverConfig.pingListConfig().description()));
 
         server.start(infoConfig.serverIP(), infoConfig.port());
+
+        if (startupConfig.hasCommand()) {
+            ProcessBuilder processBuilder = new ProcessBuilder(startupConfig.command());
+            try {
+                processBuilder.start();
+            }
+            catch (IOException e) {
+                LOGGER.warn("Failed to run startup command", e);
+            }
+        }
+
         LOGGER.info("serverIP: " + infoConfig.serverIP() + ", port: " + infoConfig.port());
     }
 }

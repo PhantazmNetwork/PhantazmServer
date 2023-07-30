@@ -8,6 +8,7 @@ import net.minestom.server.utils.chunk.ChunkSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
+import java.util.concurrent.Executor;
 
 /**
  * A {@link FileSystemInstanceLoader} that loads {@link Instance}s using {@link AnvilLoader}s.
@@ -21,8 +22,8 @@ public class AnvilFileSystemInstanceLoader extends FileSystemInstanceLoader {
      * @param chunkSupplier the {@link ChunkSupplier} used to create chunks
      */
     public AnvilFileSystemInstanceLoader(@NotNull InstanceManager instanceManager, @NotNull Path rootPath,
-            @NotNull ChunkSupplier chunkSupplier) {
-        super(instanceManager, rootPath, chunkSupplier);
+            @NotNull ChunkSupplier chunkSupplier, @NotNull Executor executor) {
+        super(instanceManager, rootPath, chunkSupplier, executor);
     }
 
     @Override

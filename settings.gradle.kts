@@ -3,7 +3,6 @@ rootProject.name = "phantazm"
 val localSettings = file("local.settings.gradle.kts")
 if (localSettings.exists()) {
     //apply from local settings too, if it exists
-    //can be used to sideload Minestom for faster testing
     apply(localSettings)
 }
 
@@ -14,7 +13,6 @@ pluginManagement {
         maven("https://maven.fabricmc.net/") {
             name = "Fabric"
         }
-
 
         maven("https://dl.cloudsmith.io/public/steanky/element/maven/")
         mavenCentral()
@@ -34,10 +32,12 @@ sequenceOf(
     "proxima-minestom",
     "server",
     "stats",
+    "zombies-timer",
     "velocity",
     "zombies",
     "zombies-mapdata",
-    "zombies-mapeditor"
+    "zombies-mapeditor",
+    "snbt-builder"
 ).forEach {
     if (!toSkip.contains(it)) {
         include(":phantazm-$it")

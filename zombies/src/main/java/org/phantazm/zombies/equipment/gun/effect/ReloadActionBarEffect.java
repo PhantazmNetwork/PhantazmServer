@@ -6,7 +6,7 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.GunStats;
-import org.phantazm.zombies.equipment.gun.audience.AudienceProvider;
+import org.phantazm.zombies.equipment.gun.action_bar.ActionBarSender;
 import org.phantazm.zombies.equipment.gun.reload.ReloadTester;
 import org.phantazm.zombies.equipment.gun.reload.actionbar.ReloadActionBarChooser;
 
@@ -20,7 +20,7 @@ import java.util.Objects;
 public class ReloadActionBarEffect implements GunEffect {
 
     private final GunStats stats;
-    private final AudienceProvider audienceProvider;
+    private final ActionBarSender actionBarSender;
     private final ReloadTester reloadTester;
     private final ReloadActionBarChooser chooser;
     private boolean active = false;
@@ -29,17 +29,16 @@ public class ReloadActionBarEffect implements GunEffect {
      * Creates a {@link ReloadActionBarEffect}.
      *
      * @param stats            The gun's {@link GunStats}
-     * @param audienceProvider A {@link AudienceProvider} to provide an {@link Audience} to send action bars to
      * @param reloadTester     The gun's {@link ReloadTester}
      * @param chooser          The {@link ReloadActionBarChooser} to choose an action bar to send to the {@link Audience}
      */
     @FactoryMethod
     public ReloadActionBarEffect(@NotNull @Child("stats") GunStats stats,
-            @NotNull @Child("audience_provider") AudienceProvider audienceProvider,
+            @NotNull @Child("action_bar_sender") ActionBarSender actionBarSender,
             @NotNull @Child("reload_tester") ReloadTester reloadTester,
             @NotNull @Child("reload_action_bar_chooser") ReloadActionBarChooser chooser) {
         this.stats = Objects.requireNonNull(stats, "stats");
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
+        this.actionBarSender = Objects.requireNonNull(actionBarSender, "actionBarSender");
         this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
         this.chooser = Objects.requireNonNull(chooser, "chooser");
     }
@@ -48,32 +47,29 @@ public class ReloadActionBarEffect implements GunEffect {
     public void apply(@NotNull GunState state) {
         if (reloadTester.isReloading(state) && state.isMainEquipment()) {
             float progress = (float)state.ticksSinceLastReload() / stats.reloadSpeed();
-            audienceProvider.provideAudience()
-                    .ifPresent(audience -> audience.sendActionBar(chooser.choose(state, progress)));
+            actionBarSender.sendActionBar(chooser.choose(state, progress));
             active = true;
-        }
-        else if (active) {
-            audienceProvider.provideAudience().ifPresent(audience -> audience.sendActionBar(Component.empty()));
-            active = false;
         }
     }
 
     @Override
     public void tick(@NotNull GunState state, long time) {
-
+        if (!(reloadTester.isReloading(state) && state.isMainEquipment()) && active) {
+            actionBarSender.sendActionBar(Component.empty());
+            active = false;
+        }
     }
 
     /**
      * Data for an {@link ReloadActionBarEffect}.
      *
      * @param stats                  A path to the guns's {@link GunStats}
-     * @param audienceProvider       A path to the {@link ReloadActionBarEffect}'s {@link AudienceProvider}
      * @param reloadTester           A path to the gun's {@link ReloadTester}
      * @param reloadActionBarChooser A path to the {@link ReloadActionBarEffect}'s {@link ReloadActionBarChooser}
      */
     @DataObject
     public record Data(@NotNull @ChildPath("stats") String stats,
-                       @NotNull @ChildPath("audience_provider") String audienceProvider,
+                       @NotNull @ChildPath("action_bar_sender") String actionBarSender,
                        @NotNull @ChildPath("reload_tester") String reloadTester,
                        @NotNull @ChildPath("reload_action_bar_chooser") String reloadActionBarChooser) {
     }

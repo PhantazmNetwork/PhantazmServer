@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 public record GunState(long ticksSinceLastShot,
                        long ticksSinceLastFire,
                        long ticksSinceLastReload,
+                       boolean reloadComplete,
                        int ammo,
                        int clip,
                        boolean isMainEquipment,
@@ -29,8 +30,8 @@ public record GunState(long ticksSinceLastShot,
      */
     public @NotNull GunState.Builder toBuilder() {
         return new Builder().setTicksSinceLastShot(ticksSinceLastShot).setTicksSinceLastFire(ticksSinceLastFire)
-                .setTicksSinceLastReload(ticksSinceLastReload).setAmmo(ammo).setClip(clip)
-                .setMainEquipment(isMainEquipment).setQueuedShots(queuedShots);
+                .setTicksSinceLastReload(ticksSinceLastReload).setReloadComplete(reloadComplete).setAmmo(ammo)
+                .setClip(clip).setMainEquipment(isMainEquipment).setQueuedShots(queuedShots);
     }
 
     /**
@@ -43,6 +44,8 @@ public record GunState(long ticksSinceLastShot,
         private long ticksSinceLastFire;
 
         private long ticksSinceLastReload;
+
+        private boolean reloadComplete;
 
         private int ammo;
 
@@ -109,6 +112,15 @@ public record GunState(long ticksSinceLastShot,
          */
         public @NotNull Builder setTicksSinceLastReload(long ticksSinceLastReload) {
             this.ticksSinceLastReload = ticksSinceLastReload;
+            return this;
+        }
+
+        public boolean isReloadComplete() {
+            return reloadComplete;
+        }
+
+        public @NotNull Builder setReloadComplete(boolean reloadComplete) {
+            this.reloadComplete = reloadComplete;
             return this;
         }
 
@@ -198,8 +210,8 @@ public record GunState(long ticksSinceLastShot,
          * @return A {@link GunState} representation of the {@link Builder}
          */
         public @NotNull GunState build() {
-            return new GunState(ticksSinceLastShot, ticksSinceLastFire, ticksSinceLastReload, ammo, clip,
-                    isMainEquipment, queuedShots);
+            return new GunState(ticksSinceLastShot, ticksSinceLastFire, ticksSinceLastReload, reloadComplete, ammo,
+                    clip, isMainEquipment, queuedShots);
         }
 
     }

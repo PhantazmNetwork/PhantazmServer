@@ -60,6 +60,8 @@ public class FilePermissionHandler implements PermissionHandler {
                 applyTo(sender, group);
             }
         }
+
+        applyTo(sender, EVERYONE_GROUP);
     }
 
     @Override
@@ -113,6 +115,10 @@ public class FilePermissionHandler implements PermissionHandler {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(group, "group");
 
+        if (group.equals(EVERYONE_GROUP)) {
+            return;
+        }
+
         permissionData.groups().computeIfAbsent(uuid, ignored -> new CopyOnWriteArraySet<>()).add(group);
 
         Player player = MinecraftServer.getConnectionManager().getPlayer(uuid);
@@ -125,6 +131,10 @@ public class FilePermissionHandler implements PermissionHandler {
     public void removeFromGroup(@NotNull UUID uuid, @NotNull String group) {
         Objects.requireNonNull(uuid, "uuid");
         Objects.requireNonNull(group, "group");
+
+        if (group.equals(EVERYONE_GROUP)) {
+            return;
+        }
 
         Map<UUID, CopyOnWriteArraySet<String>> playerGroups = permissionData.groups();
         Set<String> groups = playerGroups.get(uuid);
@@ -158,6 +168,7 @@ public class FilePermissionHandler implements PermissionHandler {
             }
         }
 
+        applyTo(player, EVERYONE_GROUP);
         player.sendPacket(MinecraftServer.getCommandManager().createDeclareCommandsPacket(player));
     }
 

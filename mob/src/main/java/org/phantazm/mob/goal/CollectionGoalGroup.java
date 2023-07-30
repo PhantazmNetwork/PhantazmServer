@@ -1,10 +1,13 @@
 package org.phantazm.mob.goal;
 
+import com.github.steanky.toolkit.collection.Containers;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -53,5 +56,10 @@ public class CollectionGoalGroup implements GoalGroup {
     @Override
     public @NotNull Optional<ProximaGoal> currentGoal() {
         return Optional.ofNullable(activeGoal);
+    }
+
+    @Override
+    public @NotNull @Unmodifiable List<ProximaGoal> goals() {
+        return Containers.arrayView(goals);
     }
 }

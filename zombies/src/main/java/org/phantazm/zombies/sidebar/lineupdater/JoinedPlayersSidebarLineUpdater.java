@@ -6,6 +6,8 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -40,22 +42,20 @@ public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
         if (currentPlayers == -1 || currentPlayers != zombiesPlayers.size()) {
             currentPlayers = zombiesPlayers.size();
 
-            String formatted;
-            try {
-                formatted = String.format(data.formatString, currentPlayers, maxPlayers);
-            }
-            catch (IllegalFormatException ignored) {
-                formatted = data.formatString;
-            }
+            TagResolver currentPlayerCountPlaceholder =
+                    Placeholder.component("current_player_count", Component.text(currentPlayers));
+            TagResolver maxPlayerCountPlaceholder =
+                    Placeholder.component("max_player_count", Component.text(maxPlayers));
 
-            return Optional.of(MiniMessage.miniMessage().deserialize(formatted));
+            return Optional.of(MiniMessage.miniMessage()
+                    .deserialize(data.format, currentPlayerCountPlaceholder, maxPlayerCountPlaceholder));
         }
 
         return Optional.empty();
     }
 
     @DataObject
-    public record Data(@NotNull String formatString) {
+    public record Data(@NotNull String format) {
 
     }
 }

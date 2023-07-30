@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 @Model("zombies.sidebar.line_updater.conditional")
+@Cache(false)
 public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
 
 
@@ -39,6 +40,7 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
     }
 
     @Model("zombies.sidebar.line_updater.conditional.child")
+    @Cache(false)
     public static class ChildUpdater {
 
         private final BooleanSupplier condition;

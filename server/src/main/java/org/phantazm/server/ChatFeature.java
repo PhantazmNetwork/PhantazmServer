@@ -2,6 +2,7 @@ package org.phantazm.server;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -10,8 +11,9 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.chat.ChatChannel;
+import org.phantazm.core.chat.ChatConfig;
 import org.phantazm.core.chat.InstanceChatChannel;
-import org.phantazm.core.chat.SelfChatChannel;
+import org.phantazm.core.chat.command.ChatChannelSendCommand;
 import org.phantazm.core.chat.command.ChatCommand;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyChatChannel;
@@ -31,8 +33,6 @@ public final class ChatFeature {
      */
     public static final String DEFAULT_CHAT_CHANNEL_NAME = "all";
 
-    public static final String SELF_CHAT_CHANNEL_NAME = "self";
-
     private ChatFeature() {
         throw new UnsupportedOperationException();
     }
@@ -45,7 +45,8 @@ public final class ChatFeature {
      * @param commandManager The {@link CommandManager} to register chat commands to
      */
     static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
-            @NotNull Map<? super UUID, ? extends Party> parties, @NotNull CommandManager commandManager) {
+            @NotNull ChatConfig chatConfig, @NotNull Map<? super UUID, ? extends Party> parties,
+            @NotNull CommandManager commandManager) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {
@@ -57,9 +58,14 @@ public final class ChatFeature {
             }
         };
 
-        channels.put(DEFAULT_CHAT_CHANNEL_NAME, new InstanceChatChannel(viewProvider));
-        channels.put(SelfChatChannel.CHANNEL_NAME, new SelfChatChannel(viewProvider));
-        channels.put(PartyChatChannel.CHANNEL_NAME, new PartyChatChannel(parties, viewProvider));
+        ChatChannel defaultChannel = new InstanceChatChannel(viewProvider, MiniMessage.miniMessage(),
+                chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME));
+        channels.put(DEFAULT_CHAT_CHANNEL_NAME, defaultChannel);
+        commandManager.register(ChatChannelSendCommand.chatChannelSend("ac", defaultChannel));
+        ChatChannel partyChannel = new PartyChatChannel(parties, viewProvider, MiniMessage.miniMessage(),
+                chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME));
+        channels.put(PartyChatChannel.CHANNEL_NAME, partyChannel);
+        commandManager.register(ChatChannelSendCommand.chatChannelSend("pc", partyChannel));
 
         Map<UUID, String> playerChannels = new HashMap<>();
         commandManager.register(new ChatCommand(channels, playerChannels, () -> DEFAULT_CHAT_CHANNEL_NAME));
@@ -79,7 +85,7 @@ public final class ChatFeature {
             }
 
             channel.findAudience(uuid, audience -> {
-                Component message = channel.formatMessage(event);
+                Component message = channel.formatMessage(event.getPlayer(), event.getMessage());
                 audience.sendMessage(message);
             }, failure -> {
                 player.sendMessage(failure.left());

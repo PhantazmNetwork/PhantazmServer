@@ -4,7 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 public class BasicRoundHandler implements RoundHandler {
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
@@ -26,24 +29,36 @@ public class BasicRoundHandler implements RoundHandler {
 
     @Override
     public void tick(long time) {
-        if (currentRound != null) {
-            currentRound.tick(time);
+        boolean hasEnded = this.hasEnded;
+        Round currentRound = this.currentRound;
 
-            if (!currentRound.isActive()) {
-                for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-                    zombiesPlayer.module().getStats()
-                            .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
-                }
+        if (currentRound == null || hasEnded) {
+            return;
+        }
 
-                if (++roundIndex < rounds.size()) {
-                    currentRound = rounds.get(roundIndex);
-                    currentRound.startRound(time);
-                }
-                else {
-                    hasEnded = true;
-                    currentRound = null;
-                }
+        currentRound.tick(time);
+        if (currentRound.isActive()) {
+            return;
+        }
+
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            if (zombiesPlayer.hasQuit()) {
+                continue;
             }
+
+            zombiesPlayer.module().getStats()
+                    .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
+        }
+
+        if (++roundIndex < rounds.size()) {
+            currentRound = rounds.get(roundIndex);
+            currentRound.startRound(time);
+
+            this.currentRound = currentRound;
+        }
+        else {
+            this.hasEnded = true;
+            this.currentRound = null;
         }
     }
 
@@ -54,22 +69,19 @@ public class BasicRoundHandler implements RoundHandler {
 
     @Override
     public int currentRoundIndex() {
-        return roundIndex;
+        return Math.min(roundIndex, rounds.size() - 1);
     }
 
     @Override
     public void setCurrentRound(int roundIndex) {
         Objects.checkIndex(roundIndex, rounds.size());
 
-        this.roundIndex = roundIndex;
-        Round newCurrent = rounds.get(roundIndex);
-        if (newCurrent == currentRound) {
+        if (currentRound != null) {
             currentRound.endRound();
-            currentRound.startRound(System.currentTimeMillis());
-            return;
         }
 
-        currentRound = newCurrent;
+        this.roundIndex = roundIndex;
+        currentRound = rounds.get(roundIndex);
         currentRound.startRound(System.currentTimeMillis());
     }
 
@@ -81,5 +93,11 @@ public class BasicRoundHandler implements RoundHandler {
     @Override
     public boolean hasEnded() {
         return hasEnded;
+    }
+
+    @Override
+    public void end() {
+        hasEnded = true;
+        currentRound = null;
     }
 }

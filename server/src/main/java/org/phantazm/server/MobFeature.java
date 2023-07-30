@@ -28,11 +28,13 @@ import org.phantazm.mob.config.MobModelConfigProcessor;
 import org.phantazm.mob.goal.*;
 import org.phantazm.mob.skill.*;
 import org.phantazm.mob.target.*;
-import org.phantazm.mob.validator.AlwaysValid;
-import org.phantazm.mob.validator.AndValidator;
-import org.phantazm.mob.validator.NotSelfValidator;
-import org.phantazm.mob.validator.OrValidator;
+import org.phantazm.mob.validator.*;
 import org.phantazm.zombies.mob.goal.BreakNearbyWindowGoal;
+import org.phantazm.zombies.mob.skill.AttributeModifyingSkill;
+import org.phantazm.zombies.mob.skill.ShootProjectileSkill;
+import org.phantazm.zombies.mob.skill.SummonMobSkill;
+import org.phantazm.zombies.mob.skill.hit_action.AttributeModifierAction;
+import org.phantazm.zombies.mob.skill.hit_action.DamageAction;
 import org.phantazm.zombies.mob.validator.MobValidator;
 import org.phantazm.zombies.mob.validator.ZombiesPlayerValidator;
 import org.slf4j.Logger;
@@ -123,7 +125,6 @@ public final class MobFeature {
         //mob goals
         contextManager.registerElementClass(FollowEntityGoal.class);
         contextManager.registerElementClass(ChargeAtEntityGoal.class);
-        contextManager.registerElementClass(UseSkillGoal.class);
         contextManager.registerElementClass(MeleeAttackGoal.class);
         contextManager.registerElementClass(PlayStepSoundGoal.class);
 
@@ -131,15 +132,23 @@ public final class MobFeature {
         contextManager.registerElementClass(BreakNearbyWindowGoal.class);
 
         //mob skills
+        contextManager.registerElementClass(AddVelocitySkill.class);
+        contextManager.registerElementClass(ApplyPotionSkill.class);
         contextManager.registerElementClass(BleedEntitiesSkill.class);
         contextManager.registerElementClass(DamageEntitySkill.class);
         contextManager.registerElementClass(KnockbackEntitySkill.class);
         contextManager.registerElementClass(PlaySoundSkill.class);
-        contextManager.registerElementClass(AttributeModifyingSkill.class);
+        contextManager.registerElementClass(PushEntitySkill.class);
         contextManager.registerElementClass(SendMessageSkill.class);
         contextManager.registerElementClass(JumpTowardsTargetSkill.class);
         contextManager.registerElementClass(SpawnParticleSkill.class);
         contextManager.registerElementClass(RadialDamageEntitySkill.class);
+
+        contextManager.registerElementClass(SummonMobSkill.class);
+        contextManager.registerElementClass(AttributeModifyingSkill.class);
+        contextManager.registerElementClass(ShootProjectileSkill.class);
+        contextManager.registerElementClass(DamageAction.class);
+        contextManager.registerElementClass(AttributeModifierAction.class);
 
         //mob meta skills
         contextManager.registerElementClass(TimerSkill.class);
@@ -155,12 +164,15 @@ public final class MobFeature {
         contextManager.registerElementClass(LastHitEntitySelector.class);
         contextManager.registerElementClass(AllPlayersSelector.class);
         contextManager.registerElementClass(NearestEntitiesSelector.class);
+        contextManager.registerElementClass(AITargetSelector.class);
 
         //mob validators
         contextManager.registerElementClass(AlwaysValid.class);
         contextManager.registerElementClass(AndValidator.class);
         contextManager.registerElementClass(OrValidator.class);
         contextManager.registerElementClass(NotSelfValidator.class);
+        contextManager.registerElementClass(LineOfSightValidator.class);
+        contextManager.registerElementClass(DistanceValidator.class);
 
         //zombies mob validators
         contextManager.registerElementClass(ZombiesPlayerValidator.class);

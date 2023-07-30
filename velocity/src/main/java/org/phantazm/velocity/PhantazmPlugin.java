@@ -1,17 +1,18 @@
 package org.phantazm.velocity;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
-import org.phantazm.commons.Namespaces;
-import org.phantazm.messaging.MessageChannels;
+import org.phantazm.messaging.packet.player.MapDataVersionQueryPacket;
 import org.phantazm.velocity.listener.MaliciousPluginMessageBlocker;
 import org.phantazm.velocity.listener.ProtocolVersionForwarder;
 import org.phantazm.velocity.listener.ProxyMessagingHandler;
+
+import java.util.Collections;
 
 /**
  * A velocity plugin used to communicate information to the Phantazm server.
@@ -39,15 +40,12 @@ public class PhantazmPlugin {
      */
     @Subscribe
     public void onInitialize(ProxyInitializeEvent event) {
-        ChannelIdentifier proxyToServer =
-                MinecraftChannelIdentifier.create(Namespaces.PHANTAZM, MessageChannels.PROXY_TO_SERVER);
-        ChannelIdentifier clientToProxy = MinecraftChannelIdentifier.create(Namespaces.PHANTAZM,
-                MessageChannels.CLIENT_TO_PROXY);
-        server.getChannelRegistrar().register(proxyToServer);
-        server.getChannelRegistrar().register(clientToProxy);
-        server.getEventManager().register(this, new MaliciousPluginMessageBlocker(proxyToServer));
-        server.getEventManager().register(this, new ProtocolVersionForwarder());
-        server.getEventManager().register(this, new ProxyMessagingHandler(clientToProxy));
+        server.getChannelRegistrar().register(MinecraftChannelIdentifier.from(MapDataVersionQueryPacket.ID));
+
+        EventManager eventManager = server.getEventManager();
+        eventManager.register(this, new MaliciousPluginMessageBlocker(Collections.emptySet()));
+        eventManager.register(this, new ProtocolVersionForwarder());
+        eventManager.register(this, ProxyMessagingHandler.createDefault());
     }
 
 }

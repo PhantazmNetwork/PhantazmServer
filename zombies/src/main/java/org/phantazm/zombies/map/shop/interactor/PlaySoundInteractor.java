@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.shop.interactor;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -15,6 +16,7 @@ import java.util.Objects;
         Plays a Minecraft sound. Can either be specific to the player activating this shop, or global (instance-wide).
         """)
 @Model("zombies.map.shop.interactor.play_sound")
+@Cache(false)
 public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data> {
     private final Instance instance;
 

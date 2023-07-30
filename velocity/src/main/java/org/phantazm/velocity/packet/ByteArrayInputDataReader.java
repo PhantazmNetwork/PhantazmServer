@@ -1,6 +1,7 @@
 package org.phantazm.velocity.packet;
 
 import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.messaging.serialization.DataReader;
 
@@ -20,6 +21,10 @@ public class ByteArrayInputDataReader implements DataReader {
      */
     public ByteArrayInputDataReader(@NotNull ByteArrayDataInput input) {
         this.input = Objects.requireNonNull(input, "input");
+    }
+
+    public ByteArrayInputDataReader(byte @NotNull[] bytes) {
+        this(ByteStreams.newDataInput(bytes));
     }
 
     @Override

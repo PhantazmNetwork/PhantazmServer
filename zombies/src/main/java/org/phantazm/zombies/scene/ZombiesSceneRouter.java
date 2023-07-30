@@ -2,15 +2,20 @@ package org.phantazm.zombies.scene;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.SceneProvider;
 import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRouteRequest> {
+    public static final Key KEY = Key.key(Namespaces.PHANTAZM, "zombies");
+
     private final Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders;
 
     private boolean shutdown = false;
@@ -58,29 +63,34 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     }
 
     @Override
-    public @NotNull RouteResult<ZombiesScene> findScene(@NotNull ZombiesRouteRequest routeRequest) {
+    public @NotNull CompletableFuture<RouteResult<ZombiesScene>> findScene(@NotNull ZombiesRouteRequest routeRequest) {
         if (isShutdown()) {
-            return RouteResult.failure(Component.text("The router is shutdown."));
+            return CompletableFuture.completedFuture(
+                    RouteResult.failure(Component.text("This game has shut down.", NamedTextColor.RED)));
         }
         if (!isJoinable()) {
-            return RouteResult.failure(Component.text("The router is not joinable."));
+            return CompletableFuture.completedFuture(
+                    RouteResult.failure(Component.text("This game is not " + "joinable.", NamedTextColor.RED)));
         }
 
         if (routeRequest.targetMap() != null) {
             return joinGame(routeRequest);
         }
 
-        return rejoinGame(routeRequest);
+        return CompletableFuture.completedFuture(rejoinGame(routeRequest));
     }
 
-    private RouteResult<ZombiesScene> joinGame(ZombiesRouteRequest routeRequest) {
+    private CompletableFuture<RouteResult<ZombiesScene>> joinGame(ZombiesRouteRequest routeRequest) {
         SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider = sceneProviders.get(routeRequest.targetMap());
         if (sceneProvider == null) {
-            return RouteResult.failure(Component.text("No games exist with key " + routeRequest.targetMap() + "."));
+            return CompletableFuture.completedFuture(RouteResult.failure(
+                    Component.text("No games exist with key " + routeRequest.targetMap() + ".", NamedTextColor.RED)));
         }
 
-        return sceneProvider.provideScene(routeRequest.joinRequest()).map(RouteResult::success)
-                .orElseGet(() -> RouteResult.failure(Component.text("No games are joinable.")));
+        return sceneProvider.provideScene(routeRequest.joinRequest()).thenApply(sceneOptional -> {
+            return sceneOptional.map(RouteResult::success)
+                    .orElseGet(() -> RouteResult.failure(Component.text("No games are joinable.", NamedTextColor.RED)));
+        });
     }
 
     private RouteResult<ZombiesScene> rejoinGame(ZombiesRouteRequest routeRequest) {
@@ -137,5 +147,10 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
         }
 
         return false;
+    }
+
+    @Override
+    public @NotNull Key key() {
+        return KEY;
     }
 }

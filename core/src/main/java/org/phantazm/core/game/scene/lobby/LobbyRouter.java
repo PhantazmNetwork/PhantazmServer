@@ -1,18 +1,23 @@
 package org.phantazm.core.game.scene.lobby;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.core.game.scene.RouteResult;
 import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.SceneProvider;
 import org.phantazm.core.game.scene.SceneRouter;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * {@link Scene} router for {@link Lobby}s.
  */
 public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
+    public static final Key KEY = Key.key(Namespaces.PHANTAZM, "lobby");
 
     private final Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders;
 
@@ -58,22 +63,27 @@ public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
     }
 
     @Override
-    public @NotNull RouteResult<Lobby> findScene(@NotNull LobbyRouteRequest routeRequest) {
+    public @NotNull CompletableFuture<RouteResult<Lobby>> findScene(@NotNull LobbyRouteRequest routeRequest) {
         if (isShutdown()) {
-            return RouteResult.failure(Component.text("The router is shutdown."));
+            return CompletableFuture.completedFuture(
+                    RouteResult.failure(Component.text("This game has shut down.", NamedTextColor.RED)));
         }
         if (!isJoinable()) {
-            return RouteResult.failure(Component.text("The router is not joinable."));
+            return CompletableFuture.completedFuture(
+                    RouteResult.failure(Component.text("This game is not joinable.", NamedTextColor.RED)));
         }
 
         SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider = lobbyProviders.get(routeRequest.targetLobbyName());
         if (lobbyProvider == null) {
-            return RouteResult.failure(
-                    Component.text("No lobbies exist under the name " + routeRequest.targetLobbyName() + "."));
+            return CompletableFuture.completedFuture(RouteResult.failure(
+                    Component.text("No lobbies exist under the name " + routeRequest.targetLobbyName() + ".",
+                            NamedTextColor.RED)));
         }
 
-        return lobbyProvider.provideScene(routeRequest.joinRequest()).map(RouteResult::success)
-                .orElseGet(() -> RouteResult.failure(Component.text("No lobbies are joinable.")));
+        return lobbyProvider.provideScene(routeRequest.joinRequest()).thenApply(sceneOptional -> {
+            return sceneOptional.map(RouteResult::success).orElseGet(
+                    () -> RouteResult.failure(Component.text("No lobbies are joinable.", NamedTextColor.RED)));
+        });
     }
 
     @Override
@@ -123,4 +133,8 @@ public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
         }
     }
 
+    @Override
+    public @NotNull Key key() {
+        return KEY;
+    }
 }

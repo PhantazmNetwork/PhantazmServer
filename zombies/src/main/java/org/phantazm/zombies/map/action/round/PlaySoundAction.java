@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.action.round;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -14,6 +15,7 @@ import java.util.Random;
 import java.util.UUID;
 
 @Model("zombies.map.round.action.play_sound")
+@Cache(false)
 public class PlaySoundAction implements Action<Round> {
     private final Data data;
     private final Random random;

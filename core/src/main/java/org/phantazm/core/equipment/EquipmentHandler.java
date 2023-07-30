@@ -3,11 +3,14 @@ package org.phantazm.core.equipment;
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.inventory.*;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class EquipmentHandler {
     private final InventoryAccessRegistry accessRegistry;
@@ -102,5 +105,92 @@ public class EquipmentHandler {
                 }
             }
         });
+    }
+
+    public @NotNull Result addOrReplaceEquipment(Key groupKey, Key equipmentKey, boolean allowReplace, int specificSlot,
+            boolean allowDuplicate, @NotNull Supplier<? extends Optional<? extends Equipment>> equipmentSupplier,
+            @Nullable Player player) {
+        if (!allowDuplicate && hasEquipment(groupKey, equipmentKey)) {
+            return Result.DUPLICATE;
+        }
+
+        boolean addEquipment;
+        if (!(addEquipment = canAddEquipment(groupKey)) && !allowReplace) {
+            return Result.FAILED;
+        }
+
+        InventoryAccessRegistry accessRegistry = accessRegistry();
+        Optional<InventoryAccess> inventoryAccessOptional = accessRegistry.getCurrentAccess();
+        if (inventoryAccessOptional.isEmpty()) {
+            return Result.FAILED;
+        }
+
+        InventoryAccess inventoryAccess = inventoryAccessOptional.get();
+        if (addEquipment) {
+            Optional<? extends Equipment> equipmentOptional = equipmentSupplier.get();
+            if (equipmentOptional.isEmpty()) {
+                return Result.FAILED;
+            }
+
+            Equipment equipment = equipmentOptional.get();
+            if (specificSlot < 0) {
+                addEquipment(equipment, groupKey);
+                return Result.ADDED;
+            }
+
+            InventoryObjectGroup group = inventoryAccess.groups().get(groupKey);
+            if (invalidGroupSlot(group, specificSlot)) {
+                return Result.FAILED;
+            }
+
+            InventoryProfile profile = group.getProfile();
+            if (!profile.hasInventoryObject(specificSlot)) {
+                accessRegistry.replaceObject(specificSlot, equipment);
+                return Result.ADDED;
+            }
+
+            InventoryObject currentObject = profile.getInventoryObject(specificSlot);
+            if (allowReplace || group.defaultObject() == currentObject) {
+                InventoryObject old = accessRegistry.replaceObject(specificSlot, equipment);
+                return old == null || old == group.defaultObject() ? Result.ADDED : Result.REPLACED;
+            }
+
+            return Result.FAILED;
+        }
+
+        if (player == null) {
+            return Result.FAILED;
+        }
+
+        int targetSlot = specificSlot < 0 ? player.getHeldSlot() : specificSlot;
+
+        InventoryObjectGroup group = inventoryAccess.groups().get(groupKey);
+        if (invalidGroupSlot(group, targetSlot)) {
+            return Result.FAILED;
+        }
+
+        Optional<? extends Equipment> equipmentOptional = equipmentSupplier.get();
+        if (equipmentOptional.isEmpty()) {
+            return Result.FAILED;
+        }
+
+        Equipment equipment = equipmentOptional.get();
+        InventoryObject old = accessRegistry.replaceObject(targetSlot, equipment);
+        return old == null || old == group.defaultObject() ? Result.ADDED : Result.REPLACED;
+    }
+
+    private boolean invalidGroupSlot(InventoryObjectGroup group, int slot) {
+        return group == null || !group.getSlots().contains(slot);
+    }
+
+    public enum Result {
+        ADDED,
+        REPLACED,
+        DUPLICATE,
+        FAILED;
+
+        public boolean success() {
+            return this == ADDED || this == REPLACED;
+        }
     }
 }

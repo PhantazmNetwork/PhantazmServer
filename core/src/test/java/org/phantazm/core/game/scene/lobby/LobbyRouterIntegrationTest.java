@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -26,10 +25,9 @@ public class LobbyRouterIntegrationTest {
         SceneRouter<Lobby, LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
         router.setJoinable(false);
-        LobbyRouteRequest request =
-                new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(env.process().connection(), List.of()));
+        LobbyRouteRequest request = new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(List.of()));
 
-        assertTrue(router.findScene(request).scene().isEmpty());
+        assertTrue(router.findScene(request).join().scene().isEmpty());
     }
 
     @SuppressWarnings("unchecked")
@@ -41,10 +39,9 @@ public class LobbyRouterIntegrationTest {
         SceneRouter<Lobby, LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
         router.shutdown();
-        LobbyRouteRequest request =
-                new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(env.process().connection(), List.of()));
+        LobbyRouteRequest request = new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(List.of()));
 
-        assertTrue(router.findScene(request).scene().isEmpty());
+        assertTrue(router.findScene(request).join().scene().isEmpty());
     }
 
     @SuppressWarnings("unchecked")
@@ -55,10 +52,9 @@ public class LobbyRouterIntegrationTest {
                 Collections.singletonMap(lobbyName, (SceneProvider<Lobby, LobbyJoinRequest>)mock(SceneProvider.class));
         SceneRouter<Lobby, LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
-        LobbyRouteRequest request =
-                new LobbyRouteRequest("notMain", new BasicLobbyJoinRequest(env.process().connection(), List.of()));
+        LobbyRouteRequest request = new LobbyRouteRequest("notMain", new BasicLobbyJoinRequest(List.of()));
 
-        assertTrue(router.findScene(request).scene().isEmpty());
+        assertTrue(router.findScene(request).join().scene().isEmpty());
     }
 
 }

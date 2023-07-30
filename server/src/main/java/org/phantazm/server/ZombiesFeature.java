@@ -5,30 +5,24 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.packet.server.play.TeamsPacket;
-import net.minestom.server.scoreboard.Team;
-import net.minestom.server.scoreboard.TeamManager;
 import net.minestom.server.timer.TaskSchedule;
-import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.BasicClientBlockHandlerSource;
-import org.phantazm.core.InstanceClientBlockHandler;
+import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.LinearUpgradePath;
 import org.phantazm.core.equipment.NoUpgradePath;
-import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.guild.party.Party;
@@ -39,12 +33,18 @@ import org.phantazm.core.item.StaticUpdatingItem;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.core.particle.data.*;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.sound.SongLoader;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
-import org.phantazm.stats.zombies.*;
+import org.phantazm.server.config.zombies.ZombiesConfig;
+import org.phantazm.stats.zombies.JooqZombiesSQLFetcher;
+import org.phantazm.stats.zombies.SQLZombiesDatabase;
+import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.zombies.ZombiesSQLFetcher;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.corpse.CorpseCreator;
+import org.phantazm.zombies.leaderboard.BestTimeLeaderboard;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
@@ -65,7 +65,6 @@ import org.phantazm.zombies.map.shop.predicate.*;
 import org.phantazm.zombies.map.shop.predicate.logic.AndPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.NotPredicate;
 import org.phantazm.zombies.map.shop.predicate.logic.OrPredicate;
-import org.phantazm.zombies.map.shop.predicate.logic.XorPredicate;
 import org.phantazm.zombies.mob.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
@@ -76,7 +75,6 @@ import org.phantazm.zombies.powerup.PowerupInfo;
 import org.phantazm.zombies.powerup.action.*;
 import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.TimedDeactivationPredicate;
-import org.phantazm.zombies.powerup.action.BossBarTimerAction;
 import org.phantazm.zombies.powerup.visual.HologramVisual;
 import org.phantazm.zombies.powerup.visual.ItemVisual;
 import org.phantazm.zombies.scene.ZombiesScene;
@@ -98,9 +96,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public final class ZombiesFeature {
@@ -114,9 +110,12 @@ public final class ZombiesFeature {
     private static Map<Key, PowerupInfo> powerups;
     private static MobSpawnerSource mobSpawnerSource;
     private static ZombiesSceneRouter sceneRouter;
-    private static ExecutorService databaseExecutor;
-    private static HikariDataSource dataSource;
     private static ZombiesDatabase database;
+
+    private record PreloadedMap(@NotNull List<String> instancePath, @NotNull Point spawn, int chunkLoadRange) {
+
+    }
+
 
     static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
@@ -124,7 +123,8 @@ public final class ZombiesFeature {
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
             @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull RouterStore routerStore) throws IOException {
+            @NotNull SceneTransferHelper sceneTransferHelper, @NotNull SongLoader songLoader,
+            @NotNull ZombiesConfig zombiesConfig) throws IOException {
         Attributes.registerAll();
         registerElementClasses(contextManager);
 
@@ -135,56 +135,54 @@ public final class ZombiesFeature {
 
         InstanceLoader instanceLoader =
                 new AnvilFileSystemInstanceLoader(MinecraftServer.getInstanceManager(), INSTANCES_FOLDER,
-                        DynamicChunk::new);
+                        DynamicChunk::new, ExecutorFeature.getExecutor());
 
-        LOGGER.info("Preloading {} map instances", maps.size());
-        for (MapInfo map : maps.values()) {
-            instanceLoader.preload(map.settings().instancePath(),
-                    VecUtils.toPoint(map.settings().origin().add(map.settings().spawn())),
-                    map.settings().chunkLoadRange());
+        Set<PreloadedMap> instancePaths = new HashSet<>(maps.size());
+        for (MapInfo mapInfo : maps.values()) {
+            instancePaths.add(new PreloadedMap(mapInfo.settings().instancePath(),
+                    VecUtils.toPoint(mapInfo.settings().origin().add(mapInfo.settings().spawn())),
+                    mapInfo.settings().chunkLoadRange()));
         }
 
+        LOGGER.info("Preloading {} map instances", instancePaths.size());
+        List<CompletableFuture<Void>> loadFutures = new ArrayList<>(instancePaths.size());
+        for (PreloadedMap map : instancePaths) {
+            loadFutures.add(CompletableFuture.runAsync(() -> {
+                instanceLoader.preload(map.instancePath, map.spawn, map.chunkLoadRange);
+            }));
+        }
+
+        CompletableFuture.allOf(loadFutures.toArray(CompletableFuture[]::new)).join();
+
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
-        TeamManager teamManager = MinecraftServer.getTeamManager();
 
-        // https://bugs.mojang.com/browse/MC-87984
-        Team mobNoPushTeam =
-                teamManager.createBuilder("mobNoPush").collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS)
-                        .build();
-        Team corpseTeam = teamManager.createBuilder("corpses").collisionRule(TeamsPacket.CollisionRule.NEVER)
-                .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
-
-        databaseExecutor = Executors.newSingleThreadExecutor();
-        HikariConfig config = new HikariConfig("./zombies.hikari.properties");
-        dataSource = new HikariDataSource(config);
         ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
-        database = new SQLZombiesDatabase(databaseExecutor, dataSource, sqlFetcher);
+        database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource(), sqlFetcher);
+
+        ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource(globalEventNode);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
-                    new ZombiesSceneProvider(20, instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback,
-                            globalEventNode, ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(),
-                            new BasicClientBlockHandlerSource(instance -> {
-                                DimensionType dimensionType = instance.getDimensionType();
-                                return new InstanceClientBlockHandler(instance, dimensionType.getMinY(),
-                                        dimensionType.getHeight());
-                            }, globalEventNode), contextManager, keyParser, mobNoPushTeam, corpseTeam, database,
-                            ZombiesFeature.powerups(),
-                            new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator,
-                                    MobFeature.getModels()),
+                    new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
+                            instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
+                            ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(), clientBlockHandlerSource,
+                            contextManager, keyParser, database, ZombiesFeature.powerups(),
+                            new BasicZombiesPlayerSource(database, viewProvider,
+                                    EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
+                                    keyParser),
                             mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
-                                    .provide(mapDependencyProvider));
+                                    .provide(mapDependencyProvider), songLoader);
             providers.put(entry.getKey(), provider);
         }
 
         ZombiesFeature.sceneRouter = new ZombiesSceneRouter(providers);
 
-        MinecraftServer.getSchedulerManager()
-                .scheduleTask(() -> sceneRouter.tick(System.currentTimeMillis()), TaskSchedule.immediate(),
-                        TaskSchedule.nextTick());
+        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+            sceneRouter.tick(System.currentTimeMillis());
+        }, TaskSchedule.immediate(), TaskSchedule.nextTick());
 
-        SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
         commandManager.register(
-                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, transferHelper, sceneFallback));
+                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, sceneTransferHelper,
+                        sceneFallback));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {
@@ -213,28 +211,45 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(AndPredicate.class);
         contextManager.registerElementClass(OrPredicate.class);
         contextManager.registerElementClass(NotPredicate.class);
-        contextManager.registerElementClass(XorPredicate.class);
 
         contextManager.registerElementClass(EquipmentCostPredicate.class);
         contextManager.registerElementClass(EquipmentSpacePredicate.class);
         contextManager.registerElementClass(EquipmentPresentPredicate.class);
+        contextManager.registerElementClass(EquipmentTierPredicate.class);
 
         //ShopInteractor
         contextManager.registerElementClass(MapFlaggingInteractor.class);
         contextManager.registerElementClass(PlayerFlaggingInteractor.class);
         contextManager.registerElementClass(MessagingInteractor.class);
         contextManager.registerElementClass(PlaySoundInteractor.class);
+        contextManager.registerElementClass(RefillAllAmmoInteractor.class);
         contextManager.registerElementClass(DelayedInteractor.class);
+        contextManager.registerElementClass(DragonsWrathInteractor.class);
         contextManager.registerElementClass(ConditionalInteractor.class);
+        contextManager.registerElementClass(CountingInteractor.class);
         contextManager.registerElementClass(OpenGuiInteractor.class);
         contextManager.registerElementClass(CloseGuiInteractor.class);
+        contextManager.registerElementClass(CostSubstitutingItem.class);
         contextManager.registerElementClass(AddEquipmentInteractor.class);
+        contextManager.registerElementClass(EquipmentStationInteractor.class);
         contextManager.registerElementClass(ChangeDoorStateInteractor.class);
         contextManager.registerElementClass(DeductCoinsInteractor.class);
         contextManager.registerElementClass(RefillAmmoInteractor.class);
+        contextManager.registerElementClass(ReviveAllInteractor.class);
         contextManager.registerElementClass(UpdateBlockPropertiesInteractor.class);
         contextManager.registerElementClass(SubstitutedTitleInteractor.class);
         contextManager.registerElementClass(TitleInteractor.class);
+        contextManager.registerElementClass(SlotMachineInteractor.class);
+        contextManager.registerElementClass(SlotMachineInteractor.BasicSlotMachineFrame.class);
+        contextManager.registerElementClass(SlotMachineInteractor.ConstantDelayFormula.class);
+        contextManager.registerElementClass(SlotMachineInteractor.LinearDelayFormula.class);
+        contextManager.registerElementClass(PlaySongInteractor.class);
+        contextManager.registerElementClass(ChangeSelectionGroupInteractor.class);
+        contextManager.registerElementClass(SelectionGroupInteractor.class);
+        contextManager.registerElementClass(AnnounceActiveSelectionGroup.class);
+        contextManager.registerElementClass(AdditiveTransactionModifierInteractor.class);
+        contextManager.registerElementClass(UpgradeEquipmentInteractor.class);
+        contextManager.registerElementClass(ChestStateInteractor.class);
 
         //ShopDisplay
         contextManager.registerElementClass(StaticHologramDisplay.class);
@@ -253,6 +268,8 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(InteractionPoint.class);
         contextManager.registerElementClass(CombiningArmorPlayerDisplayCreator.class);
 
+        contextManager.registerElementClass(BestTimeLeaderboard.class);
+
         //Sidebar
         contextManager.registerElementClass(SidebarUpdater.class);
         contextManager.registerElementClass(CollectionSidebarSection.class);
@@ -263,7 +280,6 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(ConstantSidebarLineUpdater.class);
         contextManager.registerElementClass(DateLineUpdater.class);
         contextManager.registerElementClass(JoinedPlayersSidebarLineUpdater.class);
-        contextManager.registerElementClass(PlayerStateSidebarLineUpdater.class);
         contextManager.registerElementClass(RemainingZombiesSidebarLineUpdater.class);
         contextManager.registerElementClass(RoundSidebarLineUpdater.class);
         contextManager.registerElementClass(TicksLineUpdater.class);
@@ -318,6 +334,7 @@ public final class ZombiesFeature {
         contextManager.registerElementClass(SendMessageAction.class);
         contextManager.registerElementClass(AttributeModifierAction.class);
         contextManager.registerElementClass(PreventAmmoDrainAction.class);
+        contextManager.registerElementClass(RefillAmmoAction.class);
 
         //Player conditions
         contextManager.registerElementClass(EquipmentCondition.class);
@@ -384,31 +401,4 @@ public final class ZombiesFeature {
         return FeatureUtils.check(database);
     }
 
-    public static void end() {
-        if (dataSource != null) {
-            dataSource.close();
-        }
-
-        if (databaseExecutor != null) {
-            databaseExecutor.shutdown();
-
-            try {
-                LOGGER.info(
-                        "Shutting down database executor. Please allow for one minute before shutdown " + "completes.");
-                if (!databaseExecutor.awaitTermination(1L, TimeUnit.MINUTES)) {
-                    databaseExecutor.shutdownNow();
-
-                    LOGGER.warn(
-                            "Not all database tasks completed. Please allow for one minute for tasks to be canceled.");
-                    if (!databaseExecutor.awaitTermination(1L, TimeUnit.MINUTES)) {
-                        LOGGER.warn("Database tasks failed to cancel.");
-                    }
-                }
-            }
-            catch (InterruptedException e) {
-                databaseExecutor.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
-        }
-    }
 }

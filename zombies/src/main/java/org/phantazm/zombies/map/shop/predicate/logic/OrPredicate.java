@@ -1,14 +1,19 @@
 package org.phantazm.zombies.map.shop.predicate.logic;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.predicate.PredicateBase;
 import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 
 import java.util.List;
 
 @Model("zombies.map.shop.predicate.or")
+@Cache(false)
 public class OrPredicate extends PredicateBase<OrPredicate.Data> {
     private final List<ShopPredicate> predicates;
 
@@ -19,10 +24,10 @@ public class OrPredicate extends PredicateBase<OrPredicate.Data> {
     }
 
     @Override
-    public boolean canInteract(@NotNull PlayerInteraction interaction) {
+    public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
         boolean succeeded = false;
         for (ShopPredicate predicate : predicates) {
-            if (predicate.canInteract(interaction)) {
+            if (predicate.canInteract(interaction, shop)) {
                 succeeded = true;
 
                 if (data.shortCircuit) {
@@ -36,5 +41,9 @@ public class OrPredicate extends PredicateBase<OrPredicate.Data> {
 
     @DataObject
     public record Data(boolean shortCircuit, @NotNull @ChildPath("predicates") List<String> paths) {
+        @Default("shortCircuit")
+        public static @NotNull ConfigElement shortCircuitDefault() {
+            return ConfigPrimitive.of(true);
+        }
     }
 }

@@ -15,19 +15,25 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import it.unimi.dsi.fastutil.objects.Object2FloatArrayMap;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.attribute.Attribute;
+import net.minestom.server.attribute.AttributeModifier;
+import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.timer.Task;
+import net.minestom.server.timer.TaskSchedule;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.ElementUtils;
+import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob.BasicPhantazmMob;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
@@ -37,6 +43,8 @@ import org.phantazm.mob.skill.Skill;
 import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.proxima.bindings.minestom.Spawner;
+import org.phantazm.zombies.ExtraNodeKeys;
+import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +73,7 @@ public class BasicMobSpawner implements MobSpawner {
     private final Spawner proximaSpawner;
     private final KeyParser keyParser;
     private final MobStore mobStore;
+    private final Supplier<? extends MapObjects> mapObjects;
     private final DependencyProvider mobDependencyProvider;
 
     /**
@@ -79,15 +88,33 @@ public class BasicMobSpawner implements MobSpawner {
         this.proximaSpawner = Objects.requireNonNull(proximaSpawner, "neuralSpawner");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
 
         this.mobDependencyProvider =
                 new ModuleDependencyProvider(keyParser, new Module(this, mobStore, random, mapObjects));
     }
 
     @Override
-    public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos pos, @NotNull MobModel model) {
-        ProximaEntity proximaEntity = proximaSpawner.spawn(instance, pos, model.getEntityType(), model.getFactory());
+    public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos pos, @NotNull MobModel model,
+            @NotNull Consumer<? super ProximaEntity> init) {
+        ProximaEntity proximaEntity =
+                proximaSpawner.spawn(instance, pos, model.getEntityType(), model.getFactory(), entity -> {
+                    init.accept(entity);
 
+                    BoundedTracker<Window> windowTracker = mapObjects.get().windowTracker();
+                    entity.pathfinding().setPenalty((x, y, z, h) -> {
+                        Optional<Window> windowOptional = windowTracker.atPoint(x, y + 1, z);
+
+                        //noinspection OptionalIsPresent
+                        if (windowOptional.isEmpty()) {
+                            return h;
+                        }
+
+                        return windowOptional.get().isBlockBroken(x, y + 1, z) ? h : h * 10;
+                    });
+                });
+
+        setTasks(proximaEntity, model);
         setEntityMeta(proximaEntity, model);
         setEquipment(proximaEntity, model);
         setAttributes(proximaEntity, model);
@@ -116,6 +143,40 @@ public class BasicMobSpawner implements MobSpawner {
         }
 
         return mob;
+    }
+
+    private void setTasks(@NotNull ProximaEntity proximaEntity, @NotNull MobModel model) {
+        ConfigNode extraNode = model.getExtraNode();
+
+        int ticksUntilDeath = extraNode.getNumberOrDefault(6000, ExtraNodeKeys.TICKS_UNTIL_DEATH).intValue();
+        int speedupIncrements = extraNode.getNumberOrDefault(5, ExtraNodeKeys.SPEEDUP_INCREMENTS).intValue();
+        int speedupInterval = extraNode.getNumberOrDefault(1200, ExtraNodeKeys.SPEEDUP_INTERVAL).intValue();
+        double speedupAmount = extraNode.getNumberOrDefault(0.1D, ExtraNodeKeys.SPEEDUP_AMOUNT).doubleValue();
+
+        if (ticksUntilDeath >= 0) {
+            proximaEntity.scheduler()
+                    .scheduleTask(proximaEntity::kill, TaskSchedule.tick(ticksUntilDeath), TaskSchedule.stop());
+        }
+
+        if (speedupIncrements > 0) {
+            Wrapper<Task> taskWrapper = Wrapper.ofNull();
+            Task speedupTask = proximaEntity.scheduler().scheduleTask(new Runnable() {
+                private int times = 0;
+
+                @Override
+                public void run() {
+                    if (++times == speedupIncrements) {
+                        taskWrapper.get().cancel();
+                    }
+
+                    UUID modifierUUID = UUID.randomUUID();
+                    proximaEntity.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(
+                            new AttributeModifier(modifierUUID, modifierUUID.toString(), speedupAmount,
+                                    AttributeOperation.MULTIPLY_BASE));
+                }
+            }, TaskSchedule.tick(speedupInterval), TaskSchedule.tick(speedupInterval));
+            taskWrapper.set(speedupTask);
+        }
     }
 
     private void setEntityMeta(@NotNull ProximaEntity neuralEntity, @NotNull MobModel model) {
@@ -251,8 +312,12 @@ public class BasicMobSpawner implements MobSpawner {
             return random;
         }
 
-        public @NotNull Supplier<? extends MapObjects> mapObjects() {
+        public @NotNull Supplier<? extends MapObjects> mapObjectsSupplier() {
             return mapObjects;
+        }
+
+        public @NotNull MapObjects mapObjects() {
+            return mapObjects.get();
         }
     }
 }

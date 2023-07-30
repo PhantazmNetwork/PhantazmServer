@@ -7,9 +7,12 @@ import net.minestom.server.command.CommandManager;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouterStore;
+import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.player.IdentitySource;
+import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.command.server.*;
 import org.phantazm.server.config.server.ShutdownConfig;
+import org.phantazm.server.config.server.ZombiesGamereportConfig;
 import org.phantazm.server.permission.FilePermissionHandler;
 import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.server.player.LoginValidator;
@@ -25,7 +28,8 @@ public final class ServerCommandFeature {
     static void initialize(@NotNull CommandManager commandManager, @NotNull LoginValidator loginValidator,
             boolean whitelist, @NotNull MappingProcessorSource mappingProcessorSource,
             @NotNull ConfigCodec permissionsCodec, @NotNull RouterStore routerStore,
-            @NotNull ShutdownConfig shutdownConfig) {
+            @NotNull ShutdownConfig shutdownConfig, @NotNull ZombiesGamereportConfig zombiesGamereportConfig,
+            @NotNull PlayerViewProvider playerViewProvider, @NotNull SceneTransferHelper sceneTransferHelper) {
         ServerCommandFeature.permissionHandler =
                 new FilePermissionHandler(mappingProcessorSource, permissionsCodec, PhantazmServer.PERMISSIONS_FILE);
 
@@ -37,6 +41,8 @@ public final class ServerCommandFeature {
         commandManager.register(
                 new OrderlyShutdownCommand(routerStore, shutdownConfig, MinecraftServer.getGlobalEventHandler()));
         commandManager.register(new DebugCommand());
+        commandManager.register(new GamereportCommand(routerStore, zombiesGamereportConfig));
+        commandManager.register(new GhostCommand(playerViewProvider, sceneTransferHelper, routerStore));
 
         commandManager.getConsoleSender().addPermission(ALL_PERMISSIONS);
     }

@@ -8,6 +8,7 @@ import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.core.equipment.Upgradable;
 import org.phantazm.core.equipment.UpgradePath;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.ZombiesPlayerModule;
 
@@ -29,7 +30,7 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
     }
 
     @Override
-    public boolean canInteract(@NotNull PlayerInteraction interaction) {
+    public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
         ZombiesPlayer player = interaction.player();
         ZombiesPlayerModule module = player.module();
         EquipmentHandler handler = module.getEquipmentHandler();

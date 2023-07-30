@@ -5,8 +5,10 @@ import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.HashVec3I2ObjectMap;
 import com.github.steanky.vector.Vec3I2ObjectMap;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceUnregisterEvent;
+import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.world.DimensionType;
@@ -17,9 +19,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class InstanceSettingsFunction implements Function<Instance, InstanceSpawner.InstanceSettings> {
+    private final EventNode<Event> rootNode;
     private final Map<UUID, InstanceSpawner.InstanceSettings> settingsMap;
 
     public InstanceSettingsFunction(@NotNull EventNode<Event> rootNode) {
+        this.rootNode = rootNode;
         this.settingsMap = new ConcurrentHashMap<>();
         rootNode.addListener(InstanceUnregisterEvent.class, this::onInstanceUnregister);
     }
@@ -48,9 +52,14 @@ public class InstanceSettingsFunction implements Function<Instance, InstanceSpaw
 
             InstanceSpace instanceSpace = new InstanceSpace(instance);
             ThreadLocal<Vec3I2ObjectMap<Node>> local = ThreadLocal.withInitial(() -> new HashVec3I2ObjectMap<>(bounds));
-            BasicInstanceSpaceHandler instanceSpaceHandler = new BasicInstanceSpaceHandler(instanceSpace);
 
-            return new InstanceSpawner.InstanceSettings(local, instanceSpaceHandler);
+            EventNode<InstanceEvent> node =
+                    EventNode.type("pathfinding_node_" + instance.getUniqueId(), EventFilter.INSTANCE,
+                            (e, v) -> v == instance);
+            rootNode.addChild(node);
+
+            BasicInstanceSpaceHandler instanceSpaceHandler = new BasicInstanceSpaceHandler(instanceSpace, node);
+            return new InstanceSpawner.InstanceSettings(local, node, instanceSpaceHandler);
         });
     }
 
@@ -58,6 +67,7 @@ public class InstanceSettingsFunction implements Function<Instance, InstanceSpaw
         InstanceSpawner.InstanceSettings settings = settingsMap.remove(event.getInstance().getUniqueId());
 
         if (settings != null) {
+            rootNode.removeChild(settings.instanceNode());
             settings.spaceHandler().space().clearCache();
         }
     }

@@ -4,6 +4,8 @@ import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.timer.ExecutionType;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.MathUtils;
 import org.phantazm.mob.PhantazmMob;
@@ -43,7 +45,7 @@ public class TemporalSkill implements Skill {
             return;
         }
 
-        long elapsed = System.currentTimeMillis() - startTime;
+        long elapsed = time - startTime;
         if (elapsed / MinecraftServer.TICK_MS >= entity.getTag(this.actualDelay)) {
             delegate.end(self);
 
@@ -54,11 +56,41 @@ public class TemporalSkill implements Skill {
 
     @Override
     public void use(@NotNull PhantazmMob self) {
+        Entity entity = self.entity();
+        long oldStartTime = entity.getTag(this.startTime);
+        long time = System.currentTimeMillis();
+        if (oldStartTime >= 0) {
+            long elapsed = time - oldStartTime;
+            if (elapsed / MinecraftServer.TICK_MS < entity.getTag(this.actualDelay)) {
+                delegate.end(self);
+            }
+        }
+
         delegate.use(self);
 
-        Entity entity = self.entity();
-        entity.setTag(startTime, System.currentTimeMillis());
+        entity.setTag(startTime, time);
         entity.setTag(actualDelay, MathUtils.randomInterval(data.minDuration, data.maxDuration));
+    }
+
+    @Override
+    public void end(@NotNull PhantazmMob self) {
+        Entity entity = self.entity();
+        long startTime = entity.getTag(this.startTime);
+        long actualDelay = entity.getTag(this.actualDelay);
+        if (startTime < 0 || actualDelay < 0) {
+            delegate.end(self);
+            return;
+        }
+
+        long ticksRemaining = actualDelay - ((System.currentTimeMillis() - startTime) / MinecraftServer.TICK_MS);
+        if (ticksRemaining <= 0) {
+            delegate.end(self);
+            return;
+        }
+
+        MinecraftServer.getSchedulerManager()
+                .scheduleTask(() -> delegate.end(self), TaskSchedule.tick((int)ticksRemaining), TaskSchedule.stop(),
+                        ExecutionType.SYNC);
     }
 
     @Override

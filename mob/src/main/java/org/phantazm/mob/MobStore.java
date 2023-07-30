@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.commons.Tickable;
 import org.phantazm.mob.skill.Skill;
+import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
+import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,6 +51,7 @@ public class MobStore implements Tickable {
     public void onMobDeath(@NotNull EntityDeathEvent event) {
         UUID uuid = event.getEntity().getUuid();
 
+        tickableSkills.remove(uuid);
         PhantazmMob mob = uuidToMob.remove(uuid);
         if (mob != null) {
             Collection<Skill> deathSkills = mob.triggers().get(DEATH_KEY);
@@ -57,9 +60,23 @@ public class MobStore implements Tickable {
                     skill.use(mob);
                 }
             }
-        }
 
-        tickableSkills.remove(uuid);
+            for (Collection<Skill> skills : mob.triggers().values()) {
+                for (Skill skill : skills) {
+                    skill.end(mob);
+                }
+            }
+
+            for (GoalGroup group : mob.entity().goalGroups()) {
+                for (ProximaGoal goal : group.goals()) {
+                    if (goal instanceof SkillDelegatingGoal skillDelegatingGoal) {
+                        for (Skill skill : skillDelegatingGoal.skills()) {
+                            skill.end(mob);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**

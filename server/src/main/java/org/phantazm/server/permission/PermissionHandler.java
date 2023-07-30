@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 public interface PermissionHandler {
+    String EVERYONE_GROUP = "everyone";
+
     void applyPermissions(@NotNull UUID uuid, @NotNull CommandSender sender);
 
     void flush();

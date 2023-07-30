@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.validator.TargetValidator;
 
@@ -19,7 +20,7 @@ public class MobValidator implements TargetValidator {
     }
 
     @Override
-    public boolean valid(@NotNull Entity targeter, @NotNull Entity entity) {
+    public boolean valid(@Nullable Entity targeter, @NotNull Entity entity) {
         return mobStore.hasMob(entity.getUuid());
     }
 }

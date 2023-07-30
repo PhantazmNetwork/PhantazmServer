@@ -10,6 +10,9 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.MobStore;
+import org.phantazm.mob.PhantazmMob;
+import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
@@ -28,6 +31,7 @@ public class IgniteShotHandler implements ShotHandler {
 
     private final Tag<Long> lastFireDamage;
     private final Deque<LivingEntity> targets;
+    private final MobStore mobStore;
 
     /**
      * Creates an {@link IgniteShotHandler}.
@@ -35,12 +39,13 @@ public class IgniteShotHandler implements ShotHandler {
      * @param data The {@link IgniteShotHandler}'s {@link Data}
      */
     @FactoryMethod
-    public IgniteShotHandler(@NotNull Data data) {
+    public IgniteShotHandler(@NotNull Data data, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data, "data");
 
         UUID uuid = UUID.randomUUID();
         this.lastFireDamage = Tag.Long("last_fire_damage_time" + uuid).defaultValue(-1L);
         this.targets = new ConcurrentLinkedDeque<>();
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 
     @Override
@@ -53,6 +58,11 @@ public class IgniteShotHandler implements ShotHandler {
     private void setFire(Collection<GunHit> hits, int duration) {
         for (GunHit target : hits) {
             LivingEntity entity = target.entity();
+            PhantazmMob mob = mobStore.getMob(entity.getUuid());
+            if (mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_FIRE)) {
+                continue;
+            }
+
             entity.setFireForDuration(duration);
 
             boolean alreadyActive = entity.getTag(lastFireDamage) != -1;

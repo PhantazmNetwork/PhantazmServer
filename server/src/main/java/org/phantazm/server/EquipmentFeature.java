@@ -21,6 +21,7 @@ import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.equipment.EquipmentTypes;
 import org.phantazm.zombies.equipment.gun.*;
+import org.phantazm.zombies.equipment.gun.action_bar.ZombiesPlayerActionBarSender;
 import org.phantazm.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
 import org.phantazm.zombies.equipment.gun.audience.PlayerAudienceProvider;
 import org.phantazm.zombies.equipment.gun.effect.*;
@@ -30,7 +31,7 @@ import org.phantazm.zombies.equipment.gun.reload.actionbar.GradientActionBarChoo
 import org.phantazm.zombies.equipment.gun.reload.actionbar.StaticActionBarChooser;
 import org.phantazm.zombies.equipment.gun.shoot.StateShootTester;
 import org.phantazm.zombies.equipment.gun.shoot.blockiteration.BasicBlockIteration;
-import org.phantazm.zombies.equipment.gun.shoot.blockiteration.WallshotBlockIteration;
+import org.phantazm.zombies.equipment.gun.shoot.blockiteration.WallshootingBlockIteration;
 import org.phantazm.zombies.equipment.gun.shoot.blockiteration.WindowBlockIteration;
 import org.phantazm.zombies.equipment.gun.shoot.endpoint.BasicShotEndpointSelector;
 import org.phantazm.zombies.equipment.gun.shoot.fire.HitScanFirer;
@@ -38,6 +39,7 @@ import org.phantazm.zombies.equipment.gun.shoot.fire.SpreadFirer;
 import org.phantazm.zombies.equipment.gun.shoot.fire.projectile.PhantazmMobProjectileCollisionFilter;
 import org.phantazm.zombies.equipment.gun.shoot.fire.projectile.ProjectileFirer;
 import org.phantazm.zombies.equipment.gun.shoot.handler.*;
+import org.phantazm.zombies.equipment.gun.shoot.wallshooting.MapObjectsWallshootingChecker;
 import org.phantazm.zombies.equipment.gun.target.BasicTargetFinder;
 import org.phantazm.zombies.equipment.gun.target.entityfinder.directional.AroundEndFinder;
 import org.phantazm.zombies.equipment.gun.target.entityfinder.directional.BetweenPointsFinder;
@@ -53,10 +55,7 @@ import org.phantazm.zombies.equipment.gun.visual.ClipStackMapper;
 import org.phantazm.zombies.equipment.gun.visual.ReloadStackMapper;
 import org.phantazm.zombies.equipment.perk.BasicPerkCreator;
 import org.phantazm.zombies.equipment.perk.PerkCreator;
-import org.phantazm.zombies.equipment.perk.effect.AddGroupSlotsCreator;
-import org.phantazm.zombies.equipment.perk.effect.FlaggingPerkEffectCreator;
-import org.phantazm.zombies.equipment.perk.effect.ModifierPerkEffectCreator;
-import org.phantazm.zombies.equipment.perk.effect.ShotEffectCreator;
+import org.phantazm.zombies.equipment.perk.effect.*;
 import org.phantazm.zombies.equipment.perk.effect.shot.ApplyAttributeShotEffect;
 import org.phantazm.zombies.equipment.perk.effect.shot.ApplyFireShotEffect;
 import org.phantazm.zombies.equipment.perk.equipment.BasicPerkEquipmentCreator;
@@ -187,7 +186,10 @@ final class EquipmentFeature {
         contextManager.registerElementClass(GunLevel.class);
         contextManager.registerElementClass(EntityInstanceAudienceProvider.class);
         contextManager.registerElementClass(PlayerAudienceProvider.class);
+        contextManager.registerElementClass(ZombiesPlayerActionBarSender.class);
+        contextManager.registerElementClass(AlertNoAmmoEffect.class);
         contextManager.registerElementClass(AmmoLevelEffect.class);
+        contextManager.registerElementClass(RecoilEffect.class);
         contextManager.registerElementClass(PlaySoundEffect.class);
         contextManager.registerElementClass(ReloadActionBarEffect.class);
         contextManager.registerElementClass(SendMessageEffect.class);
@@ -197,7 +199,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(StateReloadTester.class);
         contextManager.registerElementClass(BasicShotEndpointSelector.class);
         contextManager.registerElementClass(BasicBlockIteration.class);
-        contextManager.registerElementClass(WallshotBlockIteration.class);
+        contextManager.registerElementClass(WallshootingBlockIteration.class);
         contextManager.registerElementClass(WindowBlockIteration.class);
         contextManager.registerElementClass(PhantazmMobProjectileCollisionFilter.class);
         contextManager.registerElementClass(ProjectileFirer.class);
@@ -216,6 +218,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(PotionShotHandler.class);
         contextManager.registerElementClass(SlowDownShotHandler.class);
         contextManager.registerElementClass(SoundShotHandler.class);
+        contextManager.registerElementClass(MapObjectsWallshootingChecker.class);
         contextManager.registerElementClass(StateShootTester.class);
         contextManager.registerElementClass(AroundEndFinder.class);
         contextManager.registerElementClass(BetweenPointsFinder.class);
@@ -237,6 +240,7 @@ final class EquipmentFeature {
         contextManager.registerElementClass(ModifierPerkEffectCreator.class);
         contextManager.registerElementClass(AddGroupSlotsCreator.class);
         contextManager.registerElementClass(ShotEffectCreator.class);
+        contextManager.registerElementClass(TransactionModifierPerkEffectCreator.class);
 
         //ShotEffects
         contextManager.registerElementClass(ApplyAttributeShotEffect.class);
@@ -363,9 +367,12 @@ final class EquipmentFeature {
                     equipmentModule.getMapStats().setShots(equipmentModule.getMapStats().getShots() + 1);
 
                     if (!event.shot().headshotTargets().isEmpty()) {
-                        equipmentModule.getMapStats().setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + 1);
-                    } else if (!event.shot().regularTargets().isEmpty()) {
-                        equipmentModule.getMapStats().setRegularHits(equipmentModule.getMapStats().getRegularHits() + 1);
+                        equipmentModule.getMapStats()
+                                .setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + 1);
+                    }
+                    else if (!event.shot().regularTargets().isEmpty()) {
+                        equipmentModule.getMapStats()
+                                .setRegularHits(equipmentModule.getMapStats().getRegularHits() + 1);
                     }
                 });
 

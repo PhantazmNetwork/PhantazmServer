@@ -1,23 +1,15 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.equipment.Equipment;
-import org.phantazm.core.equipment.EquipmentHandler;
-import org.phantazm.core.inventory.InventoryAccessRegistry;
-import org.phantazm.core.inventory.InventoryObject;
-import org.phantazm.core.inventory.InventoryObjectGroup;
-import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
-import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.map.shop.Shop;
 
 import java.util.List;
-import java.util.Optional;
 
 @Model("zombies.map.shop.interactor.add_equipment")
-@Cache
+@Cache(false)
 public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteractor.Data> {
     private final List<ShopInteractor> successInteractors;
     private final List<ShopInteractor> failureInteractors;
@@ -32,82 +24,30 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
     }
 
     @Override
+    public void initialize(@NotNull Shop shop) {
+        ShopInteractor.initialize(successInteractors, shop);
+        ShopInteractor.initialize(failureInteractors, shop);
+    }
+
+    @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
-        return addEquipment(interaction);
+        boolean result = addOrReplaceEquipment(interaction);
+        List<ShopInteractor> interactors = result ? successInteractors : failureInteractors;
+        return result & ShopInteractor.handle(interactors, interaction);
     }
 
-    private boolean addEquipment(PlayerInteraction interaction) {
-        ZombiesPlayer zombiesPlayer = interaction.player();
-        EquipmentHandler handler = zombiesPlayer.module().getEquipmentHandler();
-
-        Wrapper<Boolean> wrapper = Wrapper.of(false);
-        if (data.allowDuplicate || !handler.hasEquipment(data.groupKey, data.equipmentKey)) {
-            if (handler.canAddEquipment(data.groupKey)) {
-                createEquipment(zombiesPlayer).ifPresent(equipment -> {
-                    if (data.specificSlot < 0) {
-                        handler.addEquipment(equipment, data.groupKey);
-                        wrapper.set(true);
-                    }
-                    else {
-                        InventoryAccessRegistry accessRegistry = handler.accessRegistry();
-
-                        accessRegistry.getCurrentAccess().ifPresent(access -> {
-                            InventoryObjectGroup group = access.groups().get(data.groupKey);
-                            if (group != null && group.getSlots().contains(data.specificSlot)) {
-                                InventoryProfile profile = group.getProfile();
-
-                                if (profile.hasInventoryObject(data.specificSlot)) {
-                                    InventoryObject currentObject = profile.getInventoryObject(data.specificSlot);
-                                    if (data.allowReplace || group.defaultObject() == currentObject) {
-                                        accessRegistry.replaceObject(data.specificSlot, equipment);
-                                        wrapper.set(true);
-                                    }
-                                }
-                                else {
-                                    accessRegistry.replaceObject(data.specificSlot, equipment);
-                                    wrapper.set(true);
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-            else if (data.allowReplace) {
-                zombiesPlayer.getPlayer().ifPresent(player -> {
-                    int targetSlot = data.specificSlot < 0 ? player.getHeldSlot() : data.specificSlot;
-
-                    InventoryAccessRegistry accessRegistry = handler.accessRegistry();
-                    accessRegistry.getCurrentAccess().ifPresent(inventoryAccess -> {
-                        InventoryObjectGroup targetGroup = inventoryAccess.groups().get(data.groupKey);
-                        if (targetGroup != null && targetGroup.getSlots().contains(targetSlot)) {
-                            createEquipment(zombiesPlayer).ifPresent(equipment -> {
-                                wrapper.set(true);
-                                accessRegistry.replaceObject(targetSlot, equipment);
-                            });
-                        }
-                    });
-                });
-            }
-        }
-
-        boolean success = wrapper.get();
-        if (success) {
-            for (ShopInteractor interactor : successInteractors) {
-                success &= interactor.handleInteraction(interaction);
-            }
-
-            return success;
-        }
-
-        for (ShopInteractor interactor : failureInteractors) {
-            interactor.handleInteraction(interaction);
-        }
-
-        return false;
+    private boolean addOrReplaceEquipment(PlayerInteraction interaction) {
+        return interaction.player().module().getEquipmentHandler()
+                .addOrReplaceEquipment(data.groupKey, data.equipmentKey, data.allowReplace, data.specificSlot,
+                        data.allowDuplicate,
+                        () -> interaction.player().module().getEquipmentCreator().createEquipment(data.equipmentKey),
+                        interaction.player().getPlayer().orElse(null)).success();
     }
 
-    private Optional<Equipment> createEquipment(ZombiesPlayer zombiesPlayer) {
-        return zombiesPlayer.module().getEquipmentCreator().createEquipment(data.equipmentKey);
+    @Override
+    public void tick(long time) {
+        ShopInteractor.tick(successInteractors, time);
+        ShopInteractor.tick(failureInteractors, time);
     }
 
     @DataObject

@@ -13,7 +13,9 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.kill.PlayerKills;
+import org.phantazm.zombies.leaderboard.BestTimeLeaderboard;
 import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.PlayerStateSwitcher;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
@@ -32,6 +34,7 @@ public class ZombiesPlayerModule implements DependencyModule {
     private final PlayerKills kills;
     private final EquipmentHandler equipmentHandler;
     private final EquipmentCreator equipmentCreator;
+    private final ZombiesPlayerActionBar actionBar;
     private final InventoryAccessRegistry profileSwitcher;
     private final PlayerStateSwitcher stateSwitcher;
     private final Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions;
@@ -41,22 +44,24 @@ public class ZombiesPlayerModule implements DependencyModule {
     private final TransactionModifierSource compositeTransactionModifierSource;
     private final Flaggable flaggable;
     private final ZombiesPlayerMapStats stats;
+    private final BestTimeLeaderboard leaderboard;
 
     public ZombiesPlayerModule(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
             @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
-            @NotNull EquipmentCreator equipmentCreator, @NotNull InventoryAccessRegistry profileSwitcher,
-            @NotNull PlayerStateSwitcher stateSwitcher,
+            @NotNull EquipmentCreator equipmentCreator, @NotNull ZombiesPlayerActionBar actionBar,
+            @NotNull InventoryAccessRegistry profileSwitcher, @NotNull PlayerStateSwitcher stateSwitcher,
             @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions,
-            @NotNull Sidebar sidebar,
-            @NotNull TabList tabList, @NotNull TransactionModifierSource mapTransactionModifierSource,
+            @NotNull Sidebar sidebar, @NotNull TabList tabList,
+            @NotNull TransactionModifierSource mapTransactionModifierSource,
             @NotNull TransactionModifierSource playerTransactionModifierSource, @NotNull Flaggable flaggable,
-            @NotNull ZombiesPlayerMapStats stats) {
+            @NotNull ZombiesPlayerMapStats stats, @NotNull BestTimeLeaderboard leaderboard) {
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.meta = Objects.requireNonNull(meta, "meta");
         this.coins = Objects.requireNonNull(coins, "coins");
         this.kills = Objects.requireNonNull(kills, "kills");
         this.equipmentHandler = Objects.requireNonNull(equipmentHandler, "equipmentHandler");
         this.equipmentCreator = Objects.requireNonNull(equipmentCreator, "equipmentCreator");
+        this.actionBar = Objects.requireNonNull(actionBar, "actionBar");
         this.profileSwitcher = Objects.requireNonNull(profileSwitcher, "profileSwitcher");
         this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
         this.stateFunctions = Map.copyOf(stateFunctions);
@@ -68,6 +73,7 @@ public class ZombiesPlayerModule implements DependencyModule {
                 TransactionModifierSource.compositeView(mapTransactionModifierSource, playerTransactionModifierSource);
         this.flaggable = Objects.requireNonNull(flaggable, "flags");
         this.stats = Objects.requireNonNull(stats, "stats");
+        this.leaderboard = Objects.requireNonNull(leaderboard, "leaderboard");
     }
 
     public @NotNull ZombiesPlayerMeta getMeta() {
@@ -92,6 +98,10 @@ public class ZombiesPlayerModule implements DependencyModule {
 
     public @NotNull InventoryAccessRegistry getInventoryAccessRegistry() {
         return profileSwitcher;
+    }
+
+    public @NotNull ZombiesPlayerActionBar getActionBar() {
+        return actionBar;
     }
 
     public @NotNull PlayerStateSwitcher getStateSwitcher() {
@@ -130,5 +140,9 @@ public class ZombiesPlayerModule implements DependencyModule {
 
     public @NotNull ZombiesPlayerMapStats getStats() {
         return stats;
+    }
+
+    public @NotNull BestTimeLeaderboard getLeaderboard() {
+        return leaderboard;
     }
 }

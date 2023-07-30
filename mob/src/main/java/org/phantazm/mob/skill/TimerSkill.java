@@ -89,6 +89,8 @@ public class TimerSkill implements Skill {
         entity.removeTag(lastActivationTag);
         entity.removeTag(useCountTag);
         entity.removeTag(startedTag);
+
+        delegate.end(self);
     }
 
     private void manageState(PhantazmMob self, int lastUseCount) {

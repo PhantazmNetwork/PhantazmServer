@@ -2,9 +2,10 @@ package org.phantazm.zombies.stage;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Activable;
 import org.phantazm.commons.Tickable;
 
-public class StageTransition implements Tickable {
+public class StageTransition implements Activable {
 
     private final Stage[] stages;
 
@@ -14,8 +15,10 @@ public class StageTransition implements Tickable {
 
     public StageTransition(@NotNull Stage @NotNull ... stages) {
         this.stages = stages.clone();
-        this.currentStageIndex = 0;
-        this.currentStage = stages[currentStageIndex];
+    }
+
+    public void start() {
+        setCurrentStageIndex(0);
     }
 
     @Override
@@ -30,6 +33,10 @@ public class StageTransition implements Tickable {
         }
         if (currentStage.shouldRevert()) {
             setCurrentStageIndex(currentStageIndex - 1);
+            return;
+        }
+        if (currentStage.shouldAbort()) {
+            setCurrentStageIndex(stages.length);
             return;
         }
 
@@ -55,7 +62,9 @@ public class StageTransition implements Tickable {
         }
 
         this.currentStageIndex = currentStageIndex;
-        currentStage.end();
+        if (currentStage != null) {
+            currentStage.end();
+        }
 
         if (currentStageIndex != stages.length) {
             currentStage = stages[currentStageIndex];
@@ -68,5 +77,11 @@ public class StageTransition implements Tickable {
 
     public Stage getCurrentStage() {
         return currentStage;
+    }
+
+    public void end() {
+        if (currentStageIndex != stages.length) {
+            setCurrentStageIndex(stages.length);
+        }
     }
 }

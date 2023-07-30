@@ -1,0 +1,22 @@
+maximumScenes = 20
+
+[gamereportConfig]
+idleStageFormat = "<#9096ad>Idle</#9096ad>"
+countdownStageFormat = "<yellow>Countdown</yellow>"
+inGameFormat = "<yellow>Round <current_round> <#b8bfde>-</#b8bfde> <game_time></yellow>"
+endedFormat = "<red>Ended <#b8bfde>(<result:'0#LOST - Round <current_round> - <game_time>|1#WON - <game_time>'>)</#b8bfde></red>"
+gameEntryFormat = "   <yellow><current_game>/<total_games></yellow> <yellow><b><game_uuid></b></yellow><br>          <green><player_list></green><br>         <#b8bfde><b><map_name>:</b></#b8bfde> <game_state> <warp><red><b>[<u>WARP</u>]</b></red></warp>"
+previousPageFormat = "  <b><yellow><previous_page>«</previous_page></yellow></b>"
+nextPageFormat = "<b><yellow><next_page>»</next_page></yellow></b>"
+pageFormat = "<gradient:#616575:#4a4c59><st>⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯</st></gradient><br><#fffa9e>»</#fffa9e> <#9096ad><current_page><#b8bfde>/</#b8bfde><max_pages> Gamereport at</#9096ad> <yellow><b><current_time> UTC</b></yellow><br><br>   <#b8bfde><b><total_games> Active Games</b></#b8bfde><br><game_list><br><br><previous_page_optional> <#9096ad>Page <current_page></#9096ad> <next_page_optional><br><gradient:#616575:#4a4c59><st>⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯</st></gradient>"
+
+#<gradient:#616575:#4a4c59><st>⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯</st></gradient><br><#fffa9e>»</#fffa9e> <#9096ad><current_page><#b8bfde>/</#b8bfde><max_pages> Gamereport at</#9096ad> <yellow><b><current_time> UTC</b></yellow><br><br>   <#b8bfde><b><total_games> Active Games</b></#b8bfde><br><game_list><br><br><previous_page_optional> <next_page_optional><br><gradient:#616575:#4a4c59><st>⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯</st></gradient>
+#
+#   <yellow><current_game>/<total_games></yellow> <yellow><b><game_uuid></b></yellow><br>          <green><player_list></green><br>          <#b8bfde><b><map_name>:</b></#b8bfde> <game_state> <warp><red><b>[<u>WARP</u>]</b></red></warp>
+#
+#  <b><yellow><previous_page>«</previous_page> <#9096ad>Page <current_page></#9096ad> <next_page>»</next_page></yellow></b><gradient:#616575:#4a4c59><st>⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯</st></gradient>
+#
+#<#9096ad>Idle</#9096ad>
+#<yellow>Countdown</yellow>
+#<yellow>Round <current_round> <#b8bfde>-</#b8bfde> <game_time></yellow>
+#<red>Ended <#b8bfde>(<result:'0#LOST - Round <current_round> - <game_time>|1#WON - <game_time>'>)</#b8bfde></red>

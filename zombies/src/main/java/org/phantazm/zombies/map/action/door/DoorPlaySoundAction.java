@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.action.door;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -11,6 +12,7 @@ import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.action.Action;
 
 @Model("zombies.map.door.action.play_sound")
+@Cache(false)
 public class DoorPlaySoundAction implements Action<Door> {
     private final Data data;
     private final Instance instance;

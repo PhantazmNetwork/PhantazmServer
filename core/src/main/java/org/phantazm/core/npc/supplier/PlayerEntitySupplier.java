@@ -11,6 +11,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.PlayerSkin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 
 import java.util.function.Supplier;
@@ -27,15 +28,29 @@ public class PlayerEntitySupplier implements Supplier<Entity> {
 
     @Override
     public Entity get() {
-        return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), data.playerName,
-                PlayerSkin.fromUuid(data.skinUUID.replace("-", "")));
+        if (data.skinUUID != null) {
+            return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), data.playerName,
+                    PlayerSkin.fromUuid(data.skinUUID.replace("-", "")));
+        }
+
+        return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), data.playerName, data.playerSkin);
     }
 
     @DataObject
-    public record Data(@NotNull String playerName, @NotNull String skinUUID) {
+    public record Data(@NotNull String playerName, @Nullable String skinUUID, @Nullable PlayerSkin playerSkin) {
         @Default("playerName")
         public static ConfigElement defaultPlayerName() {
             return ConfigPrimitive.of("");
+        }
+
+        @Default("skinUUID")
+        public static ConfigElement defaultSkinUUID() {
+            return ConfigPrimitive.NULL;
+        }
+
+        @Default("playerSkin")
+        public static ConfigElement defaultPlayerSkin() {
+            return ConfigPrimitive.NULL;
         }
     }
 }

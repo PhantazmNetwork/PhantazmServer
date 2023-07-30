@@ -14,6 +14,9 @@ import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob.MobStore;
+import org.phantazm.mob.PhantazmMob;
+import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
@@ -33,11 +36,14 @@ public class SlowDownShotHandler implements ShotHandler {
 
     private final Data data;
 
+    private MobStore mobStore;
+
     private long selfTick = 0;
 
     @FactoryMethod
-    public SlowDownShotHandler(@NotNull Data data) {
+    public SlowDownShotHandler(@NotNull Data data, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data, "data");
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 
     @Override
@@ -69,6 +75,11 @@ public class SlowDownShotHandler implements ShotHandler {
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
             @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         for (GunHit target : shot.regularTargets()) {
+            PhantazmMob mob = mobStore.getMob(target.entity().getUuid());
+            if (mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
+                continue;
+            }
+
             removalQueue.add(ObjectLongPair.of(target.entity().getUuid(), selfTick + data.headshotDuration()));
             latestTimeMap.put(target.entity().getUuid(), selfTick + data.duration());
             AttributeModifier modifier =
@@ -79,6 +90,11 @@ public class SlowDownShotHandler implements ShotHandler {
             attribute.addModifier(modifier);
         }
         for (GunHit target : shot.headshotTargets()) {
+            PhantazmMob mob = mobStore.getMob(target.entity().getUuid());
+            if (mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
+                continue;
+            }
+
             removalQueue.add(ObjectLongPair.of(target.entity().getUuid(), selfTick + data.headshotDuration()));
             latestTimeMap.put(target.entity().getUuid(), selfTick + data.headshotDuration());
             AttributeModifier modifier =

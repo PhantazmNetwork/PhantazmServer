@@ -6,6 +6,7 @@ import org.phantazm.core.game.scene.SceneProviderAbstract;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 /**
  * An abstract {@link Lobby} {@link SceneProvider}.
@@ -21,8 +22,8 @@ public abstract class LobbyProviderAbstract extends SceneProviderAbstract<Lobby,
      * @param newLobbyThreshold The weighting threshold for lobbies. If no lobbies are above this threshold,
      *                          a new {@link Lobby} will be created.
      */
-    public LobbyProviderAbstract(int maximumLobbies, int newLobbyThreshold) {
-        super(maximumLobbies);
+    public LobbyProviderAbstract(@NotNull Executor executor, int maximumLobbies, int newLobbyThreshold) {
+        super(executor, maximumLobbies);
 
         this.newLobbyThreshold = newLobbyThreshold;
     }
@@ -30,7 +31,7 @@ public abstract class LobbyProviderAbstract extends SceneProviderAbstract<Lobby,
     @Override
     protected @NotNull Optional<Lobby> chooseScene(@NotNull LobbyJoinRequest request) {
         Lobby maximumLobby = null;
-        int maximumWeighting = Integer.MIN_VALUE;
+        int maximumWeighting = Integer.MAX_VALUE;
 
         sceneLoop:
         for (Lobby lobby : getScenes()) {
@@ -42,7 +43,7 @@ public abstract class LobbyProviderAbstract extends SceneProviderAbstract<Lobby,
 
             int joinWeight = lobby.getJoinWeight(request);
 
-            if (joinWeight > maximumWeighting) {
+            if (joinWeight < maximumWeighting) {
                 maximumLobby = lobby;
                 maximumWeighting = joinWeight;
             }

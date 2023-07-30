@@ -35,17 +35,31 @@ public interface InventoryAccessRegistry {
      */
     void registerAccess(@NotNull Key key, @NotNull InventoryAccess profile);
 
-    /**
-     * Unregisters a {@link InventoryProfile} from the view.
-     *
-     * @param key The {@link Key} of the {@link InventoryProfile} to unregister
-     * @throws IllegalArgumentException If no {@link InventoryProfile} is registered with the {@link Key}
-     */
-    void unregisterAccess(@NotNull Key key);
+    default boolean canPushTo(@NotNull Key groupKey) {
+        return getCurrentAccess().filter(access -> canPushTo(access, groupKey)).isPresent();
+    }
 
-    boolean canPushTo(@NotNull Key groupKey);
+    boolean canPushTo(@NotNull InventoryAccess currentAccess, @NotNull Key groupKey);
 
-    void replaceObject(int slot, @NotNull InventoryObject newObject);
+    default @Nullable InventoryObject replaceObject(int slot, @NotNull InventoryObject newObject) {
+        return getCurrentAccess().map(access -> replaceObject(access, slot, newObject)).orElse(null);
 
-    void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object);
+    }
+
+    @Nullable InventoryObject replaceObject(@NotNull InventoryAccess currentAccess, int slot,
+            @NotNull InventoryObject newObject);
+
+    default @Nullable InventoryObject removeObject(int slot) {
+        return getCurrentAccess().map(access -> removeObject(access, slot)).orElse(null);
+    }
+
+    @Nullable InventoryObject removeObject(@NotNull InventoryAccess currentAccess, int slot);
+
+    default void pushObject(@NotNull Key groupKey, @NotNull InventoryObject object) {
+        getCurrentAccess().ifPresent(access -> pushObject(access, groupKey, object));
+    }
+
+    void pushObject(@NotNull InventoryAccess currentAccess, @NotNull Key groupKey, @NotNull InventoryObject object);
+
+    @NotNull InventoryAccess getAccess(@NotNull Key profileKey);
 }

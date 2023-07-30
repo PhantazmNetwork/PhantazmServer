@@ -1,5 +1,6 @@
 package org.phantazm.core.equipment;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -12,6 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Model("zombies.map.shop.upgrade_path.linear")
+@Cache
 public class LinearUpgradePath implements UpgradePath {
     private final Data data;
 

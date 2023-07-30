@@ -26,7 +26,7 @@ public interface LobbyJoinRequest extends SceneJoinRequest {
      * @param instance       The {@link Instance} the players are joining
      * @param instanceConfig Configuration for the {@link Instance}
      */
-    void handleJoin(@NotNull Instance instance, @NotNull InstanceConfig instanceConfig);
+    void handleJoin(@NotNull Lobby lobby, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig);
 
     @Override
     default int getRequestWeight() {

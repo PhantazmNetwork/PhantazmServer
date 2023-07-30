@@ -29,7 +29,6 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
             throw new ConfigProcessException("Invalid port: " + port + ", must be in range [0, 65535]");
         }
 
-        boolean optifineEnabled = serverInfo.getBooleanOrThrow("optifineEnabled");
         boolean whitelist = serverInfo.getBooleanOrThrow("whitelist");
         AuthType authType = AuthType.getByName(serverInfo.getStringOrThrow("authType").toUpperCase(Locale.ENGLISH))
                 .orElseThrow(() -> new ConfigProcessException(
@@ -37,7 +36,7 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         String proxySecret = serverInfo.getStringOrThrow("proxySecret");
 
         ServerInfoConfig serverInfoConfig =
-                new ServerInfoConfig(serverAddress, port, optifineEnabled, whitelist, authType, proxySecret);
+                new ServerInfoConfig(serverAddress, port, whitelist, authType, proxySecret);
 
         ConfigNode pingList = element.getNodeOrThrow("pingList");
         Component description = COMPONENT_PROCESSOR.dataFromElement(pingList.getElementOrThrow("description"));
@@ -52,7 +51,6 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
         ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
         serverInfo.putString("serverIP", serverInfoConfig.serverIP());
         serverInfo.putNumber("port", serverInfoConfig.port());
-        serverInfo.putBoolean("optifineEnabled", serverInfoConfig.optifineEnabled());
         serverInfo.putString("authType", serverInfoConfig.authType().name());
         serverInfo.putString("proxySecret", serverInfoConfig.proxySecret());
 

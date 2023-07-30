@@ -9,18 +9,17 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.ConfigProcessors;
 import org.phantazm.core.config.InstanceConfig;
+import org.phantazm.core.config.processor.ItemStackConfigProcessors;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.lobby.LobbyConfig;
 
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * {@link ConfigProcessor} used for {@link LobbiesConfig}s.
@@ -67,9 +66,16 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
                 int maxPlayers = lobby.getValue().getNumberOrThrow("maxPlayers").intValue();
                 int maxLobbies = lobby.getValue().getNumberOrThrow("maxLobbies").intValue();
 
+                String lobbyJoinFormat = lobby.getValue().getStringOrThrow("lobbyJoinFormat");
+
+                Collection<ItemStack> defaultItems = ItemStackConfigProcessors.snbt().collectionProcessor()
+                        .dataFromElement(lobby.getValue().getElementOrThrow("defaultItems"));
+
                 ConfigList npcs = lobby.getValue().getListOrDefault(ConfigList::of, "npcs");
 
-                lobbies.put(lobby.getKey(), new LobbyConfig(instanceConfig, lobbyPaths, maxPlayers, maxLobbies, npcs));
+                lobbies.put(lobby.getKey(),
+                        new LobbyConfig(instanceConfig, lobbyPaths, maxPlayers, maxLobbies, defaultItems,
+                                lobbyJoinFormat, npcs));
             }
 
             return new LobbiesConfig(instancesPath, kickMessage, mainLobbyName, lobbies);
@@ -107,6 +113,9 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
             lobbyNode.put("lobbyPaths", lobbyPathsList);
             lobbyNode.putNumber("maxPlayers", lobby.getValue().maxPlayers());
             lobbyNode.putNumber("maxLobbies", lobby.getValue().maxLobbies());
+            lobbyNode.put("defaultItems", ItemStackConfigProcessors.snbt().collectionProcessor()
+                    .elementFromData(lobby.getValue().defaultItems()));
+            lobbyNode.putString("lobbyJoinFormat", lobby.getValue().lobbyJoinFormat());
             lobbyNode.put("npcs", lobby.getValue().npcs());
 
             lobbiesNode.put(lobby.getKey(), lobbyNode);

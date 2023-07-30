@@ -4,50 +4,60 @@ import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
+import org.phantazm.zombies.map.shop.Shop;
 
-import java.util.Objects;
+import java.util.*;
 
 @Model("zombies.map.shop.interactor.delayed")
 @Cache(false)
 public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
-    private final ShopInteractor target;
+    private final List<ShopInteractor> interactors;
 
-    private PlayerInteraction interaction;
-    private long startTime;
+    private final Deque<Interaction> interactions;
+
+    private record Interaction(long startTime, PlayerInteraction interaction) {
+    }
 
     @FactoryMethod
-    public DelayedInteractor(@NotNull Data data, @NotNull @Child("target") ShopInteractor target) {
+    public DelayedInteractor(@NotNull Data data, @NotNull @Child("target") List<ShopInteractor> interactors) {
         super(data);
-        this.target = Objects.requireNonNull(target, "target");
+        this.interactors = Objects.requireNonNull(interactors, "interactors");
+        this.interactions = new ArrayDeque<>();
+    }
+
+    @Override
+    public void initialize(@NotNull Shop shop) {
+        ShopInteractor.initialize(interactors, shop);
     }
 
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
-        if (this.interaction == null || data.resetOnInteract) {
-            this.startTime = System.currentTimeMillis();
-            this.interaction = interaction;
-        }
-
+        interactions.add(new Interaction(System.currentTimeMillis(), interaction));
         return true;
     }
 
     @Override
     public void tick(long time) {
-        super.tick(time);
+        long currentTime = System.currentTimeMillis();
 
-        if (interaction != null) {
-            long elapsedTimeMs = time - startTime;
-            int elapsedTicks = (int)(elapsedTimeMs / MinecraftServer.TICK_MS);
+        Iterator<Interaction> interactionIterator = interactions.iterator();
+        while (interactionIterator.hasNext()) {
+            Interaction interaction = interactionIterator.next();
 
-            if (elapsedTicks >= data.delayTicks) {
-                target.handleInteraction(interaction);
-                interaction = null;
+            long elapsedTicks = (currentTime - interaction.startTime) / MinecraftServer.TICK_MS;
+            if (elapsedTicks < data.delayTicks) {
+                break;
             }
+
+            ShopInteractor.handle(interactors, interaction.interaction);
+            interactionIterator.remove();
         }
+
+        ShopInteractor.tick(interactors, time);
     }
 
     @DataObject
-    record Data(@ChildPath("target") String targetPath, int delayTicks, boolean resetOnInteract) {
+    public record Data(@ChildPath("target") List<String> interactors, int delayTicks) {
 
     }
 }

@@ -1,5 +1,6 @@
 package org.phantazm.core.item;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 @Model("item.updating.static")
+@Cache
 public class StaticUpdatingItem implements UpdatingItem {
     private final Data data;
 

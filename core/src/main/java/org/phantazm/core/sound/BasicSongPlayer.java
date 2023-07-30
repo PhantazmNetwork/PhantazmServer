@@ -3,6 +3,8 @@ package org.phantazm.core.sound;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Deque;
@@ -23,9 +25,29 @@ public class BasicSongPlayer implements SongPlayer {
     }
 
     @Override
-    public @NotNull Song play(@NotNull Audience audience, @NotNull Sound.Emitter emitter, @NotNull List<Note> notes,
-            boolean loop) {
-        SongImpl song = new SongImpl(audience, emitter, notes, loop);
+    public @NotNull Song play(@NotNull Audience audience, @NotNull Sound.Source source, @NotNull Sound.Emitter emitter,
+            @NotNull List<Note> notes, float volume, boolean loop) {
+        Objects.requireNonNull(audience, "audience");
+        Objects.requireNonNull(source, "source");
+        Objects.requireNonNull(emitter, "emitter");
+        Objects.requireNonNull(notes, "notes");
+
+        SongImpl song = new SongImpl(audience, emitter, source, null, notes, volume, loop);
+        if (song.nextNote != null) {
+            songDeque.add(song);
+        }
+
+        return song;
+    }
+
+    @Override
+    public @NotNull Song play(@NotNull Audience audience, @NotNull Sound.Source source, double x, double y, double z,
+            @NotNull List<Note> notes, float volume, boolean loop) {
+        Objects.requireNonNull(audience, "audience");
+        Objects.requireNonNull(source, "source");
+        Objects.requireNonNull(notes, "notes");
+
+        SongImpl song = new SongImpl(audience, null, source, new Vec(x, y, z), notes, volume, loop);
         if (song.nextNote != null) {
             songDeque.add(song);
         }
@@ -36,7 +58,10 @@ public class BasicSongPlayer implements SongPlayer {
     private static class SongImpl implements Song {
         private final Audience audience;
         private final Sound.Emitter emitter;
+        private final Sound.Source source;
+        private final Point location;
         private final List<Note> notes;
+        private final float volume;
         private final boolean loop;
 
         private boolean stopped;
@@ -46,10 +71,14 @@ public class BasicSongPlayer implements SongPlayer {
         private Note nextNote;
         private long lastNoteTime;
 
-        private SongImpl(Audience audience, Sound.Emitter emitter, List<Note> notes, boolean loop) {
+        private SongImpl(Audience audience, Sound.Emitter emitter, Sound.Source source, Point location,
+                List<Note> notes, float volume, boolean loop) {
             this.audience = Objects.requireNonNull(audience, "audience");
-            this.emitter = Objects.requireNonNull(emitter, "emitter");
+            this.emitter = emitter;
+            this.source = source;
+            this.location = location;
             this.notes = List.copyOf(notes);
+            this.volume = volume;
             this.loop = loop;
 
             this.noteIndex = 0;
@@ -97,7 +126,16 @@ public class BasicSongPlayer implements SongPlayer {
                 this.lastNoteTime = time;
 
                 do {
-                    this.audience.playSound(this.currentSound = nextNote.sound(), this.emitter);
+                    if (this.emitter != null) {
+                        this.audience.playSound(
+                                this.currentSound = Sound.sound(nextNote.soundType(), source, volume, nextNote.pitch()),
+                                this.emitter);
+                    }
+                    else {
+                        this.audience.playSound(
+                                this.currentSound = Sound.sound(nextNote.soundType(), source, volume, nextNote.pitch()),
+                                location.x(), location.y(), location.z());
+                    }
 
                     nextNoteIndex = ++this.noteIndex;
                     if (nextNoteIndex < this.notes.size()) {

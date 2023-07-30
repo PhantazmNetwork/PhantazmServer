@@ -12,7 +12,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.LivingEntity;
-import net.minestom.server.entity.damage.DamageType;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +21,7 @@ import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Flags;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
@@ -82,7 +83,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
 
                 Pos feetPos = player.getPosition();
                 Pos eyePos = feetPos.add(0, player.getEyeHeight(), 0);
-                Point targetPos = eyePos.add(feetPos.direction().mul(data.reach));
+                Point targetPos = eyePos.add(feetPos.direction().mul(data.reach + 5));
 
                 Wrapper<HitResult> closest = Wrapper.ofNull();
                 instance.getEntityTracker()
@@ -112,11 +113,12 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
                         (hitMob != null && !hitMob.model().getExtraNode()
                                 .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
+                    hit.entity.setTag(Tags.LAST_HIT_BY, player.getUuid());
                     hit.entity.kill();
                 }
                 else {
                     double angle = feetPos.yaw() * (Math.PI / 180);
-                    hit.entity.damage(DamageType.fromPlayer(player), data.damage, data.bypassArmor);
+                    hit.entity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
                     hit.entity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
                 }
 

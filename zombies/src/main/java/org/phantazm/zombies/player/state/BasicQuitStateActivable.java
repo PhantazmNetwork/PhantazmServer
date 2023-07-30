@@ -1,10 +1,12 @@
 package org.phantazm.zombies.player.state;
 
+import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.scoreboard.BelowNameTag;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
@@ -24,18 +26,21 @@ public class BasicQuitStateActivable implements Activable {
     private final MapSettingsInfo settings;
     private final Sidebar sidebar;
     private final TabList tabList;
+    private final BelowNameTag belowNameTag;
     private final Map<UUID, CancellableState> stateMap;
     private final TickTaskScheduler scheduler;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public BasicQuitStateActivable(@NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList,
+            @NotNull BelowNameTag belowNameTag,
             @NotNull Map<UUID, CancellableState> stateMap, @NotNull TickTaskScheduler scheduler) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
         this.settings = Objects.requireNonNull(settings, "settings");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
+        this.belowNameTag = Objects.requireNonNull(belowNameTag, "belowNameTag");
         this.stateMap = Objects.requireNonNull(stateMap, "stateMap");
         this.scheduler = Objects.requireNonNull(scheduler, "scheduler");
     }
@@ -48,7 +53,11 @@ public class BasicQuitStateActivable implements Activable {
             player.setExp(0);
             sidebar.removeViewer(player);
             tabList.removeViewer(player);
+            belowNameTag.removeViewer(player);
             player.setHealth(player.getMaxHealth());
+            player.resetTitle();
+            player.sendActionBar(Component.empty());
+            player.stopSound(SoundStop.all());
         });
         playerView.getDisplayName().thenAccept(displayName -> {
             TagResolver quitterPlaceholder = Placeholder.component("quitter", displayName);

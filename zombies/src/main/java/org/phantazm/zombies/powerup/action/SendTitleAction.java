@@ -1,5 +1,6 @@
 package org.phantazm.zombies.powerup.action;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -14,6 +15,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.send_title")
+@Cache(false)
 public class SendTitleAction implements Supplier<PowerupAction> {
     private final Data data;
     private final Instance instance;

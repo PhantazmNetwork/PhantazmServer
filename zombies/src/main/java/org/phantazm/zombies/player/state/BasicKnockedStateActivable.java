@@ -2,6 +2,7 @@ package org.phantazm.zombies.player.state;
 
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -13,6 +14,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.scoreboard.BelowNameTag;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +25,8 @@ import org.phantazm.core.time.TickFormatter;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.ZombiesPlayerMeta;
+import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 
@@ -39,6 +43,10 @@ public class BasicKnockedStateActivable implements Activable {
 
     private final PlayerView playerView;
 
+    private final ZombiesPlayerMeta meta;
+
+    private final ZombiesPlayerActionBar actionBar;
+
     private final MapSettingsInfo settings;
 
     private final ReviveHandler reviveHandler;
@@ -49,22 +57,28 @@ public class BasicKnockedStateActivable implements Activable {
 
     private final TabList tabList;
 
+    private final BelowNameTag belowNameTag;
+
     private final ZombiesPlayerMapStats stats;
 
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public BasicKnockedStateActivable(@NotNull KnockedPlayerStateContext context, @NotNull Instance instance,
-            @NotNull PlayerView playerView, @NotNull MapSettingsInfo settings, @NotNull ReviveHandler reviveHandler,
+            @NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta, @NotNull ZombiesPlayerActionBar actionBar,
+            @NotNull MapSettingsInfo settings, @NotNull ReviveHandler reviveHandler,
             @NotNull TickFormatter tickFormatter, @NotNull Sidebar sidebar, @NotNull TabList tabList,
-            @NotNull ZombiesPlayerMapStats stats) {
+            @NotNull BelowNameTag belowNameTag, @NotNull ZombiesPlayerMapStats stats) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.meta = Objects.requireNonNull(meta, "meta");
+        this.actionBar = Objects.requireNonNull(actionBar, "actionBar");
         this.settings = Objects.requireNonNull(settings, "settings");
         this.reviveHandler = Objects.requireNonNull(reviveHandler, "reviveHandler");
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
         this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
         this.tabList = Objects.requireNonNull(tabList, "tabList");
+        this.belowNameTag = Objects.requireNonNull(belowNameTag, "belowNameTag");
         this.stats = Objects.requireNonNull(stats, "stats");
     }
 
@@ -79,24 +93,29 @@ public class BasicKnockedStateActivable implements Activable {
             player.setGameMode(GameMode.SPECTATOR);
             sidebar.addViewer(player);
             tabList.addViewer(player);
+            belowNameTag.addViewer(player);
             context.getVehicle().addPassenger(player);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
-            Set<Player> players = new HashSet<>(instance.getPlayers());
             TagResolver[] tagResolvers = getTagResolvers(displayName);
-            playerView.getPlayer().ifPresent(player -> {
-                players.remove(player);
-                player.sendMessage(miniMessage.deserialize(settings.knockedMessageToKnockedFormat(), tagResolvers));
-            });
-            Audience instanceAudience = PacketGroupingAudience.of(players);
-            instanceAudience.sendMessage(
+            if (meta.isInGame()) {
+                playerView.getPlayer().ifPresent(player -> {
+                    player.sendMessage(miniMessage.deserialize(settings.knockedMessageToKnockedFormat(), tagResolvers));
+                });
+            }
+
+            Set<Player> players = new HashSet<>(instance.getPlayers());
+            playerView.getPlayer().ifPresent(players::remove);
+            Audience filteredAudience = PacketGroupingAudience.of(players);
+            filteredAudience.sendMessage(
                     miniMessage.deserialize(settings.knockedMessageToOthersFormat(), tagResolvers));
-            instanceAudience.sendTitlePart(TitlePart.TITLE,
+            filteredAudience.sendTitlePart(TitlePart.TITLE,
                     miniMessage.deserialize(settings.knockedTitleFormat(), tagResolvers));
-            instanceAudience.sendTitlePart(TitlePart.SUBTITLE,
+            filteredAudience.sendTitlePart(TitlePart.SUBTITLE,
                     miniMessage.deserialize(settings.knockedSubtitleFormat(), tagResolvers));
         });
 
+        instance.playSound(settings.knockedSound(), Sound.Emitter.self());
         stats.setKnocks(stats.getKnocks() + 1);
     }
 
@@ -127,12 +146,13 @@ public class BasicKnockedStateActivable implements Activable {
             player.setFlyingSpeed(0.4F);
             player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
             player.setGameMode(GameMode.ADVENTURE);
-            player.sendActionBar(Component.empty());
             sidebar.addViewer(player);
             tabList.addViewer(player);
+            belowNameTag.addViewer(player);
             context.getVehicle().remove();
             player.teleport(Pos.fromPoint(context.getKnockLocation()));
         });
+        actionBar.sendActionBar(Component.empty(), ZombiesPlayerActionBar.REVIVE_MESSAGE_CLEAR_PRIORITY);
     }
 
     private void sendReviveStatus(@NotNull ZombiesPlayer reviver, @NotNull Component knockedDisplayName,
@@ -143,7 +163,7 @@ public class BasicKnockedStateActivable implements Activable {
                     Placeholder.unparsed("time", tickFormatter.format(reviveHandler.getTicksUntilRevive()));
             Component message = miniMessage.deserialize(settings.reviveStatusToReviverFormat(), knockedNamePlaceholder,
                     timePlaceholder);
-            reviverPlayer.sendActionBar(message);
+            reviver.module().getActionBar().sendActionBar(message, ZombiesPlayerActionBar.REVIVE_MESSAGE_PRIORITY);
         });
         playerView.getPlayer().ifPresent(player -> {
             TagResolver reviverNamePlaceholder = Placeholder.component("reviver", reviverDisplayName);
@@ -151,7 +171,7 @@ public class BasicKnockedStateActivable implements Activable {
                     Placeholder.unparsed("time", tickFormatter.format(reviveHandler.getTicksUntilRevive()));
             Component message = miniMessage.deserialize(settings.reviveStatusToKnockedFormat(), reviverNamePlaceholder,
                     timePlaceholder);
-            player.sendActionBar(message);
+            actionBar.sendActionBar(message, ZombiesPlayerActionBar.REVIVE_MESSAGE_PRIORITY);
         });
     }
 
@@ -159,7 +179,8 @@ public class BasicKnockedStateActivable implements Activable {
         playerView.getPlayer().ifPresent(player -> {
             TagResolver timePlaceholder = Placeholder.component("time",
                     Component.text(tickFormatter.format(Math.max(reviveHandler.getTicksUntilDeath(), 0))));
-            player.sendActionBar(miniMessage.deserialize(settings.dyingStatusFormat(), timePlaceholder));
+            actionBar.sendActionBar(miniMessage.deserialize(settings.dyingStatusFormat(), timePlaceholder),
+                    ZombiesPlayerActionBar.REVIVE_MESSAGE_PRIORITY);
         });
     }
 

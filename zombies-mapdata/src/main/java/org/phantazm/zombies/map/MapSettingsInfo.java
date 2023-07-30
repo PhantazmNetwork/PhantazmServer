@@ -4,7 +4,9 @@ import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.chat.MessageWithDestination;
 
 import java.util.*;
 
@@ -23,10 +25,15 @@ public record MapSettingsInfo(int mapDataVersion,
                               float yaw,
                               @NotNull Component displayName,
                               @NotNull String displayItemSnbt,
-                              @NotNull List<Component> introMessages,
+                              long idleRevertTicks,
+                              @NotNull List<List<MessageWithDestination>> introMessages,
+                              long countdownTicks,
+                              @NotNull List<Long> countdownAlertTicks,
+                              @NotNull Sound countdownTickSound,
+                              @NotNull String countdownTimeFormat,
+                              long endTicks,
+                              @NotNull String endGameStatsFormat,
                               @NotNull Component scoreboardHeader,
-                              @NotNull Vec3I leaderboardPosition,
-                              int leaderboardLength,
                               int worldTime,
                               int maxPlayers,
                               int minPlayers,
@@ -39,17 +46,16 @@ public record MapSettingsInfo(int mapDataVersion,
                               long healTicks,
                               double reviveRadius,
                               boolean canWallshoot,
-                              boolean perksLostOnDeath,
+                              @NotNull List<Key> lostOnDeath,
                               long baseReviveTicks,
                               int rollsPerChest,
                               float punchDamage,
                               float punchRange,
+                              float punchKnockback,
+                              int punchCooldown,
                               boolean mobPlayerCollisions,
-                              @NotNull List<Integer> milestoneRounds,
                               @NotNull Map<Key, List<Key>> defaultEquipment,
                               @NotNull Map<Key, EquipmentGroupInfo> equipmentGroups,
-                              @NotNull Sound countdownTickSound,
-                              @NotNull String countdownTimeFormat,
                               @NotNull String winTitleFormat,
                               @NotNull String winSubtitleFormat,
                               @NotNull String lossTitleFormat,
@@ -57,15 +63,26 @@ public record MapSettingsInfo(int mapDataVersion,
                               @NotNull String reviveStatusToReviverFormat,
                               @NotNull String reviveStatusToKnockedFormat,
                               @NotNull String dyingStatusFormat,
+                              @NotNull String reviveMessageToRevivedFormat,
+                              @NotNull String reviveMessageToOthersFormat,
+                              @NotNull Sound reviveSound,
                               @NotNull String knockedMessageToKnockedFormat,
                               @NotNull String knockedMessageToOthersFormat,
                               @NotNull String knockedTitleFormat,
                               @NotNull String knockedSubtitleFormat,
+                              @NotNull Sound knockedSound,
                               @NotNull String deathMessageToKilledFormat,
                               @NotNull String deathMessageToOthersFormat,
+                              @NotNull Sound deathSound,
                               @NotNull String rejoinMessageFormat,
                               @NotNull String quitMessageFormat,
-                              @NotNull String endGameStatsFormat) {
+                              @NotNull Component nearWindowMessage,
+                              @NotNull Component startRepairingMessage,
+                              @NotNull Component stopRepairingMessage,
+                              @NotNull Component finishRepairingMessage,
+                              @NotNull Component enemiesNearbyMessage,
+                              @NotNull Component healthDisplay,
+                              @NotNull String gameJoinFormat) {
 
     public static final int MAP_DATA_VERSION = 1;
 
@@ -84,8 +101,6 @@ public record MapSettingsInfo(int mapDataVersion,
      * @param displayItemSnbt        the SNBT for the item used to represent this map
      * @param introMessages          the messages that may be sent when the game starts
      * @param scoreboardHeader       the component displayed at the top of the scoreboard
-     * @param leaderboardPosition    the position of the leaderboard, relative to origin
-     * @param leaderboardLength      the number of entries in the leaderboard
      * @param worldTime              the time in ticks that the world should have
      * @param maxPlayers             the maximum number of players this map can fit
      * @param minPlayers             the minimum number of players this map needs to start
@@ -95,11 +110,9 @@ public record MapSettingsInfo(int mapDataVersion,
      * @param windowRepairTicks      the number of ticks between each consecutive "repair tick"
      * @param corpseDeathTicks       the number of ticks it takes for a downed player to fully die if they are not revived
      * @param reviveRadius           the maximum distance away players can be from a corpse and still revive it
-     * @param canWallshoot           true if wallshooting is enabled, false otherwise
-     * @param perksLostOnDeath       true if perks are lost on death, false otherwise
+     * @param lostOnDeath            object groups that are deleted on death
      * @param baseReviveTicks        the base number of ticks it takes to revive a player
      * @param rollsPerChest          the number of rolls a lucky chest can have before it moves to another location
-     * @param milestoneRounds        "special" rounds whose times are recorded and saved
      * @param defaultEquipment       the initial equipment players receive when the game starts; the keys correspond to
      *                               the inventory object group they should be placed in
      */
@@ -111,8 +124,6 @@ public record MapSettingsInfo(int mapDataVersion,
         Objects.requireNonNull(displayItemSnbt, "displayItemSnbt");
         Objects.requireNonNull(introMessages, "introMessages");
         Objects.requireNonNull(scoreboardHeader, "scoreboardHeader");
-        Objects.requireNonNull(leaderboardPosition, "leaderboardPosition");
-        Objects.requireNonNull(milestoneRounds, "milestoneRounds");
         Objects.requireNonNull(defaultEquipment, "defaultEquipment");
     }
 
@@ -125,10 +136,19 @@ public record MapSettingsInfo(int mapDataVersion,
      */
     public MapSettingsInfo(@NotNull Key id, @NotNull Vec3I origin) {
         this(MAP_DATA_VERSION, 10, id, List.of(), origin, 47, -1, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
-                "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", new ArrayList<>(0),
-                Component.text(id.value()), Vec3I.ORIGIN, 15, 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false, false, 30, 5,
-                0, 4.5F, false, new ArrayList<>(0), new HashMap<>(0), new HashMap<>(),
-                Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F), "", "", "", "",
-                "", "", "", "", "", "", "", "", "", "", "", "", "");
+                "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", 12000L, new ArrayList<>(0), 400L,
+                new ArrayList<>(0), Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F),
+                "", 200L, "", Component.text(id.value()), 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false,
+                new ArrayList<>(), 30, 5, 0, 4.5F, 0.4F, 20, false, new HashMap<>(0), new HashMap<>(), "", "", "", "",
+                "", "", "", "", "",
+                Sound.sound(Key.key("minecraft:block.brewing_stand.brew"), Sound.Source.MASTER, 1.0F, 1.0F), "", "", "",
+                "", Sound.sound(Key.key("minecraft:entity.ender_dragon.growl"), Sound.Source.MASTER, 1.0F, 0.5F), "",
+                "", Sound.sound(Key.key("minecraft:entity.player.hurt"), Sound.Source.MASTER, 1.0F, 1.0F), "", "",
+                Component.text("Hold SNEAK to repair", NamedTextColor.GREEN),
+                Component.text("Started repairing. Keep holding SNEAK to continue.", NamedTextColor.GREEN),
+                Component.text("Stopped repairing.", NamedTextColor.RED),
+                Component.text("Fully repaired!", NamedTextColor.GREEN),
+                Component.text("You cannot repair that window while enemies are nearby!", NamedTextColor.RED),
+                Component.text("❤", NamedTextColor.RED), "");
     }
 }
