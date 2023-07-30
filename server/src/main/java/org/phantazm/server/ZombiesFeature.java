@@ -176,9 +176,9 @@ public final class ZombiesFeature {
 
         ZombiesFeature.sceneRouter = new ZombiesSceneRouter(providers);
 
-        MinecraftServer.getSchedulerManager()
-                .scheduleTask(() -> sceneRouter.tick(System.currentTimeMillis()), TaskSchedule.immediate(),
-                        TaskSchedule.nextTick());
+        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+            sceneRouter.tick(System.currentTimeMillis());
+        }, TaskSchedule.immediate(), TaskSchedule.nextTick());
 
         commandManager.register(
                 new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, sceneTransferHelper,

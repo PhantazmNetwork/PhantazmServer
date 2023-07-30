@@ -63,6 +63,7 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
         }
 
         return CompletableFuture.supplyAsync(source::copy, executor).thenApply(container -> {
+            container.enableAutoChunkLoad(false);
             container.setChunkSupplier(chunkSupplier);
             instanceManager.registerInstance(container);
 
@@ -88,6 +89,7 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
             int chunkViewDistance) {
         InstanceContainer container =
                 new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD, createChunkLoader(path));
+        container.enableAutoChunkLoad(false);
         container.setChunkSupplier(chunkSupplier);
 
         awaitChunkLoadSync(container, spawnPoint, chunkViewDistance);
@@ -99,7 +101,7 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
         Phaser phaser = new Phaser(1);
         ChunkUtils.forChunksInRange(spawnPoint, chunkViewDistance, (chunkX, chunkZ) -> {
             phaser.register();
-            instance.loadOptionalChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
+            instance.loadChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
         });
         phaser.arriveAndAwaitAdvance();
     }
