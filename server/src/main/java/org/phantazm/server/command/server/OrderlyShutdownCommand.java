@@ -41,6 +41,14 @@ public class OrderlyShutdownCommand extends Command {
                 return;
             }
 
+            globalNode.addListener(SceneShutdownEvent.class, this::onSceneShutdown);
+            globalNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
+                event.getPlayer().kick(Component.text("Server is not joinable", NamedTextColor.RED));
+            });
+            globalNode.addListener(PlayerJoinLobbyEvent.class, event -> {
+                event.getPlayer().kick(Component.text("Routing to fresh instance...", NamedTextColor.RED));
+            });
+
             initialized = true;
             shutdownStart = System.currentTimeMillis();
 
@@ -78,14 +86,6 @@ public class OrderlyShutdownCommand extends Command {
                     System.exit(0);
                 }
             }, TaskSchedule.immediate(), TaskSchedule.tick(20));
-
-            globalNode.addListener(SceneShutdownEvent.class, this::onSceneShutdown);
-            globalNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
-                event.getPlayer().kick(Component.text("Server is not joinable", NamedTextColor.RED));
-            });
-            globalNode.addListener(PlayerJoinLobbyEvent.class, event -> {
-                event.getPlayer().kick(Component.text("Routing to fresh instance...", NamedTextColor.RED));
-            });
 
             if (noGamesActive()) {
                 System.exit(0);
