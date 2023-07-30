@@ -7,6 +7,7 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.utils.chunk.ChunkSupplier;
 import net.minestom.server.utils.chunk.ChunkUtils;
+import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 /**
@@ -84,7 +86,8 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
     @SuppressWarnings("UnstableApiUsage")
     private InstanceContainer createTemplateContainer(InstanceManager instanceManager, Path path, Point spawnPoint,
             int chunkViewDistance) {
-        InstanceContainer container = instanceManager.createInstanceContainer(createChunkLoader(path));
+        InstanceContainer container =
+                new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD, createChunkLoader(path));
         container.setChunkSupplier(chunkSupplier);
 
         awaitChunkLoadSync(container, spawnPoint, chunkViewDistance);

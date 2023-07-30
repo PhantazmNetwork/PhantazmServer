@@ -18,16 +18,14 @@ import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.MathUtils;
 import org.phantazm.core.VecUtils;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
 import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * An entity with navigation capabilities based on the Proxima library.
@@ -154,6 +152,10 @@ public class ProximaEntity extends LivingEntity {
     public void addGoalGroup(@NotNull GoalGroup group) {
         Objects.requireNonNull(group, "group");
         goalGroups.add(group);
+    }
+
+    public @NotNull @Unmodifiable List<GoalGroup> goalGroups() {
+        return Collections.unmodifiableList(goalGroups);
     }
 
     @Override

@@ -10,17 +10,19 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.event.entity.EntityDeathEvent;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.Tags;
 import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob.SkillDelegatingGoal;
 import org.phantazm.mob.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
 @Model("mob.goal.melee_attack")
@@ -40,14 +42,13 @@ public class MeleeAttackGoal implements GoalCreator {
         return new Goal(data, skills, mob);
     }
 
-    private static class Goal implements ProximaGoal {
+    private static class Goal implements SkillDelegatingGoal {
         private final Data data;
         private final Collection<Skill> skills;
         private final PhantazmMob mob;
 
         private long lastAttackTime;
 
-        @FactoryMethod
         public Goal(@NotNull Data data, @NotNull Collection<Skill> skills, @NotNull PhantazmMob mob) {
             this.data = Objects.requireNonNull(data, "data");
             this.skills = Objects.requireNonNull(skills, "skills");
@@ -59,17 +60,15 @@ public class MeleeAttackGoal implements GoalCreator {
             }
 
             mob.entity().scheduler().scheduleTask(() -> {
+                if (mob.entity().isDead() || mob.entity().isRemoved()) {
+                    return;
+                }
+
                 long time = System.currentTimeMillis();
                 for (Skill skill : tickableSkills) {
                     skill.tick(time, mob);
                 }
             }, TaskSchedule.immediate(), TaskSchedule.nextTick(), ExecutionType.SYNC);
-
-            mob.entity().eventNode().addListener(EntityDeathEvent.class, event -> {
-                for (Skill skill : skills) {
-                    skill.end(mob);
-                }
-            });
         }
 
         @Override
@@ -132,6 +131,11 @@ public class MeleeAttackGoal implements GoalCreator {
         @Override
         public boolean shouldEnd() {
             return true;
+        }
+
+        @Override
+        public @NotNull @Unmodifiable Collection<Skill> skills() {
+            return Collections.unmodifiableCollection(skills);
         }
     }
 
