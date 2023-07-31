@@ -150,7 +150,9 @@ public class BasicKnockedStateActivable implements Activable {
             tabList.addViewer(player);
             belowNameTag.addViewer(player);
             context.getVehicle().remove();
-            player.teleport(Pos.fromPoint(context.getKnockLocation()));
+
+            Pos landing = player.getPosition().withCoord(context.getKnockLocation());
+            player.teleport(landing);
         });
         actionBar.sendActionBar(Component.empty(), ZombiesPlayerActionBar.REVIVE_MESSAGE_CLEAR_PRIORITY);
     }
