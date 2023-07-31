@@ -323,9 +323,8 @@ final class EquipmentFeature {
                 else if (EquipmentTypes.GUN.equals(equipmentType)) {
                     return (Optional<TEquipment>)loadGun(pair, equipmentKey);
                 }
-                else {
-                    return Optional.empty();
-                }
+
+                return Optional.empty();
             }
 
             private Optional<Equipment> loadPerk(Key equipmentKey) {
