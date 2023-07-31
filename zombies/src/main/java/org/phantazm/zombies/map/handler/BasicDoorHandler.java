@@ -45,10 +45,18 @@ public class BasicDoorHandler implements DoorHandler {
             }
 
             Player actualPlayer = playerOptional.get();
-
             if (!door.isOpen() && player.canOpenDoor(door)) {
-                Key standingIn = roomTracker.atPoint(actualPlayer.getPosition()).map(room -> room.getRoomInfo().id())
-                        .orElse(null);
+                Optional<Room> standingInRoomOptional = roomTracker.atPoint(actualPlayer.getPosition());
+                if (standingInRoomOptional.isEmpty() || !standingInRoomOptional.get().isOpen()) {
+                    return;
+                }
+
+                Room standingInRoom = standingInRoomOptional.get();
+                if (!standingInRoom.isOpen()) {
+                    return;
+                }
+                
+                Key standingIn = standingInRoom.getRoomInfo().id();
 
                 DoorInfo info = door.doorInfo();
                 List<Key> opensTo = info.opensTo();
