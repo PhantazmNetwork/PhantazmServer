@@ -31,6 +31,7 @@ import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.stage.Stage;
+import org.phantazm.zombies.stage.StageKeys;
 import org.phantazm.zombies.stage.StageTransition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -224,6 +225,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         runnable.run();
                         stage.onJoin(zombiesPlayers.get(teleportedPlayer.getUuid()));
                     }
+
+                    stageTransition.setCurrentStage(StageKeys.IN_GAME);
                 }).whenComplete((ignored, throwable) -> {
                     if (throwable != null) {
                         LOGGER.warn("Failed to finish player join", throwable);

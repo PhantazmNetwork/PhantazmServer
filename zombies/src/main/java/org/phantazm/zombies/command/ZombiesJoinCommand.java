@@ -1,6 +1,8 @@
 package org.phantazm.zombies.command;
 
 import com.github.steanky.element.core.key.KeyParser;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -24,7 +26,7 @@ import java.util.*;
 public class ZombiesJoinCommand extends Command {
     public ZombiesJoinCommand(@NotNull Map<? super UUID, ? extends Party> partyMap,
             @NotNull PlayerViewProvider viewProvider, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
-            @NotNull ZombiesJoinHelper joinHelper) {
+            @NotNull ZombiesJoinHelper joinHelper, long ratelimit) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.String("map-key");
@@ -36,6 +38,7 @@ public class ZombiesJoinCommand extends Command {
         Objects.requireNonNull(maps, "maps");
         Objects.requireNonNull(joinHelper, "joinHelper");
 
+        Object2LongMap<UUID> lastUsageTimes = new Object2LongOpenHashMap<>();
         mapKeyArgument.setSuggestionCallback((sender, context, suggestion) -> {
             for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
                 suggestion.addEntry(
@@ -64,6 +67,16 @@ public class ZombiesJoinCommand extends Command {
 
             return true;
         }, (sender, context) -> {
+            Player joiner = (Player)sender;
+            UUID joinerUUID = joiner.getUuid();
+            long currentTime = System.currentTimeMillis();
+            if (lastUsageTimes.containsKey(joinerUUID) && currentTime - lastUsageTimes.getLong(joinerUUID) < ratelimit) {
+                joiner.sendMessage(Component.text("You're using that command too quickly!", NamedTextColor.RED));
+                return;
+            } else {
+                lastUsageTimes.put(joinerUUID, currentTime);
+            }
+
             @Subst("test_map")
             String mapKeyString = context.get(mapKeyArgument);
             if (!keyParser.isValidKey(mapKeyString)) {
@@ -77,7 +90,6 @@ public class ZombiesJoinCommand extends Command {
                 return;
             }
 
-            Player joiner = (Player)sender;
             Party party = partyMap.get(joiner.getUuid());
             Collection<PlayerView> playerViews;
             if (party == null) {

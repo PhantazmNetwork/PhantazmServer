@@ -30,7 +30,7 @@ public class ZombiesCommand extends Command {
         Objects.requireNonNull(fallback, "fallback");
 
         ZombiesJoinHelper joinHelper = new ZombiesJoinHelper(viewProvider, router, transferHelper);
-        addSubcommand(new ZombiesJoinCommand(parties, viewProvider, keyParser, maps, joinHelper));
+        addSubcommand(new ZombiesJoinCommand(parties, viewProvider, keyParser, maps, joinHelper, 1000));
         addSubcommand(new CoinsCommand(router::getCurrentScene));
         addSubcommand(new RoundCommand(router::getCurrentScene));
         addSubcommand(new KillAllCommand(router::getCurrentScene));
