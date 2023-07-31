@@ -180,9 +180,9 @@ public final class ZombiesFeature {
             sceneRouter.tick(System.currentTimeMillis());
         }, TaskSchedule.immediate(), TaskSchedule.nextTick());
 
-        commandManager.register(
-                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, sceneTransferHelper,
-                        sceneFallback, zombiesConfig.joinRatelimit()));
+        commandManager.register(new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider,
+                MinecraftServer.getSchedulerManager(), sceneTransferHelper, sceneFallback,
+                zombiesConfig.joinRatelimit()));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {

@@ -8,6 +8,7 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
+import net.minestom.server.timer.SchedulerManager;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.scene.ZombiesScene;
@@ -23,7 +24,8 @@ import java.util.function.Function;
 public class RoundCommand extends Command {
     public static final Permission PERMISSION = new Permission("zombies.playtest.round");
 
-    public RoundCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
+    public RoundCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper,
+            @NotNull SchedulerManager schedulerManager) {
         super("round");
         Objects.requireNonNull(sceneMapper, "sceneMapper");
 
@@ -56,14 +58,16 @@ public class RoundCommand extends Command {
 
                 StageTransition transition = scene.getStageTransition();
                 Stage current = transition.getCurrentStage();
-                if (current == null || !current.key().equals(StageKeys.IN_GAME)) {
-                    transition.setCurrentStage(StageKeys.IN_GAME);
-                    if (roundIndex != 0) {
+                schedulerManager.scheduleNextProcess(() -> {
+                    if (current == null || !current.key().equals(StageKeys.IN_GAME)) {
+                        transition.setCurrentStage(StageKeys.IN_GAME);
+                        if (roundIndex != 0) {
+                            handler.setCurrentRound(roundIndex);
+                        }
+                    } else {
                         handler.setCurrentRound(roundIndex);
                     }
-                } else {
-                    handler.setCurrentRound(roundIndex);
-                }
+                });
             });
         }, roundArgument);
     }

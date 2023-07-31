@@ -64,6 +64,10 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
             blockLoop:
             while (it.hasNext()) {
                 blockLocation = it.next();
+
+                if (!instance.isChunkLoaded(blockLocation)) {
+                    break;
+                }
                 block = instance.getBlock(blockLocation);
 
                 for (BlockIteration.Context context : contexts) {

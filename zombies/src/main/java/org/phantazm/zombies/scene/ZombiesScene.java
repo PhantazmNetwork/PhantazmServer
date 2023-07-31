@@ -225,13 +225,15 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         runnable.run();
                         stage.onJoin(zombiesPlayers.get(teleportedPlayer.getUuid()));
                     }
-
-                    stageTransition.setCurrentStage(StageKeys.IN_GAME);
                 }).whenComplete((ignored, throwable) -> {
                     if (throwable != null) {
                         LOGGER.warn("Failed to finish player join", throwable);
                     }
                 }).join();
+
+                if (allowedRequestUUID != null) {
+                    stageTransition.setCurrentStage(StageKeys.IN_GAME);
+                }
             }, () -> {
                 synchronized (joinLock) {
                     pendingPlayers -= newPlayers.size();

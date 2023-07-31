@@ -2,6 +2,7 @@ package org.phantazm.zombies.scene;
 
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
+import net.minestom.server.timer.SchedulerManager;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.game.scene.SceneTransferHelper;
@@ -25,13 +26,17 @@ public class ZombiesJoinHelper {
 
     private final SceneRouter<ZombiesScene, ZombiesRouteRequest> router;
 
+    private final SchedulerManager schedulerManager;
+
     private final SceneTransferHelper transferHelper;
 
     public ZombiesJoinHelper(@NotNull PlayerViewProvider viewProvider,
             @NotNull SceneRouter<ZombiesScene, ZombiesRouteRequest> router,
+            @NotNull SchedulerManager schedulerManager,
             @NotNull SceneTransferHelper transferHelper) {
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
         this.router = Objects.requireNonNull(router, "router");
+        this.schedulerManager = Objects.requireNonNull(schedulerManager, "schedulerManager");
         this.transferHelper = Objects.requireNonNull(transferHelper, "transferHelper");
     }
 
@@ -75,9 +80,11 @@ public class ZombiesJoinHelper {
                 joiner.sendMessage(routeResult.message().get());
             }
             else if (routeResult.result().isPresent()) {
-                try (TransferResult transferResult = routeResult.result().get()) {
-                    transferHelper.transfer(transferResult, playerViews, viewProvider.fromPlayer(joiner));
-                }
+                schedulerManager.scheduleNextProcess(() -> {
+                    try (TransferResult transferResult = routeResult.result().get()) {
+                        transferHelper.transfer(transferResult, playerViews, viewProvider.fromPlayer(joiner));
+                    }
+                });
             }
         });
     }

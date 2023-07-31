@@ -3,6 +3,7 @@ package org.phantazm.zombies.command;
 import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.timer.SchedulerManager;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
@@ -19,7 +20,8 @@ import java.util.UUID;
 public class ZombiesCommand extends Command {
     public ZombiesCommand(@NotNull Map<? super UUID, ? extends Party> parties, @NotNull ZombiesSceneRouter router,
             @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
-            @NotNull SceneTransferHelper transferHelper, @NotNull SceneFallback fallback, long joinRatelimit) {
+            @NotNull SchedulerManager schedulerManager, @NotNull SceneTransferHelper transferHelper,
+            @NotNull SceneFallback fallback, long joinRatelimit) {
         super("zombies");
 
         Objects.requireNonNull(parties, "parties");
@@ -29,10 +31,11 @@ public class ZombiesCommand extends Command {
         Objects.requireNonNull(viewProvider, "viewProvider");
         Objects.requireNonNull(fallback, "fallback");
 
-        ZombiesJoinHelper joinHelper = new ZombiesJoinHelper(viewProvider, router, transferHelper);
-        addSubcommand(new ZombiesJoinCommand(parties, viewProvider, keyParser, maps, joinHelper, joinRatelimit));
+        ZombiesJoinHelper joinHelper = new ZombiesJoinHelper(viewProvider, router, schedulerManager, transferHelper);
+        addSubcommand(new ZombiesJoinCommand(parties, viewProvider, keyParser, maps, joinHelper,
+                joinRatelimit));
         addSubcommand(new CoinsCommand(router::getCurrentScene));
-        addSubcommand(new RoundCommand(router::getCurrentScene));
+        addSubcommand(new RoundCommand(router::getCurrentScene, schedulerManager));
         addSubcommand(new KillAllCommand(router::getCurrentScene));
         addSubcommand(new GodmodeCommand(router::getCurrentScene));
         addSubcommand(new AmmoRefillCommand(router::getCurrentScene));
