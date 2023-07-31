@@ -182,7 +182,7 @@ public final class ZombiesFeature {
 
         commandManager.register(
                 new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider, sceneTransferHelper,
-                        sceneFallback));
+                        sceneFallback, zombiesConfig.joinRatelimit()));
     }
 
     private static void registerElementClasses(ContextManager contextManager) {

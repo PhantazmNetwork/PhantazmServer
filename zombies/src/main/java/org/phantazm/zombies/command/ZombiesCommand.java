@@ -19,7 +19,7 @@ import java.util.UUID;
 public class ZombiesCommand extends Command {
     public ZombiesCommand(@NotNull Map<? super UUID, ? extends Party> parties, @NotNull ZombiesSceneRouter router,
             @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
-            @NotNull SceneTransferHelper transferHelper, @NotNull SceneFallback fallback) {
+            @NotNull SceneTransferHelper transferHelper, @NotNull SceneFallback fallback, long joinRatelimit) {
         super("zombies");
 
         Objects.requireNonNull(parties, "parties");
@@ -30,7 +30,7 @@ public class ZombiesCommand extends Command {
         Objects.requireNonNull(fallback, "fallback");
 
         ZombiesJoinHelper joinHelper = new ZombiesJoinHelper(viewProvider, router, transferHelper);
-        addSubcommand(new ZombiesJoinCommand(parties, viewProvider, keyParser, maps, joinHelper, 1000));
+        addSubcommand(new ZombiesJoinCommand(parties, viewProvider, keyParser, maps, joinHelper, joinRatelimit));
         addSubcommand(new CoinsCommand(router::getCurrentScene));
         addSubcommand(new RoundCommand(router::getCurrentScene));
         addSubcommand(new KillAllCommand(router::getCurrentScene));
