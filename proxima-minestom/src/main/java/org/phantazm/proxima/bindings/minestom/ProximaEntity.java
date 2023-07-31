@@ -248,15 +248,16 @@ public class ProximaEntity extends LivingEntity {
         Node closestNode = null;
 
         while (node != null) {
-            double flatDistance =
-                    Vec3D.distanceSquared(node.x + 0.5, 0, node.z + 0.5, currentPosition.x(), 0, currentPosition.z());
+            double thisDistance = Vec3D.distanceSquared(node.x + 0.5, node.y + node.blockOffset, node.z + 0.5,
+                    Math.floor(currentPosition.x()) + 0.5, Math.floor(currentPosition.y()),
+                    Math.floor(currentPosition.z()) + 0.5);
 
-            if (flatDistance < closestNodeDistance) {
-                closestNodeDistance = flatDistance;
+            if (thisDistance < closestNodeDistance) {
+                closestNodeDistance = thisDistance;
                 closestNode = node;
             }
 
-            if (flatDistance < 1) {
+            if (thisDistance < 1) {
                 break;
             }
 
