@@ -323,6 +323,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public void shutdown() {
+        this.shutdown = true;
+
         stageTransition.end();
         taskScheduler.end();
 
@@ -342,16 +344,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             zombiesPlayer.end();
         }
 
-        super.shutdown = true;
-
         //wait for all players to fallback before we actually shut down the scene
-        CompletableFuture.allOf(fallbackFutures.toArray(CompletableFuture[]::new)).whenComplete((ignored, error) -> {
-            if (error != null) {
-                LOGGER.warn("Error when waiting on player fallback", error);
-            }
-
-            super.shutdown();
-        });
+        CompletableFuture.allOf(fallbackFutures.toArray(CompletableFuture[]::new))
+                .whenComplete((ignored, error) -> super.shutdown());
     }
 
     @Override

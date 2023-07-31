@@ -22,12 +22,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents a lobby. Most basic scene which contains {@link Player}s.
  */
 public class Lobby extends InstanceScene<LobbyJoinRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Lobby.class);
+
     private final InstanceConfig instanceConfig;
     private final Map<UUID, PlayerView> players;
     private final NPCHandler npcHandler;
@@ -148,15 +150,19 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
 
     @Override
     public void shutdown() {
+        this.shutdown = true;
+
+        List<CompletableFuture<Boolean>> fallbackFutures = new ArrayList<>(players.size());
         for (PlayerView player : players.values()) {
-            fallback.fallback(player).whenComplete((fallbackResult, throwable) -> {
+            fallbackFutures.add(fallback.fallback(player).whenComplete((fallbackResult, throwable) -> {
                 if (throwable != null) {
                     LOGGER.warn("Failed to fallback {}", player.getUUID(), throwable);
                 }
-            });
+            }));
         }
 
-        super.shutdown();
+        CompletableFuture.allOf(fallbackFutures.toArray(CompletableFuture[]::new))
+                .whenComplete((ignored, error) -> super.shutdown());
     }
 
     @Override
