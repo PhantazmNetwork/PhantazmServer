@@ -1,9 +1,11 @@
 package org.phantazm.core.game.scene;
 
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -34,14 +36,16 @@ public class SceneProviderAbstractTest {
         SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider =
                 new SceneProviderAbstract<>(executor,maximumLobbies) {
                     @Override
-                    protected @NotNull Optional<Scene<SceneJoinRequest>> chooseScene(@NotNull SceneJoinRequest o) {
+                    protected @NotNull Optional<TransferResult> chooseScene(@NotNull SceneJoinRequest o) {
                         return Optional.empty();
                     }
 
                     @SuppressWarnings("unchecked")
                     @Override
                     protected @NotNull CompletableFuture<Scene<SceneJoinRequest>> createScene(@NotNull SceneJoinRequest o) {
-                        return CompletableFuture.completedFuture((Scene<SceneJoinRequest>)mock(Scene.class));
+                        Scene<SceneJoinRequest> scene = mock(Scene.class);
+                        when(scene.join(ArgumentMatchers.any())).thenReturn(TransferResult.failure(Component.empty()));
+                        return CompletableFuture.completedFuture(scene);
                     }
 
                     @Override
@@ -62,7 +66,9 @@ public class SceneProviderAbstractTest {
     public void testProviderScenesAreTicked() {
         Collection<Scene<SceneJoinRequest>> scenes = new ArrayList<>(maximumLobbies);
         for (int i = 0; i < maximumLobbies; i++) {
-            scenes.add(mock(Scene.class));
+            Scene<SceneJoinRequest> scene = mock(Scene.class);
+            when(scene.join(ArgumentMatchers.any())).thenReturn(TransferResult.failure(Component.empty()));
+            scenes.add(scene);
         }
 
         SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider =
@@ -71,7 +77,7 @@ public class SceneProviderAbstractTest {
                     private final Iterator<Scene<SceneJoinRequest>> iterator = scenes.iterator();
 
                     @Override
-                    protected @NotNull Optional<Scene<SceneJoinRequest>> chooseScene(@NotNull SceneJoinRequest o) {
+                    protected @NotNull Optional<TransferResult> chooseScene(@NotNull SceneJoinRequest o) {
                         return Optional.empty();
                     }
 
@@ -101,13 +107,14 @@ public class SceneProviderAbstractTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testProviderRemovesShutdownScenes() {
-        Scene<SceneJoinRequest> scene = (Scene<SceneJoinRequest>)mock(Scene.class);
+        Scene<SceneJoinRequest> scene = mock(Scene.class);
+        when(scene.join(ArgumentMatchers.any())).thenReturn(TransferResult.failure(Component.empty()));
         when(scene.isShutdown()).thenReturn(true);
 
         SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider =
                 new SceneProviderAbstract<>(executor, maximumLobbies) {
                     @Override
-                    protected @NotNull Optional<Scene<SceneJoinRequest>> chooseScene(@NotNull SceneJoinRequest o) {
+                    protected @NotNull Optional<TransferResult> chooseScene(@NotNull SceneJoinRequest o) {
                         return Optional.empty();
                     }
 

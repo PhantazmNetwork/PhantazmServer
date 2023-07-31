@@ -34,22 +34,22 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
     }
 
     @Override
-    public @NotNull CompletableFuture<Optional<TScene>> provideScene(@NotNull TRequest request) {
+    public @NotNull CompletableFuture<Optional<TransferResult>> provideScene(@NotNull TRequest request) {
         return CompletableFuture.supplyAsync(() -> {
             long optimisticReadStamp = lock.tryOptimisticRead();
             if (lock.validate(optimisticReadStamp)) {
-                Optional<TScene> sceneOptional = chooseScene(request);
+                Optional<TransferResult> resultOptional = chooseScene(request);
 
-                if (lock.validate(optimisticReadStamp) && sceneOptional.isPresent()) {
-                    return sceneOptional;
+                if (lock.validate(optimisticReadStamp) && resultOptional.isPresent()) {
+                    return resultOptional;
                 }
             }
 
             long writeStamp = lock.writeLock();
             try {
-                Optional<TScene> sceneOptional = chooseScene(request);
-                if (sceneOptional.isPresent()) {
-                    return sceneOptional;
+                Optional<TransferResult> resultOptional = chooseScene(request);
+                if (resultOptional.isPresent()) {
+                    return resultOptional;
                 }
 
                 if (scenes.size() >= maximumScenes) {
@@ -59,7 +59,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
                 TScene scene = createScene(request).join();
                 if (scene != null) {
                     scenes.add(scene);
-                    return Optional.of(scene);
+                    return Optional.of(scene.join(request));
                 }
 
                 return Optional.empty();
@@ -110,7 +110,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
      * @param request The request used to choose a {@link Scene}
      * @return An optional of a chosen {@link Scene}
      */
-    protected abstract @NotNull Optional<TScene> chooseScene(@NotNull TRequest request);
+    protected abstract @NotNull Optional<TransferResult> chooseScene(@NotNull TRequest request);
 
     /**
      * Creates a {@link Scene}.

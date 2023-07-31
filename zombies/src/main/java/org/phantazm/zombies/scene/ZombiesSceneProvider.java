@@ -30,6 +30,7 @@ import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.SceneProviderAbstract;
+import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerView;
@@ -129,36 +130,23 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     }
 
     @Override
-    protected @NotNull Optional<ZombiesScene> chooseScene(@NotNull ZombiesJoinRequest request) {
+    protected @NotNull Optional<TransferResult> chooseScene(@NotNull ZombiesJoinRequest request) {
         if (request.isRestricted()) {
             return Optional.empty();
         }
 
         sceneLoop:
         for (ZombiesScene scene : getScenes()) {
-            if (scene.isComplete() || !scene.isJoinable() || scene.isShutdown()) {
-                continue;
-            }
-
-            Stage stage = scene.getCurrentStage();
-            if (stage == null || stage.hasPermanentPlayers()) {
-                continue;
-            }
-
-            int maxPlayers = scene.getMapSettingsInfo().maxPlayers();
-            int currentPlayerCount = scene.getZombiesPlayers().size();
-
-            if (currentPlayerCount + request.getPlayers().size() > maxPlayers) {
-                continue;
-            }
-
             for (PlayerView view : request.getPlayers()) {
                 if (scene.getZombiesPlayers().containsKey(view.getUUID())) {
                     continue sceneLoop;
                 }
             }
 
-            return Optional.of(scene);
+            TransferResult result = scene.join(request);
+            if (result.executor().isPresent()) {
+                return Optional.of(result);
+            }
         }
 
         return Optional.empty();

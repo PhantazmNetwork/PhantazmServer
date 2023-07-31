@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Closeable;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -13,7 +12,7 @@ import java.util.Optional;
  */
 public record TransferResult(@NotNull Optional<Runnable> executor,
                              @NotNull Runnable end,
-                             @NotNull Optional<Component> message) implements Closeable {
+                             @NotNull Optional<Component> message) implements AutoCloseable {
 
     /**
      * Creates a transfer result.

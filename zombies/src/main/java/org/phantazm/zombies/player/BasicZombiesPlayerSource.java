@@ -226,7 +226,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             return new BasicZombiesPlayerState(Component.text("QUIT").color(NamedTextColor.RED),
                     ZombiesPlayerStateKeys.QUIT.key(),
                     List.of(new BasicQuitStateActivable(instance, playerView, mapSettingsInfo, sidebar, tabList,
-                            belowNameTag, stateMap, taskScheduler)));
+                            belowNameTag, accessRegistry, stateMap, taskScheduler)));
         };
 
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =

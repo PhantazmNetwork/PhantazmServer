@@ -107,11 +107,10 @@ public final class LobbyFeature {
             LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
-            RouteResult<Lobby> routeResult = lobbyRouter.findScene(routeRequest).join();
+            RouteResult routeResult = lobbyRouter.findScene(routeRequest).join();
             boolean success = false;
-            if (routeResult.scene().isPresent()) {
-                Lobby lobby = routeResult.scene().get();
-                try (TransferResult transferResult = lobby.join(joinRequest)) {
+            if (routeResult.result().isPresent()) {
+                try (TransferResult transferResult = routeResult.result().get()) {
                     if (transferResult.executor().isPresent()) {
                         transferResult.executor().get().run();
                         loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);

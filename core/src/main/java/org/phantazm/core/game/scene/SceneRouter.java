@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface SceneRouter<TScene extends Scene<?>, TRequest extends SceneJoinRequest> extends Tickable, Keyed {
 
-    @NotNull CompletableFuture<RouteResult<TScene>> findScene(@NotNull TRequest joinRequest);
+    @NotNull CompletableFuture<RouteResult> findScene(@NotNull TRequest joinRequest);
 
     @NotNull Collection<TScene> getScenes();
 

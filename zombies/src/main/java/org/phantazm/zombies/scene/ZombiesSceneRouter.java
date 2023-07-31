@@ -63,7 +63,7 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     }
 
     @Override
-    public @NotNull CompletableFuture<RouteResult<ZombiesScene>> findScene(@NotNull ZombiesRouteRequest routeRequest) {
+    public @NotNull CompletableFuture<RouteResult> findScene(@NotNull ZombiesRouteRequest routeRequest) {
         if (isShutdown()) {
             return CompletableFuture.completedFuture(
                     RouteResult.failure(Component.text("This game has shut down.", NamedTextColor.RED)));
@@ -80,7 +80,7 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
         return CompletableFuture.completedFuture(rejoinGame(routeRequest));
     }
 
-    private CompletableFuture<RouteResult<ZombiesScene>> joinGame(ZombiesRouteRequest routeRequest) {
+    private CompletableFuture<RouteResult> joinGame(ZombiesRouteRequest routeRequest) {
         SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider = sceneProviders.get(routeRequest.targetMap());
         if (sceneProvider == null) {
             return CompletableFuture.completedFuture(RouteResult.failure(
@@ -93,10 +93,10 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
         });
     }
 
-    private RouteResult<ZombiesScene> rejoinGame(ZombiesRouteRequest routeRequest) {
+    private RouteResult rejoinGame(ZombiesRouteRequest routeRequest) {
         for (ZombiesScene scene : getScenes()) {
             if (scene.getUUID().equals(routeRequest.targetGame())) {
-                return RouteResult.success(scene);
+                return RouteResult.success(scene.join(routeRequest.joinRequest()));
             }
         }
 

@@ -1,11 +1,14 @@
 package org.phantazm.core.game.scene.lobby;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.SceneProvider;
 import org.phantazm.core.game.scene.SceneProviderAbstract;
+import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.player.PlayerView;
 
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 /**
@@ -29,10 +32,9 @@ public abstract class LobbyProviderAbstract extends SceneProviderAbstract<Lobby,
     }
 
     @Override
-    protected @NotNull Optional<Lobby> chooseScene(@NotNull LobbyJoinRequest request) {
-        Lobby maximumLobby = null;
-        int maximumWeighting = Integer.MAX_VALUE;
-
+    protected @NotNull Optional<TransferResult> chooseScene(@NotNull LobbyJoinRequest request) {
+        Object2IntMap<UUID> weightMap = new Object2IntOpenHashMap<>(getScenes().size());
+        List<Lobby> lobbies = new ArrayList<>(getScenes().size());
         sceneLoop:
         for (Lobby lobby : getScenes()) {
             for (PlayerView playerView : request.getPlayers()) {
@@ -41,19 +43,27 @@ public abstract class LobbyProviderAbstract extends SceneProviderAbstract<Lobby,
                 }
             }
 
-            int joinWeight = lobby.getJoinWeight(request);
-
-            if (joinWeight < maximumWeighting) {
-                maximumLobby = lobby;
-                maximumWeighting = joinWeight;
-            }
+            weightMap.put(lobby.getUUID(), lobby.getJoinWeight(request));
+            lobbies.add(lobby);
         }
 
-        if (maximumWeighting < newLobbyThreshold) {
+        lobbies.sort(Comparator.comparingInt(lobbyA -> weightMap.getInt(lobbyA.getUUID())));
+        if (lobbies.isEmpty()) {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(maximumLobby);
+        if (weightMap.getInt(lobbies.get(0).getUUID()) < newLobbyThreshold) {
+            return Optional.empty();
+        }
+
+        for (Lobby acceptableLobby : lobbies) {
+            TransferResult result = acceptableLobby.join(request);
+            if (result.executor().isPresent()) {
+                return Optional.of(result);
+            }
+        }
+
+        return Optional.empty();
     }
 
 }

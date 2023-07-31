@@ -34,12 +34,11 @@ public class LobbyRouterFallback implements SceneFallback {
         LobbyJoinRequest joinRequest = new BasicLobbyJoinRequest(Collections.singleton(player));
         LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbyName, joinRequest);
         return lobbyRouter.findScene(routeRequest).thenApply(routeResult -> {
-            if (routeResult.scene().isEmpty()) {
+            if (routeResult.result().isEmpty()) {
                 return false;
             }
 
-            Lobby lobby = routeResult.scene().get();
-            try (TransferResult result = lobby.join(joinRequest)) {
+            try (TransferResult result = routeResult.result().get()) {
                 if (result.executor().isEmpty()) {
                     return false;
                 }

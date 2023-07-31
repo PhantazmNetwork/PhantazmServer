@@ -63,7 +63,7 @@ public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
     }
 
     @Override
-    public @NotNull CompletableFuture<RouteResult<Lobby>> findScene(@NotNull LobbyRouteRequest routeRequest) {
+    public @NotNull CompletableFuture<RouteResult> findScene(@NotNull LobbyRouteRequest routeRequest) {
         if (isShutdown()) {
             return CompletableFuture.completedFuture(
                     RouteResult.failure(Component.text("This game has shut down.", NamedTextColor.RED)));

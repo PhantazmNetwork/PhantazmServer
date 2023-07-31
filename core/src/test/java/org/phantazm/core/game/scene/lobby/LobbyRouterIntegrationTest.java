@@ -27,7 +27,7 @@ public class LobbyRouterIntegrationTest {
         router.setJoinable(false);
         LobbyRouteRequest request = new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(List.of()));
 
-        assertTrue(router.findScene(request).join().scene().isEmpty());
+        assertTrue(router.findScene(request).join().result().isEmpty());
     }
 
     @SuppressWarnings("unchecked")
@@ -41,7 +41,7 @@ public class LobbyRouterIntegrationTest {
         router.shutdown();
         LobbyRouteRequest request = new LobbyRouteRequest(lobbyName, new BasicLobbyJoinRequest(List.of()));
 
-        assertTrue(router.findScene(request).join().scene().isEmpty());
+        assertTrue(router.findScene(request).join().result().isEmpty());
     }
 
     @SuppressWarnings("unchecked")
@@ -54,7 +54,7 @@ public class LobbyRouterIntegrationTest {
 
         LobbyRouteRequest request = new LobbyRouteRequest("notMain", new BasicLobbyJoinRequest(List.of()));
 
-        assertTrue(router.findScene(request).join().scene().isEmpty());
+        assertTrue(router.findScene(request).join().result().isEmpty());
     }
 
 }

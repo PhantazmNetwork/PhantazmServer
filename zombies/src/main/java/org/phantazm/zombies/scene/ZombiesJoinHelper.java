@@ -5,6 +5,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.game.scene.SceneTransferHelper;
+import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.slf4j.Logger;
@@ -64,18 +65,19 @@ public class ZombiesJoinHelper {
                 return isRestricted;
             }
         };
-        router.findScene(routeRequestCreator.apply(joinRequest)).whenComplete((result, throwable) -> {
+        router.findScene(routeRequestCreator.apply(joinRequest)).whenComplete((routeResult, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Exception while finding zombies scene", throwable);
                 return;
             }
 
-            if (result.message().isPresent()) {
-                joiner.sendMessage(result.message().get());
+            if (routeResult.message().isPresent()) {
+                joiner.sendMessage(routeResult.message().get());
             }
-            else if (result.scene().isPresent()) {
-                ZombiesScene scene = result.scene().get();
-                transferHelper.transfer(scene, joinRequest, playerViews, viewProvider.fromPlayer(joiner));
+            else if (routeResult.result().isPresent()) {
+                try (TransferResult transferResult = routeResult.result().get()) {
+                    transferHelper.transfer(transferResult, playerViews, viewProvider.fromPlayer(joiner));
+                }
             }
         });
     }
