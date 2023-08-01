@@ -10,6 +10,7 @@ dependencies {
     api(libs.commons.lang3)
     api(libs.caffeine)
     api(libs.element.core)
+    api(libs.jooq)
     api(libs.toolkit.collection)
     api(libs.toolkit.function)
     api(libs.vector.core)
