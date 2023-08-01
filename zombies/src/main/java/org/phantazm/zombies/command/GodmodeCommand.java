@@ -36,6 +36,7 @@ public class GodmodeCommand extends Command {
                 boolean res = flags.toggleFlag(Flags.GODMODE);
                 if (res) {
                     player.setAllowFlying(true);
+                    player.setFlyingSpeed(0.4F);
                     player.sendMessage("Enabled godmode.");
                 }
                 else {
