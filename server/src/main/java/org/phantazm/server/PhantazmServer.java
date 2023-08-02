@@ -243,6 +243,7 @@ public final class PhantazmServer {
                     MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec);
 
             LobbyFeature.initialize(viewProvider, lobbiesConfig, contextManager);
+            CommandFeature.initialize(routerStore, viewProvider, LobbyFeature.getFallback());
             ChatFeature.initialize(viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild());
 
             MobFeature.initialize(contextManager, yamlCodec);
@@ -266,8 +267,6 @@ public final class PhantazmServer {
 
             routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
             routerStore.putRouter(RouterKeys.LOBBY_SCENE_ROUTER, LobbyFeature.getLobbyRouter());
-
-            CommandFeature.initialize(routerStore, viewProvider, LobbyFeature.getFallback());
         });
 
         CompletableFuture.allOf(independentFeatures, gameFeatures).join();
