@@ -18,6 +18,11 @@ public interface BoundedTracker<T extends Bounded> {
     @NotNull Optional<Pair<T, Vec>> closestInRangeToBoundsWithVec(@NotNull Point origin, double width, double height,
             double depth, double distance);
 
+    default @NotNull Optional<Pair<T, Vec>> closestInRangeToBoundsWithVec(@NotNull Point origin, double width,
+            double height, double distance) {
+        return closestInRangeToBoundsWithVec(origin, width, height, width, distance);
+    }
+
     @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double distance);
 
     default @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height,
