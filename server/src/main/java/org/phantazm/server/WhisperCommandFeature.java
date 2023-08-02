@@ -10,10 +10,8 @@ import org.phantazm.server.command.whisper.WhisperCommand;
 import org.phantazm.server.command.whisper.WhisperConfig;
 import org.phantazm.server.command.whisper.WhisperManager;
 
-import java.io.IOException;
-
 public class WhisperCommandFeature {
-    static void initialize(@NotNull WhisperConfig whisperConfig) throws IOException {
+    static void initialize(@NotNull WhisperConfig whisperConfig) {
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
         CommandManager commandManager = MinecraftServer.getCommandManager();
         WhisperManager whisperManager =

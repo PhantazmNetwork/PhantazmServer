@@ -24,7 +24,7 @@ public class DatapackFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize() throws IOException {
+    static void initialize() {
         BiomeManager biomeManager = MinecraftServer.getBiomeManager();
         DatapackLoader loader = new DatapackLoader();
 
@@ -48,6 +48,9 @@ public class DatapackFeature {
 
                 biomes.addAll(datapack.biomes().values());
             }
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         LOGGER.info("Loaded {} datapacks", loadedDatapacks);

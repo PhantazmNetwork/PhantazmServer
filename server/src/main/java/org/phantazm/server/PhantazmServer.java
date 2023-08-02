@@ -12,7 +12,6 @@ import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -213,23 +212,18 @@ public final class PhantazmServer {
             ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
             PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, ZombiesConfig zombiesConfig,
             LoginValidator loginValidator) {
-        RouterStore routerStore = new BasicRouterStore();
-        SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
-        PlayerViewProvider viewProvider =
-                new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
         ConfigCodec yamlCodec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                 () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
         ConfigCodec tomlCodec = new TomlCodec();
 
-        CompletableFuture<?> independentFeatures = CompletableFuture.runAsync(() -> {
-            try {
-                DatapackFeature.initialize();
-                WhisperCommandFeature.initialize(whisperConfig);
-            }
-            catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        RouterStore routerStore = new BasicRouterStore();
+        SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
+        PlayerViewProvider viewProvider =
+                new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
+        CompletableFuture<?> independentFeatures = CompletableFuture.runAsync(() -> {
+            DatapackFeature.initialize();
+            WhisperCommandFeature.initialize(whisperConfig);
             SilenceJooqFeature.initialize();
             ExecutorFeature.initialize();
             HikariFeature.initialize();
@@ -244,15 +238,11 @@ public final class PhantazmServer {
             ElementFeature.initialize(mappingProcessorSource, keyParser);
 
             ContextManager contextManager = ElementFeature.getContextManager();
-            try {
-                PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
-                        MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec,
-                        MiniMessage.miniMessage());
-                LobbyFeature.initialize(viewProvider, lobbiesConfig, contextManager);
-            }
-            catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+
+            PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
+                    MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec);
+
+            LobbyFeature.initialize(viewProvider, lobbiesConfig, contextManager);
             ChatFeature.initialize(viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild());
 
             MobFeature.initialize(contextManager, yamlCodec);
@@ -262,17 +252,12 @@ public final class PhantazmServer {
             ProximaFeature.initialize(pathfinderConfig);
             SongFeature.initialize(keyParser);
 
-            try {
-                ZombiesFeature.initialize(contextManager, MobFeature.getProcessorMap(), ProximaFeature.getSpawner(),
-                        keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, new CompositeFallback(
-                                List.of(LobbyFeature.getFallback(), new KickFallback(
-                                        Component.text("Failed to send you to lobby!", NamedTextColor.RED)))),
-                        PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
-                        zombiesConfig, EthyleneFeature.getMappingProcessorSource());
-            }
-            catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            ZombiesFeature.initialize(contextManager, MobFeature.getProcessorMap(), ProximaFeature.getSpawner(),
+                    keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, new CompositeFallback(
+                            List.of(LobbyFeature.getFallback(), new KickFallback(
+                                    Component.text("Failed to send you to lobby!", NamedTextColor.RED)))),
+                    PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
+                    zombiesConfig, EthyleneFeature.getMappingProcessorSource());
 
             ServerCommandFeature.initialize(loginValidator, serverConfig.serverInfoConfig().whitelist(),
                     mappingProcessorSource, yamlCodec, routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),

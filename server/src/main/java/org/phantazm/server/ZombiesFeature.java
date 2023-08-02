@@ -87,7 +87,7 @@ public final class ZombiesFeature {
             @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback sceneFallback,
             @NotNull Map<? super UUID, ? extends Party> parties, @NotNull SceneTransferHelper sceneTransferHelper,
             @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
-            @NotNull MappingProcessorSource mappingProcessorSource) throws IOException {
+            @NotNull MappingProcessorSource mappingProcessorSource) {
         Attributes.registerAll();
 
         ConfigCodec codec = new YamlCodec();
@@ -153,10 +153,16 @@ public final class ZombiesFeature {
                         zombiesConfig.joinRatelimit()));
     }
 
-    private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) throws IOException {
-        List<String> dataNames = loader.loadableData();
-        Map<Key, T> data = new HashMap<>(dataNames.size());
+    private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) {
+        List<String> dataNames;
+        try {
+            dataNames = loader.loadableData();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
+        Map<Key, T> data = new HashMap<>(dataNames.size());
         for (String dataName : dataNames) {
             try {
                 T feature = loader.load(dataName);

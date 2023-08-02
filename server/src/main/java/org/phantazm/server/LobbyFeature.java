@@ -55,10 +55,17 @@ public final class LobbyFeature {
      * @param lobbiesConfig      the {@link LobbiesConfig} used to determine lobby behavior
      */
     static void initialize(@NotNull PlayerViewProvider playerViewProvider, @NotNull LobbiesConfig lobbiesConfig,
-            @NotNull ContextManager contextManager) throws IOException {
+            @NotNull ContextManager contextManager) {
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
+
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
-        FileUtils.createDirectories(lobbiesConfig.instancesPath());
+        try {
+            FileUtils.createDirectories(lobbiesConfig.instancesPath());
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         InstanceLoader instanceLoader =
                 new AnvilFileSystemInstanceLoader(instanceManager, lobbiesConfig.instancesPath(), DynamicChunk::new,
                         ExecutorFeature.getExecutor());

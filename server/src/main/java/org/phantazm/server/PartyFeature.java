@@ -33,13 +33,19 @@ public class PartyFeature {
 
     static void initialize(@NotNull CommandManager commandManager, @NotNull PlayerViewProvider viewProvider,
             @NotNull SchedulerManager schedulerManager, @NotNull ContextManager contextManager,
-            @NotNull PartyConfig config, @NotNull ConfigCodec partyCodec, @NotNull MiniMessage miniMessage)
-            throws IOException {
+            @NotNull PartyConfig config, @NotNull ConfigCodec partyCodec) {
         PartyFeature.config = config;
-        ConfigElement partyConfigNode = Configuration.read(ConfigFeature.PARTY_CONFIG_PATH, partyCodec);
-        TickFormatter tickFormatter =
-                contextManager.makeContext(partyConfigNode.getNodeOrThrow("tickFormatter")).provide();
 
+        TickFormatter tickFormatter;
+        try {
+            ConfigElement partyConfigNode = Configuration.read(ConfigFeature.PARTY_CONFIG_PATH, partyCodec);
+            tickFormatter = contextManager.makeContext(partyConfigNode.getNodeOrThrow("tickFormatter")).provide();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        MiniMessage miniMessage = MiniMessage.miniMessage();
         PartyCreator partyCreator = new PartyCreator.Builder().setNotificationConfig(config.notificationConfig())
                 .setTickFormatter(tickFormatter).setMiniMessage(miniMessage).setCreatorRank(config.creatorRank())
                 .setDefaultRank(config.defaultRank()).setInvitationDuration(config.invitationDuration())
