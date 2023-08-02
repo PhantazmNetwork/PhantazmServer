@@ -106,6 +106,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
                         this::hasGhost));
         player.setGameMode(GameMode.SPECTATOR);
         player.setInstance(instance, spawnPoint);
+        player.getInventory().clear();
         return true;
     }
 
