@@ -142,6 +142,10 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         return true;
     }
 
+    public @NotNull Instance instance() {
+        return instance;
+    }
+
     private void cleanGhosts() {
         long writeStamp = ghostLock.writeLock();
         try {
