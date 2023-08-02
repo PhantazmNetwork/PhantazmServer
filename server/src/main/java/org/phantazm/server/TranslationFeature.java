@@ -9,17 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
-import java.util.stream.Stream;
 
 public final class TranslationFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(TranslationFeature.class);
 
-    public static final String LANG_FILE_EXTENSION = "lang";
     public static final Path LANG_FOLDER = Path.of("./lang");
     public static final Key TRANSLATION_REGISTRY_KEY = Key.key(Namespaces.PHANTAZM, "translation");
 
@@ -35,17 +33,10 @@ public final class TranslationFeature {
             FileUtils.createDirectories(LANG_FOLDER);
 
             int count = 0;
-            try (Stream<Path> files = Files.list(LANG_FOLDER)) {
-                Iterator<Path> iterator = files.iterator();
-                while (iterator.hasNext()) {
-                    Path path = iterator.next();
+            try (DirectoryStream<Path> files = Files.newDirectoryStream(LANG_FOLDER, "*.lang")) {
+                for (Path path : files) {
                     String filenameString = path.getFileName().toString();
-                    int dotIndex = filenameString.indexOf('.');
-                    if (dotIndex == -1 || !filenameString.endsWith(LANG_FILE_EXTENSION)) {
-                        return;
-                    }
-
-                    String withoutExtension = filenameString.substring(0, dotIndex);
+                    String withoutExtension = filenameString.substring(0, filenameString.indexOf('.'));
                     Locale fileLocale = Locale.forLanguageTag(withoutExtension);
                     if (fileLocale == null) {
                         return;
