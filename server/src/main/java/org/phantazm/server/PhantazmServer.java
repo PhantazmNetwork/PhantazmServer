@@ -213,12 +213,14 @@ public final class PhantazmServer {
             PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, ZombiesConfig zombiesConfig,
             LoginValidator loginValidator) throws Exception {
         DatapackFeature.initialize();
-        PlayerFeature.initialize(playerConfig);
         ExecutorFeature.initialize();
         HikariFeature.initialize();
         GeneralStatsFeature.initialize();
         BlockHandlerFeature.initialize();
+        TranslationFeature.initialize();
+
         SongFeature.initialize(keyParser);
+        PlayerFeature.initialize(playerConfig);
 
         MappingProcessorSource mappingProcessorSource = EthyleneFeature.getMappingProcessorSource();
         ElementFeature.initialize(mappingProcessorSource, keyParser);
