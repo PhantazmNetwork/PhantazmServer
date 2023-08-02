@@ -247,9 +247,19 @@ public class Window extends BoundedBase {
     private Point indexToCoordinate(int index) {
         Bounds3I frameRegion = windowInfo.frameRegion();
 
-        int x = index % frameRegion.lengthX();
-        int y = (index / frameRegion.lengthX()) % frameRegion.lengthY();
-        int z = (index / (frameRegion.lengthX() * frameRegion.lengthY())) % frameRegion.lengthZ();
+        int x;
+        int y;
+        int z;
+        if (frameRegion.lengthZ() > frameRegion.lengthX()) {
+            x = (index / (frameRegion.lengthZ() * frameRegion.lengthY())) % frameRegion.lengthX();
+            y = (index / frameRegion.lengthZ()) % frameRegion.lengthY();
+            z = index % frameRegion.lengthZ();
+        }
+        else {
+            x = index % frameRegion.lengthX();
+            y = (index / frameRegion.lengthX()) % frameRegion.lengthY();
+            z = (index / (frameRegion.lengthX() * frameRegion.lengthY())) % frameRegion.lengthZ();
+        }
 
         return worldMin.add(x, y, z);
     }
@@ -260,6 +270,10 @@ public class Window extends BoundedBase {
         int frameRelativeZ = z - worldMin.blockZ();
 
         Bounds3I frameRegion = windowInfo.frameRegion();
+        if (frameRegion.lengthZ() > frameRegion.lengthX()) {
+            return frameRelativeZ + (frameRelativeY * frameRegion.lengthZ()) +
+                    (frameRelativeX * frameRegion.lengthZ() * frameRegion.lengthY());
+        }
 
         return frameRelativeX + (frameRelativeY * frameRegion.lengthX()) +
                 (frameRelativeZ * frameRegion.lengthX() * frameRegion.lengthY());
