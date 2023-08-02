@@ -18,7 +18,7 @@ import java.util.Optional;
 public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     private final Map<Key, InventoryAccess> accessMap = new HashMap<>();
     private final Object sync = new Object();
-    private InventoryAccess currentAccess = null;
+    private volatile InventoryAccess currentAccess = null;
     private final PlayerView playerView;
 
     public BasicInventoryAccessRegistry(@NotNull PlayerView playerView) {
@@ -130,7 +130,9 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
 
     @Override
     public @NotNull InventoryAccess getAccess(@NotNull Key profileKey) {
-        return Objects.requireNonNull(accessMap.get(profileKey), "no access named " + profileKey);
+        synchronized (sync) {
+            return Objects.requireNonNull(accessMap.get(profileKey), "no access named " + profileKey);
+        }
     }
 
     private void onAdd(int slot, InventoryObject object) {
