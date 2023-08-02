@@ -5,6 +5,9 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.CollisionUtils;
@@ -109,24 +112,28 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                     return false;
                 }
 
+                boolean isInstaKill;
                 PhantazmMob hitMob = mobStore.getMob(hit.entity().getUuid());
                 if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
                         (hitMob != null && !hitMob.model().getExtraNode()
                                 .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
                     hit.entity.setTag(Tags.LAST_HIT_BY, player.getUuid());
                     hit.entity.kill();
+                    isInstaKill = true;
                 }
                 else {
                     double angle = feetPos.yaw() * (Math.PI / 180);
                     hit.entity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
                     hit.entity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
+                    isInstaKill = false;
                 }
 
                 PlayerCoins coins = zombiesPlayer.module().getCoins();
                 Collection<Transaction.Modifier> modifiers = zombiesPlayer.module().compositeTransactionModifiers()
                         .modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
 
-                coins.runTransaction(new Transaction(modifiers, data.coins)).applyIfAffordable(coins);
+                coins.runTransaction(new Transaction(modifiers, isInstaKill ? data.instaKillCoins : data.coins))
+                        .applyIfAffordable(coins);
 
                 return true;
             }).orElse(false);
@@ -144,7 +151,12 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                        @Description("The amount of knockback the weapon deals; 0.4 is the vanilla knockback from an " +
                                "unarmed hand") float knockback,
                        @Description("The number of coins to give on a successful hit.") int coins,
+                       @Description("The number of coins to give when instakill is active.") int instaKillCoins,
                        @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor) {
+        @Default("instaKillCoins")
+        public static @NotNull ConfigElement defaultInstaKillCoins() {
+            return ConfigPrimitive.of(50);
+        }
     }
 
     private record HitResult(LivingEntity entity, Vec pos) {
