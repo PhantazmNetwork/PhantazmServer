@@ -46,6 +46,7 @@ public final class ServerCommandFeature {
         manager.register(new DebugCommand());
         manager.register(new GamereportCommand(store, zombiesGamereportConfig));
         manager.register(new GhostCommand(playerViewProvider, sceneTransferHelper, store));
+        manager.register(new FlyCommand());
 
         manager.getConsoleSender().addPermission(ALL_PERMISSIONS);
     }
