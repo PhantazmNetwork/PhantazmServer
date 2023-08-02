@@ -13,7 +13,7 @@ junit-jupiter = "5.9.0"
 
 minestom = "b8f34679c3"
 
-toolkit = "0.3.0"
+toolkit = "0.4.0"
 
 [libraries]
 adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
