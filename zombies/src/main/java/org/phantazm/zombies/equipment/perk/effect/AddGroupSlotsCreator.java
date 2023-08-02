@@ -5,11 +5,14 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
+import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryObjectGroup;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -39,14 +42,18 @@ public class AddGroupSlotsCreator implements PerkEffectCreator {
         private final Data data;
         private final EquipmentHandler handler;
 
+        private final Int2ObjectMap<InventoryObject> removedObjects;
+
         private Effect(Data data, EquipmentHandler handler) {
             this.data = data;
             this.handler = handler;
+            this.removedObjects = new Int2ObjectOpenHashMap<>();
         }
 
         @Override
         public void start() {
-            handler.accessRegistry().getCurrentAccess().ifPresent(access -> {
+            InventoryAccessRegistry accessRegistry = handler.accessRegistry();
+            accessRegistry.getCurrentAccess().ifPresent(access -> {
                 InventoryObjectGroup group = access.groups().get(data.group);
                 if (group == null) {
                     return;
@@ -58,6 +65,11 @@ public class AddGroupSlotsCreator implements PerkEffectCreator {
                         group.addSlot(slot);
                     }
                 }
+
+                for (Int2ObjectMap.Entry<InventoryObject> entry : removedObjects.int2ObjectEntrySet()) {
+                    accessRegistry.replaceObject(access, entry.getIntKey(), entry.getValue());
+                }
+                removedObjects.clear();
             });
 
             handler.refreshGroup(data.group);
@@ -77,7 +89,10 @@ public class AddGroupSlotsCreator implements PerkEffectCreator {
                 for (int slot : data.additionalSlots) {
                     if (existingSlots.contains(slot)) {
                         group.removeSlot(slot);
-                        accessRegistry.removeObject(access, slot);
+                        InventoryObject removedObject = accessRegistry.removeObject(access, slot);
+                        if (removedObject != null && removedObject != group.defaultObject()) {
+                            removedObjects.put(slot, removedObject);
+                        }
                     }
                 }
             });

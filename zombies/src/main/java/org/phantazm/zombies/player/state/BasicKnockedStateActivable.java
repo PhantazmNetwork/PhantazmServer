@@ -140,7 +140,7 @@ public class BasicKnockedStateActivable implements Activable {
             player.setInvisible(false);
             player.setFlying(false);
             player.setAllowFlying(false);
-            player.setFlyingSpeed(0.4F);
+            player.setFlyingSpeed(0.05F);
             player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
