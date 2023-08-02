@@ -3,6 +3,7 @@ package org.phantazm.server;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -40,13 +41,12 @@ public final class ChatFeature {
     /**
      * Initializes chat features. Should only be called once from {@link PhantazmServer#main(String[])}.
      *
-     * @param node           the node to register chat-related events to
-     * @param viewProvider   A {@link PlayerViewProvider} to create {@link PlayerView}s
-     * @param commandManager The {@link CommandManager} to register chat commands to
+     * @param viewProvider A {@link PlayerViewProvider} to create {@link PlayerView}s
+     * @param chatConfig   Chat settings
+     * @param parties      A map of player {@link UUID}s to {@link Party} instances
      */
-    static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
-            @NotNull ChatConfig chatConfig, @NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull CommandManager commandManager) {
+    static void initialize(@NotNull PlayerViewProvider viewProvider, @NotNull ChatConfig chatConfig,
+            @NotNull Map<? super UUID, ? extends Party> parties) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {
@@ -58,6 +58,8 @@ public final class ChatFeature {
             }
         };
 
+        EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
+        CommandManager commandManager = MinecraftServer.getCommandManager();
         ChatChannel defaultChannel = new InstanceChatChannel(viewProvider, MiniMessage.miniMessage(),
                 chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME));
         channels.put(DEFAULT_CHAT_CHANNEL_NAME, defaultChannel);

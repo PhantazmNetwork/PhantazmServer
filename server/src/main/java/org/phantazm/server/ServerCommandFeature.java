@@ -17,7 +17,10 @@ import org.phantazm.server.permission.FilePermissionHandler;
 import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.server.player.LoginValidator;
 
+import java.nio.file.Path;
+
 public final class ServerCommandFeature {
+    public static final Path PERMISSIONS_FILE = Path.of("./permissions.yml");
     public static final Permission ALL_PERMISSIONS = new Permission("*");
 
     private static PermissionHandler permissionHandler;
@@ -25,26 +28,26 @@ public final class ServerCommandFeature {
     private ServerCommandFeature() {
     }
 
-    static void initialize(@NotNull CommandManager commandManager, @NotNull LoginValidator loginValidator,
-            boolean whitelist, @NotNull MappingProcessorSource mappingProcessorSource,
-            @NotNull ConfigCodec permissionsCodec, @NotNull RouterStore routerStore,
-            @NotNull ShutdownConfig shutdownConfig, @NotNull ZombiesGamereportConfig zombiesGamereportConfig,
-            @NotNull PlayerViewProvider playerViewProvider, @NotNull SceneTransferHelper sceneTransferHelper) {
+    static void initialize(@NotNull LoginValidator validator, boolean whitelist,
+            @NotNull MappingProcessorSource mappingProcessorSource, @NotNull ConfigCodec permissionsCodec,
+            @NotNull RouterStore store, @NotNull ShutdownConfig shutdownConfig,
+            @NotNull ZombiesGamereportConfig zombiesGamereportConfig, @NotNull PlayerViewProvider playerViewProvider,
+            @NotNull SceneTransferHelper sceneTransferHelper) {
         ServerCommandFeature.permissionHandler =
-                new FilePermissionHandler(mappingProcessorSource, permissionsCodec, PhantazmServer.PERMISSIONS_FILE);
+                new FilePermissionHandler(mappingProcessorSource, permissionsCodec, PERMISSIONS_FILE);
 
-        commandManager.register(new StopCommand());
-        commandManager.register(new BanCommand(IdentitySource.MOJANG, loginValidator));
-        commandManager.register(new PardonCommand(IdentitySource.MOJANG, loginValidator));
-        commandManager.register(new WhitelistCommand(IdentitySource.MOJANG, loginValidator, whitelist));
-        commandManager.register(new PermissionCommand(permissionHandler, IdentitySource.MOJANG));
-        commandManager.register(
-                new OrderlyShutdownCommand(routerStore, shutdownConfig, MinecraftServer.getGlobalEventHandler()));
-        commandManager.register(new DebugCommand());
-        commandManager.register(new GamereportCommand(routerStore, zombiesGamereportConfig));
-        commandManager.register(new GhostCommand(playerViewProvider, sceneTransferHelper, routerStore));
+        CommandManager manager = MinecraftServer.getCommandManager();
+        manager.register(new StopCommand());
+        manager.register(new BanCommand(IdentitySource.MOJANG, validator));
+        manager.register(new PardonCommand(IdentitySource.MOJANG, validator));
+        manager.register(new WhitelistCommand(IdentitySource.MOJANG, validator, whitelist));
+        manager.register(new PermissionCommand(permissionHandler, IdentitySource.MOJANG));
+        manager.register(new OrderlyShutdownCommand(store, shutdownConfig, MinecraftServer.getGlobalEventHandler()));
+        manager.register(new DebugCommand());
+        manager.register(new GamereportCommand(store, zombiesGamereportConfig));
+        manager.register(new GhostCommand(playerViewProvider, sceneTransferHelper, store));
 
-        commandManager.getConsoleSender().addPermission(ALL_PERMISSIONS);
+        manager.getConsoleSender().addPermission(ALL_PERMISSIONS);
     }
 
     public static @NotNull PermissionHandler permissionHandler() {

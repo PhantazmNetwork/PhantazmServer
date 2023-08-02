@@ -51,12 +51,12 @@ public final class LobbyFeature {
     /**
      * Initializes lobby-related features. Should only be called once from {@link PhantazmServer#main(String[])}.
      *
-     * @param node               the node to register lobby-related events to
      * @param playerViewProvider the {@link PlayerViewProvider} instance used by the server
      * @param lobbiesConfig      the {@link LobbiesConfig} used to determine lobby behavior
      */
-    static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider playerViewProvider,
-            @NotNull LobbiesConfig lobbiesConfig, @NotNull ContextManager contextManager) throws IOException {
+    static void initialize(@NotNull PlayerViewProvider playerViewProvider, @NotNull LobbiesConfig lobbiesConfig,
+            @NotNull ContextManager contextManager) throws IOException {
+        EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         FileUtils.createDirectories(lobbiesConfig.instancesPath());
         InstanceLoader instanceLoader =

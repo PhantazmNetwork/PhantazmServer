@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -75,15 +74,13 @@ public final class ZombiesFeature {
 
     }
 
-
-    static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
+    static void initialize(@NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
             @NotNull KeyParser keyParser,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
-            @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
-            @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull SceneTransferHelper sceneTransferHelper, @NotNull SongLoader songLoader,
-            @NotNull ZombiesConfig zombiesConfig) throws IOException {
+            @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback sceneFallback,
+            @NotNull Map<? super UUID, ? extends Party> parties, @NotNull SceneTransferHelper sceneTransferHelper,
+            @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig) throws IOException {
         Attributes.registerAll();
 
         ConfigCodec codec = new YamlCodec();
@@ -117,6 +114,7 @@ public final class ZombiesFeature {
         ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
         database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource(), sqlFetcher);
 
+        EventNode<Event> globalEventNode = MinecraftServer.getGlobalEventHandler();
         ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource(globalEventNode);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
@@ -138,9 +136,10 @@ public final class ZombiesFeature {
             sceneRouter.tick(System.currentTimeMillis());
         }, TaskSchedule.immediate(), TaskSchedule.nextTick());
 
-        commandManager.register(new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider,
-                MinecraftServer.getSchedulerManager(), sceneTransferHelper, sceneFallback,
-                zombiesConfig.joinRatelimit()));
+        MinecraftServer.getCommandManager().register(
+                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider,
+                        MinecraftServer.getSchedulerManager(), sceneTransferHelper, sceneFallback,
+                        zombiesConfig.joinRatelimit()));
     }
 
     private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) throws IOException {

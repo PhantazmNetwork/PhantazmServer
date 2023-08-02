@@ -2,8 +2,7 @@ package org.phantazm.server;
 
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.event.Event;
-import net.minestom.server.event.EventNode;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.server.permission.PermissionHandler;
@@ -17,11 +16,11 @@ public class ValidationFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(ValidationFeature.class);
 
     private ValidationFeature() {
+        throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> rootNode, @NotNull LoginValidator validator,
-            @NotNull PermissionHandler permissionHandler) {
-        rootNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
+    static void initialize(@NotNull LoginValidator validator, @NotNull PermissionHandler permissionHandler) {
+        MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerPreLoginEvent.class, event -> {
             try {
                 UUID uuid = event.getPlayerUuid();
                 BooleanObjectPair<Component> validationResult = validator.validateLogin(uuid);

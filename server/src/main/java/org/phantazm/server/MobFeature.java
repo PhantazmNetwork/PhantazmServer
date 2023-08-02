@@ -41,6 +41,8 @@ import java.util.stream.Stream;
  * Main entrypoint for PhantazmMob related features.
  */
 public final class MobFeature {
+    public static final Path MOBS_PATH = Path.of("./mobs");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MobFeature.class);
 
     private static ConfigProcessor<MobModel> MODEL_PROCESSOR;
@@ -52,7 +54,7 @@ public final class MobFeature {
     }
 
     @SuppressWarnings("SameParameterValue")
-    static void initialize(@NotNull ContextManager contextManager, @NotNull Path mobPath, @NotNull ConfigCodec codec) {
+    static void initialize(@NotNull ContextManager contextManager, @NotNull ConfigCodec codec) {
         MODEL_PROCESSOR = new MobModelConfigProcessor(contextManager, ItemStackConfigProcessors.snbt());
 
         Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap = new HashMap<>();
@@ -101,17 +103,17 @@ public final class MobFeature {
 
         MobFeature.processorMap = Map.copyOf(processorMap);
 
-        loadModels(mobPath, codec);
+        loadModels(codec);
     }
 
-    private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {
+    private static void loadModels(@NotNull ConfigCodec codec) {
         Map<Key, MobModel> loadedModels = new HashMap<>();
         try {
-            FileUtils.createDirectories(mobPath);
+            FileUtils.createDirectories(MobFeature.MOBS_PATH);
 
-            try (Stream<Path> paths = Files.walk(mobPath)) {
+            try (Stream<Path> paths = Files.walk(MobFeature.MOBS_PATH)) {
                 String ending = codec.getPreferredExtension();
-                PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**" + ending);
+                PathMatcher matcher = MobFeature.MOBS_PATH.getFileSystem().getPathMatcher("glob:**" + ending);
                 paths.forEach(path -> {
                     if (matcher.matches(path) && Files.isRegularFile(path)) {
                         try {
@@ -134,7 +136,7 @@ public final class MobFeature {
             }
         }
         catch (IOException e) {
-            LOGGER.warn("Failed to create directory {}", mobPath);
+            LOGGER.warn("Failed to create directory {}", MobFeature.MOBS_PATH);
         }
         models = Map.copyOf(loadedModels);
         LOGGER.info("Loaded {} mob files.", models.size());
@@ -159,7 +161,7 @@ public final class MobFeature {
         return FeatureUtils.check(models);
     }
 
-    public static @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> getProcessorMap() {
+    public static @NotNull @Unmodifiable Map<BooleanObjectPair<String>, ConfigProcessor<?>> getProcessorMap() {
         return FeatureUtils.check(processorMap);
     }
 }

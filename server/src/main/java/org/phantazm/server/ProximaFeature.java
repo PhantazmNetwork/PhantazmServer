@@ -3,8 +3,7 @@ package org.phantazm.server;
 import com.github.steanky.proxima.path.BasicAsyncPathfinder;
 import com.github.steanky.proxima.path.BasicPathOperation;
 import com.github.steanky.proxima.path.Pathfinder;
-import net.minestom.server.event.Event;
-import net.minestom.server.event.EventNode;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.proxima.bindings.minestom.*;
@@ -23,7 +22,7 @@ public final class ProximaFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> globalNode, @NotNull PathfinderConfig pathfinderConfig) {
+    static void initialize(@NotNull PathfinderConfig pathfinderConfig) {
         int threads = pathfinderConfig.threads();
         boolean asyncMode = pathfinderConfig.asyncMode();
         int corePoolSize = pathfinderConfig.corePoolSize();
@@ -36,7 +35,7 @@ public final class ProximaFeature {
                 corePoolSize, maximumPoolSize, minimumRunnable, forkJoinPool -> true, keepAliveTime, keepAliveTimeUnit);
 
         pathfinder = new BasicAsyncPathfinder(fjp, BasicPathOperation::new, 1000000);
-        settingsFunction = new InstanceSettingsFunction(globalNode);
+        settingsFunction = new InstanceSettingsFunction(MinecraftServer.getGlobalEventHandler());
         spawner = new InstanceSpawner(pathfinder, settingsFunction);
     }
 

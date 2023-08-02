@@ -1,10 +1,10 @@
 package org.phantazm.server;
 
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.biomes.Biome;
 import net.minestom.server.world.biomes.BiomeManager;
-import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.datapack.Datapack;
 import org.phantazm.core.datapack.DatapackLoader;
 import org.slf4j.Logger;
@@ -24,7 +24,8 @@ public class DatapackFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull BiomeManager biomeManager) throws IOException {
+    static void initialize() throws IOException {
+        BiomeManager biomeManager = MinecraftServer.getBiomeManager();
         DatapackLoader loader = new DatapackLoader();
 
         LOGGER.info("Loading datapacks");
