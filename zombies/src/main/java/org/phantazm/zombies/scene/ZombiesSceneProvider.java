@@ -34,6 +34,7 @@ import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.sound.BasicSongPlayer;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.core.sound.SongPlayer;
@@ -79,6 +80,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final ContextManager contextManager;
     private final KeyParser keyParser;
     private final ZombiesDatabase database;
+    private final PlayerViewProvider playerViewProvider;
 
     private final MapObjects.Source mapObjectSource;
     private final ZombiesPlayer.Source zombiesPlayerSource;
@@ -95,8 +97,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
             @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull ZombiesDatabase database,
-            @NotNull PowerupHandler.Source powerupHandlerSource, @NotNull ZombiesPlayer.Source zombiesPlayerSource,
-            @NotNull CorpseCreator.Source corpseCreatorSource, @NotNull SongLoader songLoader) {
+            @NotNull PlayerViewProvider playerViewProvider, @NotNull PowerupHandler.Source powerupHandlerSource,
+            @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource,
+            @NotNull SongLoader songLoader) {
         super(executor, maximumScenes);
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
         this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
@@ -106,6 +109,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.database = Objects.requireNonNull(database, "database");
+        this.playerViewProvider = Objects.requireNonNull(playerViewProvider, "playerViewProvider");
 
         MapSettingsInfo settingsInfo = mapInfo.settings();
 
@@ -237,7 +241,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             ZombiesScene scene =
                     new ZombiesScene(UUID.randomUUID(), map, zombiesPlayers, instance, sceneFallback, settings,
                             stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode,
-                            allowedRequestUUID);
+                            allowedRequestUUID, playerViewProvider);
             sceneWrapper.set(scene);
             rootNode.addChild(childNode);
 

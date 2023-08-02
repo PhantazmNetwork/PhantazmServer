@@ -18,6 +18,7 @@ import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.player.PlayerViewProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +51,8 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
             @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler,
             @NotNull Collection<ItemStack> defaultItems, @NotNull MiniMessage miniMessage,
-            @NotNull String lobbyJoinFormat, boolean quittable) {
-        super(uuid, instance, fallback, instanceConfig.spawnPoint());
+            @NotNull String lobbyJoinFormat, boolean quittable, @NotNull PlayerViewProvider playerViewProvider) {
+        super(uuid, instance, fallback, instanceConfig.spawnPoint(), playerViewProvider);
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
         this.players = new HashMap<>();
         this.npcHandler = Objects.requireNonNull(npcHandler, "npcHandler");

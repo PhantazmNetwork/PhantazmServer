@@ -132,7 +132,7 @@ public final class ZombiesFeature {
                     new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
                             instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
                             ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(), clientBlockHandlerSource,
-                            contextManager, keyParser, database, ZombiesFeature.powerupHandlerSource(),
+                            contextManager, keyParser, database, viewProvider, ZombiesFeature.powerupHandlerSource(),
                             new BasicZombiesPlayerSource(database, viewProvider,
                                     EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
                                     keyParser),
