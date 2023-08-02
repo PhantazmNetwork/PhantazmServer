@@ -22,7 +22,9 @@ import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHandAnimationEvent> {

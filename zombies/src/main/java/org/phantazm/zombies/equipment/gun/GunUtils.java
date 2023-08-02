@@ -5,8 +5,6 @@ import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.Attributes;
 
-import java.util.Optional;
-
 public final class GunUtils {
     private GunUtils() {
 

@@ -3,9 +3,7 @@ package org.phantazm.core.guild;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.Function;
 
 public class Guild<TMember extends GuildMember> {

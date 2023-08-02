@@ -12,10 +12,9 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.spawner.MobSpawner;
-import org.phantazm.zombies.equipment.gun.action_bar.ZombiesPlayerActionBarSender;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 
 import java.util.*;

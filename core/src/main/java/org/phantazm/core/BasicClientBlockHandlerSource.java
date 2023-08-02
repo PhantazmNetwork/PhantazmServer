@@ -9,7 +9,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

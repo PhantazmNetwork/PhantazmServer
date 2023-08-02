@@ -1,7 +1,6 @@
 package org.phantazm.zombies.game.player.state.revive;
 
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.EnvTest;
 import org.junit.jupiter.api.Assertions;

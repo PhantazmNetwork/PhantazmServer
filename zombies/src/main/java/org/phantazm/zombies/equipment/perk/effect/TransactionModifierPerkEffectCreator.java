@@ -36,25 +36,7 @@ public class TransactionModifierPerkEffectCreator implements PerkEffectCreator {
         private Effect(Data data, ZombiesPlayer zombiesPlayer) {
             this.data = data;
             this.zombiesPlayer = zombiesPlayer;
-            this.modifier = new Transaction.Modifier() {
-                @Override
-                public @NotNull Component getDisplayName() {
-                    return data.modifierName;
-                }
-
-                @Override
-                public int modify(int coins) {
-                    return switch (data.modifierAction) {
-                        case ADD -> (int)Math.rint(coins + data.amount);
-                        case MULTIPLY -> (int)Math.rint(coins + (data.amount * coins));
-                    };
-                }
-
-                @Override
-                public int getPriority() {
-                    return data.priority;
-                }
-            };
+            this.modifier = Transaction.modifier(data.modifierName, data.modifierAction, data.amount, data.priority);
         }
 
         @Override
@@ -68,17 +50,12 @@ public class TransactionModifierPerkEffectCreator implements PerkEffectCreator {
         }
     }
 
-    public enum ModifierAction {
-        ADD,
-        MULTIPLY
-    }
-
     @DataObject
     public record Data(@NotNull Key group,
                        @NotNull Component modifierName,
-                       @NotNull ModifierAction modifierAction,
-                       int priority,
-                       double amount) {
+                       @NotNull Transaction.Modifier.Action modifierAction,
+                       double amount,
+                       int priority) {
         @Default("priority")
         public static @NotNull ConfigElement priorityDefault() {
             return ConfigPrimitive.of(0);

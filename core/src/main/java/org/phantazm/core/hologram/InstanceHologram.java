@@ -9,7 +9,10 @@ import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Instance-wide Hologram implementation. This object retains a strong reference to its instance, and therefore should

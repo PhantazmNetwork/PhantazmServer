@@ -15,7 +15,8 @@ import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @EnvTest
 public class PartyCreateCommandIntegrationTest extends AbstractPartyCommandIntegrationTest {

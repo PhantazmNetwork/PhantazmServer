@@ -18,7 +18,10 @@ import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**

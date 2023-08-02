@@ -2,9 +2,6 @@ package org.phantazm.server.command.whisper;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;

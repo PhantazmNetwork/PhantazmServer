@@ -1,19 +1,16 @@
 package org.phantazm.core.guild.party.command;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.SceneTransferHelper;
-import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
-import org.phantazm.core.guild.party.PartyMember;
-import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 public class PartyWarpCommand {

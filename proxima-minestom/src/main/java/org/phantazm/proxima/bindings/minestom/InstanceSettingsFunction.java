@@ -14,7 +14,8 @@ import net.minestom.server.instance.WorldBorder;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 

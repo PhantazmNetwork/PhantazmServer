@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.action.PowerupAction;
-import org.phantazm.zombies.powerup.action.PowerupActionComponent;
+import org.phantazm.zombies.powerup.action.component.PowerupActionComponent;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.powerup.visual.PowerupVisual;
 import org.phantazm.zombies.powerup.visual.PowerupVisualComponent;

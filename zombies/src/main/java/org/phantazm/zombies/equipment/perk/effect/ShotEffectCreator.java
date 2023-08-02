@@ -13,7 +13,9 @@ import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
 import org.phantazm.zombies.event.EntityDamageByGunEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 @Description("An effect that can perform arbitrary actions on entities shot by the player who has the effect.")
 @Model("zombies.perk.effect.shot")

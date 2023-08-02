@@ -3,7 +3,6 @@ package org.phantazm.zombies.stage;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
-import org.phantazm.commons.Tickable;
 
 public class StageTransition implements Activable {
 

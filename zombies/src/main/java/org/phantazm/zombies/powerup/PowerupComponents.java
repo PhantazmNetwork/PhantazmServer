@@ -2,7 +2,7 @@ package org.phantazm.zombies.powerup;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.zombies.powerup.action.PowerupActionComponent;
+import org.phantazm.zombies.powerup.action.component.PowerupActionComponent;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.powerup.visual.PowerupVisualComponent;
 

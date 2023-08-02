@@ -6,7 +6,7 @@ import com.github.steanky.element.core.path.ElementPath;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.ElementUtils;
-import org.phantazm.zombies.powerup.action.PowerupActionComponent;
+import org.phantazm.zombies.powerup.action.component.PowerupActionComponent;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
 import org.phantazm.zombies.powerup.visual.PowerupVisualComponent;
@@ -14,7 +14,9 @@ import org.phantazm.zombies.scene.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 

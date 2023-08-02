@@ -1,4 +1,4 @@
-package org.phantazm.zombies.powerup.action;
+package org.phantazm.zombies.powerup.action.component;
 
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.handler.WindowHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
+import org.phantazm.zombies.powerup.action.InstantAction;
+import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.scene.ZombiesScene;
 
 @Model("zombies.powerup.action.modify_windows")

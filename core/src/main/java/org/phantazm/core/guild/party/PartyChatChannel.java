@@ -6,20 +6,14 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerChatEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.chat.BasicChatChannel;
-import org.phantazm.core.chat.ChatChannel;
 import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 public class PartyChatChannel extends BasicChatChannel {
 

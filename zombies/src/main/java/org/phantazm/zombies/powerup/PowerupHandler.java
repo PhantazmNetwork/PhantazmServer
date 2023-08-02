@@ -7,7 +7,8 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.scene.ZombiesScene;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public interface PowerupHandler extends Tickable {

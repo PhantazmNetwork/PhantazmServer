@@ -1,4 +1,4 @@
-package org.phantazm.zombies.powerup.action;
+package org.phantazm.zombies.powerup.action.component;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.attribute.Attribute;
@@ -9,6 +9,8 @@ import org.phantazm.commons.CancellableState;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
+import org.phantazm.zombies.powerup.action.PowerupAction;
+import org.phantazm.zombies.powerup.action.PowerupActionBase;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.scene.ZombiesScene;

@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.objects.ObjectBooleanPair;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerChatEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;

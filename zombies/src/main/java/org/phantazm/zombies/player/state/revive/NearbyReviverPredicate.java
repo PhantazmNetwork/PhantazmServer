@@ -7,7 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class NearbyReviverPredicate implements Predicate<ZombiesPlayer> {

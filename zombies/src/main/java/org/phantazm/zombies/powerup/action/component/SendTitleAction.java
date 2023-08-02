@@ -1,26 +1,26 @@
-package org.phantazm.zombies.powerup.action;
+package org.phantazm.zombies.powerup.action.component;
 
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
+import org.phantazm.zombies.powerup.action.InstantAction;
+import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.scene.ZombiesScene;
 
-@Model("zombies.powerup.action.send_message")
+@Model("zombies.powerup.action.send_title")
 @Cache(false)
-public class SendMessageAction implements PowerupActionComponent {
+public class SendTitleAction implements PowerupActionComponent {
     private final Data data;
 
     @FactoryMethod
-    public SendMessageAction(@NotNull Data data) {
+    public SendTitleAction(@NotNull Data data) {
         this.data = data;
     }
 
@@ -30,7 +30,7 @@ public class SendMessageAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(@NotNull String format, boolean broadcast) {
+    public record Data(@NotNull Component message, @NotNull TitlePart<Component> titlePart, boolean broadcast) {
     }
 
     private static class Action extends InstantAction {
@@ -44,20 +44,12 @@ public class SendMessageAction implements PowerupActionComponent {
 
         @Override
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
-            Component component = getComponent(player);
             if (data.broadcast) {
-                instance.sendMessage(component);
+                instance.sendTitlePart(data.titlePart, data.message);
             }
             else {
-                player.getPlayer().ifPresent(p -> p.sendMessage(component));
+                player.getPlayer().ifPresent(p -> p.sendTitlePart(data.titlePart, data.message));
             }
-        }
-
-        private Component getComponent(ZombiesPlayer player) {
-            Component playerName = player.module().getPlayerView().getDisplayNameIfPresent();
-            TagResolver playerPlaceholder = Placeholder.component("player", playerName);
-
-            return MiniMessage.miniMessage().deserialize(data.format, playerPlaceholder);
         }
     }
 }

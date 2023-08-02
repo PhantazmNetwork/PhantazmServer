@@ -17,7 +17,9 @@ import org.phantazm.zombies.map.MapSettingsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Model("zombies.leaderboard.best_time")
 @Cache(false)

@@ -6,7 +6,9 @@ import com.github.steanky.proxima.path.Pathfinder;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.proxima.bindings.minestom.*;
+import org.phantazm.proxima.bindings.minestom.InstanceSettingsFunction;
+import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
+import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.server.config.server.PathfinderConfig;
 
 import java.util.concurrent.ForkJoinPool;

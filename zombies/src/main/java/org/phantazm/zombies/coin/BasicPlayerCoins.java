@@ -26,14 +26,14 @@ public class BasicPlayerCoins implements PlayerCoins, Tickable {
     @Override
     public @NotNull TransactionResult runTransaction(@NotNull Transaction transaction) {
         List<Transaction.Modifier> modifiers = new ArrayList<>(transaction.modifiers());
-        modifiers.sort(Comparator.comparingInt(Transaction.Modifier::getPriority).reversed());
+        modifiers.sort(Comparator.comparingInt(Transaction.Modifier::priority).reversed());
 
         List<Component> displays = new ArrayList<>(modifiers.size() + transaction.extraDisplays().size());
         int change = transaction.initialChange();
         for (Transaction.Modifier modifier : modifiers) {
             int newChange = modifier.modify(change);
             if (change != newChange) {
-                displays.add(modifier.getDisplayName());
+                displays.add(modifier.displayName());
             }
 
             change = newChange;

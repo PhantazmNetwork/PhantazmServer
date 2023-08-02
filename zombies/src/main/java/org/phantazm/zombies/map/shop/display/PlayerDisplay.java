@@ -8,7 +8,10 @@ import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.display.creator.PlayerDisplayCreator;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 @Description("""
         A shop display that maintains multiple, independent displays for each player. Each player will only see the shop

@@ -2,7 +2,6 @@ package org.phantazm.zombies.event;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;

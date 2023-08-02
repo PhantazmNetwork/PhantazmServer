@@ -1,4 +1,4 @@
-package org.phantazm.zombies.powerup.action;
+package org.phantazm.zombies.powerup.action.component;
 
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
+import org.phantazm.zombies.powerup.action.PowerupAction;
+import org.phantazm.zombies.powerup.action.PowerupActionBase;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.scene.ZombiesScene;

@@ -6,7 +6,6 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
-
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 

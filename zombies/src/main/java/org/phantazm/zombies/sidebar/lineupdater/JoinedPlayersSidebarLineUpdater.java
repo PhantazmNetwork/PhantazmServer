@@ -11,7 +11,10 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @Model("zombies.sidebar.line_updater.joined_players")
 @Cache(false)

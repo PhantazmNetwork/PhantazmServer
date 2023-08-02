@@ -13,7 +13,10 @@ import org.phantazm.mob.spawner.MobSpawner;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.shop.Shop;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public final class BasicMapObjects implements MapObjects {
     private final List<Spawnpoint> spawnpoints;

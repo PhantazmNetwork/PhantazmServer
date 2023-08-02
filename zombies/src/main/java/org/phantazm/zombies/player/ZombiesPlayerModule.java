@@ -10,6 +10,7 @@ import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.kill.PlayerKills;
@@ -19,7 +20,6 @@ import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.PlayerStateSwitcher;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
-import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.Map;
 import java.util.Objects;

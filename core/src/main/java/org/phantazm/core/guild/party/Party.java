@@ -12,7 +12,7 @@ import org.phantazm.core.guild.permission.MultipleMemberPermission;
 import org.phantazm.core.guild.permission.SingleMemberPermission;
 import org.phantazm.core.player.PlayerView;
 
-import java.util.*;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class Party extends Guild<PartyMember> implements Tickable {

@@ -1,7 +1,6 @@
 package org.phantazm.mob.target;
 
 import net.minestom.server.entity.Entity;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.phantazm.mob.PhantazmMob;
