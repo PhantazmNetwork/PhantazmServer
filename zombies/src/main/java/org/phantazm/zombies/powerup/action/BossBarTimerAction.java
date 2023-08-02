@@ -15,33 +15,26 @@ import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.boss_bar_timer")
 @Cache(false)
-public class BossBarTimerAction implements Supplier<PowerupAction> {
+public class BossBarTimerAction implements PowerupActionComponent {
     private final Data data;
-    private final Instance instance;
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
     private final TickFormatter tickFormatter;
 
     @FactoryMethod
-    public BossBarTimerAction(@NotNull Data data, @NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
+    public BossBarTimerAction(@NotNull Data data, @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
         this.data = data;
-        this.instance = instance;
-        this.playerMap = playerMap;
-        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
+        this.tickFormatter = tickFormatter;
     }
 
     @Override
-    public PowerupAction get() {
-        return new Action(data, instance, playerMap, tickFormatter);
+    public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
+        return new Action(data, scene.instance(), scene.getZombiesPlayers(), tickFormatter);
     }
 
     private static class Action implements PowerupAction {

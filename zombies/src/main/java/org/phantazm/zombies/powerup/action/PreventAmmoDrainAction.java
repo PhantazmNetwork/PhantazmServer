@@ -4,35 +4,30 @@ import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.event.GunLoseAmmoEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
+import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.prevent_ammo_drain")
 @Cache(false)
-public class PreventAmmoDrainAction implements Supplier<PowerupAction> {
-    private final Supplier<DeactivationPredicate> deactivationPredicate;
-    private final Supplier<? extends EventNode<Event>> eventNode;
-    private final UUID instanceUUID;
+public class PreventAmmoDrainAction implements PowerupActionComponent {
+    private final DeactivationPredicateComponent deactivationPredicate;
 
     @FactoryMethod
     public PreventAmmoDrainAction(
-            @NotNull @Child("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate,
-            @NotNull Supplier<? extends EventNode<Event>> eventNode, @NotNull Instance instance) {
+            @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
         this.deactivationPredicate = deactivationPredicate;
-        this.eventNode = eventNode;
-        this.instanceUUID = instance.getUniqueId();
     }
 
     @Override
-    public PowerupAction get() {
-        return new Action(deactivationPredicate.get(), eventNode.get(), instanceUUID);
+    public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
+        return new Action(deactivationPredicate.apply(scene), scene.getSceneNode(), scene.instance().getUniqueId());
     }
 
     private static class Action extends PowerupActionBase {

@@ -57,9 +57,7 @@ import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.powerup.BasicPowerupHandlerSource;
 import org.phantazm.zombies.powerup.PowerupHandler;
-import org.phantazm.zombies.powerup.PowerupInfo;
 import org.phantazm.zombies.sidebar.ElementSidebarUpdaterCreator;
 import org.phantazm.zombies.sidebar.SidebarModule;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
@@ -97,7 +95,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
             @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
             @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull ZombiesDatabase database,
-            @NotNull Map<Key, PowerupInfo> powerups, @NotNull ZombiesPlayer.Source zombiesPlayerSource,
+            @NotNull PowerupHandler.Source powerupHandlerSource, @NotNull ZombiesPlayer.Source zombiesPlayerSource,
             @NotNull CorpseCreator.Source corpseCreatorSource, @NotNull SongLoader songLoader) {
         super(executor, maximumScenes);
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction, "instanceSpaceFunction");
@@ -108,15 +106,13 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
         this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
         this.database = Objects.requireNonNull(database, "database");
-        Objects.requireNonNull(powerups, "powerups");
 
         MapSettingsInfo settingsInfo = mapInfo.settings();
 
         this.mapObjectSource = new BasicMapObjectsSource(mapInfo, contextManager, mobSpawnerSource, mobModels,
                 clientBlockHandlerSource, keyParser);
         this.zombiesPlayerSource = Objects.requireNonNull(zombiesPlayerSource, "zombiesPlayerSource");
-        this.powerupHandlerSource =
-                new BasicPowerupHandlerSource(powerups, contextManager, settingsInfo.powerupPickupRadius());
+        this.powerupHandlerSource = Objects.requireNonNull(powerupHandlerSource, "powerupHandlerSource");
         this.shopHandlerSource = new BasicShopHandlerSource();
         this.windowHandlerSource =
                 new BasicWindowHandlerSource(settingsInfo.windowRepairRadius(), settingsInfo.windowRepairTicks(),
@@ -191,8 +187,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             RoundHandler roundHandler = new BasicRoundHandler(zombiesPlayers.values(), mapObjects.rounds());
             roundHandlerWrapper.set(roundHandler);
 
-            PowerupHandler powerupHandler =
-                    createPowerupHandler(instance, zombiesPlayers, mapObjects.mapDependencyProvider());
+            PowerupHandler powerupHandler = powerupHandlerSource.make(sceneWrapper.unmodifiableView());
             powerupHandlerWrapper.set(powerupHandler);
 
             ShopHandler shopHandler = createShopHandler(mapObjects.shopTracker(), mapObjects.roomTracker());
@@ -287,11 +282,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, mobNoPushTeam,
                 powerupHandler, windowHandler, eventNode, songPlayer, songLoader, tickTaskScheduler, corpseTeam,
                 ticksSinceStart);
-    }
-
-    private PowerupHandler createPowerupHandler(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            DependencyProvider mapDependencyProvider) {
-        return powerupHandlerSource.make(instance, playerMap, mapDependencyProvider);
     }
 
     private ShopHandler createShopHandler(BoundedTracker<Shop> shopTracker, BoundedTracker<Room> rooms) {

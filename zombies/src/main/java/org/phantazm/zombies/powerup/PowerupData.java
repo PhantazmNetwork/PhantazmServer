@@ -6,7 +6,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
-public record PowerupInfo(@NotNull Key id,
+public record PowerupData(@NotNull Key id,
                           @NotNull ConfigList visuals,
                           @NotNull ConfigList actions,
                           @NotNull ConfigNode deactivationPredicate) implements Keyed {

@@ -95,7 +95,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
             Key key = keyParser.parseKey(powerup);
 
-            if (!powerupHandler.typeExists(key)) {
+            if (!powerupHandler.canSpawnType(key)) {
                 LOGGER.warn("Cannot spawn nonexistent powerup key " + key);
                 return;
             }

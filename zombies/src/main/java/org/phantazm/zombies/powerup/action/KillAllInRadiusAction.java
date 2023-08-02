@@ -17,26 +17,21 @@ import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
-
-import java.util.function.Supplier;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 @Model("zombies.powerup.action.kill_all_in_radius")
 @Cache(false)
-public class KillAllInRadiusAction implements Supplier<PowerupAction> {
+public class KillAllInRadiusAction implements PowerupActionComponent {
     private final Data data;
-    private final Instance instance;
-    private final MobStore mobStore;
 
     @FactoryMethod
-    public KillAllInRadiusAction(@NotNull Data data, @NotNull Instance instance, @NotNull MobStore mobStore) {
+    public KillAllInRadiusAction(@NotNull Data data) {
         this.data = data;
-        this.instance = instance;
-        this.mobStore = mobStore;
     }
 
     @Override
-    public PowerupAction get() {
-        return new Action(data, instance, mobStore);
+    public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
+        return new Action(data, scene.instance(), scene.getMap().mapObjects().module().mobStore());
     }
 
     @DataObject

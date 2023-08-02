@@ -10,25 +10,21 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
-
-import java.util.Objects;
-import java.util.function.Supplier;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 @Model("zombies.powerup.action.send_title")
 @Cache(false)
-public class SendTitleAction implements Supplier<PowerupAction> {
+public class SendTitleAction implements PowerupActionComponent {
     private final Data data;
-    private final Instance instance;
 
     @FactoryMethod
-    public SendTitleAction(@NotNull Data data, @NotNull Instance instance) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.instance = Objects.requireNonNull(instance, "instance");
+    public SendTitleAction(@NotNull Data data) {
+        this.data = data;
     }
 
     @Override
-    public PowerupAction get() {
-        return new Action(data, instance);
+    public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
+        return new Action(data, scene.instance());
     }
 
     @DataObject

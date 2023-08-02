@@ -1,4 +1,4 @@
-package org.phantazm.zombies.powerup2.action;
+package org.phantazm.zombies.powerup.action;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.scene.ZombiesScene;

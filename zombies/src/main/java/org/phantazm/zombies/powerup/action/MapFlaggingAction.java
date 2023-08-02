@@ -7,29 +7,25 @@ import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
-
-import java.util.Objects;
-import java.util.function.Supplier;
+import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 @Model("zombies.powerup.action.map_flagging")
 @Cache(false)
-public class MapFlaggingAction implements Supplier<PowerupAction> {
+public class MapFlaggingAction implements PowerupActionComponent {
     private final Data data;
-    private final Supplier<DeactivationPredicate> deactivationPredicate;
-    private final Flaggable flaggable;
+    private final DeactivationPredicateComponent deactivationPredicate;
 
     @FactoryMethod
     public MapFlaggingAction(@NotNull Data data,
-            @NotNull @Child("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate,
-            @NotNull Flaggable flaggable) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate, "deactivationPredicate");
-        this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
+            @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
+        this.data = data;
+        this.deactivationPredicate = deactivationPredicate;
     }
 
     @Override
-    public PowerupAction get() {
-        return new Action(data, deactivationPredicate.get(), flaggable);
+    public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
+        return new Action(data, deactivationPredicate.apply(scene), scene.getMap().mapObjects().module().flags());
     }
 
     @DataObject

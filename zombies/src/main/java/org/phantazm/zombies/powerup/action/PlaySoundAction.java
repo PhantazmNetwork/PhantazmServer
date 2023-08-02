@@ -9,28 +9,23 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
+import org.phantazm.zombies.scene.ZombiesScene;
 
-import java.util.Objects;
 import java.util.Random;
-import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.play_sound")
 @Cache(false)
-public class PlaySoundAction implements Supplier<PowerupAction> {
+public class PlaySoundAction implements PowerupActionComponent {
     private final Data data;
-    private final Instance instance;
-    private final Random random;
 
     @FactoryMethod
-    public PlaySoundAction(@NotNull Data data, @NotNull Instance instance, @NotNull Random random) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.random = Objects.requireNonNull(random, "random");
+    public PlaySoundAction(@NotNull Data data) {
+        this.data = data;
     }
 
     @Override
-    public PowerupAction get() {
-        return new Action(data, instance, random);
+    public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
+        return new Action(data, scene.instance(), scene.getMap().mapObjects().module().random());
     }
 
     @DataObject

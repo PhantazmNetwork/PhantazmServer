@@ -1,4 +1,4 @@
-package org.phantazm.zombies.powerup2.predicate;
+package org.phantazm.zombies.powerup.predicate;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.scene.ZombiesScene;

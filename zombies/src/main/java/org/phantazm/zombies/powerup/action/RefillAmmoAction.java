@@ -8,24 +8,21 @@ import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.refill_ammo")
 @Cache(false)
-public class RefillAmmoAction implements Supplier<PowerupAction> {
-    private final Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers;
-
+public class RefillAmmoAction implements PowerupActionComponent {
     @FactoryMethod
-    public RefillAmmoAction(@NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
-        this.zombiesPlayers = zombiesPlayers;
+    public RefillAmmoAction() {
     }
 
     @Override
-    public PowerupAction get() {
-        return new Action(zombiesPlayers);
+    public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
+        return new Action(scene.getZombiesPlayers());
     }
 
     private static class Action extends InstantAction {

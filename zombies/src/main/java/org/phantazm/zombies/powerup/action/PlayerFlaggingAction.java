@@ -6,26 +6,25 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
-
-import java.util.Objects;
-import java.util.function.Supplier;
+import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 @Model("zombies.powerup.action.player_flagging")
 @Cache(false)
-public class PlayerFlaggingAction implements Supplier<PowerupAction> {
+public class PlayerFlaggingAction implements PowerupActionComponent {
     private final Data data;
-    private final Supplier<DeactivationPredicate> deactivationPredicate;
+    private final DeactivationPredicateComponent deactivationPredicate;
 
     @FactoryMethod
     public PlayerFlaggingAction(@NotNull Data data,
-            @NotNull @Child("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate, "deactivationPredicate");
+            @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
+        this.data = data;
+        this.deactivationPredicate = deactivationPredicate;
     }
 
     @Override
-    public PowerupAction get() {
-        return new Action(data, deactivationPredicate.get());
+    public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
+        return new Action(data, deactivationPredicate.apply(scene));
     }
 
     @DataObject

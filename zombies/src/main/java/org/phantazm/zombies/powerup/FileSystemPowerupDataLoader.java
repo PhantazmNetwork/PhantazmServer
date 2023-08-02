@@ -1,4 +1,4 @@
-package org.phantazm.zombies.powerup2;
+package org.phantazm.zombies.powerup;
 
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.bridge.Configuration;

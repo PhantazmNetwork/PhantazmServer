@@ -7,29 +7,26 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
-
-import java.util.Objects;
-import java.util.function.Supplier;
+import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 @Model("zombies.powerup.action.map_transaction_modifier.add")
 @Cache(false)
-public class MapTransactionModifierAddAction implements Supplier<PowerupAction> {
+public class MapTransactionModifierAddAction implements PowerupActionComponent {
     private final Data data;
-    private final TransactionModifierSource transactionModifierSource;
-    private final Supplier<DeactivationPredicate> deactivationPredicate;
+    private final DeactivationPredicateComponent deactivationPredicate;
 
     @FactoryMethod
     public MapTransactionModifierAddAction(@NotNull Data data,
-            @NotNull @Child("deactivation_predicate") Supplier<DeactivationPredicate> deactivationPredicate,
-            @NotNull TransactionModifierSource transactionModifierSource) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.transactionModifierSource = transactionModifierSource;
-        this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate, "deactivationPredicate");
+            @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
+        this.data = data;
+        this.deactivationPredicate = deactivationPredicate;
     }
 
     @Override
-    public PowerupAction get() {
-        return new Action(data, deactivationPredicate.get(), transactionModifierSource);
+    public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
+        return new Action(data, deactivationPredicate.apply(scene),
+                scene.getMap().mapObjects().module().modifierSource());
     }
 
     @DataObject

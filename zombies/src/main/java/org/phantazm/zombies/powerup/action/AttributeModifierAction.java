@@ -10,30 +10,29 @@ import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
+import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 @Model("zombies.powerup.action.attribute_modifier")
 @Cache(false)
-public class AttributeModifierAction implements Supplier<PowerupAction> {
+public class AttributeModifierAction implements PowerupActionComponent {
     private final Data data;
-    private final Supplier<DeactivationPredicate> deactivationPredicate;
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final DeactivationPredicateComponent deactivationPredicate;
 
     @FactoryMethod
-    public AttributeModifierAction(@NotNull Data data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull @Child("predicate") Supplier<DeactivationPredicate> deactivationPredicate) {
+    public AttributeModifierAction(@NotNull Data data,
+            @NotNull @Child("predicate") DeactivationPredicateComponent deactivationPredicate) {
         this.data = data;
-        this.playerMap = playerMap;
         this.deactivationPredicate = deactivationPredicate;
     }
 
     @Override
-    public PowerupAction get() {
-        return new Action(data, deactivationPredicate.get(), playerMap);
+    public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
+        return new Action(data, deactivationPredicate.apply(scene), scene.getZombiesPlayers());
     }
 
     @DataObject

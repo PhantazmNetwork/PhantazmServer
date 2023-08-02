@@ -8,25 +8,21 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.handler.WindowHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
-
-import java.util.Objects;
-import java.util.function.Supplier;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 @Model("zombies.powerup.action.modify_windows")
 @Cache(false)
-public class ModifyWindowsAction implements Supplier<PowerupAction> {
+public class ModifyWindowsAction implements PowerupActionComponent {
     private final Data data;
-    private final Supplier<? extends WindowHandler> windowHandler;
 
     @FactoryMethod
-    public ModifyWindowsAction(@NotNull Data data, @NotNull Supplier<? extends WindowHandler> windowHandler) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.windowHandler = Objects.requireNonNull(windowHandler, "windowHandler");
+    public ModifyWindowsAction(@NotNull Data data) {
+        this.data = data;
     }
 
     @Override
-    public PowerupAction get() {
-        return new Action(data, windowHandler);
+    public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
+        return new Action(data, scene.getMap().windowHandler());
     }
 
     @DataObject
@@ -35,16 +31,16 @@ public class ModifyWindowsAction implements Supplier<PowerupAction> {
 
     private static class Action extends InstantAction {
         private final Data data;
-        private final Supplier<? extends WindowHandler> windowHandler;
+        private final WindowHandler windowHandler;
 
-        private Action(Data data, Supplier<? extends WindowHandler> windowHandler) {
+        private Action(Data data, WindowHandler windowHandler) {
             this.data = data;
             this.windowHandler = windowHandler;
         }
 
         @Override
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
-            windowHandler.get().tracker().forEachInRangeToCenter(powerup.spawnLocation(), data.radius, window -> {
+            windowHandler.tracker().forEachInRangeToCenter(powerup.spawnLocation(), data.radius, window -> {
                 if (data.shouldBreak) {
                     window.updateIndex(0);
                 }

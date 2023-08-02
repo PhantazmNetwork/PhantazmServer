@@ -5,6 +5,8 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.ethylene.mapper.MappingProcessorSource;
+import com.github.steanky.ethylene.mapper.type.Token;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
@@ -43,8 +45,10 @@ import org.phantazm.zombies.mob.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.powerup.FileSystemPowerupLoader;
-import org.phantazm.zombies.powerup.PowerupInfo;
+import org.phantazm.zombies.powerup.BasicPowerupHandlerSource;
+import org.phantazm.zombies.powerup.FileSystemPowerupDataLoader;
+import org.phantazm.zombies.powerup.PowerupData;
+import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.scene.ZombiesSceneProvider;
 import org.phantazm.zombies.scene.ZombiesSceneRouter;
@@ -65,7 +69,9 @@ public final class ZombiesFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesFeature.class);
 
     private static Map<Key, MapInfo> maps;
-    private static Map<Key, PowerupInfo> powerups;
+
+    private static PowerupHandler.Source powerupHandlerSource;
+
     private static MobSpawnerSource mobSpawnerSource;
     private static ZombiesSceneRouter sceneRouter;
     private static ZombiesDatabase database;
@@ -80,12 +86,17 @@ public final class ZombiesFeature {
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
             @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback sceneFallback,
             @NotNull Map<? super UUID, ? extends Party> parties, @NotNull SceneTransferHelper sceneTransferHelper,
-            @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig) throws IOException {
+            @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
+            @NotNull MappingProcessorSource mappingProcessorSource) throws IOException {
         Attributes.registerAll();
 
         ConfigCodec codec = new YamlCodec();
         ZombiesFeature.maps = loadFeature("map", new FileSystemMapLoader(MAPS_FOLDER, codec));
-        ZombiesFeature.powerups = loadFeature("powerup", new FileSystemPowerupLoader(POWERUPS_FOLDER, codec));
+
+        ZombiesFeature.powerupHandlerSource = new BasicPowerupHandlerSource(loadFeature("powerup",
+                new FileSystemPowerupDataLoader(POWERUPS_FOLDER, codec,
+                        mappingProcessorSource.processorFor(Token.ofClass(PowerupData.class)))), contextManager);
+
         ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(processorMap, spawner, keyParser);
 
         InstanceLoader instanceLoader =
@@ -121,7 +132,7 @@ public final class ZombiesFeature {
                     new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
                             instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
                             ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(), clientBlockHandlerSource,
-                            contextManager, keyParser, database, ZombiesFeature.powerups(),
+                            contextManager, keyParser, database, ZombiesFeature.powerupHandlerSource(),
                             new BasicZombiesPlayerSource(database, viewProvider,
                                     EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
                                     keyParser),
@@ -171,8 +182,8 @@ public final class ZombiesFeature {
         return FeatureUtils.check(maps);
     }
 
-    public static @NotNull @Unmodifiable Map<Key, PowerupInfo> powerups() {
-        return FeatureUtils.check(powerups);
+    public static @NotNull PowerupHandler.Source powerupHandlerSource() {
+        return FeatureUtils.check(powerupHandlerSource);
     }
 
     public static @NotNull MobSpawnerSource mobSpawnerSource() {

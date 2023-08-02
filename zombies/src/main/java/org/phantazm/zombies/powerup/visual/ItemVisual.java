@@ -12,25 +12,21 @@ import net.minestom.server.entity.ItemEntity;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
-import java.util.function.Supplier;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 @Model("zombies.powerup.visual.item")
 @Cache(false)
-public class ItemVisual implements Supplier<PowerupVisual> {
+public class ItemVisual implements PowerupVisualComponent {
     private final Data data;
-    private final Instance instance;
 
     @FactoryMethod
-    public ItemVisual(@NotNull Data data, @NotNull Instance instance) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.instance = Objects.requireNonNull(instance, "instance");
+    public ItemVisual(@NotNull Data data) {
+        this.data = data;
     }
 
     @Override
-    public PowerupVisual get() {
-        return new Visual(data, instance);
+    public @NotNull PowerupVisual apply(@NotNull ZombiesScene scene) {
+        return new Visual(data, scene.instance());
     }
 
     @DataObject
