@@ -230,11 +230,12 @@ public final class PhantazmServer {
                 throw new RuntimeException(e);
             }
 
+            SilenceJooqFeature.initialize();
             ExecutorFeature.initialize();
             HikariFeature.initialize();
             GeneralStatsFeature.initialize();
             BlockHandlerFeature.initialize();
-            TranslationFeature.initialize();
+            LocalizationFeature.initialize();
             PlayerFeature.initialize(playerConfig);
         });
 

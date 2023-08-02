@@ -15,13 +15,13 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 
-public final class TranslationFeature {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TranslationFeature.class);
+public final class LocalizationFeature {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalizationFeature.class);
 
     public static final Path LANG_FOLDER = Path.of("./lang");
     public static final Key TRANSLATION_REGISTRY_KEY = Key.key(Namespaces.PHANTAZM, "translation");
 
-    private TranslationFeature() {
+    private LocalizationFeature() {
         throw new UnsupportedOperationException();
     }
 
