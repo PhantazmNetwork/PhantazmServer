@@ -39,7 +39,7 @@ import java.util.function.Supplier;
 
 public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDeathEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PhantazmMobDeathListener.class);
-    private static final BoundingBox POWERUP_BOUNDING_BOX = new BoundingBox(0.0625, 0.0625, 0.0625);
+    private static final BoundingBox POWERUP_BOUNDING_BOX = new BoundingBox(0.25, 0.0625, 0.25);
     private static final Vec DOWNWARD_SEARCH_VECTOR = new Vec(0, -10, 0);
     private static final Vec OFFSET = new Vec(0.5, 0, 0.5);
     private static final double ROOM_PENETRATION_DEPTH = 2.5;
