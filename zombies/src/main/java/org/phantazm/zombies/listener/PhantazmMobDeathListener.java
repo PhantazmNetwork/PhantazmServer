@@ -3,6 +3,7 @@ package org.phantazm.zombies.listener;
 import com.github.steanky.element.core.key.Constants;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.vector.Bounds3I;
+import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.CollisionUtils;
@@ -41,6 +42,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     private static final BoundingBox POWERUP_BOUNDING_BOX = new BoundingBox(0.25, 0.5, 0.25);
     private static final Vec DOWNWARD_SEARCH_VECTOR = new Vec(0, -10, 0);
     private static final Vec OFFSET = new Vec(0.5, 0, 0.5);
+    private static final int ROOM_PENETRATION_DEPTH = 2;
 
     private final KeyParser keyParser;
     private final Supplier<Optional<Round>> roundSupplier;
@@ -112,9 +114,20 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
                     windowTracker.closestInRangeToBounds(position, POWERUP_BOUNDING_BOX.width(),
                             POWERUP_BOUNDING_BOX.height(), 10);
             if (windowOptional.isEmpty()) {
-                LOGGER.warn("Spawning powerup at location " + position +
-                        " that does not have a nearby window and is not in a room");
-                powerupHandler.spawn(key, seekDown(position));
+                Optional<Pair<Room, Vec>> nearestRoomOptional =
+                        roomTracker.closestInRangeToBoundsWithVec(position, POWERUP_BOUNDING_BOX.width(),
+                                POWERUP_BOUNDING_BOX.height(), POWERUP_BOUNDING_BOX.width(), 15);
+                if (nearestRoomOptional.isEmpty()) {
+                    Point targetPoint = seekDown(position);
+                    LOGGER.warn("Failed to find nearby room or window for powerup spawn at " + targetPoint);
+                    powerupHandler.spawn(key, targetPoint);
+                    return;
+                }
+
+                Pair<Room, Vec> nearestRoom = nearestRoomOptional.get();
+                Vec roomVec = nearestRoom.right();
+                powerupHandler.spawn(key,
+                        seekDown(roomVec.add(roomVec.sub(position).normalize().mul(ROOM_PENETRATION_DEPTH))));
                 return;
             }
 
