@@ -1,6 +1,5 @@
 package org.phantazm.server;
 
-import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.proxima.path.BasicAsyncPathfinder;
 import com.github.steanky.proxima.path.BasicPathOperation;
 import com.github.steanky.proxima.path.Pathfinder;
@@ -24,10 +23,7 @@ public final class ProximaFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> globalNode, @NotNull ContextManager contextManager,
-            @NotNull PathfinderConfig pathfinderConfig) {
-        registerElementClasses(contextManager);
-
+    static void initialize(@NotNull EventNode<Event> globalNode, @NotNull PathfinderConfig pathfinderConfig) {
         int threads = pathfinderConfig.threads();
         boolean asyncMode = pathfinderConfig.asyncMode();
         int corePoolSize = pathfinderConfig.corePoolSize();
@@ -42,10 +38,6 @@ public final class ProximaFeature {
         pathfinder = new BasicAsyncPathfinder(fjp, BasicPathOperation::new, 1000000);
         settingsFunction = new InstanceSettingsFunction(globalNode);
         spawner = new InstanceSpawner(pathfinder, settingsFunction);
-    }
-
-    private static void registerElementClasses(@NotNull ContextManager contextManager) {
-        contextManager.registerElementClass(GroundPathfindingFactory.class);
     }
 
     public static @NotNull Pathfinder getPathfinder() {

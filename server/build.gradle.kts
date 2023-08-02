@@ -22,6 +22,8 @@ dependencies {
     implementation(libs.element.core)
     implementation(libs.ethylene.mapper)
 
+    implementation(libs.reflections)
+
     runtimeOnly(libs.mariadb)
     runtimeOnly(libs.sqlite)
 }

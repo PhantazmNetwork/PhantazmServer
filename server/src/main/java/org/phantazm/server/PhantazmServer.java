@@ -235,9 +235,6 @@ public final class PhantazmServer {
 
         ContextManager contextManager = ElementFeature.getContextManager();
 
-        TickFormatterFeature.initialize(contextManager);
-        NPCFeature.initialize(contextManager);
-
         PlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
@@ -251,7 +248,7 @@ public final class PhantazmServer {
         CommandFeature.initialize(MinecraftServer.getCommandManager(), routerStore, viewProvider,
                 LobbyFeature.getFallback());
 
-        ProximaFeature.initialize(global, contextManager, pathfinderConfig);
+        ProximaFeature.initialize(global, pathfinderConfig);
 
         ConfigCodec codec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                 () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
