@@ -10,10 +10,7 @@ import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.visual.PowerupVisual;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Powerup implements Tickable, Keyed {
     private final Key type;
@@ -34,6 +31,8 @@ public class Powerup implements Tickable, Keyed {
         this.actions = new ArrayList<>(actions);
         this.despawnPredicate = Objects.requireNonNull(despawnPredicate, "despawnPredicate");
         this.spawnLocation = Objects.requireNonNull(spawnLocation, "spawnLocation");
+
+        Collections.reverse(this.actions);
     }
 
     public void spawn() {
@@ -62,15 +61,13 @@ public class Powerup implements Tickable, Keyed {
             return;
         }
 
-        for (PowerupVisual visual : visuals) {
-            visual.despawn();
-        }
-
         boolean anyActive = false;
         for (int i = actions.size() - 1; i >= 0; i--) {
             PowerupAction action = actions.get(i);
 
-            action.activate(this, player, time);
+            if (!action.activate(this, player, time)) {
+                return;
+            }
 
             if (action.deactivationPredicate().shouldDeactivate(time)) {
                 action.deactivate(player);
@@ -79,6 +76,10 @@ public class Powerup implements Tickable, Keyed {
             else {
                 anyActive = true;
             }
+        }
+
+        for (PowerupVisual visual : visuals) {
+            visual.despawn();
         }
 
         if (anyActive) {

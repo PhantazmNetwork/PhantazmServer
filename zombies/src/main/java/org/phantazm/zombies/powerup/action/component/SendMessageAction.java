@@ -45,7 +45,7 @@ public class SendMessageAction implements PowerupActionComponent {
         }
 
         @Override
-        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+        public boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             Component component = getComponent(player);
             if (data.broadcast) {
                 instance.sendMessage(component);
@@ -53,6 +53,7 @@ public class SendMessageAction implements PowerupActionComponent {
             else {
                 player.getPlayer().ifPresent(p -> p.sendMessage(component));
             }
+            return true;
         }
 
         private Component getComponent(ZombiesPlayer player) {

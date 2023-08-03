@@ -24,9 +24,10 @@ public abstract class MapTransactionAction extends PowerupActionBase {
     }
 
     @Override
-    public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+    public boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
         super.activate(powerup, player, time);
         transactionModifierSource.addModifier(modifierGroup, activeModifier = getModifier());
+        return true;
     }
 
     @Override

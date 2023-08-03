@@ -81,7 +81,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
         }
 
         @Override
-        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+        public boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             super.activate(powerup, player, time);
 
             if (data.global) {
@@ -96,6 +96,8 @@ public class AttributeModifierAction implements PowerupActionComponent {
             else {
                 applyAttribute(player);
             }
+
+            return true;
         }
 
         @Override

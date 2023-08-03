@@ -82,7 +82,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
         }
 
         @Override
-        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+        public boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             this.startTime = System.currentTimeMillis();
 
             BossBar bossBar = BossBar.bossBar(createBossBarName(time), 1.0F, data.color, data.overlay);
@@ -94,6 +94,8 @@ public class BossBarTimerAction implements PowerupActionComponent {
                 zombiesPlayer.registerCancellable(CancellableState.named(id, () -> {
                 }, () -> zombiesPlayer.getPlayer().ifPresent(actualPlayer -> actualPlayer.hideBossBar(bossBar))), true);
             }
+
+            return true;
         }
 
         private Component createBossBarName(long time) {
