@@ -23,6 +23,7 @@ import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.Utils;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
@@ -65,8 +66,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
             @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
-            @NotNull EventNode<Event> sceneNode, @Nullable UUID allowedRequestUUID) {
-        super(uuid, instance, fallback, VecUtils.toPoint(mapSettingsInfo.spawn()));
+            @NotNull EventNode<Event> sceneNode, @Nullable UUID allowedRequestUUID,
+            @NotNull PlayerViewProvider playerViewProvider) {
+        super(uuid, instance, fallback, VecUtils.toPoint(mapSettingsInfo.spawn()), playerViewProvider);
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");

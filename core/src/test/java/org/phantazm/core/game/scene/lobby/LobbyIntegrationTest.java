@@ -5,11 +5,13 @@ import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.EnvTest;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +35,7 @@ public class LobbyIntegrationTest {
         SceneFallback sceneFallback = (ignored) -> CompletableFuture.completedFuture(true);
         Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback,
                 new NPCHandler(List.of(), instance, instance.eventNode()), Collections.emptyList(),
-                MiniMessage.miniMessage(), "", true);
+                MiniMessage.miniMessage(), "", true, Mockito.mock(PlayerViewProvider.class));
         PlayerView playerView = mock(PlayerView.class);
 
         lobby.shutdown();

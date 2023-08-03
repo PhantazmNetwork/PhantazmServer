@@ -7,7 +7,7 @@ import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 
 public interface PowerupAction extends Tickable {
-    void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time);
+    boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time);
 
     void deactivate(@NotNull ZombiesPlayer player);
 

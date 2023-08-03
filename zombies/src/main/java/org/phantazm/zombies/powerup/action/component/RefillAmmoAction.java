@@ -35,7 +35,7 @@ public class RefillAmmoAction implements PowerupActionComponent {
         }
 
         @Override
-        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+        public boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
                 if (zombiesPlayer.hasQuit()) {
                     continue;
@@ -49,6 +49,7 @@ public class RefillAmmoAction implements PowerupActionComponent {
                     }
                 });
             }
+            return true;
         }
     }
 }
