@@ -222,7 +222,8 @@ public class EndStage implements Stage {
                 List<String> formattedUsernames = new ArrayList<>(futures.size());
                 for (int i = 0; i < futures.size(); i++) {
                     formattedUsernames.add(
-                            MessageFormat.format(webhook.playerFormat(), futures.get(i).join(), kills.getInt(i)));
+                            MessageFormat.format(webhook.playerFormat(), futures.get(i).join().replaceAll("_", "\\\\_"),
+                                    kills.getInt(i)));
                 }
 
                 String playerList = String.join(", ", formattedUsernames);
