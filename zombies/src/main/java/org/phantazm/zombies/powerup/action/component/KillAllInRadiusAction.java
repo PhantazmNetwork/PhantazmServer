@@ -53,7 +53,7 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
         }
 
         @Override
-        public boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             instance.getEntityTracker()
                     .nearbyEntitiesUntil(powerup.spawnLocation(), data.radius, EntityTracker.Target.LIVING_ENTITIES,
                             entity -> {
@@ -77,8 +77,6 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
 
                                 return false;
                             });
-
-            return true;
         }
     }
 }

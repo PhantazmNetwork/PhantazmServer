@@ -41,7 +41,7 @@ public class ModifyWindowsAction implements PowerupActionComponent {
         }
 
         @Override
-        public boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             windowHandler.tracker().forEachInRangeToCenter(powerup.spawnLocation(), data.radius, window -> {
                 if (data.shouldBreak) {
                     window.updateIndex(0);
@@ -50,7 +50,6 @@ public class ModifyWindowsAction implements PowerupActionComponent {
                     window.updateIndex(window.getVolume());
                 }
             });
-            return true;
         }
     }
 }

@@ -47,9 +47,8 @@ public class PlaySoundAction implements PowerupActionComponent {
         }
 
         @Override
-        public boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             instance.playSound(Sound.sound(data.sound).seed(random.nextLong()).build(), powerup.spawnLocation());
-            return true;
         }
     }
 }

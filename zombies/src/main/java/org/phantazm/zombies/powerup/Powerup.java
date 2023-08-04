@@ -31,8 +31,6 @@ public class Powerup implements Tickable, Keyed {
         this.actions = new ArrayList<>(actions);
         this.despawnPredicate = Objects.requireNonNull(despawnPredicate, "despawnPredicate");
         this.spawnLocation = Objects.requireNonNull(spawnLocation, "spawnLocation");
-
-        Collections.reverse(this.actions);
     }
 
     public void spawn() {

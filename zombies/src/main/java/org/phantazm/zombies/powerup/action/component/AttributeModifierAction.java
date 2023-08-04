@@ -81,7 +81,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
         }
 
         @Override
-        public boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             super.activate(powerup, player, time);
 
             if (data.global) {
@@ -96,18 +96,12 @@ public class AttributeModifierAction implements PowerupActionComponent {
             else {
                 applyAttribute(player);
             }
-
-            return true;
         }
 
         @Override
         public void deactivate(@NotNull ZombiesPlayer player) {
             if (data.global) {
                 for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                    if (zombiesPlayer.hasQuit()) {
-                        continue;
-                    }
-
                     removeAttribute(zombiesPlayer);
                 }
             }

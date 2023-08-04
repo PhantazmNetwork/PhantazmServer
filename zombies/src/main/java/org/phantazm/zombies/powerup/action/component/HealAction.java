@@ -48,23 +48,22 @@ public class HealAction implements PowerupActionComponent {
         }
 
         @Override
-        public boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer zombiesPlayer, long time) {
+        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer zombiesPlayer, long time) {
             if (!zombiesPlayer.canDoGenericActions()) {
-                return false;
+                return;
             }
 
             Optional<Player> playerOptional = zombiesPlayer.getPlayer();
             if (playerOptional.isEmpty()) {
-                return false;
+                return;
             }
 
             Player player = playerOptional.get();
             if (data.noTakeOnFull && player.getHealth() == player.getMaxHealth()) {
-                return false;
+                return;
             }
 
             player.setHealth(player.getHealth() + data.amount);
-            return true;
         }
     }
 }

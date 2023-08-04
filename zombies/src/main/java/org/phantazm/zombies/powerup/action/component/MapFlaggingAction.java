@@ -45,10 +45,9 @@ public class MapFlaggingAction implements PowerupActionComponent {
         }
 
         @Override
-        public boolean activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             super.activate(powerup, player, time);
             flaggable.setFlag(data.flag);
-            return true;
         }
 
         @Override
