@@ -51,7 +51,7 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
             }
 
             PickupPredicateComponent pickupPredicateComponent;
-            if (data.pickupPredicate() == null) {
+            if (data.pickupPredicate().isEmpty()) {
                 pickupPredicateComponent = player -> AlwaysPickupPredicate.INSTANCE;
             }
             else {
