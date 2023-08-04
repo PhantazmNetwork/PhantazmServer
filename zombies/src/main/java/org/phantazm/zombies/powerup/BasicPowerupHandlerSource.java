@@ -7,8 +7,10 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.ElementUtils;
 import org.phantazm.zombies.powerup.action.component.PowerupActionComponent;
+import org.phantazm.zombies.powerup.predicate.AlwaysPickupPredicate;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
+import org.phantazm.zombies.powerup.predicate.PickupPredicateComponent;
 import org.phantazm.zombies.powerup.visual.PowerupVisualComponent;
 import org.phantazm.zombies.scene.ZombiesScene;
 import org.slf4j.Logger;
@@ -48,7 +50,22 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
                 deactivationPredicate = (scene) -> ImmediateDeactivationPredicate.INSTANCE;
             }
 
-            powerupMap.put(dataEntry.getKey(), new PowerupComponents(visuals, actions, deactivationPredicate));
+            PickupPredicateComponent pickupPredicateComponent;
+            if (data.pickupPredicate() == null) {
+                pickupPredicateComponent = player -> AlwaysPickupPredicate.INSTANCE;
+            }
+            else {
+                try {
+                    pickupPredicateComponent = contextManager.makeContext(data.pickupPredicate()).provide();
+                }
+                catch (ElementException e) {
+                    HANDLER.accept(e);
+                    pickupPredicateComponent = player -> AlwaysPickupPredicate.INSTANCE;
+                }
+            }
+
+            powerupMap.put(dataEntry.getKey(),
+                    new PowerupComponents(visuals, actions, deactivationPredicate, pickupPredicateComponent));
         }
 
         this.powerups = Map.copyOf(powerupMap);

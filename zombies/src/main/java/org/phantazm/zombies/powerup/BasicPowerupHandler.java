@@ -9,6 +9,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.action.component.PowerupActionComponent;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
+import org.phantazm.zombies.powerup.predicate.PickupPredicateComponent;
 import org.phantazm.zombies.powerup.visual.PowerupVisual;
 import org.phantazm.zombies.powerup.visual.PowerupVisualComponent;
 import org.phantazm.zombies.scene.ZombiesScene;
@@ -94,6 +95,7 @@ public class BasicPowerupHandler implements PowerupHandler {
         Collection<PowerupVisualComponent> visualComponents = component.visuals();
         Collection<PowerupActionComponent> actionComponents = component.actions();
         DeactivationPredicateComponent deactivationPredicateComponent = component.deactivationPredicate();
+        PickupPredicateComponent pickupPredicateComponent = component.pickupPredicateComponent();
 
         Collection<PowerupVisual> visuals = new ArrayList<>(visualComponents.size());
         Collection<PowerupAction> actions = new ArrayList<>(actionComponents.size());
@@ -107,7 +109,7 @@ public class BasicPowerupHandler implements PowerupHandler {
         }
 
         Powerup newPowerup = new Powerup(powerupType, visuals, actions, deactivationPredicateComponent.apply(scene),
-                new Vec(x, y, z));
+                pickupPredicateComponent.apply(scene), new Vec(x, y, z));
         newPowerup.spawn();
 
         spawnedOrActivePowerups.add(newPowerup);

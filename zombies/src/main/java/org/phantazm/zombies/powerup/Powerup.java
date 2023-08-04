@@ -8,6 +8,7 @@ import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
+import org.phantazm.zombies.powerup.predicate.PickupPredicate;
 import org.phantazm.zombies.powerup.visual.PowerupVisual;
 
 import java.util.*;
@@ -17,6 +18,7 @@ public class Powerup implements Tickable, Keyed {
     private final List<PowerupVisual> visuals;
     private final List<PowerupAction> actions;
     private final DeactivationPredicate despawnPredicate;
+    private final PickupPredicate pickupPredicate;
     private final Point spawnLocation;
 
     private boolean spawned;
@@ -25,11 +27,12 @@ public class Powerup implements Tickable, Keyed {
 
     public Powerup(@NotNull Key type, @NotNull Collection<PowerupVisual> visuals,
             @NotNull Collection<PowerupAction> actions, @NotNull DeactivationPredicate despawnPredicate,
-            @NotNull Point spawnLocation) {
+            @NotNull PickupPredicate pickupPredicate, @NotNull Point spawnLocation) {
         this.type = Objects.requireNonNull(type, "type");
         this.visuals = new ArrayList<>(visuals);
         this.actions = new ArrayList<>(actions);
         this.despawnPredicate = Objects.requireNonNull(despawnPredicate, "despawnPredicate");
+        this.pickupPredicate = Objects.requireNonNull(pickupPredicate, "pickupPredicate");
         this.spawnLocation = Objects.requireNonNull(spawnLocation, "spawnLocation");
     }
 
@@ -56,6 +59,10 @@ public class Powerup implements Tickable, Keyed {
 
     public void activate(@NotNull ZombiesPlayer player, long time) {
         if (active) {
+            return;
+        }
+
+        if (!pickupPredicate.canPickup(player)) {
             return;
         }
 
