@@ -75,17 +75,22 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     @Override
     public void shutdown() {
         shutdown = true;
-        List<CompletableFuture<?>> futures = new ArrayList<>(ghosts.size());
-        for (Player ghost : ghosts) {
-            if (invalidGhost(ghost)) {
-                continue;
+
+        try {
+            List<CompletableFuture<?>> futures = new ArrayList<>(ghosts.size());
+            for (Player ghost : ghosts) {
+                if (invalidGhost(ghost)) {
+                    continue;
+                }
+
+                futures.add(fallback.fallback(playerViewProvider.fromPlayer(ghost)));
             }
 
-            futures.add(fallback.fallback(playerViewProvider.fromPlayer(ghost)));
+            CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
         }
-
-        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
-        MinecraftServer.getInstanceManager().forceUnregisterInstance(instance);
+        finally {
+            MinecraftServer.getInstanceManager().forceUnregisterInstance(instance);
+        }
     }
 
     @Override
