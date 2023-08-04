@@ -16,6 +16,8 @@ public interface PowerupHandler extends Tickable {
 
     boolean canSpawnType(@NotNull Key powerupType);
 
+    void end();
+
     default @NotNull Powerup spawn(@NotNull Key powerupType, @NotNull Point point) {
         return spawn(powerupType, point.x(), point.y(), point.z());
     }

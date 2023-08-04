@@ -353,6 +353,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
 
         zombiesPlayers.clear();
+        map.mapObjects().module().powerupHandler().get().end();
 
         //wait for all players to fallback before we actually shut down the scene
         CompletableFuture.allOf(fallbackFutures.toArray(CompletableFuture[]::new))

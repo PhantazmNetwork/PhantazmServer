@@ -64,10 +64,7 @@ public class Powerup implements Tickable, Keyed {
         boolean anyActive = false;
         for (int i = actions.size() - 1; i >= 0; i--) {
             PowerupAction action = actions.get(i);
-
-            if (!action.activate(this, player, time)) {
-                return;
-            }
+            action.activate(this, player, time);
 
             if (action.deactivationPredicate().shouldDeactivate(time)) {
                 action.deactivate(player);
@@ -88,6 +85,29 @@ public class Powerup implements Tickable, Keyed {
         }
 
         spawned = false;
+    }
+
+    public void deactivate() {
+        if (spawned) {
+            for (PowerupVisual visual : visuals) {
+                visual.despawn();
+            }
+
+            visuals.clear();
+            spawned = false;
+        }
+
+        if (!active) {
+            return;
+        }
+
+        for (PowerupAction action : actions) {
+            action.deactivate(activatingPlayer);
+        }
+
+        actions.clear();
+        active = false;
+        activatingPlayer = null;
     }
 
     public @NotNull Point spawnLocation() {

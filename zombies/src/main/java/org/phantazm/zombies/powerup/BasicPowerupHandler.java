@@ -120,6 +120,15 @@ public class BasicPowerupHandler implements PowerupHandler {
     }
 
     @Override
+    public void end() {
+        for (Powerup powerup : spawnedOrActivePowerups) {
+            powerup.deactivate();
+        }
+
+        spawnedOrActivePowerups.clear();
+    }
+
+    @Override
     public @NotNull @UnmodifiableView Collection<Powerup> spawnedOrActivePowerups() {
         return powerupView;
     }
