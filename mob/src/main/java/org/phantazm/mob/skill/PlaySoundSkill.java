@@ -59,8 +59,7 @@ public class PlaySoundSkill implements Skill {
                     }
                 }
             }
-            else {
-                Audience target = (Audience)object;
+            else if (object instanceof Audience target) {
                 if (data.followAudience) {
                     target.playSound(randomize(), Sound.Emitter.self());
                 }
