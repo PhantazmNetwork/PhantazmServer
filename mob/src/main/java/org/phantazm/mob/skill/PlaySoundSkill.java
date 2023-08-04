@@ -47,13 +47,15 @@ public class PlaySoundSkill implements Skill {
                     }
 
                     Instance instance = player.getInstance();
-                    if (instance != null) {
-                        if (data.followAudience) {
-                            player.playSound(randomize(), player.getPosition());
-                        }
-                        else {
-                            instance.playSound(randomize(), self.entity().getPosition());
-                        }
+                    if (instance == null) {
+                        continue;
+                    }
+
+                    if (data.followAudience) {
+                        player.playSound(randomize(), player.getPosition());
+                    }
+                    else {
+                        instance.playSound(randomize(), self.entity().getPosition());
                     }
                 }
             }

@@ -95,6 +95,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
             setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(false));
         }
         module.getStateSwitcher().end();
+        getPlayer().ifPresent(player -> player.tagHandler().clearTags());
     }
 
     private void inventoryTick(Player player, long time) {
