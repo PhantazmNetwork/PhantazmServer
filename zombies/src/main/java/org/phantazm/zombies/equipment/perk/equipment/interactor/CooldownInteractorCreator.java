@@ -56,7 +56,7 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
 
         private long lastActivated;
 
-        public Interactor(@NotNull Data data, @NotNull @Child("delegate") PerkInteractor delegate, int flags) {
+        private Interactor(@NotNull Data data, @NotNull @Child("delegate") PerkInteractor delegate, int flags) {
             this.data = Objects.requireNonNull(data, "data");
             this.delegate = Objects.requireNonNull(delegate, "delegate");
             this.flags = flags;
