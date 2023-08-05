@@ -108,7 +108,6 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
 
                 HitResult hit = closest.get();
                 if (hit == null || hit.pos.distanceSquared(eyePos) > data.reach * data.reach) {
-                    System.out.println("Out of reach: " + hit);
                     return false;
                 }
 
@@ -123,7 +122,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 }
                 else {
                     double angle = feetPos.yaw() * (Math.PI / 180);
-                    hit.entity.damage(Damage.fromPlayer(player, 0), data.bypassArmor);
+                    hit.entity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
                     hit.entity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
                     isInstaKill = false;
                 }
