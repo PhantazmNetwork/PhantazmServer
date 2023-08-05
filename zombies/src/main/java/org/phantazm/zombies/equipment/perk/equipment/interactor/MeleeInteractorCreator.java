@@ -10,7 +10,6 @@ import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.collision.BoundingBox;
-import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -90,25 +89,26 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
 
                 Wrapper<HitResult> closest = Wrapper.ofNull();
                 instance.getEntityTracker()
-                        .raytraceCandidates(eyePos, targetPos, EntityTracker.Target.LIVING_ENTITIES, hit -> {
-                            if (mobStore.hasMob(hit.getUuid())) {
-                                BoundingBox boundingBox = hit.getBoundingBox();
-                                Pos hitPosition = hit.getPosition();
-
-                                RayUtils.rayTrace(boundingBox, hitPosition, eyePos).ifPresent(vec -> {
-                                    HitResult closestHit = closest.get();
-                                    if ((closestHit == null ||
-                                            vec.distanceSquared(eyePos) < closestHit.pos.distanceSquared(eyePos)) &&
-                                            CollisionUtils.isLineOfSightReachingShape(instance, player.getChunk(),
-                                                    eyePos, hitPosition, boundingBox)) {
-                                        closest.set(new HitResult(hit, vec));
-                                    }
-                                });
+                        .raytraceCandidates(eyePos, targetPos, EntityTracker.Target.LIVING_ENTITIES, candidate -> {
+                            if (!mobStore.hasMob(candidate.getUuid())) {
+                                return;
                             }
+
+                            BoundingBox boundingBox = candidate.getBoundingBox();
+                            Pos candidatePosition = candidate.getPosition();
+
+                            RayUtils.rayTrace(boundingBox, candidatePosition, eyePos).ifPresent(vec -> {
+                                HitResult closestHit = closest.get();
+                                if ((closestHit == null ||
+                                        vec.distanceSquared(eyePos) < closestHit.pos.distanceSquared(eyePos))) {
+                                    closest.set(new HitResult(candidate, vec));
+                                }
+                            });
                         });
 
                 HitResult hit = closest.get();
                 if (hit == null || hit.pos.distanceSquared(eyePos) > data.reach * data.reach) {
+                    System.out.println("Out of reach: " + hit);
                     return false;
                 }
 
@@ -123,7 +123,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 }
                 else {
                     double angle = feetPos.yaw() * (Math.PI / 180);
-                    hit.entity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
+                    hit.entity.damage(Damage.fromPlayer(player, 0), data.bypassArmor);
                     hit.entity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
                     isInstaKill = false;
                 }
