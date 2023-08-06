@@ -4,7 +4,12 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Player;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +26,8 @@ import org.phantazm.zombies.powerup.action.InstantAction;
 import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.scene.ZombiesScene;
 
+import java.util.Optional;
+
 @Model("zombies.powerup.action.kill_all_in_radius")
 @Cache(false)
 public class KillAllInRadiusAction implements PowerupActionComponent {
@@ -36,9 +43,32 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
         return new Action(data, scene.instance(), scene.getMap().mapObjects().module().mobStore());
     }
 
-    @DataObject
-    public record Data(double radius, @NotNull Key modifier, int coinsPerKill) {
+    public enum BossDamageType {
+        HEALTH_FACTOR,
+        CONSTANT
+    }
 
+    @DataObject
+    public record Data(double radius,
+                       @NotNull Key modifier,
+                       int coinsPerKill,
+                       @NotNull BossDamageType bossDamageType,
+                       float bossDamage,
+                       boolean bypassArmor) {
+        @Default("bossDamageType")
+        public static @NotNull ConfigElement defaultBossDamageType() {
+            return ConfigPrimitive.of("HEALTH_FACTOR");
+        }
+
+        @Default("bossDamage")
+        public static @NotNull ConfigElement defaultBossDamage() {
+            return ConfigPrimitive.of("0.25");
+        }
+
+        @Default("bypassArmor")
+        public static @NotNull ConfigElement defaultBypassArmor() {
+            return ConfigPrimitive.of(true);
+        }
     }
 
     private static class Action extends InstantAction {
@@ -53,30 +83,53 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
         }
 
         @Override
-        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
+        public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer zombiesPlayer, long time) {
+            Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+            if (playerOptional.isEmpty()) {
+                return;
+            }
+
+            Player player = playerOptional.get();
+
             instance.getEntityTracker()
-                    .nearbyEntitiesUntil(powerup.spawnLocation(), data.radius, EntityTracker.Target.LIVING_ENTITIES,
+                    .nearbyEntities(powerup.spawnLocation(), data.radius, EntityTracker.Target.LIVING_ENTITIES,
                             entity -> {
                                 PhantazmMob mob = mobStore.getMob(entity.getUuid());
-                                if (mob != null && !mob.model().getExtraNode()
-                                        .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
-                                    PlayerCoins coins = player.module().getCoins();
-
-                                    TransactionResult result = coins.runTransaction(new Transaction(
-                                            player.module().compositeTransactionModifiers().modifiers(data.modifier),
-                                            data.coinsPerKill));
-
-                                    if (result.applyIfAffordable(coins)) {
-                                        entity.setTag(Tags.LAST_HIT_BY, player.getUUID());
-                                        entity.kill();
-                                    }
-                                    else {
-                                        return true;
-                                    }
+                                if (mob == null) {
+                                    return;
                                 }
 
-                                return false;
+                                entity.setTag(Tags.LAST_HIT_BY, player.getUuid());
+
+                                if (mob.model().getExtraNode()
+                                        .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                                    switch (data.bossDamageType) {
+                                        case HEALTH_FACTOR -> entity.damage(
+                                                Damage.fromPlayer(player, entity.getMaxHealth() * data.bossDamage),
+                                                data.bypassArmor);
+                                        case CONSTANT -> entity.damage(Damage.fromPlayer(player, data.bossDamage),
+                                                data.bypassArmor);
+                                    }
+
+                                    if (entity.getHealth() <= 0) {
+                                        giveCoins(zombiesPlayer);
+                                    }
+
+                                    return;
+                                }
+
+                                giveCoins(zombiesPlayer);
+                                entity.kill();
                             });
+        }
+
+        private void giveCoins(ZombiesPlayer zombiesPlayer) {
+            PlayerCoins coins = zombiesPlayer.module().getCoins();
+
+            TransactionResult result = coins.runTransaction(
+                    new Transaction(zombiesPlayer.module().compositeTransactionModifiers().modifiers(data.modifier),
+                            data.coinsPerKill));
+            result.applyIfAffordable(coins);
         }
     }
 }
