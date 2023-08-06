@@ -14,6 +14,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.event.entity.EntityDeathEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
@@ -320,9 +321,10 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         //player events
         node.addListener(EntityDamageEvent.class, new PlayerDamageEventListener(instance, zombiesPlayers, mapObjects));
-        node.addListener(PlayerHandAnimationEvent.class,
-                new PlayerLeftClickListener(instance, zombiesPlayers, mobStore, settings.punchDamage(),
-                        settings.punchRange(), settings.punchCooldown(), settings.punchKnockback()));
+        node.addListener(PlayerHandAnimationEvent.class, new PlayerLeftClickListener(instance, zombiesPlayers));
+        node.addListener(EntityAttackEvent.class,
+                new PlayerAttackEntityListener(instance, zombiesPlayers, mobStore, settings.punchDamage(),
+                        settings.punchCooldown(), settings.punchKnockback()));
         node.addListener(PlayerChangeHeldSlotEvent.class, new PlayerItemSelectListener(instance, zombiesPlayers));
         node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers));
         node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(instance, zombiesPlayers, leaveHandler));

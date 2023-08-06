@@ -150,6 +150,11 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         reload();
     }
 
+    @Override
+    public void attack(@NotNull Entity target) {
+
+    }
+
     /**
      * Gets the current {@link GunState} of the {@link Gun}
      *

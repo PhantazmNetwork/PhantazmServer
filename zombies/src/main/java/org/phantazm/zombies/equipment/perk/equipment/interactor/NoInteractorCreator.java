@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -26,6 +27,11 @@ public class NoInteractorCreator implements PerkInteractorCreator {
 
         @Override
         public boolean rightClick() {
+            return true;
+        }
+
+        @Override
+        public boolean attack(@NotNull Entity target) {
             return true;
         }
     };
