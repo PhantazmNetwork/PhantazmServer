@@ -326,9 +326,11 @@ public final class MapProcessors {
         }
 
         @Override
-        public @NotNull ConfigElement elementFromData(MessageWithDestination messageWithDestination) {
-            return ConfigNode.of("component", messageWithDestination.component(), "destination",
-                    messageWithDestination.destination());
+        public @NotNull ConfigElement elementFromData(MessageWithDestination messageWithDestination)
+                throws ConfigProcessException {
+            return ConfigNode.of("component",
+                    ConfigProcessors.component().elementFromData(messageWithDestination.component()), "destination",
+                    chatDestination.elementFromData(messageWithDestination.destination()));
         }
     };
 
