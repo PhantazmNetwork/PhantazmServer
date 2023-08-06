@@ -1,4 +1,4 @@
-package org.phantazm.server.player;
+package org.phantazm.server.validator;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;

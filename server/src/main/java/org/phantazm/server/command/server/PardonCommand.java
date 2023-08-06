@@ -7,7 +7,7 @@ import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.IdentitySource;
-import org.phantazm.server.player.LoginValidator;
+import org.phantazm.server.validator.LoginValidator;
 
 public class PardonCommand extends Command {
     public static final Permission PERMISSION = new Permission("admin.pardon");

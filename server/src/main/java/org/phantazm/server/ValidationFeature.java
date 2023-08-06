@@ -6,7 +6,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.server.permission.PermissionHandler;
-import org.phantazm.server.player.LoginValidator;
+import org.phantazm.server.validator.LoginValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

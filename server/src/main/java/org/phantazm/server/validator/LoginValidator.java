@@ -1,4 +1,4 @@
-package org.phantazm.server.player;
+package org.phantazm.server.validator;
 
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.text.Component;

@@ -1,8 +1,8 @@
 package org.phantazm.server;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.server.player.DatabaseLoginValidator;
-import org.phantazm.server.player.LoginValidator;
+import org.phantazm.server.validator.DatabaseLoginValidator;
+import org.phantazm.server.validator.LoginValidator;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

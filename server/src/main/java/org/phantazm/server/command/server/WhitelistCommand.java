@@ -8,7 +8,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.IdentitySource;
-import org.phantazm.server.player.LoginValidator;
+import org.phantazm.server.validator.LoginValidator;
 
 public class WhitelistCommand extends Command {
     public static final Permission PERMISSION = new Permission("admin.whitelist");

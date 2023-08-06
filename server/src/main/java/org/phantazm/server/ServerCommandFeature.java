@@ -15,7 +15,7 @@ import org.phantazm.server.config.server.ShutdownConfig;
 import org.phantazm.server.config.server.ZombiesGamereportConfig;
 import org.phantazm.server.permission.FilePermissionHandler;
 import org.phantazm.server.permission.PermissionHandler;
-import org.phantazm.server.player.LoginValidator;
+import org.phantazm.server.validator.LoginValidator;
 
 import java.nio.file.Path;
 
