@@ -35,9 +35,9 @@ public class DatabasePermissionHandler implements PermissionHandler {
 
     public DatabasePermissionHandler(@NotNull DataSource dataSource, @NotNull Executor executor) {
         this.playerPermissionGroupCache =
-                Caffeine.newBuilder().softValues().maximumSize(2048).expireAfterAccess(Duration.ofMinutes(5)).build();
+                Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.groupPermissionCache =
-                Caffeine.newBuilder().softValues().maximumSize(2048).expireAfterAccess(Duration.ofMinutes(5)).build();
+                Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
         this.executor = Objects.requireNonNull(executor, "executor");
     }

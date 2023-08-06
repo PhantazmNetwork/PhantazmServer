@@ -34,12 +34,10 @@ public class DatabaseLoginValidator implements LoginValidator {
     private final Executor executor;
 
     public DatabaseLoginValidator(@NotNull DataSource dataSource, @NotNull Executor executor) {
-        this.banCache =
-                Caffeine.newBuilder().softValues().maximumSize(2048).expireAfterAccess(Duration.ofMinutes(5)).build();
-        this.whitelistCache =
-                Caffeine.newBuilder().softValues().maximumSize(2048).expireAfterAccess(Duration.ofMinutes(5)).build();
+        this.banCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
+        this.whitelistCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
-        this.executor = executor;
+        this.executor = Objects.requireNonNull(executor, "executor");
     }
 
     @Override
