@@ -14,8 +14,8 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class BasicLoginValidator implements LoginValidator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicLoginValidator.class);
+public class FileLoginValidator implements LoginValidator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileLoginValidator.class);
     private static final BooleanObjectPair<Component> SUCCESS = BooleanObjectPair.of(true, Component.empty());
 
     private final boolean isWhitelist;
@@ -27,7 +27,7 @@ public class BasicLoginValidator implements LoginValidator {
     private volatile boolean bansDirty;
     private volatile boolean whitelistDirty;
 
-    public BasicLoginValidator(boolean isWhitelist, @NotNull Path whitelist, @NotNull Path bans) {
+    public FileLoginValidator(boolean isWhitelist, @NotNull Path whitelist, @NotNull Path bans) {
         this.isWhitelist = isWhitelist;
         this.whitelistPath = Objects.requireNonNull(whitelist, "whitelist");
         this.banPath = Objects.requireNonNull(bans, "bans");

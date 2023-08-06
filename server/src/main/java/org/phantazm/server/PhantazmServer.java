@@ -36,7 +36,7 @@ import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
-import org.phantazm.server.player.BasicLoginValidator;
+import org.phantazm.server.player.FileLoginValidator;
 import org.phantazm.server.player.LoginValidator;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.slf4j.Logger;
@@ -154,8 +154,7 @@ public final class PhantazmServer {
             return;
         }
 
-        loginValidator =
-                new BasicLoginValidator(serverConfig.serverInfoConfig().whitelist(), WHITELIST_FILE, BANS_FILE);
+        loginValidator = new FileLoginValidator(serverConfig.serverInfoConfig().whitelist(), WHITELIST_FILE, BANS_FILE);
 
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         try {
