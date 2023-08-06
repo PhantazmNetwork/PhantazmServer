@@ -51,8 +51,8 @@ public class DatabaseLoginValidator implements LoginValidator {
         executor.execute(() -> {
             String banReason = MiniMessage.miniMessage().serialize(reason);
             using(connection).insertInto(table("player_bans"), field("player_uuid"), field("ban_reason"))
-                    .values(uuid.toString(), banReason).onDuplicateKeyUpdate().set(field("ban_reason"), banReason)
-                    .execute();
+                    .values(uuid.toString(), banReason).onDuplicateKeyUpdate()
+                    .set(field("ban_reason"), banReason.isEmpty() ? null : banReason).execute();
         });
     }
 
@@ -116,6 +116,7 @@ public class DatabaseLoginValidator implements LoginValidator {
         }
 
         String banReason = result.get("ban_reason", String.class);
-        return BooleanObjectPair.of(false, MiniMessage.miniMessage().deserialize(banReason));
+        return BooleanObjectPair.of(false,
+                banReason == null ? Component.empty() : MiniMessage.miniMessage().deserialize(banReason));
     }
 }

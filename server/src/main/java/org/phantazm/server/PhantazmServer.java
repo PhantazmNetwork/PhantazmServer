@@ -36,8 +36,6 @@ import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
-import org.phantazm.server.player.FileLoginValidator;
-import org.phantazm.server.player.LoginValidator;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +46,6 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -63,11 +60,6 @@ public final class PhantazmServer {
     public static final Logger LOGGER = LoggerFactory.getLogger(PhantazmServer.class);
     public static final String BRAND_NAME = "Minestom-Phantazm";
     private static final String UNSAFE_ARGUMENT = "unsafe";
-
-    public static final Path WHITELIST_FILE = Path.of("./whitelist.txt");
-    public static final Path BANS_FILE = Path.of("./bans.txt");
-
-    private static LoginValidator loginValidator;
 
     /**
      * Starting point for the server.
@@ -154,13 +146,11 @@ public final class PhantazmServer {
             return;
         }
 
-        loginValidator = new FileLoginValidator(serverConfig.serverInfoConfig().whitelist(), WHITELIST_FILE, BANS_FILE);
-
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         try {
             LOGGER.info("Initializing features.");
             initializeFeatures(keyParser, playerConfig, serverConfig, shutdownConfig, pathfinderConfig, lobbiesConfig,
-                    partyConfig, whisperConfig, chatConfig, zombiesConfig, loginValidator);
+                    partyConfig, whisperConfig, chatConfig, zombiesConfig);
             LOGGER.info("Features initialized successfully.");
         }
         catch (Exception exception) {
@@ -188,12 +178,9 @@ public final class PhantazmServer {
         LOGGER.info("Shutting down server. Reason: " + reason);
 
         HikariFeature.end();
-        if (loginValidator != null) {
-            loginValidator.flush();
-        }
-
         ExecutorFeature.shutdown();
         MinecraftServer.stopCleanly();
+        LoginValidatorFeature.end();
         ServerCommandFeature.flushPermissions();
     }
 
@@ -209,8 +196,7 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(KeyParser keyParser, PlayerConfig playerConfig, ServerConfig serverConfig,
             ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
-            PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, ZombiesConfig zombiesConfig,
-            LoginValidator loginValidator) {
+            PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, ZombiesConfig zombiesConfig) {
         ConfigCodec yamlCodec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
                 () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
         ConfigCodec tomlCodec = new TomlCodec();
@@ -224,15 +210,17 @@ public final class PhantazmServer {
             DatapackFeature.initialize();
             WhisperCommandFeature.initialize(whisperConfig);
             SilenceJooqFeature.initialize();
-            ExecutorFeature.initialize();
-            HikariFeature.initialize();
-            GeneralStatsFeature.initialize();
             BlockHandlerFeature.initialize();
             LocalizationFeature.initialize();
             PlayerFeature.initialize(playerConfig);
         });
 
         CompletableFuture<?> gameFeatures = CompletableFuture.runAsync(() -> {
+            ExecutorFeature.initialize();
+            HikariFeature.initialize();
+            GeneralStatsFeature.initialize(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
+            LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
+
             MappingProcessorSource mappingProcessorSource = EthyleneFeature.getMappingProcessorSource();
             ElementFeature.initialize(mappingProcessorSource, keyParser);
 
@@ -259,10 +247,11 @@ public final class PhantazmServer {
                     PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
                     zombiesConfig, EthyleneFeature.getMappingProcessorSource());
 
-            ServerCommandFeature.initialize(loginValidator, serverConfig.serverInfoConfig().whitelist(),
-                    mappingProcessorSource, yamlCodec, routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),
-                    viewProvider, transferHelper);
-            ValidationFeature.initialize(loginValidator, ServerCommandFeature.permissionHandler());
+            ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),
+                    serverConfig.serverInfoConfig().whitelist(), mappingProcessorSource, yamlCodec, routerStore,
+                    shutdownConfig, zombiesConfig.gamereportConfig(), viewProvider, transferHelper);
+            ValidationFeature.initialize(LoginValidatorFeature.loginValidator(),
+                    ServerCommandFeature.permissionHandler());
 
             routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
             routerStore.putRouter(RouterKeys.LOBBY_SCENE_ROUTER, LobbyFeature.getLobbyRouter());

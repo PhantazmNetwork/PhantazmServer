@@ -2,13 +2,16 @@ package org.phantazm.server;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import org.jetbrains.annotations.NotNull;
 import org.phantazm.stats.general.GeneralDatabase;
 import org.phantazm.stats.general.JooqGeneralSQLFetcher;
 import org.phantazm.stats.general.SQLGeneralDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.time.ZonedDateTime;
+import java.util.concurrent.Executor;
 
 public final class GeneralStatsFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneralStatsFeature.class);
@@ -18,10 +21,9 @@ public final class GeneralStatsFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize() {
+    static void initialize(@NotNull Executor executor, @NotNull DataSource dataSource) {
         JooqGeneralSQLFetcher sqlFetcher = new JooqGeneralSQLFetcher();
-        generalDatabase =
-                new SQLGeneralDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource(), sqlFetcher);
+        generalDatabase = new SQLGeneralDatabase(executor, dataSource, sqlFetcher);
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, GeneralStatsFeature::onPlayerSpawn);
     }
