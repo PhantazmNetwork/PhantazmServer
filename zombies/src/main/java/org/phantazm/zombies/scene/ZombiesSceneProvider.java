@@ -197,7 +197,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
             ShopHandler shopHandler = createShopHandler(mapObjects.shopTracker(), mapObjects.roomTracker());
 
-            WindowHandler windowHandler = createWindowHandler(mapObjects.windowTracker(), zombiesPlayers.values());
+            WindowHandler windowHandler =
+                    createWindowHandler(mapObjects.windowTracker(), mapObjects.roomTracker(), mobStore,
+                            zombiesPlayers.values());
             windowHandlerWrapper.set(windowHandler);
 
             DoorHandler doorHandler = createDoorHandler(mapObjects.doorTracker(), mapObjects.roomTracker());
@@ -293,9 +295,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return shopHandlerSource.make(shopTracker, rooms);
     }
 
-    private WindowHandler createWindowHandler(BoundedTracker<Window> windowTracker,
-            Collection<? extends ZombiesPlayer> players) {
-        return windowHandlerSource.make(windowTracker, players);
+    private WindowHandler createWindowHandler(BoundedTracker<Window> windowTracker, BoundedTracker<Room> roomTracker,
+            MobStore mobStore, Collection<? extends ZombiesPlayer> players) {
+        return windowHandlerSource.make(windowTracker, roomTracker, mobStore, players);
     }
 
     private DoorHandler createDoorHandler(BoundedTracker<Door> doorTracker, BoundedTracker<Room> roomTracker) {

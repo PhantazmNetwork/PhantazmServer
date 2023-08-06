@@ -109,13 +109,13 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
 
         if (godmode) {
             entity.kill();
+            return;
         }
-        else {
-            double angle = player.getPosition().yaw() * (Math.PI / 180);
 
-            entity.damage(Damage.fromPlayer(player, punchDamage), false);
-            entity.takeKnockback(punchKnockback, Math.sin(angle), -Math.cos(angle));
-            player.setTag(lastPunchTag, currentTime);
-        }
+        double angle = player.getPosition().yaw() * (Math.PI / 180);
+
+        entity.damage(Damage.fromPlayer(player, punchDamage), false);
+        entity.takeKnockback(punchKnockback, Math.sin(angle), -Math.cos(angle));
+        player.setTag(lastPunchTag, currentTime);
     }
 }

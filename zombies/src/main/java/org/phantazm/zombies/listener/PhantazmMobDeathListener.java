@@ -84,6 +84,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         }
 
         getMobStore().onMobDeath(event);
+        mob.entity().setCustomNameVisible(false);
     }
 
     private void trySpawnPowerup(Entity entity) {
@@ -133,7 +134,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
             Window nearestWindow = windowOptional.get();
             Bounds3I frameRegion = nearestWindow.getWindowInfo().frameRegion();
-            Point center = nearestWindow.getCenter();
+            Point center = nearestWindow.center();
 
             boolean xSmaller = frameRegion.lengthX() < frameRegion.lengthZ();
 

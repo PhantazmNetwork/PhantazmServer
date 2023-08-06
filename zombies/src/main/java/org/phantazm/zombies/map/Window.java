@@ -41,7 +41,6 @@ public class Window extends BoundedBase {
     private final Object sync;
 
     private volatile int index;
-    private volatile long lastBreakTime;
 
     /**
      * Creates a new (fully-repaired) window.
@@ -93,6 +92,10 @@ public class Window extends BoundedBase {
         });
 
         this.index = this.volume;
+    }
+
+    public @NotNull Instance instance() {
+        return instance;
     }
 
     public @NotNull WindowInfo getWindowInfo() {
@@ -203,24 +206,6 @@ public class Window extends BoundedBase {
      */
     public int getVolume() {
         return volume;
-    }
-
-    /**
-     * Gets the center of the window frame region in world coordinates. This is the point from which distance to the
-     * window should be measured.
-     *
-     * @return the center of the window
-     */
-    public @NotNull Point getCenter() {
-        return center;
-    }
-
-    public void setLastBreakTime(long time) {
-        this.lastBreakTime = time;
-    }
-
-    public long getLastBreakTime() {
-        return lastBreakTime;
     }
 
     public @NotNull Optional<Room> getLinkedRoom() {

@@ -112,7 +112,7 @@ public class Spawnpoint {
         if (linkedWindow != null) {
             Optional<Room> linkedRoom = linkedWindow.getLinkedRoom();
             if (linkedRoom.isEmpty()) {
-                LOGGER.warn("Linked window at ~" + linkedWindow.getCenter() + " does not have a linked room, for" +
+                LOGGER.warn("Linked window at ~" + linkedWindow.center() + " does not have a linked room, for" +
                         " spawnpoint at ~" + spawnPoint);
                 LOGGER.warn("Because of the missing link, spawning will be disallowed");
                 return false;

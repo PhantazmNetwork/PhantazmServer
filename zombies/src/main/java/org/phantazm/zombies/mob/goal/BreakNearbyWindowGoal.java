@@ -77,8 +77,6 @@ public class BreakNearbyWindowGoal implements GoalCreator {
 
                 windowTracker.closestInRangeToBounds(entity.getPosition(), boundingBox.width(), boundingBox.height(),
                         data.breakRadius).ifPresent(window -> {
-                    window.setLastBreakTime(time);
-
                     int index = window.getIndex();
                     int targetIndex = index - data.breakCount;
 
