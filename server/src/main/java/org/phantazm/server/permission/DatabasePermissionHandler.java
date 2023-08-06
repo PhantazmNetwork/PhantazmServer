@@ -78,7 +78,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
         }
     }
 
-    private void refreshOptionalPlayer(UUID uuid) {
+    private void applyOptionalPlayer(UUID uuid) {
         Player target = MinecraftServer.getConnectionManager().getPlayer(uuid);
         if (target != null) {
             applyPermissions0(uuid, target);
@@ -178,7 +178,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
                         field("group")).values(uuid, group).onDuplicateKeyUpdate().set(field("group"), group).execute();
             });
 
-            refreshOptionalPlayer(uuid);
+            applyOptionalPlayer(uuid);
         });
     }
 
@@ -192,7 +192,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
                         .where(field("player_uuid").eq(uuid).and(field("group").eq(group))).execute();
             });
 
-            refreshOptionalPlayer(uuid);
+            applyOptionalPlayer(uuid);
         });
     }
 

@@ -247,8 +247,9 @@ public final class PhantazmServer {
                     zombiesConfig, EthyleneFeature.getMappingProcessorSource());
 
             ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),
-                    serverConfig.serverInfoConfig().whitelist(), mappingProcessorSource, yamlCodec, routerStore,
-                    shutdownConfig, zombiesConfig.gamereportConfig(), viewProvider, transferHelper);
+                    serverConfig.serverInfoConfig().whitelist(), HikariFeature.getDataSource(),
+                    ExecutorFeature.getExecutor(), routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),
+                    viewProvider, transferHelper);
             ValidationFeature.initialize(LoginValidatorFeature.loginValidator(),
                     ServerCommandFeature.permissionHandler());
 

@@ -1,7 +1,5 @@
 package org.phantazm.server;
 
-import com.github.steanky.ethylene.core.ConfigCodec;
-import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.permission.Permission;
@@ -13,14 +11,14 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.command.server.*;
 import org.phantazm.server.config.server.ShutdownConfig;
 import org.phantazm.server.config.server.ZombiesGamereportConfig;
-import org.phantazm.server.permission.FilePermissionHandler;
+import org.phantazm.server.permission.DatabasePermissionHandler;
 import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.server.validator.LoginValidator;
 
-import java.nio.file.Path;
+import javax.sql.DataSource;
+import java.util.concurrent.Executor;
 
 public final class ServerCommandFeature {
-    public static final Path PERMISSIONS_FILE = Path.of("./permissions.yml");
     public static final Permission ALL_PERMISSIONS = new Permission("*");
 
     private static PermissionHandler permissionHandler;
@@ -28,13 +26,11 @@ public final class ServerCommandFeature {
     private ServerCommandFeature() {
     }
 
-    static void initialize(@NotNull LoginValidator validator, boolean whitelist,
-            @NotNull MappingProcessorSource mappingProcessorSource, @NotNull ConfigCodec permissionsCodec,
-            @NotNull RouterStore store, @NotNull ShutdownConfig shutdownConfig,
+    static void initialize(@NotNull LoginValidator validator, boolean whitelist, @NotNull DataSource dataSource,
+            @NotNull Executor executor, @NotNull RouterStore store, @NotNull ShutdownConfig shutdownConfig,
             @NotNull ZombiesGamereportConfig zombiesGamereportConfig, @NotNull PlayerViewProvider playerViewProvider,
             @NotNull SceneTransferHelper sceneTransferHelper) {
-        ServerCommandFeature.permissionHandler =
-                new FilePermissionHandler(mappingProcessorSource, permissionsCodec, PERMISSIONS_FILE);
+        ServerCommandFeature.permissionHandler = new DatabasePermissionHandler(dataSource, executor);
 
         CommandManager manager = MinecraftServer.getCommandManager();
         manager.register(new StopCommand());
