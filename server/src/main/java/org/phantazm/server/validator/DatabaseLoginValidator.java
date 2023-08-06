@@ -47,7 +47,7 @@ public class DatabaseLoginValidator implements LoginValidator {
         return banCache.get(uuid, key -> {
             return read(() -> {
                 return using(dataSource.getConnection()).selectFrom(table("player_bans"))
-                        .where(field("player_uuid").eq(key.toString())).fetchOne();
+                        .where(field("player_uuid").eq(key)).fetchOne();
             }, DatabaseLoginValidator::fromRecord, UNBANNED);
         });
     }
@@ -65,7 +65,7 @@ public class DatabaseLoginValidator implements LoginValidator {
             String finalBanReason = banReason;
             write(() -> {
                 using(dataSource.getConnection()).insertInto(table("player_bans"), field("player_uuid"),
-                                field("ban_reason")).values(uuid.toString(), finalBanReason).onDuplicateKeyUpdate()
+                                field("ban_reason")).values(uuid, finalBanReason).onDuplicateKeyUpdate()
                         .set(field("ban_reason"), finalBanReason).execute();
             });
         });
@@ -102,7 +102,7 @@ public class DatabaseLoginValidator implements LoginValidator {
         executor.execute(() -> {
             write(() -> {
                 using(dataSource.getConnection()).insertInto(table("player_whitelist"), field("player_uuid"))
-                        .onDuplicateKeyUpdate().set(field("player_uuid"), uuid.toString()).execute();
+                        .onDuplicateKeyUpdate().set(field("player_uuid"), uuid).execute();
             });
         });
     }
@@ -112,7 +112,7 @@ public class DatabaseLoginValidator implements LoginValidator {
         return whitelistCache.get(uuid, key -> {
             return read(() -> {
                 return using(dataSource.getConnection()).selectFrom(table("player_whitelist"))
-                        .where(field("player_uuid").eq(key.toString())).fetchOne();
+                        .where(field("player_uuid").eq(key)).fetchOne();
             }, Objects::nonNull, true);
         });
     }
