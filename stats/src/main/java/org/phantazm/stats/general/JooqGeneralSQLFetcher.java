@@ -20,7 +20,8 @@ public class JooqGeneralSQLFetcher {
                         when(field("first_join").isNull(), timestamp).otherwise(field("first_join", SQLDataType.BIGINT)))
                 .execute();
 
-        context.update(table("phantazm_player_stats")).set(field("last_join"), timestamp).execute();
+        context.update(table("phantazm_player_stats")).set(field("last_join"), timestamp)
+                .where(field("player_uuid").eq(playerUUID)).execute();
     }
 
 }
