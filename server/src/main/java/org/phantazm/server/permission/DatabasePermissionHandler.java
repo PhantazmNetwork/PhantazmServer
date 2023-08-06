@@ -175,6 +175,10 @@ public class DatabasePermissionHandler implements PermissionHandler {
 
     @Override
     public void addToGroup(@NotNull UUID uuid, @NotNull String group) {
+        if (group.equals(EVERYONE_GROUP)) {
+            return;
+        }
+
         playerPermissionGroupCache.get(uuid, ignored -> new CopyOnWriteArraySet<>()).add(group);
 
         executor.execute(() -> {
@@ -190,6 +194,10 @@ public class DatabasePermissionHandler implements PermissionHandler {
 
     @Override
     public void removeFromGroup(@NotNull UUID uuid, @NotNull String group) {
+        if (group.equals(EVERYONE_GROUP)) {
+            return;
+        }
+
         playerPermissionGroupCache.get(uuid, ignored -> new CopyOnWriteArraySet<>()).remove(group);
 
         executor.execute(() -> {
