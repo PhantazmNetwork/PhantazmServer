@@ -5,12 +5,9 @@ import org.phantazm.server.validator.DatabaseLoginValidator;
 import org.phantazm.server.validator.LoginValidator;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.concurrent.Executor;
 
 public final class LoginValidatorFeature {
-    private static Connection connection;
     private static LoginValidator loginValidator;
 
     private LoginValidatorFeature() {
@@ -18,28 +15,10 @@ public final class LoginValidatorFeature {
     }
 
     static void initialize(@NotNull DataSource dataSource, @NotNull Executor executor) {
-        try {
-            LoginValidatorFeature.connection = dataSource.getConnection();
-        }
-        catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        LoginValidatorFeature.loginValidator = new DatabaseLoginValidator(connection, executor);
+        LoginValidatorFeature.loginValidator = new DatabaseLoginValidator(dataSource, executor);
     }
 
     public static @NotNull LoginValidator loginValidator() {
         return FeatureUtils.check(loginValidator);
-    }
-
-    public static void end() {
-        try {
-            if (connection != null) {
-                connection.close();
-            }
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 }

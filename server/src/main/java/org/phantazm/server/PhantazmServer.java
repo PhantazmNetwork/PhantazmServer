@@ -180,7 +180,6 @@ public final class PhantazmServer {
         HikariFeature.end();
         ExecutorFeature.shutdown();
         MinecraftServer.stopCleanly();
-        LoginValidatorFeature.end();
         ServerCommandFeature.flushPermissions();
     }
 
