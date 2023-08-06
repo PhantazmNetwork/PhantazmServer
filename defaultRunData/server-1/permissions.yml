@@ -1,5 +1,0 @@
-groupPermissions:
-    -   key: admin
-        value:
-            - '*'
-groups: [ ]
