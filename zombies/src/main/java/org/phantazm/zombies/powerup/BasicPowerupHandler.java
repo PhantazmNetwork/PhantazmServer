@@ -2,9 +2,11 @@ package org.phantazm.zombies.powerup;
 
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.EntityTracker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.action.component.PowerupActionComponent;
@@ -114,6 +116,17 @@ public class BasicPowerupHandler implements PowerupHandler {
 
         spawnedOrActivePowerups.add(newPowerup);
         return newPowerup;
+    }
+
+    @Override
+    public void assignPowerup(@NotNull LivingEntity livingEntity, @NotNull Key powerupKey) {
+        PowerupComponents components = this.components.get(powerupKey);
+        if (components == null) {
+            return;
+        }
+
+        livingEntity.setTag(Tags.POWERUP_TAG, powerupKey.asString());
+        components.powerupEffectComponent().apply(scene.get()).apply(livingEntity);
     }
 
     @Override

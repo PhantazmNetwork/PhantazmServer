@@ -12,7 +12,8 @@ public record PowerupData(@NotNull Key id,
                           @NotNull ConfigList visuals,
                           @NotNull ConfigList actions,
                           @NotNull ConfigNode deactivationPredicate,
-                          @NotNull ConfigNode pickupPredicate) implements Keyed {
+                          @NotNull ConfigNode pickupPredicate,
+                          @NotNull ConfigNode powerupEffect) implements Keyed {
     @Override
     public @NotNull Key key() {
         return id;
@@ -20,6 +21,11 @@ public record PowerupData(@NotNull Key id,
 
     @Default("pickupPredicate")
     public static @NotNull ConfigElement defaultPickupPredicate() {
+        return ConfigNode.of();
+    }
+
+    @Default("powerupEffect")
+    public static @NotNull ConfigElement defaultPowerupEffect() {
         return ConfigNode.of();
     }
 }

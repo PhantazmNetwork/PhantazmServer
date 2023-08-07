@@ -7,6 +7,8 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.ElementUtils;
 import org.phantazm.zombies.powerup.action.component.PowerupActionComponent;
+import org.phantazm.zombies.powerup.effect.NoPowerupEffect;
+import org.phantazm.zombies.powerup.effect.PowerupEffectComponent;
 import org.phantazm.zombies.powerup.predicate.AlwaysPickupPredicate;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
@@ -52,7 +54,7 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
 
             PickupPredicateComponent pickupPredicateComponent;
             if (data.pickupPredicate().isEmpty()) {
-                pickupPredicateComponent = player -> AlwaysPickupPredicate.INSTANCE;
+                pickupPredicateComponent = scene -> AlwaysPickupPredicate.INSTANCE;
             }
             else {
                 try {
@@ -60,12 +62,27 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
                 }
                 catch (ElementException e) {
                     HANDLER.accept(e);
-                    pickupPredicateComponent = player -> AlwaysPickupPredicate.INSTANCE;
+                    pickupPredicateComponent = scene -> AlwaysPickupPredicate.INSTANCE;
+                }
+            }
+
+            PowerupEffectComponent powerupEffectComponent;
+            if (data.powerupEffect().isEmpty()) {
+                powerupEffectComponent = scene -> NoPowerupEffect.INSTANCE;
+            }
+            else {
+                try {
+                    powerupEffectComponent = contextManager.makeContext(data.powerupEffect()).provide();
+                }
+                catch (ElementException e) {
+                    HANDLER.accept(e);
+                    powerupEffectComponent = scene -> NoPowerupEffect.INSTANCE;
                 }
             }
 
             powerupMap.put(dataEntry.getKey(),
-                    new PowerupComponents(visuals, actions, deactivationPredicate, pickupPredicateComponent));
+                    new PowerupComponents(visuals, actions, deactivationPredicate, pickupPredicateComponent,
+                            powerupEffectComponent));
         }
 
         this.powerups = Map.copyOf(powerupMap);
