@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface ZombiesSQLFetcher {
 
     void synchronizeZombiesPlayerMapStats(@NotNull Connection connection, @NotNull ZombiesPlayerMapStats mapStats,
-            int playerCount, @Nullable String category);
+            int playerCount, @Nullable String category, @Nullable Long time);
 
     @NotNull ZombiesPlayerMapStats getMapStats(@NotNull Connection connection, @NotNull UUID playerUUID,
             @NotNull Key mapKey);

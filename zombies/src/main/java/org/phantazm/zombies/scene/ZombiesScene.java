@@ -333,12 +333,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         this.shutdown = true;
 
-        stageTransition.end();
-        taskScheduler.end();
-
         List<CompletableFuture<Boolean>> fallbackFutures = new ArrayList<>(zombiesPlayers.size());
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
-            database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats(), zombiesPlayers.size(), null);
+            database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats(), zombiesPlayers.size(), null,
+                    this.stageTransition.getCurrentStage().key().equals(StageKeys.END) ? map.mapObjects().module()
+                            .ticksSinceStart().get() : null);
 
             if (!zombiesPlayer.hasQuit()) {
                 fallbackFutures.add(fallback.fallback(zombiesPlayer.module().getPlayerView())
@@ -351,6 +350,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
             zombiesPlayer.end();
         }
+
+        stageTransition.end();
+        taskScheduler.end();
 
         zombiesPlayers.clear();
         map.mapObjects().module().powerupHandler().get().end();

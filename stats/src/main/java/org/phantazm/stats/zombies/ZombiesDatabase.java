@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 public interface ZombiesDatabase {
 
     @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats,
-            int playerCount, @Nullable String category);
+            int playerCount, @Nullable String category, @Nullable Long time);
 
     @NotNull CompletableFuture<ZombiesPlayerMapStats> getMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey);
 

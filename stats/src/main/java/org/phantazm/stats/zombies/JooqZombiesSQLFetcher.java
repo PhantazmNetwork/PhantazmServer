@@ -22,7 +22,7 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
 
     @Override
     public void synchronizeZombiesPlayerMapStats(@NotNull Connection connection,
-            @NotNull ZombiesPlayerMapStats mapStats, int playerCount, @Nullable String category) {
+            @NotNull ZombiesPlayerMapStats mapStats, int playerCount, @Nullable String category, @Nullable Long time) {
         DSLContext context = using(connection);
         context.insertInto(table("zombies_player_map_stats"), field("player_uuid"), field("map_key"),
                         field("games_played"), field("wins"), field("best_round"), field("rounds_survived"), field("kills"),
@@ -51,14 +51,14 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
                         field("headshot_hits", SQLDataType.INTEGER).plus(mapStats.getHeadshotHits())).execute();
         context.insertInto(table("zombies_player_map_best_time"), field("player_uuid"), field("map_key"),
                         field("best_time"), field("player_count"), field("category"))
-                .values(mapStats.getPlayerUUID(), mapStats.getMapKey().asString(), mapStats.getBestTime().orElse(null),
-                        playerCount, category).onDuplicateKeyUpdate()
-                .set(field("player_uuid"), mapStats.getPlayerUUID()).set(field("map_key"), mapStats.getMapKey())
-                .set(field("best_time"), mapStats.getBestTime().isPresent()
-                                         ? when(field("best_time").isNotNull(),
-                        least(field("best_time"), mapStats.getBestTime().get())).otherwise(mapStats.getBestTime().get())
-                                         : field("best_time", SQLDataType.BIGINT)).set(field("player_count"), 4)
-                .execute();
+                .values(mapStats.getPlayerUUID(), mapStats.getMapKey().asString(), time, playerCount, category)
+                .onDuplicateKeyUpdate().set(field("player_uuid"), mapStats.getPlayerUUID())
+                .set(field("map_key"), mapStats.getMapKey()).set(field("best_time"), time != null
+                                                                                     ? when(
+                        field("best_time").isNotNull(), least(field("best_time"), time)).otherwise(time)
+                                                                                     : field("best_time",
+                                                                                             SQLDataType.BIGINT))
+                .set(field("player_count"), 4).execute();
     }
 
     @Override
@@ -72,7 +72,7 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
         }
 
         return new BasicZombiesPlayerMapStats(playerUUID, mapKey, result.get("games_played", int.class),
-                result.get("wins", int.class), result.get("best_time", Long.class), result.get("best_round", int.class),
+                result.get("wins", int.class), result.get("best_round", int.class),
                 result.get("rounds_survived", int.class), result.get("kills", int.class),
                 result.get("knocks", int.class), result.get("coins_gained", int.class),
                 result.get("coins_spent", int.class), result.get("deaths", int.class), result.get("revives", int.class),
@@ -107,7 +107,7 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
                 using(connection).select(field("best_time", SQLDataType.BIGINT), field("rank", SQLDataType.INTEGER))
                         .from(select(field("best_time"), field("player_uuid"),
                                 rowNumber().over(orderBy(field("best_time"), field("player_uuid"))).as("rank")).from(
-                                        table("zombies_player_map_stats")).where(field("map_key").eq(mapKey.asString()))
+                                        table("zombies_player_map_best_time")).where(field("map_key").eq(mapKey.asString()))
                                 .and(field("player_count").eq(playerCount)).and(field("category").eq(category))
                                 .and(field("best_time").isNotNull()))
                         .where(field("player_uuid").eq(playerUUID.toString())).fetchOne();

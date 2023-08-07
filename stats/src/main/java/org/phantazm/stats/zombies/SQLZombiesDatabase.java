@@ -35,10 +35,10 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
 
     @Override
     public @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats,
-            int playerCount, @Nullable String category) {
+            int playerCount, @Nullable String category, @Nullable Long time) {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
-                sqlFetcher.synchronizeZombiesPlayerMapStats(connection, stats, playerCount, category);
+                sqlFetcher.synchronizeZombiesPlayerMapStats(connection, stats, playerCount, category, time);
             }
             catch (SQLException e) {
                 throw new RuntimeException(e);

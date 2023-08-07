@@ -152,11 +152,6 @@ public class EndStage implements Stage {
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
                 ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
                 stats.setWins(stats.getWins() + 1);
-                stats.getBestTime().ifPresentOrElse(prevBest -> {
-                    if (ticksSinceStart.get() < prevBest) {
-                        stats.setBestTime(ticksSinceStart.get());
-                    }
-                }, () -> stats.setBestTime(ticksSinceStart.get()));
             }
 
             this.hasWon = true;
