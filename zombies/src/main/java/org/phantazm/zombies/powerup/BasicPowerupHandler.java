@@ -125,7 +125,7 @@ public class BasicPowerupHandler implements PowerupHandler {
             return;
         }
 
-        livingEntity.setTag(Tags.POWERUP_TAG, powerupKey.asString());
+        livingEntity.getTag(Tags.POWERUP_TAG).add(powerupKey.asString());
         components.powerupEffectComponent().apply(scene.get()).apply(livingEntity);
     }
 

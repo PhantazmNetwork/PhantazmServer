@@ -1,6 +1,5 @@
 package org.phantazm.zombies.listener;
 
-import com.github.steanky.element.core.key.Constants;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.vector.Bounds3I;
 import it.unimi.dsi.fastutil.Pair;
@@ -31,10 +30,7 @@ import org.phantazm.zombies.powerup.PowerupHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDeathEvent> {
@@ -75,7 +71,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
             round.removeMob(mob);
         });
 
-        trySpawnPowerup(event.getEntity());
+        trySpawnPowerups(event.getEntity());
 
         UUID killer = mob.entity().getTag(Tags.LAST_HIT_BY);
         if (killer != null) {
@@ -87,83 +83,83 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         mob.entity().setCustomNameVisible(false);
     }
 
-    private void trySpawnPowerup(Entity entity) {
-        @Subst(Constants.NAMESPACE_OR_KEY)
-        String powerup = entity.getTag(Tags.POWERUP_TAG);
-        if (powerup != null) {
-            if (!keyParser.isValidKey(powerup)) {
-                LOGGER.warn("Cannot spawn invalid powerup key " + powerup);
-                return;
-            }
-
-            Key key = keyParser.parseKey(powerup);
-
-            if (!powerupHandler.canSpawnType(key)) {
-                LOGGER.warn("Cannot spawn nonexistent powerup key " + key);
-                return;
-            }
-
-            Point position = entity.getPosition();
-
-            Optional<Room> roomOptional = roomTracker.atPoint(position);
-            if (roomOptional.isPresent()) {
-                powerupHandler.spawn(key, seekDown(position));
-                return;
-            }
-
-            Optional<Window> windowOptional =
-                    windowTracker.closestInRangeToBounds(position, POWERUP_BOUNDING_BOX.width(),
-                            POWERUP_BOUNDING_BOX.height(), 10);
-            if (windowOptional.isEmpty()) {
-                Optional<Pair<Room, Vec>> nearestRoomOptional =
-                        roomTracker.closestInRangeToBoundsWithVec(position, POWERUP_BOUNDING_BOX.width(),
-                                POWERUP_BOUNDING_BOX.height(), 15);
-                if (nearestRoomOptional.isEmpty()) {
-                    Point targetPoint = seekDown(position);
-                    LOGGER.warn("Failed to find nearby room or window for powerup spawn at " + targetPoint);
-                    powerupHandler.spawn(key, targetPoint);
-                    return;
-                }
-
-                Pair<Room, Vec> nearestRoom = nearestRoomOptional.get();
-                Vec roomVec = nearestRoom.right();
-                powerupHandler.spawn(key,
-                        seekDown(roomVec.add(roomVec.sub(position).normalize().mul(ROOM_PENETRATION_DEPTH))));
-                return;
-            }
-
-            Window nearestWindow = windowOptional.get();
-            Bounds3I frameRegion = nearestWindow.getWindowInfo().frameRegion();
-            Point center = nearestWindow.center();
-
-            boolean xSmaller = frameRegion.lengthX() < frameRegion.lengthZ();
-
-            Vec normal = new Vec(xSmaller ? 1 : 0, 0, xSmaller ? 0 : 1);
-
-            normal = normal.mul(xSmaller ? frameRegion.lengthX() / 2.0 : frameRegion.lengthZ() / 2.0)
-                    .add(OFFSET.mul(normal));
-
-            Vec otherNormal = normal.mul(-1);
-
-            Vec targetNormal;
-            if (roomTracker.atPoint(center.add(normal)).isPresent()) {
-                targetNormal = normal;
-            }
-            else if (roomTracker.atPoint(center.add(otherNormal)).isPresent()) {
-                targetNormal = otherNormal;
-            }
-            else {
-                targetNormal = normal;
-                LOGGER.warn("Unable to find matching room at window near " + center);
-            }
-
-            Point test = seekDown(center.add(targetNormal));
-            if (roomTracker.atPoint(test).isEmpty()) {
-                LOGGER.warn("Spawning powerup outside of a room");
-            }
-
-            powerupHandler.spawn(key, test);
+    private void trySpawnPowerups(Entity entity) {
+        for (String powerup : List.copyOf(entity.getTag(Tags.POWERUP_TAG))) {
+            spawnPowerup(entity, powerup);
         }
+    }
+
+    private void spawnPowerup(Entity entity, @Subst("a") String powerup) {
+        if (!keyParser.isValidKey(powerup)) {
+            LOGGER.warn("Cannot spawn invalid powerup key " + powerup);
+            return;
+        }
+
+        Key key = keyParser.parseKey(powerup);
+        if (!powerupHandler.canSpawnType(key)) {
+            LOGGER.warn("Cannot spawn nonexistent powerup key " + key);
+            return;
+        }
+
+        Point position = entity.getPosition();
+
+        Optional<Room> roomOptional = roomTracker.atPoint(position);
+        if (roomOptional.isPresent()) {
+            powerupHandler.spawn(key, seekDown(position));
+            return;
+        }
+
+        Optional<Window> windowOptional = windowTracker.closestInRangeToBounds(position, POWERUP_BOUNDING_BOX.width(),
+                POWERUP_BOUNDING_BOX.height(), 10);
+        if (windowOptional.isEmpty()) {
+            Optional<Pair<Room, Vec>> nearestRoomOptional =
+                    roomTracker.closestInRangeToBoundsWithVec(position, POWERUP_BOUNDING_BOX.width(),
+                            POWERUP_BOUNDING_BOX.height(), 15);
+            if (nearestRoomOptional.isEmpty()) {
+                Point targetPoint = seekDown(position);
+                LOGGER.warn("Failed to find nearby room or window for powerup spawn at " + targetPoint);
+                powerupHandler.spawn(key, targetPoint);
+                return;
+            }
+
+            Pair<Room, Vec> nearestRoom = nearestRoomOptional.get();
+            Vec roomVec = nearestRoom.right();
+            powerupHandler.spawn(key,
+                    seekDown(roomVec.add(roomVec.sub(position).normalize().mul(ROOM_PENETRATION_DEPTH))));
+            return;
+        }
+
+        Window nearestWindow = windowOptional.get();
+        Bounds3I frameRegion = nearestWindow.getWindowInfo().frameRegion();
+        Point center = nearestWindow.center();
+
+        boolean xSmaller = frameRegion.lengthX() < frameRegion.lengthZ();
+
+        Vec normal = new Vec(xSmaller ? 1 : 0, 0, xSmaller ? 0 : 1);
+
+        normal = normal.mul(xSmaller ? frameRegion.lengthX() / 2.0 : frameRegion.lengthZ() / 2.0)
+                .add(OFFSET.mul(normal));
+
+        Vec otherNormal = normal.mul(-1);
+
+        Vec targetNormal;
+        if (roomTracker.atPoint(center.add(normal)).isPresent()) {
+            targetNormal = normal;
+        }
+        else if (roomTracker.atPoint(center.add(otherNormal)).isPresent()) {
+            targetNormal = otherNormal;
+        }
+        else {
+            targetNormal = normal;
+            LOGGER.warn("Unable to find matching room at window near " + center);
+        }
+
+        Point test = seekDown(center.add(targetNormal));
+        if (roomTracker.atPoint(test).isEmpty()) {
+            LOGGER.warn("Spawning powerup outside of a room");
+        }
+
+        powerupHandler.spawn(key, test);
     }
 
     private Point seekDown(Point point) {
