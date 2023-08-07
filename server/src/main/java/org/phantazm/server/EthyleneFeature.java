@@ -63,7 +63,8 @@ public final class EthyleneFeature {
                         .withCustomSignature(bounds3D()).withCustomSignature(rgbLike()).withScalarSignature(key())
                         .withScalarSignature(uuid()).withScalarSignature(component()).withScalarSignature(itemStack())
                         .withScalarSignature(titlePartComponent()).withScalarSignature(namedTextColor())
-                        .withScalarSignature(particle()).withScalarSignature(block()).withScalarSignature(permission())
+                        .withScalarSignature(namedTextColorDirect()).withScalarSignature(particle())
+                        .withScalarSignature(block()).withScalarSignature(permission())
                         .withScalarSignature(entityType()).withScalarSignature(material())
                         .withScalarSignature(potionEffect())
                         .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
@@ -273,6 +274,23 @@ public final class EthyleneFeature {
 
     private static ScalarSignature<TextColor> namedTextColor() {
         return ScalarSignature.of(Token.ofClass(TextColor.class),
+                element -> NamedTextColor.NAMES.valueOr(element.asString().toLowerCase(Locale.ROOT),
+                        NamedTextColor.WHITE), textColor -> {
+                    if (textColor == null) {
+                        return ConfigPrimitive.NULL;
+                    }
+
+                    NamedTextColor named = NamedTextColor.namedColor(textColor.value());
+                    if (named == null) {
+                        return ConfigPrimitive.NULL;
+                    }
+
+                    return ConfigPrimitive.of(named.toString());
+                });
+    }
+
+    private static ScalarSignature<NamedTextColor> namedTextColorDirect() {
+        return ScalarSignature.of(Token.ofClass(NamedTextColor.class),
                 element -> NamedTextColor.NAMES.valueOr(element.asString().toLowerCase(Locale.ROOT),
                         NamedTextColor.WHITE), textColor -> {
                     if (textColor == null) {

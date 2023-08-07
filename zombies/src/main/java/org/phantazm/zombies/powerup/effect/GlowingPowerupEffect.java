@@ -9,6 +9,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 @Model("zombies.powerup.entity_effect.glow")
 @Cache(false)
-public class GlowingPowerupEffect implements PowerupEffect {
+public class GlowingPowerupEffect implements PowerupEffectComponent {
     //private, to prevent early initialization if something calls Class.forName
     private static class Container {
         private static final Map<String, Team> COLOR_TEAMS;
@@ -38,7 +39,7 @@ public class GlowingPowerupEffect implements PowerupEffect {
             COLOR_TEAMS = Map.ofEntries(entries);
         }
     }
-
+    
     private final Data data;
 
     @FactoryMethod
@@ -46,10 +47,24 @@ public class GlowingPowerupEffect implements PowerupEffect {
         this.data = data;
     }
 
+
     @Override
-    public void apply(@NotNull LivingEntity entity) {
-        entity.setTeam(Container.COLOR_TEAMS.get(data.glowColor.toString()));
-        entity.setGlowing(true);
+    public @NotNull PowerupEffect apply(@NotNull ZombiesScene scene) {
+        return new Effect(data);
+    }
+
+    private static class Effect implements PowerupEffect {
+        private final Data data;
+
+        private Effect(Data data) {
+            this.data = data;
+        }
+
+        @Override
+        public void apply(@NotNull LivingEntity entity) {
+            entity.setTeam(Container.COLOR_TEAMS.get(data.glowColor.toString()));
+            entity.setGlowing(true);
+        }
     }
 
     @DataObject
