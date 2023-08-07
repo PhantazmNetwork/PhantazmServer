@@ -3,7 +3,6 @@ package org.phantazm.zombies;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.tag.Tag;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,7 +10,7 @@ public final class Tags {
     private Tags() {
     }
 
-    public static final Tag<List<String>> POWERUP_TAG = Tag.String("powerup").list().defaultValue(new ArrayList<>());
+    public static final Tag<List<String>> POWERUP_TAG = Tag.String("powerup").list().defaultValue(List.of());
 
     public static final Tag<UUID> LAST_HIT_BY = Tag.UUID("last_hit");
 

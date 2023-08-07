@@ -84,7 +84,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     }
 
     private void trySpawnPowerups(Entity entity) {
-        for (String powerup : List.copyOf(entity.getTag(Tags.POWERUP_TAG))) {
+        for (String powerup : entity.getTag(Tags.POWERUP_TAG)) {
             spawnPowerup(entity, powerup);
         }
     }

@@ -125,7 +125,11 @@ public class BasicPowerupHandler implements PowerupHandler {
             return;
         }
 
-        livingEntity.getTag(Tags.POWERUP_TAG).add(powerupKey.asString());
+        List<String> powerups = livingEntity.getTag(Tags.POWERUP_TAG);
+        List<String> mutableCopy = new ArrayList<>(powerups);
+        mutableCopy.add(powerupKey.asString());
+
+        livingEntity.setTag(Tags.POWERUP_TAG, List.copyOf(mutableCopy));
         components.powerupEffectComponent().apply(scene.get()).apply(livingEntity);
     }
 
