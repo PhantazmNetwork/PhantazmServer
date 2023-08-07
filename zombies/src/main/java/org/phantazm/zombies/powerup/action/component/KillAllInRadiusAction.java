@@ -62,7 +62,7 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
 
         @Default("bossDamage")
         public static @NotNull ConfigElement defaultBossDamage() {
-            return ConfigPrimitive.of("0.25");
+            return ConfigPrimitive.of(0.25F);
         }
 
         @Default("bypassArmor")
