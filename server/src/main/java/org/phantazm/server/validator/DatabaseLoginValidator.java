@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Objects;
@@ -44,8 +45,10 @@ public class DatabaseLoginValidator implements LoginValidator {
     public @NotNull BooleanObjectPair<Component> validateLogin(@NotNull UUID uuid) {
         return banCache.get(uuid, key -> {
             return read(() -> {
-                return using(dataSource.getConnection()).selectFrom(table("player_bans"))
-                        .where(field("player_uuid").eq(key)).fetchOne();
+                try (Connection connection = dataSource.getConnection()) {
+                    return using(connection).selectFrom(table("player_bans")).where(field("player_uuid").eq(key))
+                            .fetchOne();
+                }
             }, DatabaseLoginValidator::fromRecord, UNBANNED);
         });
     }
@@ -62,9 +65,11 @@ public class DatabaseLoginValidator implements LoginValidator {
 
             String finalBanReason = banReason;
             write(() -> {
-                using(dataSource.getConnection()).insertInto(table("player_bans"), field("player_uuid"),
-                                field("ban_reason")).values(uuid, finalBanReason).onDuplicateKeyUpdate()
-                        .set(field("ban_reason"), finalBanReason).execute();
+                try (Connection connection = dataSource.getConnection()) {
+                    using(connection).insertInto(table("player_bans"), field("player_uuid"), field("ban_reason"))
+                            .values(uuid, finalBanReason).onDuplicateKeyUpdate()
+                            .set(field("ban_reason"), finalBanReason).execute();
+                }
             });
         });
     }
@@ -73,8 +78,10 @@ public class DatabaseLoginValidator implements LoginValidator {
     public boolean isBanned(@NotNull UUID uuid) {
         BooleanObjectPair<Component> banned = banCache.get(uuid, key -> {
             return read(() -> {
-                return using(dataSource.getConnection()).selectFrom(table("player_bans"))
-                        .where(field("player_uuid").eq(key)).fetchOne();
+                try (Connection connection = dataSource.getConnection()) {
+                    return using(connection).selectFrom(table("player_bans")).where(field("player_uuid").eq(key))
+                            .fetchOne();
+                }
             }, DatabaseLoginValidator::fromRecord, UNBANNED);
         });
 
@@ -87,8 +94,9 @@ public class DatabaseLoginValidator implements LoginValidator {
 
         executor.execute(() -> {
             write(() -> {
-                using(dataSource.getConnection()).deleteFrom(table("player_bans")).where(field("player_uuid").eq(uuid))
-                        .execute();
+                try (Connection connection = dataSource.getConnection()) {
+                    using(connection).deleteFrom(table("player_bans")).where(field("player_uuid").eq(uuid)).execute();
+                }
             });
         });
     }
@@ -99,8 +107,10 @@ public class DatabaseLoginValidator implements LoginValidator {
 
         executor.execute(() -> {
             write(() -> {
-                using(dataSource.getConnection()).insertInto(table("player_whitelist"), field("player_uuid"))
-                        .onDuplicateKeyUpdate().set(field("player_uuid"), uuid).execute();
+                try (Connection connection = dataSource.getConnection()) {
+                    using(connection).insertInto(table("player_whitelist"), field("player_uuid")).onDuplicateKeyUpdate()
+                            .set(field("player_uuid"), uuid).execute();
+                }
             });
         });
     }
@@ -109,8 +119,10 @@ public class DatabaseLoginValidator implements LoginValidator {
     public boolean isWhitelisted(@NotNull UUID uuid) {
         return whitelistCache.get(uuid, key -> {
             return read(() -> {
-                return using(dataSource.getConnection()).selectFrom(table("player_whitelist"))
-                        .where(field("player_uuid").eq(key)).fetchOne();
+                try (Connection connection = dataSource.getConnection()) {
+                    return using(connection).selectFrom(table("player_whitelist")).where(field("player_uuid").eq(key))
+                            .fetchOne();
+                }
             }, Objects::nonNull, true);
         });
     }
@@ -121,8 +133,10 @@ public class DatabaseLoginValidator implements LoginValidator {
 
         executor.execute(() -> {
             write(() -> {
-                using(dataSource.getConnection()).deleteFrom(table("player_whitelist"))
-                        .where(field("player_uuid").eq(uuid)).execute();
+                try (Connection connection = dataSource.getConnection()) {
+                    using(connection).deleteFrom(table("player_whitelist")).where(field("player_uuid").eq(uuid))
+                            .execute();
+                }
             });
         });
     }
