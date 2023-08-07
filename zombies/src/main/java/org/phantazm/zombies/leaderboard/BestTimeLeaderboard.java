@@ -97,7 +97,7 @@ public class BestTimeLeaderboard {
     }
 
     private void updateBody() {
-        database.getBestTimes(settings.id(), data.length()).whenComplete((bestTimes, throwable) -> {
+        database.getBestTimes(settings.id(), 4, null, data.length()).whenComplete((bestTimes, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Failed to fetch best times for {}", settings.id());
                 return;
@@ -144,7 +144,7 @@ public class BestTimeLeaderboard {
     }
 
     private void updateViewerTime(TagResolver mapNamePlaceholder) {
-        database.getBestTime(viewer, settings.id()).whenComplete((bestTimeOptional, throwable) -> {
+        database.getBestTime(viewer, settings.id(), 4, null).whenComplete((bestTimeOptional, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Failed to fetch best time for {} on {}", viewer, settings.id(), throwable);
                 return;

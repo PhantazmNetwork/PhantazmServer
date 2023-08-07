@@ -2,6 +2,7 @@ package org.phantazm.stats.zombies;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +34,11 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats) {
+    public @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats,
+            int playerCount, @Nullable String category) {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
-                sqlFetcher.synchronizeZombiesPlayerMapStats(connection, stats);
+                sqlFetcher.synchronizeZombiesPlayerMapStats(connection, stats, playerCount, category);
             }
             catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -58,10 +60,11 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<List<BestTime>> getBestTimes(@NotNull Key mapKey, int maxLength) {
+    public @NotNull CompletableFuture<List<BestTime>> getBestTimes(@NotNull Key mapKey, int playerCount,
+            @Nullable String category, int maxLength) {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
-                return sqlFetcher.getBestTimes(connection, mapKey, maxLength);
+                return sqlFetcher.getBestTimes(connection, mapKey, playerCount, category, maxLength);
             }
             catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -70,10 +73,10 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<Optional<BestTime>> getBestTime(@NotNull UUID playerUUID, @NotNull Key mapKey) {
+    public @NotNull CompletableFuture<Optional<BestTime>> getBestTime(@NotNull UUID playerUUID, @NotNull Key mapKey, int playerCount, @Nullable String category) {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
-                return sqlFetcher.getBestTime(connection, playerUUID, mapKey);
+                return sqlFetcher.getBestTime(connection, playerUUID, mapKey, playerCount, category);
             }
             catch (SQLException e) {
                 throw new RuntimeException(e);

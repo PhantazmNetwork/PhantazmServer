@@ -338,7 +338,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         List<CompletableFuture<Boolean>> fallbackFutures = new ArrayList<>(zombiesPlayers.size());
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers.values()) {
-            database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
+            database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats(), zombiesPlayers.size(), null);
 
             if (!zombiesPlayer.hasQuit()) {
                 fallbackFutures.add(fallback.fallback(zombiesPlayer.module().getPlayerView())

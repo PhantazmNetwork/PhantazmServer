@@ -2,6 +2,8 @@ package org.phantazm.stats.zombies;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record2;
 import org.jooq.impl.SQLDataType;
@@ -20,23 +22,20 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
 
     @Override
     public void synchronizeZombiesPlayerMapStats(@NotNull Connection connection,
-            @NotNull ZombiesPlayerMapStats mapStats) {
-        using(connection).insertInto(table("zombies_player_map_stats"), field("player_uuid"), field("map_key"),
-                        field("games_played"), field("wins"), field("best_time"), field("best_round"), field("rounds_survived"),
-                        field("kills"), field("coins_gained"), field("coins_spent"), field("knocks"), field("deaths"),
-                        field("revives"), field("shots"), field("regular_hits"), field("headshot_hits"))
-                .values(mapStats.getPlayerUUID().toString(), mapStats.getMapKey().asString(), mapStats.getGamesPlayed(),
-                        mapStats.getWins(), mapStats.getBestTime().orElse(null), mapStats.getBestRound(),
-                        mapStats.getRoundsSurvived(), mapStats.getKills(), mapStats.getCoinsGained(),
-                        mapStats.getCoinsSpent(), mapStats.getKnocks(), mapStats.getDeaths(), mapStats.getRevives(),
-                        mapStats.getShots(), mapStats.getRegularHits(), mapStats.getHeadshotHits())
-                .onDuplicateKeyUpdate()
+            @NotNull ZombiesPlayerMapStats mapStats, int playerCount, @Nullable String category) {
+        DSLContext context = using(connection);
+        context.insertInto(table("zombies_player_map_stats"), field("player_uuid"), field("map_key"),
+                        field("games_played"), field("wins"), field("best_round"), field("rounds_survived"), field("kills"),
+                        field("coins_gained"), field("coins_spent"), field("knocks"), field("deaths"), field("revives"),
+                        field("shots"), field("regular_hits"), field("headshot_hits"))
+                .values(mapStats.getPlayerUUID(), mapStats.getMapKey().asString(), mapStats.getGamesPlayed(),
+                        mapStats.getWins(), mapStats.getBestRound(), mapStats.getRoundsSurvived(), mapStats.getKills(),
+                        mapStats.getCoinsGained(), mapStats.getCoinsSpent(), mapStats.getKnocks(), mapStats.getDeaths(),
+                        mapStats.getRevives(), mapStats.getShots(), mapStats.getRegularHits(),
+                        mapStats.getHeadshotHits()).onDuplicateKeyUpdate()
                 .set(field("games_played"), field("games_played", SQLDataType.INTEGER).plus(mapStats.getGamesPlayed()))
-                .set(field("wins"), field("wins", SQLDataType.INTEGER).plus(mapStats.getWins())).set(field("best_time"),
-                        mapStats.getBestTime().isPresent()
-                        ? when(field("best_time").isNotNull(),
-                                least(field("best_time"), mapStats.getBestTime().get())).otherwise(mapStats.getBestTime().get())
-                        : field("best_time", SQLDataType.BIGINT)).set(field("best_round"),
+                .set(field("wins"), field("wins", SQLDataType.INTEGER).plus(mapStats.getWins()))
+                .set(field("best_round"),
                         greatest(field("best_round", SQLDataType.INTEGER), val(mapStats.getBestRound())))
                 .set(field("rounds_survived"),
                         field("rounds_survived", SQLDataType.INTEGER).plus(mapStats.getRoundsSurvived()))
@@ -50,6 +49,16 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
                 .set(field("regular_hits"), field("regular_hits", SQLDataType.INTEGER).plus(mapStats.getRegularHits()))
                 .set(field("headshot_hits"),
                         field("headshot_hits", SQLDataType.INTEGER).plus(mapStats.getHeadshotHits())).execute();
+        context.insertInto(table("zombies_player_map_best_time"), field("player_uuid"), field("map_key"),
+                        field("best_time"), field("player_count"), field("category"))
+                .values(mapStats.getPlayerUUID(), mapStats.getMapKey().asString(), mapStats.getBestTime().orElse(null),
+                        playerCount, category).onDuplicateKeyUpdate()
+                .set(field("player_uuid"), mapStats.getPlayerUUID()).set(field("map_key"), mapStats.getMapKey())
+                .set(field("best_time"), mapStats.getBestTime().isPresent()
+                                         ? when(field("best_time").isNotNull(),
+                        least(field("best_time"), mapStats.getBestTime().get())).otherwise(mapStats.getBestTime().get())
+                                         : field("best_time", SQLDataType.BIGINT)).set(field("player_count"), 4)
+                .execute();
     }
 
     @Override
@@ -72,11 +81,12 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
     }
 
     @Override
-    public @NotNull List<BestTime> getBestTimes(@NotNull Connection connection, @NotNull Key mapKey, int maxLength)
-            throws SQLException {
+    public @NotNull List<BestTime> getBestTimes(@NotNull Connection connection, @NotNull Key mapKey, int playerCount,
+            @Nullable String category, int maxLength) throws SQLException {
         List<BestTime> bestTimes = new ArrayList<>();
         try (ResultSet resultSet = using(connection).select(field("player_uuid"), field("best_time"))
-                .from(table("zombies_player_map_stats")).where(field("map_key").eq(mapKey.asString()))
+                .from(table("zombies_player_map_best_time")).where(field("map_key").eq(mapKey.asString()))
+                .and(field("player_count").eq(playerCount)).and(field("category").eq(category))
                 .and(field("best_time").isNotNull()).orderBy(field("best_time"), field("player_uuid")).limit(maxLength)
                 .fetchResultSet()) {
             int i = 0;
@@ -92,12 +102,13 @@ public class JooqZombiesSQLFetcher implements ZombiesSQLFetcher {
 
     @Override
     public @NotNull Optional<BestTime> getBestTime(@NotNull Connection connection, @NotNull UUID playerUUID,
-            @NotNull Key mapKey) {
+            @NotNull Key mapKey, int playerCount, @Nullable String category) {
         Record2<Long, Integer> result =
                 using(connection).select(field("best_time", SQLDataType.BIGINT), field("rank", SQLDataType.INTEGER))
                         .from(select(field("best_time"), field("player_uuid"),
                                 rowNumber().over(orderBy(field("best_time"), field("player_uuid"))).as("rank")).from(
                                         table("zombies_player_map_stats")).where(field("map_key").eq(mapKey.asString()))
+                                .and(field("player_count").eq(playerCount)).and(field("category").eq(category))
                                 .and(field("best_time").isNotNull()))
                         .where(field("player_uuid").eq(playerUUID.toString())).fetchOne();
         if (result == null) {
