@@ -69,6 +69,10 @@ public class PartyFeature {
                     }
                 }
 
+                for (PartyMember member : party.getMemberManager().getMembers().values()) {
+                    partyHolder.uuidToGuild().remove(member.getPlayerView().getUUID());
+                }
+
                 return true;
             });
 
