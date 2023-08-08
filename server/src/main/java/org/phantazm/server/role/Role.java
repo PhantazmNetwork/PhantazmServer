@@ -3,20 +3,16 @@ package org.phantazm.server.role;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
-import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
 public sealed interface Role permits Role.RoleImpl {
-    Tag<List<String>> ROLE_TAG = Tag.String("player_roles").list().defaultValue(List.of());
-
     Role NONE = new RoleImpl("none", player -> {
         return Optional.ofNullable(player.getDisplayName()).orElseGet(player::getName);
     }, Integer.MIN_VALUE, Set.of());

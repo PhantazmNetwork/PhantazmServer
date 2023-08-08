@@ -50,16 +50,11 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public @NotNull Role getStylingRole(@NotNull Player player) {
-        List<String> roleNames = player.getTag(Role.ROLE_TAG);
+        Set<Role> roles = roleCache.get(player.getUuid(), this::loadRoles);
 
         Role stylingRole = Role.NONE;
         int highestPriority = Integer.MIN_VALUE;
-        for (String roleName : roleNames) {
-            Role role = roleMap.get(roleName);
-            if (role == null) {
-                continue;
-            }
-
+        for (Role role : roles) {
             if (role.priority() >= highestPriority) {
                 stylingRole = role;
                 highestPriority = role.priority();
@@ -70,12 +65,6 @@ public class BasicRoleStore implements RoleStore {
     }
 
     private void applyRoles0(Player player, Set<Role> roles) {
-        Set<String> mutableCopy = new HashSet<>(roles.size());
-        for (Role role : roles) {
-            mutableCopy.add(role.identifier());
-        }
-
-        player.setTag(Role.ROLE_TAG, List.copyOf(mutableCopy));
         for (Role role : roles) {
             player.getAllPermissions().addAll(role.grantedPermissions());
         }
@@ -115,12 +104,6 @@ public class BasicRoleStore implements RoleStore {
                 return;
             }
 
-            player.tagHandler().updateTag(Role.ROLE_TAG, oldValue -> {
-                Set<String> mutableCopy = new HashSet<>(oldValue);
-                mutableCopy.add(role.identifier());
-                return List.copyOf(mutableCopy);
-            });
-
             player.getAllPermissions().addAll(role.grantedPermissions());
         });
     }
@@ -148,12 +131,6 @@ public class BasicRoleStore implements RoleStore {
             if (player == null) {
                 return;
             }
-
-            player.tagHandler().updateTag(Role.ROLE_TAG, oldValue -> {
-                Set<String> mutableCopy = new HashSet<>(oldValue);
-                mutableCopy.remove(role.identifier());
-                return List.copyOf(mutableCopy);
-            });
 
             player.getAllPermissions().clear();
 
