@@ -1,6 +1,8 @@
 package org.phantazm.stats.general;
 
 import org.jetbrains.annotations.NotNull;
+import org.jooq.DSLContext;
+import org.jooq.impl.SQLDataType;
 import org.phantazm.stats.zombies.SQLZombiesDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,9 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
+
+import static org.jooq.impl.DSL.*;
 
 public class SQLGeneralDatabase implements GeneralDatabase {
 
@@ -22,20 +27,30 @@ public class SQLGeneralDatabase implements GeneralDatabase {
 
     private final DataSource dataSource;
 
-    private final JooqGeneralSQLFetcher sqlFetcher;
-
-    public SQLGeneralDatabase(@NotNull Executor executor, @NotNull DataSource dataSource,
-            @NotNull JooqGeneralSQLFetcher sqlFetcher) {
+    public SQLGeneralDatabase(@NotNull Executor executor, @NotNull DataSource dataSource) {
         this.executor = Objects.requireNonNull(executor, "executor");
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
-        this.sqlFetcher = Objects.requireNonNull(sqlFetcher, "sqlFetcher");
     }
 
     @Override
     public @NotNull CompletableFuture<Void> handleJoin(@NotNull UUID playerUUID, @NotNull ZonedDateTime time) {
+        return executeSQL(connection -> {
+            long timestamp = time.toEpochSecond();
+            DSLContext context = using(connection);
+            context.insertInto(table("phantazm_player_stats"), field("player_uuid"), field("first_join"))
+                    .values(playerUUID.toString(), timestamp).onDuplicateKeyUpdate().set(field("first_join"),
+                            when(field("first_join").isNull(), timestamp).otherwise(field("first_join", SQLDataType.BIGINT)))
+                    .execute();
+
+            context.update(table("phantazm_player_stats")).set(field("last_join"), timestamp)
+                    .where(field("player_uuid").eq(playerUUID)).execute();
+        });
+    }
+
+    private CompletableFuture<Void> executeSQL(Consumer<Connection> consumer) {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
-                sqlFetcher.handleJoin(connection, playerUUID, time);
+                consumer.accept(connection);
             }
             catch (SQLException e) {
                 throw new RuntimeException(e);
