@@ -1,12 +1,13 @@
 package org.phantazm.stats.zombies;
 
 import com.github.steanky.toolkit.function.ThrowingFunction;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.Record2;
+import org.jooq.*;
 import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,19 +100,22 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<List<BestTime>> getBestTimes(@NotNull Key mapKey, int playerCount,
-                                                                   @Nullable String category, int maxLength) {
+    public @NotNull CompletableFuture<Int2ObjectMap<List<BestTime>>> getMapBestTimes(@NotNull Key mapKey, int minPlayerCount, int maxPlayerCount,
+                                                                                     @Nullable String category, int maxLength) {
         return executeSQL(connection -> {
-            List<BestTime> bestTimes = new ArrayList<>();
-            try (ResultSet resultSet = using(connection).select(field("player_uuid"), field("best_time"))
+            Int2ObjectMap<List<BestTime>> bestTimes = new Int2ObjectOpenHashMap<>(maxPlayerCount - minPlayerCount + 1);
+            try (ResultSet resultSet = using(connection).select(field("player_uuid"), field("best_time"), field("player_count"))
                     .from(table("zombies_player_map_best_time")).where(field("map_key").eq(mapKey.asString()))
-                    .and(field("player_count").eq(playerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()).orderBy(field("best_time"), field("player_uuid"))
+                    .and(field("player_count").between(minPlayerCount, maxPlayerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()).orderBy(field("best_time"), field("player_uuid"))
                     .limit(maxLength).fetchResultSet()) {
                 int i = 0;
                 while (resultSet.next()) {
                     UUID uuid = UUID.fromString(resultSet.getString("player_uuid"));
                     long bestTime = resultSet.getLong("best_time");
-                    bestTimes.add(new BestTime(++i, uuid, bestTime));
+                    int playerCount = resultSet.getInt("player_count");
+
+                    BestTime time = new BestTime(++i, uuid, bestTime);
+                    bestTimes.computeIfAbsent(playerCount, unused -> new ArrayList<>()).add(time);
                 }
             }
 
@@ -120,22 +124,24 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<Optional<BestTime>> getBestTime(@NotNull UUID playerUUID, @NotNull Key mapKey,
-                                                                      int playerCount, @Nullable String category) {
+    public @NotNull CompletableFuture<Int2ObjectMap<BestTime>> getMapPlayerBestTimes(@NotNull UUID playerUUID, @NotNull Key mapKey,
+                                                                                     int minPlayerCount, int maxPlayerCount, @Nullable String category) {
         return executeSQL(connection -> {
-            Record2<Long, Integer> result =
-                    using(connection).select(field("best_time", SQLDataType.BIGINT), field("rank", SQLDataType.INTEGER))
+            Result<Record3<Long, Integer, Integer>> result =
+                    using(connection).select(field("best_time", SQLDataType.BIGINT), field("rank", SQLDataType.INTEGER), field("player_count", SQLDataType.INTEGER))
                             .from(select(field("best_time"), field("player_uuid"),
                                     rowNumber().over(orderBy(field("best_time"), field("player_uuid")))
                                             .as("rank")).from(table("zombies_player_map_best_time"))
                                     .where(field("map_key").eq(mapKey.asString()))
-                                    .and(field("player_count").eq(playerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()))
-                            .where(field("player_uuid").eq(playerUUID.toString())).fetchOne();
-            if (result == null) {
-                return Optional.empty();
+                                    .and(field("player_count").between(minPlayerCount, maxPlayerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()))
+                            .where(field("player_uuid").eq(playerUUID.toString())).fetch();
+
+            Int2ObjectMap<BestTime> times = new Int2ObjectOpenHashMap<>(result.size());
+            for (Record3<Long, Integer, Integer> record : result) {
+                times.put(record.value3().intValue(), new BestTime(record.value2(), playerUUID, record.value1()));
             }
 
-            return Optional.of(new BestTime(result.value2(), playerUUID, result.value1()));
+            return times;
         });
     }
 

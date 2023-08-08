@@ -49,8 +49,8 @@ public class BestTimeLeaderboard {
 
     @FactoryMethod
     public BestTimeLeaderboard(@NotNull Data data, @NotNull ZombiesDatabase database, @NotNull UUID viewer,
-            @NotNull Hologram hologram, @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
-            @NotNull MiniMessage miniMessage, @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
+                               @NotNull Hologram hologram, @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
+                               @NotNull MiniMessage miniMessage, @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
         this.data = Objects.requireNonNull(data, "data");
         this.database = Objects.requireNonNull(database, "database");
         this.viewer = Objects.requireNonNull(viewer, "viewer");
@@ -97,7 +97,7 @@ public class BestTimeLeaderboard {
     }
 
     private void updateBody() {
-        database.getBestTimes(settings.id(), 4, null, data.length()).whenComplete((bestTimes, throwable) -> {
+        database.getMapBestTimes(settings.id(), 1, 4, null, data.length()).whenComplete((bestTimes, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Failed to fetch best times for {}", settings.id());
                 return;
@@ -108,10 +108,11 @@ public class BestTimeLeaderboard {
                     return;
                 }
 
-                trimBody(bestTimes);
+                List<BestTime> solo = bestTimes.get(1);
+                trimBody(solo);
 
                 for (int i = 0; i < bestTimes.size(); ++i) {
-                    BestTime bestTime = bestTimes.get(i);
+                    BestTime bestTime = solo.get(i);
                     int index = data.headerFormats().size() + i;
                     hologram.set(index, makePlaceTimeMessage(i + 1, bestTime));
                     updateBodyName(index, i + 1, bestTime);
@@ -144,7 +145,7 @@ public class BestTimeLeaderboard {
     }
 
     private void updateViewerTime(TagResolver mapNamePlaceholder) {
-        database.getBestTime(viewer, settings.id(), 4, null).whenComplete((bestTimeOptional, throwable) -> {
+        database.getMapPlayerBestTimes(viewer, settings.id(), 1, 4, null).whenComplete((bestTimes, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Failed to fetch best time for {} on {}", viewer, settings.id(), throwable);
                 return;
@@ -156,16 +157,15 @@ public class BestTimeLeaderboard {
                 }
 
                 Component updatedViewerComponent;
-                if (bestTimeOptional.isPresent()) {
-                    BestTime bestTime = bestTimeOptional.get();
+                if (bestTimes.containsKey(1)) {
+                    BestTime bestTime = bestTimes.get(1);
                     updatedViewerComponent = makePlaceTimeMessage(bestTime.rank(), bestTime);
-                }
-                else {
+                } else {
                     updatedViewerComponent = miniMessage.deserialize(data.noneFormat());
                 }
 
                 updateHeaderFooter(mapNamePlaceholder, Placeholder.component("viewer", updatedViewerComponent));
-                updateViewerName(mapNamePlaceholder, bestTimeOptional.orElse(null));
+                updateViewerName(mapNamePlaceholder, bestTimes.getOrDefault(1, null));
             }
         });
     }
@@ -185,8 +185,7 @@ public class BestTimeLeaderboard {
                 Component updatedViewerComponent;
                 if (bestTime != null) {
                     updatedViewerComponent = makePlaceNameTimeMessage(bestTime.rank(), displayName, bestTime);
-                }
-                else {
+                } else {
                     updatedViewerComponent = miniMessage.deserialize(data.noneNameFormat(),
                             Placeholder.component("player_name", displayName));
                 }
@@ -245,8 +244,8 @@ public class BestTimeLeaderboard {
         private final MiniMessage miniMessage;
 
         public Module(@NotNull ZombiesDatabase database, @NotNull UUID viewer, @NotNull Hologram hologram,
-                @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
-                @NotNull MiniMessage miniMessage) {
+                      @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
+                      @NotNull MiniMessage miniMessage) {
             this.database = Objects.requireNonNull(database, "database");
             this.viewer = Objects.requireNonNull(viewer, "viewer");
             this.hologram = Objects.requireNonNull(hologram, "hologram");
