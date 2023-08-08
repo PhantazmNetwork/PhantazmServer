@@ -16,4 +16,9 @@ public class GuildMember {
     public @NotNull PlayerView getPlayerView() {
         return playerView;
     }
+
+    public boolean isOnline() {
+        return playerView.getPlayer().isPresent();
+    }
+
 }

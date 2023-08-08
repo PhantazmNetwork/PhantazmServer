@@ -14,6 +14,7 @@ import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.guild.party.PartyCreator;
+import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.guild.party.command.PartyCommand;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.TickFormatter;
@@ -57,7 +58,23 @@ public class PartyFeature {
         commandManager.register(partyCommand);
 
         schedulerManager.scheduleTask(() -> {
-            partyHolder.guilds().removeIf(party -> party.getMemberManager().getMembers().isEmpty());
+            partyHolder.guilds().removeIf(party -> {
+                if (party.getMemberManager().getMembers().isEmpty()) {
+                    return true;
+                }
+
+                for (PartyMember member : party.getMemberManager().getMembers().values()) {
+                    if (member.isOnline()) {
+                        return false;
+                    }
+                }
+
+                for (PartyMember member : party.getMemberManager().getMembers().values()) {
+                    partyHolder.uuidToGuild().remove(member.getPlayerView().getUUID());
+                }
+
+                return true;
+            });
 
             Set<Party> ticked = Collections.newSetFromMap(new IdentityHashMap<>());
             long time = System.currentTimeMillis();
