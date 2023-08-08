@@ -14,6 +14,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Function;
 
 public class PartyChatChannel extends BasicChatChannel {
 
@@ -22,8 +23,9 @@ public class PartyChatChannel extends BasicChatChannel {
     private final Map<? super UUID, ? extends Party> parties;
 
     public PartyChatChannel(@NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage, @NotNull String chatFormat) {
-        super(viewProvider, miniMessage, chatFormat);
+            @NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage, @NotNull String chatFormat,
+            @NotNull Function<? super Player, ? extends Component> nameFormatter) {
+        super(viewProvider, miniMessage, chatFormat, nameFormatter);
         this.parties = Objects.requireNonNull(parties, "parties");
     }
 

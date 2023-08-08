@@ -214,12 +214,16 @@ public final class PhantazmServer {
             PlayerFeature.initialize(playerConfig);
         });
 
-        CompletableFuture<?> gameFeatures = CompletableFuture.runAsync(() -> {
+        CompletableFuture<?> databaseFeatures = CompletableFuture.runAsync(() -> {
             ExecutorFeature.initialize();
             HikariFeature.initialize();
-            GeneralStatsFeature.initialize(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
-            LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
+        });
 
+        CompletableFuture<?> databaseDependents = databaseFeatures.whenCompleteAsync((ignored, error) -> {
+            GeneralStatsFeature.initialize(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
+        });
+
+        CompletableFuture<?> game = databaseFeatures.whenCompleteAsync((ignored, error) -> {
             MappingProcessorSource mappingProcessorSource = EthyleneFeature.getMappingProcessorSource();
             ElementFeature.initialize(mappingProcessorSource, keyParser);
 
@@ -229,8 +233,6 @@ public final class PhantazmServer {
                     MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec);
 
             LobbyFeature.initialize(viewProvider, lobbiesConfig, contextManager);
-            CommandFeature.initialize(routerStore, viewProvider, LobbyFeature.getFallback());
-            ChatFeature.initialize(viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild());
 
             MobFeature.initialize(contextManager, yamlCodec);
             EquipmentFeature.initialize(keyParser, contextManager, yamlCodec,
@@ -244,20 +246,29 @@ public final class PhantazmServer {
                             List.of(LobbyFeature.getFallback(), new KickFallback(
                                     Component.text("Failed to send you to lobby!", NamedTextColor.RED)))),
                     PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
-                    zombiesConfig, EthyleneFeature.getMappingProcessorSource());
-
-            ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),
-                    serverConfig.serverInfoConfig().whitelist(), HikariFeature.getDataSource(),
-                    ExecutorFeature.getExecutor(), routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),
-                    viewProvider, transferHelper);
-            ValidationFeature.initialize(LoginValidatorFeature.loginValidator(),
-                    ServerCommandFeature.permissionHandler());
+                    zombiesConfig, mappingProcessorSource);
 
             routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
             routerStore.putRouter(RouterKeys.LOBBY_SCENE_ROUTER, LobbyFeature.getLobbyRouter());
+
+            RoleFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor(), yamlCodec,
+                    contextManager, ServerCommandFeature::permissionHandler);
+
+            LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
+            ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),
+                    serverConfig.serverInfoConfig().whitelist(), HikariFeature.getDataSource(),
+                    ExecutorFeature.getExecutor(), routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),
+                    viewProvider, transferHelper, RoleFeature.roleStore());
+
+            ValidationFeature.initialize(LoginValidatorFeature.loginValidator(),
+                    ServerCommandFeature.permissionHandler(), RoleFeature.roleStore());
+
+            ChatFeature.initialize(viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
+                    RoleFeature.roleStore());
+            CommandFeature.initialize(routerStore, viewProvider, LobbyFeature.getFallback());
         });
 
-        CompletableFuture.allOf(independentFeatures, gameFeatures).join();
+        CompletableFuture.allOf(independentFeatures, databaseFeatures, databaseDependents, game).join();
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig,

@@ -108,8 +108,8 @@ public class DatabaseLoginValidator implements LoginValidator {
         executor.execute(() -> {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
-                    using(connection).insertInto(table("player_whitelist"), field("player_uuid")).onDuplicateKeyUpdate()
-                            .set(field("player_uuid"), uuid).execute();
+                    using(connection).insertInto(table("player_whitelist"), field("player_uuid")).values(uuid)
+                            .onDuplicateKeyUpdate().set(field("player_uuid"), uuid).execute();
                 }
             });
         });

@@ -9,7 +9,6 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
@@ -94,14 +93,17 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 return false;
             }
 
+            PhantazmMob hitMob = mobStore.getMob(livingEntity.getUuid());
+            if (hitMob == null) {
+                return false;
+            }
+
             Player player = playerOptional.get();
             Pos playerPosition = player.getPosition();
 
             boolean isInstaKill;
-            PhantazmMob hitMob = mobStore.getMob(livingEntity.getUuid());
             if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
-                    (hitMob != null && !hitMob.model().getExtraNode()
-                            .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
+                    (!hitMob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
                 livingEntity.setTag(Tags.LAST_HIT_BY, player.getUuid());
                 livingEntity.kill();
                 isInstaKill = true;

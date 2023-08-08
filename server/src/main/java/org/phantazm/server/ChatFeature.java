@@ -20,10 +20,12 @@ import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyChatChannel;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.server.role.RoleStore;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * Entrypoint for chat-related features.
@@ -46,7 +48,7 @@ public final class ChatFeature {
      * @param parties      A map of player {@link UUID}s to {@link Party} instances
      */
     static void initialize(@NotNull PlayerViewProvider viewProvider, @NotNull ChatConfig chatConfig,
-            @NotNull Map<? super UUID, ? extends Party> parties) {
+            @NotNull Map<? super UUID, ? extends Party> parties, @NotNull RoleStore roleStore) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {
@@ -58,14 +60,18 @@ public final class ChatFeature {
             }
         };
 
+        Function<? super Player, ? extends Component> nameFormatter = (player) -> {
+            return roleStore.getStylingRole(player).styleName(player);
+        };
+
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         CommandManager commandManager = MinecraftServer.getCommandManager();
         ChatChannel defaultChannel = new InstanceChatChannel(viewProvider, MiniMessage.miniMessage(),
-                chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME));
+                chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME), nameFormatter);
         channels.put(DEFAULT_CHAT_CHANNEL_NAME, defaultChannel);
         commandManager.register(ChatChannelSendCommand.chatChannelSend("ac", defaultChannel));
         ChatChannel partyChannel = new PartyChatChannel(parties, viewProvider, MiniMessage.miniMessage(),
-                chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME));
+                chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME), nameFormatter);
         channels.put(PartyChatChannel.CHANNEL_NAME, partyChannel);
         commandManager.register(ChatChannelSendCommand.chatChannelSend("pc", partyChannel));
 

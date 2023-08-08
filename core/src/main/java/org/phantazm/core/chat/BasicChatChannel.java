@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Basic implementation of a {@link ChatChannel}.
@@ -28,6 +29,7 @@ public abstract class BasicChatChannel implements ChatChannel {
     private final MiniMessage miniMessage;
 
     private final String chatFormat;
+    private final Function<? super Player, ? extends Component> nameFormatter;
 
     /**
      * Creates a {@link BasicChatChannel}.
@@ -35,10 +37,11 @@ public abstract class BasicChatChannel implements ChatChannel {
      * @param viewProvider The {@link BasicChatChannel}'s {@link PlayerViewProvider}
      */
     public BasicChatChannel(@NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage,
-            @NotNull String chatFormat) {
+            @NotNull String chatFormat, @NotNull Function<? super Player, ? extends Component> nameFormatter) {
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
         this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
         this.chatFormat = Objects.requireNonNull(chatFormat, "chatFormat");
+        this.nameFormatter = Objects.requireNonNull(nameFormatter, "nameFormatter");
     }
 
     @Override
@@ -64,11 +67,7 @@ public abstract class BasicChatChannel implements ChatChannel {
 
     @Override
     public @NotNull Component formatMessage(@NotNull Player player, @NotNull String message) {
-        Optional<? extends Component> displayNameOptional =
-                getViewProvider().fromPlayer(player).getDisplayNameIfCached();
-        Component displayName = displayNameOptional.isPresent()
-                                ? displayNameOptional.get()
-                                : Component.text(player.getUsername());
+        Component displayName = nameFormatter.apply(player);
 
         TagResolver senderPlaceholder = Placeholder.component("sender", displayName);
         TagResolver messagePlaceholder = Placeholder.unparsed("message", message);
