@@ -35,9 +35,10 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
     }
 
+    @SuppressWarnings("removal") // TODO: fix the bad type stuff with least
     @Override
     public @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats,
-            int playerCount, @Nullable String category, @Nullable Long time) {
+                                                                             int playerCount, @Nullable String category, @Nullable Long time) {
         return executeSQL(connection -> {
             DSLContext context = using(connection);
             context.insertInto(table("zombies_player_map_stats"), field("player_uuid"), field("map_key"),
@@ -65,22 +66,20 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
                     .set(field("regular_hits"), field("regular_hits", SQLDataType.INTEGER).plus(stats.getRegularHits()))
                     .set(field("headshot_hits"),
                             field("headshot_hits", SQLDataType.INTEGER).plus(stats.getHeadshotHits())).execute();
-            context.insertInto(table("zombies_player_map_best_time"), field("player_uuid"), field("map_key"),
-                            field("best_time"), field("player_count"), field("category"))
-                    .values(stats.getPlayerUUID(), stats.getMapKey().asString(), time, playerCount, category)
-                    .onDuplicateKeyUpdate().set(field("player_uuid"), stats.getPlayerUUID())
-                    .set(field("map_key"), stats.getMapKey()).set(field("best_time"), time != null
-                                                                                      ? when(
-                            field("best_time").isNotNull(), least(field("best_time"), time)).otherwise(time)
-                                                                                      : field("best_time",
-                                                                                              SQLDataType.BIGINT))
-                    .set(field("player_count"), 4).execute();
+
+            if (time != null) {
+                context.insertInto(table("zombies_player_map_best_time"), field("player_uuid"), field("map_key"),
+                                field("best_time"), field("player_count"), field("category"))
+                        .values(stats.getPlayerUUID(), stats.getMapKey().asString(), time, playerCount, category)
+                        .onDuplicateKeyUpdate().set(field("player_uuid"), stats.getPlayerUUID())
+                        .set(field("map_key"), stats.getMapKey()).set(field("best_time", SQLDataType.BIGINT), field("best_time", SQLDataType.BIGINT).least(time)).set(field("player_count"), 4).execute();
+            }
         });
     }
 
     @Override
     public @NotNull CompletableFuture<ZombiesPlayerMapStats> getMapStats(@NotNull UUID playerUUID,
-            @NotNull Key mapKey) {
+                                                                         @NotNull Key mapKey) {
         return executeSQL(connection -> {
             Record result = using(connection).select().from(table("zombies_player_map_stats"))
                     .where(field("player_uuid").eq(playerUUID.toString())).and(field("map_key").eq(mapKey.asString()))
@@ -101,13 +100,12 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
 
     @Override
     public @NotNull CompletableFuture<List<BestTime>> getBestTimes(@NotNull Key mapKey, int playerCount,
-            @Nullable String category, int maxLength) {
+                                                                   @Nullable String category, int maxLength) {
         return executeSQL(connection -> {
             List<BestTime> bestTimes = new ArrayList<>();
             try (ResultSet resultSet = using(connection).select(field("player_uuid"), field("best_time"))
                     .from(table("zombies_player_map_best_time")).where(field("map_key").eq(mapKey.asString()))
-                    .and(field("player_count").eq(playerCount)).and(field("category").eq(category))
-                    .and(field("best_time").isNotNull()).orderBy(field("best_time"), field("player_uuid"))
+                    .and(field("player_count").eq(playerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()).orderBy(field("best_time"), field("player_uuid"))
                     .limit(maxLength).fetchResultSet()) {
                 int i = 0;
                 while (resultSet.next()) {
@@ -123,7 +121,7 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
 
     @Override
     public @NotNull CompletableFuture<Optional<BestTime>> getBestTime(@NotNull UUID playerUUID, @NotNull Key mapKey,
-            int playerCount, @Nullable String category) {
+                                                                      int playerCount, @Nullable String category) {
         return executeSQL(connection -> {
             Record2<Long, Integer> result =
                     using(connection).select(field("best_time", SQLDataType.BIGINT), field("rank", SQLDataType.INTEGER))
@@ -131,8 +129,7 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
                                     rowNumber().over(orderBy(field("best_time"), field("player_uuid")))
                                             .as("rank")).from(table("zombies_player_map_best_time"))
                                     .where(field("map_key").eq(mapKey.asString()))
-                                    .and(field("player_count").eq(playerCount)).and(field("category").eq(category))
-                                    .and(field("best_time").isNotNull()))
+                                    .and(field("player_count").eq(playerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()))
                             .where(field("player_uuid").eq(playerUUID.toString())).fetchOne();
             if (result == null) {
                 return Optional.empty();
@@ -146,8 +143,7 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
                 consumer.accept(connection);
-            }
-            catch (SQLException e) {
+            } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }, executor).whenComplete(this::logException);
@@ -157,8 +153,7 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
                 return function.apply(connection);
-            }
-            catch (SQLException e) {
+            } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }, executor).whenComplete(this::logException);
