@@ -68,6 +68,8 @@ public class BasicRoleStore implements RoleStore {
         for (Role role : roles) {
             player.getAllPermissions().addAll(role.grantedPermissions());
         }
+
+        player.sendPacket(MinecraftServer.getCommandManager().createDeclareCommandsPacket(player));
     }
 
     @Override

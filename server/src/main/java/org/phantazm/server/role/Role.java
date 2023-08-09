@@ -82,8 +82,8 @@ public sealed interface Role permits Role.RoleImpl {
                 return true;
             }
 
-            if (obj instanceof RoleImpl other) {
-                return identifier.equals(other.identifier);
+            if (obj instanceof Role other) {
+                return identifier.equals(other.identifier());
             }
 
             return false;
