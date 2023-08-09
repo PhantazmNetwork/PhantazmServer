@@ -2,6 +2,8 @@ package org.phantazm.zombies.leaderboard;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.element.core.dependency.DependencyModule;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
@@ -9,6 +11,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.hologram.Hologram;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.stats.zombies.BestTime;
@@ -17,9 +20,8 @@ import org.phantazm.zombies.map.MapSettingsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.Executor;
 
 @Model("zombies.leaderboard.best_time")
 @Cache(false)
@@ -41,16 +43,25 @@ public class BestTimeLeaderboard {
 
     private final MiniMessage miniMessage;
 
+    private final Executor executor;
+
     private final TickFormatter tickFormatter;
 
     private final Object sync = new Object();
 
-    private volatile boolean active = false;
+    private final Int2ObjectMap<List<Component>> pages = new Int2ObjectOpenHashMap<>();
+
+    private boolean active = false;
+
+    private long stamp = Long.MIN_VALUE;
+
+    private int tabIndex = -1;
 
     @FactoryMethod
     public BestTimeLeaderboard(@NotNull Data data, @NotNull ZombiesDatabase database, @NotNull UUID viewer,
-                               @NotNull Hologram hologram, @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
-                               @NotNull MiniMessage miniMessage, @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
+            @NotNull Hologram hologram, @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
+            @NotNull MiniMessage miniMessage, @NotNull Executor executor,
+            @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
         this.data = Objects.requireNonNull(data, "data");
         this.database = Objects.requireNonNull(database, "database");
         this.viewer = Objects.requireNonNull(viewer, "viewer");
@@ -58,6 +69,7 @@ public class BestTimeLeaderboard {
         this.settings = Objects.requireNonNull(settings, "settings");
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
         this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+        this.executor = Objects.requireNonNull(executor, "executor");
         this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
     }
 
@@ -67,149 +79,243 @@ public class BestTimeLeaderboard {
                 return;
             }
 
-            TagResolver mapNamePlaceholder = Placeholder.component("map_name", settings.displayName());
-            TagResolver viewerPlaceholder = Placeholder.component("viewer", data.initialMessage());
-            for (String headerFormat : data.headerFormats()) {
-                hologram.add(miniMessage.deserialize(headerFormat, mapNamePlaceholder, viewerPlaceholder));
-            }
-            for (int i = 0; i < data.length(); ++i) {
-                TagResolver placePlaceholder = Placeholder.component("place", Component.text(i + 1));
-                Component placeMessage = miniMessage.deserialize(data.placeFormat(), placePlaceholder);
-                hologram.add(placeMessage);
-            }
-            for (String footerFormat : data.footerFormats()) {
-                hologram.add(miniMessage.deserialize(footerFormat, mapNamePlaceholder, viewerPlaceholder));
+            for (int playerCount = 1; playerCount <= 4; ++playerCount) {
+                List<Component> page =
+                        new ArrayList<>(data.headerFormats().size() + data.length() + data.footerFormats().size());
+                TagResolver mapNamePlaceholder = Placeholder.component("map_name", settings.displayName());
+                TagResolver viewerPlaceholder = Placeholder.component("viewer", data.initialMessage());
+                TagResolver playerCountPlaceholder = Formatter.choice("player_count", playerCount);
+
+                for (String headerFormat : data.headerFormats()) {
+                    page.add(miniMessage.deserialize(headerFormat, mapNamePlaceholder, viewerPlaceholder,
+                            playerCountPlaceholder));
+                }
+                for (int i = 0; i < data.length(); ++i) {
+                    TagResolver placePlaceholder = Placeholder.component("place", Component.text(i + 1));
+                    Component placeMessage = miniMessage.deserialize(data.placeFormat(), placePlaceholder);
+                    page.add(placeMessage);
+                }
+                for (String footerFormat : data.footerFormats()) {
+                    page.add(miniMessage.deserialize(footerFormat, mapNamePlaceholder, viewerPlaceholder,
+                            playerCountPlaceholder));
+                }
+
+                pages.put(playerCountToTabIndex(playerCount), page);
             }
 
-            updateBody();
-            updateViewerTime(mapNamePlaceholder);
+            renderTab(playerCountToTabIndex(4));
+            tabIndex = playerCountToTabIndex(4);
+
+            ++stamp;
+            loadMapTimes(stamp);
+            loadViewerTimes(stamp);
             active = true;
+        }
+    }
+
+    public void cycle() {
+        executor.execute(() -> {
+            synchronized (sync) {
+                if (!active) {
+                    return;
+                }
+
+                if (tabIndex == playerCountToTabIndex(1)) {
+                    tabIndex = playerCountToTabIndex(4);
+                } else {
+                    ++tabIndex;
+                }
+                renderTab(tabIndex);
+            }
+        });
+    }
+
+    private void renderTab(int tabIndex) {
+        List<Component> page = pages.get(tabIndex);
+        if (hologram.size() > page.size()) {
+            hologram.subList(page.size(), hologram.size()).clear();
+        }
+
+        for (int i = hologram.size(); i < page.size(); ++i) {
+            hologram.add(page.get(i));
+        }
+        for (int i = 0; i < hologram.size(); ++i) {
+            hologram.set(i, page.get(i));
         }
     }
 
     public void endIfActive() {
         synchronized (sync) {
-            if (active) {
-                hologram.clear();
-                active = false;
+            if (!active) {
+                return;
             }
+
+            hologram.clear();
+            pages.clear();
+            tabIndex = -1;
+            active = false;
         }
     }
 
-    private void updateBody() {
+    private int playerCountToTabIndex(int playerCount) {
+        return 4 - playerCount;
+    }
+
+    private void loadMapTimes(long oldStamp) {
         database.getMapBestTimes(settings.id(), 1, 4, null, data.length()).whenComplete((bestTimes, throwable) -> {
             if (throwable != null) {
-                LOGGER.warn("Failed to fetch best times for {}", settings.id());
+                LOGGER.warn("Failed to fetch best times on {}", settings.id(), throwable);
                 return;
             }
 
             synchronized (sync) {
-                if (!active) {
+                if (!active || stamp != oldStamp) {
                     return;
                 }
 
-                List<BestTime> solo = bestTimes.get(1);
-                trimBody(solo);
+                for (int playerCount = 1; playerCount <= 4; ++playerCount) {
+                    List<BestTime> bestTimeList = bestTimes.get(playerCount);
+                    List<Component> page = pages.get(playerCountToTabIndex(playerCount));
 
-                for (int i = 0; i < bestTimes.size(); ++i) {
-                    BestTime bestTime = solo.get(i);
-                    int index = data.headerFormats().size() + i;
-                    hologram.set(index, makePlaceTimeMessage(i + 1, bestTime));
-                    updateBodyName(index, i + 1, bestTime);
+                    int pageIndex = playerCountToTabIndex(playerCount);
+                    if (data.headerFormats().size() + bestTimeList.size() < page.size() - data.footerFormats().size()) {
+                        if (tabIndex == pageIndex) {
+                            hologram.subList(data.headerFormats().size() + bestTimeList.size(),
+                                    page.size() - data.footerFormats().size()).clear();
+                        }
+
+                        page.subList(data.headerFormats().size() + bestTimeList.size(),
+                                page.size() - data.footerFormats().size()).clear();
+                    }
+
+                    for (int i = 0; i < bestTimeList.size(); ++i) {
+                        BestTime bestTime = bestTimeList.get(i);
+                        PlayerView view = viewProvider.fromUUID(bestTime.uuid());
+                        Optional<? extends Component> displayNameOptional = view.getDisplayNameIfCached();
+                        Component line;
+                        if (displayNameOptional.isPresent()) {
+                            line = makePlaceNameTimeMessage(displayNameOptional.get(), bestTime);
+                        }
+                        else {
+                            line = makePlaceTimeMessage(bestTime);
+                            loadBodyName(oldStamp, view, playerCount, bestTime);
+                        }
+
+                        page.set(data.headerFormats().size() + i, line);
+                    }
+
+                    if (tabIndex == playerCountToTabIndex(playerCount)) {
+                        for (int i = data.headerFormats().size(); i < data.headerFormats().size() + bestTimeList.size();
+                                ++i) {
+                            hologram.set(i, page.get(i));
+                        }
+                    }
                 }
             }
         });
     }
 
-    private void trimBody(List<BestTime> bestTimes) {
-        for (int i = data.length - 1; i >= bestTimes.size(); --i) {
-            hologram.remove(data.headerFormats().size() + i);
-        }
-    }
-
-    private void updateBodyName(int index, int place, BestTime bestTime) {
-        viewProvider.fromUUID(bestTime.uuid()).getDisplayName().whenComplete((displayName, throwable) -> {
+    private void loadBodyName(long oldStamp, PlayerView view, int playerCount, BestTime bestTime) {
+        view.getDisplayName().whenComplete((displayName, throwable) -> {
             if (throwable != null) {
-                LOGGER.warn("Failed to get display name for {}", bestTime.uuid(), throwable);
+                LOGGER.warn("Failed to fetch display name for {}", bestTime.uuid());
                 return;
             }
 
             synchronized (sync) {
-                if (!active) {
+                if (!active || stamp != oldStamp) {
                     return;
                 }
-            }
 
-            hologram.set(index, makePlaceNameTimeMessage(place, displayName, bestTime));
+                Component line = makePlaceNameTimeMessage(displayName, bestTime);
+                int pageIndex = playerCountToTabIndex(playerCount);
+                int lineIndex = data.headerFormats().size() + bestTime.rank() - 1;
+                pages.get(pageIndex).set(lineIndex, line);
+                if (tabIndex == pageIndex) {
+                    hologram.set(lineIndex, line);
+                }
+            }
         });
     }
 
-    private void updateViewerTime(TagResolver mapNamePlaceholder) {
+    private void loadViewerTimes(long oldStamp) {
         database.getMapPlayerBestTimes(viewer, settings.id(), 1, 4, null).whenComplete((bestTimes, throwable) -> {
             if (throwable != null) {
-                LOGGER.warn("Failed to fetch best time for {} on {}", viewer, settings.id(), throwable);
+                LOGGER.warn("Failed to fetch best times for {} on {}", viewer, settings.id(), throwable);
                 return;
             }
 
             synchronized (sync) {
-                if (!active) {
+                if (!active || oldStamp != stamp) {
                     return;
                 }
 
-                Component updatedViewerComponent;
-                if (bestTimes.containsKey(1)) {
-                    BestTime bestTime = bestTimes.get(1);
-                    updatedViewerComponent = makePlaceTimeMessage(bestTime.rank(), bestTime);
-                } else {
-                    updatedViewerComponent = miniMessage.deserialize(data.noneFormat());
-                }
-
-                updateHeaderFooter(mapNamePlaceholder, Placeholder.component("viewer", updatedViewerComponent));
-                updateViewerName(mapNamePlaceholder, bestTimes.getOrDefault(1, null));
+                PlayerView view = viewProvider.fromUUID(viewer);
+                view.getDisplayNameIfCached().ifPresentOrElse(displayName -> {
+                    setViewerName(bestTimes, displayName);
+                }, () -> loadViewerName(oldStamp, bestTimes, view));
             }
         });
     }
 
-    private void updateViewerName(TagResolver mapNamePlaceholder, BestTime bestTime) {
-        viewProvider.fromUUID(viewer).getDisplayName().whenComplete((displayName, throwable) -> {
+    private void setViewerName(Int2ObjectMap<BestTime> viewerBestTimes, Component viewerName) {
+        TagResolver mapNamePlaceholder = Placeholder.component("map_name", settings.displayName());
+        for (int playerCount = 1; playerCount <= 4; ++playerCount) {
+            List<Component> page = pages.get(playerCountToTabIndex(playerCount));
+
+            TagResolver playerCountPlaceholder = Formatter.choice("player_count", playerCount);
+            Component viewerLine;
+            if (!viewerBestTimes.containsKey(playerCount)) {
+                TagResolver playerNamePlaceholder = Placeholder.component("player_name", viewerName);
+                viewerLine = miniMessage.deserialize(data.noneNameFormat(), playerNamePlaceholder);
+            }
+            else {
+                viewerLine = makePlaceNameTimeMessage(viewerName, viewerBestTimes.get(playerCount));
+            }
+            TagResolver viewerPlaceholder = Placeholder.component("viewer", viewerLine);
+
+            for (int i = 0; i < data.headerFormats().size(); ++i) {
+                String headerFormat = data.headerFormats().get(i);
+                Component header = miniMessage.deserialize(headerFormat, mapNamePlaceholder, viewerPlaceholder,
+                        playerCountPlaceholder);
+                page.set(i, header);
+            }
+
+            for (int i = 0; i < data.footerFormats().size(); ++i) {
+                String footerFormat = data.footerFormats().get(data.footerFormats().size() - 1 - i);
+                Component footer = miniMessage.deserialize(footerFormat, mapNamePlaceholder, viewerPlaceholder);
+                page.set(page.size() - 1 - i, footer);
+            }
+
+            if (tabIndex == playerCountToTabIndex(playerCount)) {
+                for (int i = 0; i < data.headerFormats().size(); ++i) {
+                    hologram.set(i, page.get(i));
+                }
+
+                for (int i = 0; i < data.footerFormats().size(); ++i) {
+                    hologram.set(hologram.size() - 1 - i, page.get(page.size() - 1 - i));
+                }
+            }
+        }
+    }
+
+    private void loadViewerName(long oldStamp, Int2ObjectMap<BestTime> bestTimes, PlayerView view) {
+        view.getDisplayName().whenComplete((displayName, throwable) -> {
             if (throwable != null) {
-                LOGGER.warn("Failed to fetch name for {}", viewer, throwable);
+                LOGGER.warn("Failed to get display name for {}", view.getUUID(), throwable);
                 return;
             }
 
             synchronized (sync) {
-                if (!active) {
-                    return;
+                if (active && stamp == oldStamp) {
+                    setViewerName(bestTimes, displayName);
                 }
-
-                Component updatedViewerComponent;
-                if (bestTime != null) {
-                    updatedViewerComponent = makePlaceNameTimeMessage(bestTime.rank(), displayName, bestTime);
-                } else {
-                    updatedViewerComponent = miniMessage.deserialize(data.noneNameFormat(),
-                            Placeholder.component("player_name", displayName));
-                }
-
-                updateHeaderFooter(mapNamePlaceholder, Placeholder.component("viewer", updatedViewerComponent));
             }
         });
     }
 
-    private void updateHeaderFooter(TagResolver mapNamePlaceholder, TagResolver viewerPlaceholder) {
-        for (int i = 0; i < data.headerFormats().size(); ++i) {
-            String headerFormat = data.headerFormats().get(i);
-            hologram.set(i, miniMessage.deserialize(headerFormat, mapNamePlaceholder, viewerPlaceholder));
-        }
-
-        for (int i = 0; i < data.footerFormats().size(); ++i) {
-            String footerFormat = data.footerFormats().get(data.footerFormats().size() - 1 - i);
-            hologram.set(hologram.size() - 1 - i,
-                    miniMessage.deserialize(footerFormat, mapNamePlaceholder, viewerPlaceholder));
-        }
-    }
-
-    private Component makePlaceTimeMessage(int place, BestTime bestTime) {
-        TagResolver placePlaceholder = Placeholder.component("place", Component.text(place));
+    private Component makePlaceTimeMessage(BestTime bestTime) {
+        TagResolver placePlaceholder = Placeholder.component("place", Component.text(bestTime.rank()));
         TagResolver timePlaceholder =
                 Placeholder.component("time", Component.text(tickFormatter.format(bestTime.time())));
         TagResolver isViewerPlaceholder = Formatter.choice("is_viewer", bestTime.uuid().equals(viewer) ? 1 : 0);
@@ -217,8 +323,8 @@ public class BestTimeLeaderboard {
         return miniMessage.deserialize(data.placeTimeFormat(), placePlaceholder, timePlaceholder, isViewerPlaceholder);
     }
 
-    private Component makePlaceNameTimeMessage(int place, Component playerName, BestTime bestTime) {
-        TagResolver placePlaceholder = Placeholder.component("place", Component.text(place));
+    private Component makePlaceNameTimeMessage(Component playerName, BestTime bestTime) {
+        TagResolver placePlaceholder = Placeholder.component("place", Component.text(bestTime.rank()));
         TagResolver playerNamePlaceholder = Placeholder.component("player_name", playerName);
         TagResolver timePlaceholder =
                 Placeholder.component("time", Component.text(tickFormatter.format(bestTime.time())));
@@ -243,15 +349,18 @@ public class BestTimeLeaderboard {
 
         private final MiniMessage miniMessage;
 
+        private final Executor executor;
+
         public Module(@NotNull ZombiesDatabase database, @NotNull UUID viewer, @NotNull Hologram hologram,
-                      @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
-                      @NotNull MiniMessage miniMessage) {
+                @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
+                @NotNull MiniMessage miniMessage, @NotNull Executor executor) {
             this.database = Objects.requireNonNull(database, "database");
             this.viewer = Objects.requireNonNull(viewer, "viewer");
             this.hologram = Objects.requireNonNull(hologram, "hologram");
             this.settings = Objects.requireNonNull(settings, "settings");
             this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
             this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+            this.executor = Objects.requireNonNull(executor, "executor");
         }
 
         public @NotNull ZombiesDatabase getDatabase() {
@@ -276,6 +385,10 @@ public class BestTimeLeaderboard {
 
         public @NotNull MiniMessage getMiniMessage() {
             return miniMessage;
+        }
+
+        public @NotNull Executor getExecutor() {
+            return executor;
         }
     }
 

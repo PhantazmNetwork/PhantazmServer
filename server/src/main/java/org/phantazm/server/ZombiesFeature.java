@@ -130,7 +130,7 @@ public final class ZombiesFeature {
                             instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
                             ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(), clientBlockHandlerSource,
                             contextManager, keyParser, database, viewProvider, ZombiesFeature.powerupHandlerSource(),
-                            new BasicZombiesPlayerSource(database, viewProvider,
+                            new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,
                                     EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
                                     keyParser),
                             mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())

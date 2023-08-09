@@ -70,6 +70,7 @@ import org.slf4j.LoggerFactory;
 import java.io.StringReader;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -78,6 +79,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicZombiesPlayerSource.class);
 
     private final ZombiesDatabase database;
+
+    private final Executor executor;
 
     private final PlayerViewProvider viewProvider;
 
@@ -89,11 +92,13 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
     private final KeyParser keyParser;
 
-    public BasicZombiesPlayerSource(@NotNull ZombiesDatabase database, @NotNull PlayerViewProvider viewProvider,
+    public BasicZombiesPlayerSource(@NotNull ZombiesDatabase database,
+            @NotNull Executor executor, @NotNull PlayerViewProvider viewProvider,
             @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
             @NotNull Map<Key, MobModel> mobModelMap, @NotNull ContextManager contextManager,
             @NotNull KeyParser keyParser) {
         this.database = Objects.requireNonNull(database, "database");
+        this.executor = Objects.requireNonNull(executor, "executor");
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
         this.mobModelMap = Objects.requireNonNull(mobModelMap, "mobModelMap");
@@ -246,7 +251,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         hologram.setInstance(instance);
         DependencyModule leaderboardModule =
                 new BestTimeLeaderboard.Module(database, playerView.getUUID(), hologram, mapSettingsInfo, viewProvider,
-                        MiniMessage.miniMessage());
+                        MiniMessage.miniMessage(), executor);
         BestTimeLeaderboard leaderboard = contextManager.makeContext(leaderboardInfo.data())
                 .provide(new ModuleDependencyProvider(keyParser, leaderboardModule));
 

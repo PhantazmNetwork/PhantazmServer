@@ -118,6 +118,11 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
                     bestTimes.computeIfAbsent(playerCount, unused -> new ArrayList<>()).add(time);
                 }
             }
+            for (int i = minPlayerCount; i <= maxPlayerCount; ++i) {
+                if (!bestTimes.containsKey(i)) {
+                    bestTimes.put(i, new ArrayList<>());
+                }
+            }
 
             return bestTimes;
         });
@@ -128,9 +133,9 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
                                                                                      int minPlayerCount, int maxPlayerCount, @Nullable String category) {
         return executeSQL(connection -> {
             Result<Record3<Long, Integer, Integer>> result =
-                    using(connection).select(field("best_time", SQLDataType.BIGINT), field("rank", SQLDataType.INTEGER), field("player_count", SQLDataType.INTEGER))
-                            .from(select(field("best_time"), field("player_uuid"),
-                                    rowNumber().over(orderBy(field("best_time"), field("player_uuid")))
+                    using(connection).select(field("best_time", SQLDataType.BIGINT), field("player_count", SQLDataType.INTEGER), field("rank", SQLDataType.INTEGER))
+                            .from(select(field("best_time"), field("player_uuid"), field("player_count"),
+                                    rowNumber().over(partitionBy(field("player_count")).orderBy(field("best_time"), field("player_uuid")))
                                             .as("rank")).from(table("zombies_player_map_best_time"))
                                     .where(field("map_key").eq(mapKey.asString()))
                                     .and(field("player_count").between(minPlayerCount, maxPlayerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()))
