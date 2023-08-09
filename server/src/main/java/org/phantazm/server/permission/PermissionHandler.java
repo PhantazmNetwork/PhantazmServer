@@ -11,8 +11,6 @@ public interface PermissionHandler {
 
     void applyPermissions(@NotNull UUID uuid, @NotNull CommandSender sender);
 
-    void flush();
-
     void reload();
 
     void addGroupPermission(@NotNull String group, @NotNull Permission permission);

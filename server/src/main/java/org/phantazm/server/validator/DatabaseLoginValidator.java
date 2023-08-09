@@ -141,11 +141,6 @@ public class DatabaseLoginValidator implements LoginValidator {
         });
     }
 
-    @Override
-    public void flush() {
-
-    }
-
     private static void write(ThrowingRunnable<SQLException> supplier) {
         try {
             supplier.run();

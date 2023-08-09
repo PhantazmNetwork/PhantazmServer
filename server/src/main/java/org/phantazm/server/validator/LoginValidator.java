@@ -22,6 +22,4 @@ public interface LoginValidator {
     boolean isWhitelisted(@NotNull UUID uuid);
 
     void removeWhitelist(@NotNull UUID uuid);
-
-    void flush();
 }

@@ -180,7 +180,6 @@ public final class PhantazmServer {
         HikariFeature.end();
         ExecutorFeature.shutdown();
         MinecraftServer.stopCleanly();
-        ServerCommandFeature.flushPermissions();
     }
 
     private static boolean isUnsafe(String[] args) {

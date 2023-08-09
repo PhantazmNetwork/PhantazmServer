@@ -54,10 +54,4 @@ public final class ServerCommandFeature {
     public static @NotNull PermissionHandler permissionHandler() {
         return FeatureUtils.check(permissionHandler);
     }
-
-    public static void flushPermissions() {
-        if (permissionHandler != null) {
-            permissionHandler.flush();
-        }
-    }
 }

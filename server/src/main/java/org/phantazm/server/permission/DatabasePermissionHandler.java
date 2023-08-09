@@ -138,11 +138,6 @@ public class DatabasePermissionHandler implements PermissionHandler {
     }
 
     @Override
-    public void flush() {
-
-    }
-
-    @Override
     public void reload() {
         executor.execute(this::applyAll0);
     }
