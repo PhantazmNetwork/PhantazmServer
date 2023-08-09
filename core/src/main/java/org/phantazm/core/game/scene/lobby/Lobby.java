@@ -10,7 +10,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.event.PlayerJoinLobbyEvent;
 import org.phantazm.core.game.scene.InstanceScene;
@@ -130,8 +130,8 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     }
 
     @Override
-    public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
-        return players;
+    public @Unmodifiable @NotNull Map<UUID, PlayerView> getPlayers() {
+        return Map.copyOf(players);
     }
 
     @Override

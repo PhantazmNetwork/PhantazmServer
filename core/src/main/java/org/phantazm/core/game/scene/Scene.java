@@ -2,7 +2,7 @@ package org.phantazm.core.game.scene;
 
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Tickable;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
@@ -23,7 +23,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
      *
      * @return A view of the {@link PlayerView}s associated the scene.
      */
-    @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers();
+    @Unmodifiable @NotNull Map<UUID, PlayerView> getPlayers();
 
     @NotNull UUID getUUID();
 

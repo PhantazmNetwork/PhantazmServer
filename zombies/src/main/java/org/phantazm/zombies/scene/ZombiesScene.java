@@ -15,7 +15,7 @@ import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnmodifiableView;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.InstanceScene;
@@ -244,9 +244,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     }
 
     @Override
-    public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
-        return zombiesPlayers.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().module().getPlayerView()));
+    public @Unmodifiable @NotNull Map<UUID, PlayerView> getPlayers() {
+        Map<UUID, ZombiesPlayer> playerViewCopy = Map.copyOf(zombiesPlayers);
+
+        return playerViewCopy.entrySet().stream().collect(
+                Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> entry.getValue().module().getPlayerView()));
     }
 
     @Override
