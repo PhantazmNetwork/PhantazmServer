@@ -67,6 +67,8 @@ public final class PhantazmServer {
      * @param args Do you even know java?
      *             I don't know java.
      *             At all.
+     *             
+     *             - Thamid123
      */
     public static void main(String[] args) {
         MinecraftServer minecraftServer = MinecraftServer.init();
