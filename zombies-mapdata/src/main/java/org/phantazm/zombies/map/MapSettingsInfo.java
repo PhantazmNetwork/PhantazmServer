@@ -1,5 +1,8 @@
 package org.phantazm.zombies.map;
 
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -150,5 +153,10 @@ public record MapSettingsInfo(int mapDataVersion,
                 Component.text("Fully repaired!", NamedTextColor.GREEN),
                 Component.text("You cannot repair that window while enemies are nearby!", NamedTextColor.RED),
                 Component.text("❤", NamedTextColor.RED), "");
+    }
+
+    @Default("chunkLoadRange")
+    public static @NotNull ConfigElement defaultChunkLoadRange() {
+        return ConfigPrimitive.of(10);
     }
 }

@@ -96,13 +96,13 @@ public class BasicRoleStore implements RoleStore {
     }
 
     @Override
-    public void giveRole(@NotNull UUID uuid, @NotNull String identifier) {
+    public boolean giveRole(@NotNull UUID uuid, @NotNull String identifier) {
         Role role = roleMap.get(identifier);
         if (role == null) {
-            return;
+            return false;
         }
 
-        this.roleCache.get(uuid, this::loadRoles).add(role);
+        boolean added = this.roleCache.get(uuid, this::loadRoles).add(role);
         executor.execute(() -> {
             try (Connection connection = dataSource.getConnection()) {
                 using(connection).insertInto(table("player_roles"), field("player_uuid"), field("player_role"))
@@ -120,17 +120,19 @@ public class BasicRoleStore implements RoleStore {
 
             player.getAllPermissions().addAll(role.grantedPermissions());
         });
+
+        return added;
     }
 
     @Override
-    public void removeRole(@NotNull UUID uuid, @NotNull String identifier) {
+    public boolean removeRole(@NotNull UUID uuid, @NotNull String identifier) {
         Role role = roleMap.get(identifier);
         if (role == null) {
-            return;
+            return false;
         }
 
         Set<Role> roles = this.roleCache.get(uuid, this::loadRoles);
-        roles.remove(role);
+        boolean removed = roles.remove(role);
 
         executor.execute(() -> {
             try (Connection connection = dataSource.getConnection()) {
@@ -154,6 +156,8 @@ public class BasicRoleStore implements RoleStore {
             //re-apply roles
             applyRoles0(player, roles);
         });
+
+        return removed;
     }
 
     private Set<Role> loadRoles(UUID key) {

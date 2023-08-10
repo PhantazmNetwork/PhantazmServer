@@ -16,7 +16,7 @@ public interface RoleStore {
 
     @NotNull Optional<Role> role(@NotNull String identifier);
 
-    void giveRole(@NotNull UUID uuid, @NotNull String identifier);
+    boolean giveRole(@NotNull UUID uuid, @NotNull String identifier);
 
-    void removeRole(@NotNull UUID uuid, @NotNull String identifier);
+    boolean removeRole(@NotNull UUID uuid, @NotNull String identifier);
 }
