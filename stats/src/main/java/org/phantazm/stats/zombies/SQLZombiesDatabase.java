@@ -108,14 +108,16 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
             Int2ObjectMap<List<BestTime>> bestTimes = new Int2ObjectOpenHashMap<>(maxPlayerCount - minPlayerCount + 1);
             try (ResultSet resultSet = using(connection).select(field("player_uuid"), field("best_time"), field("player_count"))
                     .from(table("zombies_player_map_best_time")).where(field("map_key").eq(mapKey.asString()))
-                    .and(field("player_count").between(minPlayerCount, maxPlayerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()).orderBy(field("best_time"), field("player_uuid"))
-                    .limit(maxLength).fetchResultSet()) {
+                    .and(field("player_count").between(minPlayerCount, maxPlayerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()).orderBy(field("best_time"), field("player_uuid")).fetchResultSet()) {
                 while (resultSet.next()) {
+                    int playerCount = resultSet.getInt("player_count");
+                    List<BestTime> bestTimeList = bestTimes.computeIfAbsent(playerCount, unused -> new ArrayList<>());
+                    if (bestTimeList.size() >= maxLength) {
+                        continue;
+                    }
+
                     UUID uuid = UUID.fromString(resultSet.getString("player_uuid"));
                     long bestTime = resultSet.getLong("best_time");
-                    int playerCount = resultSet.getInt("player_count");
-
-                    List<BestTime> bestTimeList = bestTimes.computeIfAbsent(playerCount, unused -> new ArrayList<>());
                     bestTimeList.add(new BestTime(bestTimeList.size() + 1, uuid, bestTime));
                 }
             }
