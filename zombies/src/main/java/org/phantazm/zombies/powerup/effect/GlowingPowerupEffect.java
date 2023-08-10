@@ -41,26 +41,19 @@ public class GlowingPowerupEffect implements PowerupEffectComponent {
         }
     }
 
-    private final Data data;
+    private final PowerupEffect effect;
 
     @FactoryMethod
     public GlowingPowerupEffect(@NotNull Data data) {
-        this.data = data;
+        this.effect = new Effect(data);
     }
-
-
+    
     @Override
     public @NotNull PowerupEffect apply(@NotNull ZombiesScene scene) {
-        return new Effect(data);
+        return effect;
     }
 
-    private static class Effect implements PowerupEffect {
-        private final Data data;
-
-        private Effect(Data data) {
-            this.data = data;
-        }
-
+    private record Effect(Data data) implements PowerupEffect {
         @Override
         public void apply(@NotNull LivingEntity entity) {
             entity.setTeam(Container.COLOR_TEAMS.get(data.glowColor.toString()));
