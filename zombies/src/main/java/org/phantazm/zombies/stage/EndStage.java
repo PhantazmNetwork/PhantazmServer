@@ -155,7 +155,7 @@ public class EndStage implements Stage {
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
                 ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
                 stats.setWins(stats.getWins() + 1);
-                database.synchronizeBestTime(zombiesPlayer.getUUID(), settings.id(), zombiesPlayers.size(), null, ticksSinceStart.get());
+                database.synchronizeBestTime(zombiesPlayer.getUUID(), settings.id(), zombiesPlayers.size(), "", ticksSinceStart.get());
             }
 
             this.hasWon = true;

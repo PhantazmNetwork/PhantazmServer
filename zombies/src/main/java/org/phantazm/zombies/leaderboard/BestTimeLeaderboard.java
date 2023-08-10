@@ -177,7 +177,7 @@ public class BestTimeLeaderboard {
     }
 
     private void loadMapTimes(long oldStamp) {
-        database.getMapBestTimes(settings.id(), 1, 4, null, data.length()).whenComplete((bestTimes, throwable) -> {
+        database.getMapBestTimes(settings.id(), 1, 4, "", data.length()).whenComplete((bestTimes, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Failed to fetch best times on {}", settings.id(), throwable);
                 return;
@@ -258,7 +258,7 @@ public class BestTimeLeaderboard {
     }
 
     private void loadViewerTimes(long oldStamp) {
-        database.getMapPlayerBestTimes(viewer, settings.id(), 1, 4, null).whenComplete((bestTimes, throwable) -> {
+        database.getMapPlayerBestTimes(viewer, settings.id(), 1, 4, "").whenComplete((bestTimes, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Failed to fetch best times for {} on {}", viewer, settings.id(), throwable);
                 return;

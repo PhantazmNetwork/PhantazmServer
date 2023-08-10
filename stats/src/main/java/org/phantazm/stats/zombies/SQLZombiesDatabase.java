@@ -5,9 +5,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.*;
+import org.jooq.Record3;
+import org.jooq.Result;
 import org.jooq.impl.SQLDataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,10 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -70,19 +74,21 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
 
     @Override
     @SuppressWarnings("removal") // TODO: fix the bad type stuff with least
-    public @NotNull CompletableFuture<Void> synchronizeBestTime(@NotNull UUID playerUUID, @NotNull Key mapKey, int playerCount, @Nullable String category, long time) {
+    public @NotNull CompletableFuture<Void> synchronizeBestTime(@NotNull UUID playerUUID, @NotNull Key mapKey,
+            int playerCount, @NotNull String category, long time) {
         return executeSQL(connection -> {
             using(connection).insertInto(table("zombies_player_map_best_time"), field("player_uuid"), field("map_key"),
                             field("best_time"), field("player_count"), field("category"))
-                    .values(playerUUID, mapKey.asString(), time, playerCount, category)
-                    .onDuplicateKeyUpdate().set(field("player_uuid"), playerUUID)
-                    .set(field("map_key"), mapKey.asString()).set(field("best_time", SQLDataType.BIGINT), field("best_time", SQLDataType.BIGINT).least(time)).set(field("player_count"), playerCount).execute();
+                    .values(playerUUID, mapKey.asString(), time, playerCount, category).onDuplicateKeyUpdate()
+                    .set(field("player_uuid"), playerUUID).set(field("map_key"), mapKey.asString())
+                    .set(field("best_time", SQLDataType.BIGINT), field("best_time", SQLDataType.BIGINT).least(time))
+                    .set(field("player_count"), playerCount).set(field("category"), category).execute();
         });
     }
 
     @Override
     public @NotNull CompletableFuture<ZombiesPlayerMapStats> getMapStats(@NotNull UUID playerUUID,
-                                                                         @NotNull Key mapKey) {
+            @NotNull Key mapKey) {
         return executeSQL(connection -> {
             Record result = using(connection).select().from(table("zombies_player_map_stats"))
                     .where(field("player_uuid").eq(playerUUID.toString())).and(field("map_key").eq(mapKey.asString()))
@@ -102,13 +108,16 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<Int2ObjectMap<List<BestTime>>> getMapBestTimes(@NotNull Key mapKey, int minPlayerCount, int maxPlayerCount,
-                                                                                     @Nullable String category, int maxLength) {
+    public @NotNull CompletableFuture<Int2ObjectMap<List<BestTime>>> getMapBestTimes(@NotNull Key mapKey,
+            int minPlayerCount, int maxPlayerCount, @NotNull String category, int maxLength) {
         return executeSQL(connection -> {
             Int2ObjectMap<List<BestTime>> bestTimes = new Int2ObjectOpenHashMap<>(maxPlayerCount - minPlayerCount + 1);
-            try (ResultSet resultSet = using(connection).select(field("player_uuid"), field("best_time"), field("player_count"))
-                    .from(table("zombies_player_map_best_time")).where(field("map_key").eq(mapKey.asString()))
-                    .and(field("player_count").between(minPlayerCount, maxPlayerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()).orderBy(field("best_time"), field("player_uuid")).fetchResultSet()) {
+            try (ResultSet resultSet = using(connection).select(field("player_uuid"), field("best_time"),
+                            field("player_count")).from(table("zombies_player_map_best_time"))
+                    .where(field("map_key").eq(mapKey.asString()))
+                    .and(field("player_count").between(minPlayerCount, maxPlayerCount))
+                    .and(field("category").eq(category)).orderBy(field("best_time"), field("player_uuid"))
+                    .fetchResultSet()) {
                 while (resultSet.next()) {
                     int playerCount = resultSet.getInt("player_count");
                     List<BestTime> bestTimeList = bestTimes.computeIfAbsent(playerCount, unused -> new ArrayList<>());
@@ -132,16 +141,18 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<Int2ObjectMap<BestTime>> getMapPlayerBestTimes(@NotNull UUID playerUUID, @NotNull Key mapKey,
-                                                                                     int minPlayerCount, int maxPlayerCount, @Nullable String category) {
+    public @NotNull CompletableFuture<Int2ObjectMap<BestTime>> getMapPlayerBestTimes(@NotNull UUID playerUUID,
+            @NotNull Key mapKey, int minPlayerCount, int maxPlayerCount, @NotNull String category) {
         return executeSQL(connection -> {
             Result<Record3<Long, Integer, Integer>> result =
-                    using(connection).select(field("best_time", SQLDataType.BIGINT), field("player_count", SQLDataType.INTEGER), field("rank", SQLDataType.INTEGER))
+                    using(connection).select(field("best_time", SQLDataType.BIGINT),
+                                    field("player_count", SQLDataType.INTEGER), field("rank", SQLDataType.INTEGER))
                             .from(select(field("best_time"), field("player_uuid"), field("player_count"),
-                                    rowNumber().over(partitionBy(field("player_count")).orderBy(field("best_time"), field("player_uuid")))
-                                            .as("rank")).from(table("zombies_player_map_best_time"))
-                                    .where(field("map_key").eq(mapKey.asString()))
-                                    .and(field("player_count").between(minPlayerCount, maxPlayerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()))
+                                    rowNumber().over(partitionBy(field("player_count")).orderBy(field("best_time"),
+                                            field("player_uuid"))).as("rank")).from(
+                                            table("zombies_player_map_best_time")).where(field("map_key").eq(mapKey.asString()))
+                                    .and(field("player_count").between(minPlayerCount, maxPlayerCount))
+                                    .and(field("category").eq(category)))
                             .where(field("player_uuid").eq(playerUUID.toString())).fetch();
 
             Int2ObjectMap<BestTime> times = new Int2ObjectOpenHashMap<>(result.size());
@@ -157,7 +168,8 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
                 consumer.accept(connection);
-            } catch (SQLException e) {
+            }
+            catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }, executor).whenComplete(this::logException);
@@ -167,7 +179,8 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
         return CompletableFuture.supplyAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
                 return function.apply(connection);
-            } catch (SQLException e) {
+            }
+            catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }, executor).whenComplete(this::logException);
