@@ -254,6 +254,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         Entity armorStand = new Entity(EntityType.ARMOR_STAND);
         armorStand.setNoGravity(true);
         armorStand.setInvisible(true);
+        armorStand.updateViewableRule(player -> player.getUuid().equals(playerView.getUUID()));
         armorStand.setInstance(instance);
         DependencyModule leaderboardModule =
                 new BestTimeLeaderboard.Module(database, playerView.getUUID(), hologram, leaderboardInfo.gap(), armorStand, mapSettingsInfo, viewProvider,
@@ -261,7 +262,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         BestTimeLeaderboard leaderboard = contextManager.makeContext(leaderboardInfo.data())
                 .provide(new ModuleDependencyProvider(keyParser, leaderboardModule));
         eventNode.addListener(PlayerEntityInteractEvent.class, event -> {
-            if (event.getTarget() == armorStand) {
+            if (event.getPlayer().getUuid().equals(playerView.getUUID()) && event.getTarget() == armorStand) {
                 leaderboard.cycle();
             }
         });
