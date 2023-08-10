@@ -18,7 +18,7 @@ public class PartyCommand {
 
     public static @NotNull Command partyCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
             @NotNull GuildHolder<Party> partyHolder, @NotNull PlayerViewProvider viewProvider,
-            @NotNull PartyCreator partyCreator, @NotNull Random random, int creatorRank) {
+            @NotNull PartyCreator partyCreator, @NotNull Random random, int creatorRank, int defaultRank) {
         Command command = new Command("party", "p");
         command.addSubcommand(PartyCreateCommand.createCommand(config, partyHolder, viewProvider, partyCreator));
         command.addSubcommand(
@@ -29,6 +29,8 @@ public class PartyCommand {
         command.addSubcommand(
                 PartyInviteCommand.inviteCommand(config, miniMessage, partyHolder, viewProvider, partyCreator));
         command.addSubcommand(PartyListCommand.listCommand(config, miniMessage, partyHolder.uuidToGuild()));
+        command.addSubcommand(PartyTransferCommand.transferCommand(config, miniMessage, partyHolder.uuidToGuild(),
+                viewProvider, creatorRank, defaultRank));
 
         return command;
     }

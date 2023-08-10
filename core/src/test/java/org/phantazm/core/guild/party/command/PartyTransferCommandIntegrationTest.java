@@ -15,38 +15,18 @@ import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @EnvTest
-public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegrationTest {
+public class PartyTransferCommandIntegrationTest extends AbstractPartyCommandIntegrationTest {
 
-    @SuppressWarnings({"UnstableApiUsage", "JUnitMalformedDeclaration"})
+    @SuppressWarnings("UnstableApiUsage")
     @Test
-    public void testNotInPartyAfterJoiningOtherPlayerNotInParty(Env env) {
+    public void partyOwnerCanTransferToOtherPlayer(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
-        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider,
-                partyCreator, new Random(), 1, 0);
-        env.process().command().register(command);
-        Instance instance = env.createFlatInstance();
-        Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
-        firstPlayer.setUsernameField("first");
-        Player secondPlayer = env.createPlayer(instance, Pos.ZERO);
-        secondPlayer.setUsernameField("second");
-
-        env.process().command().execute(secondPlayer, "party join first");
-
-        assertFalse(partyHolder.uuidToGuild().containsKey(firstPlayer.getUuid()));
-        assertFalse(partyHolder.uuidToGuild().containsKey(secondPlayer.getUuid()));
-    }
-
-    @SuppressWarnings({"UnstableApiUsage", "JUnitMalformedDeclaration"})
-    @Test
-    public void testNotInPartyWithoutInviteAndJoiningOtherPlayerInParty(Env env) {
-        PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
-        PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
-        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider,
-                partyCreator, new Random(), 1, 0);
+        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder,
+                viewProvider, partyCreator, new Random(), 1, 0);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -55,20 +35,23 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
         Party party = partyHolder.uuidToGuild().get(firstPlayer.getUuid());
         Player secondPlayer = env.createPlayer(instance, Pos.ZERO);
         secondPlayer.setUsernameField("second");
-
+        env.process().command().execute(firstPlayer, "party invite second");
         env.process().command().execute(secondPlayer, "party join first");
 
-        assertFalse(partyHolder.uuidToGuild().containsKey(secondPlayer.getUuid()));
-        assertFalse(party.getMemberManager().hasMember(secondPlayer.getUuid()));
+        env.process().command().execute(firstPlayer, "party transfer second");
+
+        assertEquals(secondPlayer.getUuid(), party.getOwner().get().getPlayerView().getUUID());
+        assertEquals(0, party.getMemberManager().getMember(firstPlayer.getUuid()).rank());
+        assertEquals(1, party.getMemberManager().getMember(secondPlayer.getUuid()).rank());
     }
 
-    @SuppressWarnings({"UnstableApiUsage", "JUnitMalformedDeclaration"})
+    @SuppressWarnings("UnstableApiUsage")
     @Test
-    public void testInPartyAfterInviteAndJoiningOtherPlayerInParty(Env env) {
+    public void partyOwnerCannotTransferToSelf(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
-        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider,
-                partyCreator, new Random(), 1, 0);
+        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder,
+                viewProvider, partyCreator, new Random(), 1, 0);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
@@ -77,13 +60,44 @@ public class PartyJoinCommandIntegrationTest extends AbstractPartyCommandIntegra
         Party party = partyHolder.uuidToGuild().get(firstPlayer.getUuid());
         Player secondPlayer = env.createPlayer(instance, Pos.ZERO);
         secondPlayer.setUsernameField("second");
-        party.getInvitationManager().invite(party.getMemberManager().getMember(firstPlayer.getUuid()),
-                viewProvider.fromPlayer(secondPlayer));
-
+        env.process().command().execute(firstPlayer, "party invite second");
         env.process().command().execute(secondPlayer, "party join first");
 
-        assertEquals(party, partyHolder.uuidToGuild().get(secondPlayer.getUuid()));
-        assertTrue(party.getMemberManager().hasMember(secondPlayer.getUuid()));
+        env.process().command().execute(firstPlayer, "party transfer first");
+
+        assertEquals(firstPlayer.getUuid(), party.getOwner().get().getPlayerView().getUUID());
+        assertEquals(1, party.getMemberManager().getMember(firstPlayer.getUuid()).rank());
+        assertEquals(0, party.getMemberManager().getMember(secondPlayer.getUuid()).rank());
+    }
+
+    @SuppressWarnings("UnstableApiUsage")
+    @Test
+    public void nonOwnerCannotTransferToOtherPlayer(Env env) {
+        PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
+        PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
+        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder,
+                viewProvider, partyCreator, new Random(), 1, 0);
+        env.process().command().register(command);
+        Instance instance = env.createFlatInstance();
+        Player firstPlayer = env.createPlayer(instance, Pos.ZERO);
+        firstPlayer.setUsernameField("first");
+        env.process().command().execute(firstPlayer, "party create");
+        Party party = partyHolder.uuidToGuild().get(firstPlayer.getUuid());
+        Player secondPlayer = env.createPlayer(instance, Pos.ZERO);
+        secondPlayer.setUsernameField("second");
+        env.process().command().execute(firstPlayer, "party invite second");
+        env.process().command().execute(secondPlayer, "party join first");
+        Player thirdPlayer = env.createPlayer(instance, Pos.ZERO);
+        thirdPlayer.setUsernameField("third");
+        env.process().command().execute(firstPlayer, "party invite third");
+        env.process().command().execute(thirdPlayer, "party join first");
+
+        env.process().command().execute(secondPlayer, "party transfer third");
+
+        assertEquals(firstPlayer.getUuid(), party.getOwner().get().getPlayerView().getUUID());
+        assertEquals(1, party.getMemberManager().getMember(firstPlayer.getUuid()).rank());
+        assertEquals(0, party.getMemberManager().getMember(secondPlayer.getUuid()).rank());
+        assertEquals(0, party.getMemberManager().getMember(secondPlayer.getUuid()).rank());
     }
 
 }

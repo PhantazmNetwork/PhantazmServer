@@ -54,7 +54,7 @@ public class PartyFeature {
                 .setMinimumJoinRank(config.minimumJoinRank()).build();
         Command partyCommand =
                 PartyCommand.partyCommand(config.commandConfig(), miniMessage, partyHolder, viewProvider, partyCreator,
-                        new Random(), config.creatorRank());
+                        new Random(), config.creatorRank(), config.defaultRank());
         commandManager.register(partyCommand);
 
         schedulerManager.scheduleTask(() -> {
