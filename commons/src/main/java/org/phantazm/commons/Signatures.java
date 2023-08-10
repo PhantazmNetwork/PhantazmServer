@@ -39,13 +39,13 @@ public final class Signatures {
     }
 
     private static ScalarSignature<Component> component() {
-        return ScalarSignature.of(Token.ofClass(Component.class),
-                element -> MiniMessage.miniMessage().deserialize(element.asString()), component -> component == null
-                                                                                                   ? ConfigPrimitive.NULL
-                                                                                                   : ConfigPrimitive.of(
-                                                                                                           MiniMessage.miniMessage()
-                                                                                                                   .serialize(
-                                                                                                                           component)));
+        return ScalarSignature.of(Token.ofClass(Component.class), element -> {
+            return MiniMessage.miniMessage().deserialize(element.asString());
+        }, component -> {
+            return component == null
+                   ? ConfigPrimitive.NULL
+                   : ConfigPrimitive.of(MiniMessage.miniMessage().serialize(component));
+        });
     }
 
     private static Signature<Sound> sound() {
@@ -173,7 +173,6 @@ public final class Signatures {
                         Map.entry("lengths", SignatureParameter.parameter(Token.ofClass(Vec3D.class)))).matchingNames()
                 .matchingTypeHints().build();
     }
-
 
     private static Signature<Vec3I> vec3I() {
         return Signature.builder(Token.ofClass(Vec3I.class),
