@@ -14,6 +14,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
@@ -263,8 +264,15 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                 .provide(new ModuleDependencyProvider(keyParser, leaderboardModule));
         eventNode.addListener(PlayerEntityInteractEvent.class, event -> {
             if (event.getPlayer().getUuid().equals(playerView.getUUID()) && event.getTarget() == armorStand) {
+                playerView.getPlayer().ifPresent(player -> player.playSound(leaderboardInfo.clickSound(), armorStand));
                 leaderboard.cycle();
             }
+        });
+        eventNode.addListener(EntityAttackEvent.class, event -> {
+           if (event.getEntity().getUuid().equals(playerView.getUUID()) && event.getTarget() == armorStand) {
+               playerView.getPlayer().ifPresent(player -> player.playSound(leaderboardInfo.clickSound(), armorStand));
+               leaderboard.cycle();
+           }
         });
 
         ZombiesPlayerModule module =

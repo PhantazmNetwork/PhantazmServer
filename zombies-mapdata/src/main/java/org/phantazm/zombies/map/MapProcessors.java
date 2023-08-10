@@ -54,12 +54,11 @@ public final class MapProcessors {
             Key spawnRule = ConfigProcessors.key().dataFromElement(element.getElementOrThrow("spawnRule"));
             boolean linkToWindow = element.getBooleanOrDefault(true, "linkToWindow");
 
-            ConfigElement positionElement = element.getElementOrDefault((ConfigElement)null, "linkedWindowPosition");
+            ConfigElement positionElement = element.getElementOrDefault((ConfigElement) null, "linkedWindowPosition");
             Vec3I linkedWindowPosition;
             if (positionElement != null) {
                 linkedWindowPosition = VectorConfigProcessors.vec3I().dataFromElement(positionElement);
-            }
-            else {
+            } else {
                 linkedWindowPosition = null;
             }
 
@@ -89,15 +88,16 @@ public final class MapProcessors {
         public LeaderboardInfo dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             Vec3D location = VectorConfigProcessors.vec3D().dataFromElement(element.getElementOrThrow("location"));
             double gap = element.getNumberOrThrow("gap").doubleValue();
+            Sound clickSound = ConfigProcessors.sound().dataFromElement(element.getElementOrThrow("clickSound"));
             ConfigNode data = element.getNodeOrThrow("data");
 
-            return new LeaderboardInfo(location, gap, data);
+            return new LeaderboardInfo(location, gap, clickSound, data);
         }
 
         @Override
         public @NotNull ConfigElement elementFromData(LeaderboardInfo leaderboardInfo) throws ConfigProcessException {
             return ConfigNode.of("location", VectorConfigProcessors.vec3D().elementFromData(leaderboardInfo.location()),
-                    "gap", leaderboardInfo.gap(), "data", leaderboardInfo.data());
+                    "gap", leaderboardInfo.gap(), "clickSound", ConfigProcessors.sound().elementFromData(leaderboardInfo.clickSound()), "data", leaderboardInfo.data());
         }
     };
 
