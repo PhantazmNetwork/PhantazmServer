@@ -16,6 +16,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.WebhookInfo;
@@ -53,6 +54,7 @@ public class EndStage implements Stage {
 
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final RoundHandler roundHandler;
+    private final ZombiesDatabase database;
 
     private final Map<UUID, SidebarUpdater> sidebarUpdaters;
     private final HttpClient client = HttpClient.newHttpClient();
@@ -63,7 +65,7 @@ public class EndStage implements Stage {
             @NotNull TickFormatter tickFormatter, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
             @NotNull Wrapper<Long> remainingTicks, @NotNull Wrapper<Long> ticksSinceStart,
             @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
-            @NotNull RoundHandler roundHandler) {
+            @NotNull RoundHandler roundHandler, @NotNull ZombiesDatabase database) {
         this.instance = Objects.requireNonNull(instance, "instance");
         this.settings = Objects.requireNonNull(settings, "settings");
         this.webhook = Objects.requireNonNull(webhook, "webhook");
@@ -73,6 +75,7 @@ public class EndStage implements Stage {
         this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
         this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
+        this.database = Objects.requireNonNull(database, "database");
 
         this.sidebarUpdaters = new HashMap<>();
     }
@@ -152,6 +155,7 @@ public class EndStage implements Stage {
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
                 ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
                 stats.setWins(stats.getWins() + 1);
+                database.synchronizeBestTime(zombiesPlayer.getUUID(), settings.id(), zombiesPlayers.size(), null, ticksSinceStart.get());
             }
 
             this.hasWon = true;

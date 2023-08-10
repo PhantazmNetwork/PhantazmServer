@@ -36,10 +36,9 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
     }
 
-    @SuppressWarnings("removal") // TODO: fix the bad type stuff with least
     @Override
     public @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats,
-                                                                             int playerCount, @Nullable String category, @Nullable Long time) {
+                                                                             int playerCount, @Nullable String category) {
         return executeSQL(connection -> {
             DSLContext context = using(connection);
             context.insertInto(table("zombies_player_map_stats"), field("player_uuid"), field("map_key"),
@@ -67,14 +66,18 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
                     .set(field("regular_hits"), field("regular_hits", SQLDataType.INTEGER).plus(stats.getRegularHits()))
                     .set(field("headshot_hits"),
                             field("headshot_hits", SQLDataType.INTEGER).plus(stats.getHeadshotHits())).execute();
+        });
+    }
 
-            if (time != null) {
-                context.insertInto(table("zombies_player_map_best_time"), field("player_uuid"), field("map_key"),
-                                field("best_time"), field("player_count"), field("category"))
-                        .values(stats.getPlayerUUID(), stats.getMapKey().asString(), time, playerCount, category)
-                        .onDuplicateKeyUpdate().set(field("player_uuid"), stats.getPlayerUUID())
-                        .set(field("map_key"), stats.getMapKey()).set(field("best_time", SQLDataType.BIGINT), field("best_time", SQLDataType.BIGINT).least(time)).set(field("player_count"), 4).execute();
-            }
+    @Override
+    @SuppressWarnings("removal") // TODO: fix the bad type stuff with least
+    public @NotNull CompletableFuture<Void> synchronizeBestTime(@NotNull UUID playerUUID, @NotNull Key mapKey, int playerCount, @Nullable String category, long time) {
+        return executeSQL(connection -> {
+            using(connection).insertInto(table("zombies_player_map_best_time"), field("player_uuid"), field("map_key"),
+                            field("best_time"), field("player_count"), field("category"))
+                    .values(playerUUID, mapKey.asString(), time, playerCount, category)
+                    .onDuplicateKeyUpdate().set(field("player_uuid"), playerUUID)
+                    .set(field("map_key"), mapKey.asString()).set(field("best_time", SQLDataType.BIGINT), field("best_time", SQLDataType.BIGINT).least(time)).set(field("player_count"), playerCount).execute();
         });
     }
 
