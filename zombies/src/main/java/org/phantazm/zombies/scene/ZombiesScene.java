@@ -214,7 +214,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     }
                 }).join();
 
-                if (allowedRequestUUID != null) {
+                if (allowedRequestUUID != null && joinRequest.getUUID().equals(allowedRequestUUID)) {
                     stageTransition.setCurrentStage(StageKeys.IN_GAME);
                 }
             }, () -> {
