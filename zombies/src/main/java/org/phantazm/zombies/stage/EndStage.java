@@ -226,7 +226,7 @@ public class EndStage implements Stage {
                 }
 
                 String playerList = String.join(", ", formattedUsernames);
-                String output = MessageFormat.format(webhook.webhookFormat(), date, time, playerList);
+                String output = MessageFormat.format(webhook.webhookFormat(), date, time, zombiesPlayers.size(), playerList);
                 HttpRequest request = HttpRequest.newBuilder(URI.create(webhook.webhookURL()))
                         .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(output))
                         .build();
