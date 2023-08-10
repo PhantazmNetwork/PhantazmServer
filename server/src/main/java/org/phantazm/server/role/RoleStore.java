@@ -5,11 +5,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public interface RoleStore {
     void register(@NotNull Role role);
 
-    @NotNull Role getStylingRole(@NotNull Player player);
+    @NotNull CompletableFuture<Role> getStylingRole(@NotNull Player player);
 
     void applyRoles(@NotNull Player player);
 

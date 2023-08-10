@@ -25,6 +25,7 @@ import org.phantazm.server.role.RoleStore;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 /**
@@ -60,8 +61,8 @@ public final class ChatFeature {
             }
         };
 
-        Function<? super Player, ? extends Component> nameFormatter = (player) -> {
-            return roleStore.getStylingRole(player).styleName(player);
+        Function<? super Player, ? extends CompletableFuture<Component>> nameFormatter = (player) -> {
+            return roleStore.getStylingRole(player).thenApply(role -> role.styleName(player));
         };
 
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
@@ -93,8 +94,13 @@ public final class ChatFeature {
             }
 
             channel.findAudience(uuid, audience -> {
-                Component message = channel.formatMessage(event.getPlayer(), event.getMessage());
-                audience.sendMessage(message);
+                channel.formatMessage(event.getPlayer(), event.getMessage()).whenComplete((component, throwable) -> {
+                    if (component == null) {
+                        return;
+                    }
+
+                    audience.sendMessage(component);
+                });
             }, failure -> {
                 player.sendMessage(failure.left());
                 if (failure.rightBoolean()) {

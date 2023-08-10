@@ -7,6 +7,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -30,6 +31,6 @@ public interface ChatChannel {
      *
      * @return The formatted {@link Component} message
      */
-    @NotNull Component formatMessage(@NotNull Player player, @NotNull String message);
+    @NotNull CompletableFuture<Component> formatMessage(@NotNull Player player, @NotNull String message);
 
 }

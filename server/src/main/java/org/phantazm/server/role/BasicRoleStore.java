@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
@@ -49,9 +50,20 @@ public class BasicRoleStore implements RoleStore {
     }
 
     @Override
-    public @NotNull Role getStylingRole(@NotNull Player player) {
-        Set<Role> roles = roleCache.get(player.getUuid(), this::loadRoles);
+    public @NotNull CompletableFuture<Role> getStylingRole(@NotNull Player player) {
+        Set<Role> currentRole = roleCache.getIfPresent(player.getUuid());
+        if (currentRole != null) {
+            //avoid async call if we can
+            return CompletableFuture.completedFuture(getStylingRole0(currentRole));
+        }
 
+        return CompletableFuture.supplyAsync(() -> {
+            Set<Role> roles = roleCache.get(player.getUuid(), this::loadRoles);
+            return getStylingRole0(roles);
+        }, executor);
+    }
+
+    private Role getStylingRole0(Set<Role> roles) {
         Role stylingRole = Role.NONE;
         int highestPriority = Integer.MIN_VALUE;
         for (Role role : roles) {

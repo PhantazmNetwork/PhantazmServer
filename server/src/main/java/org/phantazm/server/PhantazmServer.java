@@ -67,7 +67,7 @@ public final class PhantazmServer {
      * @param args Do you even know java?
      *             I don't know java.
      *             At all.
-     *             
+     *             <p>
      *             - Thamid123
      */
     public static void main(String[] args) {
@@ -249,9 +249,6 @@ public final class PhantazmServer {
                     PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
                     zombiesConfig, mappingProcessorSource);
 
-            routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
-            routerStore.putRouter(RouterKeys.LOBBY_SCENE_ROUTER, LobbyFeature.getLobbyRouter());
-
             RoleFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor(), yamlCodec,
                     contextManager, ServerCommandFeature::permissionHandler);
 
@@ -267,6 +264,9 @@ public final class PhantazmServer {
             ChatFeature.initialize(viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
                     RoleFeature.roleStore());
             CommandFeature.initialize(routerStore, viewProvider, LobbyFeature.getFallback());
+
+            routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
+            routerStore.putRouter(RouterKeys.LOBBY_SCENE_ROUTER, LobbyFeature.getLobbyRouter());
         });
 
         CompletableFuture.allOf(independentFeatures, databaseFeatures, databaseDependents, game).join();

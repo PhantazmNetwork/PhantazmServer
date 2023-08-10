@@ -16,6 +16,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -29,7 +30,7 @@ public abstract class BasicChatChannel implements ChatChannel {
     private final MiniMessage miniMessage;
 
     private final String chatFormat;
-    private final Function<? super Player, ? extends Component> nameFormatter;
+    private final Function<? super Player, ? extends CompletableFuture<Component>> nameFormatter;
 
     /**
      * Creates a {@link BasicChatChannel}.
@@ -37,7 +38,8 @@ public abstract class BasicChatChannel implements ChatChannel {
      * @param viewProvider The {@link BasicChatChannel}'s {@link PlayerViewProvider}
      */
     public BasicChatChannel(@NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage,
-            @NotNull String chatFormat, @NotNull Function<? super Player, ? extends Component> nameFormatter) {
+            @NotNull String chatFormat,
+            @NotNull Function<? super Player, ? extends CompletableFuture<Component>> nameFormatter) {
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
         this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
         this.chatFormat = Objects.requireNonNull(chatFormat, "chatFormat");
@@ -66,13 +68,13 @@ public abstract class BasicChatChannel implements ChatChannel {
 
 
     @Override
-    public @NotNull Component formatMessage(@NotNull Player player, @NotNull String message) {
-        Component displayName = nameFormatter.apply(player);
+    public @NotNull CompletableFuture<Component> formatMessage(@NotNull Player player, @NotNull String message) {
+        return nameFormatter.apply(player).thenApply((component) -> {
+            TagResolver senderPlaceholder = Placeholder.component("sender", component);
+            TagResolver messagePlaceholder = Placeholder.unparsed("message", message);
 
-        TagResolver senderPlaceholder = Placeholder.component("sender", displayName);
-        TagResolver messagePlaceholder = Placeholder.unparsed("message", message);
-
-        return miniMessage.deserialize(chatFormat, senderPlaceholder, messagePlaceholder);
+            return miniMessage.deserialize(chatFormat, senderPlaceholder, messagePlaceholder);
+        });
     }
 
     /**
