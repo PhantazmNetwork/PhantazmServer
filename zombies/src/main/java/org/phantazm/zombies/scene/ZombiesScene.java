@@ -121,9 +121,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             if (isComplete()) {
                 return TransferResult.failure(Component.text("Game is over."));
             }
-            if (allowedRequestUUID != null && !joinRequest.getUUID().equals(allowedRequestUUID)) {
-                return TransferResult.failure(Component.text("You aren't allowed to join this game."));
-            }
 
             Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
             Collection<PlayerView> newPlayers = new ArrayList<>(joinRequest.getPlayers().size());
@@ -137,6 +134,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 else {
                     newPlayers.add(player);
                 }
+            }
+
+            if (!newPlayers.isEmpty() && allowedRequestUUID != null && !joinRequest.getUUID().equals(allowedRequestUUID)) {
+                return TransferResult.failure(Component.text("You aren't allowed to join this game."));
             }
 
             Stage stage = getCurrentStage();
