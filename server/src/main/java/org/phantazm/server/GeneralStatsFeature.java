@@ -4,7 +4,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.stats.general.GeneralDatabase;
-import org.phantazm.stats.general.JooqGeneralSQLFetcher;
 import org.phantazm.stats.general.SQLGeneralDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +21,7 @@ public final class GeneralStatsFeature {
     }
 
     static void initialize(@NotNull Executor executor, @NotNull DataSource dataSource) {
-        JooqGeneralSQLFetcher sqlFetcher = new JooqGeneralSQLFetcher();
-        generalDatabase = new SQLGeneralDatabase(executor, dataSource, sqlFetcher);
+        generalDatabase = new SQLGeneralDatabase(executor, dataSource);
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, GeneralStatsFeature::onPlayerSpawn);
     }

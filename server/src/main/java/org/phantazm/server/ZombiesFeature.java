@@ -32,10 +32,8 @@ import org.phantazm.core.sound.SongLoader;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
-import org.phantazm.stats.zombies.JooqZombiesSQLFetcher;
 import org.phantazm.stats.zombies.SQLZombiesDatabase;
 import org.phantazm.stats.zombies.ZombiesDatabase;
-import org.phantazm.stats.zombies.ZombiesSQLFetcher;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.map.FileSystemMapLoader;
@@ -122,8 +120,7 @@ public final class ZombiesFeature {
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
 
-        ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
-        database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource(), sqlFetcher);
+        database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
 
         EventNode<Event> globalEventNode = MinecraftServer.getGlobalEventHandler();
         ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource(globalEventNode);
@@ -133,7 +130,7 @@ public final class ZombiesFeature {
                             instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
                             ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(), clientBlockHandlerSource,
                             contextManager, keyParser, database, viewProvider, ZombiesFeature.powerupHandlerSource(),
-                            new BasicZombiesPlayerSource(database, viewProvider,
+                            new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,
                                     EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
                                     keyParser),
                             mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
