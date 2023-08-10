@@ -10,8 +10,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.ScoreboardObjectivePacket;
@@ -93,10 +96,10 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
     private final KeyParser keyParser;
 
     public BasicZombiesPlayerSource(@NotNull ZombiesDatabase database,
-            @NotNull Executor executor, @NotNull PlayerViewProvider viewProvider,
-            @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
-            @NotNull Map<Key, MobModel> mobModelMap, @NotNull ContextManager contextManager,
-            @NotNull KeyParser keyParser) {
+                                    @NotNull Executor executor, @NotNull PlayerViewProvider viewProvider,
+                                    @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
+                                    @NotNull Map<Key, MobModel> mobModelMap, @NotNull ContextManager contextManager,
+                                    @NotNull KeyParser keyParser) {
         this.database = Objects.requireNonNull(database, "database");
         this.executor = Objects.requireNonNull(executor, "executor");
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
@@ -109,13 +112,13 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
     @SuppressWarnings("unchecked")
     @Override
     public @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
-            @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
-            @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
-            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-            @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
-            @NotNull BelowNameTag belowNameTag) {
+                                               @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+                                               @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
+                                               @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
+                                               @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
+                                               @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
+                                               @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
+                                               @NotNull BelowNameTag belowNameTag) {
         TransactionModifierSource playerTransactionModifierSource = new BasicTransactionModifierSource();
 
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
@@ -148,8 +151,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                             new StringReader(groupInfo.defaultItem())).parse() instanceof NBTCompound compound) {
                         itemStack = ItemStack.fromItemNBT(compound);
                     }
-                }
-                catch (NBTException e) {
+                } catch (NBTException e) {
                     LOGGER.warn("Failed to load item in slot {} because its NBT string is invalid:", i, e);
                 }
             }
@@ -239,7 +241,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
                 Map.of(ZombiesPlayerStateKeys.ALIVE, aliveStateCreator, ZombiesPlayerStateKeys.DEAD,
-                        (Function<DeadPlayerStateContext, ZombiesPlayerState>)context -> deadStateCreator.apply(context,
+                        (Function<DeadPlayerStateContext, ZombiesPlayerState>) context -> deadStateCreator.apply(context,
                                 List.of()), ZombiesPlayerStateKeys.KNOCKED, knockedStateCreator,
                         ZombiesPlayerStateKeys.QUIT, quitStateCreator);
 
@@ -249,11 +251,20 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         Hologram hologram = new ViewableHologram(location, leaderboardInfo.gap(),
                 viewer -> viewer.getUuid().equals(playerView.getUUID()));
         hologram.setInstance(instance);
+        Entity armorStand = new Entity(EntityType.ARMOR_STAND);
+        armorStand.setNoGravity(true);
+        armorStand.setInvisible(true);
+        armorStand.setInstance(instance);
         DependencyModule leaderboardModule =
-                new BestTimeLeaderboard.Module(database, playerView.getUUID(), hologram, mapSettingsInfo, viewProvider,
+                new BestTimeLeaderboard.Module(database, playerView.getUUID(), hologram, leaderboardInfo.gap(), armorStand, mapSettingsInfo, viewProvider,
                         MiniMessage.miniMessage(), executor);
         BestTimeLeaderboard leaderboard = contextManager.makeContext(leaderboardInfo.data())
                 .provide(new ModuleDependencyProvider(keyParser, leaderboardModule));
+        eventNode.addListener(PlayerEntityInteractEvent.class, event -> {
+            if (event.getTarget() == armorStand) {
+                leaderboard.cycle();
+            }
+        });
 
         ZombiesPlayerModule module =
                 new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator, actionBar,

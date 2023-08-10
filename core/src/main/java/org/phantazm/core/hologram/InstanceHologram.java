@@ -19,7 +19,7 @@ import java.util.Objects;
  * not be stored for longer than the lifetime of the instance.
  */
 public class InstanceHologram extends AbstractList<Component> implements Hologram {
-    private static final double MESSAGE_HEIGHT = 0.25;
+    public static final double MESSAGE_HEIGHT = 0.25;
 
     private final ArrayList<Entity> armorStands;
     private final ArrayList<Component> components;

@@ -108,14 +108,13 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
                     .from(table("zombies_player_map_best_time")).where(field("map_key").eq(mapKey.asString()))
                     .and(field("player_count").between(minPlayerCount, maxPlayerCount)).and(category != null ? field("category").eq(category) : field("category").isNull()).orderBy(field("best_time"), field("player_uuid"))
                     .limit(maxLength).fetchResultSet()) {
-                int i = 0;
                 while (resultSet.next()) {
                     UUID uuid = UUID.fromString(resultSet.getString("player_uuid"));
                     long bestTime = resultSet.getLong("best_time");
                     int playerCount = resultSet.getInt("player_count");
 
-                    BestTime time = new BestTime(++i, uuid, bestTime);
-                    bestTimes.computeIfAbsent(playerCount, unused -> new ArrayList<>()).add(time);
+                    List<BestTime> bestTimeList = bestTimes.computeIfAbsent(playerCount, unused -> new ArrayList<>());
+                    bestTimeList.add(new BestTime(bestTimeList.size() + 1, uuid, bestTime));
                 }
             }
             for (int i = minPlayerCount; i <= maxPlayerCount; ++i) {
@@ -143,7 +142,7 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
 
             Int2ObjectMap<BestTime> times = new Int2ObjectOpenHashMap<>(result.size());
             for (Record3<Long, Integer, Integer> record : result) {
-                times.put(record.value3().intValue(), new BestTime(record.value2(), playerUUID, record.value1()));
+                times.put(record.value2().intValue(), new BestTime(record.value3(), playerUUID, record.value1()));
             }
 
             return times;

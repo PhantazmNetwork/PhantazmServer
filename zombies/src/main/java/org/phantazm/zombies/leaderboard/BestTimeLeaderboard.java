@@ -9,8 +9,11 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.hologram.Hologram;
+import org.phantazm.core.hologram.InstanceHologram;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.TickFormatter;
@@ -37,6 +40,10 @@ public class BestTimeLeaderboard {
 
     private final Hologram hologram;
 
+    private final double gap;
+
+    private final Entity armorStand;
+
     private final MapSettingsInfo settings;
 
     private final PlayerViewProvider viewProvider;
@@ -59,13 +66,15 @@ public class BestTimeLeaderboard {
 
     @FactoryMethod
     public BestTimeLeaderboard(@NotNull Data data, @NotNull ZombiesDatabase database, @NotNull UUID viewer,
-            @NotNull Hologram hologram, @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
-            @NotNull MiniMessage miniMessage, @NotNull Executor executor,
+            @NotNull Hologram hologram, double gap, @NotNull Entity armorStand, @NotNull MapSettingsInfo settings,
+            @NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage, @NotNull Executor executor,
             @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
         this.data = Objects.requireNonNull(data, "data");
         this.database = Objects.requireNonNull(database, "database");
         this.viewer = Objects.requireNonNull(viewer, "viewer");
         this.hologram = Objects.requireNonNull(hologram, "hologram");
+        this.gap = gap;
+        this.armorStand = Objects.requireNonNull(armorStand, "armorStand");
         this.settings = Objects.requireNonNull(settings, "settings");
         this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
         this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
@@ -122,7 +131,8 @@ public class BestTimeLeaderboard {
 
                 if (tabIndex == playerCountToTabIndex(1)) {
                     tabIndex = playerCountToTabIndex(4);
-                } else {
+                }
+                else {
                     ++tabIndex;
                 }
                 renderTab(tabIndex);
@@ -142,6 +152,10 @@ public class BestTimeLeaderboard {
         for (int i = 0; i < hologram.size(); ++i) {
             hologram.set(i, page.get(i));
         }
+        Pos armorStandLocation = Pos.fromPoint(hologram.getLocation().add(0,
+                ((gap * (hologram.size() - 1) + hologram.size() * InstanceHologram.MESSAGE_HEIGHT) / 2 -
+                        ((hologram.size() - 1) * (gap + InstanceHologram.MESSAGE_HEIGHT))), 0));
+        armorStand.teleport(armorStandLocation);
     }
 
     public void endIfActive() {
@@ -151,6 +165,7 @@ public class BestTimeLeaderboard {
             }
 
             hologram.clear();
+            armorStand.remove();
             pages.clear();
             tabIndex = -1;
             active = false;
@@ -182,6 +197,10 @@ public class BestTimeLeaderboard {
                         if (tabIndex == pageIndex) {
                             hologram.subList(data.headerFormats().size() + bestTimeList.size(),
                                     page.size() - data.footerFormats().size()).clear();
+                            Pos armorStandLocation = Pos.fromPoint(hologram.getLocation().add(0,
+                                    ((gap * (hologram.size() - 1) + hologram.size() * InstanceHologram.MESSAGE_HEIGHT) /
+                                            2 - ((hologram.size() - 1) * (gap + InstanceHologram.MESSAGE_HEIGHT))), 0));
+                            armorStand.teleport(armorStandLocation);
                         }
 
                         page.subList(data.headerFormats().size() + bestTimeList.size(),
@@ -283,7 +302,7 @@ public class BestTimeLeaderboard {
 
             for (int i = 0; i < data.footerFormats().size(); ++i) {
                 String footerFormat = data.footerFormats().get(data.footerFormats().size() - 1 - i);
-                Component footer = miniMessage.deserialize(footerFormat, mapNamePlaceholder, viewerPlaceholder);
+                Component footer = miniMessage.deserialize(footerFormat, mapNamePlaceholder, viewerPlaceholder, playerCountPlaceholder);
                 page.set(page.size() - 1 - i, footer);
             }
 
@@ -341,6 +360,10 @@ public class BestTimeLeaderboard {
 
         private final Hologram hologram;
 
+        private final double gap;
+
+        private final Entity armorStand;
+
         private final UUID viewer;
 
         private final MapSettingsInfo settings;
@@ -351,12 +374,14 @@ public class BestTimeLeaderboard {
 
         private final Executor executor;
 
-        public Module(@NotNull ZombiesDatabase database, @NotNull UUID viewer, @NotNull Hologram hologram,
-                @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
+        public Module(@NotNull ZombiesDatabase database, @NotNull UUID viewer, @NotNull Hologram hologram, double gap,
+                @NotNull Entity armorStand, @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
                 @NotNull MiniMessage miniMessage, @NotNull Executor executor) {
             this.database = Objects.requireNonNull(database, "database");
             this.viewer = Objects.requireNonNull(viewer, "viewer");
             this.hologram = Objects.requireNonNull(hologram, "hologram");
+            this.gap = gap;
+            this.armorStand = Objects.requireNonNull(armorStand, "armorStand");
             this.settings = Objects.requireNonNull(settings, "settings");
             this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
             this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
@@ -373,6 +398,14 @@ public class BestTimeLeaderboard {
 
         public @NotNull Hologram getHologram() {
             return hologram;
+        }
+
+        public double getGap() {
+            return gap;
+        }
+
+        public @NotNull Entity getArmorStand() {
+            return armorStand;
         }
 
         public @NotNull MapSettingsInfo getSettings() {
