@@ -91,7 +91,7 @@ public final class ZombiesFeature {
         Attributes.registerAll();
 
         ConfigCodec codec = new YamlCodec();
-        ZombiesFeature.maps = loadFeature("map", new FileSystemMapLoader(MAPS_FOLDER, codec));
+        ZombiesFeature.maps = loadFeature("map", new FileSystemMapLoader(MAPS_FOLDER, codec, mappingProcessorSource));
 
         ZombiesFeature.powerupHandlerSource = new BasicPowerupHandlerSource(loadFeature("powerup",
                 new FileSystemPowerupDataLoader(POWERUPS_FOLDER, codec,

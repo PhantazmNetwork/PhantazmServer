@@ -56,7 +56,7 @@ public class Spawnpoint {
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
 
         if (spawnInfo.linkToWindow()) {
-            Vec3I linkedWindowPosition = spawnInfo.linkedWindow();
+            Vec3I linkedWindowPosition = spawnInfo.linkedWindowPosition();
             if (linkedWindowPosition != null) {
                 Optional<Window> linkedWindow = windowTracker.atPoint(linkedWindowPosition.x() + mapOrigin.blockX(),
                         linkedWindowPosition.y() + mapOrigin.blockY(), linkedWindowPosition.z() + mapOrigin.blockZ());
