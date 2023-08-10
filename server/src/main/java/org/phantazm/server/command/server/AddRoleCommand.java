@@ -1,5 +1,7 @@
 package org.phantazm.server.command.server;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -23,7 +25,15 @@ public class AddRoleCommand extends Command {
             String name = context.get(PLAYER_ARGUMENT);
             identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
                 uuidOptional.ifPresent(uuid -> {
-                    roleStore.giveRole(uuid, context.get(ROLE));
+                    String role = context.get(ROLE);
+                    if (roleStore.giveRole(uuid, role)) {
+                        sender.sendMessage("Gave " + uuid + " (" + name + ") role " + role);
+                    }
+                    else {
+                        sender.sendMessage(Component.text("Failed to add role. The player may already have it, or it " +
+                                "may not be a known role.", NamedTextColor.RED));
+                    }
+
                 });
             });
         }, PLAYER_ARGUMENT, ROLE);

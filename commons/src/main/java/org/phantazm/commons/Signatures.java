@@ -77,37 +77,43 @@ public final class Signatures {
     }
 
     private static ScalarSignature<TextColor> namedTextColor() {
-        return ScalarSignature.of(Token.ofClass(TextColor.class),
-                element -> NamedTextColor.NAMES.valueOr(element.asString().toLowerCase(Locale.ROOT),
-                        NamedTextColor.WHITE), textColor -> {
-                    if (textColor == null) {
-                        return ConfigPrimitive.NULL;
-                    }
-
-                    NamedTextColor named = NamedTextColor.namedColor(textColor.value());
-                    if (named == null) {
-                        return ConfigPrimitive.NULL;
-                    }
-
-                    return ConfigPrimitive.of(named.toString());
-                });
+        return ScalarSignature.of(Token.ofClass(TextColor.class), element -> textColorFromString(element.asString()),
+                textColor -> configFromTextColor(textColor, true));
     }
 
     private static ScalarSignature<NamedTextColor> namedTextColorDirect() {
         return ScalarSignature.of(Token.ofClass(NamedTextColor.class),
-                element -> NamedTextColor.NAMES.valueOr(element.asString().toLowerCase(Locale.ROOT),
-                        NamedTextColor.WHITE), textColor -> {
-                    if (textColor == null) {
-                        return ConfigPrimitive.NULL;
-                    }
+                element -> namedTextColorFromString(element.asString()),
+                textColor -> configFromTextColor(textColor, false));
+    }
 
-                    NamedTextColor named = NamedTextColor.namedColor(textColor.value());
-                    if (named == null) {
-                        return ConfigPrimitive.NULL;
-                    }
+    private static ConfigPrimitive configFromTextColor(TextColor textColor, boolean allowFullRGB) {
+        if (textColor instanceof NamedTextColor namedTextColor) {
+            return ConfigPrimitive.of(namedTextColor.toString());
+        }
 
-                    return ConfigPrimitive.of(named.toString());
-                });
+        NamedTextColor named = NamedTextColor.namedColor(textColor.value());
+        if (named != null) {
+            return ConfigPrimitive.of(named.toString());
+        }
+
+        if (!allowFullRGB) {
+            return ConfigPrimitive.NULL;
+        }
+
+        return ConfigPrimitive.of(textColor.asHexString());
+    }
+
+    private static TextColor textColorFromString(String string) {
+        if (string.startsWith("#")) {
+            return Objects.requireNonNullElse(TextColor.fromHexString(string), NamedTextColor.WHITE);
+        }
+
+        return namedTextColorFromString(string);
+    }
+
+    private static NamedTextColor namedTextColorFromString(String string) {
+        return NamedTextColor.NAMES.valueOr(string.toLowerCase(Locale.ROOT), NamedTextColor.WHITE);
     }
 
     private static Signature<RGBLike> rgbLike() {
