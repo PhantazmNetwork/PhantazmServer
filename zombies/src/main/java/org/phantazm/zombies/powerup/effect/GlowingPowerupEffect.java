@@ -7,6 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.scene.ZombiesScene;
@@ -31,15 +32,15 @@ public class GlowingPowerupEffect implements PowerupEffectComponent {
             Iterator<NamedTextColor> colorIterator = colors.iterator();
             for (int i = 0; i < colors.size(); i++) {
                 NamedTextColor color = colorIterator.next();
-                Team team =
-                        MinecraftServer.getTeamManager().createBuilder("color-team-" + color).teamColor(color).build();
+                Team team = MinecraftServer.getTeamManager().createBuilder("color-team-" + color).teamColor(color)
+                        .collisionRule(TeamsPacket.CollisionRule.NEVER).build();
                 entries[i] = Map.entry(color.toString(), team);
             }
 
             COLOR_TEAMS = Map.ofEntries(entries);
         }
     }
-    
+
     private final Data data;
 
     @FactoryMethod
