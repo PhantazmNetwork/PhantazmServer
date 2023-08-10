@@ -37,8 +37,7 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats,
-                                                                             int playerCount, @Nullable String category) {
+    public @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats) {
         return executeSQL(connection -> {
             DSLContext context = using(connection);
             context.insertInto(table("zombies_player_map_stats"), field("player_uuid"), field("map_key"),

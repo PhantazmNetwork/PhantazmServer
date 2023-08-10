@@ -11,8 +11,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface ZombiesDatabase {
 
-    @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats,
-                                                                      int playerCount, @Nullable String category);
+    @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats);
 
     @NotNull CompletableFuture<Void> synchronizeBestTime(@NotNull UUID playerUUID, @NotNull Key mapKey, int playerCount, @Nullable String category, long time);
 
