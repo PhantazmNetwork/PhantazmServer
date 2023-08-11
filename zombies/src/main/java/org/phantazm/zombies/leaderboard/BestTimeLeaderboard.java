@@ -83,43 +83,45 @@ public class BestTimeLeaderboard {
     }
 
     public void startIfNotActive() {
-        synchronized (sync) {
-            if (active) {
-                return;
+        executor.execute(() -> {
+            synchronized (sync) {
+                if (active) {
+                    return;
+                }
+
+                for (int playerCount = 1; playerCount <= 4; ++playerCount) {
+                    List<Component> page =
+                            new ArrayList<>(data.headerFormats().size() + data.length() + data.footerFormats().size());
+                    TagResolver mapNamePlaceholder = Placeholder.component("map_name", settings.displayName());
+                    TagResolver viewerPlaceholder = Placeholder.component("viewer", data.initialMessage());
+                    TagResolver playerCountPlaceholder = Formatter.choice("player_count", playerCount);
+
+                    for (String headerFormat : data.headerFormats()) {
+                        page.add(miniMessage.deserialize(headerFormat, mapNamePlaceholder, viewerPlaceholder,
+                                playerCountPlaceholder));
+                    }
+                    for (int i = 0; i < data.length(); ++i) {
+                        TagResolver placePlaceholder = Placeholder.component("place", Component.text(i + 1));
+                        Component placeMessage = miniMessage.deserialize(data.placeFormat(), placePlaceholder);
+                        page.add(placeMessage);
+                    }
+                    for (String footerFormat : data.footerFormats()) {
+                        page.add(miniMessage.deserialize(footerFormat, mapNamePlaceholder, viewerPlaceholder,
+                                playerCountPlaceholder));
+                    }
+
+                    pages.put(playerCountToTabIndex(playerCount), page);
+                }
+
+                renderTab(playerCountToTabIndex(4));
+                tabIndex = playerCountToTabIndex(4);
+
+                ++stamp;
+                loadMapTimes(stamp);
+                loadViewerTimes(stamp);
+                active = true;
             }
-
-            for (int playerCount = 1; playerCount <= 4; ++playerCount) {
-                List<Component> page =
-                        new ArrayList<>(data.headerFormats().size() + data.length() + data.footerFormats().size());
-                TagResolver mapNamePlaceholder = Placeholder.component("map_name", settings.displayName());
-                TagResolver viewerPlaceholder = Placeholder.component("viewer", data.initialMessage());
-                TagResolver playerCountPlaceholder = Formatter.choice("player_count", playerCount);
-
-                for (String headerFormat : data.headerFormats()) {
-                    page.add(miniMessage.deserialize(headerFormat, mapNamePlaceholder, viewerPlaceholder,
-                            playerCountPlaceholder));
-                }
-                for (int i = 0; i < data.length(); ++i) {
-                    TagResolver placePlaceholder = Placeholder.component("place", Component.text(i + 1));
-                    Component placeMessage = miniMessage.deserialize(data.placeFormat(), placePlaceholder);
-                    page.add(placeMessage);
-                }
-                for (String footerFormat : data.footerFormats()) {
-                    page.add(miniMessage.deserialize(footerFormat, mapNamePlaceholder, viewerPlaceholder,
-                            playerCountPlaceholder));
-                }
-
-                pages.put(playerCountToTabIndex(playerCount), page);
-            }
-
-            renderTab(playerCountToTabIndex(4));
-            tabIndex = playerCountToTabIndex(4);
-
-            ++stamp;
-            loadMapTimes(stamp);
-            loadViewerTimes(stamp);
-            active = true;
-        }
+        });
     }
 
     public void cycle() {
@@ -159,17 +161,19 @@ public class BestTimeLeaderboard {
     }
 
     public void endIfActive() {
-        synchronized (sync) {
-            if (!active) {
-                return;
-            }
+        executor.execute(() -> {
+            synchronized (sync) {
+                if (!active) {
+                    return;
+                }
 
-            hologram.clear();
-            armorStand.remove();
-            pages.clear();
-            tabIndex = -1;
-            active = false;
-        }
+                hologram.clear();
+                armorStand.remove();
+                pages.clear();
+                tabIndex = -1;
+                active = false;
+            }
+        });
     }
 
     private int playerCountToTabIndex(int playerCount) {
