@@ -17,7 +17,7 @@ public class BanCommand extends Command {
     public static final Permission PERMISSION = new Permission("admin.ban");
 
     private static final ArgumentWord PLAYER_ARGUMENT = ArgumentType.Word("player");
-    private static final Argument<String> REASON = ArgumentType.String("reason").setDefaultValue("");
+    private static final Argument<String[]> REASON = ArgumentType.StringArray("reason").setDefaultValue(new String[0]);
 
     public BanCommand(@NotNull IdentitySource identitySource, @NotNull LoginValidator loginValidator) {
         super("ban");
@@ -27,8 +27,8 @@ public class BanCommand extends Command {
             String name = context.get(PLAYER_ARGUMENT);
             identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
                 uuidOptional.ifPresent(uuid -> {
-                    Component reason;
-                    loginValidator.ban(uuid, reason = MiniMessage.miniMessage().deserialize(context.get(REASON)));
+                    Component reason = MiniMessage.miniMessage().deserialize(String.join(" ", context.get(REASON)));
+                    loginValidator.ban(uuid, reason);
 
                     Player player = MinecraftServer.getConnectionManager().getPlayer(uuid);
                     if (player != null) {
