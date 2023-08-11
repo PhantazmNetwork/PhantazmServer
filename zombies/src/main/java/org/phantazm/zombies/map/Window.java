@@ -12,7 +12,10 @@ import org.phantazm.zombies.map.action.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Represents a window in-game. May be repaired or broken. Broken window blocks are replaced by air on the server-side,
@@ -38,7 +41,6 @@ public class Window extends BoundedBase {
     private final Object sync;
 
     private volatile int index;
-    private volatile long lastBreakTime;
 
     /**
      * Creates a new (fully-repaired) window.
@@ -90,6 +92,10 @@ public class Window extends BoundedBase {
         });
 
         this.index = this.volume;
+    }
+
+    public @NotNull Instance instance() {
+        return instance;
     }
 
     public @NotNull WindowInfo getWindowInfo() {
@@ -202,24 +208,6 @@ public class Window extends BoundedBase {
         return volume;
     }
 
-    /**
-     * Gets the center of the window frame region in world coordinates. This is the point from which distance to the
-     * window should be measured.
-     *
-     * @return the center of the window
-     */
-    public @NotNull Point getCenter() {
-        return center;
-    }
-
-    public void setLastBreakTime(long time) {
-        this.lastBreakTime = time;
-    }
-
-    public long getLastBreakTime() {
-        return lastBreakTime;
-    }
-
     public @NotNull Optional<Room> getLinkedRoom() {
         return Optional.ofNullable(linkedRoom);
     }
@@ -244,9 +232,19 @@ public class Window extends BoundedBase {
     private Point indexToCoordinate(int index) {
         Bounds3I frameRegion = windowInfo.frameRegion();
 
-        int x = index % frameRegion.lengthX();
-        int y = (index / frameRegion.lengthX()) % frameRegion.lengthY();
-        int z = (index / (frameRegion.lengthX() * frameRegion.lengthY())) % frameRegion.lengthZ();
+        int x;
+        int y;
+        int z;
+        if (frameRegion.lengthZ() > frameRegion.lengthX()) {
+            x = (index / (frameRegion.lengthZ() * frameRegion.lengthY())) % frameRegion.lengthX();
+            y = (index / frameRegion.lengthZ()) % frameRegion.lengthY();
+            z = index % frameRegion.lengthZ();
+        }
+        else {
+            x = index % frameRegion.lengthX();
+            y = (index / frameRegion.lengthX()) % frameRegion.lengthY();
+            z = (index / (frameRegion.lengthX() * frameRegion.lengthY())) % frameRegion.lengthZ();
+        }
 
         return worldMin.add(x, y, z);
     }
@@ -257,6 +255,10 @@ public class Window extends BoundedBase {
         int frameRelativeZ = z - worldMin.blockZ();
 
         Bounds3I frameRegion = windowInfo.frameRegion();
+        if (frameRegion.lengthZ() > frameRegion.lengthX()) {
+            return frameRelativeZ + (frameRelativeY * frameRegion.lengthZ()) +
+                    (frameRelativeX * frameRegion.lengthZ() * frameRegion.lengthY());
+        }
 
         return frameRelativeX + (frameRelativeY * frameRegion.lengthX()) +
                 (frameRelativeZ * frameRegion.lengthX() * frameRegion.lengthY());

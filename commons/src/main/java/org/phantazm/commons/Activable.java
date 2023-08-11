@@ -6,11 +6,6 @@ public interface Activable extends Tickable {
 
     }
 
-    @Override
-    default void tick(long time) {
-
-    }
-
     default void end() {
 
     }

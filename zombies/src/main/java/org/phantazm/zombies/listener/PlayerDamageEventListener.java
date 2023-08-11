@@ -49,7 +49,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
             return;
         }
 
-        if (event.getDamage().getAmount() < event.getEntity().getHealth()) {
+        if (event.getActualAmount() < event.getEntity().getHealth()) {
             return;
         }
 
@@ -58,8 +58,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
-            ZombiesPlayerDeathEvent deathEvent =
-                    new ZombiesPlayerDeathEvent(player, zombiesPlayer, event.getDamage());
+            ZombiesPlayerDeathEvent deathEvent = new ZombiesPlayerDeathEvent(player, zombiesPlayer, event.getDamage());
             EventDispatcher.call(deathEvent);
 
             if (deathEvent.isCancelled()) {
@@ -104,9 +103,11 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         Damage damage = event.getDamage();
         if (damage.getAttacker() != null) {
             return getEntityName(damage.getAttacker());
-        } else if (damage.getSource() != null) {
+        }
+        else if (damage.getSource() != null) {
             return getEntityName(damage.getSource());
-        } else if (damage.hasTag(Tags.DAMAGE_NAME)) {
+        }
+        else if (damage.hasTag(Tags.DAMAGE_NAME)) {
             return damage.tagHandler().getTag(Tags.DAMAGE_NAME);
         }
 

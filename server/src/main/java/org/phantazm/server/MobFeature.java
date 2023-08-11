@@ -25,18 +25,6 @@ import org.phantazm.core.config.processor.ItemStackConfigProcessors;
 import org.phantazm.core.config.processor.MinestomConfigProcessors;
 import org.phantazm.mob.MobModel;
 import org.phantazm.mob.config.MobModelConfigProcessor;
-import org.phantazm.mob.goal.*;
-import org.phantazm.mob.skill.*;
-import org.phantazm.mob.target.*;
-import org.phantazm.mob.validator.*;
-import org.phantazm.zombies.mob.goal.BreakNearbyWindowGoal;
-import org.phantazm.zombies.mob.skill.AttributeModifyingSkill;
-import org.phantazm.zombies.mob.skill.ShootProjectileSkill;
-import org.phantazm.zombies.mob.skill.SummonMobSkill;
-import org.phantazm.zombies.mob.skill.hit_action.AttributeModifierAction;
-import org.phantazm.zombies.mob.skill.hit_action.DamageAction;
-import org.phantazm.zombies.mob.validator.MobValidator;
-import org.phantazm.zombies.mob.validator.ZombiesPlayerValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +41,8 @@ import java.util.stream.Stream;
  * Main entrypoint for PhantazmMob related features.
  */
 public final class MobFeature {
+    public static final Path MOBS_PATH = Path.of("./mobs");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MobFeature.class);
 
     private static ConfigProcessor<MobModel> MODEL_PROCESSOR;
@@ -64,10 +54,8 @@ public final class MobFeature {
     }
 
     @SuppressWarnings("SameParameterValue")
-    static void initialize(@NotNull ContextManager contextManager, @NotNull Path mobPath, @NotNull ConfigCodec codec) {
+    static void initialize(@NotNull ContextManager contextManager, @NotNull ConfigCodec codec) {
         MODEL_PROCESSOR = new MobModelConfigProcessor(contextManager, ItemStackConfigProcessors.snbt());
-
-        registerElementClasses(contextManager);
 
         Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap = new HashMap<>();
         processorMap.put(BooleanObjectPair.of(false, byte.class.getName()), ConfigProcessor.BYTE);
@@ -115,81 +103,17 @@ public final class MobFeature {
 
         MobFeature.processorMap = Map.copyOf(processorMap);
 
-        loadModels(mobPath, codec);
+        loadModels(codec);
     }
 
-    private static void registerElementClasses(@NotNull ContextManager contextManager) {
-        //goal appliers
-        contextManager.registerElementClass(CollectionGoalApplier.class);
-
-        //mob goals
-        contextManager.registerElementClass(FollowEntityGoal.class);
-        contextManager.registerElementClass(ChargeAtEntityGoal.class);
-        contextManager.registerElementClass(MeleeAttackGoal.class);
-        contextManager.registerElementClass(PlayStepSoundGoal.class);
-
-        //zombies mob goals
-        contextManager.registerElementClass(BreakNearbyWindowGoal.class);
-
-        //mob skills
-        contextManager.registerElementClass(AddVelocitySkill.class);
-        contextManager.registerElementClass(ApplyPotionSkill.class);
-        contextManager.registerElementClass(BleedEntitiesSkill.class);
-        contextManager.registerElementClass(DamageEntitySkill.class);
-        contextManager.registerElementClass(KnockbackEntitySkill.class);
-        contextManager.registerElementClass(PlaySoundSkill.class);
-        contextManager.registerElementClass(PushEntitySkill.class);
-        contextManager.registerElementClass(SendMessageSkill.class);
-        contextManager.registerElementClass(ShowHealthbarSkill.class);
-        contextManager.registerElementClass(JumpTowardsTargetSkill.class);
-        contextManager.registerElementClass(SpawnParticleSkill.class);
-        contextManager.registerElementClass(RadialDamageEntitySkill.class);
-
-        contextManager.registerElementClass(SummonMobSkill.class);
-        contextManager.registerElementClass(AttributeModifyingSkill.class);
-        contextManager.registerElementClass(ShootProjectileSkill.class);
-        contextManager.registerElementClass(DamageAction.class);
-        contextManager.registerElementClass(AttributeModifierAction.class);
-
-        //mob meta skills
-        contextManager.registerElementClass(TimerSkill.class);
-        contextManager.registerElementClass(RandomSkill.class);
-        contextManager.registerElementClass(RandomTimerSkill.class);
-        contextManager.registerElementClass(GroupSkill.class);
-        contextManager.registerElementClass(TemporalSkill.class);
-
-        //mob selectors
-        contextManager.registerElementClass(SelfSelector.class);
-        contextManager.registerElementClass(NearestPlayerSelector.class);
-        contextManager.registerElementClass(NearestPlayersSelector.class);
-        contextManager.registerElementClass(LastHitEntitySelector.class);
-        contextManager.registerElementClass(AllPlayersSelector.class);
-        contextManager.registerElementClass(NearestEntitiesSelector.class);
-        contextManager.registerElementClass(AITargetSelector.class);
-
-        //mob validators
-        contextManager.registerElementClass(AlwaysValid.class);
-        contextManager.registerElementClass(AndValidator.class);
-        contextManager.registerElementClass(OrValidator.class);
-        contextManager.registerElementClass(NotSelfValidator.class);
-        contextManager.registerElementClass(LineOfSightValidator.class);
-        contextManager.registerElementClass(DistanceValidator.class);
-
-        //zombies mob validators
-        contextManager.registerElementClass(ZombiesPlayerValidator.class);
-        contextManager.registerElementClass(MobValidator.class);
-
-        LOGGER.info("Registered Mob element classes.");
-    }
-
-    private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {
+    private static void loadModels(@NotNull ConfigCodec codec) {
         Map<Key, MobModel> loadedModels = new HashMap<>();
         try {
-            FileUtils.createDirectories(mobPath);
+            FileUtils.createDirectories(MobFeature.MOBS_PATH);
 
-            try (Stream<Path> paths = Files.walk(mobPath)) {
+            try (Stream<Path> paths = Files.walk(MobFeature.MOBS_PATH)) {
                 String ending = codec.getPreferredExtension();
-                PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**" + ending);
+                PathMatcher matcher = MobFeature.MOBS_PATH.getFileSystem().getPathMatcher("glob:**" + ending);
                 paths.forEach(path -> {
                     if (matcher.matches(path) && Files.isRegularFile(path)) {
                         try {
@@ -212,7 +136,7 @@ public final class MobFeature {
             }
         }
         catch (IOException e) {
-            LOGGER.warn("Failed to create directory {}", mobPath);
+            LOGGER.warn("Failed to create directory {}", MobFeature.MOBS_PATH);
         }
         models = Map.copyOf(loadedModels);
         LOGGER.info("Loaded {} mob files.", models.size());
@@ -237,7 +161,7 @@ public final class MobFeature {
         return FeatureUtils.check(models);
     }
 
-    public static @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> getProcessorMap() {
+    public static @NotNull @Unmodifiable Map<BooleanObjectPair<String>, ConfigProcessor<?>> getProcessorMap() {
         return FeatureUtils.check(processorMap);
     }
 }

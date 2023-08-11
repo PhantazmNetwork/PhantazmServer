@@ -8,7 +8,10 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.ConfigProcessors;
-import org.phantazm.server.config.server.*;
+import org.phantazm.server.config.server.AuthType;
+import org.phantazm.server.config.server.PingListConfig;
+import org.phantazm.server.config.server.ServerConfig;
+import org.phantazm.server.config.server.ServerInfoConfig;
 
 import java.util.Arrays;
 import java.util.Locale;

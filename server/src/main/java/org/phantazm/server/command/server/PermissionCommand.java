@@ -13,7 +13,6 @@ import java.util.UUID;
 public class PermissionCommand extends Command {
     public static final Permission PERMISSION = new Permission("admin.permission");
 
-    public static final Permission PERMISSION_FLUSH = new Permission("admin.permission.flush");
     public static final Permission PERMISSION_RELOAD = new Permission("admin.permission.reload");
 
     public static final Permission PERMISSION_ADD_GROUP = new Permission("admin.permission.group.add");
@@ -35,7 +34,6 @@ public class PermissionCommand extends Command {
         addSubcommand(new GroupSet(permissionHandler, identitySource));
         addSubcommand(new GroupClear(permissionHandler, identitySource));
         addSubcommand(new Reload(permissionHandler));
-        addSubcommand(new Flush(permissionHandler));
     }
 
     private static class Reload extends Command {
@@ -45,17 +43,6 @@ public class PermissionCommand extends Command {
             setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_RELOAD));
             addConditionalSyntax(getCondition(), (sender, context) -> {
                 permissionHandler.reload();
-            });
-        }
-    }
-
-    private static class Flush extends Command {
-        private Flush(PermissionHandler permissionHandler) {
-            super("flush");
-
-            setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_FLUSH));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
-                permissionHandler.flush();
             });
         }
     }

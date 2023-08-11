@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
@@ -18,7 +17,6 @@ import org.phantazm.zombies.coin.component.TransactionMessager;
 import org.phantazm.zombies.map.PlayerCoinsInfo;
 import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,9 +34,8 @@ public class BasicPlayerCoinsTest {
         Player player = mock(Player.class);
         when(playerView.getPlayer()).thenReturn(Optional.of(player));
         ZombiesPlayerActionBar actionBar = new ZombiesPlayerActionBar(playerView);
-        TransactionMessager componentCreator =
-                new BasicTransactionMessager(actionBar, MiniMessage.miniMessage(), new PlayerCoinsInfo("", "",
-                        NamedTextColor.WHITE, NamedTextColor.WHITE, 20L));
+        TransactionMessager componentCreator = new BasicTransactionMessager(actionBar, MiniMessage.miniMessage(),
+                new PlayerCoinsInfo("", "", NamedTextColor.WHITE, NamedTextColor.WHITE, 20L));
 
         coins = new BasicPlayerCoins(
                 BasicZombiesPlayerMapStats.createBasicStats(UUID.randomUUID(), Key.key("phantazm:test")),
@@ -73,23 +70,8 @@ public class BasicPlayerCoinsTest {
     public void testOneModifier() {
         setup(0);
         int delta = 10;
-        TransactionResult result =
-                coins.runTransaction(new Transaction(Collections.singletonList(new Transaction.Modifier() {
-                    @Override
-                    public @NotNull Component getDisplayName() {
-                        return Component.empty();
-                    }
-
-                    @Override
-                    public int modify(int change) {
-                        return change + delta;
-                    }
-
-                    @Override
-                    public int getPriority() {
-                        return 0;
-                    }
-                }), delta));
+        TransactionResult result = coins.runTransaction(new Transaction(
+                List.of(Transaction.modifier(Component.empty(), Transaction.Modifier.Action.ADD, delta)), delta));
         assertEquals(delta * 2, result.change());
     }
 
@@ -97,41 +79,12 @@ public class BasicPlayerCoinsTest {
     public void testPriority() {
         setup(0);
         int delta = 10;
-        Transaction.Modifier modifier1 = new Transaction.Modifier() {
-            @Override
-            public @NotNull Component getDisplayName() {
-                return Component.empty();
-            }
-
-            @Override
-            public int modify(int change) {
-                return change + delta;
-            }
-
-            @Override
-            public int getPriority() {
-                return 0;
-            }
-        };
+        Transaction.Modifier modifier1 =
+                Transaction.modifier(Component.empty(), Transaction.Modifier.Action.ADD, delta);
         int changedValue = 100;
-        Transaction.Modifier modifier2 = new Transaction.Modifier() {
-            @Override
-            public @NotNull Component getDisplayName() {
-                return Component.empty();
-            }
-
-            @Override
-            public int modify(int change) {
-                return changedValue;
-            }
-
-            @Override
-            public int getPriority() {
-                return 1;
-            }
-        };
-        TransactionResult result =
-                coins.runTransaction(new Transaction(List.of(modifier1, modifier2), delta));
+        Transaction.Modifier modifier2 =
+                Transaction.modifier(Component.empty(), Transaction.Modifier.Action.SET, changedValue, 1);
+        TransactionResult result = coins.runTransaction(new Transaction(List.of(modifier1, modifier2), delta));
         assertEquals(changedValue + delta, result.change());
     }
 

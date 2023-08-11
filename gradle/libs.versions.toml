@@ -13,7 +13,7 @@ junit-jupiter = "5.9.0"
 
 minestom = "b8f34679c3"
 
-toolkit = "0.3.0"
+toolkit = "0.4.0"
 
 [libraries]
 adventure-api = { group = "net.kyori", name = "adventure-api", version.ref = "adventure" }
@@ -32,7 +32,7 @@ cloth-config = { module = "me.shedaniel.cloth:cloth-config-fabric", version = "1
 
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
 
-element-core = { module = "com.github.steanky:element-core", version = "0.15.2" }
+element-core = { module = "com.github.steanky:element-core", version = "0.16.0" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-hjson = { module = "com.github.steanky:ethylene-hjson", version.ref = "ethylene" }
@@ -78,6 +78,8 @@ modmenu = { module = "com.terraformersmc:modmenu", version = "7.1.0" }
 proxima-core = { module = "com.github.steanky:proxima-core", version = "0.7.0" }
 
 renderer = { module = "com.github.0x3C50:Renderer", version = "e1bb03f45e" }
+
+reflections = { module = "org.reflections:reflections", version = "0.10.2" }
 
 sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.42.0.0" }
 

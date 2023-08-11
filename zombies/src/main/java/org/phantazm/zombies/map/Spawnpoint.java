@@ -56,7 +56,7 @@ public class Spawnpoint {
         this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
 
         if (spawnInfo.linkToWindow()) {
-            Vec3I linkedWindowPosition = spawnInfo.linkedWindow();
+            Vec3I linkedWindowPosition = spawnInfo.linkedWindowPosition();
             if (linkedWindowPosition != null) {
                 Optional<Window> linkedWindow = windowTracker.atPoint(linkedWindowPosition.x() + mapOrigin.blockX(),
                         linkedWindowPosition.y() + mapOrigin.blockY(), linkedWindowPosition.z() + mapOrigin.blockZ());
@@ -112,7 +112,7 @@ public class Spawnpoint {
         if (linkedWindow != null) {
             Optional<Room> linkedRoom = linkedWindow.getLinkedRoom();
             if (linkedRoom.isEmpty()) {
-                LOGGER.warn("Linked window at ~" + linkedWindow.getCenter() + " does not have a linked room, for" +
+                LOGGER.warn("Linked window at ~" + linkedWindow.center() + " does not have a linked room, for" +
                         " spawnpoint at ~" + spawnPoint);
                 LOGGER.warn("Because of the missing link, spawning will be disallowed");
                 return false;

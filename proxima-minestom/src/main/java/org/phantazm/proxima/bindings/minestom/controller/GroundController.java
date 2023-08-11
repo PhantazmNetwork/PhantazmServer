@@ -135,6 +135,10 @@ public class GroundController implements Controller {
 
         //slows down entities when they reach their position
         double distSquared = dX * dX + dZ * dZ;
+        if (distSquared < Vec.EPSILON) {
+            return;
+        }
+
         double speed = entity.getAttributeValue(Attribute.MOVEMENT_SPEED);
         if (speed > distSquared) {
             speed = distSquared;
@@ -148,7 +152,7 @@ public class GroundController implements Controller {
         Instance instance = entity.getInstance();
         assert instance != null;
 
-        if (ticks++ % 4 == 0) { //only do entity-entity collision every 4 ticks
+        if (ticks++ % 4 == 0) { //only do entity-entity collision every 4 ticks when moving
             this.trackerPredicate.set(entityPos, vX, vZ);
             instance.getEntityTracker().nearbyEntitiesUntil(entityPos, entity.getBoundingBox().width(),
                     EntityTracker.Target.LIVING_ENTITIES, trackerPredicate);

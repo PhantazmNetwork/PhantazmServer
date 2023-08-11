@@ -5,21 +5,19 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
-import java.util.function.Supplier;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 @Model("zombies.powerup.deactivation_predicate.timed")
-public class TimedDeactivationPredicate implements Supplier<DeactivationPredicate> {
+public class TimedDeactivationPredicate implements DeactivationPredicateComponent {
     private final Data data;
 
     @FactoryMethod
     public TimedDeactivationPredicate(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = data;
     }
 
     @Override
-    public DeactivationPredicate get() {
+    public @NotNull DeactivationPredicate apply(@NotNull ZombiesScene scene) {
         return new Predicate(data);
     }
 

@@ -1,5 +1,8 @@
 package org.phantazm.zombies.map;
 
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +16,7 @@ import java.util.Objects;
 public record SpawnpointInfo(@NotNull Vec3I position,
                              @NotNull Key spawnRule,
                              boolean linkToWindow,
-                             @Nullable Vec3I linkedWindow) {
+                             @Nullable Vec3I linkedWindowPosition) {
     /**
      * Creates a new instance of this record.
      *
@@ -24,5 +27,15 @@ public record SpawnpointInfo(@NotNull Vec3I position,
     public SpawnpointInfo {
         Objects.requireNonNull(position, "position");
         Objects.requireNonNull(spawnRule, "spawnRule");
+    }
+
+    @Default("linkToWindow")
+    public static @NotNull ConfigElement defaultLinkToWindow() {
+        return ConfigPrimitive.of(true);
+    }
+
+    @Default("linkedWindowPosition")
+    public static @NotNull ConfigElement defaultLinkedWindowPosition() {
+        return ConfigPrimitive.NULL;
     }
 }

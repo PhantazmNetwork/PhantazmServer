@@ -3,6 +3,7 @@ package org.phantazm.zombies.equipment.perk.equipment.interactor;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.element.core.annotation.document.Description;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -22,11 +23,12 @@ import java.util.function.BooleanSupplier;
         * `RIGHT_CLICK`
         * `CLICK`
         * `SELECTION`
+        * `ATTACK`
         * `ALL`
                 
         `LEFT_CLICK` causes the cooldown to only apply to left-clicking. Right-clicking and selecting will be passed
-        through to the delegate. `CLICK` causes the cooldown to apply to both left and right clicking, but not
-        selection.
+        through to the delegate. `CLICK` causes the cooldown to apply to left clicking, right clicking, and attacking,
+        but not selection. `ATTACK` specifically applies to attacking entities.
                 
         If the type array is empty, all types of interaction will bypass the cooldown.
         """)
@@ -56,7 +58,7 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
 
         private long lastActivated;
 
-        public Interactor(@NotNull Data data, @NotNull @Child("delegate") PerkInteractor delegate, int flags) {
+        private Interactor(@NotNull Data data, @NotNull @Child("delegate") PerkInteractor delegate, int flags) {
             this.data = Objects.requireNonNull(data, "data");
             this.delegate = Objects.requireNonNull(delegate, "delegate");
             this.flags = flags;
@@ -96,14 +98,20 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
         public boolean rightClick() {
             return activateIfCooldown(DelegateType.RIGHT_CLICK, delegate::rightClick);
         }
+
+        @Override
+        public boolean attack(@NotNull Entity target) {
+            return activateIfCooldown(DelegateType.ATTACK, () -> delegate.attack(target));
+        }
     }
 
     public enum DelegateType {
         LEFT_CLICK(1),
         RIGHT_CLICK(2),
-        CLICK(3),
+        CLICK(11),
         SELECTION(4),
-        ALL(7);
+        ATTACK(8),
+        ALL(15);
 
         public final int bits;
 

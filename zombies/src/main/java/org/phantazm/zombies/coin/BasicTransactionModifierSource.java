@@ -33,7 +33,7 @@ public class BasicTransactionModifierSource implements TransactionModifierSource
             current.append('.');
         }
 
-        mergedModifiers.sort(Comparator.comparing(Transaction.Modifier::getPriority).reversed());
+        mergedModifiers.sort(Comparator.comparing(Transaction.Modifier::priority).reversed());
         return Collections.unmodifiableCollection(mergedModifiers);
     }
 

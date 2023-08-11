@@ -15,7 +15,8 @@ import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @EnvTest
 public class PartyCreateCommandIntegrationTest extends AbstractPartyCommandIntegrationTest {
@@ -26,7 +27,7 @@ public class PartyCreateCommandIntegrationTest extends AbstractPartyCommandInteg
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
         Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider,
-                partyCreator, new Random(), 1);
+                partyCreator, new Random(), 1, 0);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);
@@ -45,7 +46,7 @@ public class PartyCreateCommandIntegrationTest extends AbstractPartyCommandInteg
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
         Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder, viewProvider,
-                partyCreator, new Random(), 1);
+                partyCreator, new Random(), 1, 0);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);

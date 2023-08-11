@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
  * A {@link ChatChannel} that sends a message to an entire {@link Instance}.
@@ -25,8 +27,9 @@ public class InstanceChatChannel extends BasicChatChannel {
      * @param viewProvider The {@link InstanceChatChannel}'s {@link PlayerViewProvider}
      */
     public InstanceChatChannel(@NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage,
-            @NotNull String chatFormat) {
-        super(viewProvider, miniMessage, chatFormat);
+            @NotNull String chatFormat,
+            @NotNull Function<? super Player, ? extends CompletableFuture<Component>> nameFormatter) {
+        super(viewProvider, miniMessage, chatFormat, nameFormatter);
     }
 
     @Override

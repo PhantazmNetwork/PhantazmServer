@@ -248,9 +248,8 @@ public class ProximaEntity extends LivingEntity {
         Node closestNode = null;
 
         while (node != null) {
-            double thisDistance = Vec3D.distanceSquared(node.x + 0.5, node.y + node.blockOffset, node.z + 0.5,
-                    Math.floor(currentPosition.x()) + 0.5, Math.floor(currentPosition.y()),
-                    Math.floor(currentPosition.z()) + 0.5);
+            double thisDistance =
+                    Vec3D.distanceSquared(node.x + 0.5, 0, node.z + 0.5, currentPosition.x(), 0, currentPosition.z());
 
             if (thisDistance < closestNodeDistance) {
                 closestNodeDistance = thisDistance;
@@ -306,7 +305,9 @@ public class ProximaEntity extends LivingEntity {
         }
 
         Node target = this.target;
-        if (target == null && pathfinding.target != null && currentPath != null && currentPath.isSuccessful() &&
+        if (target == null && pathfinding.target != null && currentPath != null && (currentPath.isSuccessful() ||
+                (pathfinding.useSynthetic() &&
+                        pathfinding.target.getDistanceSquared(this) < NODE_DEVIATION_DISTANCE_SQ)) &&
                 pathfinding.useSynthetic()) {
             Vec3I synthetic = PositionResolver.FLOORED.resolve(VecUtils.toDouble(pathfinding.target.getPosition()));
 

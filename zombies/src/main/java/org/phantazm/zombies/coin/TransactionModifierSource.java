@@ -83,7 +83,7 @@ public interface TransactionModifierSource {
                     modifiers.addAll(transactionModifierSource.modifiers(key));
                 }
 
-                modifiers.sort(Comparator.comparing(Transaction.Modifier::getPriority).reversed());
+                modifiers.sort(Comparator.comparing(Transaction.Modifier::priority).reversed());
                 return Collections.unmodifiableCollection(modifiers);
             }
 

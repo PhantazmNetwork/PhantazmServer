@@ -5,11 +5,12 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.ethylene.mapper.MappingProcessorSource;
+import com.github.steanky.ethylene.mapper.type.Token;
 import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandManager;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -21,75 +22,34 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.BasicClientBlockHandlerSource;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
-import org.phantazm.core.equipment.LinearUpgradePath;
-import org.phantazm.core.equipment.NoUpgradePath;
 import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
-import org.phantazm.core.item.AnimatedUpdatingItem;
-import org.phantazm.core.item.StaticUpdatingItem;
-import org.phantazm.core.particle.ParticleWrapper;
-import org.phantazm.core.particle.data.*;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
-import org.phantazm.stats.zombies.JooqZombiesSQLFetcher;
 import org.phantazm.stats.zombies.SQLZombiesDatabase;
 import org.phantazm.stats.zombies.ZombiesDatabase;
-import org.phantazm.stats.zombies.ZombiesSQLFetcher;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
-import org.phantazm.zombies.corpse.CorpseCreator;
-import org.phantazm.zombies.leaderboard.BestTimeLeaderboard;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
-import org.phantazm.zombies.map.action.door.DoorPlaySoundAction;
-import org.phantazm.zombies.map.action.door.DoorSendMessageAction;
-import org.phantazm.zombies.map.action.door.DoorSendOpenedRoomsAction;
-import org.phantazm.zombies.map.action.room.SpawnMobsAction;
-import org.phantazm.zombies.map.action.round.AnnounceRoundAction;
-import org.phantazm.zombies.map.action.round.RevivePlayersAction;
-import org.phantazm.zombies.map.action.round.SelectBombedRoom;
-import org.phantazm.zombies.map.action.round.SpawnPowerupAction;
-import org.phantazm.zombies.map.action.wave.SelectPowerupZombieAction;
-import org.phantazm.zombies.map.shop.display.*;
-import org.phantazm.zombies.map.shop.display.creator.*;
-import org.phantazm.zombies.map.shop.gui.InteractingClickHandler;
-import org.phantazm.zombies.map.shop.interactor.*;
-import org.phantazm.zombies.map.shop.predicate.*;
-import org.phantazm.zombies.map.shop.predicate.logic.AndPredicate;
-import org.phantazm.zombies.map.shop.predicate.logic.NotPredicate;
-import org.phantazm.zombies.map.shop.predicate.logic.OrPredicate;
 import org.phantazm.zombies.mob.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob.MobSpawnerSource;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.player.condition.EquipmentCondition;
-import org.phantazm.zombies.powerup.FileSystemPowerupLoader;
-import org.phantazm.zombies.powerup.PowerupInfo;
-import org.phantazm.zombies.powerup.action.*;
-import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
-import org.phantazm.zombies.powerup.predicate.TimedDeactivationPredicate;
-import org.phantazm.zombies.powerup.visual.HologramVisual;
-import org.phantazm.zombies.powerup.visual.ItemVisual;
+import org.phantazm.zombies.powerup.BasicPowerupHandlerSource;
+import org.phantazm.zombies.powerup.FileSystemPowerupDataLoader;
+import org.phantazm.zombies.powerup.PowerupData;
+import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.scene.ZombiesSceneProvider;
 import org.phantazm.zombies.scene.ZombiesSceneRouter;
-import org.phantazm.zombies.sidebar.SidebarUpdater;
-import org.phantazm.zombies.sidebar.lineupdater.*;
-import org.phantazm.zombies.sidebar.lineupdater.condition.StateConditionCreator;
-import org.phantazm.zombies.sidebar.lineupdater.creator.CoinsUpdaterCreator;
-import org.phantazm.zombies.sidebar.lineupdater.creator.ConditionalUpdaterCreator;
-import org.phantazm.zombies.sidebar.lineupdater.creator.StateUpdaterCreator;
-import org.phantazm.zombies.sidebar.lineupdater.creator.ZombieKillsUpdaterCreator;
-import org.phantazm.zombies.sidebar.section.CollectionSidebarSection;
-import org.phantazm.zombies.sidebar.section.ZombiesPlayerSection;
-import org.phantazm.zombies.sidebar.section.ZombiesPlayersSection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +67,9 @@ public final class ZombiesFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesFeature.class);
 
     private static Map<Key, MapInfo> maps;
-    private static Map<Key, PowerupInfo> powerups;
+
+    private static PowerupHandler.Source powerupHandlerSource;
+
     private static MobSpawnerSource mobSpawnerSource;
     private static ZombiesSceneRouter sceneRouter;
     private static ZombiesDatabase database;
@@ -116,21 +78,23 @@ public final class ZombiesFeature {
 
     }
 
-
-    static void initialize(@NotNull EventNode<Event> globalEventNode, @NotNull ContextManager contextManager,
+    static void initialize(@NotNull ContextManager contextManager,
             @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
             @NotNull KeyParser keyParser,
             @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
-            @NotNull PlayerViewProvider viewProvider, @NotNull CommandManager commandManager,
-            @NotNull SceneFallback sceneFallback, @NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull SceneTransferHelper sceneTransferHelper, @NotNull SongLoader songLoader,
-            @NotNull ZombiesConfig zombiesConfig) throws IOException {
+            @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback sceneFallback,
+            @NotNull Map<? super UUID, ? extends Party> parties, @NotNull SceneTransferHelper sceneTransferHelper,
+            @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
+            @NotNull MappingProcessorSource mappingProcessorSource) {
         Attributes.registerAll();
-        registerElementClasses(contextManager);
 
         ConfigCodec codec = new YamlCodec();
-        ZombiesFeature.maps = loadFeature("map", new FileSystemMapLoader(MAPS_FOLDER, codec));
-        ZombiesFeature.powerups = loadFeature("powerup", new FileSystemPowerupLoader(POWERUPS_FOLDER, codec));
+        ZombiesFeature.maps = loadFeature("map", new FileSystemMapLoader(MAPS_FOLDER, codec, mappingProcessorSource));
+
+        ZombiesFeature.powerupHandlerSource = new BasicPowerupHandlerSource(loadFeature("powerup",
+                new FileSystemPowerupDataLoader(POWERUPS_FOLDER, codec,
+                        mappingProcessorSource.processorFor(Token.ofClass(PowerupData.class)))), contextManager);
+
         ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(processorMap, spawner, keyParser);
 
         InstanceLoader instanceLoader =
@@ -156,17 +120,17 @@ public final class ZombiesFeature {
 
         Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
 
-        ZombiesSQLFetcher sqlFetcher = new JooqZombiesSQLFetcher();
-        database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource(), sqlFetcher);
+        database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
 
+        EventNode<Event> globalEventNode = MinecraftServer.getGlobalEventHandler();
         ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource(globalEventNode);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                     new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
                             instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
                             ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(), clientBlockHandlerSource,
-                            contextManager, keyParser, database, ZombiesFeature.powerups(),
-                            new BasicZombiesPlayerSource(database, viewProvider,
+                            contextManager, keyParser, database, viewProvider, ZombiesFeature.powerupHandlerSource(),
+                            new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,
                                     EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
                                     keyParser),
                             mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
@@ -180,177 +144,22 @@ public final class ZombiesFeature {
             sceneRouter.tick(System.currentTimeMillis());
         }, TaskSchedule.immediate(), TaskSchedule.nextTick());
 
-        commandManager.register(new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider,
-                MinecraftServer.getSchedulerManager(), sceneTransferHelper, sceneFallback,
-                zombiesConfig.joinRatelimit()));
+        MinecraftServer.getCommandManager().register(
+                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider,
+                        MinecraftServer.getSchedulerManager(), sceneTransferHelper, sceneFallback,
+                        zombiesConfig.joinRatelimit()));
     }
 
-    private static void registerElementClasses(ContextManager contextManager) {
-        //Action<Room>, Action<Round>, Action<Door>, and Action<Wave>
-        contextManager.registerElementClass(AnnounceRoundAction.class);
-        contextManager.registerElementClass(RevivePlayersAction.class);
-        contextManager.registerElementClass(SelectBombedRoom.class);
-        contextManager.registerElementClass(SpawnMobsAction.class);
-        contextManager.registerElementClass(SpawnPowerupAction.class);
-        contextManager.registerElementClass(DoorSendMessageAction.class);
-        contextManager.registerElementClass(DoorSendOpenedRoomsAction.class);
-        contextManager.registerElementClass(SelectPowerupZombieAction.class);
-        contextManager.registerElementClass(DoorPlaySoundAction.class);
-        contextManager.registerElementClass(org.phantazm.zombies.map.action.round.PlaySoundAction.class);
+    private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) {
+        List<String> dataNames;
+        try {
+            dataNames = loader.loadableData();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-        //ShopPredicate
-        contextManager.registerElementClass(StaticCostPredicate.class);
-        contextManager.registerElementClass(MapFlagPredicate.class);
-        contextManager.registerElementClass(InteractingPredicate.class);
-        contextManager.registerElementClass(PlayerFlagPredicate.class);
-        contextManager.registerElementClass(PlayerInGamePredicate.class);
-        contextManager.registerElementClass(PlayerStatePredicate.class);
-        contextManager.registerElementClass(UuidPredicate.class);
-        contextManager.registerElementClass(TypePredicate.class);
-
-        contextManager.registerElementClass(AndPredicate.class);
-        contextManager.registerElementClass(OrPredicate.class);
-        contextManager.registerElementClass(NotPredicate.class);
-
-        contextManager.registerElementClass(EquipmentCostPredicate.class);
-        contextManager.registerElementClass(EquipmentSpacePredicate.class);
-        contextManager.registerElementClass(EquipmentPresentPredicate.class);
-        contextManager.registerElementClass(EquipmentTierPredicate.class);
-
-        //ShopInteractor
-        contextManager.registerElementClass(MapFlaggingInteractor.class);
-        contextManager.registerElementClass(PlayerFlaggingInteractor.class);
-        contextManager.registerElementClass(MessagingInteractor.class);
-        contextManager.registerElementClass(PlaySoundInteractor.class);
-        contextManager.registerElementClass(RefillAllAmmoInteractor.class);
-        contextManager.registerElementClass(DelayedInteractor.class);
-        contextManager.registerElementClass(DragonsWrathInteractor.class);
-        contextManager.registerElementClass(ConditionalInteractor.class);
-        contextManager.registerElementClass(CountingInteractor.class);
-        contextManager.registerElementClass(OpenGuiInteractor.class);
-        contextManager.registerElementClass(CloseGuiInteractor.class);
-        contextManager.registerElementClass(CostSubstitutingItem.class);
-        contextManager.registerElementClass(AddEquipmentInteractor.class);
-        contextManager.registerElementClass(EquipmentStationInteractor.class);
-        contextManager.registerElementClass(ChangeDoorStateInteractor.class);
-        contextManager.registerElementClass(DeductCoinsInteractor.class);
-        contextManager.registerElementClass(RefillAmmoInteractor.class);
-        contextManager.registerElementClass(ReviveAllInteractor.class);
-        contextManager.registerElementClass(UpdateBlockPropertiesInteractor.class);
-        contextManager.registerElementClass(SubstitutedTitleInteractor.class);
-        contextManager.registerElementClass(TitleInteractor.class);
-        contextManager.registerElementClass(SlotMachineInteractor.class);
-        contextManager.registerElementClass(SlotMachineInteractor.BasicSlotMachineFrame.class);
-        contextManager.registerElementClass(SlotMachineInteractor.ConstantDelayFormula.class);
-        contextManager.registerElementClass(SlotMachineInteractor.LinearDelayFormula.class);
-        contextManager.registerElementClass(PlaySongInteractor.class);
-        contextManager.registerElementClass(ChangeSelectionGroupInteractor.class);
-        contextManager.registerElementClass(SelectionGroupInteractor.class);
-        contextManager.registerElementClass(AnnounceActiveSelectionGroup.class);
-        contextManager.registerElementClass(AdditiveTransactionModifierInteractor.class);
-        contextManager.registerElementClass(UpgradeEquipmentInteractor.class);
-        contextManager.registerElementClass(ChestStateInteractor.class);
-
-        //ShopDisplay
-        contextManager.registerElementClass(StaticHologramDisplay.class);
-        contextManager.registerElementClass(PlayerDisplay.class);
-        contextManager.registerElementClass(StaticItemDisplay.class);
-        contextManager.registerElementClass(ConditionalDisplay.class);
-        contextManager.registerElementClass(FlagConditionalDisplay.class);
-        contextManager.registerElementClass(IncrementalMetaDisplay.class);
-        contextManager.registerElementClass(AnimatedItemDisplay.class);
-        contextManager.registerElementClass(EmptyDisplay.class);
-
-        contextManager.registerElementClass(EquipmentUpgradeCostDisplayCreator.class);
-        contextManager.registerElementClass(IncrementalMetaPlayerDisplayCreator.class);
-        contextManager.registerElementClass(PlayerHologramDisplayCreator.class);
-        contextManager.registerElementClass(PlayerConditionalDisplayCreator.class);
-        contextManager.registerElementClass(InteractionPoint.class);
-        contextManager.registerElementClass(CombiningArmorPlayerDisplayCreator.class);
-
-        contextManager.registerElementClass(BestTimeLeaderboard.class);
-
-        //Sidebar
-        contextManager.registerElementClass(SidebarUpdater.class);
-        contextManager.registerElementClass(CollectionSidebarSection.class);
-        contextManager.registerElementClass(ZombiesPlayersSection.class);
-        contextManager.registerElementClass(ZombiesPlayerSection.class);
-        contextManager.registerElementClass(ConditionalSidebarLineUpdater.class);
-        contextManager.registerElementClass(ConditionalSidebarLineUpdater.ChildUpdater.class);
-        contextManager.registerElementClass(ConstantSidebarLineUpdater.class);
-        contextManager.registerElementClass(DateLineUpdater.class);
-        contextManager.registerElementClass(JoinedPlayersSidebarLineUpdater.class);
-        contextManager.registerElementClass(RemainingZombiesSidebarLineUpdater.class);
-        contextManager.registerElementClass(RoundSidebarLineUpdater.class);
-        contextManager.registerElementClass(TicksLineUpdater.class);
-
-        contextManager.registerElementClass(CoinsUpdaterCreator.class);
-        contextManager.registerElementClass(ZombieKillsUpdaterCreator.class);
-        contextManager.registerElementClass(ConditionalUpdaterCreator.class);
-        contextManager.registerElementClass(StateUpdaterCreator.class);
-
-        contextManager.registerElementClass(StateConditionCreator.class);
-
-        //ClickHandlers
-        contextManager.registerElementClass(InteractingClickHandler.class);
-
-        //UpdatingItem
-        contextManager.registerElementClass(StaticUpdatingItem.class);
-        contextManager.registerElementClass(AnimatedUpdatingItem.class);
-
-        //Particles
-        contextManager.registerElementClass(ParticleWrapper.class);
-        contextManager.registerElementClass(BlockParticleVariantData.class);
-        contextManager.registerElementClass(BlockPositionSource.class);
-        contextManager.registerElementClass(DustParticleVariantData.class);
-        contextManager.registerElementClass(ItemStackParticleVariantData.class);
-        contextManager.registerElementClass(NoParticleVariantData.class);
-        contextManager.registerElementClass(TransitionDustParticleVariantData.class);
-        contextManager.registerElementClass(VibrationParticleVariantData.class);
-
-
-        //UpgradePath
-        contextManager.registerElementClass(LinearUpgradePath.class);
-        contextManager.registerElementClass(NoUpgradePath.class);
-
-        //DeactivationPredicates
-        contextManager.registerElementClass(TimedDeactivationPredicate.class);
-        contextManager.registerElementClass(ImmediateDeactivationPredicate.class);
-
-        //PowerupVisuals
-        contextManager.registerElementClass(ItemVisual.class);
-        contextManager.registerElementClass(HologramVisual.class);
-        contextManager.registerElementClass(BossBarTimerAction.class);
-
-        //PowerupActions
-        contextManager.registerElementClass(MapFlaggingAction.class);
-        contextManager.registerElementClass(PlayerFlaggingAction.class);
-        contextManager.registerElementClass(MapTransactionModifierMultiplyAction.class);
-        contextManager.registerElementClass(MapTransactionModifierAddAction.class);
-        contextManager.registerElementClass(KillAllInRadiusAction.class);
-        contextManager.registerElementClass(PlaySoundAction.class);
-        contextManager.registerElementClass(ModifyWindowsAction.class);
-        contextManager.registerElementClass(SendTitleAction.class);
-        contextManager.registerElementClass(SendMessageAction.class);
-        contextManager.registerElementClass(AttributeModifierAction.class);
-        contextManager.registerElementClass(PreventAmmoDrainAction.class);
-        contextManager.registerElementClass(RefillAmmoAction.class);
-
-        //Player conditions
-        contextManager.registerElementClass(EquipmentCondition.class);
-
-        //Corpses
-        contextManager.registerElementClass(CorpseCreator.class);
-        contextManager.registerElementClass(CorpseCreator.TimeLine.class);
-        contextManager.registerElementClass(CorpseCreator.StaticLine.class);
-
-        LOGGER.info("Registered Zombies element classes.");
-    }
-
-    private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) throws IOException {
-        List<String> dataNames = loader.loadableData();
         Map<Key, T> data = new HashMap<>(dataNames.size());
-
         for (String dataName : dataNames) {
             try {
                 T feature = loader.load(dataName);
@@ -376,8 +185,8 @@ public final class ZombiesFeature {
         return FeatureUtils.check(maps);
     }
 
-    public static @NotNull @Unmodifiable Map<Key, PowerupInfo> powerups() {
-        return FeatureUtils.check(powerups);
+    public static @NotNull PowerupHandler.Source powerupHandlerSource() {
+        return FeatureUtils.check(powerupHandlerSource);
     }
 
     public static @NotNull MobSpawnerSource mobSpawnerSource() {

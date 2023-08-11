@@ -12,9 +12,7 @@ import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandManager;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -38,8 +36,6 @@ import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
-import org.phantazm.server.player.BasicLoginValidator;
-import org.phantazm.server.player.LoginValidator;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,9 +46,9 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Launches the server, and provides some useful static constants.
@@ -65,19 +61,14 @@ public final class PhantazmServer {
     public static final String BRAND_NAME = "Minestom-Phantazm";
     private static final String UNSAFE_ARGUMENT = "unsafe";
 
-    public static final Path BANS_FILE = Path.of("./bans.txt");
-    public static final Path WHITELIST_FILE = Path.of("./whitelist.txt");
-    public static final Path PERMISSIONS_FILE = Path.of("./permissions.yml");
-    public static final Path MOBS_PATH = Path.of("./mobs");
-
-    private static LoginValidator loginValidator;
-
     /**
      * Starting point for the server.
      *
      * @param args Do you even know java?
      *             I don't know java.
      *             At all.
+     *             <p>
+     *             - Thamid123
      */
     public static void main(String[] args) {
         MinecraftServer minecraftServer = MinecraftServer.init();
@@ -157,14 +148,11 @@ public final class PhantazmServer {
             return;
         }
 
-        loginValidator =
-                new BasicLoginValidator(serverConfig.serverInfoConfig().whitelist(), WHITELIST_FILE, BANS_FILE);
-
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         try {
             LOGGER.info("Initializing features.");
-            initializeFeatures(keyParser, node, playerConfig, serverConfig, shutdownConfig, pathfinderConfig,
-                    lobbiesConfig, partyConfig, whisperConfig, chatConfig, zombiesConfig, loginValidator);
+            initializeFeatures(keyParser, playerConfig, serverConfig, shutdownConfig, pathfinderConfig, lobbiesConfig,
+                    partyConfig, whisperConfig, chatConfig, zombiesConfig);
             LOGGER.info("Features initialized successfully.");
         }
         catch (Exception exception) {
@@ -192,13 +180,8 @@ public final class PhantazmServer {
         LOGGER.info("Shutting down server. Reason: " + reason);
 
         HikariFeature.end();
-        if (loginValidator != null) {
-            loginValidator.flush();
-        }
-
         ExecutorFeature.shutdown();
         MinecraftServer.stopCleanly();
-        ServerCommandFeature.flushPermissions();
     }
 
     private static boolean isUnsafe(String[] args) {
@@ -211,71 +194,82 @@ public final class PhantazmServer {
         return false;
     }
 
-    private static void initializeFeatures(KeyParser keyParser, EventNode<Event> global, PlayerConfig playerConfig,
-            ServerConfig serverConfig, ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig,
-            LobbiesConfig lobbiesConfig, PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig,
-            ZombiesConfig zombiesConfig, LoginValidator loginValidator) throws Exception {
-        DatapackFeature.initialize(MinecraftServer.getBiomeManager());
-        PlayerFeature.initialize(playerConfig, global, MiniMessage.miniMessage());
+    private static void initializeFeatures(KeyParser keyParser, PlayerConfig playerConfig, ServerConfig serverConfig,
+            ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
+            PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, ZombiesConfig zombiesConfig) {
+        ConfigCodec yamlCodec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
+                () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
+        ConfigCodec tomlCodec = new TomlCodec();
 
         RouterStore routerStore = new BasicRouterStore();
-        ExecutorFeature.initialize();
-        HikariFeature.initialize();
-        GeneralStatsFeature.initialize(global);
-        BlockHandlerFeature.initialize(MinecraftServer.getBlockManager());
-
-        SongFeature.initialize(keyParser);
-
-        MappingProcessorSource mappingProcessorSource = EthyleneFeature.getMappingProcessorSource();
-        ElementFeature.initialize(mappingProcessorSource, keyParser);
-
-        ConfigCodec tomlCodec = new TomlCodec();
-        WhisperCommandFeature.initialize(MinecraftServer.getCommandManager(), MinecraftServer.getConnectionManager(),
-                whisperConfig);
-
-        ContextManager contextManager = ElementFeature.getContextManager();
-
-        TickFormatterFeature.initialize(contextManager);
-        NPCFeature.initialize(contextManager);
-
+        SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
         PlayerViewProvider viewProvider =
                 new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
+        CompletableFuture<?> independentFeatures = CompletableFuture.runAsync(() -> {
+            DatapackFeature.initialize();
+            WhisperCommandFeature.initialize(whisperConfig);
+            SilenceJooqFeature.initialize();
+            BlockHandlerFeature.initialize();
+            LocalizationFeature.initialize();
+            PlayerFeature.initialize(playerConfig);
+        });
 
-        PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
-                MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec,
-                MiniMessage.miniMessage());
-        LobbyFeature.initialize(global, viewProvider, lobbiesConfig, contextManager);
-        ChatFeature.initialize(global, viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
-                MinecraftServer.getCommandManager());
-        CommandFeature.initialize(MinecraftServer.getCommandManager(), routerStore, viewProvider,
-                LobbyFeature.getFallback());
+        CompletableFuture<?> databaseFeatures = CompletableFuture.runAsync(() -> {
+            ExecutorFeature.initialize();
+            HikariFeature.initialize();
+        });
 
-        ProximaFeature.initialize(global, contextManager, pathfinderConfig);
+        CompletableFuture<?> databaseDependents = databaseFeatures.whenCompleteAsync((ignored, error) -> {
+            GeneralStatsFeature.initialize(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
+        });
 
-        ConfigCodec codec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
-                () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
+        CompletableFuture<?> game = databaseFeatures.whenCompleteAsync((ignored, error) -> {
+            MappingProcessorSource mappingProcessorSource = EthyleneFeature.getMappingProcessorSource();
+            ElementFeature.initialize(mappingProcessorSource, keyParser);
 
-        MobFeature.initialize(contextManager, MOBS_PATH, codec);
-        EquipmentFeature.initialize(keyParser, contextManager, codec,
-                mappingProcessorSource.processorFor(Token.ofClass(EquipmentData.class)));
+            ContextManager contextManager = ElementFeature.getContextManager();
 
-        CommandManager commandManager = MinecraftServer.getCommandManager();
+            PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
+                    MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec);
 
-        SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
-        ZombiesFeature.initialize(global, contextManager, MobFeature.getProcessorMap(), ProximaFeature.getSpawner(),
-                keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, commandManager,
-                new CompositeFallback(List.of(LobbyFeature.getFallback(),
-                        new KickFallback(Component.text("Failed to send you to lobby", NamedTextColor.RED)))),
-                PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(), zombiesConfig);
+            LobbyFeature.initialize(viewProvider, lobbiesConfig, contextManager);
 
-        ServerCommandFeature.initialize(commandManager, loginValidator, serverConfig.serverInfoConfig().whitelist(),
-                mappingProcessorSource, codec, routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),
-                viewProvider, transferHelper);
-        ValidationFeature.initialize(global, loginValidator, ServerCommandFeature.permissionHandler());
+            MobFeature.initialize(contextManager, yamlCodec);
+            EquipmentFeature.initialize(keyParser, contextManager, yamlCodec,
+                    mappingProcessorSource.processorFor(Token.ofClass(EquipmentData.class)));
 
-        routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
-        routerStore.putRouter(RouterKeys.LOBBY_SCENE_ROUTER, LobbyFeature.getLobbyRouter());
+            ProximaFeature.initialize(pathfinderConfig);
+            SongFeature.initialize(keyParser);
+
+            ZombiesFeature.initialize(contextManager, MobFeature.getProcessorMap(), ProximaFeature.getSpawner(),
+                    keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, new CompositeFallback(
+                            List.of(LobbyFeature.getFallback(), new KickFallback(
+                                    Component.text("Failed to send you to lobby!", NamedTextColor.RED)))),
+                    PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
+                    zombiesConfig, mappingProcessorSource);
+
+            RoleFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor(), yamlCodec,
+                    contextManager, ServerCommandFeature::permissionHandler);
+
+            LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
+            ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),
+                    serverConfig.serverInfoConfig().whitelist(), HikariFeature.getDataSource(),
+                    ExecutorFeature.getExecutor(), routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),
+                    viewProvider, transferHelper, RoleFeature.roleStore());
+
+            ValidationFeature.initialize(LoginValidatorFeature.loginValidator(),
+                    ServerCommandFeature.permissionHandler(), RoleFeature.roleStore());
+
+            ChatFeature.initialize(viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
+                    RoleFeature.roleStore());
+            CommandFeature.initialize(routerStore, viewProvider, LobbyFeature.getFallback());
+
+            routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
+            routerStore.putRouter(RouterKeys.LOBBY_SCENE_ROUTER, LobbyFeature.getLobbyRouter());
+        });
+
+        CompletableFuture.allOf(independentFeatures, databaseFeatures, databaseDependents, game).join();
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig,

@@ -1,6 +1,8 @@
 package org.phantazm.core.tracker;
 
+import it.unimi.dsi.fastutil.Pair;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -12,6 +14,14 @@ import java.util.function.Consumer;
 public interface BoundedTracker<T extends Bounded> {
     @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height, double depth,
             double distance);
+
+    @NotNull Optional<Pair<T, Vec>> closestInRangeToBoundsWithVec(@NotNull Point origin, double width, double height,
+            double depth, double distance);
+
+    default @NotNull Optional<Pair<T, Vec>> closestInRangeToBoundsWithVec(@NotNull Point origin, double width,
+            double height, double distance) {
+        return closestInRangeToBoundsWithVec(origin, width, height, width, distance);
+    }
 
     @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double distance);
 

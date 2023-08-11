@@ -10,6 +10,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
+import net.minestom.server.thread.Acquired;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -111,17 +112,24 @@ public class MeleeAttackGoal implements GoalCreator {
                 float knockbackStrength = self.getAttributeValue(Attribute.ATTACK_KNOCKBACK);
 
                 double angle = pos.yaw() * (Math.PI / 180);
-                boolean damaged = livingEntity.damage(Damage.fromEntity(self, damageAmount), data.bypassArmor);
+                Acquired<Entity> entityAcquired = livingEntity.getAcquirable().lock();
+                try {
+                    LivingEntity actualEntity = (LivingEntity)entityAcquired.get();
+                    boolean damaged = actualEntity.damage(Damage.fromEntity(self, damageAmount), data.bypassArmor);
 
-                if (!damaged) {
-                    return;
+                    if (!damaged) {
+                        return;
+                    }
+
+                    actualEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));
+                    self.setTag(Tags.LAST_MELEE_HIT_TAG, actualEntity.getUuid());
+
+                    for (Skill skill : skills) {
+                        skill.use(mob);
+                    }
                 }
-
-                livingEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));
-                self.setTag(Tags.LAST_MELEE_HIT_TAG, livingEntity.getUuid());
-
-                for (Skill skill : skills) {
-                    skill.use(mob);
+                finally {
+                    entityAcquired.unlock();
                 }
             }
 

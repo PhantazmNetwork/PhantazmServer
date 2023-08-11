@@ -2,7 +2,10 @@ package org.phantazm.zombies.player.state;
 
 import net.kyori.adventure.key.Key;
 import org.phantazm.commons.Namespaces;
-import org.phantazm.zombies.player.state.context.*;
+import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
+import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
+import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
+import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 
 public class ZombiesPlayerStateKeys {
 

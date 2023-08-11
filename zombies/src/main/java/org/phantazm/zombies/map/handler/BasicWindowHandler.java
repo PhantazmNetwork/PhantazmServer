@@ -1,16 +1,20 @@
 package org.phantazm.zombies.map.handler;
 
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.instance.EntityTracker;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
+import org.phantazm.mob.MobStore;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.event.ZombiesPlayerRepairWindowEvent;
+import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.stage.StageKeys;
@@ -19,7 +23,6 @@ import java.util.*;
 
 public class BasicWindowHandler implements WindowHandler {
     private static final int POSITION_CHECK_INTERVAL = 200;
-    private static final int UNREPAIRABLE_BREAK_DELAY = 2000;
 
     private static class RepairOperation {
         private final ZombiesPlayer zombiesPlayer;
@@ -34,6 +37,8 @@ public class BasicWindowHandler implements WindowHandler {
     }
 
     private final BoundedTracker<Window> windowTracker;
+    private final BoundedTracker<Room> roomTracker;
+    private final MobStore mobStore;
     private final Collection<? extends ZombiesPlayer> players;
     private final double repairRadius;
     private final long repairInterval;
@@ -46,10 +51,12 @@ public class BasicWindowHandler implements WindowHandler {
 
     private long lastPositionCheck;
 
-    public BasicWindowHandler(@NotNull BoundedTracker<Window> windowTracker,
-            @NotNull Collection<? extends ZombiesPlayer> players, double repairRadius, long repairInterval,
-            int coinsPerWindowBlock, @NotNull WindowMessages windowMessages) {
+    public BasicWindowHandler(@NotNull BoundedTracker<Window> windowTracker, @NotNull BoundedTracker<Room> roomTracker,
+            @NotNull MobStore mobStore, @NotNull Collection<? extends ZombiesPlayer> players, double repairRadius,
+            long repairInterval, int coinsPerWindowBlock, @NotNull WindowMessages windowMessages) {
         this.windowTracker = Objects.requireNonNull(windowTracker, "windowTracker");
+        this.roomTracker = Objects.requireNonNull(roomTracker, "roomTracker");
+        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.players = Objects.requireNonNull(players, "players");
         this.repairRadius = repairRadius;
         this.repairInterval = repairInterval;
@@ -173,47 +180,73 @@ public class BasicWindowHandler implements WindowHandler {
                 repairOperation.lastRepairTime = time;
 
                 Window targetWindow = repairOperation.window;
-                if (!targetWindow.isFullyRepaired()) {
-                    long timeElapsedSinceLastBroken = time - targetWindow.getLastBreakTime();
-                    if (timeElapsedSinceLastBroken < UNREPAIRABLE_BREAK_DELAY) {
-                        zombiesPlayer.sendMessage(windowMessages.enemiesNearby());
-                        continue;
-                    }
+                if (targetWindow.isFullyRepaired()) {
+                    repairOperationIterator.remove();
+                    continue;
+                }
 
-                    int repaired = targetWindow.updateIndex(
-                            targetWindow.getIndex() + zombiesPlayer.module().getMeta().getWindowRepairAmount());
-                    if (repaired == 0) {
-                        continue;
-                    }
+                Wrapper<Boolean> hasNearby = Wrapper.of(false);
+                targetWindow.instance().getEntityTracker()
+                        .nearbyEntitiesUntil(targetWindow.center(), 5, EntityTracker.Target.LIVING_ENTITIES,
+                                candidate -> {
+                                    if (!mobStore.hasMob(candidate.getUuid())) {
+                                        //entities not in the mob store don't prevent repairs
+                                        return false;
+                                    }
 
-                    Optional<Player> playerOptional = zombiesPlayer.getPlayer();
-                    if (playerOptional.isEmpty()) {
-                        repairOperationIterator.remove();
-                        continue;
-                    }
+                                    if (roomTracker.atPoint(candidate.getPosition()).isPresent()) {
+                                        //entities in a room don't prevent repairs
+                                        return false;
+                                    }
 
-                    Player player = playerOptional.get();
+                                    Optional<Window> windowOptional = windowTracker.atPoint(candidate.getPosition());
+                                    if (windowOptional.isPresent() && windowOptional.get() != targetWindow) {
+                                        //entities in other nearby windows don't prevent repairs
+                                        return false;
+                                    }
 
-                    int baseGold = repaired * coinsPerWindowBlock;
-                    PlayerCoins coins = zombiesPlayer.module().getCoins();
+                                    hasNearby.set(true);
+                                    return true;
+                                });
 
-                    TransactionResult result = coins.runTransaction(new Transaction(
-                            zombiesPlayer.module().compositeTransactionModifiers()
-                                    .modifiers(ModifierSourceGroups.WINDOW_COIN_GAIN), baseGold));
+                if (hasNearby.get()) {
+                    zombiesPlayer.sendMessage(windowMessages.enemiesNearby());
+                    continue;
+                }
 
-                    ZombiesPlayerRepairWindowEvent event =
-                            new ZombiesPlayerRepairWindowEvent(player, zombiesPlayer, targetWindow, repaired,
-                                    result.change());
+                int repaired = targetWindow.updateIndex(
+                        targetWindow.getIndex() + zombiesPlayer.module().getMeta().getWindowRepairAmount());
+                if (repaired == 0) {
+                    continue;
+                }
 
-                    EventDispatcher.call(event);
-                    if (event.isCancelled()) {
-                        continue;
-                    }
+                Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+                if (playerOptional.isEmpty()) {
+                    repairOperationIterator.remove();
+                    continue;
+                }
 
-                    coins.applyTransaction(new TransactionResult(result.displays(), event.goldGain()));
-                    if (targetWindow.isFullyRepaired()) {
-                        zombiesPlayer.sendMessage(windowMessages.finishRepairing());
-                    }
+                Player player = playerOptional.get();
+
+                int baseGold = repaired * coinsPerWindowBlock;
+                PlayerCoins coins = zombiesPlayer.module().getCoins();
+
+                TransactionResult result = coins.runTransaction(new Transaction(
+                        zombiesPlayer.module().compositeTransactionModifiers()
+                                .modifiers(ModifierSourceGroups.WINDOW_COIN_GAIN), baseGold));
+
+                ZombiesPlayerRepairWindowEvent event =
+                        new ZombiesPlayerRepairWindowEvent(player, zombiesPlayer, targetWindow, repaired,
+                                result.change());
+
+                EventDispatcher.call(event);
+                if (event.isCancelled()) {
+                    continue;
+                }
+
+                coins.applyTransaction(new TransactionResult(result.displays(), event.goldGain()));
+                if (targetWindow.isFullyRepaired()) {
+                    zombiesPlayer.sendMessage(windowMessages.finishRepairing());
                 }
             }
         }

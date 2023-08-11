@@ -2,14 +2,19 @@ package org.phantazm.zombies.powerup;
 
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.EntityTracker;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.action.PowerupAction;
-import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
+import org.phantazm.zombies.powerup.action.component.PowerupActionComponent;
+import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
+import org.phantazm.zombies.powerup.predicate.PickupPredicateComponent;
 import org.phantazm.zombies.powerup.visual.PowerupVisual;
+import org.phantazm.zombies.powerup.visual.PowerupVisualComponent;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -17,24 +22,20 @@ import java.util.function.Supplier;
 public class BasicPowerupHandler implements PowerupHandler {
     private static final int PICKUP_CHECK_INTERVAL = 100; //check every 2 ticks for powerup pickups
 
-    private final Instance instance;
+    private final Supplier<? extends @NotNull ZombiesScene> scene;
     private final Map<Key, PowerupComponents> components;
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
-    private final double powerupPickupRadius;
 
     private final List<Powerup> spawnedOrActivePowerups;
     private final Collection<Powerup> powerupView;
 
     private long lastPickupCheck = 0L;
 
-    public BasicPowerupHandler(@NotNull Instance instance, @NotNull Map<Key, PowerupComponents> components,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap, double powerupPickupRadius) {
-        this.instance = Objects.requireNonNull(instance, "instance");
+    public BasicPowerupHandler(@NotNull Supplier<? extends @NotNull ZombiesScene> scene,
+            @NotNull Map<Key, PowerupComponents> components) {
+        this.scene = Objects.requireNonNull(scene, "scene");
         this.components = Map.copyOf(components);
         this.spawnedOrActivePowerups = new ArrayList<>(16);
         this.powerupView = Collections.unmodifiableCollection(this.spawnedOrActivePowerups);
-        this.playerMap = Objects.requireNonNull(playerMap);
-        this.powerupPickupRadius = powerupPickupRadius;
     }
 
     @Override
@@ -69,10 +70,12 @@ public class BasicPowerupHandler implements PowerupHandler {
     }
 
     private void maybePickup(Powerup powerup, long time) {
-        instance.getEntityTracker()
-                .nearbyEntitiesUntil(powerup.spawnLocation(), powerupPickupRadius, EntityTracker.Target.PLAYERS,
-                        player -> {
-                            ZombiesPlayer zombiesPlayer = playerMap.get(player.getUuid());
+        ZombiesScene scene = this.scene.get();
+
+        scene.instance().getEntityTracker()
+                .nearbyEntitiesUntil(powerup.spawnLocation(), scene.getMapSettingsInfo().powerupPickupRadius(),
+                        EntityTracker.Target.PLAYERS, player -> {
+                            ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(player.getUuid());
                             if (zombiesPlayer != null && zombiesPlayer.canPickupPowerup(powerup)) {
                                 powerup.activate(zombiesPlayer, time);
                                 return true;
@@ -86,26 +89,29 @@ public class BasicPowerupHandler implements PowerupHandler {
     public @NotNull Powerup spawn(@NotNull Key powerupType, double x, double y, double z) {
         PowerupComponents component = components.get(powerupType);
         if (component == null) {
-            throw new IllegalArgumentException("Powerup type '" + powerupType + "' unknown");
+            throw new IllegalArgumentException("Unknown powerup type " + powerupType);
         }
 
-        Collection<Supplier<PowerupVisual>> visualSuppliers = component.visuals();
-        Collection<Supplier<PowerupAction>> actionSuppliers = component.actions();
-        Supplier<DeactivationPredicate> deactivationPredicateSupplier = component.deactivationPredicate();
+        ZombiesScene scene = this.scene.get();
 
-        Collection<PowerupVisual> visuals = new ArrayList<>(visualSuppliers.size());
-        Collection<PowerupAction> actions = new ArrayList<>(actionSuppliers.size());
+        Collection<PowerupVisualComponent> visualComponents = component.visuals();
+        Collection<PowerupActionComponent> actionComponents = component.actions();
+        DeactivationPredicateComponent deactivationPredicateComponent = component.deactivationPredicate();
+        PickupPredicateComponent pickupPredicateComponent = component.pickupPredicateComponent();
 
-        for (Supplier<PowerupVisual> supplier : visualSuppliers) {
-            visuals.add(supplier.get());
+        Collection<PowerupVisual> visuals = new ArrayList<>(visualComponents.size());
+        Collection<PowerupAction> actions = new ArrayList<>(actionComponents.size());
+
+        for (PowerupVisualComponent supplier : visualComponents) {
+            visuals.add(supplier.apply(scene));
         }
 
-        for (Supplier<PowerupAction> supplier : actionSuppliers) {
-            actions.add(supplier.get());
+        for (PowerupActionComponent supplier : actionComponents) {
+            actions.add(supplier.apply(scene));
         }
 
-        Powerup newPowerup =
-                new Powerup(powerupType, visuals, actions, deactivationPredicateSupplier.get(), new Vec(x, y, z));
+        Powerup newPowerup = new Powerup(powerupType, visuals, actions, deactivationPredicateComponent.apply(scene),
+                pickupPredicateComponent.apply(scene), new Vec(x, y, z));
         newPowerup.spawn();
 
         spawnedOrActivePowerups.add(newPowerup);
@@ -113,8 +119,33 @@ public class BasicPowerupHandler implements PowerupHandler {
     }
 
     @Override
-    public boolean typeExists(@NotNull Key powerupType) {
+    public void assignPowerup(@NotNull LivingEntity livingEntity, @NotNull Key powerupKey) {
+        PowerupComponents components = this.components.get(powerupKey);
+        if (components == null) {
+            return;
+        }
+
+        livingEntity.tagHandler().updateTag(Tags.POWERUP_TAG, currentValue -> {
+            List<String> mutableCopy = new ArrayList<>(currentValue);
+            mutableCopy.add(powerupKey.asString());
+            return List.copyOf(mutableCopy);
+        });
+
+        components.powerupEffectComponent().apply(scene.get()).apply(livingEntity);
+    }
+
+    @Override
+    public boolean canSpawnType(@NotNull Key powerupType) {
         return components.containsKey(powerupType);
+    }
+
+    @Override
+    public void end() {
+        for (Powerup powerup : spawnedOrActivePowerups) {
+            powerup.deactivate();
+        }
+
+        spawnedOrActivePowerups.clear();
     }
 
     @Override

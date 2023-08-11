@@ -104,6 +104,7 @@ public class PartyKickCommand {
 
                     if (toKick == kicker) {
                         sender.sendMessage(config.cannotKickSelf());
+                        return;
                     }
 
                     if (!party.getKickPermission().canExecute(kicker, toKick)) {

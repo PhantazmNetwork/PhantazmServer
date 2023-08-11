@@ -11,9 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 
 import java.util.*;
-import java.util.function.BiPredicate;
 import java.util.function.BooleanSupplier;
-import java.util.function.Predicate;
 
 /**
  * Extension of {@link Inventory} designed to ease the creation of graphical user interfaces. May or may not be

@@ -35,8 +35,14 @@ public class ChatChannelSendCommand {
         }, (sender, context) -> {
             Player player = (Player)sender;
             channel.findAudience(player.getUuid(), audience -> {
-                Component formatted = channel.formatMessage(player, String.join(" ", context.get(message)));
-                audience.sendMessage(formatted);
+                channel.formatMessage(player, String.join(" ", context.get(message)))
+                        .whenComplete((component, throwable) -> {
+                            if (component == null) {
+                                return;
+                            }
+
+                            audience.sendMessage(component);
+                        });
             }, (failure) -> {
                 player.sendMessage(failure.left());
             });

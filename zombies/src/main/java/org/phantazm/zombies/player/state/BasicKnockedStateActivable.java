@@ -34,9 +34,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class BasicKnockedStateActivable implements Activable {
-
-    private static final TagResolver[] EMPTY_TAG_RESOLVER_ARRAY = new TagResolver[0];
-
     private final KnockedPlayerStateContext context;
 
     private final Instance instance;
@@ -143,7 +140,7 @@ public class BasicKnockedStateActivable implements Activable {
             player.setInvisible(false);
             player.setFlying(false);
             player.setAllowFlying(false);
-            player.setFlyingSpeed(0.4F);
+            player.setFlyingSpeed(0.05F);
             player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1F);
             player.setGameMode(GameMode.ADVENTURE);
             sidebar.addViewer(player);
@@ -151,8 +148,10 @@ public class BasicKnockedStateActivable implements Activable {
             belowNameTag.addViewer(player);
             context.getVehicle().remove();
 
-            Pos landing = player.getPosition().withCoord(context.getKnockLocation());
-            player.teleport(landing);
+            if (player.getInstance() != null) {
+                Pos landing = player.getPosition().withCoord(context.getKnockLocation());
+                player.teleport(landing);
+            }
         });
         actionBar.sendActionBar(Component.empty(), ZombiesPlayerActionBar.REVIVE_MESSAGE_CLEAR_PRIORITY);
     }
@@ -201,7 +200,7 @@ public class BasicKnockedStateActivable implements Activable {
             tagResolvers.add(Placeholder.component("killer", context.getKiller().get()));
         }
 
-        return tagResolvers.toArray(EMPTY_TAG_RESOLVER_ARRAY);
+        return tagResolvers.toArray(TagResolver[]::new);
     }
 
 }

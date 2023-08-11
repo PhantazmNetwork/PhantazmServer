@@ -4,4 +4,5 @@ plugins {
 
 dependencies {
     implementation(projects.phantazmCommons)
+    api(libs.ethylene.mapper)
 }

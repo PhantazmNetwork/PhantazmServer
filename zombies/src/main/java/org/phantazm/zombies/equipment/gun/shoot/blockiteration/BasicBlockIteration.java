@@ -10,7 +10,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 

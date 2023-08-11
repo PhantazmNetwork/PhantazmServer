@@ -9,8 +9,10 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.StampedLock;
 
 /**
@@ -23,6 +25,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     protected final Instance instance;
     protected final SceneFallback fallback;
     protected final Point spawnPoint;
+    protected final PlayerViewProvider playerViewProvider;
 
     private final Set<Player> ghosts;
     private final StampedLock ghostLock;
@@ -30,11 +33,12 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     protected volatile boolean shutdown = false;
 
     public InstanceScene(@NotNull UUID uuid, @NotNull Instance instance, @NotNull SceneFallback fallback,
-            @NotNull Point spawnPoint) {
+            @NotNull Point spawnPoint, @NotNull PlayerViewProvider playerViewProvider) {
         this.uuid = Objects.requireNonNull(uuid, "uuid");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.fallback = Objects.requireNonNull(fallback, "fallback");
         this.spawnPoint = Objects.requireNonNull(spawnPoint, "spawnPoint");
+        this.playerViewProvider = Objects.requireNonNull(playerViewProvider, "playerViewProvider");
         this.ghosts = Collections.newSetFromMap(new WeakHashMap<>());
         this.ghostLock = new StampedLock();
     }
@@ -71,7 +75,22 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
     @Override
     public void shutdown() {
         shutdown = true;
-        MinecraftServer.getInstanceManager().forceUnregisterInstance(instance);
+
+        try {
+            List<CompletableFuture<?>> futures = new ArrayList<>(ghosts.size());
+            for (Player ghost : ghosts) {
+                if (invalidGhost(ghost)) {
+                    continue;
+                }
+
+                futures.add(fallback.fallback(playerViewProvider.fromPlayer(ghost)));
+            }
+
+            CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
+        }
+        finally {
+            MinecraftServer.getInstanceManager().forceUnregisterInstance(instance);
+        }
     }
 
     @Override
@@ -106,6 +125,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
                         this::hasGhost));
         player.setGameMode(GameMode.SPECTATOR);
         player.setInstance(instance, spawnPoint);
+        player.getInventory().clear();
         return true;
     }
 
@@ -140,6 +160,10 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         }
 
         return true;
+    }
+
+    public @NotNull Instance instance() {
+        return instance;
     }
 
     private void cleanGhosts() {

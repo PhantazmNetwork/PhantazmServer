@@ -51,14 +51,21 @@ public final class LobbyFeature {
     /**
      * Initializes lobby-related features. Should only be called once from {@link PhantazmServer#main(String[])}.
      *
-     * @param node               the node to register lobby-related events to
      * @param playerViewProvider the {@link PlayerViewProvider} instance used by the server
      * @param lobbiesConfig      the {@link LobbiesConfig} used to determine lobby behavior
      */
-    static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider playerViewProvider,
-            @NotNull LobbiesConfig lobbiesConfig, @NotNull ContextManager contextManager) throws IOException {
+    static void initialize(@NotNull PlayerViewProvider playerViewProvider, @NotNull LobbiesConfig lobbiesConfig,
+            @NotNull ContextManager contextManager) {
+        EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
+
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
-        FileUtils.createDirectories(lobbiesConfig.instancesPath());
+        try {
+            FileUtils.createDirectories(lobbiesConfig.instancesPath());
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         InstanceLoader instanceLoader =
                 new AnvilFileSystemInstanceLoader(instanceManager, lobbiesConfig.instancesPath(), DynamicChunk::new,
                         ExecutorFeature.getExecutor());
@@ -84,7 +91,7 @@ public final class LobbyFeature {
                         -mainLobbyConfig.maxPlayers(), instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback,
                         mainLobbyConfig.instanceConfig(), contextManager, mainLobbyConfig.npcs(),
                         mainLobbyConfig.defaultItems(), MiniMessage.miniMessage(), mainLobbyConfig.lobbyJoinFormat(),
-                        false, node);
+                        false, node, playerViewProvider);
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
         fallback = new LobbyRouterFallback(LobbyFeature.getLobbyRouter(), lobbiesConfig.mainLobbyName());
@@ -97,7 +104,7 @@ public final class LobbyFeature {
                                 -lobby.getValue().maxPlayers(), instanceLoader, lobby.getValue().lobbyPaths(),
                                 regularFallback, lobby.getValue().instanceConfig(), contextManager,
                                 mainLobbyConfig.npcs(), mainLobbyConfig.defaultItems(), MiniMessage.miniMessage(),
-                                lobby.getValue().lobbyJoinFormat(), true, node));
+                                lobby.getValue().lobbyJoinFormat(), true, node, playerViewProvider));
             }
         }
 

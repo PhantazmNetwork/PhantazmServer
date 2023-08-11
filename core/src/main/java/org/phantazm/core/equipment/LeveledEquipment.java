@@ -1,6 +1,7 @@
 package org.phantazm.core.equipment;
 
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -59,6 +60,11 @@ public class LeveledEquipment<TEquipment extends Equipment & UpgradeNode> implem
     @Override
     public void leftClick() {
         currentLevel.leftClick();
+    }
+
+    @Override
+    public void attack(@NotNull Entity target) {
+        currentLevel.attack(target);
     }
 
     @Override

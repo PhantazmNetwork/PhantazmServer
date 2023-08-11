@@ -1,10 +1,11 @@
 package org.phantazm.server;
 
 import it.unimi.dsi.fastutil.ints.IntObjectPair;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.world.biomes.Biome;
 import net.minestom.server.world.biomes.BiomeManager;
-import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FileUtils;
 import org.phantazm.core.datapack.Datapack;
 import org.phantazm.core.datapack.DatapackLoader;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class DatapackFeature {
+    public static Path DATAPACK_PATH = Path.of("./datapacks");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatapackFeature.class);
 
@@ -24,16 +26,22 @@ public class DatapackFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull BiomeManager biomeManager) throws IOException {
+    static void initialize() {
+        try {
+            FileUtils.createDirectories(DATAPACK_PATH);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        BiomeManager biomeManager = MinecraftServer.getBiomeManager();
         DatapackLoader loader = new DatapackLoader();
 
-        LOGGER.info("Loading datapacks");
         List<Biome> biomes = new ArrayList<>();
-        Path datapacksPath = Path.of("./datapacks");
-        PathMatcher matcher = datapacksPath.getFileSystem().getPathMatcher("glob:**/*.zip");
+        PathMatcher matcher = DATAPACK_PATH.getFileSystem().getPathMatcher("glob:**/*.zip");
         DirectoryStream.Filter<Path> filter = entry -> matcher.matches(entry) && Files.isRegularFile(entry);
         int loadedDatapacks = 0;
-        try (DirectoryStream<Path> datapacks = Files.newDirectoryStream(datapacksPath, filter)) {
+        try (DirectoryStream<Path> datapacks = Files.newDirectoryStream(DATAPACK_PATH, filter)) {
             for (Path zipPath : datapacks) {
                 Datapack datapack;
                 try {
@@ -47,6 +55,9 @@ public class DatapackFeature {
 
                 biomes.addAll(datapack.biomes().values());
             }
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         LOGGER.info("Loaded {} datapacks", loadedDatapacks);

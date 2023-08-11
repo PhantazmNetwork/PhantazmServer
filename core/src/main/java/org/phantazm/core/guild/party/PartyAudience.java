@@ -5,7 +5,9 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.GuildMember;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
 
 public class PartyAudience implements PacketGroupingAudience {
 

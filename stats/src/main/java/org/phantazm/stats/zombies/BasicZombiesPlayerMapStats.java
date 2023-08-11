@@ -2,10 +2,8 @@ package org.phantazm.stats.zombies;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
@@ -17,8 +15,6 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     private int gamesPlayed;
 
     private int wins;
-
-    private Long bestTime;
 
     private int bestRound;
 
@@ -42,14 +38,12 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
 
     private int headshotHits;
 
-    public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey, int gamesPlayed, int wins,
-            @Nullable Long bestTime, int bestRound, int roundsSurvived, int kills, int knocks, long coinsGained,
+    public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey, int gamesPlayed, int wins, int bestRound, int roundsSurvived, int kills, int knocks, long coinsGained,
             long coinsSpent, int deaths, int revives, int shots, int regularHits, int headshotHits) {
         this.playerUUID = Objects.requireNonNull(playerUUID, "playerUUID");
         this.mapKey = Objects.requireNonNull(mapKey, "mapKey");
         this.gamesPlayed = gamesPlayed;
         this.wins = wins;
-        this.bestTime = bestTime;
         this.bestRound = bestRound;
         this.roundsSurvived = roundsSurvived;
         this.kills = kills;
@@ -64,7 +58,7 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     }
 
     public static ZombiesPlayerMapStats createBasicStats(@NotNull UUID playerUUID, @NotNull Key mapKey) {
-        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        return new BasicZombiesPlayerMapStats(playerUUID, mapKey, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 
     @Override
@@ -95,16 +89,6 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     @Override
     public void setWins(int wins) {
         this.wins = wins;
-    }
-
-    @Override
-    public @NotNull Optional<Long> getBestTime() {
-        return Optional.ofNullable(bestTime);
-    }
-
-    @Override
-    public void setBestTime(@Nullable Long bestTime) {
-        this.bestTime = bestTime;
     }
 
     @Override

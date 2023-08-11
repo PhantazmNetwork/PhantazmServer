@@ -4,10 +4,10 @@ import it.unimi.dsi.fastutil.objects.ObjectBooleanPair;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerChatEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -31,6 +31,6 @@ public interface ChatChannel {
      *
      * @return The formatted {@link Component} message
      */
-    @NotNull Component formatMessage(@NotNull Player player, @NotNull String message);
+    @NotNull CompletableFuture<Component> formatMessage(@NotNull Player player, @NotNull String message);
 
 }

@@ -8,16 +8,19 @@ import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.player.IdentitySource;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @EnvTest
 public class AbstractPartyCommandIntegrationTest {
 
     protected PartyCommandConfig commandConfig =
-            new PartyCommandConfig(Component.empty(), Component.empty(), Component.empty(), "", "", Component.empty(),
-                    Component.empty(), Component.empty(), Component.empty(), "", "", Component.empty(),
-                    Component.empty(), "", Component.empty(), "", "", "", "");
+            new PartyCommandConfig(Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "",
+                    Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "",
+                    Component.empty(), Component.empty(), "", Component.empty(), "", "", "", "", "", Component.empty());
 
     protected GuildHolder<Party> partyHolder;
 

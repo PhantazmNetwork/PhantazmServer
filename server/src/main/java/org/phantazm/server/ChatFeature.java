@@ -3,6 +3,7 @@ package org.phantazm.server;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -19,10 +20,13 @@ import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyChatChannel;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.server.role.RoleStore;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
  * Entrypoint for chat-related features.
@@ -40,13 +44,12 @@ public final class ChatFeature {
     /**
      * Initializes chat features. Should only be called once from {@link PhantazmServer#main(String[])}.
      *
-     * @param node           the node to register chat-related events to
-     * @param viewProvider   A {@link PlayerViewProvider} to create {@link PlayerView}s
-     * @param commandManager The {@link CommandManager} to register chat commands to
+     * @param viewProvider A {@link PlayerViewProvider} to create {@link PlayerView}s
+     * @param chatConfig   Chat settings
+     * @param parties      A map of player {@link UUID}s to {@link Party} instances
      */
-    static void initialize(@NotNull EventNode<Event> node, @NotNull PlayerViewProvider viewProvider,
-            @NotNull ChatConfig chatConfig, @NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull CommandManager commandManager) {
+    static void initialize(@NotNull PlayerViewProvider viewProvider, @NotNull ChatConfig chatConfig,
+            @NotNull Map<? super UUID, ? extends Party> parties, @NotNull RoleStore roleStore) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {
@@ -58,12 +61,18 @@ public final class ChatFeature {
             }
         };
 
+        Function<? super Player, ? extends CompletableFuture<Component>> nameFormatter = (player) -> {
+            return roleStore.getStylingRole(player).thenApply(role -> role.styleName(player));
+        };
+
+        EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
+        CommandManager commandManager = MinecraftServer.getCommandManager();
         ChatChannel defaultChannel = new InstanceChatChannel(viewProvider, MiniMessage.miniMessage(),
-                chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME));
+                chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME), nameFormatter);
         channels.put(DEFAULT_CHAT_CHANNEL_NAME, defaultChannel);
         commandManager.register(ChatChannelSendCommand.chatChannelSend("ac", defaultChannel));
         ChatChannel partyChannel = new PartyChatChannel(parties, viewProvider, MiniMessage.miniMessage(),
-                chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME));
+                chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME), nameFormatter);
         channels.put(PartyChatChannel.CHANNEL_NAME, partyChannel);
         commandManager.register(ChatChannelSendCommand.chatChannelSend("pc", partyChannel));
 
@@ -85,8 +94,13 @@ public final class ChatFeature {
             }
 
             channel.findAudience(uuid, audience -> {
-                Component message = channel.formatMessage(event.getPlayer(), event.getMessage());
-                audience.sendMessage(message);
+                channel.formatMessage(event.getPlayer(), event.getMessage()).whenComplete((component, throwable) -> {
+                    if (component == null) {
+                        return;
+                    }
+
+                    audience.sendMessage(component);
+                });
             }, failure -> {
                 player.sendMessage(failure.left());
                 if (failure.rightBoolean()) {

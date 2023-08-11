@@ -1,6 +1,7 @@
 package org.phantazm.zombies.equipment.perk.level;
 
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -65,6 +66,11 @@ public class BasicPerkLevel implements PerkLevel {
     @Override
     public void leftClick() {
         equipment.leftClick();
+    }
+
+    @Override
+    public void attack(@NotNull Entity target) {
+        equipment.attack(target);
     }
 
     @Override

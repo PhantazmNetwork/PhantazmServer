@@ -7,9 +7,9 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.Flaggable;
-import org.phantazm.zombies.map.shop.ShopFlagSource;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
+import org.phantazm.zombies.map.shop.ShopFlagSource;
 
 import java.util.List;
 

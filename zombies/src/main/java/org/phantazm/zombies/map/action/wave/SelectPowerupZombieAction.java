@@ -7,21 +7,25 @@ import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
-import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.map.action.Action;
+import org.phantazm.zombies.powerup.PowerupHandler;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 @Model("zombies.map.wave.action.select_powerup")
 @Cache(false)
 public class SelectPowerupZombieAction implements Action<List<PhantazmMob>> {
     private final Data data;
     private final Random random;
+    private final Supplier<? extends PowerupHandler> powerupHandler;
 
     @FactoryMethod
-    public SelectPowerupZombieAction(@NotNull Data data, @NotNull Random random) {
+    public SelectPowerupZombieAction(@NotNull Data data, @NotNull Random random,
+            @NotNull Supplier<? extends PowerupHandler> powerupHandler) {
         this.data = Objects.requireNonNull(data, "data");
         this.random = Objects.requireNonNull(random, "random");
+        this.powerupHandler = powerupHandler;
     }
 
     @Override
@@ -40,7 +44,7 @@ public class SelectPowerupZombieAction implements Action<List<PhantazmMob>> {
             }
 
             PhantazmMob mob = mobIterator.next();
-            mob.entity().setTag(Tags.POWERUP_TAG, powerup.asString());
+            powerupHandler.get().assignPowerup(mob.entity(), powerup);
         }
     }
 

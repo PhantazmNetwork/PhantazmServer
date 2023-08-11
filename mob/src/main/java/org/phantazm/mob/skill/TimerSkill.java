@@ -2,6 +2,9 @@ package org.phantazm.mob.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.element.core.annotation.document.Description;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
@@ -123,5 +126,19 @@ public class TimerSkill implements Skill {
 
                        @Description("The skill to call when the timer activates") @ChildPath(
                                "delegate") String delegate) {
+        @Default("requiresActivation")
+        public static @NotNull ConfigElement defaultRequiresActivation() {
+            return ConfigPrimitive.of(false);
+        }
+
+        @Default("resetOnActivation")
+        public static @NotNull ConfigElement defaultResetOnActivation() {
+            return ConfigPrimitive.of(true);
+        }
+
+        @Default("repeat")
+        public static @NotNull ConfigElement defaultRepeat() {
+            return ConfigPrimitive.of(-1);
+        }
     }
 }

@@ -15,7 +15,7 @@ import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnmodifiableView;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.InstanceScene;
@@ -23,6 +23,7 @@ import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.core.game.scene.Utils;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
@@ -65,8 +66,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
             @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
             @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
-            @NotNull EventNode<Event> sceneNode, @Nullable UUID allowedRequestUUID) {
-        super(uuid, instance, fallback, VecUtils.toPoint(mapSettingsInfo.spawn()));
+            @NotNull EventNode<Event> sceneNode, @Nullable UUID allowedRequestUUID,
+            @NotNull PlayerViewProvider playerViewProvider) {
+        super(uuid, instance, fallback, VecUtils.toPoint(mapSettingsInfo.spawn()), playerViewProvider);
         this.map = Objects.requireNonNull(map, "map");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
@@ -119,9 +121,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             if (isComplete()) {
                 return TransferResult.failure(Component.text("Game is over."));
             }
-            if (allowedRequestUUID != null && !joinRequest.getUUID().equals(allowedRequestUUID)) {
-                return TransferResult.failure(Component.text("You aren't allowed to join this game."));
-            }
 
             Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
             Collection<PlayerView> newPlayers = new ArrayList<>(joinRequest.getPlayers().size());
@@ -135,6 +134,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 else {
                     newPlayers.add(player);
                 }
+            }
+
+            if (!newPlayers.isEmpty() && allowedRequestUUID != null && !joinRequest.getUUID().equals(allowedRequestUUID)) {
+                return TransferResult.failure(Component.text("You aren't allowed to join this game."));
             }
 
             Stage stage = getCurrentStage();
@@ -169,17 +172,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 List<Runnable> runnables = new ArrayList<>(oldPlayers.size() + newPlayers.size());
                 for (ZombiesPlayer zombiesPlayer : oldPlayers) {
                     zombiesPlayer.getPlayer().ifPresent(player -> {
-                        teleportedPlayers.add(Pair.of(player, player.getInstance()));
-                        if (player.getInstance() == instance) {
-                            futures.add(player.teleport(pos));
-                        }
-                        else {
-                            Instance oldInstance = player.getInstance();
-                            player.setInstanceAddCallback(
-                                    () -> Utils.handleInstanceTransfer(oldInstance, instance, player,
-                                            newInstancePlayer -> !super.hasGhost(newInstancePlayer)));
-                            futures.add(player.setInstance(instance, pos));
-                        }
+                        teleportOrSetInstance(teleportedPlayers, player, futures, pos);
                         runnables.add(() -> {
                             zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
                         });
@@ -187,17 +180,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 }
                 for (PlayerView view : newPlayers) {
                     view.getPlayer().ifPresent(player -> {
-                        teleportedPlayers.add(Pair.of(player, player.getInstance()));
-                        if (player.getInstance() == instance) {
-                            futures.add(player.teleport(pos));
-                        }
-                        else {
-                            Instance oldInstance = player.getInstance();
-                            player.setInstanceAddCallback(
-                                    () -> Utils.handleInstanceTransfer(oldInstance, instance, player,
-                                            newInstancePlayer -> !super.hasGhost(newInstancePlayer)));
-                            futures.add(player.setInstance(instance, pos));
-                        }
+                        teleportOrSetInstance(teleportedPlayers, player, futures, pos);
                         runnables.add(() -> {
                             ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
                             zombiesPlayer.start();
@@ -231,7 +214,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     }
                 }).join();
 
-                if (allowedRequestUUID != null) {
+                if (allowedRequestUUID != null && joinRequest.getUUID().equals(allowedRequestUUID)) {
                     stageTransition.setCurrentStage(StageKeys.IN_GAME);
                 }
             }, () -> {
@@ -242,15 +225,31 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         }
     }
 
+    private void teleportOrSetInstance(List<Pair<Player, Instance>> teleportedPlayers, Player player,
+            List<CompletableFuture<?>> futures, Pos pos) {
+        teleportedPlayers.add(Pair.of(player, player.getInstance()));
+        if (player.getInstance() == instance) {
+            futures.add(player.teleport(pos));
+            return;
+        }
+
+        Instance oldInstance = player.getInstance();
+        player.setInstanceAddCallback(() -> Utils.handleInstanceTransfer(oldInstance, instance, player,
+                newInstancePlayer -> !super.hasGhost(newInstancePlayer)));
+        futures.add(player.setInstance(instance, pos));
+    }
+
     @Override
     public @NotNull TransferResult leave(@NotNull Iterable<UUID> leavers) {
         return leaveHandler.leave(leavers);
     }
 
     @Override
-    public @UnmodifiableView @NotNull Map<UUID, PlayerView> getPlayers() {
-        return zombiesPlayers.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().module().getPlayerView()));
+    public @Unmodifiable @NotNull Map<UUID, PlayerView> getPlayers() {
+        Map<UUID, ZombiesPlayer> playerViewCopy = Map.copyOf(zombiesPlayers);
+
+        return playerViewCopy.entrySet().stream().collect(
+                Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> entry.getValue().module().getPlayerView()));
     }
 
     @Override
@@ -331,6 +330,10 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public void shutdown() {
+        if (this.shutdown) {
+            return;
+        }
+
         this.shutdown = true;
 
         stageTransition.end();
@@ -352,6 +355,9 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             zombiesPlayer.end();
         }
 
+        zombiesPlayers.clear();
+        map.mapObjects().module().powerupHandler().get().end();
+
         //wait for all players to fallback before we actually shut down the scene
         CompletableFuture.allOf(fallbackFutures.toArray(CompletableFuture[]::new))
                 .whenComplete((ignored, error) -> super.shutdown());
@@ -359,8 +365,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
     @Override
     public void tick(long time) {
-        super.tick(time);
-        if (!isShutdown() && stageTransition.isComplete()) {
+        if (isShutdown()) {
+            return;
+        }
+
+        if (stageTransition.isComplete()) {
             shutdown();
             return;
         }

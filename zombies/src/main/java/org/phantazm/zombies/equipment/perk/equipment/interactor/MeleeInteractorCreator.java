@@ -5,18 +5,15 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
-import com.github.steanky.toolkit.collection.Wrapper;
-import net.minestom.server.collision.BoundingBox;
-import net.minestom.server.collision.CollisionUtils;
-import net.minestom.server.coordinate.Point;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.instance.EntityTracker;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.RayUtils;
 import org.phantazm.mob.MobStore;
 import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.ExtraNodeKeys;
@@ -31,9 +28,11 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Optional;
 
 @Description("""
-        Interactor capable of hitting a mob in a Zombies game. Supports variable reach, knockback, and damage.
+        Interactor capable of hitting a mob in a Zombies game. Supports variable knockback, damage, and armor bypassing
+        capabilities.
         """)
 @Model("zombies.perk.interactor.melee")
 @Cache(false)
@@ -75,79 +74,72 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
 
         @Override
         public boolean leftClick() {
-            return zombiesPlayer.getPlayer().map(player -> {
-                Instance instance = player.getInstance();
-                if (instance == null) {
-                    return false;
-                }
-
-                Pos feetPos = player.getPosition();
-                Pos eyePos = feetPos.add(0, player.getEyeHeight(), 0);
-                Point targetPos = eyePos.add(feetPos.direction().mul(data.reach + 5));
-
-                Wrapper<HitResult> closest = Wrapper.ofNull();
-                instance.getEntityTracker()
-                        .raytraceCandidates(eyePos, targetPos, EntityTracker.Target.LIVING_ENTITIES, hit -> {
-                            if (mobStore.hasMob(hit.getUuid())) {
-                                BoundingBox boundingBox = hit.getBoundingBox();
-                                Pos hitPosition = hit.getPosition();
-
-                                RayUtils.rayTrace(boundingBox, hitPosition, eyePos).ifPresent(vec -> {
-                                    HitResult closestHit = closest.get();
-                                    if ((closestHit == null ||
-                                            vec.distanceSquared(eyePos) < closestHit.pos.distanceSquared(eyePos)) &&
-                                            CollisionUtils.isLineOfSightReachingShape(instance, player.getChunk(),
-                                                    eyePos, hitPosition, boundingBox)) {
-                                        closest.set(new HitResult(hit, vec));
-                                    }
-                                });
-                            }
-                        });
-
-                HitResult hit = closest.get();
-                if (hit == null || hit.pos.distanceSquared(eyePos) > data.reach * data.reach) {
-                    return false;
-                }
-
-                PhantazmMob hitMob = mobStore.getMob(hit.entity().getUuid());
-                if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
-                        (hitMob != null && !hitMob.model().getExtraNode()
-                                .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
-                    hit.entity.setTag(Tags.LAST_HIT_BY, player.getUuid());
-                    hit.entity.kill();
-                }
-                else {
-                    double angle = feetPos.yaw() * (Math.PI / 180);
-                    hit.entity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
-                    hit.entity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
-                }
-
-                PlayerCoins coins = zombiesPlayer.module().getCoins();
-                Collection<Transaction.Modifier> modifiers = zombiesPlayer.module().compositeTransactionModifiers()
-                        .modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
-
-                coins.runTransaction(new Transaction(modifiers, data.coins)).applyIfAffordable(coins);
-
-                return true;
-            }).orElse(false);
+            return false;
         }
 
         @Override
         public boolean rightClick() {
             return false;
         }
+
+        @Override
+        public boolean attack(@NotNull Entity target) {
+            if (!(target instanceof LivingEntity livingEntity)) {
+                return false;
+            }
+
+            Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+            if (playerOptional.isEmpty()) {
+                return false;
+            }
+
+            PhantazmMob hitMob = mobStore.getMob(livingEntity.getUuid());
+            if (hitMob == null) {
+                return false;
+            }
+
+            Player player = playerOptional.get();
+            Pos playerPosition = player.getPosition();
+
+            boolean isInstaKill;
+            if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
+                    (!hitMob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
+                livingEntity.setTag(Tags.LAST_HIT_BY, player.getUuid());
+                livingEntity.kill();
+                isInstaKill = true;
+            }
+            else {
+                double angle = playerPosition.yaw() * (Math.PI / 180);
+                livingEntity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
+                livingEntity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
+                isInstaKill = false;
+            }
+
+            PlayerCoins coins = zombiesPlayer.module().getCoins();
+            Collection<Transaction.Modifier> modifiers = zombiesPlayer.module().compositeTransactionModifiers()
+                    .modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
+
+            coins.runTransaction(new Transaction(modifiers, isInstaKill ? data.instaKillCoins : data.coins))
+                    .applyIfAffordable(coins);
+            return true;
+        }
     }
 
     @DataObject
-    public record Data(@Description("The reach of this weapon") double reach,
-                       @Description("The damage it does on a successful hit") float damage,
+    public record Data(@Description("The damage it does on a successful hit") float damage,
                        @Description("The amount of knockback the weapon deals; 0.4 is the vanilla knockback from an " +
                                "unarmed hand") float knockback,
                        @Description("The number of coins to give on a successful hit.") int coins,
+                       @Description("The number of coins to give when instakill is active.") int instaKillCoins,
                        @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor) {
-    }
+        @Default("instaKillCoins")
+        public static @NotNull ConfigElement defaultInstaKillCoins() {
+            return ConfigPrimitive.of(50);
+        }
 
-    private record HitResult(LivingEntity entity, Vec pos) {
-
+        @Default("bypassArmor")
+        public static @NotNull ConfigElement defaultBypassArmor() {
+            return ConfigPrimitive.of(false);
+        }
     }
 }

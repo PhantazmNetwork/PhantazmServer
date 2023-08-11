@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 public record PartyCommandConfig(@NotNull Component notInParty,
                                  @NotNull Component alreadyInParty,
                                  @NotNull Component mustBeAPlayer,
+                                 @NotNull Component mustBeOwner,
                                  @NotNull String playerNotOnlineFormat,
                                  @NotNull String cannotFindPlayerFormat,
                                  @NotNull Component createCommandSuccess,
@@ -21,12 +22,13 @@ public record PartyCommandConfig(@NotNull Component notInParty,
                                  @NotNull String cannotKickOtherFormat,
                                  @NotNull String listFormat,
                                  @NotNull String onlineMemberFormat,
-                                 @NotNull String offlineMemberFormat) {
+                                 @NotNull String offlineMemberFormat,
+                                 @NotNull String toTransferNotInPartyFormat,
+                                 @NotNull Component cannotTransferToSelf) {
 
     public static final PartyCommandConfig DEFAULT =
-            new PartyCommandConfig(Component.empty(), Component.empty(), Component.empty(), "",
-                    "", Component.empty(), Component.empty(), Component.empty(), Component.empty(),
-                    "", "", Component.empty(), Component.empty(), "",
-                    Component.empty(), "", "", "", "");
+            new PartyCommandConfig(Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "",
+                    Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "",
+                    Component.empty(), Component.empty(), "", Component.empty(), "", "", "", "", "", Component.empty());
 
 }

@@ -3,6 +3,7 @@ package org.phantazm.zombies.equipment.perk.equipment;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.element.core.annotation.document.Description;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Namespaces;
@@ -83,6 +84,11 @@ public class BasicPerkEquipmentCreator implements PerkEquipmentCreator {
         @Override
         public boolean shouldRedraw() {
             return visual.shouldCompute();
+        }
+
+        @Override
+        public void attack(@NotNull Entity target) {
+            interactor.attack(target);
         }
     }
 

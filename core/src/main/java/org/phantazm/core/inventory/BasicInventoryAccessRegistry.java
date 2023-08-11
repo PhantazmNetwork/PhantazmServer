@@ -18,7 +18,7 @@ import java.util.Optional;
 public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     private final Map<Key, InventoryAccess> accessMap = new HashMap<>();
     private final Object sync = new Object();
-    private InventoryAccess currentAccess = null;
+    private volatile InventoryAccess currentAccess = null;
     private final PlayerView playerView;
 
     public BasicInventoryAccessRegistry(@NotNull PlayerView playerView) {
@@ -33,23 +33,29 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     @Override
     public void switchAccess(@Nullable Key key) {
         synchronized (sync) {
+            InventoryAccess oldAccess = this.currentAccess;
+
             if (key == null) {
-                applyTo(null);
-                currentAccess = null;
+                if (oldAccess == null) {
+                    return;
+                }
+
+                this.currentAccess = null;
+                applyTo(null, oldAccess);
                 return;
             }
 
-            InventoryAccess access = accessMap.get(key);
-            if (access == null) {
+            InventoryAccess newAccess = accessMap.get(key);
+            if (newAccess == null) {
                 throw new IllegalArgumentException("No matching inventory access found");
             }
 
-            if (access == currentAccess) {
+            if (newAccess == currentAccess) {
                 return;
             }
-            
-            applyTo(access);
-            currentAccess = access;
+
+            this.currentAccess = newAccess;
+            applyTo(newAccess, oldAccess);
         }
     }
 
@@ -124,7 +130,9 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
 
     @Override
     public @NotNull InventoryAccess getAccess(@NotNull Key profileKey) {
-        return Objects.requireNonNull(accessMap.get(profileKey), "no access named " + profileKey);
+        synchronized (sync) {
+            return Objects.requireNonNull(accessMap.get(profileKey), "no access named " + profileKey);
+        }
     }
 
     private void onAdd(int slot, InventoryObject object) {
@@ -145,11 +153,9 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         return group;
     }
 
-    private void applyTo(InventoryAccess newAccess) {
+    private void applyTo(InventoryAccess newAccess, InventoryAccess oldAccess) {
         playerView.getPlayer().ifPresent(player -> {
             player.getInventory().clear();
-
-            InventoryAccess oldAccess = this.currentAccess;
 
             if (oldAccess != null) {
                 InventoryProfile oldProfile = oldAccess.profile();

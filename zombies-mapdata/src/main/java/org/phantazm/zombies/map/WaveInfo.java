@@ -1,6 +1,8 @@
 package org.phantazm.zombies.map;
 
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.collection.ConfigList;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -19,5 +21,10 @@ public record WaveInfo(long delayTicks, @NotNull List<SpawnInfo> spawns, @NotNul
      */
     public WaveInfo {
         Objects.requireNonNull(spawns, "spawns");
+    }
+
+    @Default("spawnActions")
+    public static @NotNull ConfigElement defaultSpawnActions() {
+        return ConfigList.of();
     }
 }

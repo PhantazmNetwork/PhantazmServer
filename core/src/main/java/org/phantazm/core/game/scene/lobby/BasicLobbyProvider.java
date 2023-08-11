@@ -29,6 +29,7 @@ import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.npc.NPC;
 import org.phantazm.core.npc.NPCHandler;
+import org.phantazm.core.player.PlayerViewProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +55,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     private final String lobbyJoinFormat;
     private final boolean quittable;
     private final EventNode<Event> rootNode;
+    private final PlayerViewProvider playerViewProvider;
 
     /**
      * Creates a basic implementation of a {@link SceneProviderAbstract}.
@@ -71,7 +73,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
             @NotNull InstanceConfig instanceConfig, @NotNull ContextManager contextManager,
             @NotNull ConfigList npcConfigs, @NotNull Collection<ItemStack> defaultItems,
             @NotNull MiniMessage miniMessage, @NotNull String lobbyJoinFormat, boolean quittable,
-            @NotNull EventNode<Event> rootNode) {
+            @NotNull EventNode<Event> rootNode, @NotNull PlayerViewProvider playerViewProvider) {
         super(executor, maximumLobbies, newLobbyThreshold);
 
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
@@ -92,7 +94,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
         this.lobbyJoinFormat = Objects.requireNonNull(lobbyJoinFormat, "lobbyJoinFormat");
         this.quittable = quittable;
-        this.rootNode = rootNode;
+        this.rootNode = Objects.requireNonNull(rootNode, "rootNode");
+        this.playerViewProvider = Objects.requireNonNull(playerViewProvider, "playerViewProvider");
     }
 
     @Override
@@ -134,7 +137,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
 
             Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
                     new NPCHandler(List.copyOf(npcs), instance, instanceNode), defaultItems, miniMessage,
-                    lobbyJoinFormat, quittable);
+                    lobbyJoinFormat, quittable, playerViewProvider);
             instanceNode.addListener(PlayerDisconnectEvent.class, event -> {
                 try (TransferResult result = lobby.leave(Collections.singleton(event.getPlayer().getUuid()))) {
                     result.executor().ifPresent(Runnable::run);

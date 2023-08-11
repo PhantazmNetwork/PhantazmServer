@@ -14,6 +14,7 @@ import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.guild.party.PartyCreator;
+import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.guild.party.command.PartyCommand;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.TickFormatter;
@@ -33,13 +34,19 @@ public class PartyFeature {
 
     static void initialize(@NotNull CommandManager commandManager, @NotNull PlayerViewProvider viewProvider,
             @NotNull SchedulerManager schedulerManager, @NotNull ContextManager contextManager,
-            @NotNull PartyConfig config, @NotNull ConfigCodec partyCodec, @NotNull MiniMessage miniMessage)
-            throws IOException {
+            @NotNull PartyConfig config, @NotNull ConfigCodec partyCodec) {
         PartyFeature.config = config;
-        ConfigElement partyConfigNode = Configuration.read(ConfigFeature.PARTY_CONFIG_PATH, partyCodec);
-        TickFormatter tickFormatter =
-                contextManager.makeContext(partyConfigNode.getNodeOrThrow("tickFormatter")).provide();
 
+        TickFormatter tickFormatter;
+        try {
+            ConfigElement partyConfigNode = Configuration.read(ConfigFeature.PARTY_CONFIG_PATH, partyCodec);
+            tickFormatter = contextManager.makeContext(partyConfigNode.getNodeOrThrow("tickFormatter")).provide();
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        MiniMessage miniMessage = MiniMessage.miniMessage();
         PartyCreator partyCreator = new PartyCreator.Builder().setNotificationConfig(config.notificationConfig())
                 .setTickFormatter(tickFormatter).setMiniMessage(miniMessage).setCreatorRank(config.creatorRank())
                 .setDefaultRank(config.defaultRank()).setInvitationDuration(config.invitationDuration())
@@ -47,11 +54,27 @@ public class PartyFeature {
                 .setMinimumJoinRank(config.minimumJoinRank()).build();
         Command partyCommand =
                 PartyCommand.partyCommand(config.commandConfig(), miniMessage, partyHolder, viewProvider, partyCreator,
-                        new Random(), config.creatorRank());
+                        new Random(), config.creatorRank(), config.defaultRank());
         commandManager.register(partyCommand);
 
         schedulerManager.scheduleTask(() -> {
-            partyHolder.guilds().removeIf(party -> party.getMemberManager().getMembers().isEmpty());
+            partyHolder.guilds().removeIf(party -> {
+                if (party.getMemberManager().getMembers().isEmpty()) {
+                    return true;
+                }
+
+                for (PartyMember member : party.getMemberManager().getMembers().values()) {
+                    if (member.isOnline()) {
+                        return false;
+                    }
+                }
+
+                for (PartyMember member : party.getMemberManager().getMembers().values()) {
+                    partyHolder.uuidToGuild().remove(member.getPlayerView().getUUID());
+                }
+
+                return true;
+            });
 
             Set<Party> ticked = Collections.newSetFromMap(new IdentityHashMap<>());
             long time = System.currentTimeMillis();

@@ -33,7 +33,7 @@ public class SpawnPowerupAction implements Action<Round> {
 
     @Override
     public void perform(@NotNull Round round) {
-        powerupHandler.get().spawnIfExists(data.powerup, VecUtils.toPoint(data.spawnPosition), LOGGER);
+        powerupHandler.get().spawnIfExists(data.powerup, VecUtils.toPoint(data.spawnPosition));
     }
 
     @DataObject

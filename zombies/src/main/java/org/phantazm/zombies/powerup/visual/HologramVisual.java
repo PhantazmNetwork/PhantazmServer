@@ -14,26 +14,23 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
 
 @Model("zombies.powerup.visual.hologram")
 @Cache(false)
-public class HologramVisual implements Supplier<PowerupVisual> {
+public class HologramVisual implements PowerupVisualComponent {
     private final Data data;
-    private final Instance instance;
 
     @FactoryMethod
-    public HologramVisual(@NotNull Data data, @NotNull Instance instance) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.instance = Objects.requireNonNull(instance, "instance");
+    public HologramVisual(@NotNull Data data) {
+        this.data = data;
     }
 
     @Override
-    public PowerupVisual get() {
-        return new Visual(data, instance);
+    public @NotNull PowerupVisual apply(@NotNull ZombiesScene scene) {
+        return new Visual(data, scene.instance());
     }
 
     @DataObject

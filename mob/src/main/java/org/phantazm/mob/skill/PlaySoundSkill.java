@@ -1,6 +1,9 @@
 package org.phantazm.mob.skill;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.Player;
@@ -38,21 +41,25 @@ public class PlaySoundSkill implements Skill {
     public void use(@NotNull PhantazmMob self) {
         selector.selectTarget(self).ifPresent(object -> {
             if (object instanceof Iterable<?> iterable) {
-                Iterable<Player> audienceIterable = (Iterable<Player>)iterable;
-                for (Player player : audienceIterable) {
+                for (Object playerObject : iterable) {
+                    if (!(playerObject instanceof Player player)) {
+                        continue;
+                    }
+
                     Instance instance = player.getInstance();
-                    if (instance != null) {
-                        if (data.followAudience) {
-                            player.playSound(randomize(), player.getPosition());
-                        }
-                        else {
-                            instance.playSound(randomize(), self.entity().getPosition());
-                        }
+                    if (instance == null) {
+                        continue;
+                    }
+
+                    if (data.followAudience) {
+                        player.playSound(randomize(), player.getPosition());
+                    }
+                    else {
+                        instance.playSound(randomize(), self.entity().getPosition());
                     }
                 }
             }
-            else {
-                Audience target = (Audience)object;
+            else if (object instanceof Audience target) {
                 if (data.followAudience) {
                     target.playSound(randomize(), Sound.Emitter.self());
                 }
@@ -72,12 +79,9 @@ public class PlaySoundSkill implements Skill {
 
     @DataObject
     public record Data(@NotNull @ChildPath("selector") String selector, @NotNull Sound sound, boolean followAudience) {
-
-        public Data {
-            Objects.requireNonNull(selector, "selector");
-            Objects.requireNonNull(sound, "sound");
+        @Default("followAudience")
+        public static @NotNull ConfigElement defaultFollowAudience() {
+            return ConfigPrimitive.of(false);
         }
-
     }
-
 }
