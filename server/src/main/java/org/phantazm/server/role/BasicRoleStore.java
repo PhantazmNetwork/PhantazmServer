@@ -86,8 +86,15 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public void applyRoles(@NotNull Player player) {
-        Set<Role> roles = this.roleCache.get(player.getUuid(), this::loadRoles);
-        applyRoles0(player, roles);
+        Set<Role> roles = this.roleCache.getIfPresent(player.getUuid());
+        if (roles != null) {
+            applyRoles0(player, roles);
+            return;
+        }
+
+        executor.execute(() -> {
+            applyRoles0(player, this.roleCache.get(player.getUuid(), this::loadRoles));
+        });
     }
 
     @Override
