@@ -5,6 +5,7 @@ import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.Configuration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.timer.SchedulerManager;
@@ -53,8 +54,9 @@ public class PartyFeature {
                 .setMinimumKickRank(config.minimumKickRank()).setMinimumInviteRank(config.minimumInviteRank())
                 .setMinimumJoinRank(config.minimumJoinRank()).build();
         Command partyCommand =
-                PartyCommand.partyCommand(config.commandConfig(), miniMessage, partyHolder, viewProvider, partyCreator,
-                        new Random(), config.creatorRank(), config.defaultRank());
+                PartyCommand.partyCommand(config.commandConfig(), MinecraftServer.getConnectionManager(), miniMessage,
+                        partyHolder, viewProvider, partyCreator, new Random(), config.creatorRank(),
+                        config.defaultRank());
         commandManager.register(partyCommand);
 
         schedulerManager.scheduleTask(() -> {

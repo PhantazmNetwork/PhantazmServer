@@ -6,6 +6,7 @@ import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +22,13 @@ public class WhisperCommand {
 
         Command command = new Command("whisper", "w", "msg");
         Argument<String> target = ArgumentType.Word("target");
+        target.setSuggestionCallback((sender, context, suggestion) -> {
+            for (Player player : connectionManager.getOnlinePlayers()) {
+                if (player != sender) {
+                    suggestion.addEntry(new SuggestionEntry(player.getUsername()));
+                }
+            }
+        });
         Argument<String[]> message = ArgumentType.StringArray("message");
 
         command.addConditionalSyntax((sender, commandString) -> {

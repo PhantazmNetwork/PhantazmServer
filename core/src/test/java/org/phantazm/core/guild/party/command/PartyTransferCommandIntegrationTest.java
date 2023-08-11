@@ -25,7 +25,7 @@ public class PartyTransferCommandIntegrationTest extends AbstractPartyCommandInt
     public void partyOwnerCanTransferToOtherPlayer(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
-        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder,
+        Command command = PartyCommand.partyCommand(commandConfig, env.process().connection(), MiniMessage.miniMessage(), partyHolder,
                 viewProvider, partyCreator, new Random(), 1, 0);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
@@ -50,7 +50,7 @@ public class PartyTransferCommandIntegrationTest extends AbstractPartyCommandInt
     public void partyOwnerCannotTransferToSelf(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
-        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder,
+        Command command = PartyCommand.partyCommand(commandConfig, env.process().connection(), MiniMessage.miniMessage(), partyHolder,
                 viewProvider, partyCreator, new Random(), 1, 0);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
@@ -75,7 +75,7 @@ public class PartyTransferCommandIntegrationTest extends AbstractPartyCommandInt
     public void nonOwnerCannotTransferToOtherPlayer(Env env) {
         PlayerViewProvider viewProvider = new BasicPlayerViewProvider(identitySource, env.process().connection());
         PartyCreator partyCreator = new PartyCreator.Builder().setCreatorRank(1).build();
-        Command command = PartyCommand.partyCommand(commandConfig, MiniMessage.miniMessage(), partyHolder,
+        Command command = PartyCommand.partyCommand(commandConfig, env.process().connection(), MiniMessage.miniMessage(), partyHolder,
                 viewProvider, partyCreator, new Random(), 1, 0);
         env.process().command().register(command);
         Instance instance = env.createFlatInstance();
