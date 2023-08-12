@@ -137,6 +137,7 @@ public final class EthyleneFeature {
                 return ItemStack.fromItemNBT((NBTCompound)new SNBTParser(new StringReader(element.asString())).parse());
             }
             catch (NBTException e) {
+                LOGGER.warn("Error deserializing SNBT", e);
                 return ItemStack.AIR;
             }
         }, itemStack -> itemStack == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(itemStack.toItemNBT().toSNBT()));

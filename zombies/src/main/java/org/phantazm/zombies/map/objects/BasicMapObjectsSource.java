@@ -107,7 +107,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         MapSettingsInfo mapSettingsInfo = mapInfo.settings();
         Pos respawnPos =
                 new Pos(VecUtils.toPoint(mapSettingsInfo.origin().add(mapSettingsInfo.spawn())), mapSettingsInfo.yaw(),
-                        mapSettingsInfo.pitch());
+                        mapSettingsInfo.pitch()).add(0.5, 0, 0.5);
 
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
         MobSpawner mobSpawner = mobSpawnerSource.make(random, mapObjectsWrapper, mobStore);

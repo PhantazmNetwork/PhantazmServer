@@ -163,7 +163,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Wrapper<ZombiesScene> sceneWrapper = Wrapper.ofNull();
 
         MapSettingsInfo settings = mapInfo.settings();
-        Pos spawnPos = VecUtils.toPos(settings.origin().add(settings.spawn()));
+        Pos spawnPos = VecUtils.toPos(settings.origin().add(settings.spawn())).add(0.5, 0, 0.5);
 
         return instanceLoader.loadInstance(settings.instancePath()).thenApply(instance -> {
             instance.setTime(settings.worldTime());

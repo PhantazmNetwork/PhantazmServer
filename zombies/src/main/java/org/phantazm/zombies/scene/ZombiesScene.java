@@ -182,7 +182,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
             return TransferResult.success(() -> {
                 Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
-                Pos pos = new Pos(spawn.x(), spawn.y(), spawn.z(), mapSettingsInfo.yaw(), mapSettingsInfo.pitch());
+                Pos pos = new Pos(spawn.x() + 0.5, spawn.y(), spawn.z() + 0.5, mapSettingsInfo.yaw(),
+                        mapSettingsInfo.pitch());
                 List<Pair<Player, Instance>> teleportedPlayers = new ArrayList<>(oldPlayers.size() + newPlayers.size());
                 List<CompletableFuture<?>> futures = new ArrayList<>(oldPlayers.size() + newPlayers.size());
                 List<Runnable> runnables = new ArrayList<>(oldPlayers.size() + newPlayers.size());
