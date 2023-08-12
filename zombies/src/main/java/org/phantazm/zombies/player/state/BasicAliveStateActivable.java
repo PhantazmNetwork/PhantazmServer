@@ -41,6 +41,8 @@ public class BasicAliveStateActivable implements Activable {
 
     private long healTicks = 0;
 
+    private int lastTickHp = -1;
+
     public BasicAliveStateActivable(@NotNull AlivePlayerStateContext context, @NotNull Instance instance,
             @NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
             @NotNull ZombiesPlayerMeta meta, @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar,
@@ -113,7 +115,11 @@ public class BasicAliveStateActivable implements Activable {
                 }
             }
 
-            belowNameTag.updateScore(player, (int)Math.floor(player.getHealth()));
+            int currentHP = (int)Math.floor(player.getHealth());
+            if (currentHP != lastTickHp) {
+                belowNameTag.updateScore(player, (int)Math.floor(player.getHealth()));
+                lastTickHp = currentHP;
+            }
         });
     }
 
