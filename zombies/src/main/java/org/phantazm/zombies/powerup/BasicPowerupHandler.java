@@ -1,6 +1,9 @@
 package org.phantazm.zombies.powerup;
 
+import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.EntityTracker;
@@ -72,9 +75,19 @@ public class BasicPowerupHandler implements PowerupHandler {
     private void maybePickup(Powerup powerup, long time) {
         ZombiesScene scene = this.scene.get();
 
+        double powerupPickupRadius = scene.getMapSettingsInfo().powerupPickupRadius();
         scene.instance().getEntityTracker()
-                .nearbyEntitiesUntil(powerup.spawnLocation(), scene.getMapSettingsInfo().powerupPickupRadius(),
-                        EntityTracker.Target.PLAYERS, player -> {
+                .nearbyEntitiesUntil(powerup.spawnLocation(), powerupPickupRadius + 2, EntityTracker.Target.PLAYERS,
+                        player -> {
+                            Point powerupSpawnLocation = powerup.spawnLocation();
+                            Pos playerPosition = player.getPosition();
+                            double horizontalDistanceSquared =
+                                    Vec3D.distanceSquared(playerPosition.x(), 0, playerPosition.z(),
+                                            powerupSpawnLocation.x(), 0, powerupSpawnLocation.z());
+                            if (horizontalDistanceSquared > powerupPickupRadius * powerupPickupRadius) {
+                                return false;
+                            }
+
                             ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(player.getUuid());
                             if (zombiesPlayer != null && zombiesPlayer.canPickupPowerup(powerup)) {
                                 powerup.activate(zombiesPlayer, time);

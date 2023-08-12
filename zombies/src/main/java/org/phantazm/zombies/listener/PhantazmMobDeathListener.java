@@ -38,7 +38,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     private static final BoundingBox POWERUP_BOUNDING_BOX = new BoundingBox(0.25, 0.0625, 0.25);
     private static final Vec DOWNWARD_SEARCH_VECTOR = new Vec(0, -10, 0);
     private static final Vec OFFSET = new Vec(0.5, 0, 0.5);
-    private static final double ROOM_PENETRATION_DEPTH = 2.5;
+    private static final double ROOM_PENETRATION_DEPTH = 1.5;
 
     private final KeyParser keyParser;
     private final Supplier<Optional<Round>> roundSupplier;
