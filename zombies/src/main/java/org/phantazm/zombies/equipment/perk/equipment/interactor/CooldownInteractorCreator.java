@@ -2,6 +2,7 @@ package org.phantazm.zombies.equipment.perk.equipment.interactor;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.element.core.annotation.document.Description;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -55,7 +56,7 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
         private final PerkInteractor delegate;
         private final int flags;
 
-        private long lastActivatedTicks;
+        private int lastActivatedTicks;
 
         private Interactor(@NotNull Data data, @NotNull @Child("delegate") PerkInteractor delegate, int flags) {
             this.data = Objects.requireNonNull(data, "data");
@@ -67,11 +68,11 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
 
         private boolean activateIfCooldown(DelegateType type, BooleanSupplier supplier) {
             if (type.bitsHave(flags)) {
-                if (lastActivatedTicks == -1 || ++lastActivatedTicks >= data.cooldown) {
+                if (lastActivatedTicks == -1 || MinecraftServer.currentTick() - lastActivatedTicks >= data.cooldown) {
                     boolean success = supplier.getAsBoolean();
 
                     if (success) {
-                        lastActivatedTicks = 0;
+                        lastActivatedTicks = MinecraftServer.currentTick();
                     }
                     return success;
                 }

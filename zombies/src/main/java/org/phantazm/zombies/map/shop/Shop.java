@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.shop;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -32,11 +33,9 @@ public class Shop extends BoundedBase implements Tickable {
     private final List<ShopInteractor> failureInteractors;
     private final List<ShopDisplay> displays;
 
-    private final Tag<Long> lastActivationTag;
+    private final Tag<Integer> lastActivationTag;
 
     private final Flaggable flaggable;
-
-    private long ticks = 0;
 
     public Shop(@NotNull Point mapOrigin, @NotNull ShopInfo shopInfo, @NotNull Instance instance,
             @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> successInteractors,
@@ -52,7 +51,7 @@ public class Shop extends BoundedBase implements Tickable {
         this.failureInteractors = List.copyOf(failureInteractors);
         this.displays = List.copyOf(displays);
 
-        this.lastActivationTag = Tag.Long(UUID.randomUUID().toString()).defaultValue(-1L);
+        this.lastActivationTag = Tag.Integer(UUID.randomUUID().toString()).defaultValue(-1);
         this.flaggable = new BasicFlaggable();
     }
 
@@ -108,7 +107,7 @@ public class Shop extends BoundedBase implements Tickable {
             Player player = playerOptional.get();
 
             long lastActivate = player.getTag(lastActivationTag);
-            if (lastActivate != -1 && ticks - lastActivate < SHOP_ACTIVATION_DELAY) {
+            if (lastActivate != -1 && MinecraftServer.currentTick() - lastActivate < SHOP_ACTIVATION_DELAY) {
                 return;
             }
         }
@@ -124,12 +123,11 @@ public class Shop extends BoundedBase implements Tickable {
             display.update(this, interaction, success);
         }
 
-        playerOptional.ifPresent(player -> player.setTag(lastActivationTag, ticks));
+        playerOptional.ifPresent(player -> player.setTag(lastActivationTag, MinecraftServer.currentTick()));
     }
 
     @Override
     public void tick(long time) {
-        ++ticks;
         for (ShopDisplay display : displays) {
             display.tick(time);
         }

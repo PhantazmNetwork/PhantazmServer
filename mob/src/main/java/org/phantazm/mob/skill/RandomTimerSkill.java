@@ -83,7 +83,7 @@ public class RandomTimerSkill implements Skill {
         }
 
         long activationTicks = entity.getTag(activationTicksTag);
-        entity.setTag(activationTicksTag, ++activationTicks);
+        entity.setTag(activationTicksTag, activationTicks + 1);
 
         if (activationTicks >= actualInterval) {
             entity.setTag(activationTicksTag, 0L);

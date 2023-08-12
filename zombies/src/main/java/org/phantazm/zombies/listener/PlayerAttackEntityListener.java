@@ -1,5 +1,6 @@
 package org.phantazm.zombies.listener;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
@@ -29,8 +30,7 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
     private final int punchCooldown;
     private final float punchKnockback;
 
-    private final Tag<Long> lastPunchTicksTag;
-    private long ticks = 0;
+    private final Tag<Integer> lastPunchTicksTag;
 
     public PlayerAttackEntityListener(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MobStore mobStore,
@@ -38,14 +38,9 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
         super(instance, zombiesPlayers);
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.punchDamage = punchDamage;
-        this.lastPunchTicksTag = Tag.Long("last_punch").defaultValue(0L);
+        this.lastPunchTicksTag = Tag.Integer("last_punch").defaultValue(0);
         this.punchCooldown = punchCooldown;
         this.punchKnockback = punchKnockback;
-    }
-
-    @Override
-    public void tick(long time) {
-        ++ticks;
     }
 
     @Override
@@ -98,11 +93,10 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
 
         boolean godmode = zombiesPlayer.flags().hasFlag(Flags.GODMODE);
 
-        long currentTime = 0L;
-        if (!godmode && ticks - player.getTag(lastPunchTicksTag) < punchCooldown) {
+        int currentTick = MinecraftServer.currentTick();
+        if (!godmode && currentTick - player.getTag(lastPunchTicksTag) < punchCooldown) {
             return;
         }
-
 
         PhantazmMob hit = mobStore.getMob(target.getUuid());
         if (hit == null) {
@@ -120,6 +114,6 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
 
         entity.damage(Damage.fromPlayer(player, punchDamage), false);
         entity.takeKnockback(punchKnockback, Math.sin(angle), -Math.cos(angle));
-        player.setTag(lastPunchTicksTag, ticks);
+        player.setTag(lastPunchTicksTag, currentTick);
     }
 }
