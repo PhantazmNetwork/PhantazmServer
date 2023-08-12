@@ -47,6 +47,7 @@ public final class ServerCommandFeature {
         manager.register(new GamemodeCommand());
         manager.register(new AddRoleCommand(IdentitySource.MOJANG, roleStore));
         manager.register(new RemoveRoleCommand(IdentitySource.MOJANG, roleStore));
+        manager.register(new AnnounceCommand());
 
         manager.getConsoleSender().addPermission(ALL_PERMISSIONS);
     }
