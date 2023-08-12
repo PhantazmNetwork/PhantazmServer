@@ -11,7 +11,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
@@ -178,18 +177,13 @@ public class SelectBombedRoom implements Action<Round> {
                                     }
 
                                     long lastEnterBombedRoom = player.getTag(Tags.LAST_ENTER_BOMBED_ROOM);
-                                    if (lastEnterBombedRoom == -1) {
-                                        player.setTag(Tags.LAST_ENTER_BOMBED_ROOM, time);
-                                        lastEnterBombedRoom = time;
-                                    }
+                                    player.setTag(Tags.LAST_ENTER_BOMBED_ROOM, ++lastEnterBombedRoom);
 
-                                    long ticksSinceEnter = (time - lastEnterBombedRoom) / MinecraftServer.TICK_MS;
-
-                                    if (ticksSinceEnter >= data.damageDelay) {
+                                    if (lastEnterBombedRoom >= data.damageDelay) {
                                         player.damage(bombDamage, true);
                                     }
 
-                                    if (ticksSinceEnter >= data.effectDelay) {
+                                    if (lastEnterBombedRoom >= data.effectDelay) {
                                         applyModifiers(zombiesPlayer);
                                     }
                                 }
@@ -206,7 +200,7 @@ public class SelectBombedRoom implements Action<Round> {
                     }
                 }
             }
-        }, (long)data.gracePeriod * MinecraftServer.TICK_MS);
+        }, (long)data.gracePeriod);
     }
 
     private void applyModifiers(ZombiesPlayer player) {

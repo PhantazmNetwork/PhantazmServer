@@ -56,24 +56,23 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
         private final PerkInteractor delegate;
         private final int flags;
 
-        private long lastActivated;
+        private int lastActivatedTicks;
 
         private Interactor(@NotNull Data data, @NotNull @Child("delegate") PerkInteractor delegate, int flags) {
             this.data = Objects.requireNonNull(data, "data");
             this.delegate = Objects.requireNonNull(delegate, "delegate");
             this.flags = flags;
 
-            this.lastActivated = -1;
+            this.lastActivatedTicks = -1;
         }
 
         private boolean activateIfCooldown(DelegateType type, BooleanSupplier supplier) {
             if (type.bitsHave(flags)) {
-                long currentTime = System.currentTimeMillis();
-                if (lastActivated == -1 || (currentTime - lastActivated) / MinecraftServer.TICK_MS >= data.cooldown) {
+                if (lastActivatedTicks == -1 || MinecraftServer.currentTick() - lastActivatedTicks >= data.cooldown) {
                     boolean success = supplier.getAsBoolean();
 
                     if (success) {
-                        lastActivated = currentTime;
+                        lastActivatedTicks = MinecraftServer.currentTick();
                     }
                     return success;
                 }

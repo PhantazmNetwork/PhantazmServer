@@ -7,7 +7,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
@@ -52,9 +51,9 @@ public class SlotMachineInteractor implements ShopInteractor {
     private boolean rolling;
     private boolean doneRolling;
 
-    private long rollFinishTime;
+    private long rollFinishTicks;
 
-    private long lastFrameTime;
+    private long frameTicks = 0;
     private int currentFrameIndex;
     private int ticksUntilNextFrame;
 
@@ -143,7 +142,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         Collections.shuffle(frames, random);
 
         rollInteraction = interaction;
-        lastFrameTime = System.currentTimeMillis();
+        frameTicks = 0;
         currentFrameIndex = 0;
         ticksUntilNextFrame = delayFormula.delay(data.frameCount, currentFrameIndex);
 
@@ -169,11 +168,11 @@ public class SlotMachineInteractor implements ShopInteractor {
         }
 
         if (!doneRolling) {
-            long ticksSinceLastFrame = (time - lastFrameTime) / MinecraftServer.TICK_MS;
-            if (ticksSinceLastFrame >= ticksUntilNextFrame) {
+            ++frameTicks;
+            if (frameTicks >= ticksUntilNextFrame) {
                 displayRollFrame(currentFrameIndex);
 
-                lastFrameTime = time;
+                frameTicks = 0;
                 currentFrameIndex++;
                 ticksUntilNextFrame = delayFormula.delay(data.frameCount, currentFrameIndex);
             }
@@ -184,7 +183,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         }
 
         if (!doneRolling) {
-            rollFinishTime = time;
+            rollFinishTicks = 0;
 
             TagResolver rolledItemPlaceholder = Placeholder.component("rolled_item",
                     getItemName(frames.get((currentFrameIndex - 1) % frames.size()).getVisual()));
@@ -211,10 +210,9 @@ public class SlotMachineInteractor implements ShopInteractor {
         }
 
         doneRolling = true;
-        long ticksSinceDoneRolling = (time - rollFinishTime) / MinecraftServer.TICK_MS;
-
-        if (ticksSinceDoneRolling < data.gracePeriodTicks) {
-            String timeString = tickFormatter.format(data.gracePeriodTicks - ticksSinceDoneRolling);
+        ++rollFinishTicks;
+        if (rollFinishTicks < data.gracePeriodTicks) {
+            String timeString = tickFormatter.format(data.gracePeriodTicks - rollFinishTicks);
             TagResolver[] tags =
                     getTagsForFrame(frames.isEmpty() ? null : frames.get((currentFrameIndex - 1) % frames.size()),
                             Placeholder.unparsed("time_left", timeString));
@@ -248,8 +246,8 @@ public class SlotMachineInteractor implements ShopInteractor {
         rolling = false;
         shop.flags().clearFlag(data.rollingFlag);
         doneRolling = false;
-        rollFinishTime = 0L;
-        lastFrameTime = 0L;
+        rollFinishTicks = 0L;
+        frameTicks = 0L;
         currentFrameIndex = 0;
         ticksUntilNextFrame = 0;
     }

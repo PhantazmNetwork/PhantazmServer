@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.shop;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -21,7 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class Shop extends BoundedBase implements Tickable {
-    public static final long SHOP_ACTIVATION_DELAY = 750L;
+    public static final long SHOP_ACTIVATION_DELAY = 15L;
 
     private final Point mapOrigin;
     private final Instance instance;
@@ -32,7 +33,7 @@ public class Shop extends BoundedBase implements Tickable {
     private final List<ShopInteractor> failureInteractors;
     private final List<ShopDisplay> displays;
 
-    private final Tag<Long> lastActivationTag;
+    private final Tag<Integer> lastActivationTag;
 
     private final Flaggable flaggable;
 
@@ -50,7 +51,7 @@ public class Shop extends BoundedBase implements Tickable {
         this.failureInteractors = List.copyOf(failureInteractors);
         this.displays = List.copyOf(displays);
 
-        this.lastActivationTag = Tag.Long(UUID.randomUUID().toString()).defaultValue(-1L);
+        this.lastActivationTag = Tag.Integer(UUID.randomUUID().toString()).defaultValue(-1);
         this.flaggable = new BasicFlaggable();
     }
 
@@ -106,7 +107,7 @@ public class Shop extends BoundedBase implements Tickable {
             Player player = playerOptional.get();
 
             long lastActivate = player.getTag(lastActivationTag);
-            if (lastActivate != -1 && System.currentTimeMillis() - lastActivate < SHOP_ACTIVATION_DELAY) {
+            if (lastActivate != -1 && MinecraftServer.currentTick() - lastActivate < SHOP_ACTIVATION_DELAY) {
                 return;
             }
         }
@@ -122,7 +123,7 @@ public class Shop extends BoundedBase implements Tickable {
             display.update(this, interaction, success);
         }
 
-        playerOptional.ifPresent(player -> player.setTag(lastActivationTag, System.currentTimeMillis()));
+        playerOptional.ifPresent(player -> player.setTag(lastActivationTag, MinecraftServer.currentTick()));
     }
 
     @Override

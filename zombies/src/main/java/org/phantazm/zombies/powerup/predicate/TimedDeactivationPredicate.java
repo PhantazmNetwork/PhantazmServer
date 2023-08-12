@@ -28,7 +28,7 @@ public class TimedDeactivationPredicate implements DeactivationPredicateComponen
 
     private static class Predicate implements DeactivationPredicate {
         private final Data data;
-        private long start = -1;
+        private int startTick = -1;
 
         private Predicate(Data data) {
             this.data = data;
@@ -36,16 +36,16 @@ public class TimedDeactivationPredicate implements DeactivationPredicateComponen
 
         @Override
         public void activate(long time) {
-            start = time;
+            startTick = MinecraftServer.currentTick();
         }
 
         @Override
         public boolean shouldDeactivate(long time) {
-            if (start < 0) {
+            if (startTick < 0) {
                 return false;
             }
 
-            return (time - start) / MinecraftServer.TICK_MS >= data.time;
+            return MinecraftServer.currentTick() - startTick >= data.time;
         }
     }
 }

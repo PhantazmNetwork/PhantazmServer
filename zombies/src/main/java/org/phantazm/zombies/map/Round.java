@@ -1,6 +1,5 @@
 package org.phantazm.zombies.map;
 
-import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Tickable;
@@ -28,7 +27,7 @@ public class Round implements Tickable {
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
 
     private boolean isActive;
-    private long waveStartTime;
+    private long waveTicks = 0;
     private Wave currentWave;
     private int waveIndex;
     private int totalMobCount;
@@ -113,9 +112,9 @@ public class Round implements Tickable {
             action.perform(this);
         }
 
-        if (waves.size() > 0) {
+        if (!waves.isEmpty()) {
             currentWave = waves.get(waveIndex = 0);
-            waveStartTime = time;
+            waveTicks = 0;
 
             totalMobCount = 0;
             for (Wave wave : waves) {
@@ -138,7 +137,7 @@ public class Round implements Tickable {
         }
 
         currentWave = null;
-        waveStartTime = 0;
+        waveTicks = 0;
         totalMobCount = 0;
 
         Iterator<PhantazmMob> spawnedIterator = spawnedMobs.values().iterator();
@@ -189,12 +188,12 @@ public class Round implements Tickable {
                 return;
             }
 
-            long timeSinceLastWave = (time - waveStartTime) / MinecraftServer.TICK_MS;
-            if (waveIndex < waves.size() && timeSinceLastWave > currentWave.getWaveInfo().delayTicks()) {
+            ++waveTicks;
+            if (waveIndex < waves.size() && waveTicks > currentWave.getWaveInfo().delayTicks()) {
                 List<PhantazmMob> mobs = spawnMobs(currentWave.getWaveInfo().spawns(), spawnDistributor, true);
                 currentWave.onSpawn(mobs);
 
-                waveStartTime = time;
+                waveTicks = 0;
                 if (++waveIndex >= waves.size()) {
                     return;
                 }

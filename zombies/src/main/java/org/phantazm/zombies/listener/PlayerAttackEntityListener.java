@@ -29,7 +29,7 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
     private final int punchCooldown;
     private final float punchKnockback;
 
-    private final Tag<Long> lastPunchTag;
+    private final Tag<Integer> lastPunchTicksTag;
 
     public PlayerAttackEntityListener(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MobStore mobStore,
@@ -37,7 +37,7 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
         super(instance, zombiesPlayers);
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.punchDamage = punchDamage;
-        this.lastPunchTag = Tag.Long("last_punch").defaultValue(0L);
+        this.lastPunchTicksTag = Tag.Integer("last_punch").defaultValue(0);
         this.punchCooldown = punchCooldown;
         this.punchKnockback = punchKnockback;
     }
@@ -92,13 +92,10 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
 
         boolean godmode = zombiesPlayer.flags().hasFlag(Flags.GODMODE);
 
-        long currentTime = 0L;
-        if (!godmode &&
-                ((currentTime = System.currentTimeMillis()) - player.getTag(lastPunchTag)) / MinecraftServer.TICK_MS <
-                        punchCooldown) {
+        int currentTick = MinecraftServer.currentTick();
+        if (!godmode && currentTick - player.getTag(lastPunchTicksTag) < punchCooldown) {
             return;
         }
-
 
         PhantazmMob hit = mobStore.getMob(target.getUuid());
         if (hit == null) {
@@ -116,6 +113,6 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
 
         entity.damage(Damage.fromPlayer(player, punchDamage), false);
         entity.takeKnockback(punchKnockback, Math.sin(angle), -Math.cos(angle));
-        player.setTag(lastPunchTag, currentTime);
+        player.setTag(lastPunchTicksTag, currentTick);
     }
 }

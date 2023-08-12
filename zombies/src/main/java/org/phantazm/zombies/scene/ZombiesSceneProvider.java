@@ -217,8 +217,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             stageTransition.start();
 
             LeaveHandler leaveHandler = new LeaveHandler(stageTransition, zombiesPlayers);
-
-
             EventNode<Event> childNode =
                     createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
                             doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, mobStore,
@@ -324,9 +322,11 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         //player events
         node.addListener(EntityDamageEvent.class, new PlayerDamageEventListener(instance, zombiesPlayers, mapObjects));
         node.addListener(PlayerHandAnimationEvent.class, new PlayerLeftClickListener(instance, zombiesPlayers));
-        node.addListener(EntityAttackEvent.class,
+        PlayerAttackEntityListener attackEntityListener =
                 new PlayerAttackEntityListener(instance, zombiesPlayers, mobStore, settings.punchDamage(),
-                        settings.punchCooldown(), settings.punchKnockback()));
+                        settings.punchCooldown(), settings.punchKnockback());
+
+        node.addListener(EntityAttackEvent.class, attackEntityListener);
         node.addListener(PlayerChangeHeldSlotEvent.class, new PlayerItemSelectListener(instance, zombiesPlayers));
         node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers));
         node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(instance, zombiesPlayers, leaveHandler));

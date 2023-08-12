@@ -5,7 +5,6 @@ import com.github.steanky.element.core.annotation.document.Description;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +24,7 @@ public class TimerSkill implements Skill {
     private final Data data;
     private final Skill delegate;
 
-    private final Tag<Long> lastActivationTag;
+    private final Tag<Long> activationTicksTag;
     private final Tag<Integer> useCountTag;
     private final Tag<Boolean> startedTag;
 
@@ -37,7 +36,7 @@ public class TimerSkill implements Skill {
         this.delegate = delegate;
 
         UUID uuid = UUID.randomUUID();
-        this.lastActivationTag = Tag.Long("last_activation_" + uuid).defaultValue(-1L);
+        this.activationTicksTag = Tag.Long("activation_ticks_" + uuid).defaultValue(-1L);
         this.useCountTag = Tag.Integer("use_count_" + uuid).defaultValue(0);
         this.startedTag = Tag.Boolean("started_" + uuid).defaultValue(!data.requiresActivation);
         this.tickDelegate = delegate.needsTicking();
@@ -51,7 +50,7 @@ public class TimerSkill implements Skill {
         }
 
         if (data.resetOnActivation || !entity.getTag(startedTag)) {
-            entity.removeTag(lastActivationTag);
+            entity.removeTag(activationTicksTag);
             entity.removeTag(useCountTag);
         }
     }
@@ -73,13 +72,11 @@ public class TimerSkill implements Skill {
             return;
         }
 
-        long lastActivationTime = entity.getTag(lastActivationTag);
-        if (lastActivationTime == -1) {
-            entity.setTag(lastActivationTag, lastActivationTime = time);
-        }
+        long activationTicks = entity.getTag(activationTicksTag);
+        entity.setTag(activationTicksTag, ++activationTicks);
 
-        if ((time - lastActivationTime) / MinecraftServer.TICK_MS >= data.interval) {
-            entity.setTag(lastActivationTag, time);
+        if (activationTicks >= data.interval) {
+            entity.setTag(activationTicksTag, 0L);
             delegate.use(self);
             manageState(self, lastUseCount);
         }
@@ -89,7 +86,7 @@ public class TimerSkill implements Skill {
     public void end(@NotNull PhantazmMob self) {
         Entity entity = self.entity();
 
-        entity.removeTag(lastActivationTag);
+        entity.removeTag(activationTicksTag);
         entity.removeTag(useCountTag);
         entity.removeTag(startedTag);
 

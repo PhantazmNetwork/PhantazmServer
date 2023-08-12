@@ -5,7 +5,6 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.vector.Vec3D;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.VecUtils;
@@ -20,7 +19,7 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
     private final Data data;
 
     private int frameIndex;
-    private long timeAtLastFrame;
+    private long lastFrameTicks;
     private ItemAnimationFrame currentFrame;
 
     @FactoryMethod
@@ -38,18 +37,19 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
         if (currentFrame == null) {
             frameIndex = 0;
             currentFrame = data.frames.get(0);
-            timeAtLastFrame = time;
+            lastFrameTicks = 0;
             return;
         }
 
-        if ((timeAtLastFrame - time) / MinecraftServer.TICK_MS > currentFrame.delayTicks()) {
+        ++lastFrameTicks;
+        if (lastFrameTicks > currentFrame.delayTicks()) {
             if (++frameIndex >= data.frames.size()) {
                 frameIndex = 0;
             }
 
             currentFrame = data.frames.get(frameIndex);
             itemEntity.setItemStack(currentFrame.itemStack());
-            timeAtLastFrame = time;
+            lastFrameTicks = 0;
         }
     }
 
@@ -57,7 +57,7 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
     public void destroy(@NotNull Shop shop) {
         super.destroy(shop);
         frameIndex = 0;
-        timeAtLastFrame = 0;
+        lastFrameTicks = 0;
         currentFrame = null;
     }
 

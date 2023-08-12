@@ -1,7 +1,6 @@
 package org.phantazm.core.npc;
 
 import com.github.steanky.element.core.annotation.*;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,13 +14,12 @@ public class AnimationTicker implements EntityTicker {
 
     private Frame current;
     private int currentIndex;
-    private long lastFrameTime;
+    private long frameTicks = 0;
 
     @FactoryMethod
     public AnimationTicker(@NotNull @Child("frames") List<Frame> frames) {
         this.frames = frames;
         this.current = frames.isEmpty() ? null : frames.get(0);
-        this.lastFrameTime = System.currentTimeMillis();
     }
 
     @Override
@@ -31,15 +29,15 @@ public class AnimationTicker implements EntityTicker {
             return;
         }
 
-        long ticksSinceLastFrame = (time - lastFrameTime) / MinecraftServer.TICK_MS;
-        if (ticksSinceLastFrame >= current.data.ticks) {
+        ++frameTicks;
+        if (frameTicks >= current.data.ticks) {
             current.effect.accept(entity);
 
             int newIndex = (currentIndex + 1) % frames.size();
 
             this.current = frames.get(newIndex);
             currentIndex = newIndex;
-            lastFrameTime = time;
+            frameTicks = 0;
         }
     }
 

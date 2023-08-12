@@ -1,7 +1,6 @@
 package org.phantazm.zombies.map.handler;
 
 import com.github.steanky.toolkit.collection.Wrapper;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -22,17 +21,16 @@ import org.phantazm.zombies.stage.StageKeys;
 import java.util.*;
 
 public class BasicWindowHandler implements WindowHandler {
-    private static final int POSITION_CHECK_INTERVAL = 200;
+    private static final int POSITION_CHECK_INTERVAL = 4;
 
     private static class RepairOperation {
         private final ZombiesPlayer zombiesPlayer;
         private final Window window;
-        private long lastRepairTime;
+        private long repairTicks = 0;
 
-        private RepairOperation(ZombiesPlayer zombiesPlayer, Window window, long lastRepairTime) {
+        private RepairOperation(ZombiesPlayer zombiesPlayer, Window window) {
             this.zombiesPlayer = zombiesPlayer;
             this.window = window;
-            this.lastRepairTime = lastRepairTime;
         }
     }
 
@@ -49,7 +47,7 @@ public class BasicWindowHandler implements WindowHandler {
 
     private final WindowMessages windowMessages;
 
-    private long lastPositionCheck;
+    private long positionCheckTicks;
 
     public BasicWindowHandler(@NotNull BoundedTracker<Window> windowTracker, @NotNull BoundedTracker<Room> roomTracker,
             @NotNull MobStore mobStore, @NotNull Collection<? extends ZombiesPlayer> players, double repairRadius,
@@ -63,7 +61,7 @@ public class BasicWindowHandler implements WindowHandler {
         this.repairOperationMap = new LinkedHashMap<>();
         this.activeRepairs = repairOperationMap.values();
         this.coinsPerWindowBlock = coinsPerWindowBlock;
-        this.lastPositionCheck = System.currentTimeMillis();
+        this.positionCheckTicks = 0;
         this.windowMessages = Objects.requireNonNull(windowMessages, "windowMessages");
     }
 
@@ -102,7 +100,7 @@ public class BasicWindowHandler implements WindowHandler {
                     player.sendMessage(windowMessages.startRepairing());
                 }
 
-                return new RepairOperation(zombiesPlayer, window, System.currentTimeMillis());
+                return new RepairOperation(zombiesPlayer, window);
             });
         });
     }
@@ -114,7 +112,7 @@ public class BasicWindowHandler implements WindowHandler {
 
     @Override
     public void tick(long time) {
-        if (time - lastPositionCheck >= POSITION_CHECK_INTERVAL) {
+        if (++positionCheckTicks >= POSITION_CHECK_INTERVAL) {
             for (ZombiesPlayer zombiesPlayer : players) {
                 Optional<Player> playerOptional = zombiesPlayer.getPlayer();
                 if (playerOptional.isPresent() && zombiesPlayer.canRepairWindow()) {
@@ -139,7 +137,7 @@ public class BasicWindowHandler implements WindowHandler {
                 }
             }
 
-            lastPositionCheck = time;
+            positionCheckTicks = 0;
         }
 
         Iterator<RepairOperation> repairOperationIterator = activeRepairs.iterator();
@@ -173,11 +171,9 @@ public class BasicWindowHandler implements WindowHandler {
                 }
             }
 
-            long elapsedMS = time - repairOperation.lastRepairTime;
-            long elapsedTicks = elapsedMS / MinecraftServer.TICK_MS;
-
-            if (elapsedTicks >= repairInterval) {
-                repairOperation.lastRepairTime = time;
+            ++repairOperation.repairTicks;
+            if (repairOperation.repairTicks >= repairInterval) {
+                repairOperation.repairTicks = 0;
 
                 Window targetWindow = repairOperation.window;
                 if (targetWindow.isFullyRepaired()) {

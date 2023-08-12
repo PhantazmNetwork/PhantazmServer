@@ -19,7 +19,7 @@ public class TemporalSkill implements Skill {
     private final Skill delegate;
 
     private final boolean delegateNeedsTicking;
-    private final Tag<Long> startTime;
+    private final Tag<Long> startTicks;
     private final Tag<Long> actualDelay;
 
     @FactoryMethod
@@ -29,7 +29,7 @@ public class TemporalSkill implements Skill {
         this.delegateNeedsTicking = delegate.needsTicking();
 
         UUID uuid = UUID.randomUUID();
-        this.startTime = Tag.Long("start_time_" + uuid).defaultValue(-1L);
+        this.startTicks = Tag.Long("start_ticks_" + uuid).defaultValue(-1L);
         this.actualDelay = Tag.Long("actual_delay_" + uuid).defaultValue(-1L);
     }
 
@@ -40,49 +40,48 @@ public class TemporalSkill implements Skill {
         }
 
         Entity entity = self.entity();
-        long startTime = entity.getTag(this.startTime);
-        if (startTime < 0) {
+        long ticks = entity.getTag(this.startTicks);
+        if (ticks < 0) {
             return;
         }
 
-        long elapsed = time - startTime;
-        if (elapsed / MinecraftServer.TICK_MS >= entity.getTag(this.actualDelay)) {
+        if (ticks >= entity.getTag(this.actualDelay)) {
             delegate.end(self);
 
-            entity.removeTag(this.startTime);
+            entity.removeTag(this.startTicks);
             entity.removeTag(actualDelay);
         }
+
+        entity.setTag(this.startTicks, ticks + 1);
     }
 
     @Override
     public void use(@NotNull PhantazmMob self) {
         Entity entity = self.entity();
-        long oldStartTime = entity.getTag(this.startTime);
-        long time = System.currentTimeMillis();
+        long oldStartTime = entity.getTag(this.startTicks);
         if (oldStartTime >= 0) {
-            long elapsed = time - oldStartTime;
-            if (elapsed / MinecraftServer.TICK_MS < entity.getTag(this.actualDelay)) {
+            if (oldStartTime < entity.getTag(this.actualDelay)) {
                 delegate.end(self);
             }
         }
 
         delegate.use(self);
 
-        entity.setTag(startTime, time);
+        entity.setTag(startTicks, 0L);
         entity.setTag(actualDelay, MathUtils.randomInterval(data.minDuration, data.maxDuration));
     }
 
     @Override
     public void end(@NotNull PhantazmMob self) {
         Entity entity = self.entity();
-        long startTime = entity.getTag(this.startTime);
+        long ticks = entity.getTag(this.startTicks);
         long actualDelay = entity.getTag(this.actualDelay);
-        if (startTime < 0 || actualDelay < 0) {
+        if (ticks < 0 || actualDelay < 0) {
             delegate.end(self);
             return;
         }
 
-        long ticksRemaining = actualDelay - ((System.currentTimeMillis() - startTime) / MinecraftServer.TICK_MS);
+        long ticksRemaining = actualDelay - ticks;
         if (ticksRemaining <= 0) {
             delegate.end(self);
             return;

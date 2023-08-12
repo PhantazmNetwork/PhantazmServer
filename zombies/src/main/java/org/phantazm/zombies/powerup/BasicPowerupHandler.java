@@ -23,7 +23,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 public class BasicPowerupHandler implements PowerupHandler {
-    private static final int PICKUP_CHECK_INTERVAL = 100; //check every 2 ticks for powerup pickups
+    private static final int PICKUP_CHECK_INTERVAL = 2; //check every 2 ticks for powerup pickups
 
     private final Supplier<? extends @NotNull ZombiesScene> scene;
     private final Map<Key, PowerupComponents> components;
@@ -31,7 +31,7 @@ public class BasicPowerupHandler implements PowerupHandler {
     private final List<Powerup> spawnedOrActivePowerups;
     private final Collection<Powerup> powerupView;
 
-    private long lastPickupCheck = 0L;
+    private long pickupCheckTicks = 0L;
 
     public BasicPowerupHandler(@NotNull Supplier<? extends @NotNull ZombiesScene> scene,
             @NotNull Map<Key, PowerupComponents> components) {
@@ -48,9 +48,9 @@ public class BasicPowerupHandler implements PowerupHandler {
         }
 
         //don't check for pickups too many times
-        boolean pickupCheckTick = time - lastPickupCheck >= PICKUP_CHECK_INTERVAL;
+        boolean pickupCheckTick = ++pickupCheckTicks >= PICKUP_CHECK_INTERVAL;
         if (pickupCheckTick) {
-            lastPickupCheck = time;
+            pickupCheckTicks = 0;
         }
 
         for (int i = spawnedOrActivePowerups.size() - 1; i >= 0; i--) {

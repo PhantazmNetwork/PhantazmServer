@@ -5,7 +5,6 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
@@ -31,7 +30,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @Cache(false)
 public class ApplyFireShotEffect implements ShotEffect, Tickable {
     private final Data data;
-    private final Tag<Long> lastDamageTime;
+    private final Tag<Long> lastDamageTicksTag;
     private final Deque<DamageTarget> activeEntities;
     private final MobStore mobStore;
 
@@ -43,7 +42,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         this.data = Objects.requireNonNull(data, "data");
 
         UUID uuid = UUID.randomUUID();
-        this.lastDamageTime = Tag.Long("last_fire_damage_time_" + uuid).defaultValue(-1L);
+        this.lastDamageTicksTag = Tag.Long("last_fire_damage_ticks_" + uuid).defaultValue(-1L);
 
         this.activeEntities = new ConcurrentLinkedDeque<>();
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
@@ -63,8 +62,8 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
         livingEntity.setFireForDuration(data.fireTicks);
 
-        boolean alreadyActive = entity.getTag(lastDamageTime) != -1;
-        entity.setTag(lastDamageTime, System.currentTimeMillis());
+        boolean alreadyActive = entity.getTag(lastDamageTicksTag) != -1;
+        entity.setTag(lastDamageTicksTag, 0L);
 
         if (!alreadyActive) {
             activeEntities.add(new DamageTarget(zombiesPlayer.getUUID(), livingEntity));
@@ -81,10 +80,11 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
                 return true;
             }
 
-            long lastDamageTime = entity.getTag(this.lastDamageTime);
-            if ((time - lastDamageTime) / MinecraftServer.TICK_MS >= data.damageInterval) {
+            long lastDamageTicks = entity.getTag(this.lastDamageTicksTag);
+            entity.setTag(this.lastDamageTicksTag, ++lastDamageTicks);
+            if (lastDamageTicks >= data.damageInterval) {
                 doDamage(entity, target.damager);
-                entity.setTag(this.lastDamageTime, time);
+                entity.setTag(this.lastDamageTicksTag, time);
             }
 
             return false;
@@ -99,7 +99,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     }
 
     private void stopFire(Entity entity) {
-        entity.removeTag(lastDamageTime);
+        entity.removeTag(lastDamageTicksTag);
     }
 
     @DataObject

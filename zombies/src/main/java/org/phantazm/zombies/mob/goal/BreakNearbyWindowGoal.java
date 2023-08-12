@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.event.EventDispatcher;
@@ -47,7 +46,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
         private final BoundedTracker<Room> roomTracker;
         private final PhantazmMob self;
 
-        private long lastBreakCheck;
+        private long breakTicks = -1;
 
         private Goal(Data data, BoundedTracker<Window> windowTracker, BoundedTracker<Room> roomTracker,
                 PhantazmMob self) {
@@ -55,19 +54,14 @@ public class BreakNearbyWindowGoal implements GoalCreator {
             this.windowTracker = windowTracker;
             this.roomTracker = roomTracker;
             this.self = self;
-            this.lastBreakCheck = -1;
         }
 
         @Override
         public void tick(long time) {
-            if (lastBreakCheck == -1) {
-                lastBreakCheck = time;
-                return;
-            }
+            ++breakTicks;
 
-            long ticksSinceLastBreak = (time - lastBreakCheck) / MinecraftServer.TICK_MS;
             LivingEntity entity = self.entity();
-            if (ticksSinceLastBreak > data.breakTicks) {
+            if (breakTicks > data.breakTicks) {
                 Optional<Room> roomOptional = roomTracker.atPoint(entity.getPosition());
                 if (roomOptional.isPresent()) {
                     return;
@@ -87,13 +81,13 @@ public class BreakNearbyWindowGoal implements GoalCreator {
                     }
                 });
 
-                lastBreakCheck = time;
+                breakTicks = 0;
             }
         }
 
         @Override
         public void end() {
-            this.lastBreakCheck = -1;
+            this.breakTicks = -1;
         }
 
         @Override
