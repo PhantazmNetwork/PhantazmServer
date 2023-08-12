@@ -217,8 +217,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             stageTransition.start();
 
             LeaveHandler leaveHandler = new LeaveHandler(stageTransition, zombiesPlayers);
-
-
             EventNode<Event> childNode =
                     createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
                             doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, mobStore,
