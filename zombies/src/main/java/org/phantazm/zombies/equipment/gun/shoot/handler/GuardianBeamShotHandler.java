@@ -33,8 +33,9 @@ import java.util.*;
 @Cache(false)
 public class GuardianBeamShotHandler implements ShotHandler {
 
-    private final Queue<Beam> removalQueue = new PriorityQueue<>(Comparator.comparingLong(Beam::time));
+    private final Queue<Beam> removalQueue = new PriorityQueue<>(Comparator.comparingLong(Beam::ticks));
     private final Data data;
+    private long ticks = 0;
 
     /**
      * Creates a new {@link GuardianBeamShotHandler}.
@@ -110,12 +111,13 @@ public class GuardianBeamShotHandler implements ShotHandler {
         instance.sendGroupedPacket(guardianSpawnPacket);
         instance.sendGroupedPacket(guardianMetaPacket);
 
-        removalQueue.add(new Beam(new WeakReference<>(instance), guardian, armorStand, System.currentTimeMillis()));
+        removalQueue.add(new Beam(new WeakReference<>(instance), guardian, armorStand, ticks));
     }
 
     @Override
     public void tick(@NotNull GunState state, long time) {
-        for (Beam beam = removalQueue.peek(); beam != null && (time - beam.time()) / 50 > data.beamTime();
+        ++ticks;
+        for (Beam beam = removalQueue.peek(); beam != null && ticks - beam.ticks() > data.beamTime();
                 beam = removalQueue.peek()) {
             removalQueue.remove();
             Instance instance = beam.instance().get();
@@ -139,7 +141,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
     private record Beam(@NotNull Reference<Instance> instance,
                         @NotNull Entity guardian,
                         @NotNull Entity armorStand,
-                        long time) {
+                        long ticks) {
 
     }
 

@@ -5,7 +5,6 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
@@ -43,7 +42,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
     private final Attribute attribute;
 
     private final Deque<LivingEntity> entities;
-    private final Tag<Long> applyTime;
+    private final Tag<Long> applyTicksTag;
 
     private final MobStore mobStore;
 
@@ -57,7 +56,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
         String name = NAMES.computeIfAbsent(data, ignored -> UUID.randomUUID().toString());
         this.entities = new ConcurrentLinkedDeque<>();
-        this.applyTime = Tag.Long(name).defaultValue(-1L);
+        this.applyTicksTag = Tag.Long(name).defaultValue(-1L);
         this.mobStore = mobStore;
     }
 
@@ -73,10 +72,10 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
             return;
         }
 
-        long tag = livingEntity.getTag(applyTime);
-        livingEntity.setTag(applyTime, System.currentTimeMillis());
+        long tag = livingEntity.getTag(applyTicksTag);
+        livingEntity.setTag(applyTicksTag, ++tag);
 
-        if (tag == -1) {
+        if (tag == 0) {
             livingEntity.getAttribute(attribute).addModifier(
                     new AttributeModifier(attributeUUID, attributeName, data.amount, data.attributeOperation));
             entities.add(livingEntity);
@@ -85,12 +84,11 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
     @Override
     public void tick(long time) {
-        entities.removeIf(entity -> process(entity, time));
+        entities.removeIf(this::process);
     }
 
-    private boolean process(LivingEntity livingEntity, long time) {
-        if (livingEntity.isRemoved() || livingEntity.isDead() ||
-                ((time - livingEntity.getTag(applyTime)) / MinecraftServer.TICK_MS) >= data.duration) {
+    private boolean process(LivingEntity livingEntity) {
+        if (livingEntity.isRemoved() || livingEntity.isDead() || livingEntity.getTag(applyTicksTag) >= data.duration) {
             removeAttribute(livingEntity);
             return true;
         }
@@ -100,7 +98,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
     private void removeAttribute(LivingEntity entity) {
         entity.getAttribute(attribute).removeModifier(attributeUUID);
-        entity.removeTag(applyTime);
+        entity.removeTag(applyTicksTag);
     }
 
     @DataObject

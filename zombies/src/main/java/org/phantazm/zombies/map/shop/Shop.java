@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class Shop extends BoundedBase implements Tickable {
-    public static final long SHOP_ACTIVATION_DELAY = 750L;
+    public static final long SHOP_ACTIVATION_DELAY = 15L;
 
     private final Point mapOrigin;
     private final Instance instance;
@@ -35,6 +35,8 @@ public class Shop extends BoundedBase implements Tickable {
     private final Tag<Long> lastActivationTag;
 
     private final Flaggable flaggable;
+
+    private long ticks = 0;
 
     public Shop(@NotNull Point mapOrigin, @NotNull ShopInfo shopInfo, @NotNull Instance instance,
             @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> successInteractors,
@@ -106,7 +108,7 @@ public class Shop extends BoundedBase implements Tickable {
             Player player = playerOptional.get();
 
             long lastActivate = player.getTag(lastActivationTag);
-            if (lastActivate != -1 && System.currentTimeMillis() - lastActivate < SHOP_ACTIVATION_DELAY) {
+            if (lastActivate != -1 && ticks - lastActivate < SHOP_ACTIVATION_DELAY) {
                 return;
             }
         }
@@ -122,11 +124,12 @@ public class Shop extends BoundedBase implements Tickable {
             display.update(this, interaction, success);
         }
 
-        playerOptional.ifPresent(player -> player.setTag(lastActivationTag, System.currentTimeMillis()));
+        playerOptional.ifPresent(player -> player.setTag(lastActivationTag, ticks));
     }
 
     @Override
     public void tick(long time) {
+        ++ticks;
         for (ShopDisplay display : displays) {
             display.tick(time);
         }

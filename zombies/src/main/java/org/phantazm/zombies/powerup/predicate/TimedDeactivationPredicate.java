@@ -3,7 +3,6 @@ package org.phantazm.zombies.powerup.predicate;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.scene.ZombiesScene;
 
@@ -28,7 +27,7 @@ public class TimedDeactivationPredicate implements DeactivationPredicateComponen
 
     private static class Predicate implements DeactivationPredicate {
         private final Data data;
-        private long start = -1;
+        private long startTicks = -1;
 
         private Predicate(Data data) {
             this.data = data;
@@ -36,16 +35,16 @@ public class TimedDeactivationPredicate implements DeactivationPredicateComponen
 
         @Override
         public void activate(long time) {
-            start = time;
+            startTicks = 0;
         }
 
         @Override
         public boolean shouldDeactivate(long time) {
-            if (start < 0) {
+            if (startTicks < 0) {
                 return false;
             }
 
-            return (time - start) / MinecraftServer.TICK_MS >= data.time;
+            return ++startTicks >= data.time;
         }
     }
 }

@@ -41,7 +41,7 @@ import java.util.function.Supplier;
 @Cache(false)
 public class ProjectileFirer implements Firer {
     private final PriorityQueue<AliveProjectile> removalQueue =
-            new PriorityQueue<>(Comparator.comparingLong(AliveProjectile::time));
+            new PriorityQueue<>(Comparator.comparingLong(AliveProjectile::ticks));
     private final Map<UUID, FiredShot> firedShots = new HashMap<>();
     private final Data data;
     private final Supplier<Optional<? extends Entity>> entitySupplier;
@@ -51,8 +51,8 @@ public class ProjectileFirer implements Firer {
     private final TargetFinder targetFinder;
     private final ProjectileCollisionFilter collisionFilter;
     private final Collection<ShotHandler> shotHandlers;
-
     private final MobSpawner spawner;
+    private long ticks = 0;
 
     /**
      * Creates a new {@link ProjectileFirer}.
@@ -106,8 +106,7 @@ public class ProjectileFirer implements Firer {
                     proximaEntity.setNoGravity(!data.hasGravity());
 
                     firedShots.put(proximaEntity.getUuid(), new FiredShot(gun, state, shooter, start, previousHits));
-                    removalQueue.add(
-                            new AliveProjectile(new WeakReference<>(proximaEntity), System.currentTimeMillis()));
+                    removalQueue.add(new AliveProjectile(new WeakReference<>(proximaEntity), ticks));
                 }
             });
         });
@@ -115,8 +114,9 @@ public class ProjectileFirer implements Firer {
 
     @Override
     public void tick(@NotNull GunState state, long time) {
+        ++ticks;
         for (AliveProjectile aliveProjectile = removalQueue.peek();
-                aliveProjectile != null && (time - aliveProjectile.time()) / 50 > data.maxAliveTime();
+                aliveProjectile != null && ticks - aliveProjectile.ticks() > data.maxAliveTime();
                 aliveProjectile = removalQueue.peek()) {
             Entity projectile = aliveProjectile.projectile().get();
             if (projectile == null) {
@@ -237,7 +237,7 @@ public class ProjectileFirer implements Firer {
 
     }
 
-    private record AliveProjectile(@NotNull Reference<Entity> projectile, long time) {
+    private record AliveProjectile(@NotNull Reference<Entity> projectile, long ticks) {
 
         private AliveProjectile {
             Objects.requireNonNull(projectile, "projectile");

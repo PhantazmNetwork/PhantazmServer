@@ -21,10 +21,12 @@ public class BasicTickTaskScheduler implements TickTaskScheduler {
     }
 
     @Override
-    public void scheduleTaskAfter(@NotNull TickableTask tickableTask, long millis) {
+    public void scheduleTaskAfter(@NotNull TickableTask tickableTask, long ticks) {
         Objects.requireNonNull(tickableTask, "tickableTask");
-        long startTime = System.currentTimeMillis();
         tickableTasks.add(new TickableTask() {
+
+            private long duration = 0;
+
             private boolean finished;
 
             @Override
@@ -34,7 +36,8 @@ public class BasicTickTaskScheduler implements TickTaskScheduler {
 
             @Override
             public void tick(long time) {
-                if (time - startTime >= millis) {
+                ++duration;
+                if (duration >= ticks) {
                     tickableTasks.add(tickableTask);
                     finished = true;
                 }

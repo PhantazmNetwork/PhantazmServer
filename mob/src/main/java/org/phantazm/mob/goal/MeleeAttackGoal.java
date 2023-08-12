@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -48,12 +47,16 @@ public class MeleeAttackGoal implements GoalCreator {
         private final Collection<Skill> skills;
         private final PhantazmMob mob;
 
-        private long lastAttackTime;
+        private long ticksSinceAttack = 0;
 
         public Goal(@NotNull Data data, @NotNull Collection<Skill> skills, @NotNull PhantazmMob mob) {
             this.data = Objects.requireNonNull(data, "data");
             this.skills = Objects.requireNonNull(skills, "skills");
             this.mob = Objects.requireNonNull(mob, "mob");
+
+            mob.entity().scheduler().scheduleTask(() -> {
+                ++ticksSinceAttack;
+            }, TaskSchedule.immediate(), TaskSchedule.nextTick(), ExecutionType.SYNC);
 
             Skill[] tickableSkills = skills.stream().filter(Skill::needsTicking).toArray(Skill[]::new);
             if (tickableSkills.length == 0) {
@@ -82,7 +85,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 attackSpeedMultiplier = self.getAttributeValue(attribute);
             }
 
-            if ((float)((System.currentTimeMillis() - lastAttackTime) / MinecraftServer.TICK_MS) *
+            if ((float) ticksSinceAttack *
                     attackSpeedMultiplier >= data.cooldown()) {
                 Entity target = self.getTargetEntity();
                 if (target == null) {
@@ -133,7 +136,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 }
             }
 
-            lastAttackTime = System.currentTimeMillis();
+            ticksSinceAttack = 0;
         }
 
         @Override

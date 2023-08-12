@@ -2,7 +2,6 @@ package org.phantazm.core.sound;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
@@ -69,7 +68,7 @@ public class BasicSongPlayer implements SongPlayer {
 
         private int noteIndex;
         private Note nextNote;
-        private long lastNoteTime;
+        private long lastNoteTicks;
 
         private SongImpl(Audience audience, Sound.Emitter emitter, Sound.Source source, Point location,
                 List<Note> notes, float volume, boolean loop) {
@@ -83,7 +82,7 @@ public class BasicSongPlayer implements SongPlayer {
 
             this.noteIndex = 0;
             this.nextNote = this.notes.isEmpty() ? null : this.notes.get(0);
-            this.lastNoteTime = -1;
+            this.lastNoteTicks = -1;
         }
 
         @Override
@@ -113,17 +112,11 @@ public class BasicSongPlayer implements SongPlayer {
                 return true;
             }
 
-            long lastNoteTime = this.lastNoteTime;
-            if (lastNoteTime == -1) {
-                this.lastNoteTime = time;
-                lastNoteTime = time;
-            }
-
-            int ticksSinceLastNote = (int)((time - lastNoteTime) / MinecraftServer.TICK_MS);
+            long lastNoteTicks = ++this.lastNoteTicks;
 
             int nextNoteIndex;
-            if (ticksSinceLastNote >= nextNote.ticks()) {
-                this.lastNoteTime = time;
+            if (lastNoteTicks >= nextNote.ticks()) {
+                this.lastNoteTicks = 0;
 
                 do {
                     if (this.emitter != null) {

@@ -1,6 +1,5 @@
 package org.phantazm.zombies.listener;
 
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
@@ -9,6 +8,7 @@ import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Tickable;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObject;
@@ -23,13 +23,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<EntityAttackEvent> {
+public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<EntityAttackEvent> implements Tickable {
     private final MobStore mobStore;
     private final float punchDamage;
     private final int punchCooldown;
     private final float punchKnockback;
 
-    private final Tag<Long> lastPunchTag;
+    private final Tag<Long> lastPunchTicksTag;
+    private long ticks = 0;
 
     public PlayerAttackEntityListener(@NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MobStore mobStore,
@@ -37,9 +38,14 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
         super(instance, zombiesPlayers);
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
         this.punchDamage = punchDamage;
-        this.lastPunchTag = Tag.Long("last_punch").defaultValue(0L);
+        this.lastPunchTicksTag = Tag.Long("last_punch").defaultValue(0L);
         this.punchCooldown = punchCooldown;
         this.punchKnockback = punchKnockback;
+    }
+
+    @Override
+    public void tick(long time) {
+        ++ticks;
     }
 
     @Override
@@ -93,9 +99,7 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
         boolean godmode = zombiesPlayer.flags().hasFlag(Flags.GODMODE);
 
         long currentTime = 0L;
-        if (!godmode &&
-                ((currentTime = System.currentTimeMillis()) - player.getTag(lastPunchTag)) / MinecraftServer.TICK_MS <
-                        punchCooldown) {
+        if (!godmode && ticks - player.getTag(lastPunchTicksTag) < punchCooldown) {
             return;
         }
 
@@ -116,6 +120,6 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
 
         entity.damage(Damage.fromPlayer(player, punchDamage), false);
         entity.takeKnockback(punchKnockback, Math.sin(angle), -Math.cos(angle));
-        player.setTag(lastPunchTag, currentTime);
+        player.setTag(lastPunchTicksTag, ticks);
     }
 }

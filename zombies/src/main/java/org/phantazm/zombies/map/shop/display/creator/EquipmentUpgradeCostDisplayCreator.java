@@ -7,7 +7,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.VecUtils;
@@ -49,14 +48,14 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
         private final ZombiesPlayer zombiesPlayer;
         private final UpgradePath upgradePath;
 
-        private long lastUpdate;
+        private long updateTicks;
 
         private Display(@NotNull Data data, @NotNull ZombiesPlayer zombiesPlayer, @NotNull UpgradePath upgradePath) {
             super(new ViewableHologram(Vec.ZERO, 0, player -> player.getUuid().equals(zombiesPlayer.getUUID())));
             this.data = Objects.requireNonNull(data, "data");
             this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
             this.upgradePath = Objects.requireNonNull(upgradePath, "upgradePath");
-            this.lastUpdate = -1;
+            this.updateTicks = -1;
         }
 
         private Optional<Integer> computeCost() {
@@ -118,13 +117,8 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
 
         @Override
         public void tick(long time) {
-            if (lastUpdate == -1) {
-                lastUpdate = time;
-                return;
-            }
-
-            long ticksSinceUpdate = (time - lastUpdate) / MinecraftServer.TICK_MS;
-            if (ticksSinceUpdate >= data.updateInterval) {
+            ++updateTicks;
+            if (updateTicks >= data.updateInterval) {
                 updateCostDisplay();
             }
         }

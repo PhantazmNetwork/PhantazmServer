@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
@@ -32,7 +31,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class IgniteShotHandler implements ShotHandler {
     private final Data data;
 
-    private final Tag<Long> lastFireDamage;
+    private final Tag<Long> lastFireDamageTicksTag;
     private final Deque<LivingEntity> targets;
     private final MobStore mobStore;
 
@@ -46,7 +45,7 @@ public class IgniteShotHandler implements ShotHandler {
         this.data = Objects.requireNonNull(data, "data");
 
         UUID uuid = UUID.randomUUID();
-        this.lastFireDamage = Tag.Long("last_fire_damage_time" + uuid).defaultValue(-1L);
+        this.lastFireDamageTicksTag = Tag.Long("last_fire_damage_ticks" + uuid).defaultValue(-1L);
         this.targets = new ConcurrentLinkedDeque<>();
         this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
@@ -68,8 +67,9 @@ public class IgniteShotHandler implements ShotHandler {
 
             entity.setFireForDuration(duration);
 
-            boolean alreadyActive = entity.getTag(lastFireDamage) != -1;
-            entity.setTag(lastFireDamage, System.currentTimeMillis());
+            long lastFireDamageTicks = entity.getTag(lastFireDamageTicksTag);
+            boolean alreadyActive = lastFireDamageTicks != -1;
+            entity.setTag(lastFireDamageTicksTag, ++lastFireDamageTicks);
 
             if (!alreadyActive) {
                 targets.add(entity);
@@ -85,9 +85,9 @@ public class IgniteShotHandler implements ShotHandler {
                 return true;
             }
 
-            if ((time - target.getTag(this.lastFireDamage)) / MinecraftServer.TICK_MS >= data.damageInterval) {
+            if (target.getTag(this.lastFireDamageTicksTag) >= data.damageInterval) {
                 damage(target);
-                target.setTag(this.lastFireDamage, time);
+                target.setTag(this.lastFireDamageTicksTag, 0L);
             }
 
             return false;
@@ -95,7 +95,7 @@ public class IgniteShotHandler implements ShotHandler {
     }
 
     private void remove(LivingEntity target) {
-        target.removeTag(lastFireDamage);
+        target.removeTag(lastFireDamageTicksTag);
     }
 
     private void damage(LivingEntity target) {

@@ -46,7 +46,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
         private final TickFormatter tickFormatter;
         private final UUID id;
 
-        private long startTime = -1;
+        private long startTicks = -1;
         private BossBar bossBar;
 
         private Action(Data data, Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,
@@ -61,7 +61,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
 
                 @Override
                 public boolean shouldDeactivate(long time) {
-                    return (time - startTime) / MinecraftServer.TICK_MS >= data.duration;
+                    return startTicks >= data.duration;
                 }
             };
             this.playerMap = playerMap;
@@ -72,18 +72,18 @@ public class BossBarTimerAction implements PowerupActionComponent {
         @Override
         public void tick(long time) {
             BossBar bossBar = this.bossBar;
-            if (startTime < 0 || bossBar == null) {
+            if (startTicks < 0 || bossBar == null) {
                 return;
             }
 
-            long elapsedTime = (time - startTime) / MinecraftServer.TICK_MS;
+            ++startTicks;
             bossBar.name(createBossBarName(time));
-            bossBar.progress((float)MathUtils.clamp(1D - ((float)elapsedTime / (float)data.duration), 0, 1));
+            bossBar.progress((float)MathUtils.clamp(1D - ((float)startTicks / (float)data.duration), 0, 1));
         }
 
         @Override
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
-            this.startTime = System.currentTimeMillis();
+            this.startTicks = 0;
 
             BossBar bossBar = BossBar.bossBar(createBossBarName(time), 1.0F, data.color, data.overlay);
             instance.showBossBar(bossBar);
@@ -97,8 +97,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
         }
 
         private Component createBossBarName(long time) {
-            long delta = (time - startTime) / MinecraftServer.TICK_MS;
-            long remainingTicks = data.duration - delta;
+            long remainingTicks = data.duration - startTicks;
 
             TagResolver timePlaceholder = Placeholder.unparsed("time", tickFormatter.format(remainingTicks));
             return MiniMessage.miniMessage().deserialize(data.format, timePlaceholder);

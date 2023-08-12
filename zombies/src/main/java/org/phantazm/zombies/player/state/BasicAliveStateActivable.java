@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -40,7 +39,7 @@ public class BasicAliveStateActivable implements Activable {
     private final BelowNameTag belowNameTag;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
-    private long lastHeal;
+    private long healTicks = 0;
 
     public BasicAliveStateActivable(@NotNull AlivePlayerStateContext context, @NotNull Instance instance,
             @NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
@@ -104,10 +103,11 @@ public class BasicAliveStateActivable implements Activable {
 
     @Override
     public void tick(long time) {
+        ++healTicks;
         playerView.getPlayer().ifPresent(player -> {
-            if ((time - lastHeal) / MinecraftServer.TICK_MS >= (int)player.getAttributeValue(Attributes.HEAL_TICKS)) {
+            if (healTicks >= (int)player.getAttributeValue(Attributes.HEAL_TICKS)) {
                 player.setHealth(player.getHealth() + 1F);
-                lastHeal = time;
+                healTicks = 0;
             }
 
             belowNameTag.updateScore(player, (int)Math.floor(player.getHealth()));
