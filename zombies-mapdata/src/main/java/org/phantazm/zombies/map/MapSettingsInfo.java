@@ -22,6 +22,7 @@ public record MapSettingsInfo(int mapDataVersion,
                               @NotNull Key id,
                               @NotNull List<String> instancePath,
                               @NotNull Vec3I origin,
+                              double coinsLostOnKnock,
                               @NotNull List<String> requiredPermissions,
                               int minimumProtocolVersion,
                               int maximumProtocolVersion,
@@ -140,7 +141,7 @@ public record MapSettingsInfo(int mapDataVersion,
      *               otherwise specified
      */
     public MapSettingsInfo(@NotNull Key id, @NotNull Vec3I origin) {
-        this(MAP_DATA_VERSION, 10, id, List.of(), origin, List.of(), 47, -1, Vec3I.ORIGIN, 0, 0,
+        this(MAP_DATA_VERSION, 10, id, List.of(), origin, -1, List.of(), 47, -1, Vec3I.ORIGIN, 0, 0,
                 Component.text(id.value()), "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", 12000L,
                 new ArrayList<>(0), 400L, new ArrayList<>(0),
                 Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F), "", 200L, "",
@@ -165,5 +166,10 @@ public record MapSettingsInfo(int mapDataVersion,
     @Default("requiredPermissions")
     public static @NotNull ConfigElement defaultRequiredPermissions() {
         return ConfigList.of();
+    }
+
+    @Default("coinsLostOnKnock")
+    public static @NotNull ConfigElement defaultCoinsLostOnKnock() {
+        return ConfigPrimitive.of(0.25);
     }
 }

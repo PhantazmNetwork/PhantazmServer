@@ -23,6 +23,7 @@ import org.phantazm.commons.MiniMessageUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
+import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.ZombiesPlayerMeta;
@@ -32,6 +33,7 @@ import org.phantazm.zombies.player.state.revive.ReviveHandler;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 public class BasicKnockedStateActivable implements Activable {
     private final KnockedPlayerStateContext context;
@@ -60,11 +62,16 @@ public class BasicKnockedStateActivable implements Activable {
 
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
+    private final MapSettingsInfo mapSettingsInfo;
+
+    private final Supplier<ZombiesPlayer> zombiesPlayerSupplier;
+
     public BasicKnockedStateActivable(@NotNull KnockedPlayerStateContext context, @NotNull Instance instance,
             @NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta, @NotNull ZombiesPlayerActionBar actionBar,
             @NotNull MapSettingsInfo settings, @NotNull ReviveHandler reviveHandler,
             @NotNull TickFormatter tickFormatter, @NotNull Sidebar sidebar, @NotNull TabList tabList,
-            @NotNull BelowNameTag belowNameTag, @NotNull ZombiesPlayerMapStats stats) {
+            @NotNull BelowNameTag belowNameTag, @NotNull ZombiesPlayerMapStats stats,
+            @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Supplier<ZombiesPlayer> zombiesPlayerSupplier) {
         this.context = Objects.requireNonNull(context, "context");
         this.instance = Objects.requireNonNull(instance, "instance");
         this.playerView = Objects.requireNonNull(playerView, "playerView");
@@ -77,6 +84,8 @@ public class BasicKnockedStateActivable implements Activable {
         this.tabList = Objects.requireNonNull(tabList, "tabList");
         this.belowNameTag = Objects.requireNonNull(belowNameTag, "belowNameTag");
         this.stats = Objects.requireNonNull(stats, "stats");
+        this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
+        this.zombiesPlayerSupplier = Objects.requireNonNull(zombiesPlayerSupplier, "zombiesPlayerSupplier");
     }
 
     @Override
@@ -110,6 +119,13 @@ public class BasicKnockedStateActivable implements Activable {
                     miniMessage.deserialize(settings.knockedTitleFormat(), tagResolvers));
             filteredAudience.sendTitlePart(TitlePart.SUBTITLE,
                     miniMessage.deserialize(settings.knockedSubtitleFormat(), tagResolvers));
+
+            if (mapSettingsInfo.coinsLostOnKnock() >= 0) {
+                PlayerCoins coins = zombiesPlayerSupplier.get().module().getCoins();
+                int amount = coins.getCoins();
+                int amountLost = (int)Math.round(mapSettingsInfo.coinsLostOnKnock() * amount);
+                coins.set(amount - amountLost);
+            }
         });
 
         instance.playSound(settings.knockedSound(), Sound.Emitter.self());
