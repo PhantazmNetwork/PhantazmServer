@@ -28,7 +28,6 @@ import net.minestom.server.scoreboard.TeamManager;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.BasicTickTaskScheduler;
 import org.phantazm.commons.TickTaskScheduler;
-import org.phantazm.commons.TickableTask;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.SceneProviderAbstract;
@@ -223,7 +222,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             EventNode<Event> childNode =
                     createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
                             doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, mobStore,
-                            leaveHandler, tickTaskScheduler);
+                            leaveHandler);
             eventNodeWrapper.set(childNode);
 
             CorpseCreator corpseCreator = createCorpseCreator(mapObjects.mapDependencyProvider());
@@ -310,7 +309,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             @NotNull RoundHandler roundHandler, @NotNull ShopHandler shopHandler, @NotNull WindowHandler windowHandler,
             @NotNull DoorHandler doorHandler, @NotNull BoundedTracker<Room> roomTracker,
             @NotNull BoundedTracker<Window> windowTracker, @NotNull PowerupHandler powerupHandler,
-            @NotNull MobStore mobStore, @NotNull LeaveHandler leaveHandler, @NotNull TickTaskScheduler tickTaskScheduler) {
+            @NotNull MobStore mobStore, @NotNull LeaveHandler leaveHandler) {
         EventNode<Event> node = EventNode.all("phantazm_zombies_instance_" + instance.getUniqueId());
         MapSettingsInfo settings = mapInfo.settings();
 
@@ -328,17 +327,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         PlayerAttackEntityListener attackEntityListener =
                 new PlayerAttackEntityListener(instance, zombiesPlayers, mobStore, settings.punchDamage(),
                         settings.punchCooldown(), settings.punchKnockback());
-        tickTaskScheduler.scheduleTaskNow(new TickableTask() {
-            @Override
-            public void tick(long time) {
-                attackEntityListener.tick(time);
-            }
 
-            @Override
-            public boolean isFinished() {
-                return false;
-            }
-        });
         node.addListener(EntityAttackEvent.class, attackEntityListener);
         node.addListener(PlayerChangeHeldSlotEvent.class, new PlayerItemSelectListener(instance, zombiesPlayers));
         node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers));

@@ -9,7 +9,6 @@ import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObject;
@@ -24,7 +23,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<EntityAttackEvent> implements Tickable {
+public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<EntityAttackEvent> {
     private final MobStore mobStore;
     private final float punchDamage;
     private final int punchCooldown;
