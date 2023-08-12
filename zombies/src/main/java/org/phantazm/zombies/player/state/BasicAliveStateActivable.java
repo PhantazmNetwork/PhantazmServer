@@ -27,7 +27,6 @@ import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 import java.util.*;
 
 public class BasicAliveStateActivable implements Activable {
-    private static final TagResolver[] EMPTY_TAG_RESOLVER_ARRAY = new TagResolver[0];
     private final AlivePlayerStateContext context;
     private final Instance instance;
     private final InventoryAccessRegistry accessRegistry;
@@ -115,10 +114,10 @@ public class BasicAliveStateActivable implements Activable {
                 }
             }
 
-            int currentHP = (int)Math.floor(player.getHealth());
-            if (currentHP != lastTickHp) {
-                belowNameTag.updateScore(player, (int)Math.floor(player.getHealth()));
-                lastTickHp = currentHP;
+            int currentHp = (int)Math.floor(player.getHealth());
+            if (currentHp != lastTickHp) {
+                belowNameTag.updateScore(player, currentHp);
+                lastTickHp = currentHp;
             }
         });
     }
@@ -146,7 +145,7 @@ public class BasicAliveStateActivable implements Activable {
             tagResolvers.add(Placeholder.component("reviver", context.reviverName()));
         }
 
-        return tagResolvers.toArray(EMPTY_TAG_RESOLVER_ARRAY);
+        return tagResolvers.toArray(TagResolver[]::new);
     }
 
 }

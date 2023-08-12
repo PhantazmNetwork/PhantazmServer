@@ -13,6 +13,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
+import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -122,6 +123,20 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 return TransferResult.failure(Component.text("Game is over."));
             }
 
+            for (PlayerView playerView : joinRequest.getPlayers()) {
+                Optional<Player> playerOptional = playerView.getPlayer();
+                if (playerOptional.isEmpty()) {
+                    return TransferResult.failure(Component.text("Not all players are online."));
+                }
+
+                Player player = playerOptional.get();
+                for (String permission : mapSettingsInfo.requiredPermissions()) {
+                    if (!player.hasPermission(new Permission(permission))) {
+                        return TransferResult.failure(Component.text("You do not have permission to join this game!"));
+                    }
+                }
+            }
+
             Collection<ZombiesPlayer> oldPlayers = new ArrayList<>(joinRequest.getPlayers().size());
             Collection<PlayerView> newPlayers = new ArrayList<>(joinRequest.getPlayers().size());
             for (PlayerView player : joinRequest.getPlayers()) {
@@ -136,7 +151,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                 }
             }
 
-            if (!newPlayers.isEmpty() && allowedRequestUUID != null && !joinRequest.getUUID().equals(allowedRequestUUID)) {
+            if (!newPlayers.isEmpty() && allowedRequestUUID != null &&
+                    !joinRequest.getUUID().equals(allowedRequestUUID)) {
                 return TransferResult.failure(Component.text("You aren't allowed to join this game."));
             }
 

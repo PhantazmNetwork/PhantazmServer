@@ -2,6 +2,7 @@ package org.phantazm.zombies.map;
 
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
@@ -21,6 +22,7 @@ public record MapSettingsInfo(int mapDataVersion,
                               @NotNull Key id,
                               @NotNull List<String> instancePath,
                               @NotNull Vec3I origin,
+                              @NotNull List<String> requiredPermissions,
                               int minimumProtocolVersion,
                               int maximumProtocolVersion,
                               @NotNull Vec3I spawn,
@@ -138,12 +140,12 @@ public record MapSettingsInfo(int mapDataVersion,
      *               otherwise specified
      */
     public MapSettingsInfo(@NotNull Key id, @NotNull Vec3I origin) {
-        this(MAP_DATA_VERSION, 10, id, List.of(), origin, 47, -1, Vec3I.ORIGIN, 0, 0, Component.text(id.value()),
-                "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", 12000L, new ArrayList<>(0), 400L,
-                new ArrayList<>(0), Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F),
-                "", 200L, "", Component.text(id.value()), 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false,
-                new ArrayList<>(), 30, 5, 0, 4.5F, 0.4F, 20, false, new HashMap<>(0), new HashMap<>(), "", "", "", "",
-                "", "", "", "", "",
+        this(MAP_DATA_VERSION, 10, id, List.of(), origin, List.of(), 47, -1, Vec3I.ORIGIN, 0, 0,
+                Component.text(id.value()), "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", 12000L,
+                new ArrayList<>(0), 400L, new ArrayList<>(0),
+                Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F), "", 200L, "",
+                Component.text(id.value()), 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, false, new ArrayList<>(), 30, 5, 0,
+                4.5F, 0.4F, 20, false, new HashMap<>(0), new HashMap<>(), "", "", "", "", "", "", "", "", "",
                 Sound.sound(Key.key("minecraft:block.brewing_stand.brew"), Sound.Source.MASTER, 1.0F, 1.0F), "", "", "",
                 "", Sound.sound(Key.key("minecraft:entity.ender_dragon.growl"), Sound.Source.MASTER, 1.0F, 0.5F), "",
                 "", Sound.sound(Key.key("minecraft:entity.player.hurt"), Sound.Source.MASTER, 1.0F, 1.0F), "", "",
@@ -158,5 +160,10 @@ public record MapSettingsInfo(int mapDataVersion,
     @Default("chunkLoadRange")
     public static @NotNull ConfigElement defaultChunkLoadRange() {
         return ConfigPrimitive.of(10);
+    }
+
+    @Default("requiredPermissions")
+    public static @NotNull ConfigElement defaultRequiredPermissions() {
+        return ConfigList.of();
     }
 }
