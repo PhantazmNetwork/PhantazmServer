@@ -15,7 +15,9 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.packet.MinestomPacketUtils;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.messaging.packet.server.RoundStartPacket;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
@@ -156,6 +158,11 @@ public class EndStage implements Stage {
                 ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
                 stats.setWins(stats.getWins() + 1);
                 database.synchronizeBestTime(zombiesPlayer.getUUID(), settings.id(), zombiesPlayers.size(), "", ticksSinceStart.get());
+
+                zombiesPlayer.getPlayer().ifPresent(player -> {
+                    byte[] data = MinestomPacketUtils.serialize(new RoundStartPacket());
+                    player.sendPluginMessage(RoundStartPacket.ID.asString(), data);
+                });
             }
 
             this.hasWon = true;
