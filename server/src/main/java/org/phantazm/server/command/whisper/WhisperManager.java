@@ -54,6 +54,7 @@ public class WhisperManager {
 
         if (senderUUID != null && targetUUID != null) {
             previousConverser.put(targetUUID, senderUUID);
+            previousConverser.put(senderUUID, targetUUID);
         }
     }
 
