@@ -6,7 +6,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.server.permission.PermissionHandler;
-import org.phantazm.server.role.RoleStore;
 import org.phantazm.server.validator.LoginValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +26,7 @@ public class ValidationFeature {
                 BooleanObjectPair<Component> validationResult = validator.validateLogin(uuid);
                 if (!validationResult.firstBoolean()) {
                     event.getPlayer().kick(validationResult.second());
+                    return;
                 }
 
                 permissionHandler.applyPermissions(uuid, event.getPlayer());

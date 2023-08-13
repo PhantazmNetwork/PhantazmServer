@@ -263,7 +263,6 @@ public final class PhantazmServer {
             ValidationFeature.initialize(LoginValidatorFeature.loginValidator(),
                     ServerCommandFeature.permissionHandler());
 
-
             CommandFeature.initialize(routerStore, viewProvider, LobbyFeature.getFallback());
 
             routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());

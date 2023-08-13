@@ -9,6 +9,7 @@ import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.IdentitySource;
+import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.server.role.RoleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,8 @@ public class RemoveRoleCommand extends Command {
     private static final ArgumentWord PLAYER_ARGUMENT = ArgumentType.Word("player");
     private static final Argument<String> ROLE = ArgumentType.String("role");
 
-    public RemoveRoleCommand(@NotNull IdentitySource identitySource, @NotNull RoleStore roleStore) {
+    public RemoveRoleCommand(@NotNull IdentitySource identitySource, @NotNull RoleStore roleStore,
+            @NotNull PermissionHandler permissionHandler) {
         super("remove_role");
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
@@ -41,6 +43,7 @@ public class RemoveRoleCommand extends Command {
 
                         if (result) {
                             sender.sendMessage("Removed role " + role + " from " + uuid + " (" + name + ")");
+                            permissionHandler.applyPermissions(uuid, sender);
                         }
                         else {
                             sender.sendMessage(Component.text("Failed to remove role. The player may not " +

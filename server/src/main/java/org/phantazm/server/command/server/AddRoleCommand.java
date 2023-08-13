@@ -9,6 +9,7 @@ import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.IdentitySource;
+import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.server.role.RoleStore;
 
 public class AddRoleCommand extends Command {
@@ -17,7 +18,8 @@ public class AddRoleCommand extends Command {
     private static final ArgumentWord PLAYER_ARGUMENT = ArgumentType.Word("player");
     private static final Argument<String> ROLE = ArgumentType.String("role");
 
-    public AddRoleCommand(@NotNull IdentitySource identitySource, @NotNull RoleStore roleStore) {
+    public AddRoleCommand(@NotNull IdentitySource identitySource, @NotNull RoleStore roleStore,
+            @NotNull PermissionHandler permissionHandler) {
         super("add_role");
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
@@ -38,6 +40,7 @@ public class AddRoleCommand extends Command {
 
                         if (result) {
                             sender.sendMessage("Gave " + uuid + " (" + name + ") role " + role);
+                            permissionHandler.applyPermissions(uuid, sender);
                         }
                         else {
                             sender.sendMessage(Component.text("Failed to add role. The player may already " +
