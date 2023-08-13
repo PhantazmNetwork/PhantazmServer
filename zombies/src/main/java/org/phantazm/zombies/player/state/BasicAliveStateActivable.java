@@ -67,6 +67,9 @@ public class BasicAliveStateActivable implements Activable {
             sidebar.addViewer(player);
             tabList.addViewer(player);
             belowNameTag.addViewer(player);
+
+            player.getAttribute(Attributes.HEAL_TICKS).setBaseValue(settings.healTicks());
+            player.getAttribute(Attributes.REVIVE_TICKS).setBaseValue(settings.baseReviveTicks());
         });
 
         if (context.isRevive()) {

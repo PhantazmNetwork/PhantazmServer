@@ -48,7 +48,6 @@ import org.phantazm.mob.trigger.EventTrigger;
 import org.phantazm.mob.trigger.EventTriggers;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.stats.zombies.ZombiesDatabase;
-import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.event.EntityDamageByGunEvent;
 import org.phantazm.zombies.listener.*;
@@ -226,11 +225,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             CorpseCreator corpseCreator = createCorpseCreator(mapObjects.mapDependencyProvider());
             BelowNameTag belowNameTag = new BelowNameTag(UUID.randomUUID().toString(), settings.healthDisplay());
             Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
-                playerView.getPlayer().ifPresent(player -> {
-                    player.getAttribute(Attributes.HEAL_TICKS).setBaseValue(settings.healTicks());
-                    player.getAttribute(Attributes.REVIVE_TICKS).setBaseValue(settings.baseReviveTicks());
-                });
-
                 return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings,
                         mapInfo.playerCoins(), mapInfo.leaderboard(), instance, playerView,
                         mapObjects.module().modifierSource(), new BasicFlaggable(), childNode,
@@ -320,7 +314,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 new EntityDamageByGunEventListener(instance, mobStore, mapObjects, zombiesPlayers));
 
         //player events
-        node.addListener(EntityDamageEvent.class, new PlayerDamageEventListener(instance, zombiesPlayers, mapObjects));
+        node.addListener(EntityDamageEvent.class,
+                new PlayerDamageEventListener(instance, zombiesPlayers, mapObjects, settings));
         node.addListener(PlayerHandAnimationEvent.class, new PlayerLeftClickListener(instance, zombiesPlayers));
         PlayerAttackEntityListener attackEntityListener =
                 new PlayerAttackEntityListener(instance, zombiesPlayers, mobStore, settings.punchDamage(),

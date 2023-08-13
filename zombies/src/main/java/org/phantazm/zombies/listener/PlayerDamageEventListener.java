@@ -17,6 +17,7 @@ import org.phantazm.mob.PhantazmMob;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.event.ZombiesPlayerDeathEvent;
+import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
@@ -30,11 +31,14 @@ import java.util.UUID;
 public class PlayerDamageEventListener extends ZombiesPlayerEventListener<EntityDamageEvent> {
 
     private final MapObjects mapObjects;
+    private final MapSettingsInfo mapSettingsInfo;
 
     public PlayerDamageEventListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects) {
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
+            @NotNull MapSettingsInfo mapSettingsInfo) {
         super(instance, zombiesPlayers);
         this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+        this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
     }
 
     @Override
@@ -65,7 +69,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
                 return;
             }
 
-            player.setHealth(player.getMaxHealth());
+            player.setHealth(player.getMaxHealth() * mapSettingsInfo.reviveHealthFactor());
         }
 
         Pos deathPosition = event.getEntity().getPosition();
