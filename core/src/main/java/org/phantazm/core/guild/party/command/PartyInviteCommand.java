@@ -133,6 +133,16 @@ public class PartyInviteCommand {
                         return;
                     }
 
+                    if (inviterParty.getInvitationManager().hasInvitation(playerView.getUUID())) {
+                        playerView.getDisplayName().thenAccept(displayName -> {
+                            TagResolver inviteePlaceholder = Placeholder.component("invitee", displayName);
+                            Component message = miniMessage.deserialize(config.inviteeAlreadyInvitedFormat(),
+                                    inviteePlaceholder);
+                            sender.sendMessage(message);
+                        });
+                        return;
+                    }
+
                     inviterParty.getInvitationManager().invite(inviter, playerView);
                 }, () -> {
                     TagResolver usernamePlaceholder = Placeholder.unparsed("username", name);

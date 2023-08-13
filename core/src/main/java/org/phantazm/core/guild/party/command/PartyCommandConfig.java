@@ -14,6 +14,7 @@ public record PartyCommandConfig(@NotNull Component notInParty,
                                  @NotNull Component automaticPartyCreation,
                                  @NotNull Component cannotInviteSelf,
                                  @NotNull String inviteeAlreadyInPartyFormat,
+                                 @NotNull String inviteeAlreadyInvitedFormat,
                                  @NotNull String toJoinNotInParty,
                                  @NotNull Component noInvite,
                                  @NotNull Component cannotKickMembers,
@@ -28,7 +29,7 @@ public record PartyCommandConfig(@NotNull Component notInParty,
 
     public static final PartyCommandConfig DEFAULT =
             new PartyCommandConfig(Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "",
-                    Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "",
+                    Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "", "",
                     Component.empty(), Component.empty(), "", Component.empty(), "", "", "", "", "", Component.empty());
 
 }
