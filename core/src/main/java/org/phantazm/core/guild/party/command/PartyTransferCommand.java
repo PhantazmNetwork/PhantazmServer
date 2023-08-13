@@ -44,11 +44,14 @@ public class PartyTransferCommand {
                 return;
             }
 
+            String prefix = context.getOrDefault(nameArgument, "");
             PartyMember member = party.getMemberManager().getMember(player.getUuid());
             for (PartyMember otherMember : party.getMemberManager().getMembers().values()) {
                 if (otherMember != member) {
                     otherMember.getPlayerView().getUsernameIfCached().ifPresent(username -> {
-                        suggestion.addEntry(new SuggestionEntry(username));
+                        if (username.startsWith(prefix)) {
+                            suggestion.addEntry(new SuggestionEntry(username));
+                        }
                     });
                 }
             }

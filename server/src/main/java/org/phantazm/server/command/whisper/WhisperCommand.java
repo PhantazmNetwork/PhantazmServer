@@ -23,8 +23,14 @@ public class WhisperCommand {
         Command command = new Command("whisper", "w", "msg");
         Argument<String> target = ArgumentType.Word("target");
         target.setSuggestionCallback((sender, context, suggestion) -> {
+            String prefix = context.getOrDefault(target, "");
             for (Player player : connectionManager.getOnlinePlayers()) {
-                if (player != sender) {
+                if (player == sender) {
+                    continue;
+                }
+
+                String username = player.getUsername();
+                if (username.startsWith(prefix)) {
                     suggestion.addEntry(new SuggestionEntry(player.getUsername()));
                 }
             }

@@ -37,11 +37,18 @@ public class PartyInviteCommand {
 
         Argument<String> nameArgument = ArgumentType.Word("name");
         nameArgument.setSuggestionCallback((sender, context, suggestion) -> {
+            String prefix = context.getOrDefault(nameArgument, "");
+
             if (sender instanceof Player player) {
                 Party party = partyHolder.uuidToGuild().get(player.getUuid());
                 if (party != null) {
                     for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
-                        if (!party.getMemberManager().hasMember(otherPlayer.getUuid())) {
+                        if (party.getMemberManager().hasMember(otherPlayer.getUuid())) {
+                            continue;
+                        }
+
+                        String username = player.getUsername();
+                        if (username.startsWith(prefix)) {
                             suggestion.addEntry(new SuggestionEntry(otherPlayer.getUsername()));
                         }
                     }
@@ -51,7 +58,12 @@ public class PartyInviteCommand {
             }
 
             for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
-                if (otherPlayer != sender) {
+                if (otherPlayer == sender) {
+                    continue;
+                }
+
+                String username = otherPlayer.getUsername();
+                if (username.startsWith(prefix)) {
                     suggestion.addEntry(new SuggestionEntry(otherPlayer.getUsername()));
                 }
             }

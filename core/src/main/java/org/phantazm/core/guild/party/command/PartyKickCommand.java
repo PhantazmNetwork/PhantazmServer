@@ -50,10 +50,13 @@ public class PartyKickCommand {
                 return;
             }
 
+            String prefix = context.getOrDefault(nameArgument, "");
             for (PartyMember otherMember : party.getMemberManager().getMembers().values()) {
                 if (otherMember != member && permission.canExecute(member, otherMember)) {
                     otherMember.getPlayerView().getUsernameIfCached().ifPresent(username -> {
-                        suggestion.addEntry(new SuggestionEntry(username));
+                        if (username.startsWith(prefix)) {
+                            suggestion.addEntry(new SuggestionEntry(username));
+                        }
                     });
                 }
             }
