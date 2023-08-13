@@ -2,6 +2,8 @@ package org.phantazm.server.role;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jooq.Record;
@@ -73,7 +75,9 @@ public class BasicRoleStore implements RoleStore {
         }
 
         return CompletableFuture.supplyAsync(() -> {
-            boolean added = this.roleCache.get(uuid, this::loadRoles).add(role);
+            Set<Role> roles = this.roleCache.get(uuid, this::loadRoles);
+            boolean added = roles.add(role);
+
             try (Connection connection = dataSource.getConnection()) {
                 using(connection).insertInto(table("player_roles"), field("player_uuid"), field("player_role"))
                         .values(uuid, identifier).onDuplicateKeyUpdate().set(field("player_uuid"), uuid)
@@ -81,6 +85,10 @@ public class BasicRoleStore implements RoleStore {
             }
             catch (SQLException e) {
                 LOGGER.warn("SQLException when writing role update to database", e);
+            }
+
+            if (added) {
+                styleIfPresent(uuid, roles);
             }
 
             return added;
@@ -109,6 +117,10 @@ public class BasicRoleStore implements RoleStore {
                 LOGGER.warn("SQLException when deleting player role from database", e);
             }
 
+            if (removed) {
+                styleIfPresent(uuid, roles);
+            }
+
             return removed;
         }, executor);
     }
@@ -123,6 +135,15 @@ public class BasicRoleStore implements RoleStore {
         return CompletableFuture.supplyAsync(() -> {
             return this.roleCache.get(uuid, this::loadRoles);
         }, executor);
+    }
+
+    private void styleIfPresent(UUID uuid, Set<Role> roles) {
+        Player player = MinecraftServer.getConnectionManager().getPlayer(uuid);
+        if (player == null) {
+            return;
+        }
+
+        getStylingRole0(roles).styleDisplayName(player);
     }
 
     private Role getStylingRole0(Set<Role> roles) {

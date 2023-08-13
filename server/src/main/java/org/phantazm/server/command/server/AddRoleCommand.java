@@ -42,12 +42,6 @@ public class AddRoleCommand extends Command {
                         if (result) {
                             sender.sendMessage("Gave " + uuid + " (" + name + ") role " + role);
                             permissionHandler.applyPermissions(uuid, sender);
-
-                            if (sender instanceof Player player) {
-                                roleStore.getStylingRole(uuid).thenAccept(stylingRole -> {
-                                    stylingRole.styleDisplayName(player);
-                                });
-                            }
                         }
                         else {
                             sender.sendMessage(Component.text("Failed to add role. The player may already " +
