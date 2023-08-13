@@ -7,7 +7,6 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.Configuration;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FileUtils;
-import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.server.role.BasicRoleStore;
 import org.phantazm.server.role.RoleCreator;
 import org.phantazm.server.role.RoleStore;
@@ -20,7 +19,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.Executor;
-import java.util.function.Supplier;
 
 public final class RoleFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(RoleFeature.class);
@@ -33,8 +31,8 @@ public final class RoleFeature {
     }
 
     static void initialize(@NotNull DataSource dataSource, @NotNull Executor executor, @NotNull ConfigCodec codec,
-            @NotNull ContextManager contextManager, @NotNull Supplier<PermissionHandler> permissionHandler) {
-        roleStore = new BasicRoleStore(dataSource, executor, permissionHandler);
+            @NotNull ContextManager contextManager) {
+        roleStore = new BasicRoleStore(dataSource, executor);
 
         try {
             FileUtils.createDirectories(ROLE_FOLDER);

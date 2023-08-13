@@ -31,7 +31,7 @@ public final class ServerCommandFeature {
             @NotNull Executor executor, @NotNull RouterStore store, @NotNull ShutdownConfig shutdownConfig,
             @NotNull ZombiesGamereportConfig zombiesGamereportConfig, @NotNull PlayerViewProvider playerViewProvider,
             @NotNull SceneTransferHelper sceneTransferHelper, @NotNull RoleStore roleStore) {
-        ServerCommandFeature.permissionHandler = new DatabasePermissionHandler(dataSource, executor);
+        ServerCommandFeature.permissionHandler = new DatabasePermissionHandler(dataSource, executor, roleStore);
 
         CommandManager manager = MinecraftServer.getCommandManager();
         manager.register(new StopCommand());

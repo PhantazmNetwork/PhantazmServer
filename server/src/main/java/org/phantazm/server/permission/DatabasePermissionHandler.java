@@ -9,8 +9,11 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.phantazm.server.role.Role;
+import org.phantazm.server.role.RoleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +22,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
@@ -33,101 +37,17 @@ public class DatabasePermissionHandler implements PermissionHandler {
     private final Cache<String, Set<Permission>> groupPermissionCache;
     private final DataSource dataSource;
     private final Executor executor;
+    private final RoleStore roleStore;
 
-    public DatabasePermissionHandler(@NotNull DataSource dataSource, @NotNull Executor executor) {
+    public DatabasePermissionHandler(@NotNull DataSource dataSource, @NotNull Executor executor,
+            @NotNull RoleStore roleStore) {
         this.playerPermissionGroupCache =
                 Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.groupPermissionCache =
                 Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
         this.executor = Objects.requireNonNull(executor, "executor");
-    }
-
-    private void applyAll0() {
-        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            applyPermissions0(player.getUuid(), player);
-        }
-    }
-
-    private void applyPermissions0(UUID uuid, CommandSender sender) {
-        sender.getAllPermissions().clear();
-
-        Set<String> permissionGroups = playerPermissionGroupCache.get(uuid, key -> {
-            return read(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    return using(connection).selectFrom(table("player_permission_groups"))
-                            .where(field("player_uuid").eq(key)).fetch();
-                }
-            }, DatabasePermissionHandler::groupsFromResult, CopyOnWriteArraySet::new);
-        });
-
-        for (String group : permissionGroups) {
-            applyGroup(group, sender);
-        }
-
-        applyGroup(EVERYONE_GROUP, sender);
-
-        if (sender instanceof Player player) {
-            player.sendPacket(MinecraftServer.getCommandManager().createDeclareCommandsPacket(player));
-        }
-    }
-
-    private void applyGroup(String group, CommandSender commandSender) {
-        Set<Permission> permissions = groupPermissionCache.get(group, key -> {
-            return read(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    return using(connection).selectFrom(table("permission_groups"))
-                            .where(field("permission_group").eq(key)).fetch();
-                }
-            }, DatabasePermissionHandler::permissionsFromResult, CopyOnWriteArraySet::new);
-        });
-
-        for (Permission permission : permissions) {
-            commandSender.addPermission(permission);
-        }
-    }
-
-    private void applyOptionalPlayer(UUID uuid) {
-        Player target = MinecraftServer.getConnectionManager().getPlayer(uuid);
-        if (target != null) {
-            applyPermissions0(uuid, target);
-        }
-    }
-
-    private static Set<String> groupsFromResult(Result<Record> result) {
-        if (result == null) {
-            return new CopyOnWriteArraySet<>();
-        }
-
-        List<String> temp = new ArrayList<>(result.size());
-        for (Record record : result) {
-            String group = (String)record.get("player_group");
-            if (group == null) {
-                continue;
-            }
-
-            temp.add(group);
-        }
-
-        return new CopyOnWriteArraySet<>(temp);
-    }
-
-    private static Set<Permission> permissionsFromResult(Result<Record> result) {
-        if (result == null) {
-            return new CopyOnWriteArraySet<>();
-        }
-
-        List<Permission> temp = new ArrayList<>(result.size());
-        for (Record record : result) {
-            String permission = (String)record.get("permission");
-            if (permission == null) {
-                continue;
-            }
-
-            temp.add(new Permission(permission));
-        }
-
-        return new CopyOnWriteArraySet<>(temp);
+        this.roleStore = Objects.requireNonNull(roleStore, "roleStore");
     }
 
     @Override
@@ -217,6 +137,18 @@ public class DatabasePermissionHandler implements PermissionHandler {
         });
     }
 
+    @Override
+    public @NotNull CompletableFuture<@Unmodifiable Set<String>> groups(@NotNull UUID uuid) {
+        Set<String> groups = this.playerPermissionGroupCache.getIfPresent(uuid);
+        if (groups != null) {
+            return CompletableFuture.completedFuture(groups);
+        }
+
+        return CompletableFuture.supplyAsync(() -> {
+            return this.playerPermissionGroupCache.get(uuid, this::readPermissionGroups);
+        }, executor);
+    }
+
     private static void write(ThrowingRunnable<SQLException> supplier) {
         try {
             supplier.run();
@@ -236,5 +168,100 @@ public class DatabasePermissionHandler implements PermissionHandler {
         }
 
         return defaultValue.get();
+    }
+
+    private Set<String> readPermissionGroups(UUID uuid) {
+        return read(() -> {
+            try (Connection connection = dataSource.getConnection()) {
+                return using(connection).selectFrom(table("player_permission_groups"))
+                        .where(field("player_uuid").eq(uuid)).fetch();
+            }
+        }, DatabasePermissionHandler::groupsFromResult, CopyOnWriteArraySet::new);
+    }
+
+    private void applyPermissions0(UUID uuid, CommandSender sender) {
+        sender.getAllPermissions().clear();
+
+        Set<String> permissionGroups = playerPermissionGroupCache.get(uuid, this::readPermissionGroups);
+
+        for (String group : permissionGroups) {
+            applyGroup(group, sender);
+        }
+
+        applyGroup(EVERYONE_GROUP, sender);
+
+        roleStore.roles(uuid).thenAccept(roles -> {
+            for (Role role : roles) {
+                sender.addPermissions(role.grantedPermissions());
+            }
+        }).whenComplete((ignored, error) -> {
+            if (sender instanceof Player player) {
+                player.sendPacket(MinecraftServer.getCommandManager().createDeclareCommandsPacket(player));
+            }
+        });
+    }
+
+    private void applyAll0() {
+        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            applyPermissions0(player.getUuid(), player);
+        }
+    }
+
+    private void applyGroup(String group, CommandSender commandSender) {
+        Set<Permission> permissions = groupPermissionCache.get(group, key -> {
+            return read(() -> {
+                try (Connection connection = dataSource.getConnection()) {
+                    return using(connection).selectFrom(table("permission_groups"))
+                            .where(field("permission_group").eq(key)).fetch();
+                }
+            }, DatabasePermissionHandler::permissionsFromResult, CopyOnWriteArraySet::new);
+        });
+
+        for (Permission permission : permissions) {
+            commandSender.addPermission(permission);
+        }
+    }
+
+    private void applyOptionalPlayer(UUID uuid) {
+        Player target = MinecraftServer.getConnectionManager().getPlayer(uuid);
+        if (target != null) {
+            applyPermissions0(uuid, target);
+        }
+    }
+
+    private static Set<String> groupsFromResult(Result<Record> result) {
+        if (result == null) {
+            return new CopyOnWriteArraySet<>();
+        }
+
+        List<String> temp = new ArrayList<>(result.size());
+        for (Record record : result) {
+            String group = (String)record.get("player_group");
+            if (group == null) {
+                continue;
+            }
+
+            temp.add(group);
+        }
+
+        return new CopyOnWriteArraySet<>(temp);
+    }
+
+    private static Set<Permission> permissionsFromResult(Result<Record> result) {
+        if (result == null) {
+            return new CopyOnWriteArraySet<>();
+        }
+
+        List<Permission> temp = new ArrayList<>(result.size());
+        for (Record record : result) {
+            String permission = (String)record.get("permission");
+            if (permission == null) {
+                continue;
+            }
+
+            temp.add(new Permission(permission));
+        }
+
+        return new CopyOnWriteArraySet<>(temp);
     }
 }
