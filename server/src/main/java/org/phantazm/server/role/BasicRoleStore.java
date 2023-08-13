@@ -45,10 +45,10 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public @NotNull CompletableFuture<Role> getStylingRole(@NotNull UUID uuid) {
-        Set<Role> currentRole = roleCache.getIfPresent(uuid);
-        if (currentRole != null) {
+        Set<Role> currentRoles = roleCache.getIfPresent(uuid);
+        if (currentRoles != null) {
             //avoid async call if we can
-            return CompletableFuture.completedFuture(getStylingRole0(currentRole));
+            return CompletableFuture.completedFuture(getStylingRole0(currentRoles));
         }
 
         return CompletableFuture.supplyAsync(() -> {
@@ -63,6 +63,10 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public @NotNull CompletableFuture<Boolean> giveRole(@NotNull UUID uuid, @NotNull String identifier) {
+        if (identifier.equals(RoleStore.DEFAULT)) {
+            return CompletableFuture.completedFuture(false);
+        }
+
         Role role = roleMap.get(identifier);
         if (role == null) {
             return CompletableFuture.completedFuture(false);
@@ -85,6 +89,10 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public @NotNull CompletableFuture<Boolean> removeRole(@NotNull UUID uuid, @NotNull String identifier) {
+        if (identifier.equals(RoleStore.DEFAULT)) {
+            return CompletableFuture.completedFuture(false);
+        }
+
         Role role = roleMap.get(identifier);
         if (role == null) {
             return CompletableFuture.completedFuture(false);
@@ -118,7 +126,7 @@ public class BasicRoleStore implements RoleStore {
     }
 
     private Role getStylingRole0(Set<Role> roles) {
-        Role stylingRole = Role.NONE;
+        Role stylingRole = roleMap.getOrDefault(RoleStore.DEFAULT, Role.NONE);
         int highestPriority = Integer.MIN_VALUE;
         for (Role role : roles) {
             if (role.priority() >= highestPriority) {
@@ -131,11 +139,13 @@ public class BasicRoleStore implements RoleStore {
     }
 
     private Set<Role> loadRoles(UUID key) {
+        Role defaultRole = roleMap.get(RoleStore.DEFAULT);
+
         try (Connection connection = dataSource.getConnection()) {
             Result<Record> result =
                     using(connection).selectFrom(table("player_roles")).where(field("player_uuid").eq(key)).fetch();
 
-            Set<Role> roleSet = new HashSet<>(result.size());
+            Set<Role> roleSet = new HashSet<>(result.size() + (defaultRole == null ? 0 : 1));
             for (Record record : result) {
                 String playerRole = (String)record.get("player_role");
                 if (playerRole == null) {
@@ -150,12 +160,16 @@ public class BasicRoleStore implements RoleStore {
                 roleSet.add(role);
             }
 
+            if (defaultRole != null) {
+                roleSet.add(defaultRole);
+            }
+
             return new CopyOnWriteArraySet<>(roleSet);
         }
         catch (Exception e) {
             LOGGER.warn("Exception when fetching player roles", e);
         }
 
-        return new CopyOnWriteArraySet<>();
+        return defaultRole == null ? new CopyOnWriteArraySet<>() : new CopyOnWriteArraySet<>(List.of(defaultRole));
     }
 }

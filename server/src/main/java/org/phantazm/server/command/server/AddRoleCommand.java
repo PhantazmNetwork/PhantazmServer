@@ -6,6 +6,7 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
+import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.IdentitySource;
@@ -41,6 +42,12 @@ public class AddRoleCommand extends Command {
                         if (result) {
                             sender.sendMessage("Gave " + uuid + " (" + name + ") role " + role);
                             permissionHandler.applyPermissions(uuid, sender);
+
+                            if (sender instanceof Player player) {
+                                roleStore.getStylingRole(uuid).thenAccept(stylingRole -> {
+                                    stylingRole.styleDisplayName(player);
+                                });
+                            }
                         }
                         else {
                             sender.sendMessage(Component.text("Failed to add role. The player may already " +

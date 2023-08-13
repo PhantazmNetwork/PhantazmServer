@@ -9,6 +9,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public interface RoleStore {
+    String DEFAULT = "default";
+
     void register(@NotNull Role role);
 
     @NotNull CompletableFuture<Role> getStylingRole(@NotNull UUID uuid);
