@@ -42,7 +42,7 @@ public class BasicTransactionModifierSource implements TransactionModifierSource
         Objects.requireNonNull(group, "group");
         Objects.requireNonNull(modifier, "modifier");
 
-        modifierSources.computeIfAbsent(group.asString(), (ignored) -> new LinkedHashSet<>(4)).add(modifier);
+        modifierSources.computeIfAbsent(group.asString(), (ignored) -> new ArrayList<>(4)).add(modifier);
     }
 
     @Override
