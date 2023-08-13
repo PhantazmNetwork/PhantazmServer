@@ -158,7 +158,6 @@ public final class LobbyFeature {
             if (joinRequest == null) {
                 LOGGER.warn("Player {} spawned without a login join request", player.getUuid());
                 player.kick(Component.empty());
-                return;
             }
         });
 
