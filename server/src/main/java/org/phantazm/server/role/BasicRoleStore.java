@@ -42,6 +42,10 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public void register(@NotNull Role role) {
+        if (role.identifier().equals(Role.NONE.identifier())) {
+            return;
+        }
+
         roleMap.put(role.identifier(), role);
     }
 
@@ -65,7 +69,7 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public @NotNull CompletableFuture<Boolean> giveRole(@NotNull UUID uuid, @NotNull String identifier) {
-        if (identifier.equals(RoleStore.DEFAULT)) {
+        if (identifier.equals(RoleStore.DEFAULT) || identifier.equals(Role.NONE.identifier())) {
             return CompletableFuture.completedFuture(false);
         }
 
@@ -97,7 +101,7 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public @NotNull CompletableFuture<Boolean> removeRole(@NotNull UUID uuid, @NotNull String identifier) {
-        if (identifier.equals(RoleStore.DEFAULT)) {
+        if (identifier.equals(RoleStore.DEFAULT) || identifier.equals(Role.NONE.identifier())) {
             return CompletableFuture.completedFuture(false);
         }
 
