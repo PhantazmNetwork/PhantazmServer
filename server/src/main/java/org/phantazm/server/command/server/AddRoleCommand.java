@@ -26,14 +26,24 @@ public class AddRoleCommand extends Command {
             identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
                 uuidOptional.ifPresent(uuid -> {
                     String role = context.get(ROLE);
-                    if (roleStore.giveRole(uuid, role)) {
-                        sender.sendMessage("Gave " + uuid + " (" + name + ") role " + role);
-                    }
-                    else {
-                        sender.sendMessage(Component.text("Failed to add role. The player may already have it, or it " +
-                                "may not be a known role.", NamedTextColor.RED));
-                    }
 
+                    roleStore.giveRole(uuid, role).whenComplete((result, error) -> {
+                        if (error != null) {
+                            sender.sendMessage(
+                                    Component.text("An internal error occured while executing " + "this command.")
+                                            .color(NamedTextColor.RED));
+                            LOGGER.warn("An exception occurred while adding a role", error);
+                            return;
+                        }
+
+                        if (result) {
+                            sender.sendMessage("Gave " + uuid + " (" + name + ") role " + role);
+                        }
+                        else {
+                            sender.sendMessage(Component.text("Failed to add role. The player may already " +
+                                    "have it, or it may not be a known role.", NamedTextColor.RED));
+                        }
+                    });
                 });
             });
         }, PLAYER_ARGUMENT, ROLE);

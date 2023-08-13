@@ -10,8 +10,11 @@ import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.server.role.RoleStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RemoveRoleCommand extends Command {
+    public static final Logger LOGGER = LoggerFactory.getLogger(RemoveRoleCommand.class);
     public static final Permission PERMISSION = new Permission("admin.remove_role");
 
     private static final ArgumentWord PLAYER_ARGUMENT = ArgumentType.Word("player");
@@ -26,13 +29,24 @@ public class RemoveRoleCommand extends Command {
             identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
                 uuidOptional.ifPresent(uuid -> {
                     String role = context.get(ROLE);
-                    if (roleStore.removeRole(uuid, context.get(ROLE))) {
-                        sender.sendMessage("Removed role " + role + " from " + uuid + " (" + name + ")");
-                    }
-                    else {
-                        sender.sendMessage(Component.text("Failed to remove role. The player may not have " +
-                                "it, or it may not be a known role.", NamedTextColor.RED));
-                    }
+
+                    roleStore.removeRole(uuid, role).whenComplete((result, error) -> {
+                        if (error != null) {
+                            sender.sendMessage(
+                                    Component.text("An internal error occured while executing " + "this command.")
+                                            .color(NamedTextColor.RED));
+                            LOGGER.warn("An exception occurred while removing a role", error);
+                            return;
+                        }
+
+                        if (result) {
+                            sender.sendMessage("Removed role " + role + " from " + uuid + " (" + name + ")");
+                        }
+                        else {
+                            sender.sendMessage(Component.text("Failed to remove role. The player may not " +
+                                    "have it, or it may not be a known role.", NamedTextColor.RED));
+                        }
+                    });
                 });
             });
         }, PLAYER_ARGUMENT, ROLE);
