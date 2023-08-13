@@ -20,8 +20,7 @@ public class ValidationFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull LoginValidator validator, @NotNull PermissionHandler permissionHandler,
-            @NotNull RoleStore roleStore) {
+    static void initialize(@NotNull LoginValidator validator, @NotNull PermissionHandler permissionHandler) {
         MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerPreLoginEvent.class, event -> {
             try {
                 UUID uuid = event.getPlayerUuid();
@@ -31,7 +30,6 @@ public class ValidationFeature {
                 }
 
                 permissionHandler.applyPermissions(uuid, event.getPlayer());
-                roleStore.applyRoles(event.getPlayer());
             }
             catch (Throwable e) {
                 LOGGER.warn("Error during AsyncPlayerPreLoginEvent", e);

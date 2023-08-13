@@ -250,7 +250,9 @@ public final class PhantazmServer {
                     zombiesConfig, mappingProcessorSource);
 
             RoleFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor(), yamlCodec,
-                    contextManager, ServerCommandFeature::permissionHandler);
+                    contextManager);
+            ChatFeature.initialize(viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
+                    RoleFeature.roleStore());
 
             LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
             ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),
@@ -259,10 +261,9 @@ public final class PhantazmServer {
                     viewProvider, transferHelper, RoleFeature.roleStore());
 
             ValidationFeature.initialize(LoginValidatorFeature.loginValidator(),
-                    ServerCommandFeature.permissionHandler(), RoleFeature.roleStore());
+                    ServerCommandFeature.permissionHandler());
 
-            ChatFeature.initialize(viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
-                    RoleFeature.roleStore());
+
             CommandFeature.initialize(routerStore, viewProvider, LobbyFeature.getFallback());
 
             routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
