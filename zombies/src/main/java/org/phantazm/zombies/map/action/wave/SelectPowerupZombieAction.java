@@ -49,6 +49,6 @@ public class SelectPowerupZombieAction implements Action<List<PhantazmMob>> {
     }
 
     @DataObject
-    public record Data(@NotNull Set<Key> powerups) {
+    public record Data(@NotNull List<Key> powerups) {
     }
 }
