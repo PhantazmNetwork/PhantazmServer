@@ -233,7 +233,12 @@ public final class PhantazmServer {
             PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
                     MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec);
 
-            LobbyFeature.initialize(viewProvider, lobbiesConfig, contextManager);
+            RoleFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor(), yamlCodec,
+                    contextManager);
+            ChatFeature.initialize(viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
+                    RoleFeature.roleStore());
+
+            LobbyFeature.initialize(viewProvider, lobbiesConfig, contextManager, RoleFeature.roleStore());
 
             MobFeature.initialize(contextManager, yamlCodec);
             EquipmentFeature.initialize(keyParser, contextManager, yamlCodec,
@@ -248,11 +253,6 @@ public final class PhantazmServer {
                                     Component.text("Failed to send you to lobby!", NamedTextColor.RED)))),
                     PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
                     zombiesConfig, mappingProcessorSource);
-
-            RoleFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor(), yamlCodec,
-                    contextManager);
-            ChatFeature.initialize(viewProvider, chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
-                    RoleFeature.roleStore());
 
             LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
             ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),

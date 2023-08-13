@@ -24,7 +24,6 @@ public final class PlayerFeature {
 
             TagResolver namePlaceholder = Placeholder.component("name", event.getPlayer().getName());
             Component newName = MiniMessage.miniMessage().deserialize(playerConfig.nameFormat(), namePlaceholder);
-            event.getPlayer().setDisplayName(newName);
             event.getPlayer().setCustomName(newName);
             event.getPlayer().setCustomNameVisible(true);
 

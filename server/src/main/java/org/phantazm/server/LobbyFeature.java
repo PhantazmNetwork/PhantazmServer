@@ -4,6 +4,7 @@ import com.github.steanky.element.core.context.ContextManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerLoginEvent;
@@ -25,6 +26,7 @@ import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.lobby.LobbyConfig;
+import org.phantazm.server.role.RoleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +57,7 @@ public final class LobbyFeature {
      * @param lobbiesConfig      the {@link LobbiesConfig} used to determine lobby behavior
      */
     static void initialize(@NotNull PlayerViewProvider playerViewProvider, @NotNull LobbiesConfig lobbiesConfig,
-            @NotNull ContextManager contextManager) {
+            @NotNull ContextManager contextManager, @NotNull RoleStore roleStore) {
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
 
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
@@ -138,11 +140,21 @@ public final class LobbyFeature {
                 return;
             }
 
-            LoginLobbyJoinRequest joinRequest = loginJoinRequests.remove(event.getPlayer().getUuid());
+            Player player = event.getPlayer();
+            LoginLobbyJoinRequest joinRequest = loginJoinRequests.remove(player.getUuid());
             if (joinRequest == null) {
-                LOGGER.warn("Player {} spawned without a login join request", event.getPlayer().getUuid());
-                event.getPlayer().kick(Component.empty());
+                LOGGER.warn("Player {} spawned without a login join request", player.getUuid());
+                player.kick(Component.empty());
+                return;
             }
+
+            roleStore.getStylingRole(player.getUuid()).whenComplete((result, error) -> {
+                if (error != null) {
+                    return;
+                }
+
+                result.styleDisplayName(event.getPlayer());
+            });
         });
 
         MinecraftServer.getSchedulerManager().scheduleTask(() -> {

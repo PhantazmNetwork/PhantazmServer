@@ -62,7 +62,7 @@ public final class ChatFeature {
         };
 
         Function<? super Player, ? extends CompletableFuture<Component>> nameFormatter = (player) -> {
-            return roleStore.getStylingRole(player).thenApply(role -> role.styleName(player));
+            return roleStore.getStylingRole(player.getUuid()).thenApply(role -> role.styleChatName(player));
         };
 
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();

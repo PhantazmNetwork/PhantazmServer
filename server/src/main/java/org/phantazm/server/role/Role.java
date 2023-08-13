@@ -10,39 +10,46 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public sealed interface Role permits Role.RoleImpl {
     Role NONE = new RoleImpl("none", player -> {
         return Optional.ofNullable(player.getDisplayName()).orElseGet(player::getName);
+    }, ignored -> {
     }, Integer.MIN_VALUE, Set.of());
 
     @NotNull String identifier();
 
-    @Nullable Component styleName(@NotNull Player player);
+    @Nullable Component styleChatName(@NotNull Player player);
+
+    void styleDisplayName(@NotNull Player player);
 
     int priority();
 
     @NotNull @Unmodifiable Set<Permission> grantedPermissions();
 
     static @NotNull Role of(@NotNull String identifier,
-            @NotNull Function<? super Player, ? extends Component> styleFunction, int priority,
-            @NotNull Set<Permission> permissions) {
+            @NotNull Function<? super Player, ? extends Component> chatStyleFunction,
+            @NotNull Consumer<? super Player> displayNameStyler, int priority, @NotNull Set<Permission> permissions) {
         Objects.requireNonNull(identifier, "identifier");
-        Objects.requireNonNull(styleFunction, "styleFunction");
-        return new RoleImpl(identifier, styleFunction, priority, Set.copyOf(permissions));
+        Objects.requireNonNull(chatStyleFunction, "chatStyleFunction");
+        Objects.requireNonNull(displayNameStyler, "displayNameStyler");
+        return new RoleImpl(identifier, chatStyleFunction, displayNameStyler, priority, Set.copyOf(permissions));
     }
 
     final class RoleImpl implements Role {
         private final String identifier;
-        private final Function<? super Player, ? extends Component> styleFunction;
+        private final Function<? super Player, ? extends Component> chatStyleFunction;
+        private final Consumer<? super Player> displayNameStyler;
         private final int priority;
         private final Set<Permission> permissions;
 
-        private RoleImpl(String identifier, Function<? super Player, ? extends Component> styleFunction, int priority,
-                Set<Permission> permissions) {
+        private RoleImpl(String identifier, Function<? super Player, ? extends Component> chatStyleFunction,
+                Consumer<? super Player> displayNameStyler, int priority, Set<Permission> permissions) {
             this.identifier = identifier;
-            this.styleFunction = styleFunction;
+            this.chatStyleFunction = chatStyleFunction;
+            this.displayNameStyler = displayNameStyler;
             this.priority = priority;
             this.permissions = permissions;
         }
@@ -53,8 +60,13 @@ public sealed interface Role permits Role.RoleImpl {
         }
 
         @Override
-        public @Nullable Component styleName(@NotNull Player player) {
-            return styleFunction.apply(player);
+        public @Nullable Component styleChatName(@NotNull Player player) {
+            return chatStyleFunction.apply(player);
+        }
+
+        @Override
+        public void styleDisplayName(@NotNull Player player) {
+            displayNameStyler.accept(player);
         }
 
         @Override

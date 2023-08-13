@@ -2,7 +2,6 @@ package org.phantazm.server.role;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jooq.Record;
@@ -45,8 +44,7 @@ public class BasicRoleStore implements RoleStore {
     }
 
     @Override
-    public @NotNull CompletableFuture<Role> getStylingRole(@NotNull Player player) {
-        UUID uuid = player.getUuid();
+    public @NotNull CompletableFuture<Role> getStylingRole(@NotNull UUID uuid) {
         Set<Role> currentRole = roleCache.getIfPresent(uuid);
         if (currentRole != null) {
             //avoid async call if we can

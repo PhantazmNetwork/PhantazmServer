@@ -1,6 +1,5 @@
 package org.phantazm.server.role;
 
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -12,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 public interface RoleStore {
     void register(@NotNull Role role);
 
-    @NotNull CompletableFuture<Role> getStylingRole(@NotNull Player player);
+    @NotNull CompletableFuture<Role> getStylingRole(@NotNull UUID uuid);
 
     @NotNull Optional<Role> role(@NotNull String identifier);
 
