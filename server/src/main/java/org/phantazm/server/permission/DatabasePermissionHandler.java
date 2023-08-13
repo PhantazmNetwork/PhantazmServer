@@ -180,7 +180,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
     }
 
     private void applyPermissions0(UUID uuid, CommandSender sender) {
-        sender.getAllPermissions().clear();
+        sender.clearPermissions();
 
         Set<String> permissionGroups = playerPermissionGroupCache.get(uuid, this::readPermissionGroups);
 
