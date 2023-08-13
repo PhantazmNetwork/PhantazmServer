@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
  * Main entrypoint for lobby-related features.
@@ -88,12 +90,22 @@ public final class LobbyFeature {
                     lobbyConfig.instanceConfig().chunkLoadDistance());
         }
 
+        Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler = (player -> {
+            return roleStore.getStylingRole(player.getUuid()).whenComplete((result, error) -> {
+                if (error != null) {
+                    return;
+                }
+
+                result.styleDisplayName(player);
+            });
+        });
+
         SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
                 new BasicLobbyProvider(ExecutorFeature.getExecutor(), mainLobbyConfig.maxLobbies(),
                         -mainLobbyConfig.maxPlayers(), instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback,
                         mainLobbyConfig.instanceConfig(), contextManager, mainLobbyConfig.npcs(),
                         mainLobbyConfig.defaultItems(), MiniMessage.miniMessage(), mainLobbyConfig.lobbyJoinFormat(),
-                        false, node, playerViewProvider);
+                        false, node, playerViewProvider, displayNameStyler);
         lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
 
         fallback = new LobbyRouterFallback(LobbyFeature.getLobbyRouter(), lobbiesConfig.mainLobbyName());
@@ -106,7 +118,7 @@ public final class LobbyFeature {
                                 -lobby.getValue().maxPlayers(), instanceLoader, lobby.getValue().lobbyPaths(),
                                 regularFallback, lobby.getValue().instanceConfig(), contextManager,
                                 mainLobbyConfig.npcs(), mainLobbyConfig.defaultItems(), MiniMessage.miniMessage(),
-                                lobby.getValue().lobbyJoinFormat(), true, node, playerViewProvider));
+                                lobby.getValue().lobbyJoinFormat(), true, node, playerViewProvider, displayNameStyler));
             }
         }
 
@@ -116,13 +128,14 @@ public final class LobbyFeature {
             LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
             LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
 
+            Player player = event.getPlayer();
             RouteResult routeResult = lobbyRouter.findScene(routeRequest).join();
             boolean success = false;
             if (routeResult.result().isPresent()) {
                 try (TransferResult transferResult = routeResult.result().get()) {
                     if (transferResult.executor().isPresent()) {
                         transferResult.executor().get().run();
-                        loginJoinRequests.put(event.getPlayer().getUuid(), joinRequest);
+                        loginJoinRequests.put(player.getUuid(), joinRequest);
                         success = true;
                     }
                 }
@@ -130,7 +143,7 @@ public final class LobbyFeature {
 
             if (!success) {
                 LOGGER.warn("Kicking player {} because we weren't able to find a lobby for them to join",
-                        event.getPlayer().getUuid());
+                        player.getUuid());
                 event.setCancelled(true);
             }
         });
@@ -147,14 +160,6 @@ public final class LobbyFeature {
                 player.kick(Component.empty());
                 return;
             }
-
-            roleStore.getStylingRole(player.getUuid()).whenComplete((result, error) -> {
-                if (error != null) {
-                    return;
-                }
-
-                result.styleDisplayName(event.getPlayer());
-            });
         });
 
         MinecraftServer.getSchedulerManager().scheduleTask(() -> {

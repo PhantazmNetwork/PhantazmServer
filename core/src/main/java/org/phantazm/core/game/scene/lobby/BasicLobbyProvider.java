@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Basic implementation of a {@link LobbyProviderAbstract}.
@@ -56,6 +57,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     private final boolean quittable;
     private final EventNode<Event> rootNode;
     private final PlayerViewProvider playerViewProvider;
+    private final Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler;
 
     /**
      * Creates a basic implementation of a {@link SceneProviderAbstract}.
@@ -73,7 +75,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
             @NotNull InstanceConfig instanceConfig, @NotNull ContextManager contextManager,
             @NotNull ConfigList npcConfigs, @NotNull Collection<ItemStack> defaultItems,
             @NotNull MiniMessage miniMessage, @NotNull String lobbyJoinFormat, boolean quittable,
-            @NotNull EventNode<Event> rootNode, @NotNull PlayerViewProvider playerViewProvider) {
+            @NotNull EventNode<Event> rootNode, @NotNull PlayerViewProvider playerViewProvider,
+            @NotNull Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler) {
         super(executor, maximumLobbies, newLobbyThreshold);
 
         this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
@@ -96,6 +99,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         this.quittable = quittable;
         this.rootNode = Objects.requireNonNull(rootNode, "rootNode");
         this.playerViewProvider = Objects.requireNonNull(playerViewProvider, "playerViewProvider");
+        this.displayNameStyler = Objects.requireNonNull(displayNameStyler, "displayNameStyler");
     }
 
     @Override
@@ -137,7 +141,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
 
             Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
                     new NPCHandler(List.copyOf(npcs), instance, instanceNode), defaultItems, miniMessage,
-                    lobbyJoinFormat, quittable, playerViewProvider);
+                    lobbyJoinFormat, quittable, playerViewProvider, displayNameStyler);
             instanceNode.addListener(PlayerDisconnectEvent.class, event -> {
                 try (TransferResult result = lobby.leave(Collections.singleton(event.getPlayer().getUuid()))) {
                     result.executor().ifPresent(Runnable::run);

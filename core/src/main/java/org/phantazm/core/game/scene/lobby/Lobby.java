@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
  * Represents a lobby. Most basic scene which contains {@link Player}s.
@@ -38,6 +39,7 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     private final MiniMessage miniMessage;
     private final String lobbyJoinFormat;
     private final boolean quittable;
+    private final Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler;
 
     private boolean joinable = true;
 
@@ -51,7 +53,8 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
             @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler,
             @NotNull Collection<ItemStack> defaultItems, @NotNull MiniMessage miniMessage,
-            @NotNull String lobbyJoinFormat, boolean quittable, @NotNull PlayerViewProvider playerViewProvider) {
+            @NotNull String lobbyJoinFormat, boolean quittable, @NotNull PlayerViewProvider playerViewProvider,
+            @NotNull Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler) {
         super(uuid, instance, fallback, instanceConfig.spawnPoint(), playerViewProvider);
         this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
         this.players = new HashMap<>();
@@ -61,6 +64,7 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
         this.lobbyJoinFormat = Objects.requireNonNull(lobbyJoinFormat, "lobbyJoinFormat");
         this.quittable = quittable;
+        this.displayNameStyler = Objects.requireNonNull(displayNameStyler, "displayNameStyler");
     }
 
     @Override
@@ -92,18 +96,24 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
             }
 
             joinRequest.handleJoin(this, instance, instanceConfig);
-            for (Pair<PlayerView, Player> player : joiners) {
-                player.left().getDisplayName().thenAccept(joiner -> {
+            for (Pair<PlayerView, Player> pair : joiners) {
+                Player player = pair.right();
+                displayNameStyler.apply(player).whenComplete((result, error) -> {
+                    if (error != null) {
+                        return;
+                    }
+
+                    Component joiner = player.getName();
                     TagResolver joinerPlaceholder = Placeholder.component("joiner", joiner);
                     Component message = miniMessage.deserialize(lobbyJoinFormat, joinerPlaceholder);
                     instance.sendMessage(message);
                 });
 
                 for (ItemStack stack : defaultItems) {
-                    player.right().getInventory().addItemStack(stack);
+                    player.getInventory().addItemStack(stack);
                 }
 
-                EventDispatcher.call(new PlayerJoinLobbyEvent(player.right()));
+                EventDispatcher.call(new PlayerJoinLobbyEvent(player));
             }
         });
     }
