@@ -11,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
@@ -81,7 +82,7 @@ public class SelectBombedRoom implements Action<Round> {
         List<Room> candidateRooms = objects.roomTracker().items().stream()
                 .filter(room -> room.isOpen() && !room.flags().hasFlag(Flags.BOMBED_ROOM) &&
                         !data.exemptRooms.contains(room.getRoomInfo().id())).toList();
-        if (candidateRooms.size() == 0) {
+        if (candidateRooms.isEmpty()) {
             return;
         }
 
@@ -177,13 +178,17 @@ public class SelectBombedRoom implements Action<Round> {
                                     }
 
                                     long lastEnterBombedRoom = player.getTag(Tags.LAST_ENTER_BOMBED_ROOM);
-                                    player.setTag(Tags.LAST_ENTER_BOMBED_ROOM, ++lastEnterBombedRoom);
+                                    if (lastEnterBombedRoom == -1) {
+                                        player.setTag(Tags.LAST_ENTER_BOMBED_ROOM, lastEnterBombedRoom =
+                                                MinecraftServer.currentTick());
+                                    }
+                                    long ticksSinceEnter = MinecraftServer.currentTick() - lastEnterBombedRoom;
 
-                                    if (lastEnterBombedRoom >= data.damageDelay) {
+                                    if (ticksSinceEnter >= data.damageDelay) {
                                         player.damage(bombDamage, true);
                                     }
 
-                                    if (lastEnterBombedRoom >= data.effectDelay) {
+                                    if (ticksSinceEnter >= data.effectDelay) {
                                         applyModifiers(zombiesPlayer);
                                     }
                                 }
