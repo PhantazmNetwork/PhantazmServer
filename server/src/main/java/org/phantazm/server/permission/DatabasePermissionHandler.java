@@ -217,9 +217,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
             }, DatabasePermissionHandler::permissionsFromResult, CopyOnWriteArraySet::new);
         });
 
-        for (Permission permission : permissions) {
-            commandSender.addPermission(permission);
-        }
+        commandSender.addPermissions(permissions);
     }
 
     private void applyOptionalPlayer(UUID uuid) {
