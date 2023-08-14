@@ -3,30 +3,30 @@ package org.phantazm.zombies.command;
 import com.github.steanky.element.core.key.Constants;
 import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentString;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-public class FlagToggleCommand extends Command {
+public class FlagToggleCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.flag_toggle");
 
     private static final ArgumentString FLAG_ARGUMENT = ArgumentType.String("flag");
 
     public FlagToggleCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper,
             @NotNull KeyParser keyParser) {
-        super("toggle_flag");
+        super("toggle_flag", PERMISSION);
 
-        setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-        addSyntax((sender, context) -> {
+        addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             Player player = (Player)sender;
             UUID uuid = player.getUuid();
 

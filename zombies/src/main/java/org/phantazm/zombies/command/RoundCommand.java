@@ -2,7 +2,6 @@ package org.phantazm.zombies.command;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
@@ -10,6 +9,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import net.minestom.server.timer.SchedulerManager;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.stage.Stage;
@@ -21,12 +22,12 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-public class RoundCommand extends Command {
+public class RoundCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.round");
 
     public RoundCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper,
             @NotNull SchedulerManager schedulerManager) {
-        super("round");
+        super("round", PERMISSION);
         Objects.requireNonNull(sceneMapper, "sceneMapper");
 
         Argument<Integer> roundArgument =
@@ -42,8 +43,7 @@ public class RoundCommand extends Command {
                     });
                 });
 
-        setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-        addSyntax((sender, context) -> {
+        addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
                 RoundHandler handler = scene.getMap().roundHandler();

@@ -2,19 +2,19 @@ package org.phantazm.server.command.server;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.server.role.RoleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RemoveRoleCommand extends Command {
+public class RemoveRoleCommand extends PermissionLockedCommand {
     public static final Logger LOGGER = LoggerFactory.getLogger(RemoveRoleCommand.class);
     public static final Permission PERMISSION = new Permission("admin.remove_role");
 
@@ -23,9 +23,8 @@ public class RemoveRoleCommand extends Command {
 
     public RemoveRoleCommand(@NotNull IdentitySource identitySource, @NotNull RoleStore roleStore,
             @NotNull PermissionHandler permissionHandler) {
-        super("remove_role");
+        super("remove_role", PERMISSION);
 
-        setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
         addSyntax((sender, context) -> {
             String name = context.get(PLAYER_ARGUMENT);
             identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {

@@ -1,12 +1,13 @@
 package org.phantazm.zombies.command;
 
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentEnum;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -17,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-public class CoinsCommand extends Command {
+public class CoinsCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.coins");
 
     public enum CoinAction {
@@ -31,11 +32,10 @@ public class CoinsCommand extends Command {
     private static final Argument<Integer> COIN_AMOUNT_ARGUMENT = ArgumentType.Integer("amount");
 
     public CoinsCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
-        super("coins");
+        super("coins", PERMISSION);
         Objects.requireNonNull(sceneMapper, "sceneMapper");
 
-        setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-        addSyntax((sender, context) -> {
+        addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
                 ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(uuid);

@@ -4,13 +4,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import net.minestom.server.permission.Permission;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.event.PlayerJoinLobbyEvent;
 import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneRouter;
@@ -22,7 +22,7 @@ import org.phantazm.server.config.server.ShutdownConfig;
 
 import java.util.Objects;
 
-public class OrderlyShutdownCommand extends Command {
+public class OrderlyShutdownCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.orderly_shutdown");
 
     private final RouterStore routerStore;
@@ -31,10 +31,9 @@ public class OrderlyShutdownCommand extends Command {
 
     public OrderlyShutdownCommand(@NotNull RouterStore routerStore, @NotNull ShutdownConfig shutdownConfig,
             @NotNull EventNode<Event> globalNode) {
-        super("orderly_shutdown");
+        super("orderly_shutdown", PERMISSION);
         this.routerStore = Objects.requireNonNull(routerStore, "routerStore");
 
-        setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
         addSyntax((sender, context) -> {
             if (initialized) {
                 sender.sendMessage("Orderly shutdown has already been initialized");

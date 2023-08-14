@@ -11,13 +11,13 @@ import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.SceneRouter;
@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class GamereportCommand extends Command {
+public class GamereportCommand extends PermissionLockedCommand {
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
     private interface PageFormatter {
@@ -169,7 +169,7 @@ public class GamereportCommand extends Command {
     private final Map<Key, PageFormatter> pageFormatters;
 
     public GamereportCommand(@NotNull RouterStore routerStore, @NotNull ZombiesGamereportConfig config) {
-        super("gamereport");
+        super("gamereport", PERMISSION);
 
         Map<Key, PageFormatter> temp = new HashMap<>();
         temp.put(ZombiesSceneRouter.KEY, new ZombiesPageFormatter(config));
@@ -188,9 +188,6 @@ public class GamereportCommand extends Command {
         });
 
         Argument<Integer> pageArgument = ArgumentType.Integer("page").setDefaultValue(1);
-
-        setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-
         addSyntax((sender, context) -> {
             @Subst(Constants.NAMESPACE_OR_KEY)
             String key = context.get(routerArgument);
