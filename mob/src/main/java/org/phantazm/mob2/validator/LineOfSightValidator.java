@@ -14,10 +14,10 @@ public class LineOfSightValidator implements ValidatorComponent {
 
     @Override
     public @NotNull Validator apply(@NotNull InjectionStore injectionStore) {
-        return new SightlineValidator(injectionStore.get(Keys.MOB_KEY));
+        return new Internal(injectionStore.get(Keys.MOB_KEY));
     }
 
-    private record SightlineValidator(Mob self) implements Validator {
+    private record Internal(Mob self) implements Validator {
         @Override
         public boolean valid(@NotNull Entity entity) {
             return self.hasLineOfSight(entity);

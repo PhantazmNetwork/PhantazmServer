@@ -2,6 +2,7 @@ package org.phantazm.mob2;
 
 import net.minestom.server.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob2.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 
@@ -57,7 +58,7 @@ public class Mob extends ProximaEntity {
         super.update(time);
 
         for (Skill skill : tickableSkills) {
-            skill.tick(time);
+            skill.tick();
         }
     }
 }
