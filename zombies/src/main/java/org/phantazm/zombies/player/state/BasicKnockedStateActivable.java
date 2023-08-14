@@ -120,7 +120,7 @@ public class BasicKnockedStateActivable implements Activable {
             filteredAudience.sendTitlePart(TitlePart.SUBTITLE,
                     miniMessage.deserialize(settings.knockedSubtitleFormat(), tagResolvers));
 
-            if (mapSettingsInfo.coinsLostOnKnock() >= 0) {
+            if (mapSettingsInfo.coinsLostOnKnock() > 0) {
                 PlayerCoins coins = zombiesPlayerSupplier.get().module().getCoins();
                 int amount = coins.getCoins();
                 int amountLost = (int)Math.round(mapSettingsInfo.coinsLostOnKnock() * amount);

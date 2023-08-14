@@ -171,7 +171,7 @@ public record MapSettingsInfo(int mapDataVersion,
 
     @Default("coinsLostOnKnock")
     public static @NotNull ConfigElement defaultCoinsLostOnKnock() {
-        return ConfigPrimitive.of(0.25);
+        return ConfigPrimitive.of(0D);
     }
 
     @Default("reviveHealthFactor")
