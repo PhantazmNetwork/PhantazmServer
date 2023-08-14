@@ -35,7 +35,7 @@ public class CoinsCommand extends Command {
         Objects.requireNonNull(sceneMapper, "sceneMapper");
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-        addConditionalSyntax(getCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
                 ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(uuid);

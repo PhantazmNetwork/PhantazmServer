@@ -27,7 +27,7 @@ public class WhitelistCommand extends Command {
             super("add");
 
             setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 String name = context.get(PLAYER_ARGUMENT);
                 identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
                     uuidOptional.ifPresent(uuid -> {
@@ -50,7 +50,7 @@ public class WhitelistCommand extends Command {
             super("remove");
 
             setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 String name = context.get(PLAYER_ARGUMENT);
                 identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
                     uuidOptional.ifPresent(uuid -> {

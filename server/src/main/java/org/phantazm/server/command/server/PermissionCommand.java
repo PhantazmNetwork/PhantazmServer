@@ -41,7 +41,7 @@ public class PermissionCommand extends Command {
             super("reload");
 
             setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_RELOAD));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 permissionHandler.reload();
             });
         }
@@ -52,7 +52,7 @@ public class PermissionCommand extends Command {
             super("group_set");
 
             setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_GROUP_SET));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 String group = context.get(GROUP_ARGUMENT);
                 String player = context.get(PLAYER_ARGUMENT);
                 identitySource.getUUID(player).whenComplete((uuidOptional, throwable) -> {
@@ -74,7 +74,7 @@ public class PermissionCommand extends Command {
             super("group_clear");
 
             setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_GROUP_CLEAR));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 String group = context.get(GROUP_ARGUMENT);
                 String player = context.get(PLAYER_ARGUMENT);
                 identitySource.getUUID(player).whenComplete((uuidOptional, throwable) -> {
@@ -96,7 +96,7 @@ public class PermissionCommand extends Command {
             super("add");
 
             setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_ADD_GROUP));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 String group = context.get(GROUP_ARGUMENT);
                 String permission = context.get(PERMISSION_ARGUMENT);
 
@@ -111,7 +111,7 @@ public class PermissionCommand extends Command {
             super("remove");
 
             setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_REMOVE_GROUP));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 String group = context.get(GROUP_ARGUMENT);
                 String permission = context.get(PERMISSION_ARGUMENT);
 

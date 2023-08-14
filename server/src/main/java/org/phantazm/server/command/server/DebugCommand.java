@@ -24,8 +24,7 @@ public class DebugCommand extends Command {
             super("event");
 
             setCondition((sender, commandString) -> sender.hasPermission(EVENT_PERMISSION));
-            addConditionalSyntax(getCondition(),
-                    (sender, context) -> sender.sendMessage(MinecraftServer.getGlobalEventHandler().toString()));
+            addSyntax((sender, context) -> sender.sendMessage(MinecraftServer.getGlobalEventHandler().toString()));
         }
     }
 
@@ -34,7 +33,7 @@ public class DebugCommand extends Command {
             super("instance");
 
             setCondition((sender, commandString) -> sender.hasPermission(INSTANCE_PERMISSION));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 for (Instance instance : MinecraftServer.getInstanceManager().getInstances()) {
                     sender.sendMessage(instance.getUniqueId() + ": " +
                             instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS).size() + " player");

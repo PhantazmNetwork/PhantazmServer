@@ -23,7 +23,7 @@ public class KillAllCommand extends Command {
         Objects.requireNonNull(sceneMapper, "sceneMapper");
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-        addConditionalSyntax(getCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
                 return;

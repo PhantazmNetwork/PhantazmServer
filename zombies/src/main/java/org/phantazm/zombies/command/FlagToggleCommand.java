@@ -26,7 +26,7 @@ public class FlagToggleCommand extends Command {
         super("toggle_flag");
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-        addConditionalSyntax(getCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             Player player = (Player)sender;
             UUID uuid = player.getUuid();
 

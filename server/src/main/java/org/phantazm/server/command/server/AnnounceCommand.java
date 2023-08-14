@@ -21,10 +21,10 @@ public class AnnounceCommand extends Command {
     public AnnounceCommand() {
         super("announce");
         setCondition(((sender, commandString) -> sender.hasPermission(PERMISSION)));
-        addConditionalSyntax(getCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             Collection<Player> players = MinecraftServer.getConnectionManager().getOnlinePlayers();
-            Component message = MiniMessage.miniMessage().deserialize(DEFAULT_FORMAT + String.join(" ",
-                    context.get(ANNOUNCEMENT)));
+            Component message =
+                    MiniMessage.miniMessage().deserialize(DEFAULT_FORMAT + String.join(" ", context.get(ANNOUNCEMENT)));
             for (Player player : players) {
                 player.sendMessage(message);
             }

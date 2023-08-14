@@ -6,10 +6,11 @@ import net.minestom.server.permission.Permission;
 
 public class FlyCommand extends Command {
     public static final Permission PERMISSION = new Permission("admin.fly");
+
     public FlyCommand() {
         super("fly");
-        setCondition(((sender, commandString) -> sender.hasPermission(PERMISSION)));
-        addConditionalSyntax(getCondition(), ((sender, context) -> {
+        setCondition(((sender, commandString) -> false));
+        addSyntax(((sender, context) -> {
             if (!(sender instanceof Player player)) {
                 return;
             }

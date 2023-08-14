@@ -19,7 +19,7 @@ public class PardonCommand extends Command {
         super("pardon");
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-        addConditionalSyntax(getCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             String name = context.get(PLAYER_ARGUMENT);
             identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
                 uuidOptional.ifPresent(uuid -> {

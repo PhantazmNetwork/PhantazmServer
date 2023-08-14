@@ -191,7 +191,7 @@ public class GamereportCommand extends Command {
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
 
-        addConditionalSyntax(getCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             @Subst(Constants.NAMESPACE_OR_KEY)
             String key = context.get(routerArgument);
 

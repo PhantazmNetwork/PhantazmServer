@@ -24,7 +24,7 @@ public class AmmoRefillCommand extends Command {
         super("ammo_refill");
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-        addConditionalSyntax(getCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
                 return;

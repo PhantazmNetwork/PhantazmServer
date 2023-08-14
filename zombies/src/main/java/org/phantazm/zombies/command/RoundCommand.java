@@ -43,7 +43,7 @@ public class RoundCommand extends Command {
                 });
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-        addConditionalSyntax(getCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             UUID uuid = ((Player)sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
                 RoundHandler handler = scene.getMap().roundHandler();
@@ -64,7 +64,8 @@ public class RoundCommand extends Command {
                         if (roundIndex != 0) {
                             handler.setCurrentRound(roundIndex);
                         }
-                    } else {
+                    }
+                    else {
                         handler.setCurrentRound(roundIndex);
                     }
                 });

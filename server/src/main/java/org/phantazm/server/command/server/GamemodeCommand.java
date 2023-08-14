@@ -10,12 +10,13 @@ import net.minestom.server.permission.Permission;
 public class GamemodeCommand extends Command {
     public static final Permission PERMISSION = new Permission("admin.gamemode");
 
-    private static final ArgumentEnum<GameMode> GAMEMODE = ArgumentType.Enum("gamemode", GameMode.class).setFormat(
-            ArgumentEnum.Format.LOWER_CASED);
+    private static final ArgumentEnum<GameMode> GAMEMODE =
+            ArgumentType.Enum("gamemode", GameMode.class).setFormat(ArgumentEnum.Format.LOWER_CASED);
+
     public GamemodeCommand() {
         super("gamemode");
         setCondition(((sender, commandString) -> sender.hasPermission(PERMISSION)));
-        addConditionalSyntax(getCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             if (!(sender instanceof Player player)) {
                 return;
             }

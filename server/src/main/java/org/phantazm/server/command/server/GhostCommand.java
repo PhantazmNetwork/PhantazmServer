@@ -39,7 +39,7 @@ public class GhostCommand extends Command {
             }
         });
 
-        addConditionalSyntax(getCondition(), ((sender, context) -> {
+        addSyntax(((sender, context) -> {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(
                         Component.text("You must be a player to use this command!").color(NamedTextColor.RED));

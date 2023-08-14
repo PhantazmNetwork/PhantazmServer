@@ -11,6 +11,6 @@ public class StopCommand extends Command {
         super("stop");
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-        addConditionalSyntax(getCondition(), (sender, context) -> PhantazmServer.shutdown("stop command"));
+        addSyntax((sender, context) -> PhantazmServer.shutdown("stop command"));
     }
 }

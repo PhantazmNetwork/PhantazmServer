@@ -35,7 +35,7 @@ public class OrderlyShutdownCommand extends Command {
         this.routerStore = Objects.requireNonNull(routerStore, "routerStore");
 
         setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
-        addConditionalSyntax(getCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             if (initialized) {
                 sender.sendMessage("Orderly shutdown has already been initialized");
                 return;
