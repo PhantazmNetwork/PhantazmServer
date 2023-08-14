@@ -25,7 +25,8 @@ import java.util.*;
 
 public class PartyFeature {
 
-    private static final GuildHolder<Party> partyHolder = new GuildHolder<>(new HashMap<>(), new ArrayList<>());
+    private static final GuildHolder<Party> partyHolder =
+            new GuildHolder<>(new HashMap<>(), Collections.newSetFromMap(new IdentityHashMap<>()));
 
     private static PartyConfig config;
 

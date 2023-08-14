@@ -224,13 +224,26 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
 
         CompletableFuture.allOf(fromDisplayName, toDisplayName).whenComplete((ignored, throwable) -> {
             if (throwable != null) {
-                LOGGER.warn("Exception while sending kick message", throwable);
+                LOGGER.warn("Exception while sending transfer message", throwable);
                 return;
             }
 
             TagResolver fromPlaceholder = Placeholder.component("from", fromDisplayName.join());
             TagResolver toPlaceholder = Placeholder.component("to", toDisplayName.join());
             Component message = miniMessage.deserialize(config.transferFormat(), fromPlaceholder, toPlaceholder);
+            audience.sendMessage(message);
+        });
+    }
+
+    public void notifyDisband() {
+        owner.get().getPlayerView().getDisplayName().whenComplete((displayName, throwable) -> {
+            if (throwable != null) {
+                LOGGER.warn("Exception while sending party disband message", throwable);
+                return;
+            }
+
+            TagResolver ownerPlaceholder = Placeholder.component("owner", displayName);
+            Component message = miniMessage.deserialize(config.transferFormat(), ownerPlaceholder);
             audience.sendMessage(message);
         });
     }

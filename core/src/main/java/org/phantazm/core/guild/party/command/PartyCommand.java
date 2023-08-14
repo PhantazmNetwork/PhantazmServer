@@ -35,6 +35,7 @@ public class PartyCommand {
         command.addSubcommand(
                 PartyTransferCommand.transferCommand(config, miniMessage, partyHolder.uuidToGuild(), viewProvider,
                         creatorRank, defaultRank));
+        command.addSubcommand(PartyDisbandCommand.disbandCommand(config, partyHolder));
 
         return command;
     }

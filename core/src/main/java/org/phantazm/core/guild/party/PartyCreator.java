@@ -57,7 +57,7 @@ public class PartyCreator {
     }
 
     public @NotNull Party createPartyFor(@NotNull PlayerView playerView) {
-        Map<? super UUID, PartyMember> members = new HashMap<>();
+        Map<UUID, PartyMember> members = new HashMap<>();
         GuildMemberManager<PartyMember> memberManager = new GuildMemberManager<>(members);
 
         PartyMember owner = new PartyMember(playerView, creatorRank);

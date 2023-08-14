@@ -9,11 +9,11 @@ import java.util.UUID;
 
 public class GuildMemberManager<TMember extends GuildMember> {
 
-    private final Map<? super UUID, TMember> guildMembers;
+    private final Map<UUID, TMember> guildMembers;
 
-    private final Map<? super UUID, TMember> immutableGuildMembers;
+    private final Map<UUID, TMember> immutableGuildMembers;
 
-    public GuildMemberManager(@NotNull Map<? super UUID, TMember> guildMembers) {
+    public GuildMemberManager(@NotNull Map<UUID, TMember> guildMembers) {
         this.guildMembers = Objects.requireNonNull(guildMembers, "guildMembers");
         this.immutableGuildMembers = Collections.unmodifiableMap(guildMembers);
     }
@@ -34,7 +34,7 @@ public class GuildMemberManager<TMember extends GuildMember> {
         return getMember(memberUUID) != null;
     }
 
-    public @NotNull Map<? super UUID, TMember> getMembers() {
+    public @NotNull Map<UUID, TMember> getMembers() {
         return immutableGuildMembers;
     }
 

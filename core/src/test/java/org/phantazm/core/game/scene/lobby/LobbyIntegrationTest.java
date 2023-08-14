@@ -1,5 +1,6 @@
 package org.phantazm.core.game.scene.lobby;
 
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
@@ -35,7 +36,8 @@ public class LobbyIntegrationTest {
         SceneFallback sceneFallback = (ignored) -> CompletableFuture.completedFuture(true);
         Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback,
                 new NPCHandler(List.of(), instance, instance.eventNode()), Collections.emptyList(),
-                MiniMessage.miniMessage(), "", true, Mockito.mock(PlayerViewProvider.class));
+                MiniMessage.miniMessage(), "", true, Mockito.mock(PlayerViewProvider.class),
+                player -> CompletableFuture.completedFuture(Component.empty()));
         PlayerView playerView = mock(PlayerView.class);
 
         lobby.shutdown();
