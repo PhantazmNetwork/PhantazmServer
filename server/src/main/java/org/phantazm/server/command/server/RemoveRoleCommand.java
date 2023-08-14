@@ -6,7 +6,6 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
-import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.IdentitySource;
@@ -44,7 +43,7 @@ public class RemoveRoleCommand extends Command {
 
                         if (result) {
                             sender.sendMessage("Removed role " + role + " from " + uuid + " (" + name + ")");
-                            permissionHandler.applyPermissions(uuid, sender);
+                            permissionHandler.applyPermissions(uuid);
                         }
                         else {
                             sender.sendMessage(Component.text("Failed to remove role. The player may not " +

@@ -51,9 +51,10 @@ public class DatabasePermissionHandler implements PermissionHandler {
     }
 
     @Override
-    public void applyPermissions(@NotNull UUID uuid, @NotNull CommandSender sender) {
+    public void applyPermissions(@NotNull Player target) {
+        Objects.requireNonNull(target, "target");
         executor.execute(() -> {
-            applyPermissions0(uuid, sender);
+            applyPermissions0(target.getUuid(), target);
         });
     }
 

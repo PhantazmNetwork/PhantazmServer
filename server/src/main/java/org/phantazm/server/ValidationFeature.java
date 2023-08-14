@@ -29,7 +29,7 @@ public class ValidationFeature {
                     return;
                 }
 
-                permissionHandler.applyPermissions(uuid, event.getPlayer());
+                permissionHandler.applyPermissions(event.getPlayer());
             }
             catch (Throwable e) {
                 LOGGER.warn("Error during AsyncPlayerPreLoginEvent", e);
