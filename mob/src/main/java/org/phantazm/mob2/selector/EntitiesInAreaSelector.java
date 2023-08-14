@@ -102,8 +102,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
             }
 
             Point point = optionalPoint.get();
-            boolean unlimited = limit < 0;
-            List<DoubleObjectPair<T>> targets = new ArrayList<>(unlimited ? 10 : limit);
+            List<DoubleObjectPair<T>> targets = new ArrayList<>(limit < 0 ? 10 : limit);
 
             instance.getEntityTracker().nearbyEntities(point, range, target, target -> {
                 if (!validator.valid(target)) {
@@ -115,7 +114,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
                 for (int i = 0; i < targets.size(); i++) {
                     DoubleObjectPair<T> existingTargets = targets.get(i);
                     if (existingTargets.firstDouble() > thisDistanceSquared) {
-                        if (!unlimited && targets.size() == limit) {
+                        if (targets.size() == limit) {
                             targets.remove(targets.size() - 1);
                         }
 
@@ -124,7 +123,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
                     }
                 }
 
-                if (!unlimited && targets.size() == limit) {
+                if (targets.size() == limit) {
                     return;
                 }
 
