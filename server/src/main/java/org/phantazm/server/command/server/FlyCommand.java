@@ -9,7 +9,7 @@ public class FlyCommand extends Command {
 
     public FlyCommand() {
         super("fly");
-        setCondition(((sender, commandString) -> false));
+        setCondition(((sender, commandString) -> sender.hasPermission(PERMISSION)));
         addSyntax(((sender, context) -> {
             if (!(sender instanceof Player player)) {
                 return;
