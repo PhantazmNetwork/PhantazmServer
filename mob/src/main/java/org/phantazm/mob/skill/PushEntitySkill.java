@@ -1,6 +1,9 @@
 package org.phantazm.mob.skill;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
@@ -40,10 +43,23 @@ public class PushEntitySkill implements Skill {
 
     private void setVelocity(Entity target, Entity self) {
         Vec diff = target.getPosition().sub(self.getPosition()).asVec().normalize();
-        target.setVelocity(diff.mul(data.power).add(0, data.vertical, 0));
+
+        if (data.additive) {
+            target.setVelocity(target.getVelocity().add(diff.mul(data.power).add(0, data.vertical, 0)));
+        }
+        else {
+            target.setVelocity(diff.mul(data.power).add(0, data.vertical, 0));
+        }
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector, double power, double vertical) {
+    public record Data(@NotNull @ChildPath("selector") String selector,
+                       double power,
+                       double vertical,
+                       boolean additive) {
+        @Default("additive")
+        public static @NotNull ConfigElement defaultAdditive() {
+            return ConfigPrimitive.of(false);
+        }
     }
 }

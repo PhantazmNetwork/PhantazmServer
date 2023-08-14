@@ -283,7 +283,7 @@ public class ProximaEntity extends LivingEntity {
                 NODE_REACH_DISTANCE_SQ && (int)Math.floor(position.y()) == node.y;
     }
 
-    private enum MoveResult {
+    protected enum MoveResult {
         CONTINUE,
         CANCEL,
         KEEP_DESTINATION

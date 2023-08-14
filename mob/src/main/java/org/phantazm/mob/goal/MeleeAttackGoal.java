@@ -85,8 +85,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 attackSpeedMultiplier = self.getAttributeValue(attribute);
             }
 
-            if ((float) ticksSinceAttack *
-                    attackSpeedMultiplier >= data.cooldown()) {
+            if ((float)ticksSinceAttack * attackSpeedMultiplier >= data.cooldown()) {
                 Entity target = self.getTargetEntity();
                 if (target == null) {
                     return false;
@@ -115,9 +114,8 @@ public class MeleeAttackGoal implements GoalCreator {
                 float knockbackStrength = self.getAttributeValue(Attribute.ATTACK_KNOCKBACK);
 
                 double angle = pos.yaw() * (Math.PI / 180);
-                Acquired<Entity> entityAcquired = livingEntity.getAcquirable().lock();
-                try {
-                    LivingEntity actualEntity = (LivingEntity)entityAcquired.get();
+                livingEntity.getAcquirable().sync(entity -> {
+                    LivingEntity actualEntity = (LivingEntity)entity;
                     boolean damaged = actualEntity.damage(Damage.fromEntity(self, damageAmount), data.bypassArmor);
 
                     if (!damaged) {
@@ -130,10 +128,7 @@ public class MeleeAttackGoal implements GoalCreator {
                     for (Skill skill : skills) {
                         skill.use(mob);
                     }
-                }
-                finally {
-                    entityAcquired.unlock();
-                }
+                });
             }
 
             ticksSinceAttack = 0;
