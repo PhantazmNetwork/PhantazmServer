@@ -37,7 +37,7 @@ public class PartyInviteCommand {
 
         Argument<String> nameArgument = ArgumentType.Word("name");
         nameArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            String prefix = context.getOrDefault(nameArgument, "").trim();
+            String prefix = context.getOrDefault(nameArgument, "").trim().toLowerCase();
 
             if (sender instanceof Player player) {
                 Party party = partyHolder.uuidToGuild().get(player.getUuid());
@@ -47,7 +47,7 @@ public class PartyInviteCommand {
                             continue;
                         }
 
-                        String username = player.getUsername();
+                        String username = otherPlayer.getUsername();
                         if (username.toLowerCase().startsWith(prefix)) {
                             suggestion.addEntry(new SuggestionEntry(username));
                         }
