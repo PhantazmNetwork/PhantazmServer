@@ -148,7 +148,7 @@ public record MapSettingsInfo(int mapDataVersion,
                 Component.text(id.value()), "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", 12000L,
                 new ArrayList<>(0), 400L, new ArrayList<>(0),
                 Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F), "", 200L, "",
-                Component.text(id.value()), 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, 20, false, new ArrayList<>(), 30, 5,
+                Component.text(id.value()), 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, 10, false, new ArrayList<>(), 30, 5,
                 0, 4.5F, 0.4F, 20, false, new HashMap<>(0), new HashMap<>(), "", "", "", "", "", "", "", "", "",
                 Sound.sound(Key.key("minecraft:block.brewing_stand.brew"), Sound.Source.MASTER, 1.0F, 1.0F), "", "", "",
                 "", Sound.sound(Key.key("minecraft:entity.ender_dragon.growl"), Sound.Source.MASTER, 1.0F, 0.5F), "",
@@ -184,5 +184,10 @@ public record MapSettingsInfo(int mapDataVersion,
     @Default("coinLossFormat")
     public static @NotNull ConfigElement defaultCoinLossFormat() {
         return ConfigPrimitive.of("");
+    }
+
+    @Default("reviveInvulnerabilityTicks")
+    public static @NotNull ConfigElement defaultReviveInvulnerabilityTicks() {
+        return ConfigPrimitive.of(15);
     }
 }
