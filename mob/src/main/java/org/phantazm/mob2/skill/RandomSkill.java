@@ -1,6 +1,7 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.ChildPath;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +27,7 @@ public class RandomSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(double chance) {
+    public record Data(@NotNull @ChildPath("delegate") String delegate, double chance) {
     }
 
     private static class Internal implements Skill {

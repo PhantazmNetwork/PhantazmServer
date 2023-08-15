@@ -46,7 +46,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
         };
 
         return new Internal<>(injectionStore.get(Keys.MOB_KEY), originSelector.apply(injectionStore), target,
-                validator.apply(injectionStore), data.limit, data.range);
+                validator.apply(injectionStore), data.limit, data.range, data.excludeSelf);
     }
 
     public enum TargetType {
@@ -59,7 +59,8 @@ public class EntitiesInAreaSelector implements SelectorComponent {
                        @NotNull @ChildPath("validator") String validator,
                        @NotNull TargetType target,
                        double range,
-                       int limit) {
+                       int limit,
+                       boolean excludeSelf) {
         @Default("target")
         public static @NotNull ConfigElement targetDefault() {
             return ConfigPrimitive.of("ENTITIES");
@@ -69,6 +70,11 @@ public class EntitiesInAreaSelector implements SelectorComponent {
         public static @NotNull ConfigElement limitDefault() {
             return ConfigPrimitive.of(-1);
         }
+
+        @Default("excludeSelf")
+        public static @NotNull ConfigElement excludeSelfDefault() {
+            return ConfigPrimitive.of(true);
+        }
     }
 
     private record Internal<T extends Entity>(Mob self,
@@ -76,9 +82,10 @@ public class EntitiesInAreaSelector implements SelectorComponent {
                                               EntityTracker.Target<T> target,
                                               Validator validator,
                                               int limit,
-                                              double range) implements Selector {
+                                              double range,
+                                              boolean excludeSelf) implements Selector {
         private Internal(Mob self, Selector originSelector, EntityTracker.Target<T> target, Validator validator,
-                int limit, double range) {
+                int limit, double range, boolean excludeSelf) {
             this.self = Objects.requireNonNull(self, "self");
             this.originSelector = Objects.requireNonNull(originSelector, "originSelector");
             this.target = Objects.requireNonNull(target, "target");
@@ -86,6 +93,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
 
             this.limit = limit;
             this.range = range;
+            this.excludeSelf = excludeSelf;
         }
 
         @Override
@@ -105,7 +113,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
             List<DoubleObjectPair<T>> targets = new ArrayList<>(limit < 0 ? 10 : limit);
 
             instance.getEntityTracker().nearbyEntities(point, range, target, target -> {
-                if (!validator.valid(target)) {
+                if ((target == self && excludeSelf) || !validator.valid(target)) {
                     return;
                 }
 

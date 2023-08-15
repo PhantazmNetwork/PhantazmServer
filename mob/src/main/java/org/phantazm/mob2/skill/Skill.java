@@ -4,7 +4,8 @@ public interface Skill {
     default void init() {
     }
 
-    void use();
+    default void use() {
+    }
 
     default void tick() {
     }
