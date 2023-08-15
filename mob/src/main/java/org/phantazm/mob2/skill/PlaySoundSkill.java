@@ -21,20 +21,23 @@ import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
 import java.util.Collection;
+import java.util.Random;
 
 public class PlaySoundSkill implements SkillComponent {
     private final Data data;
     private final SelectorComponent targetSelector;
+    private final Random random;
 
     @FactoryMethod
     public PlaySoundSkill(@NotNull Data data, @NotNull @Child("target") SelectorComponent targetSelector) {
         this.data = data;
         this.targetSelector = targetSelector;
+        this.random = new Random();
     }
 
     @Override
     public @NotNull Skill apply(@NotNull InjectionStore injectionStore) {
-        return new Internal(injectionStore.get(Keys.MOB_KEY), targetSelector.apply(injectionStore), data);
+        return new Internal(injectionStore.get(Keys.MOB_KEY), targetSelector.apply(injectionStore), data, random);
     }
 
     @DataObject
@@ -47,10 +50,16 @@ public class PlaySoundSkill implements SkillComponent {
 
     private static class Internal extends TargetedSkill {
         private final Data data;
+        private final Random random;
 
-        private Internal(Mob self, Selector selector, Data data) {
+        private Internal(Mob self, Selector selector, Data data, Random random) {
             super(self, selector);
             this.data = data;
+            this.random = random;
+        }
+
+        private Sound randomize(Sound sound) {
+            return Sound.sound(sound).seed(random.nextLong()).build();
         }
 
         @Override
@@ -64,10 +73,9 @@ public class PlaySoundSkill implements SkillComponent {
             if (!entities.isEmpty()) {
                 for (Entity entity : entities) {
                     if (!data.broadcast && entity instanceof Player player) {
-                        player.playSound(data.sound, entity.getPosition());
-                    }
-                    else {
-                        instance.playSound(data.sound, entity.getPosition());
+                        player.playSound(randomize(data.sound), entity.getPosition());
+                    } else {
+                        instance.playSound(randomize(data.sound), entity.getPosition());
                     }
                 }
 
@@ -75,7 +83,7 @@ public class PlaySoundSkill implements SkillComponent {
             }
 
             for (Point point : target.locations()) {
-                instance.playSound(data.sound, point);
+                instance.playSound(randomize(data.sound), point);
             }
         }
     }

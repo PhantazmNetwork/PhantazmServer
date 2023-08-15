@@ -14,6 +14,7 @@ import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.TrackerTargetType;
 import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
@@ -40,27 +41,16 @@ public class EntitiesInAreaSelector implements SelectorComponent {
 
     @Override
     public @NotNull Selector apply(@NotNull InjectionStore injectionStore) {
-        EntityTracker.Target<?> target = switch (data.target) {
-            case PLAYERS -> EntityTracker.Target.PLAYERS;
-            case ENTITIES -> EntityTracker.Target.LIVING_ENTITIES;
-        };
-
-        return new Internal<>(injectionStore.get(Keys.MOB_KEY), originSelector.apply(injectionStore), target,
-                validator.apply(injectionStore), data.limit, data.range, data.excludeSelf);
-    }
-
-    public enum TargetType {
-        PLAYERS,
-        ENTITIES
+        return new Internal<>(injectionStore.get(Keys.MOB_KEY), originSelector.apply(injectionStore),
+                data.target.target(), validator.apply(injectionStore), data.limit, data.range);
     }
 
     @DataObject
     public record Data(@NotNull @ChildPath("origin") String originSelector,
                        @NotNull @ChildPath("validator") String validator,
-                       @NotNull TargetType target,
+                       @NotNull TrackerTargetType target,
                        double range,
-                       int limit,
-                       boolean excludeSelf) {
+                       int limit) {
         @Default("target")
         public static @NotNull ConfigElement targetDefault() {
             return ConfigPrimitive.of("ENTITIES");
@@ -70,11 +60,6 @@ public class EntitiesInAreaSelector implements SelectorComponent {
         public static @NotNull ConfigElement limitDefault() {
             return ConfigPrimitive.of(-1);
         }
-
-        @Default("excludeSelf")
-        public static @NotNull ConfigElement excludeSelfDefault() {
-            return ConfigPrimitive.of(true);
-        }
     }
 
     private record Internal<T extends Entity>(Mob self,
@@ -82,10 +67,9 @@ public class EntitiesInAreaSelector implements SelectorComponent {
                                               EntityTracker.Target<T> target,
                                               Validator validator,
                                               int limit,
-                                              double range,
-                                              boolean excludeSelf) implements Selector {
+                                              double range) implements Selector {
         private Internal(Mob self, Selector originSelector, EntityTracker.Target<T> target, Validator validator,
-                int limit, double range, boolean excludeSelf) {
+                int limit, double range) {
             this.self = Objects.requireNonNull(self, "self");
             this.originSelector = Objects.requireNonNull(originSelector, "originSelector");
             this.target = Objects.requireNonNull(target, "target");
@@ -93,7 +77,6 @@ public class EntitiesInAreaSelector implements SelectorComponent {
 
             this.limit = limit;
             this.range = range;
-            this.excludeSelf = excludeSelf;
         }
 
         @Override
@@ -113,7 +96,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
             List<DoubleObjectPair<T>> targets = new ArrayList<>(limit < 0 ? 10 : limit);
 
             instance.getEntityTracker().nearbyEntities(point, range, target, target -> {
-                if ((target == self && excludeSelf) || !validator.valid(target)) {
+                if (!validator.valid(target)) {
                     return;
                 }
 

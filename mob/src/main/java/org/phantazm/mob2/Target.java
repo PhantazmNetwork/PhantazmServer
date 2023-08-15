@@ -7,10 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Represents a target of a particular skill.
@@ -27,6 +25,30 @@ public sealed interface Target
     @NotNull @Unmodifiable Collection<? extends @NotNull Entity> targets();
 
     @NotNull Optional<? extends Entity> target();
+
+    default <T extends Entity> void typedTargets(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
+        Collection<? extends Entity> targets = targets();
+
+        for (Entity targetEntity : targets) {
+            if (type.isAssignableFrom(targetEntity.getClass())) {
+                consumer.accept(type.cast(targetEntity));
+            }
+        }
+    }
+
+    default <T extends Entity> @NotNull Optional<T> typedTarget(@NotNull Class<T> type) {
+        Optional<? extends Entity> target = target();
+        if (target.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Entity entity = target.get();
+        if (type.isAssignableFrom(entity.getClass())) {
+            return Optional.of(type.cast(entity));
+        }
+
+        return Optional.empty();
+    }
 
     static @NotNull Target ofNullable(@Nullable Entity entity) {
         if (entity == null) {
