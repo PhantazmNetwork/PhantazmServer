@@ -89,7 +89,8 @@ public record MapSettingsInfo(int mapDataVersion,
                               @NotNull Component finishRepairingMessage,
                               @NotNull Component enemiesNearbyMessage,
                               @NotNull Component healthDisplay,
-                              @NotNull String gameJoinFormat) {
+                              @NotNull String gameJoinFormat,
+                              @NotNull String coinLossFormat) {
 
     public static final int MAP_DATA_VERSION = 1;
 
@@ -156,7 +157,7 @@ public record MapSettingsInfo(int mapDataVersion,
                 Component.text("Stopped repairing.", NamedTextColor.RED),
                 Component.text("Fully repaired!", NamedTextColor.GREEN),
                 Component.text("You cannot repair that window while enemies are nearby!", NamedTextColor.RED),
-                Component.text("❤", NamedTextColor.RED), "");
+                Component.text("❤", NamedTextColor.RED), "", "");
     }
 
     @Default("chunkLoadRange")
@@ -177,5 +178,10 @@ public record MapSettingsInfo(int mapDataVersion,
     @Default("reviveHealthFactor")
     public static @NotNull ConfigElement defaultReviveHealthFactor() {
         return ConfigPrimitive.of(1.0F);
+    }
+
+    @Default("coinLossFormat")
+    public static @NotNull ConfigElement defaultCoinLossFormat() {
+        return ConfigPrimitive.of("");
     }
 }
