@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupSkill implements SkillComponent {
+    private static final Skill[] EMPTY_SKILL_ARRAY = new Skill[0];
+
     private final List<SkillComponent> delegates;
 
     @FactoryMethod
@@ -31,7 +33,7 @@ public class GroupSkill implements SkillComponent {
             }
         }
 
-        return new Internal(delegateSkills, tickables.isEmpty() ? null : tickables.toArray(Skill[]::new));
+        return new Internal(delegateSkills, tickables.isEmpty() ? EMPTY_SKILL_ARRAY : tickables.toArray(Skill[]::new));
     }
 
     @DataObject
@@ -55,10 +57,6 @@ public class GroupSkill implements SkillComponent {
 
         @Override
         public void tick() {
-            if (tickables == null) {
-                return;
-            }
-
             for (Skill skill : tickables) {
                 skill.tick();
             }
@@ -66,7 +64,7 @@ public class GroupSkill implements SkillComponent {
 
         @Override
         public boolean needsTicking() {
-            return tickables != null;
+            return tickables.length > 0;
         }
 
         @Override
