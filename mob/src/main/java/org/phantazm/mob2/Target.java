@@ -26,7 +26,7 @@ public sealed interface Target
 
     @NotNull Optional<? extends Entity> target();
 
-    default <T extends Entity> void typedTargets(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
+    default <T extends Entity> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
         Collection<? extends Entity> targets = targets();
 
         for (Entity targetEntity : targets) {
@@ -36,7 +36,7 @@ public sealed interface Target
         }
     }
 
-    default <T extends Entity> @NotNull Optional<T> typedTarget(@NotNull Class<T> type) {
+    default <T extends Entity> @NotNull Optional<T> forType(@NotNull Class<T> type) {
         Optional<? extends Entity> target = target();
         if (target.isEmpty()) {
             return Optional.empty();

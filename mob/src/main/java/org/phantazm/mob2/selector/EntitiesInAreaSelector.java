@@ -10,7 +10,6 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.doubles.DoubleObjectPair;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -23,7 +22,6 @@ import org.phantazm.mob2.validator.ValidatorComponent;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public class EntitiesInAreaSelector implements SelectorComponent {
@@ -41,8 +39,8 @@ public class EntitiesInAreaSelector implements SelectorComponent {
 
     @Override
     public @NotNull Selector apply(@NotNull InjectionStore injectionStore) {
-        return new Internal<>(injectionStore.get(Keys.MOB_KEY), originSelector.apply(injectionStore),
-                data.target.target(), validator.apply(injectionStore), data.limit, data.range);
+        return new Internal(injectionStore.get(Keys.MOB_KEY), originSelector.apply(injectionStore),
+                validator.apply(injectionStore), data);
     }
 
     @DataObject
@@ -62,27 +60,11 @@ public class EntitiesInAreaSelector implements SelectorComponent {
         }
     }
 
-    private record Internal<T extends Entity>(Mob self,
-                                              Selector originSelector,
-                                              EntityTracker.Target<T> target,
-                                              Validator validator,
-                                              int limit,
-                                              double range) implements Selector {
-        private Internal(Mob self, Selector originSelector, EntityTracker.Target<T> target, Validator validator,
-                int limit, double range) {
-            this.self = Objects.requireNonNull(self, "self");
-            this.originSelector = Objects.requireNonNull(originSelector, "originSelector");
-            this.target = Objects.requireNonNull(target, "target");
-            this.validator = Objects.requireNonNull(validator, "validator");
-
-            this.limit = limit;
-            this.range = range;
-        }
-
+    private record Internal(Mob self, Selector originSelector, Validator validator, Data data) implements Selector {
         @Override
         public @NotNull Target select() {
             Instance instance = self.getInstance();
-            if (instance == null || limit == 0) {
+            if (instance == null || data.limit == 0) {
                 return Target.NONE;
             }
 
@@ -93,9 +75,9 @@ public class EntitiesInAreaSelector implements SelectorComponent {
             }
 
             Point point = optionalPoint.get();
-            List<DoubleObjectPair<T>> targets = new ArrayList<>(limit < 0 ? 10 : limit);
+            List<DoubleObjectPair<Entity>> targets = new ArrayList<>(data.limit < 0 ? 10 : data.limit);
 
-            instance.getEntityTracker().nearbyEntities(point, range, target, target -> {
+            instance.getEntityTracker().nearbyEntities(point, data.range, data.target.target(), target -> {
                 if (!validator.valid(target)) {
                     return;
                 }
@@ -103,9 +85,9 @@ public class EntitiesInAreaSelector implements SelectorComponent {
                 double thisDistanceSquared = point.distanceSquared(target.getPosition());
 
                 for (int i = 0; i < targets.size(); i++) {
-                    DoubleObjectPair<T> existingTargets = targets.get(i);
-                    if (existingTargets.firstDouble() > thisDistanceSquared) {
-                        if (targets.size() == limit) {
+                    DoubleObjectPair<Entity> existingTarget = targets.get(i);
+                    if (existingTarget.firstDouble() > thisDistanceSquared) {
+                        if (targets.size() == data.limit) {
                             targets.remove(targets.size() - 1);
                         }
 
@@ -114,7 +96,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
                     }
                 }
 
-                if (targets.size() == limit) {
+                if (targets.size() == data.limit) {
                     return;
                 }
 
@@ -125,8 +107,8 @@ public class EntitiesInAreaSelector implements SelectorComponent {
                 return Target.NONE;
             }
 
-            List<T> actualTargets = new ArrayList<>(targets.size());
-            for (DoubleObjectPair<T> target : targets) {
+            List<Entity> actualTargets = new ArrayList<>(targets.size());
+            for (DoubleObjectPair<Entity> target : targets) {
                 actualTargets.add(target.right());
             }
 

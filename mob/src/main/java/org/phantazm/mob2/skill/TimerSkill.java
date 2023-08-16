@@ -10,14 +10,16 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 
+import java.util.Objects;
+
 public class TimerSkill implements SkillComponent {
     private final Data data;
     private final Skill delegate;
 
     @FactoryMethod
     public TimerSkill(@NotNull Data data, @NotNull @Child("delegate") Skill delegate) {
-        this.data = data;
-        this.delegate = delegate;
+        this.data = Objects.requireNonNull(data);
+        this.delegate = Objects.requireNonNull(delegate);
     }
 
     @Override
@@ -27,10 +29,10 @@ public class TimerSkill implements SkillComponent {
 
     @DataObject
     public record Data(int repeat,
-                       long interval,
-                       boolean requiresActivation,
-                       boolean resetOnActivation,
-                       @NotNull @ChildPath("delegate") String delegate) {
+        long interval,
+        boolean requiresActivation,
+        boolean resetOnActivation,
+        @NotNull @ChildPath("delegate") String delegate) {
         @Default("repeat")
         public static @NotNull ConfigElement defaultRepeat() {
             return ConfigPrimitive.of(-1);
@@ -52,6 +54,8 @@ public class TimerSkill implements SkillComponent {
         private final Skill delegate;
         private final boolean tickDelegate;
 
+        private final Object lock = new Object();
+
         private boolean started;
         private long activationTicks;
         private int useCount;
@@ -65,13 +69,15 @@ public class TimerSkill implements SkillComponent {
 
         @Override
         public void use() {
-            if (data.requiresActivation) {
-                started = true;
-            }
+            synchronized (lock) {
+                if (data.requiresActivation) {
+                    started = true;
+                }
 
-            if (data.resetOnActivation || !started) {
-                activationTicks = -1;
-                useCount = 0;
+                if (data.resetOnActivation || !started) {
+                    activationTicks = -1;
+                    useCount = 0;
+                }
             }
         }
 
@@ -81,30 +87,43 @@ public class TimerSkill implements SkillComponent {
                 delegate.tick();
             }
 
-            if (!started) {
-                return;
+            boolean useDelegate = false;
+            synchronized (lock) {
+                if (!started) {
+                    return;
+                }
+
+                int lastUseCount = -1;
+                if (data.repeat == 0 || (data.repeat > 0 && (lastUseCount = useCount) >= data.repeat)) {
+                    started = false;
+                    return;
+                }
+
+                ++activationTicks;
+                if (activationTicks >= data.interval) {
+                    activationTicks = 0;
+                    useDelegate = true;
+                    manageState(lastUseCount);
+                }
             }
 
-            int lastUseCount = -1;
-            if (data.repeat == 0 || (data.repeat > 0 && (lastUseCount = useCount) >= data.repeat)) {
-                started = false;
-                return;
-            }
-
-            ++activationTicks;
-            if (activationTicks >= data.interval) {
-                activationTicks = 0;
+            if (useDelegate) {
                 delegate.use();
-                manageState(lastUseCount);
             }
         }
 
         @Override
         public void end() {
-            activationTicks = -1;
-            useCount = 0;
-            started = false;
-            delegate.end();
+            synchronized (lock) {
+                if (!started) {
+                    return;
+                }
+
+                activationTicks = -1;
+                useCount = 0;
+                started = false;
+                delegate.end();
+            }
         }
 
         @Override

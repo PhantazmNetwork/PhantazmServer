@@ -12,8 +12,8 @@ public abstract class TargetedSkill implements Skill {
     private final Selector selector;
 
     public TargetedSkill(@NotNull Mob self, @NotNull Selector selector) {
-        this.self = Objects.requireNonNull(self, "self");
-        this.selector = Objects.requireNonNull(selector, "selector");
+        this.self = Objects.requireNonNull(self);
+        this.selector = Objects.requireNonNull(selector);
     }
 
     @Override

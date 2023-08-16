@@ -19,18 +19,19 @@ import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class ShowHealthbarSkill implements SkillComponent {
     private static final char HEX = '#';
     private static final Map<String, TextColor> COLOR_ALIASES =
-            Map.of("dark_grey", NamedTextColor.DARK_GRAY, "grey", NamedTextColor.GRAY);
+        Map.of("dark_grey", NamedTextColor.DARK_GRAY, "grey", NamedTextColor.GRAY);
 
     private final Data data;
 
     @FactoryMethod
     public ShowHealthbarSkill(@NotNull Data data) {
-        this.data = data;
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class ShowHealthbarSkill implements SkillComponent {
             float maxHealth = entity.getMaxHealth();
             float currentHealth = MathUtils.clamp(entity.getHealth(), 0, maxHealth);
 
-            float percentage = maxHealth == 0 ? 0 : currentHealth / maxHealth;
+            float percentage = maxHealth == 0 ? 0:currentHealth / maxHealth;
             int aliveBars = Math.round(percentage * data.barWidth);
 
             if (lastAliveBars == aliveBars) {
@@ -99,13 +100,13 @@ public class ShowHealthbarSkill implements SkillComponent {
 
                     switch (value) {
                         case "bar_component" ->
-                                barElement = argumentQueue.popOr(() -> "Missing bar_component argument value").value();
+                            barElement = argumentQueue.popOr(() -> "Missing bar_component argument value").value();
                         case "color_start" -> colorStart = resolveColor(context,
-                                argumentQueue.popOr(() -> "Missing color_start argument value").value());
+                            argumentQueue.popOr(() -> "Missing color_start argument value").value());
                         case "color_end" -> colorEnd = resolveColor(context,
-                                argumentQueue.popOr(() -> "Missing color_end argument value").value());
+                            argumentQueue.popOr(() -> "Missing color_end argument value").value());
                         case "missing_color" -> missingColor = resolveColor(context,
-                                argumentQueue.popOr(() -> "Missing missing_color argument value").value());
+                            argumentQueue.popOr(() -> "Missing missing_color argument value").value());
                     }
                 }
 
@@ -120,32 +121,30 @@ public class ShowHealthbarSkill implements SkillComponent {
 
                 Component aliveComponent = Component.text(alivePart, aliveColor);
                 Component deadComponent =
-                        missingPart.isEmpty() ? Component.empty() : Component.text(missingPart, missingColor);
+                    missingPart.isEmpty() ? Component.empty():Component.text(missingPart, missingColor);
 
                 return Tag.selfClosingInserting(
-                        Component.join(JoinConfiguration.noSeparators(), aliveComponent, deadComponent));
+                    Component.join(JoinConfiguration.noSeparators(), aliveComponent, deadComponent));
             }));
 
             return Optional.of(MiniMessage.miniMessage().deserialize(data.bar, resolver));
         }
 
         static @NotNull TextColor resolveColor(@NotNull Context ctx, @NotNull String colorName)
-                throws ParsingException {
+            throws ParsingException {
             TextColor color;
             if (COLOR_ALIASES.containsKey(colorName)) {
                 color = COLOR_ALIASES.get(colorName);
-            }
-            else if (colorName.charAt(0) == HEX) {
+            } else if (colorName.charAt(0) == HEX) {
                 color = TextColor.fromHexString(colorName);
-            }
-            else {
+            } else {
                 color = NamedTextColor.NAMES.value(colorName);
             }
 
             if (color == null) {
                 throw ctx.newException(String.format(
-                        "Unable to parse a color from '%s'. Please use named colours or hex (#RRGGBB) colors.",
-                        colorName));
+                    "Unable to parse a color from '%s'. Please use named colours or hex (#RRGGBB) colors.",
+                    colorName));
             }
             return color;
         }

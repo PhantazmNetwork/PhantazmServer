@@ -7,6 +7,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 
+import java.util.Objects;
 import java.util.Random;
 
 public class RandomSkill implements SkillComponent {
@@ -16,9 +17,9 @@ public class RandomSkill implements SkillComponent {
 
     @FactoryMethod
     public RandomSkill(@NotNull Data data, @NotNull @Child("delegate") SkillComponent delegate) {
-        this.data = data;
+        this.data = Objects.requireNonNull(data);
         this.random = new Random();
-        this.delegate = delegate;
+        this.delegate = Objects.requireNonNull(delegate);
     }
 
     @Override

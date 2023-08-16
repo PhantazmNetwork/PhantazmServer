@@ -8,12 +8,14 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
 
+import java.util.Objects;
+
 public class DistanceValidator implements ValidatorComponent {
     private final Data data;
 
     @FactoryMethod
     public DistanceValidator(@NotNull Data data) {
-        this.data = data;
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

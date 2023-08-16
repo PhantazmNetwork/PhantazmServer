@@ -43,6 +43,10 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
         return new KeyImpl<>(clazz, id);
     }
 
+    static @NotNull InjectionStore of() {
+        return EMPTY;
+    }
+
     static @NotNull <T> InjectionStore of(@NotNull Key<T> key, @NotNull T object) {
         return new InjectionStoreImpl(Map.of(key, object));
     }
@@ -69,6 +73,10 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
 
         @Override
         public @NotNull InjectionStore build() {
+            if (values.isEmpty()) {
+                return EMPTY;
+            }
+
             return new InjectionStoreImpl(Map.copyOf(values));
         }
     }

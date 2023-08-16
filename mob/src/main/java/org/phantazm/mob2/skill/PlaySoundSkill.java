@@ -21,6 +21,7 @@ import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Random;
 
 public class PlaySoundSkill implements SkillComponent {
@@ -30,8 +31,8 @@ public class PlaySoundSkill implements SkillComponent {
 
     @FactoryMethod
     public PlaySoundSkill(@NotNull Data data, @NotNull @Child("target") SelectorComponent targetSelector) {
-        this.data = data;
-        this.targetSelector = targetSelector;
+        this.data = Objects.requireNonNull(data);
+        this.targetSelector = Objects.requireNonNull(targetSelector);
         this.random = new Random();
     }
 
@@ -74,7 +75,8 @@ public class PlaySoundSkill implements SkillComponent {
                 for (Entity entity : entities) {
                     if (!data.broadcast && entity instanceof Player player) {
                         player.playSound(randomize(data.sound), entity.getPosition());
-                    } else {
+                    }
+                    else {
                         instance.playSound(randomize(data.sound), entity.getPosition());
                     }
                 }
