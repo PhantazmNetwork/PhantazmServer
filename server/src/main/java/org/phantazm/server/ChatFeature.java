@@ -76,7 +76,13 @@ public final class ChatFeature {
         commandManager.register(ChatChannelSendCommand.chatChannelSend("pc", partyChannel));
 
         Map<UUID, String> playerChannels = new HashMap<>();
-        commandManager.register(new ChatCommand(channels, playerChannels, () -> DEFAULT_CHAT_CHANNEL_NAME));
+        Map<String, String> aliasResolver = Map.of(
+                DEFAULT_CHAT_CHANNEL_NAME.substring(0, 1), DEFAULT_CHAT_CHANNEL_NAME,
+                PartyChatChannel.CHANNEL_NAME.substring(0, 1), PartyChatChannel.CHANNEL_NAME,
+                DEFAULT_CHAT_CHANNEL_NAME, DEFAULT_CHAT_CHANNEL_NAME,
+                PartyChatChannel.CHANNEL_NAME, PartyChatChannel.CHANNEL_NAME
+        );
+        commandManager.register(new ChatCommand(channels, playerChannels, aliasResolver, () -> DEFAULT_CHAT_CHANNEL_NAME));
         node.addListener(PlayerLoginEvent.class, event -> {
             UUID uuid = event.getPlayer().getUuid();
             playerChannels.putIfAbsent(uuid, DEFAULT_CHAT_CHANNEL_NAME);
