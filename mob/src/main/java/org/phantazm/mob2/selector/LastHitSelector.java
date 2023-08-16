@@ -1,7 +1,7 @@
 package org.phantazm.mob2.selector;
 
 import com.github.steanky.element.core.annotation.FactoryMethod;
-import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -36,17 +36,16 @@ public class LastHitSelector implements SelectorComponent {
                 return Target.NONE;
             }
 
-            for (LivingEntity livingEntity : instance.getEntityTracker()
-                    .entities(EntityTracker.Target.LIVING_ENTITIES)) {
-                if (!livingEntity.getUuid().equals(lastHit)) {
+            for (Entity entity : instance.getEntityTracker().entities(EntityTracker.Target.ENTITIES)) {
+                if (!entity.getUuid().equals(lastHit)) {
                     continue;
                 }
 
-                if (livingEntity.isRemoved()) {
+                if (entity.isRemoved()) {
                     return Target.NONE;
                 }
 
-                return Target.entities(livingEntity);
+                return Target.entities(entity);
             }
 
             return Target.NONE;
