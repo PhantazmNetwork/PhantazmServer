@@ -25,11 +25,15 @@ public record PartyCommandConfig(@NotNull Component notInParty,
                                  @NotNull String onlineMemberFormat,
                                  @NotNull String offlineMemberFormat,
                                  @NotNull String toTransferNotInPartyFormat,
-                                 @NotNull Component cannotTransferToSelf) {
+                                 @NotNull Component cannotTransferToSelf,
+                                 @NotNull String toSpyNotInPartyFormat,
+                                 @NotNull String nowSpyingFormat,
+                                 @NotNull String noLongerSpyingFormat) {
 
     public static final PartyCommandConfig DEFAULT =
             new PartyCommandConfig(Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "",
                     Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "", "",
-                    Component.empty(), Component.empty(), "", Component.empty(), "", "", "", "", "", Component.empty());
+                    Component.empty(), Component.empty(), "", Component.empty(), "", "", "", "", "",
+                    Component.empty(), "", "", "");
 
 }

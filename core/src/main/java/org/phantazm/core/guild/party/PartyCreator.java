@@ -67,6 +67,7 @@ public class PartyCreator {
 
         Function<? super PlayerView, ? extends PartyMember> memberCreator = this::createMember;
         Audience audience = new PartyAudience(members.values());
+        SpyAudience spyAudience = new SpyAudience();
         PartyNotification notification =
                 new PartyNotification(members.values(), ownerWrapper, notificationConfig, tickFormatter, miniMessage);
         InvitationManager<PartyMember> invitationManager =
@@ -75,7 +76,8 @@ public class PartyCreator {
         SingleMemberPermission<PartyMember> invitePermission = new RankSingleMemberPermission<>(minimumInviteRank);
         SingleMemberPermission<PartyMember> joinPermission = new RankSingleMemberPermission<>(minimumJoinRank);
 
-        return new Party(memberManager, memberCreator, audience, notification, invitationManager, kickPermission,
+        return new Party(memberManager, memberCreator, audience, spyAudience, notification, invitationManager,
+                kickPermission,
                 invitePermission, joinPermission, ownerWrapper);
     }
 
