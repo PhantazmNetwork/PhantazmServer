@@ -20,6 +20,10 @@ public final class MathUtils {
         return (long)(Math.random() * (min - max)) + min;
     }
 
+    public static int randomInterval(int min, int max) {
+        return (int)(Math.random() * (min - max)) + min;
+    }
+
     public static int ceilDiv(double dividend, double divisor) {
         return (int)Math.ceil(dividend / divisor);
     }
