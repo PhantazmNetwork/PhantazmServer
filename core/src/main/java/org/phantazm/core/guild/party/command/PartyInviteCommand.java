@@ -63,7 +63,7 @@ public class PartyInviteCommand {
                 }
 
                 String username = otherPlayer.getUsername();
-                if (username.startsWith(prefix)) {
+                if (username.toLowerCase().startsWith(prefix)) {
                     suggestion.addEntry(new SuggestionEntry(otherPlayer.getUsername()));
                 }
             }
