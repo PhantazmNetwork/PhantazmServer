@@ -52,7 +52,7 @@ public class PartySpyCommand {
         });
 
         command.setCondition((sender, commandString) -> {
-            if (false && !sender.hasPermission(PERMISSION)) {
+            if (!sender.hasPermission(PERMISSION)) {
                 return false;
             }
 
