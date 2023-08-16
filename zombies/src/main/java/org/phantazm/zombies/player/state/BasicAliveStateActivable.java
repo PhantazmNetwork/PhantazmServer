@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -73,6 +74,10 @@ public class BasicAliveStateActivable implements Activable {
         });
 
         if (context.isRevive()) {
+            playerView.getPlayer().ifPresent(player -> {
+                player.setNextHurtTick(MinecraftServer.currentTick() + settings.reviveInvulnerabilityTicks());
+            });
+
             // TODO: theoretical memleaks here
             playerView.getDisplayName().thenAccept(displayName -> {
                 TagResolver[] tagResolvers = getTagResolvers(displayName);

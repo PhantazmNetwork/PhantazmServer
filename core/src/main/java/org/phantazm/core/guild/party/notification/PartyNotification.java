@@ -243,7 +243,7 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
             }
 
             TagResolver ownerPlaceholder = Placeholder.component("owner", displayName);
-            Component message = miniMessage.deserialize(config.transferFormat(), ownerPlaceholder);
+            Component message = miniMessage.deserialize(config.disbandFormat(), ownerPlaceholder);
             audience.sendMessage(message);
         });
     }

@@ -4,12 +4,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
-import net.minestom.server.command.builder.arguments.ArgumentWord;
+import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.chat.ChatChannel;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -25,8 +26,6 @@ public class ChatCommand extends Command {
      */
     public static final String COMMAND_ID = "chat";
 
-    private static final String[] EMPTY_STRING_ARRAY = new String[0];
-
     /**
      * Creates a chat {@link Command}.
      *
@@ -35,41 +34,20 @@ public class ChatCommand extends Command {
      * @param defaultChannelNameSupplier A {@link Supplier} of the default {@link ChatChannel} name
      */
     public ChatCommand(@NotNull Map<String, ChatChannel> channels, @NotNull Map<UUID, String> playerChannels,
+            @NotNull Map<String, String> aliasResolver,
             @NotNull Supplier<String> defaultChannelNameSupplier) {
-        super(COMMAND_ID);
+        super(COMMAND_ID, "ch");
 
         Objects.requireNonNull(channels, "channels");
         Objects.requireNonNull(playerChannels, "playerChannels");
+        Objects.requireNonNull(aliasResolver, "aliasResolver");
         Objects.requireNonNull(defaultChannelNameSupplier, "defaultChannelNameSupplier");
 
-        String[] channelNames = channels.keySet().toArray(EMPTY_STRING_ARRAY);
-        Argument<String> channelNameArgument = new ArgumentWord("channel").from(channelNames);
+        Argument<String> channelNameArgument = ArgumentType.String("channel");
         channelNameArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            for (String channelName : channelNames) {
+            for (String channelName : channels.keySet()) {
                 suggestion.addEntry(new SuggestionEntry(channelName));
             }
-        });
-
-        channelNameArgument.setCallback((sender, exception) -> {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("Invalid channel! Valid options are ");
-
-            for (int i = 0; i < channelNames.length; i++) {
-                String name = channelNames[i];
-                stringBuilder.append(name);
-
-                if (i < channelNames.length - 2) {
-                    stringBuilder.append(", ");
-                }
-                else if (i == channelNames.length - 2) {
-                    if (channelNames.length != 2) {
-                        stringBuilder.append(",");
-                    }
-                    stringBuilder.append(" or ");
-                }
-            }
-
-            sender.sendMessage(Component.text(stringBuilder.toString(), NamedTextColor.RED));
         });
 
         addConditionalSyntax((sender, commandString) -> {
@@ -83,10 +61,36 @@ public class ChatCommand extends Command {
             Player player = (Player)sender;
 
             String channelName = context.get(channelNameArgument);
-            Component channelNameComponent = Component.text(channelName, NamedTextColor.GOLD);
             String previousChannelName =
                     playerChannels.computeIfAbsent(player.getUuid(), uuid -> defaultChannelNameSupplier.get());
 
+            if (!aliasResolver.containsKey(channelName)) {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append("Invalid channel! Valid options are ");
+
+                Iterator<String> channelIterator = channels.keySet().iterator();
+                for (int i = 0; channelIterator.hasNext(); ++i) {
+                    String name = channelIterator.next();
+                    stringBuilder.append(name);
+
+                    if (i < channels.size() - 2) {
+                        stringBuilder.append(", ");
+                    }
+                    else if (i == channels.size() - 2) {
+                        if (channels.size() != 2) {
+                            stringBuilder.append(",");
+                        }
+                        stringBuilder.append(" or ");
+                    }
+                }
+                stringBuilder.append(".");
+
+                sender.sendMessage(Component.text(stringBuilder.toString(), NamedTextColor.RED));
+                return;
+            }
+
+            channelName = aliasResolver.get(channelName);
+            Component channelNameComponent = Component.text(channelName, NamedTextColor.GOLD);
             if (channelName.equals(previousChannelName)) {
                 Component message = Component.text()
                         .append(Component.text("You are already in the "), channelNameComponent,

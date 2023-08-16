@@ -1,3 +1,4 @@
+spyChatFormat = "<sender> <message>"
 creatorRank = 1
 defaultRank = 0
 invitationDuration = 1200
@@ -45,3 +46,8 @@ cannotKickOtherFormat = "<gradient:#ff6c33:#ff76b5><st>⎯⎯⎯⎯⎯⎯⎯⎯�
 listFormat = "<gradient:#ff6c33:#ff76b5><st>⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯</st></gradient><br><#fffa9e>»</#fffa9e> <yellow><b>Party Owner:</b></yellow> <green><owner></green><br><br>  <#9096ad>Party Members</#9096ad> <#b8bfde>(<member_count>):</#b8bfde> <br>  <#b8bfde><members:, ></#b8bfde><br><br>  <#9096ad>Online</#9096ad><#b8bfde>:</#b8bfde> <green><online_count></green><br>  <#9096ad>Offline</#9096ad><#b8bfde>:</#b8bfde> <red><offline_count></red><br><gradient:#ff6c33:#ff76b5><st>⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯</st></gradient>"
 onlineMemberFormat = "<green><member> ▪</green>"
 offlineMemberFormat = "<green><member></green> <red>▪</red>"
+toTransferNotInPartyFormat = "<red><new_owner> is not in your party!"
+cannotTransferToSelf = "You cannot transfer the party to yourself!"
+toSpyNotInPartyFormat = "<red><target> isn't in a party!"
+nowSpyingFormat = "<red>You are spying on <target>!"
+noLongerSpyingFormat = "<red>You are no longer spying on <target>!"

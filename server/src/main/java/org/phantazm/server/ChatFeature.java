@@ -11,15 +11,13 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.chat.BasicChatChannel;
 import org.phantazm.core.chat.ChatChannel;
 import org.phantazm.core.chat.ChatConfig;
-import org.phantazm.core.chat.InstanceChatChannel;
 import org.phantazm.core.chat.command.ChatChannelSendCommand;
 import org.phantazm.core.chat.command.ChatCommand;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyChatChannel;
-import org.phantazm.core.player.PlayerView;
-import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.role.RoleStore;
 
 import java.util.HashMap;
@@ -44,12 +42,11 @@ public final class ChatFeature {
     /**
      * Initializes chat features. Should only be called once from {@link PhantazmServer#main(String[])}.
      *
-     * @param viewProvider A {@link PlayerViewProvider} to create {@link PlayerView}s
-     * @param chatConfig   Chat settings
-     * @param parties      A map of player {@link UUID}s to {@link Party} instances
+     * @param chatConfig Chat settings
+     * @param parties    A map of player {@link UUID}s to {@link Party} instances
      */
-    static void initialize(@NotNull PlayerViewProvider viewProvider, @NotNull ChatConfig chatConfig,
-            @NotNull Map<? super UUID, ? extends Party> parties, @NotNull RoleStore roleStore) {
+    static void initialize(@NotNull ChatConfig chatConfig, @NotNull Map<? super UUID, ? extends Party> parties,
+            @NotNull RoleStore roleStore) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {
@@ -67,17 +64,25 @@ public final class ChatFeature {
 
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         CommandManager commandManager = MinecraftServer.getCommandManager();
-        ChatChannel defaultChannel = new InstanceChatChannel(viewProvider, MiniMessage.miniMessage(),
-                chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME), nameFormatter);
+        ChatChannel defaultChannel =
+                new BasicChatChannel(MiniMessage.miniMessage(), chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME),
+                        nameFormatter);
         channels.put(DEFAULT_CHAT_CHANNEL_NAME, defaultChannel);
         commandManager.register(ChatChannelSendCommand.chatChannelSend("ac", defaultChannel));
-        ChatChannel partyChannel = new PartyChatChannel(parties, viewProvider, MiniMessage.miniMessage(),
-                chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME), nameFormatter);
+        ChatChannel partyChannel = new PartyChatChannel(parties, MiniMessage.miniMessage(),
+                chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME), PartyFeature.getConfig().spyChatFormat(),
+                nameFormatter);
         channels.put(PartyChatChannel.CHANNEL_NAME, partyChannel);
         commandManager.register(ChatChannelSendCommand.chatChannelSend("pc", partyChannel));
 
         Map<UUID, String> playerChannels = new HashMap<>();
-        commandManager.register(new ChatCommand(channels, playerChannels, () -> DEFAULT_CHAT_CHANNEL_NAME));
+        Map<String, String> aliasResolver = Map.of(
+                DEFAULT_CHAT_CHANNEL_NAME.substring(0, 1), DEFAULT_CHAT_CHANNEL_NAME,
+                PartyChatChannel.CHANNEL_NAME.substring(0, 1), PartyChatChannel.CHANNEL_NAME,
+                DEFAULT_CHAT_CHANNEL_NAME, DEFAULT_CHAT_CHANNEL_NAME,
+                PartyChatChannel.CHANNEL_NAME, PartyChatChannel.CHANNEL_NAME
+        );
+        commandManager.register(new ChatCommand(channels, playerChannels, aliasResolver, () -> DEFAULT_CHAT_CHANNEL_NAME));
         node.addListener(PlayerLoginEvent.class, event -> {
             UUID uuid = event.getPlayer().getUuid();
             playerChannels.putIfAbsent(uuid, DEFAULT_CHAT_CHANNEL_NAME);
@@ -93,15 +98,7 @@ public final class ChatFeature {
                 return;
             }
 
-            channel.findAudience(uuid, audience -> {
-                channel.formatMessage(event.getPlayer(), event.getMessage()).whenComplete((component, throwable) -> {
-                    if (component == null) {
-                        return;
-                    }
-
-                    audience.sendMessage(component);
-                });
-            }, failure -> {
+            channel.sendMessage(event.getPlayer(), event.getMessage(), failure -> {
                 player.sendMessage(failure.left());
                 if (failure.rightBoolean()) {
                     player.sendMessage(Component.text().append(Component.text("Set channel to "),

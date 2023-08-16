@@ -36,6 +36,8 @@ public class PartyCommand {
                 PartyTransferCommand.transferCommand(config, miniMessage, partyHolder.uuidToGuild(), viewProvider,
                         creatorRank, defaultRank));
         command.addSubcommand(PartyDisbandCommand.disbandCommand(config, partyHolder));
+        command.addSubcommand(
+                PartySpyCommand.spyCommand(config, miniMessage, connectionManager, partyHolder, viewProvider));
 
         return command;
     }

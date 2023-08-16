@@ -84,7 +84,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             entity.setTag(this.lastDamageTicksTag, ++lastDamageTicks);
             if (lastDamageTicks >= data.damageInterval) {
                 doDamage(entity, target.damager);
-                entity.setTag(this.lastDamageTicksTag, time);
+                entity.setTag(this.lastDamageTicksTag, 0L);
             }
 
             return false;
