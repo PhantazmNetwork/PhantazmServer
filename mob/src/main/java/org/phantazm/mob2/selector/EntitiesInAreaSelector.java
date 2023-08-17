@@ -54,6 +54,11 @@ public class EntitiesInAreaSelector implements SelectorComponent {
             return ConfigPrimitive.of("ENTITIES");
         }
 
+        @Default("range")
+        public static @NotNull ConfigElement rangeDefault() {
+            return ConfigPrimitive.of(-1D);
+        }
+
         @Default("limit")
         public static @NotNull ConfigElement limitDefault() {
             return ConfigPrimitive.of(-1);
@@ -69,39 +74,23 @@ public class EntitiesInAreaSelector implements SelectorComponent {
             }
 
             Target originTarget = originSelector.select();
-            Optional<? extends Point> optionalPoint = originTarget.location();
-            if (optionalPoint.isEmpty()) {
+            Optional<? extends Point> optionalOrigin = originTarget.location();
+            if (optionalOrigin.isEmpty()) {
                 return Target.NONE;
             }
 
-            Point point = optionalPoint.get();
+            Point origin = optionalOrigin.get();
             List<DoubleObjectPair<Entity>> targets = new ArrayList<>(data.limit < 0 ? 10 : data.limit);
 
-            instance.getEntityTracker().nearbyEntities(point, data.range, data.target.target(), target -> {
-                if (!validator.valid(target)) {
-                    return;
+            if (data.range < 0) {
+                for (Entity target : instance.getEntityTracker().entities(data.target.target())) {
+                    handleEntity(origin, target, targets);
                 }
-
-                double thisDistanceSquared = point.distanceSquared(target.getPosition());
-
-                for (int i = 0; i < targets.size(); i++) {
-                    DoubleObjectPair<Entity> existingTarget = targets.get(i);
-                    if (existingTarget.firstDouble() > thisDistanceSquared) {
-                        if (targets.size() == data.limit) {
-                            targets.remove(targets.size() - 1);
-                        }
-
-                        targets.add(i, DoubleObjectPair.of(thisDistanceSquared, target));
-                        return;
-                    }
-                }
-
-                if (targets.size() == data.limit) {
-                    return;
-                }
-
-                targets.add(DoubleObjectPair.of(thisDistanceSquared, target));
-            });
+            }
+            else {
+                instance.getEntityTracker().nearbyEntities(origin, data.range, data.target.target(),
+                        target -> handleEntity(origin, target, targets));
+            }
 
             if (targets.isEmpty()) {
                 return Target.NONE;
@@ -113,6 +102,32 @@ public class EntitiesInAreaSelector implements SelectorComponent {
             }
 
             return Target.entities(actualTargets);
+        }
+
+        private void handleEntity(Point origin, Entity target, List<DoubleObjectPair<Entity>> targets) {
+            if (!validator.valid(target)) {
+                return;
+            }
+
+            double thisDistanceSquared = origin.distanceSquared(target.getPosition());
+
+            for (int i = 0; i < targets.size(); i++) {
+                DoubleObjectPair<Entity> existingTarget = targets.get(i);
+                if (existingTarget.firstDouble() > thisDistanceSquared) {
+                    if (targets.size() == data.limit) {
+                        targets.remove(targets.size() - 1);
+                    }
+
+                    targets.add(i, DoubleObjectPair.of(thisDistanceSquared, target));
+                    return;
+                }
+            }
+
+            if (targets.size() == data.limit) {
+                return;
+            }
+
+            targets.add(DoubleObjectPair.of(thisDistanceSquared, target));
         }
     }
 }
