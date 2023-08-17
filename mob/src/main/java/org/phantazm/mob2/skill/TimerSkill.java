@@ -24,15 +24,15 @@ public class TimerSkill implements SkillComponent {
 
     @Override
     public @NotNull Skill apply(@NotNull InjectionStore injectionStore) {
-        return new Internal(data, delegate);
+        return new Internal(delegate, data.requiresActivation, data.resetOnActivation, data.repeat, data.interval);
     }
 
     @DataObject
-    public record Data(int repeat,
-        long interval,
-        boolean requiresActivation,
-        boolean resetOnActivation,
-        @NotNull @ChildPath("delegate") String delegate) {
+    public record Data(@NotNull @ChildPath("delegate") String delegate,
+                       int repeat,
+                       int interval,
+                       boolean requiresActivation,
+                       boolean resetOnActivation) {
         @Default("repeat")
         public static @NotNull ConfigElement defaultRepeat() {
             return ConfigPrimitive.of(-1);
@@ -49,97 +49,18 @@ public class TimerSkill implements SkillComponent {
         }
     }
 
-    private static class Internal implements Skill {
-        private final Data data;
-        private final Skill delegate;
-        private final boolean tickDelegate;
+    private static class Internal extends TimerSkillAbstract {
+        private final int interval;
 
-        private final Object lock = new Object();
-
-        private boolean started;
-        private long activationTicks;
-        private int useCount;
-
-        private Internal(Data data, Skill delegate) {
-            this.data = data;
-            this.delegate = delegate;
-            this.tickDelegate = delegate.needsTicking();
-            this.started = !data.requiresActivation;
+        public Internal(Skill delegate, boolean requiresActivation, boolean resetOnActivation, int repeat,
+                int interval) {
+            super(delegate, requiresActivation, resetOnActivation, repeat, interval);
+            this.interval = interval;
         }
 
         @Override
-        public void use() {
-            synchronized (lock) {
-                if (data.requiresActivation) {
-                    started = true;
-                }
-
-                if (data.resetOnActivation || !started) {
-                    activationTicks = -1;
-                    useCount = 0;
-                }
-            }
-        }
-
-        @Override
-        public void tick() {
-            if (tickDelegate) {
-                delegate.tick();
-            }
-
-            boolean useDelegate = false;
-            synchronized (lock) {
-                if (!started) {
-                    return;
-                }
-
-                int lastUseCount = -1;
-                if (data.repeat == 0 || (data.repeat > 0 && (lastUseCount = useCount) >= data.repeat)) {
-                    started = false;
-                    return;
-                }
-
-                ++activationTicks;
-                if (activationTicks >= data.interval) {
-                    activationTicks = 0;
-                    useDelegate = true;
-                    manageState(lastUseCount);
-                }
-            }
-
-            if (useDelegate) {
-                delegate.use();
-            }
-        }
-
-        @Override
-        public void end() {
-            synchronized (lock) {
-                if (!started) {
-                    return;
-                }
-
-                activationTicks = -1;
-                useCount = 0;
-                started = false;
-                delegate.end();
-            }
-        }
-
-        @Override
-        public boolean needsTicking() {
-            return true;
-        }
-
-        private void manageState(int lastUseCount) {
-            if (lastUseCount == -1) {
-                return;
-            }
-
-            useCount = ++lastUseCount;
-            if (lastUseCount >= data.repeat) {
-                started = false;
-            }
+        public int computeInterval() {
+            return interval;
         }
     }
 }

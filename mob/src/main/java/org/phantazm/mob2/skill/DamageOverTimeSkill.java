@@ -64,7 +64,7 @@ public class DamageOverTimeSkill implements SkillComponent {
         @Override
         protected void useOnTarget(@NotNull Target target) {
             int startTicks = ticks;
-            target.forType(LivingEntity.class, livingEntity -> addBleedTarget(livingEntity, startTicks));
+            target.forType(LivingEntity.class, livingEntity -> addDamageTarget(livingEntity, startTicks));
         }
 
         @Override
@@ -102,7 +102,7 @@ public class DamageOverTimeSkill implements SkillComponent {
             });
         }
 
-        private void addBleedTarget(LivingEntity livingEntity, int ticks) {
+        private void addDamageTarget(LivingEntity livingEntity, int ticks) {
             targets.add(new Entry(livingEntity, ticks));
         }
 

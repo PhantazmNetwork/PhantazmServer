@@ -28,7 +28,7 @@ public class RandomTimerSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@ChildPath("delegate") String delegate,
+    public record Data(@NotNull @ChildPath("delegate") String delegate,
                        int repeat,
                        int minInterval,
                        int maxInterval,
@@ -50,101 +50,22 @@ public class RandomTimerSkill implements SkillComponent {
         }
     }
 
-    private static class Internal implements Skill {
+    private static class Internal extends TimerSkillAbstract {
         private final Data data;
-        private final Skill delegate;
-        private final boolean tickDelegate;
-        private final Object lock = new Object();
 
-        private boolean started;
-        private int useCount;
-        private int interval;
-        private int activationTicks;
-
-        private Internal(Data data, Skill delegate) {
+        public Internal(Data data, Skill delegate) {
+            super(delegate, data.requiresActivation, data.resetOnActivation, data.repeat,
+                    computeInterval0(data.minInterval, data.maxInterval));
             this.data = data;
-            this.delegate = delegate;
-            this.tickDelegate = delegate.needsTicking();
-            this.started = !data.requiresActivation;
-            this.interval = data.requiresActivation ? -1 : MathUtils.randomInterval(data.minInterval, data.maxInterval);
-            this.activationTicks = -1;
         }
 
         @Override
-        public void init() {
-            delegate.init();
+        public int computeInterval() {
+            return computeInterval0(data.minInterval, data.maxInterval);
         }
 
-        @Override
-        public void use() {
-            synchronized (lock) {
-                if (data.requiresActivation) {
-                    started = true;
-                    interval = MathUtils.randomInterval(data.minInterval, data.maxInterval);
-                }
-
-                if (data.resetOnActivation || !started) {
-                    activationTicks = -1;
-                    useCount = 0;
-                }
-            }
-        }
-
-        @Override
-        public void tick() {
-            if (tickDelegate) {
-                delegate.tick();
-            }
-
-            boolean useDelegate = false;
-            synchronized (lock) {
-                if (!started) {
-                    return;
-                }
-
-                if (interval == -1L) {
-                    return;
-                }
-
-                int lastUseCount = -1;
-                if (data.repeat == 0 || (data.repeat > 0 && (lastUseCount = useCount) >= data.repeat)) {
-                    started = false;
-                    return;
-                }
-
-                if (++activationTicks >= interval) {
-                    activationTicks = 0;
-                    interval = MathUtils.randomInterval(data.minInterval, data.maxInterval);
-
-                    useDelegate = true;
-                    manageState(lastUseCount);
-                }
-            }
-
-            if (useDelegate) {
-                delegate.use();
-            }
-        }
-
-        @Override
-        public boolean needsTicking() {
-            return true;
-        }
-
-        @Override
-        public void end() {
-            delegate.end();
-        }
-
-        private void manageState(int lastUseCount) {
-            if (lastUseCount == -1) {
-                return;
-            }
-
-            useCount = ++lastUseCount;
-            if (lastUseCount >= data.repeat) {
-                started = false;
-            }
+        private static int computeInterval0(int min, int max) {
+            return MathUtils.randomInterval(min, max);
         }
     }
 }
