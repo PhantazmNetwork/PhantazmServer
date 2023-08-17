@@ -13,17 +13,15 @@ import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 public class Mob extends ProximaEntity {
-    private final Set<Skill> tickableSkills;
-    private final Map<String, Set<Skill>> mappedSkills;
+    private final List<Skill> tickableSkills;
+    private final Map<Trigger, List<Skill>> mappedSkills;
 
     public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding) {
         super(entityType, uuid, pathfinding);
-        this.tickableSkills = new CopyOnWriteArraySet<>();
-        this.mappedSkills = new ConcurrentHashMap<>();
+        this.tickableSkills = new ArrayList<>();
+        this.mappedSkills = new EnumMap<>(Trigger.class);
     }
 
     public void addSkills(@NotNull Collection<? extends Skill.@NotNull Entry> entries) {
@@ -45,23 +43,23 @@ public class Mob extends ProximaEntity {
     public void removeSkill(Skill.@NotNull Entry entry) {
         Objects.requireNonNull(entry);
         Skill skill = entry.skill();
-        String trigger = entry.trigger();
+        Trigger trigger = entry.trigger();
 
-        tickableSkills.remove(skill);
+        tickableSkills.removeIf(existing -> existing == skill);
         if (trigger == null) {
             return;
         }
 
-        Set<Skill> triggers = mappedSkills.get(trigger);
+        List<Skill> triggers = mappedSkills.get(trigger);
         if (triggers != null) {
-            triggers.remove(skill);
+            triggers.removeIf(existing -> existing == skill);
         }
     }
 
     private static void addSkill0(Skill.Entry entry, Collection<Skill> tickableSkills,
-            Map<String, Set<Skill>> mappedSkills) {
+            Map<Trigger, List<Skill>> mappedSkills) {
         Skill skill = entry.skill();
-        String trigger = entry.trigger();
+        Trigger trigger = entry.trigger();
 
         boolean needsTicking = skill.needsTicking();
         if (!needsTicking && trigger == null) {
@@ -73,12 +71,12 @@ public class Mob extends ProximaEntity {
         }
 
         if (trigger != null) {
-            mappedSkills.computeIfAbsent(trigger, ignored -> new CopyOnWriteArraySet<>()).add(skill);
+            mappedSkills.computeIfAbsent(trigger, ignored -> new ArrayList<>()).add(skill);
         }
     }
 
-    private void useIfPresent(String trigger) {
-        Set<Skill> skills = mappedSkills.get(trigger);
+    private void useIfPresent(Trigger trigger) {
+        List<Skill> skills = mappedSkills.get(trigger);
         if (skills == null) {
             return;
         }

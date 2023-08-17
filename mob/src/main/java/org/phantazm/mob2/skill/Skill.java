@@ -2,6 +2,7 @@ package org.phantazm.mob2.skill;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.mob2.trigger.Trigger;
 
 import java.util.Objects;
 
@@ -25,7 +26,7 @@ public interface Skill {
     sealed interface Entry {
         @NotNull Skill skill();
 
-        @Nullable String trigger();
+        @Nullable Trigger trigger();
     }
 
     static @NotNull Entry entry(@NotNull Skill skill) {
@@ -33,18 +34,18 @@ public interface Skill {
         return new EntryImpl(skill, null);
     }
 
-    static @NotNull Entry entry(@NotNull Skill skill, @Nullable String string) {
+    static @NotNull Entry entry(@NotNull Skill skill, @Nullable Trigger trigger) {
         Objects.requireNonNull(skill);
-        return new EntryImpl(skill, string);
+        return new EntryImpl(skill, trigger);
     }
 
     final class EntryImpl implements Entry {
         private final Skill skill;
-        private final String string;
+        private final Trigger trigger;
 
-        private EntryImpl(Skill skill, String string) {
+        private EntryImpl(Skill skill, Trigger trigger) {
             this.skill = skill;
-            this.string = string;
+            this.trigger = trigger;
         }
 
         @Override
@@ -53,8 +54,8 @@ public interface Skill {
         }
 
         @Override
-        public @Nullable String trigger() {
-            return string;
+        public @Nullable Trigger trigger() {
+            return trigger;
         }
     }
 }
