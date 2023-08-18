@@ -52,7 +52,7 @@ public class MobCreatorBase implements MobCreator {
         InstanceSettings settings = settingsFunction.apply(instance);
 
         Pathfinding pathfinding = this.pathfinding.make(pathfinder, settings.nodeLocal(), settings.spaceHandler());
-        Mob mob = new Mob(data.type(), UUID.randomUUID(), pathfinding);
+        Mob mob = new Mob(data.type(), UUID.randomUUID(), pathfinding, data);
 
         InjectionStore store = store();
         for (SkillComponent component : skills) {
@@ -133,7 +133,7 @@ public class MobCreatorBase implements MobCreator {
 
     protected void setGoals(@NotNull Mob mob) {
         for (GoalApplier applier : goalAppliers) {
-            applier.apply(mob);
+            applier.apply(mob, store());
         }
     }
 }

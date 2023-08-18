@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.ChildPath;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob.goal.CollectionGoalGroup;
 import org.phantazm.mob2.Mob;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
@@ -22,10 +23,10 @@ public class CollectionGoalApplier implements GoalApplier {
     }
 
     @Override
-    public void apply(@NotNull Mob mob) {
+    public void apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         Collection<ProximaGoal> goalCollection = new ArrayList<>(creators.size());
         for (GoalCreator creator : creators) {
-            goalCollection.add(creator.create(mob));
+            goalCollection.add(creator.create(mob, injectionStore));
         }
 
         mob.addGoalGroup(new CollectionGoalGroup(goalCollection));

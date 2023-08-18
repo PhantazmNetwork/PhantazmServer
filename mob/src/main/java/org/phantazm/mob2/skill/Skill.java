@@ -1,7 +1,7 @@
 package org.phantazm.mob2.skill;
 
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.mob2.trigger.Trigger;
+import org.phantazm.mob2.Trigger;
 
 public interface Skill {
     @Nullable Trigger trigger();

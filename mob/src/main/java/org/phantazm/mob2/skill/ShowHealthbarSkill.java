@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.commons.MathUtils;
 import org.phantazm.mob2.Mob;
-import org.phantazm.mob2.trigger.Trigger;
+import org.phantazm.mob2.Trigger;
 
 import java.util.Map;
 import java.util.Objects;

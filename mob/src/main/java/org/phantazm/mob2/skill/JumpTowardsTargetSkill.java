@@ -16,7 +16,7 @@ import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
-import org.phantazm.mob2.trigger.Trigger;
+import org.phantazm.mob2.Trigger;
 
 import java.util.Objects;
 import java.util.Optional;

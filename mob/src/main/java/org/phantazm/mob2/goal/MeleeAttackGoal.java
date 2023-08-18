@@ -11,6 +11,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
@@ -25,7 +26,7 @@ public class MeleeAttackGoal implements GoalCreator {
     }
 
     @Override
-    public @NotNull ProximaGoal create(@NotNull Mob mob) {
+    public @NotNull ProximaGoal create(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         return new Goal(data, mob);
     }
 
@@ -65,7 +66,7 @@ public class MeleeAttackGoal implements GoalCreator {
         @Override
         public void start() {
             ticksSinceAttack = 0;
-            
+
             Entity target = self.getTargetEntity();
             if (target == null || self.isDead()) {
                 return;

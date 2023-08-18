@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
-import org.phantazm.mob2.trigger.Trigger;
+import org.phantazm.mob2.Trigger;
 
 import java.util.ArrayList;
 import java.util.List;

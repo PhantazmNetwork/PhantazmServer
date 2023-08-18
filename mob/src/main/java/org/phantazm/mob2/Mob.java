@@ -10,7 +10,6 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.mob2.skill.Skill;
-import org.phantazm.mob2.trigger.Trigger;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 
@@ -23,15 +22,18 @@ public class Mob extends ProximaEntity {
     private final List<Skill> tickableSkills;
     private final List<Skill> useOnTick;
     private final Map<Trigger, List<Skill>> triggeredSkills;
+    private final MobCreator.MobData data;
 
     private Reference<Entity> lastHitEntity;
     private Reference<Player> lastInteractingPlayer;
 
-    public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding) {
+    public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
+            MobCreator.@NotNull MobData data) {
         super(entityType, uuid, pathfinding);
         this.tickableSkills = new ArrayList<>();
         this.useOnTick = new ArrayList<>();
         this.triggeredSkills = new EnumMap<>(Trigger.class);
+        this.data = Objects.requireNonNull(data);
 
         this.lastHitEntity = new WeakReference<>(null);
         this.lastInteractingPlayer = new WeakReference<>(null);
@@ -66,6 +68,10 @@ public class Mob extends ProximaEntity {
         if (triggers != null) {
             triggers.removeIf(existing -> existing == skill);
         }
+    }
+
+    public @NotNull MobCreator.MobData data() {
+        return data;
     }
 
     public @NotNull Optional<Entity> lastHitEntity() {
