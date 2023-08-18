@@ -6,6 +6,7 @@ public enum Trigger {
     DEATH("death"),
     SPAWN("spawn"),
     ATTACK("attack"),
+    INTERACT("interact"),
     DAMAGED("damaged");
 
     private final String name;

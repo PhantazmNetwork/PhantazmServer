@@ -1,8 +1,10 @@
 package org.phantazm.mob2;
 
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -11,17 +13,24 @@ import org.phantazm.mob2.trigger.Trigger;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class Mob extends ProximaEntity {
     private final List<Skill> tickableSkills;
-    private final Map<Trigger, List<Skill>> mappedSkills;
+    private final Map<Trigger, List<Skill>> triggeredSkills;
+
+    private Reference<Entity> lastHitEntity;
+    private Reference<Player> lastInteractingPlayer;
 
     public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding) {
         super(entityType, uuid, pathfinding);
         this.tickableSkills = new ArrayList<>();
-        this.mappedSkills = new EnumMap<>(Trigger.class);
+        this.triggeredSkills = new EnumMap<>(Trigger.class);
+        this.lastHitEntity = new WeakReference<>(null);
+        this.lastInteractingPlayer = new WeakReference<>(null);
     }
 
     public void addSkills(@NotNull Collection<? extends Skill.@NotNull Entry> entries) {
@@ -29,7 +38,7 @@ public class Mob extends ProximaEntity {
         List<Skill> tickableSkills = new ArrayList<>(entries.size());
 
         for (Skill.Entry entry : entries) {
-            addSkill0(entry, tickableSkills, this.mappedSkills);
+            addSkill0(entry, tickableSkills, this.triggeredSkills);
         }
 
         this.tickableSkills.addAll(tickableSkills);
@@ -37,7 +46,7 @@ public class Mob extends ProximaEntity {
 
     public void addSkill(Skill.@NotNull Entry entry) {
         Objects.requireNonNull(entry);
-        addSkill0(entry, this.tickableSkills, this.mappedSkills);
+        addSkill0(entry, this.tickableSkills, this.triggeredSkills);
     }
 
     public void removeSkill(Skill.@NotNull Entry entry) {
@@ -50,10 +59,18 @@ public class Mob extends ProximaEntity {
             return;
         }
 
-        List<Skill> triggers = mappedSkills.get(trigger);
+        List<Skill> triggers = triggeredSkills.get(trigger);
         if (triggers != null) {
             triggers.removeIf(existing -> existing == skill);
         }
+    }
+
+    public @NotNull Optional<Entity> lastHitEntity() {
+        return Optional.ofNullable(lastHitEntity.get());
+    }
+
+    public @NotNull Optional<Entity> lastInteractingPlayer() {
+        return Optional.ofNullable(lastInteractingPlayer.get());
     }
 
     private static void addSkill0(Skill.Entry entry, Collection<Skill> tickableSkills,
@@ -76,7 +93,7 @@ public class Mob extends ProximaEntity {
     }
 
     private void useIfPresent(Trigger trigger) {
-        List<Skill> skills = mappedSkills.get(trigger);
+        List<Skill> skills = triggeredSkills.get(trigger);
         if (skills == null) {
             return;
         }
@@ -94,8 +111,22 @@ public class Mob extends ProximaEntity {
     }
 
     @Override
+    public void interact(@NotNull Player player, @NotNull Point position) {
+        super.interact(player, position);
+        if (lastInteractingPlayer.get() != player) {
+            lastInteractingPlayer = new WeakReference<>(player);
+        }
+
+        useIfPresent(Trigger.INTERACT);
+    }
+
+    @Override
     public void attack(@NotNull Entity target, boolean swingHand) {
         super.attack(target, swingHand);
+        if (lastHitEntity.get() != target) {
+            lastHitEntity = new WeakReference<>(target);
+        }
+
         useIfPresent(Trigger.ATTACK);
     }
 
