@@ -49,7 +49,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 attackSpeedMultiplier = self.getAttributeValue(attribute);
             }
 
-            if ((float)ticksSinceAttack * attackSpeedMultiplier >= data.cooldown()) {
+            if ((float)ticksSinceAttack++ * attackSpeedMultiplier >= data.cooldown()) {
                 Entity target = self.getTargetEntity();
                 if (target == null) {
                     return false;
@@ -64,6 +64,8 @@ public class MeleeAttackGoal implements GoalCreator {
 
         @Override
         public void start() {
+            ticksSinceAttack = 0;
+            
             Entity target = self.getTargetEntity();
             if (target == null || self.isDead()) {
                 return;
@@ -88,18 +90,11 @@ public class MeleeAttackGoal implements GoalCreator {
                     actualEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));
                 });
             }
-
-            ticksSinceAttack = 0;
         }
 
         @Override
         public boolean shouldEnd() {
             return true;
-        }
-
-        @Override
-        public void tick(long time) {
-            ticksSinceAttack++;
         }
     }
 

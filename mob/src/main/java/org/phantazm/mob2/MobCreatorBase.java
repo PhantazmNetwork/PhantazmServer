@@ -10,7 +10,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob.goal.GoalApplier;
+import org.phantazm.mob2.goal.GoalApplier;
 import org.phantazm.mob2.skill.SkillComponent;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.slf4j.Logger;
@@ -29,6 +29,7 @@ public class MobCreatorBase implements MobCreator {
 
     private final Pathfinding.Factory pathfinding;
     private final List<SkillComponent> skills;
+    private final List<GoalApplier> goalAppliers;
 
     private final Pathfinder pathfinder;
     private final Function<? super Instance, ? extends InstanceSettings> settingsFunction;
@@ -40,6 +41,7 @@ public class MobCreatorBase implements MobCreator {
         this.data = Objects.requireNonNull(data);
         this.pathfinding = Objects.requireNonNull(pathfinding);
         this.skills = List.copyOf(skills);
+        this.goalAppliers = List.copyOf(goalAppliers);
 
         this.pathfinder = Objects.requireNonNull(pathfinder);
         this.settingsFunction = Objects.requireNonNull(settingsFunction);
@@ -66,10 +68,27 @@ public class MobCreatorBase implements MobCreator {
     }
 
     protected void setup(@NotNull Mob mob) {
+        setDisplayName(mob);
+        setEquipment(mob);
+        setAttributes(mob);
+        setMeta(mob);
+        setGoals(mob);
+    }
+
+    protected void setDisplayName(@NotNull Mob mob) {
+        data.hologramDisplayName().ifPresent(component -> {
+            mob.setCustomName(component);
+            mob.setCustomNameVisible(true);
+        });
+    }
+
+    protected void setEquipment(@NotNull Mob mob) {
         for (Map.Entry<EquipmentSlot, ItemStack> entry : data.equipment().entrySet()) {
             mob.setEquipment(entry.getKey(), entry.getValue());
         }
+    }
 
+    protected void setAttributes(@NotNull Mob mob) {
         for (Object2FloatArrayMap.Entry<String> entry : data.attributes().object2FloatEntrySet()) {
             Attribute attribute = Attribute.fromKey(entry.getKey());
             if (attribute != null) {
@@ -78,12 +97,6 @@ public class MobCreatorBase implements MobCreator {
         }
 
         mob.setHealth(mob.getAttributeValue(Attribute.MAX_HEALTH));
-        data.hologramDisplayName().ifPresent(component -> {
-            mob.setCustomName(component);
-            mob.setCustomNameVisible(true);
-        });
-
-        setMeta(mob);
     }
 
     protected void setMeta(@NotNull Mob mob) {
@@ -115,6 +128,12 @@ public class MobCreatorBase implements MobCreator {
             catch (IllegalAccessException | InvocationTargetException e) {
                 LOGGER.warn("failed to set meta value for meta key {} and method name {}", key, methodName, e);
             }
+        }
+    }
+
+    protected void setGoals(@NotNull Mob mob) {
+        for (GoalApplier applier : goalAppliers) {
+            applier.apply(mob);
         }
     }
 }
