@@ -1,9 +1,6 @@
 package org.phantazm.mob2.skill;
 
-import com.github.steanky.element.core.annotation.Child;
-import com.github.steanky.element.core.annotation.ChildPath;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
@@ -30,6 +27,8 @@ public class SpawnMobSkill implements SkillComponent {
     public interface SpawnCallback extends Consumer<@NotNull Mob> {
     }
 
+    @Model("mob.skill.spawn_mob.callback.none")
+    @Cache
     public static class NoCallback implements SpawnCallbackComponent {
         private static final SpawnCallback INSTANCE = mob -> {
         };
@@ -65,6 +64,7 @@ public class SpawnMobSkill implements SkillComponent {
     @DataObject
     public record Data(@Nullable Trigger trigger,
                        @NotNull @ChildPath("selector") String selector,
+                       @NotNull @ChildPath("callback") String callback,
                        @NotNull Key identifier,
                        int spawnAmount,
                        int maxSpawn) {
