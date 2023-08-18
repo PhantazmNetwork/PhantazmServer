@@ -67,6 +67,12 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
         public @NotNull <T> Builder with(@NotNull Key<T> key, @NotNull T object) {
             Objects.requireNonNull(key, "key");
             Objects.requireNonNull(object, "object");
+
+            Class<?> objectClass = object.getClass();
+            if (!key.getClass().isAssignableFrom(objectClass)) {
+                throw new IllegalArgumentException("bad type " + objectClass + " not assignable to " + key);
+            }
+
             values.put(key, object);
             return this;
         }
@@ -85,6 +91,9 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
         private final Class<T> clazz;
         private final String id;
 
+        private int hash;
+        private boolean hashed;
+
         private KeyImpl(Class<T> clazz, String id) {
             this.clazz = clazz;
             this.id = id;
@@ -92,7 +101,13 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
 
         @Override
         public int hashCode() {
-            return Objects.hash(clazz, id);
+            if (hashed) {
+                return hash;
+            }
+
+            hash = Objects.hash(clazz, id);
+            hashed = true;
+            return hash;
         }
 
         @Override
