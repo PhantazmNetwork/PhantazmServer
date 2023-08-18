@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class Mob extends ProximaEntity {
+    private final List<Skill> allSkills;
     private final List<Skill> tickableSkills;
     private final List<Skill> useOnTick;
     private final Map<Trigger, List<Skill>> triggeredSkills;
@@ -30,6 +31,7 @@ public class Mob extends ProximaEntity {
     public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
             MobCreator.@NotNull MobData data) {
         super(entityType, uuid, pathfinding);
+        this.allSkills = new ArrayList<>();
         this.tickableSkills = new ArrayList<>();
         this.useOnTick = new ArrayList<>();
         this.triggeredSkills = new EnumMap<>(Trigger.class);
@@ -51,10 +53,18 @@ public class Mob extends ProximaEntity {
         addSkill0(skill);
     }
 
-    public void removeSkill(Skill skill) {
+    public void removeSkill(@NotNull Skill skill) {
         Objects.requireNonNull(skill);
         Trigger trigger = skill.trigger();
 
+        allSkills.removeIf(existing -> {
+            boolean remove = existing == skill;
+            if (remove) {
+                existing.end();
+            }
+
+            return remove;
+        });
         tickableSkills.removeIf(existing -> existing == skill);
         if (trigger == Trigger.TICK) {
             useOnTick.removeIf(existing -> existing == skill);
@@ -91,6 +101,7 @@ public class Mob extends ProximaEntity {
     private void addSkill0(Skill skill) {
         skill.init();
 
+        allSkills.add(skill);
         Trigger trigger = skill.trigger();
 
         if (trigger == Trigger.TICK) {
@@ -158,6 +169,14 @@ public class Mob extends ProximaEntity {
     public void kill() {
         useIfPresent(Trigger.DEATH);
         super.kill();
+    }
+
+    @Override
+    public void remove() {
+        super.remove();
+        for (Skill skill : allSkills) {
+            skill.end();
+        }
     }
 
     @Override

@@ -2,7 +2,6 @@ package org.phantazm.mob2;
 
 import com.github.steanky.proxima.path.Pathfinder;
 import it.unimi.dsi.fastutil.objects.Object2FloatArrayMap;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.EntityMeta;
@@ -48,31 +47,26 @@ public class MobCreatorBase implements MobCreator {
     }
 
     @Override
-    public @NotNull Mob create(@NotNull Key key, @NotNull Instance instance) {
+    public @NotNull Mob create(@NotNull Instance instance, @NotNull InjectionStore injectionStore) {
         InstanceSettings settings = settingsFunction.apply(instance);
 
         Pathfinding pathfinding = this.pathfinding.make(pathfinder, settings.nodeLocal(), settings.spaceHandler());
         Mob mob = new Mob(data.type(), UUID.randomUUID(), pathfinding, data);
 
-        InjectionStore store = store();
         for (SkillComponent component : skills) {
-            mob.addSkill(component.apply(mob, store));
+            mob.addSkill(component.apply(mob, injectionStore));
         }
 
-        setup(mob);
+        setup(mob, injectionStore);
         return mob;
     }
 
-    public @NotNull InjectionStore store() {
-        return InjectionStore.EMPTY;
-    }
-
-    protected void setup(@NotNull Mob mob) {
+    protected void setup(@NotNull Mob mob, @NotNull InjectionStore store) {
         setDisplayName(mob);
         setEquipment(mob);
         setAttributes(mob);
         setMeta(mob);
-        setGoals(mob);
+        setGoals(mob, store);
     }
 
     protected void setDisplayName(@NotNull Mob mob) {
@@ -131,9 +125,9 @@ public class MobCreatorBase implements MobCreator {
         }
     }
 
-    protected void setGoals(@NotNull Mob mob) {
+    protected void setGoals(@NotNull Mob mob, @NotNull InjectionStore store) {
         for (GoalApplier applier : goalAppliers) {
-            applier.apply(mob, store());
+            applier.apply(mob, store);
         }
     }
 }

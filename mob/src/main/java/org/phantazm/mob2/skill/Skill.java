@@ -4,7 +4,9 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.mob2.Trigger;
 
 public interface Skill {
-    @Nullable Trigger trigger();
+    default @Nullable Trigger trigger() {
+        return null;
+    }
 
     default void init() {
     }

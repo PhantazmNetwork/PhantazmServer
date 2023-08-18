@@ -48,12 +48,44 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
     }
 
     static @NotNull <T> InjectionStore of(@NotNull Key<T> key, @NotNull T object) {
+        InjectionStoreImpl.validateEntry(key, object);
         return new InjectionStoreImpl(Map.of(key, object));
     }
 
     static @NotNull <T, V> InjectionStore of(@NotNull Key<T> key1, @NotNull T object1, @NotNull Key<V> key2,
             @NotNull V object2) {
+        InjectionStoreImpl.validateEntry(key1, object1);
+        InjectionStoreImpl.validateEntry(key2, object2);
         return new InjectionStoreImpl(Map.of(key1, object1, key2, object2));
+    }
+
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
+    static @NotNull InjectionStore ofEntries(@NotNull Map.Entry<Key<?>, Object> @NotNull ... entries) {
+        if (entries.length == 0) {
+            return EMPTY;
+        }
+
+        if (entries.length == 1) {
+            Map.Entry<Key<?>, Object> entry = entries[0];
+
+            Key<?> key = entry.getKey();
+            Object value = entry.getValue();
+            InjectionStoreImpl.validateEntry(key, value);
+            return new InjectionStoreImpl(Map.of(key, value));
+        }
+
+        Map.Entry<Key<?>, Object>[] newEntries = new Map.Entry[entries.length];
+        for (int i = 0; i < newEntries.length; i++) {
+            Map.Entry<Key<?>, Object> entry = entries[i];
+            Key<?> key = entry.getKey();
+            Object value = entry.getValue();
+
+            InjectionStoreImpl.validateEntry(key, value);
+            newEntries[i] = Map.entry(key, value);
+        }
+
+        return new InjectionStoreImpl(Map.ofEntries(newEntries));
     }
 
     final class BuilderImpl implements Builder {
@@ -65,13 +97,7 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
 
         @Override
         public @NotNull <T> Builder with(@NotNull Key<T> key, @NotNull T object) {
-            Objects.requireNonNull(key, "key");
-            Objects.requireNonNull(object, "object");
-
-            Class<?> objectClass = object.getClass();
-            if (!key.getClass().isAssignableFrom(objectClass)) {
-                throw new IllegalArgumentException("bad type " + objectClass + " not assignable to " + key);
-            }
+            InjectionStoreImpl.validateEntry(key, object);
 
             values.put(key, object);
             return this;
@@ -149,6 +175,16 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
 
         private InjectionStoreImpl(@NotNull Map<Key<?>, Object> mappings) {
             this.mappings = mappings;
+        }
+
+        private static void validateEntry(Key<?> key, Object object) {
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(object);
+
+            Class<?> objectClass = object.getClass();
+            if (!key.getClass().isAssignableFrom(objectClass)) {
+                throw new IllegalArgumentException("bad type " + objectClass + " not assignable to " + key);
+            }
         }
 
         @Override
