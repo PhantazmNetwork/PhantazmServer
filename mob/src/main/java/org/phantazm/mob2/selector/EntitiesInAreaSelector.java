@@ -44,9 +44,15 @@ public class EntitiesInAreaSelector implements SelectorComponent {
     @DataObject
     public record Data(@NotNull @ChildPath("origin") String originSelector,
                        @NotNull @ChildPath("validator") String validator,
+                       boolean limitSelf,
                        @NotNull TrackerTargetType target,
                        double range,
                        int limit) {
+        @Default("limitSelf")
+        public static @NotNull ConfigElement limitSelfDefault() {
+            return ConfigPrimitive.of(true);
+        }
+
         @Default("target")
         public static @NotNull ConfigElement targetDefault() {
             return ConfigPrimitive.of("ENTITIES");
@@ -103,7 +109,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
         }
 
         private void handleEntity(Point origin, Entity target, List<DoubleObjectPair<Entity>> targets) {
-            if (!validator.valid(target)) {
+            if ((data.limitSelf && target == self) || !validator.valid(target)) {
                 return;
             }
 
