@@ -32,30 +32,26 @@ public class Mob extends ProximaEntity {
         this.tickableSkills = new ArrayList<>();
         this.useOnTick = new ArrayList<>();
         this.triggeredSkills = new EnumMap<>(Trigger.class);
+
         this.lastHitEntity = new WeakReference<>(null);
         this.lastInteractingPlayer = new WeakReference<>(null);
     }
 
-    public void addSkills(@NotNull Collection<? extends Skill.@NotNull Entry> entries) {
-        Objects.requireNonNull(entries);
-        List<Skill> tickableSkills = new ArrayList<>(entries.size());
-
-        for (Skill.Entry entry : entries) {
-            addSkill0(entry, tickableSkills, this.triggeredSkills);
+    public void addSkills(@NotNull Collection<? extends Skill> skills) {
+        Objects.requireNonNull(skills);
+        for (Skill skill : skills) {
+            addSkill0(skill);
         }
-
-        this.tickableSkills.addAll(tickableSkills);
     }
 
-    public void addSkill(Skill.@NotNull Entry entry) {
-        Objects.requireNonNull(entry);
-        addSkill0(entry, this.tickableSkills, this.triggeredSkills);
+    public void addSkill(@NotNull Skill skill) {
+        Objects.requireNonNull(skill);
+        addSkill0(skill);
     }
 
-    public void removeSkill(Skill.@NotNull Entry entry) {
-        Objects.requireNonNull(entry);
-        Skill skill = entry.skill();
-        Trigger trigger = entry.trigger();
+    public void removeSkill(Skill skill) {
+        Objects.requireNonNull(skill);
+        Trigger trigger = skill.trigger();
 
         tickableSkills.removeIf(existing -> existing == skill);
         if (trigger == Trigger.TICK) {
@@ -86,16 +82,14 @@ public class Mob extends ProximaEntity {
         }
     }
 
-    private void addSkill0(Skill.Entry entry, Collection<Skill> tickableSkills,
-            Map<Trigger, List<Skill>> mappedSkills) {
-        Skill skill = entry.skill();
-        Trigger trigger = entry.trigger();
+    private void addSkill0(Skill skill) {
+        skill.init();
+
+        Trigger trigger = skill.trigger();
 
         if (trigger == Trigger.TICK) {
             useOnTick.add(skill);
         }
-
-        skill.init();
 
         boolean needsTicking = skill.needsTicking();
         if (!needsTicking && trigger == null) {
@@ -107,7 +101,7 @@ public class Mob extends ProximaEntity {
         }
 
         if (trigger != null && trigger != Trigger.TICK) {
-            mappedSkills.computeIfAbsent(trigger, ignored -> new ArrayList<>()).add(skill);
+            triggeredSkills.computeIfAbsent(trigger, ignored -> new ArrayList<>()).add(skill);
         }
     }
 

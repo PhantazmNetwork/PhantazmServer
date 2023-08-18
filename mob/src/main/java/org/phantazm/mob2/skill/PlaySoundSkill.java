@@ -13,12 +13,13 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
+import org.phantazm.mob2.trigger.Trigger;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -37,12 +38,20 @@ public class PlaySoundSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull InjectionStore injectionStore) {
-        return new Internal(injectionStore.get(Keys.MOB_KEY), targetSelector.apply(injectionStore), data, random);
+    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+        return new Internal(mob, targetSelector.apply(mob, injectionStore), data, random);
     }
 
     @DataObject
-    public record Data(@ChildPath("target") String selector, @NotNull Sound sound, boolean broadcast) {
+    public record Data(@Nullable Trigger trigger,
+                       @ChildPath("target") String selector,
+                       @NotNull Sound sound,
+                       boolean broadcast) {
+        @Default("trigger")
+        public static @NotNull ConfigElement defaultTrigger() {
+            return ConfigPrimitive.NULL;
+        }
+
         @Default("broadcast")
         public static @NotNull ConfigElement defaultBroadcast() {
             return ConfigPrimitive.of(true);
@@ -87,6 +96,11 @@ public class PlaySoundSkill implements SkillComponent {
             for (Point point : target.locations()) {
                 instance.playSound(randomize(data.sound), point);
             }
+        }
+
+        @Override
+        public @Nullable Trigger trigger() {
+            return data.trigger;
         }
     }
 }

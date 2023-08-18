@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
 
 public class LineOfSightValidator implements ValidatorComponent {
@@ -13,8 +12,8 @@ public class LineOfSightValidator implements ValidatorComponent {
     }
 
     @Override
-    public @NotNull Validator apply(@NotNull InjectionStore injectionStore) {
-        return new Internal(injectionStore.get(Keys.MOB_KEY));
+    public @NotNull Validator apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+        return new Internal(mob);
     }
 
     private record Internal(Mob self) implements Validator {

@@ -10,12 +10,13 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
+import org.phantazm.mob2.trigger.Trigger;
 
 import java.util.Objects;
 
@@ -30,15 +31,21 @@ public class RadialDamageSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull InjectionStore injectionStore) {
-        return new Internal(injectionStore.get(Keys.MOB_KEY), selector.apply(injectionStore), data);
+    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+        return new Internal(mob, selector.apply(mob, injectionStore), data);
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector,
+    public record Data(@Nullable Trigger trigger,
+                       @NotNull @ChildPath("selector") String selector,
                        float damage,
                        boolean bypassArmor,
                        double range) {
+        @Default("trigger")
+        public static @NotNull ConfigElement defaultTrigger() {
+            return ConfigPrimitive.NULL;
+        }
+
         @Default("bypassArmor")
         public static @NotNull ConfigElement defaultBypassArmor() {
             return ConfigPrimitive.of(false);
@@ -68,6 +75,11 @@ public class RadialDamageSkill implements SkillComponent {
         private double calculateDamage(double distanceToEntity) {
             return ((data.damage * Math.sqrt(data.range)) / data.range) *
                     (Math.sqrt(Math.max(0, -distanceToEntity + data.range)));
+        }
+
+        @Override
+        public @Nullable Trigger trigger() {
+            return data.trigger;
         }
     }
 }

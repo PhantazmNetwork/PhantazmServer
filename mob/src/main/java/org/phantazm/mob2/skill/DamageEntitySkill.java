@@ -9,12 +9,13 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
+import org.phantazm.mob2.trigger.Trigger;
 
 import java.util.Objects;
 
@@ -29,12 +30,17 @@ public class DamageEntitySkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull InjectionStore injectionStore) {
-        return new Internal(injectionStore.get(Keys.MOB_KEY), selector.apply(injectionStore), data);
+    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+        return new Internal(mob, selector.apply(mob, injectionStore), data);
     }
 
     @DataObject
-    public record Data(float amount, boolean armorBypassing) {
+    public record Data(@Nullable Trigger trigger, float amount, boolean armorBypassing) {
+        @Default("trigger")
+        public static @NotNull ConfigElement defaultTrigger() {
+            return ConfigPrimitive.NULL;
+        }
+
         @Default("armorBypassing")
         public static @NotNull ConfigElement defaultArmorBypassing() {
             return ConfigPrimitive.of(false);
@@ -44,7 +50,7 @@ public class DamageEntitySkill implements SkillComponent {
     private static class Internal extends TargetedSkill {
         private final Data data;
 
-        private Internal(@NotNull Mob self, @NotNull Selector selector, @NotNull Data data) {
+        private Internal(Mob self, Selector selector, Data data) {
             super(self, selector);
             this.data = data;
         }
@@ -53,6 +59,11 @@ public class DamageEntitySkill implements SkillComponent {
         protected void useOnTarget(@NotNull Target target) {
             target.forType(LivingEntity.class,
                     livingEntity -> livingEntity.damage(Damage.fromEntity(self, data.amount), data.armorBypassing));
+        }
+
+        @Override
+        public @Nullable Trigger trigger() {
+            return data.trigger;
         }
     }
 }

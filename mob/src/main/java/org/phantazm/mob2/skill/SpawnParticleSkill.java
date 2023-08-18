@@ -3,17 +3,21 @@ package org.phantazm.mob2.skill;
 import com.github.steanky.element.core.annotation.ChildPath;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.vector.Bounds3D;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.particle.ParticleWrapper;
-import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
+import org.phantazm.mob2.trigger.Trigger;
 
 import java.util.Objects;
 import java.util.Random;
@@ -34,15 +38,19 @@ public class SpawnParticleSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull InjectionStore injectionStore) {
-        return new Internal(injectionStore.get(Keys.MOB_KEY), selector.apply(injectionStore), data, particle, random);
+    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+        return new Internal(mob, selector.apply(mob, injectionStore), data, particle, random);
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector,
+    public record Data(@Nullable Trigger trigger,
+                       @NotNull @ChildPath("selector") String selector,
                        @NotNull @ChildPath("particle") String particle,
                        @NotNull Bounds3D bounds) {
-
+        @Default("trigger")
+        public static @NotNull ConfigElement defaultTrigger() {
+            return ConfigPrimitive.NULL;
+        }
     }
 
     private static class Internal extends TargetedSkill {
@@ -79,6 +87,11 @@ public class SpawnParticleSkill implements SkillComponent {
             }
 
             return random.nextDouble(length);
+        }
+
+        @Override
+        public @Nullable Trigger trigger() {
+            return data.trigger;
         }
     }
 }

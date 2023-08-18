@@ -7,8 +7,11 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.commons.MathUtils;
+import org.phantazm.mob2.Mob;
+import org.phantazm.mob2.trigger.Trigger;
 
 import java.util.Objects;
 
@@ -23,17 +26,23 @@ public class RandomTimerSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull InjectionStore injectionStore) {
-        return new Internal(data, delegate.apply(injectionStore));
+    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+        return new Internal(data, delegate.apply(mob, injectionStore));
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("delegate") String delegate,
+    public record Data(@Nullable Trigger trigger,
+                       @NotNull @ChildPath("delegate") String delegate,
                        int repeat,
                        int minInterval,
                        int maxInterval,
                        boolean requiresActivation,
                        boolean resetOnActivation) {
+        @Default("trigger")
+        public static @NotNull ConfigElement defaultTrigger() {
+            return ConfigPrimitive.NULL;
+        }
+
         @Default("repeat")
         public static @NotNull ConfigElement repeatDefault() {
             return ConfigPrimitive.of(-1);
@@ -62,6 +71,11 @@ public class RandomTimerSkill implements SkillComponent {
         @Override
         public int computeInterval() {
             return MathUtils.randomInterval(data.minInterval, data.maxInterval);
+        }
+
+        @Override
+        public @Nullable Trigger trigger() {
+            return data.trigger;
         }
     }
 }

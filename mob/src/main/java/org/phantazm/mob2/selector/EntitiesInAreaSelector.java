@@ -14,7 +14,6 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.TrackerTargetType;
-import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.validator.Validator;
@@ -38,9 +37,8 @@ public class EntitiesInAreaSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull InjectionStore injectionStore) {
-        return new Internal(injectionStore.get(Keys.MOB_KEY), originSelector.apply(injectionStore),
-                validator.apply(injectionStore), data);
+    public @NotNull Selector apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+        return new Internal(mob, originSelector.apply(mob, injectionStore), validator.apply(mob, injectionStore), data);
     }
 
     @DataObject

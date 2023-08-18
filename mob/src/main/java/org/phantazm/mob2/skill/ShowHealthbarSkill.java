@@ -2,6 +2,9 @@ package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,10 +16,11 @@ import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.commons.MathUtils;
-import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
+import org.phantazm.mob2.trigger.Trigger;
 
 import java.util.Map;
 import java.util.Objects;
@@ -25,7 +29,7 @@ import java.util.Optional;
 public class ShowHealthbarSkill implements SkillComponent {
     private static final char HEX = '#';
     private static final Map<String, TextColor> COLOR_ALIASES =
-        Map.of("dark_grey", NamedTextColor.DARK_GRAY, "grey", NamedTextColor.GRAY);
+            Map.of("dark_grey", NamedTextColor.DARK_GRAY, "grey", NamedTextColor.GRAY);
 
     private final Data data;
 
@@ -35,12 +39,16 @@ public class ShowHealthbarSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull InjectionStore injectionStore) {
-        return new Internal(injectionStore.get(Keys.MOB_KEY), data);
+    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+        return new Internal(mob, data);
     }
 
     @DataObject
-    public record Data(@NotNull String bar, int barWidth) {
+    public record Data(@Nullable Trigger trigger, @NotNull String bar, int barWidth) {
+        @Default("trigger")
+        public static @NotNull ConfigElement defaultTrigger() {
+            return ConfigPrimitive.NULL;
+        }
     }
 
     private static class Internal implements Skill {
@@ -53,6 +61,11 @@ public class ShowHealthbarSkill implements SkillComponent {
             this.self = self;
             this.data = data;
             this.lastAliveBars = -1;
+        }
+
+        @Override
+        public @Nullable Trigger trigger() {
+            return data.trigger;
         }
 
         @Override
@@ -80,7 +93,7 @@ public class ShowHealthbarSkill implements SkillComponent {
             float maxHealth = entity.getMaxHealth();
             float currentHealth = MathUtils.clamp(entity.getHealth(), 0, maxHealth);
 
-            float percentage = maxHealth == 0 ? 0:currentHealth / maxHealth;
+            float percentage = maxHealth == 0 ? 0 : currentHealth / maxHealth;
             int aliveBars = Math.round(percentage * data.barWidth);
 
             if (lastAliveBars == aliveBars) {
@@ -100,13 +113,13 @@ public class ShowHealthbarSkill implements SkillComponent {
 
                     switch (value) {
                         case "bar_component" ->
-                            barElement = argumentQueue.popOr(() -> "Missing bar_component argument value").value();
+                                barElement = argumentQueue.popOr(() -> "Missing bar_component argument value").value();
                         case "color_start" -> colorStart = resolveColor(context,
-                            argumentQueue.popOr(() -> "Missing color_start argument value").value());
+                                argumentQueue.popOr(() -> "Missing color_start argument value").value());
                         case "color_end" -> colorEnd = resolveColor(context,
-                            argumentQueue.popOr(() -> "Missing color_end argument value").value());
+                                argumentQueue.popOr(() -> "Missing color_end argument value").value());
                         case "missing_color" -> missingColor = resolveColor(context,
-                            argumentQueue.popOr(() -> "Missing missing_color argument value").value());
+                                argumentQueue.popOr(() -> "Missing missing_color argument value").value());
                     }
                 }
 
@@ -121,30 +134,32 @@ public class ShowHealthbarSkill implements SkillComponent {
 
                 Component aliveComponent = Component.text(alivePart, aliveColor);
                 Component deadComponent =
-                    missingPart.isEmpty() ? Component.empty():Component.text(missingPart, missingColor);
+                        missingPart.isEmpty() ? Component.empty() : Component.text(missingPart, missingColor);
 
                 return Tag.selfClosingInserting(
-                    Component.join(JoinConfiguration.noSeparators(), aliveComponent, deadComponent));
+                        Component.join(JoinConfiguration.noSeparators(), aliveComponent, deadComponent));
             }));
 
             return Optional.of(MiniMessage.miniMessage().deserialize(data.bar, resolver));
         }
 
         static @NotNull TextColor resolveColor(@NotNull Context ctx, @NotNull String colorName)
-            throws ParsingException {
+                throws ParsingException {
             TextColor color;
             if (COLOR_ALIASES.containsKey(colorName)) {
                 color = COLOR_ALIASES.get(colorName);
-            } else if (colorName.charAt(0) == HEX) {
+            }
+            else if (colorName.charAt(0) == HEX) {
                 color = TextColor.fromHexString(colorName);
-            } else {
+            }
+            else {
                 color = NamedTextColor.NAMES.value(colorName);
             }
 
             if (color == null) {
                 throw ctx.newException(String.format(
-                    "Unable to parse a color from '%s'. Please use named colours or hex (#RRGGBB) colors.",
-                    colorName));
+                        "Unable to parse a color from '%s'. Please use named colours or hex (#RRGGBB) colors.",
+                        colorName));
             }
             return color;
         }
