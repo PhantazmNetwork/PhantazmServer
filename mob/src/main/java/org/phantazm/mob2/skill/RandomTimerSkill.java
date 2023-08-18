@@ -55,17 +55,13 @@ public class RandomTimerSkill implements SkillComponent {
 
         public Internal(Data data, Skill delegate) {
             super(delegate, data.requiresActivation, data.resetOnActivation, data.repeat,
-                    computeInterval0(data.minInterval, data.maxInterval));
+                    MathUtils.randomInterval(data.minInterval, data.maxInterval));
             this.data = data;
         }
 
         @Override
         public int computeInterval() {
-            return computeInterval0(data.minInterval, data.maxInterval);
-        }
-
-        private static int computeInterval0(int min, int max) {
-            return MathUtils.randomInterval(min, max);
+            return MathUtils.randomInterval(data.minInterval, data.maxInterval);
         }
     }
 }

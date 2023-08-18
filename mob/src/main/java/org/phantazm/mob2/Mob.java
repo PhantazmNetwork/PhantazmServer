@@ -8,6 +8,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.mob2.skill.Skill;
 import org.phantazm.mob2.trigger.Trigger;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
@@ -20,6 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class Mob extends ProximaEntity {
     private final List<Skill> tickableSkills;
+    private final List<Skill> useOnTick;
     private final Map<Trigger, List<Skill>> triggeredSkills;
 
     private Reference<Entity> lastHitEntity;
@@ -28,6 +30,7 @@ public class Mob extends ProximaEntity {
     public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding) {
         super(entityType, uuid, pathfinding);
         this.tickableSkills = new ArrayList<>();
+        this.useOnTick = new ArrayList<>();
         this.triggeredSkills = new EnumMap<>(Trigger.class);
         this.lastHitEntity = new WeakReference<>(null);
         this.lastInteractingPlayer = new WeakReference<>(null);
@@ -55,6 +58,10 @@ public class Mob extends ProximaEntity {
         Trigger trigger = entry.trigger();
 
         tickableSkills.removeIf(existing -> existing == skill);
+        if (trigger == Trigger.TICK) {
+            useOnTick.removeIf(existing -> existing == skill);
+        }
+
         if (trigger == null) {
             return;
         }
@@ -73,10 +80,22 @@ public class Mob extends ProximaEntity {
         return Optional.ofNullable(lastInteractingPlayer.get());
     }
 
-    private static void addSkill0(Skill.Entry entry, Collection<Skill> tickableSkills,
+    public void setLastHitEntity(@Nullable Entity entity) {
+        if (lastHitEntity.get() != entity) {
+            lastHitEntity = new WeakReference<>(entity);
+        }
+    }
+
+    private void addSkill0(Skill.Entry entry, Collection<Skill> tickableSkills,
             Map<Trigger, List<Skill>> mappedSkills) {
         Skill skill = entry.skill();
         Trigger trigger = entry.trigger();
+
+        if (trigger == Trigger.TICK) {
+            useOnTick.add(skill);
+        }
+
+        skill.init();
 
         boolean needsTicking = skill.needsTicking();
         if (!needsTicking && trigger == null) {
@@ -87,7 +106,7 @@ public class Mob extends ProximaEntity {
             tickableSkills.add(skill);
         }
 
-        if (trigger != null) {
+        if (trigger != null && trigger != Trigger.TICK) {
             mappedSkills.computeIfAbsent(trigger, ignored -> new ArrayList<>()).add(skill);
         }
     }
@@ -147,6 +166,10 @@ public class Mob extends ProximaEntity {
 
         for (Skill skill : tickableSkills) {
             skill.tick();
+        }
+
+        for (Skill skill : useOnTick) {
+            skill.use();
         }
     }
 }
