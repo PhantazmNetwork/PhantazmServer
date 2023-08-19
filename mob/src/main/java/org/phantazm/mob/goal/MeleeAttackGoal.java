@@ -9,7 +9,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.thread.Acquired;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -140,8 +139,7 @@ public class MeleeAttackGoal implements GoalCreator {
         }
 
         @Override
-        public @NotNull
-        @Unmodifiable Collection<Skill> skills() {
+        public @NotNull @Unmodifiable Collection<Skill> skills() {
             return Collections.unmodifiableCollection(skills);
         }
     }

@@ -9,7 +9,6 @@ import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.thread.Acquirable;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
@@ -38,10 +37,11 @@ public class TemporalSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger,
-                       @NotNull @ChildPath("delegate") String delegate,
-                       int minDuration,
-                       int maxDuration) {
+    public record Data(
+            @Nullable Trigger trigger,
+            @NotNull @ChildPath("delegate") String delegate,
+            int minDuration,
+            int maxDuration) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -91,8 +91,7 @@ public class TemporalSkill implements SkillComponent {
 
                 startTicks = 0;
                 actualDelay = MathUtils.randomInterval(data.minDuration, data.maxDuration);
-            }
-            finally {
+            } finally {
                 acquired.unlock();
             }
 
@@ -136,20 +135,17 @@ public class TemporalSkill implements SkillComponent {
             try {
                 if (this.startTicks < 0 || this.actualDelay < 0) {
                     end = true;
-                }
-                else {
+                } else {
                     int ticksRemaining = this.actualDelay - this.startTicks;
                     if (ticksRemaining <= 0) {
                         end = true;
-                    }
-                    else {
+                    } else {
                         MinecraftServer.getSchedulerManager()
                                 .scheduleTask(delegate::end, TaskSchedule.tick(ticksRemaining), TaskSchedule.stop(),
                                         ExecutionType.SYNC);
                     }
                 }
-            }
-            finally {
+            } finally {
                 acquired.unlock();
             }
 

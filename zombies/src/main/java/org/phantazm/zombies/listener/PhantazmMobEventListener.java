@@ -9,7 +9,6 @@ import org.phantazm.mob.PhantazmMob;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-@SuppressWarnings("UnstableApiUsage")
 public abstract class PhantazmMobEventListener<TEvent extends EntityInstanceEvent> implements Consumer<TEvent> {
     protected final Instance instance;
     protected final MobStore mobStore;
