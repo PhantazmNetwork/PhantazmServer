@@ -20,17 +20,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Model("mob.skill.spawn_mob")
+@Cache
 public class SpawnMobSkill implements SkillComponent {
     private final Data data;
     private final SelectorComponent selector;
-    private final SpawnCallback callback;
+    private final SpawnCallbackComponent callback;
 
     @FactoryMethod
     public SpawnMobSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector,
-        @NotNull @Child("callback") SpawnCallback callback) {
+        @NotNull @Child("callback") SpawnCallbackComponent callback) {
         this.data = Objects.requireNonNull(data);
         this.selector = Objects.requireNonNull(selector);
         this.callback = Objects.requireNonNull(callback);
@@ -39,10 +42,10 @@ public class SpawnMobSkill implements SkillComponent {
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         return new Internal(mob, selector.apply(mob, injectionStore), data, injectionStore.get(Keys.MOB_SPAWNER),
-            callback);
+            callback.apply(mob, injectionStore));
     }
 
-    public interface SpawnCallbackComponent extends Function<@NotNull InjectionStore, @NotNull SpawnCallback> {
+    public interface SpawnCallbackComponent extends BiFunction<@NotNull Mob, @NotNull InjectionStore, @NotNull SpawnCallback> {
 
     }
 
@@ -60,7 +63,7 @@ public class SpawnMobSkill implements SkillComponent {
         }
 
         @Override
-        public @NotNull SpawnCallback apply(@NotNull InjectionStore injectionStore) {
+        public @NotNull SpawnCallback apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
             return INSTANCE;
         }
     }

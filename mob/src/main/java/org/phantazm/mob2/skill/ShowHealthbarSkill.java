@@ -1,7 +1,9 @@
 package org.phantazm.mob2.skill;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
@@ -26,6 +28,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+@Model("mob.skill.show_healthbar")
+@Cache
 public class ShowHealthbarSkill implements SkillComponent {
     private static final char HEX = '#';
     private static final Map<String, TextColor> COLOR_ALIASES =

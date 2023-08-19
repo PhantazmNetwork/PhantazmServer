@@ -24,5 +24,10 @@ public abstract class TargetedSkill implements Skill {
         useOnTarget(selector.select());
     }
 
+    /**
+     * Called with the return value of {@link Selector#select()} whenever this skill is used.
+     *
+     * @param target the target of this skill
+     */
     protected abstract void useOnTarget(@NotNull Target target);
 }

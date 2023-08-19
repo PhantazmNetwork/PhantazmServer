@@ -1,9 +1,6 @@
 package org.phantazm.mob2.validator;
 
-import com.github.steanky.element.core.annotation.Child;
-import com.github.steanky.element.core.annotation.ChildPath;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -12,6 +9,8 @@ import org.phantazm.mob2.Mob;
 import java.util.ArrayList;
 import java.util.List;
 
+@Model("mob.validator.or")
+@Cache
 public class OrValidator implements ValidatorComponent {
     private final List<ValidatorComponent> validators;
 

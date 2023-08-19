@@ -1,7 +1,9 @@
 package org.phantazm.mob2.goal;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
@@ -17,6 +19,8 @@ import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Objects;
 
+@Model("mob.goal.melee_attack")
+@Cache
 public class MeleeAttackGoal implements GoalCreator {
     private final Data data;
 

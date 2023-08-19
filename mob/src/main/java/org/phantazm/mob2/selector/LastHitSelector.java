@@ -1,6 +1,8 @@
 package org.phantazm.mob2.selector;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
@@ -12,6 +14,8 @@ import org.phantazm.mob2.Target;
 
 import java.util.UUID;
 
+@Model("mob.selector.last_hit")
+@Cache
 public class LastHitSelector implements SelectorComponent {
     @FactoryMethod
     public LastHitSelector() {
@@ -30,24 +34,7 @@ public class LastHitSelector implements SelectorComponent {
                 return Target.NONE;
             }
 
-            UUID lastHit = self.getTag(Tags.LAST_MELEE_HIT_TAG);
-            if (lastHit == null) {
-                return Target.NONE;
-            }
-
-            for (Entity entity : instance.getEntityTracker().entities(EntityTracker.Target.ENTITIES)) {
-                if (!entity.getUuid().equals(lastHit)) {
-                    continue;
-                }
-
-                if (entity.isRemoved()) {
-                    return Target.NONE;
-                }
-
-                return Target.entities(entity);
-            }
-
-            return Target.NONE;
+            return self.lastHitEntity().map(Target::entities).orElse(Target.NONE);
         }
     }
 }

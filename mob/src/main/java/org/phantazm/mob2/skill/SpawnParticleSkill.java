@@ -1,8 +1,6 @@
 package org.phantazm.mob2.skill;
 
-import com.github.steanky.element.core.annotation.ChildPath;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
@@ -22,6 +20,8 @@ import org.phantazm.mob2.selector.SelectorComponent;
 import java.util.Objects;
 import java.util.Random;
 
+@Model("mob.skill.spawn_particle")
+@Cache
 public class SpawnParticleSkill implements SkillComponent {
     private final Data data;
     private final ParticleWrapper particle;

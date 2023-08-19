@@ -1,7 +1,9 @@
 package org.phantazm.mob2.validator;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -9,6 +11,8 @@ import org.phantazm.mob2.Mob;
 
 import java.util.Objects;
 
+@Model("mob.validator.distance")
+@Cache
 public class DistanceValidator implements ValidatorComponent {
     private final Data data;
 

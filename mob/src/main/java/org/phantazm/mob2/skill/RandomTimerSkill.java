@@ -1,8 +1,6 @@
 package org.phantazm.mob2.skill;
 
-import com.github.steanky.element.core.annotation.ChildPath;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
@@ -15,6 +13,8 @@ import org.phantazm.mob2.Trigger;
 
 import java.util.Objects;
 
+@Model("mob.skill.random_timer")
+@Cache
 public class RandomTimerSkill implements SkillComponent {
     private final Data data;
     private final SkillComponent delegate;
@@ -32,12 +32,12 @@ public class RandomTimerSkill implements SkillComponent {
 
     @DataObject
     public record Data(@Nullable Trigger trigger,
-                       @NotNull @ChildPath("delegate") String delegate,
-                       int repeat,
-                       int minInterval,
-                       int maxInterval,
-                       boolean requiresActivation,
-                       boolean resetOnActivation) {
+        @NotNull @ChildPath("delegate") String delegate,
+        int repeat,
+        int minInterval,
+        int maxInterval,
+        boolean requiresActivation,
+        boolean resetOnActivation) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -64,7 +64,7 @@ public class RandomTimerSkill implements SkillComponent {
 
         public Internal(Data data, Skill delegate, Mob self) {
             super(self, delegate, data.requiresActivation, data.resetOnActivation, data.repeat,
-                    MathUtils.randomInterval(data.minInterval, data.maxInterval));
+                MathUtils.randomInterval(data.minInterval, data.maxInterval));
             this.data = data;
         }
 

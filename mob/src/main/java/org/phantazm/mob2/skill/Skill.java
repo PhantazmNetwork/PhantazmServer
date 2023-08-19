@@ -37,6 +37,8 @@ public interface Skill {
      * Generally speaking, it is not appropriate to call this method manually. Implementations <b>might not</b> guard
      * against state corruption caused by multiple invocations.
      * <p>
+     * When this method is called, the entity that owns this skill <b>may or may not</b> have an instance set.
+     * <p>
      * <b>Thread Behavior</b>: This method safely supports being called by threads other than the owning entity's
      * current tick thread. It does <b>not</b> support concurrent access.
      */

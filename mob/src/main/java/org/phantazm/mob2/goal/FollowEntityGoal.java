@@ -1,9 +1,6 @@
 package org.phantazm.mob2.goal;
 
-import com.github.steanky.element.core.annotation.Child;
-import com.github.steanky.element.core.annotation.ChildPath;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.proxima.path.PathTarget;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
@@ -17,6 +14,8 @@ import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 import java.util.Objects;
 import java.util.Optional;
 
+@Model("mob.goal.follow_entity")
+@Cache
 public class FollowEntityGoal implements GoalCreator {
     private final Data data;
     private final Selector selector;
