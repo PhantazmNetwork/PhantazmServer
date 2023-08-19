@@ -205,7 +205,7 @@ public class SelectBombedRoom implements Action<Round> {
                     }
                 }
             }
-        }, (long)data.gracePeriod);
+        }, data.gracePeriod);
     }
 
     private void applyModifiers(ZombiesPlayer player) {

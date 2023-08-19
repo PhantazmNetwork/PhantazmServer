@@ -36,7 +36,7 @@ public class SlowDownShotHandler implements ShotHandler {
 
     private final Data data;
 
-    private MobStore mobStore;
+    private final MobStore mobStore;
 
     private long selfTick = 0;
 
