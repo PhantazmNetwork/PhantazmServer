@@ -22,7 +22,7 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
     @FactoryMethod
     public DelayedInteractor(@NotNull Data data, @NotNull @Child("target") List<ShopInteractor> interactors) {
         super(data);
-        this.interactors = Objects.requireNonNull(interactors, "interactors");
+        this.interactors = Objects.requireNonNull(interactors);
         this.interactions = new ArrayDeque<>();
     }
 

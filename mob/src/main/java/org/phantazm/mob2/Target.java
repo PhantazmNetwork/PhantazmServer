@@ -14,17 +14,23 @@ import java.util.function.Consumer;
  * Represents a target of a particular skill.
  */
 public sealed interface Target
-        permits Target.NoTarget, Target.SinglePointTarget, Target.MultiPointTarget, Target.SingleEntityTarget,
-        Target.MultiEntityTarget {
+    permits Target.NoTarget, Target.SinglePointTarget, Target.MultiPointTarget, Target.SingleEntityTarget,
+                Target.MultiEntityTarget {
     Target NONE = new NoTarget();
 
-    @NotNull Optional<? extends Point> location();
+    @NotNull
+    Optional<? extends Point> location();
 
-    @NotNull @Unmodifiable Collection<? extends @NotNull Point> locations();
+    @NotNull
+    @Unmodifiable
+    Collection<? extends @NotNull Point> locations();
 
-    @NotNull @Unmodifiable Collection<? extends @NotNull Entity> targets();
+    @NotNull
+    @Unmodifiable
+    Collection<? extends @NotNull Entity> targets();
 
-    @NotNull Optional<? extends Entity> target();
+    @NotNull
+    Optional<? extends Entity> target();
 
     default <T extends Entity> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
         Collection<? extends Entity> targets = targets();
@@ -63,12 +69,12 @@ public sealed interface Target
     }
 
     static @NotNull Target entities(@NotNull Entity entity) {
-        Objects.requireNonNull(entity, "entity");
+        Objects.requireNonNull(entity);
         return new SingleEntityTarget(entity);
     }
 
     static @NotNull Target entities(@NotNull Entity @NotNull ... entities) {
-        Objects.requireNonNull(entities, "entities");
+        Objects.requireNonNull(entities);
         if (entities.length == 0) {
             return NONE;
         }
@@ -106,12 +112,12 @@ public sealed interface Target
     }
 
     static @NotNull Target points(@NotNull Point point) {
-        Objects.requireNonNull(point, "point");
+        Objects.requireNonNull(point);
         return new SinglePointTarget(point);
     }
 
     static @NotNull Target points(@NotNull Point @NotNull ... points) {
-        Objects.requireNonNull(points, "points");
+        Objects.requireNonNull(points);
         if (points.length == 0) {
             return NONE;
         }
@@ -146,12 +152,14 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends @NotNull Point> locations() {
+        public @NotNull
+        @Unmodifiable Collection<? extends @NotNull Point> locations() {
             return List.of();
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends @NotNull Entity> targets() {
+        public @NotNull
+        @Unmodifiable Collection<? extends @NotNull Entity> targets() {
             return List.of();
         }
 
@@ -174,12 +182,14 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends @NotNull Point> locations() {
+        public @NotNull
+        @Unmodifiable Collection<? extends @NotNull Point> locations() {
             return List.of(point);
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends @NotNull Entity> targets() {
+        public @NotNull
+        @Unmodifiable Collection<? extends @NotNull Entity> targets() {
             return List.of();
         }
 
@@ -206,12 +216,14 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends @NotNull Point> locations() {
+        public @NotNull
+        @Unmodifiable Collection<? extends @NotNull Point> locations() {
             return points;
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends @NotNull Entity> targets() {
+        public @NotNull
+        @Unmodifiable Collection<? extends @NotNull Entity> targets() {
             return List.of();
         }
 
@@ -234,12 +246,14 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends @NotNull Point> locations() {
+        public @NotNull
+        @Unmodifiable Collection<? extends @NotNull Point> locations() {
             return List.of(entity.getPosition());
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends Entity> targets() {
+        public @NotNull
+        @Unmodifiable Collection<? extends Entity> targets() {
             return List.of(entity);
         }
 
@@ -266,7 +280,8 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends @NotNull Point> locations() {
+        public @NotNull
+        @Unmodifiable Collection<? extends @NotNull Point> locations() {
             if (entities.isEmpty()) {
                 return List.of();
             }
@@ -280,7 +295,8 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends Entity> targets() {
+        public @NotNull
+        @Unmodifiable Collection<? extends Entity> targets() {
             return entities;
         }
 

@@ -25,8 +25,8 @@ public final class LogicUtils {
      * @return null if in is null, or the result of calling the specified mapping function
      */
     public static <TIn, TOut> @Nullable TOut nullCoalesce(@Nullable TIn in,
-            @NotNull Function<? super TIn, ? extends TOut> mapper) {
-        Objects.requireNonNull(mapper, "mapper");
+        @NotNull Function<? super TIn, ? extends TOut> mapper) {
+        Objects.requireNonNull(mapper);
         if (in == null) {
             return null;
         }

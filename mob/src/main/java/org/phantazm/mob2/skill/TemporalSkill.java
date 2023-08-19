@@ -8,6 +8,9 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.thread.Acquirable;
+import net.minestom.server.thread.Acquired;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +34,7 @@ public class TemporalSkill implements SkillComponent {
 
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, delegate.apply(mob, injectionStore));
+        return new Internal(data, delegate.apply(mob, injectionStore), mob);
     }
 
     @DataObject
@@ -49,15 +52,16 @@ public class TemporalSkill implements SkillComponent {
         private final Data data;
         private final Skill delegate;
         private final boolean tickDelegate;
-        private final Object lock = new Object();
+        private final Mob self;
 
         private int startTicks;
         private int actualDelay;
 
-        private Internal(Data data, Skill delegate) {
+        private Internal(Data data, Skill delegate, Mob self) {
             this.data = data;
             this.delegate = delegate;
             this.tickDelegate = delegate.needsTicking();
+            this.self = self;
             this.startTicks = -1;
             this.actualDelay = -1;
         }
@@ -74,16 +78,26 @@ public class TemporalSkill implements SkillComponent {
 
         @Override
         public void use() {
-            synchronized (lock) {
+            boolean endDelegate = false;
+
+            Acquired<Entity> acquired = self.getAcquirable().lock();
+            try {
                 int oldStartTime = this.startTicks;
                 if (oldStartTime >= 0) {
                     if (oldStartTime < actualDelay) {
-                        delegate.end();
+                        endDelegate = true;
                     }
                 }
 
                 startTicks = 0;
                 actualDelay = MathUtils.randomInterval(data.minDuration, data.maxDuration);
+            }
+            finally {
+                acquired.unlock();
+            }
+
+            if (endDelegate) {
+                delegate.end();
             }
 
             delegate.use();
@@ -95,20 +109,18 @@ public class TemporalSkill implements SkillComponent {
                 delegate.tick();
             }
 
-            synchronized (lock) {
-                if (startTicks < 0) {
-                    return;
-                }
-
-                if (startTicks >= actualDelay) {
-                    delegate.end();
-
-                    startTicks = -1;
-                    actualDelay = -1;
-                }
-
-                startTicks++;
+            if (startTicks < 0) {
+                return;
             }
+
+            if (startTicks >= actualDelay) {
+                delegate.end();
+
+                startTicks = -1;
+                actualDelay = -1;
+            }
+
+            startTicks++;
         }
 
         @Override
@@ -120,7 +132,8 @@ public class TemporalSkill implements SkillComponent {
         public void end() {
             boolean end = false;
 
-            synchronized (lock) {
+            Acquired<Entity> acquired = self.getAcquirable().lock();
+            try {
                 if (this.startTicks < 0 || this.actualDelay < 0) {
                     end = true;
                 }
@@ -135,6 +148,9 @@ public class TemporalSkill implements SkillComponent {
                                         ExecutionType.SYNC);
                     }
                 }
+            }
+            finally {
+                acquired.unlock();
             }
 
             if (end) {

@@ -20,12 +20,12 @@ import java.util.Objects;
  * @param maxLobbies     The maximum number of {@link Lobby}s for this {@link Lobby} type
  */
 public record LobbyConfig(@NotNull InstanceConfig instanceConfig,
-                          @NotNull List<String> lobbyPaths,
-                          int maxPlayers,
-                          int maxLobbies,
-                          @NotNull Collection<ItemStack> defaultItems,
-                          @NotNull String lobbyJoinFormat,
-                          @NotNull ConfigList npcs) {
+    @NotNull List<String> lobbyPaths,
+    int maxPlayers,
+    int maxLobbies,
+    @NotNull Collection<ItemStack> defaultItems,
+    @NotNull String lobbyJoinFormat,
+    @NotNull ConfigList npcs) {
 
     /**
      * The default number of max players.
@@ -46,8 +46,8 @@ public record LobbyConfig(@NotNull InstanceConfig instanceConfig,
      * @param maxLobbies     The maximum number of {@link Lobby}s for this {@link Lobby} type
      */
     public LobbyConfig {
-        Objects.requireNonNull(instanceConfig, "instanceConfig");
-        Objects.requireNonNull(lobbyPaths, "lobbyPaths");
+        Objects.requireNonNull(instanceConfig);
+        Objects.requireNonNull(lobbyPaths);
     }
 
 }

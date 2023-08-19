@@ -26,8 +26,8 @@ public class PlaySoundEffect implements GunEffect {
      */
     @FactoryMethod
     public PlaySoundEffect(@NotNull Data data, @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "actionBarSender");
+        this.data = Objects.requireNonNull(data);
+        this.audienceProvider = Objects.requireNonNull(audienceProvider);
     }
 
     @Override

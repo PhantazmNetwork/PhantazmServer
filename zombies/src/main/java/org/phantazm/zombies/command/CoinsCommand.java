@@ -28,15 +28,15 @@ public class CoinsCommand extends PermissionLockedCommand {
     }
 
     private static final Argument<CoinAction> COIN_ACTION_ARGUMENT =
-            ArgumentType.Enum("action", CoinAction.class).setFormat(ArgumentEnum.Format.LOWER_CASED);
+        ArgumentType.Enum("action", CoinAction.class).setFormat(ArgumentEnum.Format.LOWER_CASED);
     private static final Argument<Integer> COIN_AMOUNT_ARGUMENT = ArgumentType.Integer("amount");
 
     public CoinsCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
         super("coins", PERMISSION);
-        Objects.requireNonNull(sceneMapper, "sceneMapper");
+        Objects.requireNonNull(sceneMapper);
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
-            UUID uuid = ((Player)sender).getUuid();
+            UUID uuid = ((Player) sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
                 ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(uuid);
                 if (zombiesPlayer == null) {

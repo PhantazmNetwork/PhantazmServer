@@ -36,23 +36,23 @@ public class DamageShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public DamageShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         handleDamageTargets(gun, attacker, shot.regularTargets(), data.damage, false);
         handleDamageTargets(gun, attacker, shot.headshotTargets(), data.headshotDamage, true);
     }
 
     private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damage,
-            boolean headshot) {
+        boolean headshot) {
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();
 
             EntityDamageByGunEvent event =
-                    new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damage);
+                new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damage);
             EventDispatcher.call(event);
 
             if (event.isCancelled()) {

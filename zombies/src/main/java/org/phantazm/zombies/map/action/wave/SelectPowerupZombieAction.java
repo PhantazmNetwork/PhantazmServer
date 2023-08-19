@@ -22,9 +22,9 @@ public class SelectPowerupZombieAction implements Action<List<PhantazmMob>> {
 
     @FactoryMethod
     public SelectPowerupZombieAction(@NotNull Data data, @NotNull Random random,
-            @NotNull Supplier<? extends PowerupHandler> powerupHandler) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.random = Objects.requireNonNull(random, "random");
+        @NotNull Supplier<? extends PowerupHandler> powerupHandler) {
+        this.data = Objects.requireNonNull(data);
+        this.random = Objects.requireNonNull(random);
         this.powerupHandler = powerupHandler;
     }
 

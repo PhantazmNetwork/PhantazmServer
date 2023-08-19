@@ -27,7 +27,7 @@ public interface ClickHandler {
      * @return a new ClickHandler instance
      */
     default @NotNull ClickHandler filter(@NotNull GuiItem.ClickType requiredType) {
-        Objects.requireNonNull(requiredType, "requiredType");
+        Objects.requireNonNull(requiredType);
 
         return (owner, player, slot, clickType) -> {
             if (clickType == requiredType) {
@@ -43,7 +43,7 @@ public interface ClickHandler {
      * @return a new ClickHandler instance
      */
     default @NotNull ClickHandler filter(@NotNull Predicate<? super GuiItem.ClickType> clickPredicate) {
-        Objects.requireNonNull(clickPredicate, "requiredType");
+        Objects.requireNonNull(clickPredicate);
 
         return (owner, player, slot, clickType) -> {
             if (clickPredicate.test(clickType)) {

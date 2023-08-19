@@ -41,14 +41,14 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
     private static final Consumer<? super ElementException> HANDLER = ElementUtils.logging(LOGGER, "pathfinding");
 
     private static final ConfigProcessor<EquipmentSlot> EQUIPMENT_SLOT_PROCESSOR =
-            ConfigProcessor.enumProcessor(EquipmentSlot.class);
+        ConfigProcessor.enumProcessor(EquipmentSlot.class);
 
     private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
 
     private static final ConfigProcessor<Component> COMPONENT_PROCESSOR = ConfigProcessors.component();
 
     private static final ConfigProcessor<Object2FloatMap<String>> ATTRIBUTE_MAP_PROCESSOR =
-            ConfigProcessor.FLOAT.mapProcessor(Object2FloatOpenHashMap::new);
+        ConfigProcessor.FLOAT.mapProcessor(Object2FloatOpenHashMap::new);
 
     private final ContextManager contextManager;
 
@@ -61,9 +61,9 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
      * @param itemStackProcessor A {@link ConfigProcessor} for {@link ItemStack}s
      */
     public MobModelConfigProcessor(@NotNull ContextManager contextManager,
-            @NotNull ConfigProcessor<ItemStack> itemStackProcessor) {
-        this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
-        this.itemStackProcessor = Objects.requireNonNull(itemStackProcessor, "itemStackProcessor");
+        @NotNull ConfigProcessor<ItemStack> itemStackProcessor) {
+        this.contextManager = Objects.requireNonNull(contextManager);
+        this.itemStackProcessor = Objects.requireNonNull(itemStackProcessor);
     }
 
     @Override
@@ -75,12 +75,12 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
 
         Key key = KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("key"));
         EntityType entityType = EntityType.fromNamespaceId(
-                NamespaceID.from(KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("entityType"))));
+            NamespaceID.from(KEY_PROCESSOR.dataFromElement(element.getElementOrThrow("entityType"))));
 
         ElementContext context = contextManager.makeContext(element.getNodeOrThrow("pathfindingSettings"));
 
         Pathfinding.Factory factory = context.provide(HANDLER,
-                () -> new GroundPathfindingFactory(new GroundPathfindingFactory.Data(1, 4, 0.5F, 0, false)));
+            () -> new GroundPathfindingFactory(new GroundPathfindingFactory.Data(1, 4, 0.5F, 0, false)));
 
         ConfigNode metaNode = element.getNodeOrDefault(ConfigNode::of, "meta");
         ConfigNode extraNode = element.getNodeOrDefault(ConfigNode::of, "extra");
@@ -89,18 +89,16 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         ConfigElement displayNameElement = element.getElementOrDefault(() -> ConfigPrimitive.NULL, "displayName");
         if (displayNameElement.isNull()) {
             displayName = null;
-        }
-        else {
+        } else {
             displayName = COMPONENT_PROCESSOR.dataFromElement(displayNameElement);
         }
 
         Component hologramDisplayName;
         ConfigElement hologramDisplayNameElement =
-                element.getElementOrDefault(ConfigPrimitive.NULL, "hologramDisplayName");
+            element.getElementOrDefault(ConfigPrimitive.NULL, "hologramDisplayName");
         if (hologramDisplayNameElement.isNull()) {
             hologramDisplayName = null;
-        }
-        else {
+        } else {
             hologramDisplayName = COMPONENT_PROCESSOR.dataFromElement(hologramDisplayNameElement);
         }
 
@@ -108,15 +106,15 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         Map<EquipmentSlot, ItemStack> equipment = new HashMap<>(equipmentNode.size());
         for (Map.Entry<String, ConfigElement> entry : equipmentNode.entrySet()) {
             EquipmentSlot equipmentSlot =
-                    EQUIPMENT_SLOT_PROCESSOR.dataFromElement(ConfigPrimitive.of(entry.getKey().toUpperCase()));
+                EQUIPMENT_SLOT_PROCESSOR.dataFromElement(ConfigPrimitive.of(entry.getKey().toUpperCase()));
             equipment.put(equipmentSlot, itemStackProcessor.dataFromElement(entry.getValue()));
         }
 
         Object2FloatMap<String> attributes =
-                ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrDefault(ConfigNode::of, "attributes"));
+            ATTRIBUTE_MAP_PROCESSOR.dataFromElement(element.getElementOrDefault(ConfigNode::of, "attributes"));
 
         return new MobModel(key, entityType, factory, contextManager.makeContext(node), metaNode, extraNode,
-                displayName, hologramDisplayName, equipment, attributes);
+            displayName, hologramDisplayName, equipment, attributes);
     }
 
     @Override
@@ -127,8 +125,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         ConfigElement displayNameElement;
         if (displayName.isPresent()) {
             displayNameElement = COMPONENT_PROCESSOR.elementFromData(displayName.get());
-        }
-        else {
+        } else {
             displayNameElement = ConfigPrimitive.NULL;
         }
 
@@ -136,8 +133,7 @@ public class MobModelConfigProcessor implements ConfigProcessor<MobModel> {
         ConfigElement hologramDisplayNameElement;
         if (hologramDisplayName.isPresent()) {
             hologramDisplayNameElement = COMPONENT_PROCESSOR.elementFromData(hologramDisplayName.get());
-        }
-        else {
+        } else {
             hologramDisplayNameElement = ConfigPrimitive.NULL;
         }
 

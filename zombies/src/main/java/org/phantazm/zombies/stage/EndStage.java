@@ -64,20 +64,20 @@ public class EndStage implements Stage {
     private boolean hasWon;
 
     public EndStage(@NotNull Instance instance, @NotNull MapSettingsInfo settings, @NotNull WebhookInfo webhook,
-            @NotNull TickFormatter tickFormatter, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull Wrapper<Long> remainingTicks, @NotNull Wrapper<Long> ticksSinceStart,
-            @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
-            @NotNull RoundHandler roundHandler, @NotNull ZombiesDatabase database) {
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.settings = Objects.requireNonNull(settings, "settings");
-        this.webhook = Objects.requireNonNull(webhook, "webhook");
-        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
-        this.remainingTicks = Objects.requireNonNull(remainingTicks, "remainingTicks");
-        this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
-        this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
-        this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
-        this.database = Objects.requireNonNull(database, "database");
+        @NotNull TickFormatter tickFormatter, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
+        @NotNull Wrapper<Long> remainingTicks, @NotNull Wrapper<Long> ticksSinceStart,
+        @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
+        @NotNull RoundHandler roundHandler, @NotNull ZombiesDatabase database) {
+        this.instance = Objects.requireNonNull(instance);
+        this.settings = Objects.requireNonNull(settings);
+        this.webhook = Objects.requireNonNull(webhook);
+        this.tickFormatter = Objects.requireNonNull(tickFormatter);
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
+        this.remainingTicks = Objects.requireNonNull(remainingTicks);
+        this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart);
+        this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator);
+        this.roundHandler = Objects.requireNonNull(roundHandler);
+        this.database = Objects.requireNonNull(database);
 
         this.sidebarUpdaters = new HashMap<>();
     }
@@ -139,7 +139,7 @@ public class EndStage implements Stage {
             if (zombiesPlayer.isState(ZombiesPlayerStateKeys.KNOCKED)) {
                 Point deathLocation = zombiesPlayer.getPlayer().map(Player::getPosition).orElse(null);
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD,
-                        DeadPlayerStateContext.killed(deathLocation, null, null));
+                    DeadPlayerStateContext.killed(deathLocation, null, null));
             }
         }
 
@@ -150,14 +150,15 @@ public class EndStage implements Stage {
         TagResolver roundPlaceholder = Placeholder.component("round", Component.text(bestRound + 1));
         if (anyAlive) {
             instance.sendTitlePart(TitlePart.TITLE,
-                    MINI_MESSAGE.deserialize(settings.winTitleFormat(), roundPlaceholder));
+                MINI_MESSAGE.deserialize(settings.winTitleFormat(), roundPlaceholder));
             instance.sendTitlePart(TitlePart.SUBTITLE,
-                    MINI_MESSAGE.deserialize(settings.winSubtitleFormat(), roundPlaceholder));
+                MINI_MESSAGE.deserialize(settings.winSubtitleFormat(), roundPlaceholder));
 
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
                 ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
                 stats.setWins(stats.getWins() + 1);
-                database.synchronizeBestTime(zombiesPlayer.getUUID(), settings.id(), zombiesPlayers.size(), "", ticksSinceStart.get());
+                database.synchronizeBestTime(zombiesPlayer.getUUID(), settings.id(), zombiesPlayers.size(), "",
+                    ticksSinceStart.get());
 
                 zombiesPlayer.getPlayer().ifPresent(player -> {
                     byte[] data = MinestomPacketUtils.serialize(new RoundStartPacket());
@@ -167,12 +168,11 @@ public class EndStage implements Stage {
 
             this.hasWon = true;
             runWebhook(timeString);
-        }
-        else {
+        } else {
             instance.sendTitlePart(TitlePart.TITLE,
-                    MINI_MESSAGE.deserialize(settings.lossTitleFormat(), roundPlaceholder));
+                MINI_MESSAGE.deserialize(settings.lossTitleFormat(), roundPlaceholder));
             instance.sendTitlePart(TitlePart.SUBTITLE,
-                    MINI_MESSAGE.deserialize(settings.lossSubtitleFormat(), roundPlaceholder));
+                MINI_MESSAGE.deserialize(settings.lossSubtitleFormat(), roundPlaceholder));
 
             this.hasWon = false;
         }
@@ -184,26 +184,26 @@ public class EndStage implements Stage {
 
             ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
             int gunAccuracy = stats.getShots() <= 0
-                              ? 100
-                              : (int)Math.rint(((double)(stats.getRegularHits() + stats.getHeadshotHits()) /
-                                      (double)stats.getShots()) * 100);
+                                  ? 100
+                                  :(int) Math.rint(((double) (stats.getRegularHits() + stats.getHeadshotHits()) /
+                                                        (double) stats.getShots()) * 100);
             int headshotAccuracy = stats.getShots() <= 0
-                                   ? 100
-                                   : (int)Math.rint(
-                                           ((double)(stats.getHeadshotHits()) / (double)stats.getShots()) * 100);
-            TagResolver[] tagResolvers = new TagResolver[] {Placeholder.component("map", settings.displayName()),
-                    Placeholder.component("final_time", finalTime), roundPlaceholder,
-                    Placeholder.component("total_shots", Component.text(stats.getShots())),
-                    Placeholder.component("regular_hits", Component.text(stats.getRegularHits())),
-                    Placeholder.component("headshot_hits", Component.text(stats.getHeadshotHits())),
-                    Placeholder.component("gun_accuracy", Component.text(gunAccuracy)),
-                    Placeholder.component("headshot_accuracy", Component.text(headshotAccuracy)),
-                    Placeholder.component("kills", Component.text(stats.getKills())),
-                    Placeholder.component("coins_gained", Component.text(stats.getCoinsGained())),
-                    Placeholder.component("coins_spent", Component.text(stats.getCoinsSpent())),
-                    Placeholder.component("knocks", Component.text(stats.getKnocks())),
-                    Placeholder.component("deaths", Component.text(stats.getDeaths())),
-                    Placeholder.component("revives", Component.text(stats.getRevives()))};
+                                       ? 100
+                                       :(int) Math.rint(
+                ((double) (stats.getHeadshotHits()) / (double) stats.getShots()) * 100);
+            TagResolver[] tagResolvers = new TagResolver[]{Placeholder.component("map", settings.displayName()),
+                Placeholder.component("final_time", finalTime), roundPlaceholder,
+                Placeholder.component("total_shots", Component.text(stats.getShots())),
+                Placeholder.component("regular_hits", Component.text(stats.getRegularHits())),
+                Placeholder.component("headshot_hits", Component.text(stats.getHeadshotHits())),
+                Placeholder.component("gun_accuracy", Component.text(gunAccuracy)),
+                Placeholder.component("headshot_accuracy", Component.text(headshotAccuracy)),
+                Placeholder.component("kills", Component.text(stats.getKills())),
+                Placeholder.component("coins_gained", Component.text(stats.getCoinsGained())),
+                Placeholder.component("coins_spent", Component.text(stats.getCoinsSpent())),
+                Placeholder.component("knocks", Component.text(stats.getKnocks())),
+                Placeholder.component("deaths", Component.text(stats.getDeaths())),
+                Placeholder.component("revives", Component.text(stats.getRevives()))};
 
             zombiesPlayer.sendMessage(MINI_MESSAGE.deserialize(settings.endGameStatsFormat(), tagResolvers));
         }
@@ -228,23 +228,24 @@ public class EndStage implements Stage {
                 List<String> formattedUsernames = new ArrayList<>(futures.size());
                 for (int i = 0; i < futures.size(); i++) {
                     formattedUsernames.add(
-                            MessageFormat.format(webhook.playerFormat(), futures.get(i).join().replaceAll("_", "\\\\\\\\_"),
-                                    kills.getInt(i)));
+                        MessageFormat.format(webhook.playerFormat(), futures.get(i).join().replaceAll("_", "\\\\\\\\_"),
+                            kills.getInt(i)));
                 }
 
                 String playerList = String.join(", ", formattedUsernames);
-                String output = MessageFormat.format(webhook.webhookFormat(), date, time, zombiesPlayers.size(), playerList);
+                String output = MessageFormat.format(webhook.webhookFormat(), date, time, zombiesPlayers.size(),
+                    playerList);
                 HttpRequest request = HttpRequest.newBuilder(URI.create(webhook.webhookURL()))
-                        .header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(output))
-                        .build();
+                                          .header("Content-Type", "application/json")
+                                          .POST(HttpRequest.BodyPublishers.ofString(output))
+                                          .build();
                 return client.sendAsync(request, HttpResponse.BodyHandlers.discarding());
             }).whenComplete((ignored, throwable) -> {
                 if (throwable != null) {
                     LOGGER.warn("Failed to send webhook", throwable);
                 }
             });
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.warn("Failed to send webhook", e);
         }
     }
@@ -255,7 +256,7 @@ public class EndStage implements Stage {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (!zombiesPlayer.hasQuit()) {
                 SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(),
-                        unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
+                    unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
                 sidebarUpdater.tick(time);
             }
 

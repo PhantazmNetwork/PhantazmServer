@@ -32,10 +32,10 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
     private final Tag<Integer> lastPunchTicksTag;
 
     public PlayerAttackEntityListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MobStore mobStore,
-            float punchDamage, int punchCooldown, float punchKnockback) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MobStore mobStore,
+        float punchDamage, int punchCooldown, float punchKnockback) {
         super(instance, zombiesPlayers);
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        this.mobStore = Objects.requireNonNull(mobStore);
         this.punchDamage = punchDamage;
         this.lastPunchTicksTag = Tag.Integer("last_punch").defaultValue(0);
         this.punchCooldown = punchCooldown;
@@ -80,7 +80,7 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
     }
 
     private void handleNoEquipmentAttack(@NotNull ZombiesPlayer zombiesPlayer, @NotNull Player player,
-            @NotNull Entity target) {
+        @NotNull Entity target) {
         Instance instance = player.getInstance();
         if (instance == null) {
             return;

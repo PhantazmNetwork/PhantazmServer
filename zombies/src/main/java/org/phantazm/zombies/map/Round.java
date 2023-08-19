@@ -45,15 +45,15 @@ public class Round implements Tickable {
             LOGGER.warn("Round {} has no waves", roundInfo);
         }
 
-        this.roundInfo = Objects.requireNonNull(roundInfo, "roundInfo");
+        this.roundInfo = Objects.requireNonNull(roundInfo);
         this.waves = List.copyOf(waves);
         this.startActions = List.copyOf(startActions);
         this.endActions = List.copyOf(endActions);
-        this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
+        this.spawnDistributor = Objects.requireNonNull(spawnDistributor);
 
         this.spawnedMobs = new HashMap<>();
-        this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        this.spawnpoints = Objects.requireNonNull(spawnpoints);
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
     }
 
     public @NotNull RoundInfo getRoundInfo() {
@@ -72,7 +72,8 @@ public class Round implements Tickable {
         }
     }
 
-    public @Unmodifiable @NotNull List<PhantazmMob> getSpawnedMobs() {
+    public @Unmodifiable
+    @NotNull List<PhantazmMob> getSpawnedMobs() {
         return List.copyOf(spawnedMobs.values());
     }
 
@@ -80,7 +81,8 @@ public class Round implements Tickable {
         return totalMobCount;
     }
 
-    public @Unmodifiable @NotNull List<Wave> getWaves() {
+    public @Unmodifiable
+    @NotNull List<Wave> getWaves() {
         return waves;
     }
 

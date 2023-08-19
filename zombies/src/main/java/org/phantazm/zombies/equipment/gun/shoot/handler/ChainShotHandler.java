@@ -35,15 +35,15 @@ public class ChainShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public ChainShotHandler(@NotNull Data data, @NotNull @Child("finder") PositionalEntityFinder finder,
-            @NotNull @Child("firer") Firer firer) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.finder = Objects.requireNonNull(finder, "finder");
-        this.firer = Objects.requireNonNull(firer, "firer");
+        @NotNull @Child("firer") Firer firer) {
+        this.data = Objects.requireNonNull(data);
+        this.finder = Objects.requireNonNull(finder);
+        this.firer = Objects.requireNonNull(firer);
     }
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;
@@ -70,7 +70,7 @@ public class ChainShotHandler implements ShotHandler {
 
                 BoundingBox boundingBox = entity.getBoundingBox();
                 Vec direction =
-                        Vec.fromPoint(entity.getPosition().add(0, boundingBox.height() / 2, 0).sub(hit.location()));
+                    Vec.fromPoint(entity.getPosition().add(0, boundingBox.height() / 2, 0).sub(hit.location()));
                 int initialSize = previousHits.size();
                 firer.fire(gun, state, new Pos(hit.location()).withDirection(direction), previousHits);
                 if (previousHits.size() > initialSize && --attempts <= 0) {
@@ -92,13 +92,14 @@ public class ChainShotHandler implements ShotHandler {
      * @param finder             A path to the {@link ChainShotHandler}'s {@link PositionalEntityFinder} which finds
      *                           {@link Entity}s to shoot in the direction of
      * @param firer              A path to the {@link ChainShotHandler}'s {@link Firer} used to shoot new shots
-     * @param ignorePreviousHits Whether the {@link ChainShotHandler} should shoot in the direction of previously hit targets
+     * @param ignorePreviousHits Whether the {@link ChainShotHandler} should shoot in the direction of previously hit
+     *                           targets
      * @param fireAttempts       The number of times the {@link ChainShotHandler} should try to shoot at new targets
      */
     @DataObject
     public record Data(@NotNull @ChildPath("finder") String finder,
-                       @NotNull @ChildPath("firer") String firer,
-                       boolean ignorePreviousHits,
-                       int fireAttempts) {
+        @NotNull @ChildPath("firer") String firer,
+        boolean ignorePreviousHits,
+        int fireAttempts) {
     }
 }

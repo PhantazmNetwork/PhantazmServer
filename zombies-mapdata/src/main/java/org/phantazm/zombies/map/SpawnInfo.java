@@ -16,6 +16,6 @@ public record SpawnInfo(@NotNull Key id, @NotNull Key spawnType, int amount) {
      * @param amount the amount of mobs to spawn
      */
     public SpawnInfo {
-        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(id);
     }
 }

@@ -32,21 +32,20 @@ public class ShootExpEffect implements GunEffect {
      */
     @FactoryMethod
     public ShootExpEffect(@NotNull PlayerView playerView, @NotNull @Child("stats") GunStats stats) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.stats = Objects.requireNonNull(stats, "stats");
+        this.playerView = Objects.requireNonNull(playerView);
+        this.stats = Objects.requireNonNull(stats);
     }
 
     @Override
     public void apply(@NotNull GunState state) {
         if (state.isMainEquipment()) {
             float exp = MathUtils.clamp(
-                    state.ammo() > 0 ? (state.ticksSinceLastShot() * fireRateFactor()) / (float)stats.shootSpeed() : 0F,
-                    0, 1);
+                state.ammo() > 0 ? (state.ticksSinceLastShot() * fireRateFactor()) / (float) stats.shootSpeed():0F,
+                0, 1);
 
             playerView.getPlayer().ifPresent(player -> player.setExp(exp));
             currentlyActive = true;
-        }
-        else if (currentlyActive) {
+        } else if (currentlyActive) {
             playerView.getPlayer().ifPresent(player -> player.setExp(0));
             currentlyActive = false;
         }

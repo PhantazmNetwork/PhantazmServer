@@ -25,17 +25,16 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
     @FactoryMethod
     public MessagingInteractor(@NotNull Data data, @NotNull Instance instance) {
         super(data);
-        this.instance = Objects.requireNonNull(instance, "instance");
+        this.instance = Objects.requireNonNull(instance);
     }
 
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         if (data.broadcast) {
             interaction.player().module().getPlayerView().getPlayer()
-                    .ifPresent(player -> sendMessages(instance, player));
+                .ifPresent(player -> sendMessages(instance, player));
 
-        }
-        else {
+        } else {
             interaction.player().module().getPlayerView().getPlayer().ifPresent(player -> sendMessages(player, player));
         }
 

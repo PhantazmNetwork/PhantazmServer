@@ -55,6 +55,7 @@ public class ApplyPotionSkill implements SkillComponent {
 
         @Override
         protected void useOnTarget(@NotNull Target target) {
+            //THREADING: safe to call without acquirable
             target.forType(Entity.class, entity -> entity.addEffect(data.potion));
         }
 

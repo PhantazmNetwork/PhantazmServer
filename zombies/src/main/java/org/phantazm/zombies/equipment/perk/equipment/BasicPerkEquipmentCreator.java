@@ -16,12 +16,12 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import java.util.Objects;
 
 @Description("""
-        Standard perk equipment.
-                
-        This element consists of:
-        * An "interactor" that handles player interactions, like right-clicking, left-clicking, or selecting
-        * A "visual" that controls how the perk looks
-        """)
+    Standard perk equipment.
+            
+    This element consists of:
+    * An "interactor" that handles player interactions, like right-clicking, left-clicking, or selecting
+    * A "visual" that controls how the perk looks
+    """)
 @Model("zombies.perk.equipment.basic")
 @Cache(false)
 public class BasicPerkEquipmentCreator implements PerkEquipmentCreator {
@@ -30,9 +30,9 @@ public class BasicPerkEquipmentCreator implements PerkEquipmentCreator {
 
     @FactoryMethod
     public BasicPerkEquipmentCreator(@NotNull @Child("interactor") PerkInteractorCreator interactor,
-            @NotNull @Child("visual") PerkVisualCreator visual) {
-        this.interactor = Objects.requireNonNull(interactor, "interactor");
-        this.visual = Objects.requireNonNull(visual, "visual");
+        @NotNull @Child("visual") PerkVisualCreator visual) {
+        this.interactor = Objects.requireNonNull(interactor);
+        this.visual = Objects.requireNonNull(visual);
     }
 
     @Override
@@ -94,8 +94,8 @@ public class BasicPerkEquipmentCreator implements PerkEquipmentCreator {
 
     @DataObject
     public record Data(@NotNull @ChildPath("interactor") @Description(
-            "The interactor, which handles player actions") String interactor,
-                       @NotNull @ChildPath("visual") @Description(
-                               "The visual, which controls how the perk appears") String visual) {
+        "The interactor, which handles player actions") String interactor,
+        @NotNull @ChildPath("visual") @Description(
+            "The visual, which controls how the perk appears") String visual) {
     }
 }

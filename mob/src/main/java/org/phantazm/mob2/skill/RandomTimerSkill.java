@@ -27,7 +27,7 @@ public class RandomTimerSkill implements SkillComponent {
 
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, delegate.apply(mob, injectionStore));
+        return new Internal(data, delegate.apply(mob, injectionStore), mob);
     }
 
     @DataObject
@@ -62,8 +62,8 @@ public class RandomTimerSkill implements SkillComponent {
     private static class Internal extends TimerSkillAbstract {
         private final Data data;
 
-        public Internal(Data data, Skill delegate) {
-            super(delegate, data.requiresActivation, data.resetOnActivation, data.repeat,
+        public Internal(Data data, Skill delegate, Mob self) {
+            super(self, delegate, data.requiresActivation, data.resetOnActivation, data.repeat,
                     MathUtils.randomInterval(data.minInterval, data.maxInterval));
             this.data = data;
         }

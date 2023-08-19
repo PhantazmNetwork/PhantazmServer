@@ -50,19 +50,19 @@ public class BasicWindowHandler implements WindowHandler {
     private long positionCheckTicks;
 
     public BasicWindowHandler(@NotNull BoundedTracker<Window> windowTracker, @NotNull BoundedTracker<Room> roomTracker,
-            @NotNull MobStore mobStore, @NotNull Collection<? extends ZombiesPlayer> players, double repairRadius,
-            long repairInterval, int coinsPerWindowBlock, @NotNull WindowMessages windowMessages) {
-        this.windowTracker = Objects.requireNonNull(windowTracker, "windowTracker");
-        this.roomTracker = Objects.requireNonNull(roomTracker, "roomTracker");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
-        this.players = Objects.requireNonNull(players, "players");
+        @NotNull MobStore mobStore, @NotNull Collection<? extends ZombiesPlayer> players, double repairRadius,
+        long repairInterval, int coinsPerWindowBlock, @NotNull WindowMessages windowMessages) {
+        this.windowTracker = Objects.requireNonNull(windowTracker);
+        this.roomTracker = Objects.requireNonNull(roomTracker);
+        this.mobStore = Objects.requireNonNull(mobStore);
+        this.players = Objects.requireNonNull(players);
         this.repairRadius = repairRadius;
         this.repairInterval = repairInterval;
         this.repairOperationMap = new LinkedHashMap<>();
         this.activeRepairs = repairOperationMap.values();
         this.coinsPerWindowBlock = coinsPerWindowBlock;
         this.positionCheckTicks = 0;
-        this.windowMessages = Objects.requireNonNull(windowMessages, "windowMessages");
+        this.windowMessages = Objects.requireNonNull(windowMessages);
     }
 
     @Override
@@ -120,14 +120,13 @@ public class BasicWindowHandler implements WindowHandler {
 
                     if (player.isSneaking()) {
                         addOperationIfNearby(zombiesPlayer, player);
-                    }
-                    else {
+                    } else {
                         BoundingBox boundingBox = player.getBoundingBox();
                         double width = boundingBox.width();
                         double height = boundingBox.height();
 
                         Optional<Window> windowOptional =
-                                windowTracker.closestInRangeToBounds(player.getPosition(), width, height, repairRadius);
+                            windowTracker.closestInRangeToBounds(player.getPosition(), width, height, repairRadius);
                         if (windowOptional.isPresent()) {
                             if (!windowOptional.get().isFullyRepaired()) {
                                 player.sendActionBar(windowMessages.nearWindow());
@@ -164,7 +163,7 @@ public class BasicWindowHandler implements WindowHandler {
                 double height = boundingBox.height();
 
                 Optional<Window> windowOptional =
-                        windowTracker.closestInRangeToBounds(player.getPosition(), width, height, repairRadius);
+                    windowTracker.closestInRangeToBounds(player.getPosition(), width, height, repairRadius);
                 if (windowOptional.isEmpty() || windowOptional.get() != targetWindow) {
                     repairOperationIterator.remove();
                     continue;
@@ -183,27 +182,27 @@ public class BasicWindowHandler implements WindowHandler {
 
                 Wrapper<Boolean> hasNearby = Wrapper.of(false);
                 targetWindow.instance().getEntityTracker()
-                        .nearbyEntitiesUntil(targetWindow.center(), 5, EntityTracker.Target.LIVING_ENTITIES,
-                                candidate -> {
-                                    if (!mobStore.hasMob(candidate.getUuid())) {
-                                        //entities not in the mob store don't prevent repairs
-                                        return false;
-                                    }
+                    .nearbyEntitiesUntil(targetWindow.center(), 5, EntityTracker.Target.LIVING_ENTITIES,
+                        candidate -> {
+                            if (!mobStore.hasMob(candidate.getUuid())) {
+                                //entities not in the mob store don't prevent repairs
+                                return false;
+                            }
 
-                                    if (roomTracker.atPoint(candidate.getPosition()).isPresent()) {
-                                        //entities in a room don't prevent repairs
-                                        return false;
-                                    }
+                            if (roomTracker.atPoint(candidate.getPosition()).isPresent()) {
+                                //entities in a room don't prevent repairs
+                                return false;
+                            }
 
-                                    Optional<Window> windowOptional = windowTracker.atPoint(candidate.getPosition());
-                                    if (windowOptional.isPresent() && windowOptional.get() != targetWindow) {
-                                        //entities in other nearby windows don't prevent repairs
-                                        return false;
-                                    }
+                            Optional<Window> windowOptional = windowTracker.atPoint(candidate.getPosition());
+                            if (windowOptional.isPresent() && windowOptional.get() != targetWindow) {
+                                //entities in other nearby windows don't prevent repairs
+                                return false;
+                            }
 
-                                    hasNearby.set(true);
-                                    return true;
-                                });
+                            hasNearby.set(true);
+                            return true;
+                        });
 
                 if (hasNearby.get()) {
                     zombiesPlayer.sendMessage(windowMessages.enemiesNearby());
@@ -211,7 +210,7 @@ public class BasicWindowHandler implements WindowHandler {
                 }
 
                 int repaired = targetWindow.updateIndex(
-                        targetWindow.getIndex() + zombiesPlayer.module().getMeta().getWindowRepairAmount());
+                    targetWindow.getIndex() + zombiesPlayer.module().getMeta().getWindowRepairAmount());
                 if (repaired == 0) {
                     continue;
                 }
@@ -228,12 +227,12 @@ public class BasicWindowHandler implements WindowHandler {
                 PlayerCoins coins = zombiesPlayer.module().getCoins();
 
                 TransactionResult result = coins.runTransaction(new Transaction(
-                        zombiesPlayer.module().compositeTransactionModifiers()
-                                .modifiers(ModifierSourceGroups.WINDOW_COIN_GAIN), baseGold));
+                    zombiesPlayer.module().compositeTransactionModifiers()
+                        .modifiers(ModifierSourceGroups.WINDOW_COIN_GAIN), baseGold));
 
                 ZombiesPlayerRepairWindowEvent event =
-                        new ZombiesPlayerRepairWindowEvent(player, zombiesPlayer, targetWindow, repaired,
-                                result.change());
+                    new ZombiesPlayerRepairWindowEvent(player, zombiesPlayer, targetWindow, repaired,
+                        result.change());
 
                 EventDispatcher.call(event);
                 if (event.isCancelled()) {

@@ -26,7 +26,7 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
      */
     public InventoryObjectGroupAbstract(@NotNull InventoryProfile profile, @NotNull IntSet slots,
             @NotNull Function<? super IntSet, ? extends IntSet> unmodifiableMapper) {
-        this.profile = Objects.requireNonNull(profile, "profile");
+        this.profile = Objects.requireNonNull(profile);
         this.slots = new IntRBTreeSet(slots);
         this.unmodifiableSlots = Objects.requireNonNull(unmodifiableMapper.apply(this.slots), "mapped slots");
     }
@@ -56,7 +56,8 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
     }
 
     @Override
-    public @NotNull @UnmodifiableView IntSet getSlots() {
+    public @NotNull
+    @UnmodifiableView IntSet getSlots() {
         return unmodifiableSlots;
     }
 

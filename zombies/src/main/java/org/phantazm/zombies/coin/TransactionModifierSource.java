@@ -24,7 +24,9 @@ public interface TransactionModifierSource {
         }
     };
 
-    @NotNull @UnmodifiableView Collection<Transaction.Modifier> modifiers(@NotNull Key key);
+    @NotNull
+    @UnmodifiableView
+    Collection<Transaction.Modifier> modifiers(@NotNull Key key);
 
     void addModifier(@NotNull Key group, @NotNull Transaction.Modifier modifier);
 
@@ -35,12 +37,13 @@ public interface TransactionModifierSource {
     }
 
     static @NotNull TransactionModifierSource compositeView(
-            @NotNull TransactionModifierSource transactionModifierSource) {
-        Objects.requireNonNull(transactionModifierSource, "transactionModifierSource");
+        @NotNull TransactionModifierSource transactionModifierSource) {
+        Objects.requireNonNull(transactionModifierSource);
 
         return new TransactionModifierSource() {
             @Override
-            public @NotNull @UnmodifiableView Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
+            public @NotNull
+            @UnmodifiableView Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
                 return transactionModifierSource.modifiers(key);
             }
 

@@ -16,7 +16,7 @@ public class BasicInstanceSpaceHandler implements InstanceSpaceHandler {
     private final InstanceSpace space;
 
     public BasicInstanceSpaceHandler(@NotNull InstanceSpace space, @NotNull EventNode<InstanceEvent> instanceNode) {
-        this.space = Objects.requireNonNull(space, "space");
+        this.space = Objects.requireNonNull(space);
 
         instanceNode.addListener(InstanceChunkUnloadEvent.class, this::chunkUnload);
         instanceNode.addListener(BlockChangeEvent.class, this::blockChange);

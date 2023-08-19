@@ -26,7 +26,7 @@ public class StaticActionBarChooser implements ReloadActionBarChooser {
      */
     @FactoryMethod
     public StaticActionBarChooser(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

@@ -41,7 +41,7 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
     public PartyNotification(@NotNull Collection<? extends PartyMember> partyMembers,
             @NotNull Wrapper<PartyMember> owner, @NotNull PartyNotificationConfig config,
             @NotNull TickFormatter tickFormatter, @NotNull MiniMessage miniMessage) {
-        Objects.requireNonNull(partyMembers, "partyMembers");
+        Objects.requireNonNull(partyMembers);
         this.audience = (ForwardingAudience)() -> {
             Collection<Audience> audiences = new ArrayList<>(partyMembers.size());
 
@@ -51,10 +51,10 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
 
             return audiences;
         };
-        this.owner = Objects.requireNonNull(owner, "owner");
-        this.config = Objects.requireNonNull(config, "config");
-        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+        this.owner = Objects.requireNonNull(owner);
+        this.config = Objects.requireNonNull(config);
+        this.tickFormatter = Objects.requireNonNull(tickFormatter);
+        this.miniMessage = Objects.requireNonNull(miniMessage);
     }
 
     @Override

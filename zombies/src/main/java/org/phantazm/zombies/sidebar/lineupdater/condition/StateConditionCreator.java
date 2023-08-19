@@ -18,7 +18,7 @@ public class StateConditionCreator implements PlayerConditionCreator {
 
     @FactoryMethod
     public StateConditionCreator(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -31,8 +31,8 @@ public class StateConditionCreator implements PlayerConditionCreator {
         private final ZombiesPlayer zombiesPlayer;
 
         private Condition(Data data, ZombiesPlayer zombiesPlayer) {
-            this.data = Objects.requireNonNull(data, "data");
-            this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
+            this.data = Objects.requireNonNull(data);
+            this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
         }
 
         @Override

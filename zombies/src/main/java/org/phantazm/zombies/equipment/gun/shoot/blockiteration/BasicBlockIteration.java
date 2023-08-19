@@ -23,7 +23,7 @@ public class BasicBlockIteration implements BlockIteration {
 
     @FactoryMethod
     public BasicBlockIteration(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -32,7 +32,8 @@ public class BasicBlockIteration implements BlockIteration {
             @SuppressWarnings("UnstableApiUsage")
             @Override
             public boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Block block) {
-                return !data.passableBlocks().contains(block.key()) && !block.registry().collisionShape().relativeEnd().isZero();
+                return !data.passableBlocks().contains(block.key()) && !block.registry().collisionShape().relativeEnd()
+                                                                            .isZero();
             }
 
             @Override

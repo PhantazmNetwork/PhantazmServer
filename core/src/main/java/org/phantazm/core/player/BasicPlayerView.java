@@ -50,9 +50,9 @@ class BasicPlayerView implements PlayerView {
      */
     BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
             @NotNull UUID uuid) {
-        this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
-        this.uuid = Objects.requireNonNull(uuid, "player");
+        this.identitySource = Objects.requireNonNull(identitySource);
+        this.connectionManager = Objects.requireNonNull(connectionManager);
+        this.uuid = Objects.requireNonNull(uuid);
         this.playerReference = new WeakReference<>(null);
     }
 
@@ -65,8 +65,8 @@ class BasicPlayerView implements PlayerView {
      */
     BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
             @NotNull Player player) {
-        this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
+        this.identitySource = Objects.requireNonNull(identitySource);
+        this.connectionManager = Objects.requireNonNull(connectionManager);
         this.uuid = player.getUuid();
         this.playerReference = new WeakReference<>(player);
         this.username = player.getUsername();

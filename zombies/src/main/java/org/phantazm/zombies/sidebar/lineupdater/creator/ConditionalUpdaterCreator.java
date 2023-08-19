@@ -20,17 +20,17 @@ public class ConditionalUpdaterCreator implements PlayerUpdaterCreator {
 
     @FactoryMethod
     public ConditionalUpdaterCreator(@NotNull @Child("condition") PlayerConditionCreator condition,
-            @NotNull @Child("success") PlayerUpdaterCreator successUpdater,
-            @NotNull @Child("failure") PlayerUpdaterCreator failureUpdater) {
-        this.condition = Objects.requireNonNull(condition, "condition");
-        this.successUpdater = Objects.requireNonNull(successUpdater, "successUpdater");
-        this.failureUpdater = Objects.requireNonNull(failureUpdater, "failureUpdater");
+        @NotNull @Child("success") PlayerUpdaterCreator successUpdater,
+        @NotNull @Child("failure") PlayerUpdaterCreator failureUpdater) {
+        this.condition = Objects.requireNonNull(condition);
+        this.successUpdater = Objects.requireNonNull(successUpdater);
+        this.failureUpdater = Objects.requireNonNull(failureUpdater);
     }
 
     @Override
     public @NotNull SidebarLineUpdater forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
         return new Updater(condition.forPlayer(zombiesPlayer), successUpdater.forPlayer(zombiesPlayer),
-                failureUpdater.forPlayer(zombiesPlayer));
+            failureUpdater.forPlayer(zombiesPlayer));
     }
 
     private static class Updater implements SidebarLineUpdater {
@@ -75,7 +75,7 @@ public class ConditionalUpdaterCreator implements PlayerUpdaterCreator {
 
     @DataObject
     public record Data(@NotNull @ChildPath("condition") String condition,
-                       @NotNull @ChildPath("success") String success,
-                       @NotNull @ChildPath("failure") String failure) {
+        @NotNull @ChildPath("success") String success,
+        @NotNull @ChildPath("failure") String failure) {
     }
 }

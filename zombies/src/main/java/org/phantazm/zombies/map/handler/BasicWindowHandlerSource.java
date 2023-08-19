@@ -17,18 +17,18 @@ public class BasicWindowHandlerSource implements WindowHandler.Source {
     private final WindowHandler.WindowMessages windowMessages;
 
     public BasicWindowHandlerSource(double repairRadius, long repairInterval, int coinsPerWindowBlock,
-            @NotNull WindowHandler.WindowMessages windowMessages) {
+        @NotNull WindowHandler.WindowMessages windowMessages) {
         this.repairRadius = repairRadius;
         this.repairInterval = repairInterval;
         this.coinsPerWindowBlock = coinsPerWindowBlock;
-        this.windowMessages = Objects.requireNonNull(windowMessages, "windowMessages");
+        this.windowMessages = Objects.requireNonNull(windowMessages);
     }
 
     @Override
     public @NotNull WindowHandler make(@NotNull BoundedTracker<Window> windowTracker,
-            @NotNull BoundedTracker<Room> roomTracker, @NotNull MobStore mobStore,
-            @NotNull Collection<? extends ZombiesPlayer> players) {
+        @NotNull BoundedTracker<Room> roomTracker, @NotNull MobStore mobStore,
+        @NotNull Collection<? extends ZombiesPlayer> players) {
         return new BasicWindowHandler(windowTracker, roomTracker, mobStore, players, repairRadius, repairInterval,
-                coinsPerWindowBlock, windowMessages);
+            coinsPerWindowBlock, windowMessages);
     }
 }

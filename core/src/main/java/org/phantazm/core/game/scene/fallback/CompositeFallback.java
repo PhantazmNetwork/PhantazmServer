@@ -17,11 +17,11 @@ public class CompositeFallback implements SceneFallback {
     /**
      * Creates a composite {@link SceneFallback}.
      *
-     * @param fallbacks The {@link SceneFallback}s to use for the fallback. This will iterate over the fallbacks until
-     *                  a fallback succeeds.
+     * @param fallbacks The {@link SceneFallback}s to use for the fallback. This will iterate over the fallbacks until a
+     *                  fallback succeeds.
      */
     public CompositeFallback(@NotNull Iterable<SceneFallback> fallbacks) {
-        this.fallbacks = Objects.requireNonNull(fallbacks, "fallbacks");
+        this.fallbacks = Objects.requireNonNull(fallbacks);
     }
 
     @Override

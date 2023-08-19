@@ -23,10 +23,10 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
 
     @FactoryMethod
     public EquipmentSpacePredicate(@NotNull Data data, @NotNull @Child("upgrade_path") UpgradePath upgradePath,
-            @NotNull @Child("equipment_predicate") EquipmentPredicate equipmentPredicate) {
+        @NotNull @Child("equipment_predicate") EquipmentPredicate equipmentPredicate) {
         super(data);
-        this.upgradePath = Objects.requireNonNull(upgradePath, "upgradePath");
-        this.equipmentPredicate = Objects.requireNonNull(equipmentPredicate, "equipmentPredicate");
+        this.upgradePath = Objects.requireNonNull(upgradePath);
+        this.equipmentPredicate = Objects.requireNonNull(equipmentPredicate);
     }
 
     @Override
@@ -45,7 +45,7 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
 
                 if (sameType && equipment instanceof Upgradable upgradable) {
                     Optional<Key> upgradeKey = upgradePath.nextUpgrade(upgradable.currentLevel())
-                            .filter(key -> upgradable.getSuggestedUpgrades().contains(key));
+                                                   .filter(key -> upgradable.getSuggestedUpgrades().contains(key));
 
                     if (upgradeKey.isPresent()) {
                         return equipmentPredicate.canUpgrade(interaction, upgradable, upgradeKey.get());
@@ -85,7 +85,7 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
 
             if (data.allowUpgrade && equipment instanceof Upgradable upgradable) {
                 Optional<Key> upgradeKey = upgradePath.nextUpgrade(upgradable.currentLevel())
-                        .filter(key -> upgradable.getSuggestedUpgrades().contains(key));
+                                               .filter(key -> upgradable.getSuggestedUpgrades().contains(key));
 
                 if (upgradeKey.isPresent()) {
                     return equipmentPredicate.canUpgrade(interaction, upgradable, upgradeKey.get());
@@ -100,16 +100,16 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
 
         //check if there's room to add equipment to this group
         return module.getEquipmentHandler().canAddEquipment(data.groupKey) &&
-                equipmentPredicate.canAdd(interaction, data.equipmentKey);
+                   equipmentPredicate.canAdd(interaction, data.equipmentKey);
     }
 
     @DataObject
     public record Data(@NotNull Key equipmentKey,
-                       @NotNull Key groupKey,
-                       boolean allowUpgrade,
-                       boolean mustHoldItemToUpgrade,
-                       boolean allowDuplicate,
-                       @NotNull @ChildPath("upgrade_path") String upgradePath,
-                       @NotNull @ChildPath("equipment_predicate") String equipmentPredicatePath) {
+        @NotNull Key groupKey,
+        boolean allowUpgrade,
+        boolean mustHoldItemToUpgrade,
+        boolean allowDuplicate,
+        @NotNull @ChildPath("upgrade_path") String upgradePath,
+        @NotNull @ChildPath("equipment_predicate") String equipmentPredicatePath) {
     }
 }

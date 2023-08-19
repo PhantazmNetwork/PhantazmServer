@@ -27,9 +27,9 @@ public class ReloadStackMapper implements GunStackMapper {
      */
     @FactoryMethod
     public ReloadStackMapper(@NotNull @Child("stats") GunStats stats,
-            @NotNull @Child("reload_tester") ReloadTester reloadTester) {
-        this.stats = Objects.requireNonNull(stats, "stats");
-        this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
+        @NotNull @Child("reload_tester") ReloadTester reloadTester) {
+        this.stats = Objects.requireNonNull(stats);
+        this.reloadTester = Objects.requireNonNull(reloadTester);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class ReloadStackMapper implements GunStackMapper {
         if (reloadTester.isReloading(state)) {
             long reloadSpeed = stats.reloadSpeed();
             int maxDamage = intermediate.material().registry().maxDamage();
-            int damage = maxDamage - (int)(maxDamage * ((double)state.ticksSinceLastReload() / reloadSpeed));
+            int damage = maxDamage - (int) (maxDamage * ((double) state.ticksSinceLastReload() / reloadSpeed));
 
             return intermediate.withMeta(builder -> builder.damage(damage));
         }
@@ -53,6 +53,6 @@ public class ReloadStackMapper implements GunStackMapper {
      */
     @DataObject
     public record Data(@NotNull @ChildPath("stats") String stats,
-                       @NotNull @ChildPath("reload_tester") String reloadTester) {
+        @NotNull @ChildPath("reload_tester") String reloadTester) {
     }
 }

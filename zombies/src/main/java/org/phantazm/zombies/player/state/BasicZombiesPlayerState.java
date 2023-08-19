@@ -16,9 +16,9 @@ public class BasicZombiesPlayerState implements ZombiesPlayerState {
     private final Collection<Activable> actions;
 
     public BasicZombiesPlayerState(@NotNull Component displayName, @NotNull Key key,
-            @NotNull Collection<Activable> actions) {
-        this.displayName = Objects.requireNonNull(displayName, "displayName");
-        this.key = Objects.requireNonNull(key, "key");
+        @NotNull Collection<Activable> actions) {
+        this.displayName = Objects.requireNonNull(displayName);
+        this.key = Objects.requireNonNull(key);
         this.actions = List.copyOf(actions);
     }
 

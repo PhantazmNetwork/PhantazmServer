@@ -33,8 +33,8 @@ public class MeleeAttackGoal implements GoalCreator {
 
     @FactoryMethod
     public MeleeAttackGoal(@NotNull Data data, @NotNull @Child("skills") Collection<Skill> skills) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.skills = Objects.requireNonNull(skills, "skills");
+        this.data = Objects.requireNonNull(data);
+        this.skills = Objects.requireNonNull(skills);
     }
 
     @Override
@@ -50,9 +50,9 @@ public class MeleeAttackGoal implements GoalCreator {
         private long ticksSinceAttack = 0;
 
         public Goal(@NotNull Data data, @NotNull Collection<Skill> skills, @NotNull PhantazmMob mob) {
-            this.data = Objects.requireNonNull(data, "data");
-            this.skills = Objects.requireNonNull(skills, "skills");
-            this.mob = Objects.requireNonNull(mob, "mob");
+            this.data = Objects.requireNonNull(data);
+            this.skills = Objects.requireNonNull(skills);
+            this.mob = Objects.requireNonNull(mob);
 
             mob.entity().scheduler().scheduleTask(() -> {
                 ++ticksSinceAttack;
@@ -140,7 +140,8 @@ public class MeleeAttackGoal implements GoalCreator {
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<Skill> skills() {
+        public @NotNull
+        @Unmodifiable Collection<Skill> skills() {
             return Collections.unmodifiableCollection(skills);
         }
     }

@@ -18,10 +18,10 @@ public class ZombiesPlayerRepairWindowEvent implements ZombiesPlayerEvent, Cance
     private boolean cancelled;
 
     public ZombiesPlayerRepairWindowEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
-            @NotNull Window window, int amount, int goldGain) {
-        this.player = Objects.requireNonNull(player, "player");
-        this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
-        this.window = Objects.requireNonNull(window, "window");
+        @NotNull Window window, int amount, int goldGain) {
+        this.player = Objects.requireNonNull(player);
+        this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
+        this.window = Objects.requireNonNull(window);
         this.amount = amount;
         this.goldGain = goldGain;
     }

@@ -31,7 +31,7 @@ public class ChangeDoorStateInteractor extends InteractorBase<ChangeDoorStateInt
     @FactoryMethod
     public ChangeDoorStateInteractor(@NotNull Data data, @NotNull Supplier<? extends MapObjects> mapObjects) {
         super(data);
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+        this.mapObjects = Objects.requireNonNull(mapObjects);
     }
 
     @Override

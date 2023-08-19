@@ -21,8 +21,8 @@ public record EquipmentData(@NotNull Key type, @NotNull Key name, @NotNull Key r
      * @param rootLevel The initial level of the equipment
      */
     public EquipmentData {
-        Objects.requireNonNull(type, "type");
-        Objects.requireNonNull(name, "name");
-        Objects.requireNonNull(rootLevel, "rootLevel");
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(rootLevel);
     }
 }

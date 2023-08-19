@@ -23,12 +23,12 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
     private final PlayerRightClickListener rightClickListener;
 
     public PlayerInteractBlockListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
-            @NotNull DoorHandler doorHandler, @NotNull PlayerRightClickListener rightClickListener) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
+        @NotNull DoorHandler doorHandler, @NotNull PlayerRightClickListener rightClickListener) {
         super(instance, zombiesPlayers);
-        this.shopHandler = Objects.requireNonNull(shopHandler, "shopHandler");
-        this.doorHandler = Objects.requireNonNull(doorHandler, "doorHandler");
-        this.rightClickListener = Objects.requireNonNull(rightClickListener, "rightClickListener");
+        this.shopHandler = Objects.requireNonNull(shopHandler);
+        this.doorHandler = Objects.requireNonNull(doorHandler);
+        this.rightClickListener = Objects.requireNonNull(rightClickListener);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
 
         if (event.getHand() == Player.Hand.MAIN) {
             if (shopHandler.handleInteraction(zombiesPlayer, event.getBlockPosition(),
-                    InteractionTypes.RIGHT_CLICK_BLOCK)) {
+                InteractionTypes.RIGHT_CLICK_BLOCK)) {
                 return;
             }
 

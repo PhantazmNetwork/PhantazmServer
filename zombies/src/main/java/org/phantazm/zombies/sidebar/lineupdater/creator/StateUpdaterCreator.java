@@ -26,7 +26,7 @@ public class StateUpdaterCreator implements PlayerUpdaterCreator {
 
     @FactoryMethod
     public StateUpdaterCreator(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -45,9 +45,9 @@ public class StateUpdaterCreator implements PlayerUpdaterCreator {
 
         @FactoryMethod
         public Updater(@NotNull Data data, @NotNull PlayerView playerView, @NotNull PlayerStateSwitcher stateSwitcher) {
-            this.data = Objects.requireNonNull(data, "data");
-            this.playerView = Objects.requireNonNull(playerView, "playerView");
-            this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
+            this.data = Objects.requireNonNull(data);
+            this.playerView = Objects.requireNonNull(playerView);
+            this.stateSwitcher = Objects.requireNonNull(stateSwitcher);
             this.cacheInvalidated = true;
         }
 
@@ -79,7 +79,8 @@ public class StateUpdaterCreator implements PlayerUpdaterCreator {
 
                 TagResolver playerPlaceholder = Placeholder.component("player", playerName);
                 TagResolver statePlaceholder = Placeholder.component("state", currentState.getDisplayName());
-                Component message = MiniMessage.miniMessage().deserialize(data.format, playerPlaceholder, statePlaceholder);
+                Component message = MiniMessage.miniMessage()
+                                        .deserialize(data.format, playerPlaceholder, statePlaceholder);
                 return Optional.of(message);
             }
 

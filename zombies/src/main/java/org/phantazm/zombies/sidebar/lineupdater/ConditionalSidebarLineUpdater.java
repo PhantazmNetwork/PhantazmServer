@@ -48,9 +48,9 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
 
         @FactoryMethod
         public ChildUpdater(@NotNull @Child("condition") BooleanSupplier condition,
-                @NotNull @Child("updater") SidebarLineUpdater updater) {
-            this.condition = Objects.requireNonNull(condition, "condition");
-            this.updater = Objects.requireNonNull(updater, "updater");
+            @NotNull @Child("updater") SidebarLineUpdater updater) {
+            this.condition = Objects.requireNonNull(condition);
+            this.updater = Objects.requireNonNull(updater);
         }
 
         public @NotNull BooleanSupplier getCondition() {
@@ -63,11 +63,11 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
 
         @DataObject
         public record Data(@NotNull @ChildPath("condition") String conditionPath,
-                           @NotNull @ChildPath("updater") String updaterPath) {
+            @NotNull @ChildPath("updater") String updaterPath) {
 
             public Data {
-                Objects.requireNonNull(conditionPath, "conditionPath");
-                Objects.requireNonNull(updaterPath, "updaterPath");
+                Objects.requireNonNull(conditionPath);
+                Objects.requireNonNull(updaterPath);
             }
 
         }
@@ -78,7 +78,7 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
     public record Data(@NotNull @ChildPath("child_updaters") List<String> childUpdaterPaths) {
 
         public Data {
-            Objects.requireNonNull(childUpdaterPaths, "childUpdaterPaths");
+            Objects.requireNonNull(childUpdaterPaths);
         }
 
     }

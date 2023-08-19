@@ -18,9 +18,9 @@ public class PlayerDamageMobListener extends PhantazmMobEventListener<EntityDama
     private final Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers;
 
     public PlayerDamageMobListener(@NotNull Instance instance, @NotNull MobStore mobStore,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
         super(instance, mobStore);
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
     }
 
     @Override

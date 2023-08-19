@@ -7,6 +7,9 @@ import org.phantazm.mob2.selector.Selector;
 
 import java.util.Objects;
 
+/**
+ * An abstract {@link Skill} implementation that is used on a specific {@link Target}.
+ */
 public abstract class TargetedSkill implements Skill {
     protected final Mob self;
     private final Selector selector;

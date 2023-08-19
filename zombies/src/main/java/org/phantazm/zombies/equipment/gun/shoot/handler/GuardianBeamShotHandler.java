@@ -44,7 +44,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public GuardianBeamShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     /**
@@ -64,7 +64,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
                     throw new ConfigProcessException("beamTime must be greater than or equal to 0");
                 }
 
-                return new Data(isElder ? EntityType.ELDER_GUARDIAN : EntityType.GUARDIAN, beamTime);
+                return new Data(isElder ? EntityType.ELDER_GUARDIAN:EntityType.GUARDIAN, beamTime);
             }
 
             @Override
@@ -80,30 +80,30 @@ public class GuardianBeamShotHandler implements ShotHandler {
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;
         }
 
         Entity armorStand = new Entity(EntityType.ARMOR_STAND);
-        ArmorStandMeta armorStandMeta = (ArmorStandMeta)armorStand.getEntityMeta();
+        ArmorStandMeta armorStandMeta = (ArmorStandMeta) armorStand.getEntityMeta();
         armorStandMeta.setMarker(true);
         armorStandMeta.setInvisible(true);
 
         Entity guardian = new Entity(data.entityType());
-        GuardianMeta guardianMeta = (GuardianMeta)guardian.getEntityMeta();
+        GuardianMeta guardianMeta = (GuardianMeta) guardian.getEntityMeta();
         guardianMeta.setTarget(armorStand);
         guardian.setInvisible(true);
 
         Pos start = attacker.getPosition().add(0, attacker.getEyeHeight(), 0);
         ServerPacket armorStandSpawnPacket =
-                new SpawnEntityPacket(armorStand.getEntityId(), armorStand.getUuid(), armorStand.getEntityType().id(),
-                        Pos.fromPoint(shot.end()), 0F, 0, (short)0, (short)0, (short)0);
+            new SpawnEntityPacket(armorStand.getEntityId(), armorStand.getUuid(), armorStand.getEntityType().id(),
+                Pos.fromPoint(shot.end()), 0F, 0, (short) 0, (short) 0, (short) 0);
         ServerPacket armorStandMetaPacket = armorStand.getMetadataPacket();
         ServerPacket guardianSpawnPacket =
-                new SpawnEntityPacket(guardian.getEntityId(), guardian.getUuid(), guardian.getEntityType().id(), start,
-                        start.yaw(), 0, (short)0, (short)0, (short)0);
+            new SpawnEntityPacket(guardian.getEntityId(), guardian.getUuid(), guardian.getEntityType().id(), start,
+                start.yaw(), 0, (short) 0, (short) 0, (short) 0);
         ServerPacket guardianMetaPacket = guardian.getMetadataPacket();
 
         instance.sendGroupedPacket(armorStandSpawnPacket);
@@ -118,12 +118,12 @@ public class GuardianBeamShotHandler implements ShotHandler {
     public void tick(@NotNull GunState state, long time) {
         ++ticks;
         for (Beam beam = removalQueue.peek(); beam != null && ticks - beam.ticks() > data.beamTime();
-                beam = removalQueue.peek()) {
+             beam = removalQueue.peek()) {
             removalQueue.remove();
             Instance instance = beam.instance().get();
             if (instance != null) {
                 instance.sendGroupedPacket(new DestroyEntitiesPacket(
-                        List.of(beam.armorStand().getEntityId(), beam.guardian().getEntityId())));
+                    List.of(beam.armorStand().getEntityId(), beam.guardian().getEntityId())));
             }
         }
     }
@@ -139,9 +139,9 @@ public class GuardianBeamShotHandler implements ShotHandler {
     }
 
     private record Beam(@NotNull Reference<Instance> instance,
-                        @NotNull Entity guardian,
-                        @NotNull Entity armorStand,
-                        long ticks) {
+        @NotNull Entity guardian,
+        @NotNull Entity armorStand,
+        long ticks) {
 
     }
 

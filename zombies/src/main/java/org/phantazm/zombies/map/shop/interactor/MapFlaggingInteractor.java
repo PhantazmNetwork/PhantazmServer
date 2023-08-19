@@ -20,7 +20,7 @@ public class MapFlaggingInteractor extends InteractorBase<MapFlaggingInteractor.
     @FactoryMethod
     public MapFlaggingInteractor(@NotNull Data data, @NotNull Flaggable flaggable) {
         super(data);
-        this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
+        this.flaggable = Objects.requireNonNull(flaggable);
     }
 
     @Override

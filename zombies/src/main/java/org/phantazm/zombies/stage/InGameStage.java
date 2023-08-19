@@ -27,18 +27,18 @@ public class InGameStage implements Stage {
     private final ShopHandler shopHandler;
 
     public InGameStage(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
-            @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
-            @NotNull Map<Key, List<Key>> defaultEquipment, @NotNull Set<Key> equipmentGroups,
-            @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
-            @NotNull ShopHandler shopHandler) {
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
-        this.spawnPos = Objects.requireNonNull(spawnPos, "spawnPos");
-        this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
-        this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
-        this.defaultEquipment = Objects.requireNonNull(defaultEquipment, "defaultEquipment");
-        this.equipmentGroups = Objects.requireNonNull(equipmentGroups, "equipmentGroups");
-        this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
-        this.shopHandler = Objects.requireNonNull(shopHandler, "shopHandler");
+        @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
+        @NotNull Map<Key, List<Key>> defaultEquipment, @NotNull Set<Key> equipmentGroups,
+        @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
+        @NotNull ShopHandler shopHandler) {
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
+        this.spawnPos = Objects.requireNonNull(spawnPos);
+        this.roundHandler = Objects.requireNonNull(roundHandler);
+        this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart);
+        this.defaultEquipment = Objects.requireNonNull(defaultEquipment);
+        this.equipmentGroups = Objects.requireNonNull(equipmentGroups);
+        this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator);
+        this.shopHandler = Objects.requireNonNull(shopHandler);
     }
 
     public long ticksSinceStart() {
@@ -109,7 +109,7 @@ public class InGameStage implements Stage {
 
                 for (Key key : defaultEquipment.get(groupKey)) {
                     module.getEquipmentCreator().createEquipment(key)
-                            .ifPresent(equipment -> equipmentHandler.addEquipment(equipment, groupKey));
+                        .ifPresent(equipment -> equipmentHandler.addEquipment(equipment, groupKey));
 
                     if (!equipmentHandler.canAddEquipment(groupKey)) {
                         break;

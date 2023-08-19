@@ -26,14 +26,14 @@ public class Powerup implements Tickable, Keyed {
     private ZombiesPlayer activatingPlayer;
 
     public Powerup(@NotNull Key type, @NotNull Collection<PowerupVisual> visuals,
-            @NotNull Collection<PowerupAction> actions, @NotNull DeactivationPredicate despawnPredicate,
-            @NotNull PickupPredicate pickupPredicate, @NotNull Point spawnLocation) {
-        this.type = Objects.requireNonNull(type, "type");
+        @NotNull Collection<PowerupAction> actions, @NotNull DeactivationPredicate despawnPredicate,
+        @NotNull PickupPredicate pickupPredicate, @NotNull Point spawnLocation) {
+        this.type = Objects.requireNonNull(type);
         this.visuals = new ArrayList<>(visuals);
         this.actions = new ArrayList<>(actions);
-        this.despawnPredicate = Objects.requireNonNull(despawnPredicate, "despawnPredicate");
-        this.pickupPredicate = Objects.requireNonNull(pickupPredicate, "pickupPredicate");
-        this.spawnLocation = Objects.requireNonNull(spawnLocation, "spawnLocation");
+        this.despawnPredicate = Objects.requireNonNull(despawnPredicate);
+        this.pickupPredicate = Objects.requireNonNull(pickupPredicate);
+        this.spawnLocation = Objects.requireNonNull(spawnLocation);
     }
 
     public void spawn() {
@@ -74,8 +74,7 @@ public class Powerup implements Tickable, Keyed {
             if (action.deactivationPredicate().shouldDeactivate(time)) {
                 action.deactivate(player);
                 actions.remove(i);
-            }
-            else {
+            } else {
                 anyActive = true;
             }
         }
@@ -148,8 +147,7 @@ public class Powerup implements Tickable, Keyed {
             if (deactivationPredicate.shouldDeactivate(time)) {
                 action.deactivate(activatingPlayer);
                 actions.remove(i);
-            }
-            else {
+            } else {
                 anyActive = true;
             }
 

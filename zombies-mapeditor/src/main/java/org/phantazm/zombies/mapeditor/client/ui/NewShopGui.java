@@ -25,7 +25,7 @@ public class NewShopGui extends NamedObjectGui {
     public NewShopGui(@NotNull EditorSession session) {
         super(null);
 
-        Objects.requireNonNull(session, "session");
+        Objects.requireNonNull(session);
 
         MapInfo currentMap = session.getMap();
         Bounds3I selection = session.getSelection().shift(currentMap.settings().origin().mul(-1));

@@ -22,9 +22,9 @@ public class AlertNoAmmoEffect implements GunEffect {
 
     @FactoryMethod
     public AlertNoAmmoEffect(@NotNull Data data,
-            @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "audienceProvider");
+        @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
+        this.data = Objects.requireNonNull(data);
+        this.audienceProvider = Objects.requireNonNull(audienceProvider);
     }
 
     @Override
@@ -34,8 +34,7 @@ public class AlertNoAmmoEffect implements GunEffect {
                 displayMessage(data.message.component());
                 hadNoAmmo = true;
             }
-        }
-        else {
+        } else {
             displayMessage(Component.empty());
             hadNoAmmo = false;
         }
@@ -61,7 +60,7 @@ public class AlertNoAmmoEffect implements GunEffect {
 
     @DataObject
     public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider,
-                       @NotNull MessageWithDestination message) {
+        @NotNull MessageWithDestination message) {
     }
 
 }

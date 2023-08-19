@@ -40,23 +40,23 @@ public final class BasicMapObjects implements MapObjects {
     private final Team corpseTeam;
 
     public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull BoundedTracker<Window> windows,
-            @NotNull BoundedTracker<Shop> shops, @NotNull BoundedTracker<Door> doors,
-            @NotNull BoundedTracker<Room> rooms, @NotNull List<Round> rounds,
-            @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Point mapOrigin,
-            @NotNull Module module, @NotNull TickTaskScheduler taskScheduler, @Nullable Team mobNoPushTeam,
-            @NotNull Team corpseTeam) {
+        @NotNull BoundedTracker<Shop> shops, @NotNull BoundedTracker<Door> doors,
+        @NotNull BoundedTracker<Room> rooms, @NotNull List<Round> rounds,
+        @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Point mapOrigin,
+        @NotNull Module module, @NotNull TickTaskScheduler taskScheduler, @Nullable Team mobNoPushTeam,
+        @NotNull Team corpseTeam) {
         this.spawnpoints = List.copyOf(spawnpoints);
         this.rounds = List.copyOf(rounds);
 
-        this.mapDependencyProvider = Objects.requireNonNull(mapDependencyProvider, "mapDependencyProvider");
-        this.module = Objects.requireNonNull(module, "module");
+        this.mapDependencyProvider = Objects.requireNonNull(mapDependencyProvider);
+        this.module = Objects.requireNonNull(module);
 
-        this.windowTracker = Objects.requireNonNull(windows, "windows");
-        this.shopTracker = Objects.requireNonNull(shops, "shops");
-        this.doorTracker = Objects.requireNonNull(doors, "doors");
-        this.roomTracker = Objects.requireNonNull(rooms, "rooms");
+        this.windowTracker = Objects.requireNonNull(windows);
+        this.shopTracker = Objects.requireNonNull(shops);
+        this.doorTracker = Objects.requireNonNull(doors);
+        this.roomTracker = Objects.requireNonNull(rooms);
 
-        this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
+        this.mobSpawner = Objects.requireNonNull(mobSpawner);
 
         Map<Key, Room> map = new HashMap<>(rooms.items().size());
         for (Room room : rooms.items()) {
@@ -65,18 +65,20 @@ public final class BasicMapObjects implements MapObjects {
 
         this.roomMap = Map.copyOf(map);
         this.mapOrigin = mapOrigin;
-        this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
+        this.taskScheduler = Objects.requireNonNull(taskScheduler);
         this.mobNoPushTeam = mobNoPushTeam;
-        this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
+        this.corpseTeam = Objects.requireNonNull(corpseTeam);
     }
 
     @Override
-    public @Unmodifiable @NotNull List<Spawnpoint> spawnpoints() {
+    public @Unmodifiable
+    @NotNull List<Spawnpoint> spawnpoints() {
         return spawnpoints;
     }
 
     @Override
-    public @Unmodifiable @NotNull List<Round> rounds() {
+    public @Unmodifiable
+    @NotNull List<Round> rounds() {
         return rounds;
     }
 

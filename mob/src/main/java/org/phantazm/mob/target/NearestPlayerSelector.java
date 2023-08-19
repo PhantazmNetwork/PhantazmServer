@@ -35,7 +35,7 @@ public class NearestPlayerSelector extends FirstTargetSelector<Player> {
     public record Data(@NotNull @ChildPath("delegate") String delegate) {
 
         public Data {
-            Objects.requireNonNull(delegate, "delegate");
+            Objects.requireNonNull(delegate);
         }
 
     }

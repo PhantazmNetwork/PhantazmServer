@@ -64,7 +64,7 @@ public class BasicMobSpawner implements MobSpawner {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicMobSpawner.class);
     private static final Consumer<? super ElementException> GOAL_HANDLER = ElementUtils.logging(LOGGER, "mob goal");
     private static final Consumer<? super ElementException> TRIGGER_HANDLER =
-            ElementUtils.logging(LOGGER, "mob trigger");
+        ElementUtils.logging(LOGGER, "mob trigger");
 
     private static final ElementPath GOAL_APPLIERS_PATH = ElementPath.of("goalAppliers");
     private static final ElementPath TRIGGERS_PATH = ElementPath.of("triggers");
@@ -82,37 +82,37 @@ public class BasicMobSpawner implements MobSpawner {
      * @param proximaSpawner The {@link Spawner} to spawn backing {@link ProximaEntity}s
      */
     public BasicMobSpawner(@NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap,
-            @NotNull Spawner proximaSpawner, @NotNull KeyParser keyParser, @NotNull Random random,
-            @NotNull Supplier<? extends MapObjects> mapObjects, @NotNull MobStore mobStore) {
+        @NotNull Spawner proximaSpawner, @NotNull KeyParser keyParser, @NotNull Random random,
+        @NotNull Supplier<? extends MapObjects> mapObjects, @NotNull MobStore mobStore) {
         this.processorMap = Map.copyOf(processorMap);
-        this.proximaSpawner = Objects.requireNonNull(proximaSpawner, "neuralSpawner");
-        this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+        this.proximaSpawner = Objects.requireNonNull(proximaSpawner);
+        this.keyParser = Objects.requireNonNull(keyParser);
+        this.mobStore = Objects.requireNonNull(mobStore);
+        this.mapObjects = Objects.requireNonNull(mapObjects);
 
         this.mobDependencyProvider =
-                new ModuleDependencyProvider(keyParser, new Module(this, mobStore, random, mapObjects));
+            new ModuleDependencyProvider(keyParser, new Module(this, mobStore, random, mapObjects));
     }
 
     @Override
     public @NotNull PhantazmMob spawn(@NotNull Instance instance, @NotNull Pos pos, @NotNull MobModel model,
-            @NotNull Consumer<? super ProximaEntity> init) {
+        @NotNull Consumer<? super ProximaEntity> init) {
         ProximaEntity proximaEntity =
-                proximaSpawner.spawn(instance, pos, model.getEntityType(), model.getFactory(), entity -> {
-                    init.accept(entity);
+            proximaSpawner.spawn(instance, pos, model.getEntityType(), model.getFactory(), entity -> {
+                init.accept(entity);
 
-                    BoundedTracker<Window> windowTracker = mapObjects.get().windowTracker();
-                    entity.pathfinding().setPenalty((x, y, z, h) -> {
-                        Optional<Window> windowOptional = windowTracker.atPoint(x, y + 1, z);
+                BoundedTracker<Window> windowTracker = mapObjects.get().windowTracker();
+                entity.pathfinding().setPenalty((x, y, z, h) -> {
+                    Optional<Window> windowOptional = windowTracker.atPoint(x, y + 1, z);
 
-                        //noinspection OptionalIsPresent
-                        if (windowOptional.isEmpty()) {
-                            return h;
-                        }
+                    //noinspection OptionalIsPresent
+                    if (windowOptional.isEmpty()) {
+                        return h;
+                    }
 
-                        return windowOptional.get().isBlockBroken(x, y + 1, z) ? h : h * 10;
-                    });
+                    return windowOptional.get().isBlockBroken(x, y + 1, z) ? h:h * 10;
                 });
+            });
 
         setTasks(proximaEntity, model);
         setEntityMeta(proximaEntity, model);
@@ -155,7 +155,7 @@ public class BasicMobSpawner implements MobSpawner {
 
         if (ticksUntilDeath >= 0) {
             proximaEntity.scheduler()
-                    .scheduleTask(proximaEntity::kill, TaskSchedule.tick(ticksUntilDeath), TaskSchedule.stop());
+                .scheduleTask(proximaEntity::kill, TaskSchedule.tick(ticksUntilDeath), TaskSchedule.stop());
         }
 
         if (speedupIncrements > 0) {
@@ -171,8 +171,8 @@ public class BasicMobSpawner implements MobSpawner {
 
                     UUID modifierUUID = UUID.randomUUID();
                     proximaEntity.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(
-                            new AttributeModifier(modifierUUID, modifierUUID.toString(), speedupAmount,
-                                    AttributeOperation.MULTIPLY_BASE));
+                        new AttributeModifier(modifierUUID, modifierUUID.toString(), speedupAmount,
+                            AttributeOperation.MULTIPLY_BASE));
                 }
             }, TaskSchedule.tick(speedupInterval), TaskSchedule.tick(speedupInterval));
             taskWrapper.set(speedupTask);
@@ -217,8 +217,7 @@ public class BasicMobSpawner implements MobSpawner {
             Object data;
             try {
                 data = processor.dataFromElement(element);
-            }
-            catch (ConfigProcessException e) {
+            } catch (ConfigProcessException e) {
                 LOGGER.warn("Failed to process meta config for meta key '{}'", key, e);
                 continue;
             }
@@ -227,8 +226,7 @@ public class BasicMobSpawner implements MobSpawner {
             }
             try {
                 method.invoke(meta, data);
-            }
-            catch (IllegalAccessException | InvocationTargetException e) {
+            } catch (IllegalAccessException | InvocationTargetException e) {
                 LOGGER.warn("Failed to set meta value for meta key '{}' and method name '{}'", key, methodName, e);
             }
         }
@@ -266,7 +264,7 @@ public class BasicMobSpawner implements MobSpawner {
             Key key = keyParser.parseKey(stringKey);
 
             Collection<Skill> triggeredSkills =
-                    context.provideCollection(TRIGGERS_PATH.append(stringKey), mobDependencyProvider, TRIGGER_HANDLER);
+                context.provideCollection(TRIGGERS_PATH.append(stringKey), mobDependencyProvider, TRIGGER_HANDLER);
 
             if (!triggeredSkills.isEmpty()) {
                 skills.put(key, triggeredSkills);
@@ -293,11 +291,11 @@ public class BasicMobSpawner implements MobSpawner {
         private final Supplier<? extends MapObjects> mapObjects;
 
         private Module(@NotNull MobSpawner spawner, @NotNull MobStore mobStore, @NotNull Random random,
-                @NotNull Supplier<? extends MapObjects> mapObjects) {
-            this.spawner = Objects.requireNonNull(spawner, "spawner");
-            this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
-            this.random = Objects.requireNonNull(random, "random");
-            this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+            @NotNull Supplier<? extends MapObjects> mapObjects) {
+            this.spawner = Objects.requireNonNull(spawner);
+            this.mobStore = Objects.requireNonNull(mobStore);
+            this.random = Objects.requireNonNull(random);
+            this.mapObjects = Objects.requireNonNull(mapObjects);
         }
 
         public @NotNull MobSpawner getSpawner() {

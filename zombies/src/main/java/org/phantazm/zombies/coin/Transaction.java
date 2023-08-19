@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Objects;
 
 public record Transaction(@NotNull Collection<Modifier> modifiers,
-                          @NotNull Collection<Component> extraDisplays,
-                          int initialChange) {
+    @NotNull Collection<Component> extraDisplays,
+    int initialChange) {
     public Transaction(int initialChange) {
         this(List.of(), List.of(), initialChange);
     }
@@ -19,7 +19,7 @@ public record Transaction(@NotNull Collection<Modifier> modifiers,
     }
 
     public Transaction(@NotNull Collection<Modifier> modifiers, @NotNull Collection<Component> extraDisplays,
-            int initialChange) {
+        int initialChange) {
         this.modifiers = List.copyOf(modifiers);
         this.extraDisplays = List.copyOf(extraDisplays);
         this.initialChange = initialChange;
@@ -33,7 +33,8 @@ public record Transaction(@NotNull Collection<Modifier> modifiers,
             SET
         }
 
-        @NotNull Component displayName();
+        @NotNull
+        Component displayName();
 
         int modify(int coins);
 
@@ -49,24 +50,24 @@ public record Transaction(@NotNull Collection<Modifier> modifiers,
         @Override
         public int modify(int coins) {
             return switch (action) {
-                case ADD -> (int)Math.rint((double)coins + amount);
-                case ABS_ADD -> (int)Math.rint(coins + (coins < 0 ? -amount : amount));
-                case MULTIPLY -> (int)Math.rint((double)coins + (coins * amount));
-                case SET -> (int)Math.rint(amount);
+                case ADD -> (int) Math.rint((double) coins + amount);
+                case ABS_ADD -> (int) Math.rint(coins + (coins < 0 ? -amount:amount));
+                case MULTIPLY -> (int) Math.rint((double) coins + (coins * amount));
+                case SET -> (int) Math.rint(amount);
             };
         }
     }
 
     public static @NotNull Modifier modifier(@NotNull Component displayName,
-            @NotNull Transaction.Modifier.Action action, double amount, int priority) {
-        Objects.requireNonNull(displayName, "displayName");
-        Objects.requireNonNull(action, "action");
+        @NotNull Transaction.Modifier.Action action, double amount, int priority) {
+        Objects.requireNonNull(displayName);
+        Objects.requireNonNull(action);
 
         return new ModifierImpl(displayName, action, amount, priority);
     }
 
     public static @NotNull Modifier modifier(@NotNull Component displayName,
-            @NotNull Transaction.Modifier.Action action, double amount) {
+        @NotNull Transaction.Modifier.Action action, double amount) {
         return modifier(displayName, action, amount, 0);
     }
 }

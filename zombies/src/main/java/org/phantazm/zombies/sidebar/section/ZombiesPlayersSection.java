@@ -18,10 +18,10 @@ public class ZombiesPlayersSection implements SidebarSection {
 
     @FactoryMethod
     public ZombiesPlayersSection(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull @Child("creator_path") PlayerUpdaterCreator playerUpdaterCreator) {
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        @NotNull @Child("creator_path") PlayerUpdaterCreator playerUpdaterCreator) {
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
         this.lineUpdaters = new ArrayList<>(zombiesPlayers.size());
-        this.playerUpdaterCreator = Objects.requireNonNull(playerUpdaterCreator, "playerUpdaterCreator");
+        this.playerUpdaterCreator = Objects.requireNonNull(playerUpdaterCreator);
     }
 
     @Override

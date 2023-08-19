@@ -18,7 +18,7 @@ public class Wave {
      * @param waveInfo the backing data object
      */
     public Wave(@NotNull WaveInfo waveInfo, @NotNull List<Action<List<PhantazmMob>>> spawnActions) {
-        this.waveInfo = Objects.requireNonNull(waveInfo, "waveInfo");
+        this.waveInfo = Objects.requireNonNull(waveInfo);
 
         int count = 0;
         for (SpawnInfo spawnInfo : waveInfo.spawns()) {

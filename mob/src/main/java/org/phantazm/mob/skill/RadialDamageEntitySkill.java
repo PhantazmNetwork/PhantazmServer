@@ -17,8 +17,8 @@ public class RadialDamageEntitySkill implements Skill {
 
     @FactoryMethod
     public RadialDamageEntitySkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<Object> selector) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.selector = Objects.requireNonNull(selector, "selector");
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
     }
 
     @Override
@@ -29,26 +29,25 @@ public class RadialDamageEntitySkill implements Skill {
                 for (Object object : iterable) {
                     if (object instanceof LivingEntity entity) {
                         double damage = calculateDamage(entity.getDistance(selfEntity));
-                        entity.damage(Damage.fromEntity(selfEntity, (float)damage), data.bypassArmor);
+                        entity.damage(Damage.fromEntity(selfEntity, (float) damage), data.bypassArmor);
                     }
                 }
-            }
-            else if (target instanceof LivingEntity living) {
+            } else if (target instanceof LivingEntity living) {
                 double damage = calculateDamage(living.getDistance(selfEntity));
-                living.damage(Damage.fromEntity(selfEntity, (float)damage), data.bypassArmor);
+                living.damage(Damage.fromEntity(selfEntity, (float) damage), data.bypassArmor);
             }
         });
     }
 
     private double calculateDamage(double distanceToEntity) {
         return ((data.damage * Math.sqrt(data.range)) / data.range) *
-                (Math.sqrt(Math.max(0, -distanceToEntity + data.range)));
+                   (Math.sqrt(Math.max(0, -distanceToEntity + data.range)));
     }
 
     @DataObject
     public record Data(@NotNull @ChildPath("selector") String selector,
-                       float damage,
-                       boolean bypassArmor,
-                       double range) {
+        float damage,
+        boolean bypassArmor,
+        double range) {
     }
 }

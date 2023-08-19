@@ -51,20 +51,20 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
      * @param fallback       A fallback for the lobby
      */
     public Lobby(@NotNull UUID uuid, @NotNull Instance instance, @NotNull InstanceConfig instanceConfig,
-            @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler,
-            @NotNull Collection<ItemStack> defaultItems, @NotNull MiniMessage miniMessage,
-            @NotNull String lobbyJoinFormat, boolean quittable, @NotNull PlayerViewProvider playerViewProvider,
-            @NotNull Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler) {
+        @NotNull SceneFallback fallback, @NotNull NPCHandler npcHandler,
+        @NotNull Collection<ItemStack> defaultItems, @NotNull MiniMessage miniMessage,
+        @NotNull String lobbyJoinFormat, boolean quittable, @NotNull PlayerViewProvider playerViewProvider,
+        @NotNull Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler) {
         super(uuid, instance, fallback, instanceConfig.spawnPoint(), playerViewProvider);
-        this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
+        this.instanceConfig = Objects.requireNonNull(instanceConfig);
         this.players = new HashMap<>();
-        this.npcHandler = Objects.requireNonNull(npcHandler, "npcHandler");
+        this.npcHandler = Objects.requireNonNull(npcHandler);
         this.npcHandler.spawnAll();
-        this.defaultItems = Objects.requireNonNull(defaultItems, "defaultItems");
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
-        this.lobbyJoinFormat = Objects.requireNonNull(lobbyJoinFormat, "lobbyJoinFormat");
+        this.defaultItems = Objects.requireNonNull(defaultItems);
+        this.miniMessage = Objects.requireNonNull(miniMessage);
+        this.lobbyJoinFormat = Objects.requireNonNull(lobbyJoinFormat);
         this.quittable = quittable;
-        this.displayNameStyler = Objects.requireNonNull(displayNameStyler, "displayNameStyler");
+        this.displayNameStyler = Objects.requireNonNull(displayNameStyler);
     }
 
     @Override
@@ -140,7 +140,8 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
     }
 
     @Override
-    public @Unmodifiable @NotNull Map<UUID, PlayerView> getPlayers() {
+    public @Unmodifiable
+    @NotNull Map<UUID, PlayerView> getPlayers() {
         return Map.copyOf(players);
     }
 
@@ -173,7 +174,7 @@ public class Lobby extends InstanceScene<LobbyJoinRequest> {
         }
 
         CompletableFuture.allOf(fallbackFutures.toArray(CompletableFuture[]::new))
-                .whenComplete((ignored, error) -> super.shutdown());
+            .whenComplete((ignored, error) -> super.shutdown());
     }
 
     @Override

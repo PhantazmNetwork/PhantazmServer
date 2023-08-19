@@ -9,7 +9,7 @@ import java.util.Objects;
  * A request to be routed to a {@link Lobby}.
  */
 public record LobbyRouteRequest(@NotNull String targetLobbyName, @NotNull LobbyJoinRequest joinRequest)
-        implements SceneJoinRequest {
+    implements SceneJoinRequest {
 
     /**
      * Creates a lobby route request.
@@ -18,8 +18,8 @@ public record LobbyRouteRequest(@NotNull String targetLobbyName, @NotNull LobbyJ
      * @param joinRequest     The {@link LobbyJoinRequest} to be routed
      */
     public LobbyRouteRequest {
-        Objects.requireNonNull(targetLobbyName, "targetLobbyName");
-        Objects.requireNonNull(joinRequest, "joinRequest");
+        Objects.requireNonNull(targetLobbyName);
+        Objects.requireNonNull(joinRequest);
     }
 
     @Override

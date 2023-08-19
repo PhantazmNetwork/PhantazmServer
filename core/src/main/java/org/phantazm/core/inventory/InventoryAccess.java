@@ -11,7 +11,7 @@ public record InventoryAccess(@NotNull InventoryProfile profile,
                               @NotNull @Unmodifiable Map<Key, InventoryObjectGroup> groups) {
 
     public InventoryAccess(@NotNull InventoryProfile profile, @NotNull Map<Key, InventoryObjectGroup> groups) {
-        this.profile = Objects.requireNonNull(profile, "profile");
+        this.profile = Objects.requireNonNull(profile);
         this.groups = Map.copyOf(groups);
     }
 

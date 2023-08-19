@@ -16,8 +16,8 @@ import java.util.Objects;
  * @param entity The actual {@link ProximaEntity} instance of the mob
  */
 public record BasicPhantazmMob(@NotNull MobModel model,
-                               @NotNull ProximaEntity entity,
-                               @NotNull Map<Key, Collection<Skill>> triggers) implements PhantazmMob {
+    @NotNull ProximaEntity entity,
+    @NotNull Map<Key, Collection<Skill>> triggers) implements PhantazmMob {
 
     /**
      * Creates a PhantazmMob instance
@@ -26,9 +26,9 @@ public record BasicPhantazmMob(@NotNull MobModel model,
      * @param entity The actual {@link ProximaEntity} instance of the mob
      */
     public BasicPhantazmMob {
-        Objects.requireNonNull(model, "model");
-        Objects.requireNonNull(entity, "entity");
-        Objects.requireNonNull(triggers, "triggers");
+        Objects.requireNonNull(model);
+        Objects.requireNonNull(entity);
+        Objects.requireNonNull(triggers);
     }
 
     @Override

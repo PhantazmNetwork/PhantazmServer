@@ -37,8 +37,8 @@ public class InstanceSpace extends ConcurrentCachingSpace {
 
     public InstanceSpace(@NotNull Instance instance, @NotNull Vec3IFunction<? extends Solid> overrideFunction) {
         super(instance.getDimensionType().getMinY());
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.overrideFunction = Objects.requireNonNull(overrideFunction, "overrideFunction");
+        this.instance = Objects.requireNonNull(instance);
+        this.overrideFunction = Objects.requireNonNull(overrideFunction);
     }
 
     @Override
@@ -132,7 +132,7 @@ public class InstanceSpace extends ConcurrentCachingSpace {
 
             for (BoundingBox boundingBox : ourChildren) {
                 newBoundsArray[i++] = Bounds3D.immutable(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ(),
-                        boundingBox.width(), boundingBox.height(), boundingBox.depth());
+                    boundingBox.width(), boundingBox.height(), boundingBox.depth());
             }
 
             return Solid.of(newBoundsArray);
@@ -146,7 +146,7 @@ public class InstanceSpace extends ConcurrentCachingSpace {
     }
 
     public void setOverrideFunction(@NotNull Vec3IFunction<? extends Solid> overrideFunction) {
-        this.overrideFunction = Objects.requireNonNull(overrideFunction, "overrideFunction");
+        this.overrideFunction = Objects.requireNonNull(overrideFunction);
     }
 
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
@@ -167,20 +167,19 @@ public class InstanceSpace extends ConcurrentCachingSpace {
                 if (boundingBox.maxY() > 1) {
                     double minY = boundingBox.minY();
                     upper.add(Bounds3D.immutable(boundingBox.minX(), 0, boundingBox.minZ(), boundingBox.width(),
-                            boundingBox.height() - 1, boundingBox.depth()));
+                        boundingBox.height() - 1, boundingBox.depth()));
 
                     if (minY < 1) {
                         lower.add(Bounds3D.immutable(boundingBox.minX(), minY, boundingBox.minZ(), boundingBox.width(),
-                                1 - minY, boundingBox.depth()));
+                            1 - minY, boundingBox.depth()));
                     }
-                }
-                else {
+                } else {
                     lower.add(Bounds3D.immutable(boundingBox.minX(), boundingBox.minY(), boundingBox.minZ(),
-                            boundingBox.width(), boundingBox.height(), boundingBox.depth()));
+                        boundingBox.width(), boundingBox.height(), boundingBox.depth()));
                 }
             }
 
-            return new Solid[] {Solid.of(lower.toArray(Bounds3D[]::new)), Solid.of(upper.toArray(Bounds3D[]::new))};
+            return new Solid[]{Solid.of(lower.toArray(Bounds3D[]::new)), Solid.of(upper.toArray(Bounds3D[]::new))};
         });
     }
 
@@ -192,7 +191,7 @@ public class InstanceSpace extends ConcurrentCachingSpace {
             for (int i = 0; i < bounds.length; i++) {
                 BoundingBox box = boundingBoxes.get(i);
                 bounds[i] =
-                        Bounds3D.immutable(box.minX(), box.minY(), box.minZ(), box.width(), box.height(), box.depth());
+                    Bounds3D.immutable(box.minX(), box.minY(), box.minZ(), box.width(), box.height(), box.depth());
             }
 
             return Solid.of(bounds);

@@ -24,9 +24,9 @@ public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.
             @Child("success_interactors") List<ShopInteractor> successInteractors,
             @Child("failure_interactors") List<ShopInteractor> failureInteractors) {
         super(data);
-        this.predicates = Objects.requireNonNull(predicates, "predicates");
-        this.successInteractors = Objects.requireNonNull(successInteractors, "successInteractors");
-        this.failureInteractors = Objects.requireNonNull(failureInteractors, "failureInteractors");
+        this.predicates = Objects.requireNonNull(predicates);
+        this.successInteractors = Objects.requireNonNull(successInteractors);
+        this.failureInteractors = Objects.requireNonNull(failureInteractors);
     }
 
     @Override

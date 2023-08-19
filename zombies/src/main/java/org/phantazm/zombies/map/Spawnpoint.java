@@ -44,43 +44,39 @@ public class Spawnpoint {
      * @param mobSpawner        the function used to actually spawn mobs in the world
      */
     public Spawnpoint(@NotNull Point mapOrigin, @NotNull SpawnpointInfo spawnInfo, @NotNull Instance instance,
-            @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobSpawner mobSpawner,
-            @NotNull BoundedTracker<Window> windowTracker, @NotNull BoundedTracker<Room> roomTracker) {
-        this.spawnInfo = Objects.requireNonNull(spawnInfo, "spawnInfo");
+        @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobSpawner mobSpawner,
+        @NotNull BoundedTracker<Window> windowTracker, @NotNull BoundedTracker<Room> roomTracker) {
+        this.spawnInfo = Objects.requireNonNull(spawnInfo);
 
         Vec3I spawnPosition = spawnInfo.position();
         this.spawnPoint =
-                Pos.fromPoint(mapOrigin.add(spawnPosition.x() + 0.5, spawnPosition.y(), spawnPosition.z() + 0.5));
-        this.spawnrules = Objects.requireNonNull(spawnruleFunction, "spawnrules");
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
+            Pos.fromPoint(mapOrigin.add(spawnPosition.x() + 0.5, spawnPosition.y(), spawnPosition.z() + 0.5));
+        this.spawnrules = Objects.requireNonNull(spawnruleFunction);
+        this.instance = Objects.requireNonNull(instance);
+        this.mobSpawner = Objects.requireNonNull(mobSpawner);
 
         if (spawnInfo.linkToWindow()) {
             Vec3I linkedWindowPosition = spawnInfo.linkedWindowPosition();
             if (linkedWindowPosition != null) {
                 Optional<Window> linkedWindow = windowTracker.atPoint(linkedWindowPosition.x() + mapOrigin.blockX(),
-                        linkedWindowPosition.y() + mapOrigin.blockY(), linkedWindowPosition.z() + mapOrigin.blockZ());
+                    linkedWindowPosition.y() + mapOrigin.blockY(), linkedWindowPosition.z() + mapOrigin.blockZ());
                 if (linkedWindow.isEmpty()) {
                     LOGGER.warn(
-                            "No linked window found at " + linkedWindowPosition + ", for spawnpoint at ~" + spawnPoint);
+                        "No linked window found at " + linkedWindowPosition + ", for spawnpoint at ~" + spawnPoint);
                     this.linkedWindow = null;
-                }
-                else {
+                } else {
                     this.linkedWindow = linkedWindow.get();
                 }
-            }
-            else {
+            } else {
                 Optional<Window> linkedWindow = windowTracker.closestInRangeToBounds(spawnPoint, 1, 1, 10);
                 if (linkedWindow.isEmpty()) {
                     LOGGER.warn("No window to link to found within 10 blocks of spawnpoint at ~" + spawnPoint);
                     this.linkedWindow = null;
-                }
-                else {
+                } else {
                     this.linkedWindow = linkedWindow.get();
                 }
             }
-        }
-        else {
+        } else {
             this.linkedWindow = null;
         }
 
@@ -89,8 +85,7 @@ public class Spawnpoint {
             Optional<Room> room = roomTracker.closestInRangeToBounds(spawnPoint, 1, 1, 10);
             if (room.isEmpty()) {
                 LOGGER.warn("No linked room or window found for spawnpoint at ~" + spawnPoint);
-            }
-            else {
+            } else {
                 linkedRoom = room.get();
             }
         }
@@ -113,7 +108,7 @@ public class Spawnpoint {
             Optional<Room> linkedRoom = linkedWindow.getLinkedRoom();
             if (linkedRoom.isEmpty()) {
                 LOGGER.warn("Linked window at ~" + linkedWindow.center() + " does not have a linked room, for" +
-                        " spawnpoint at ~" + spawnPoint);
+                                " spawnpoint at ~" + spawnPoint);
                 LOGGER.warn("Because of the missing link, spawning will be disallowed");
                 return false;
             }
@@ -122,8 +117,7 @@ public class Spawnpoint {
             if (!room.isOpen()) {
                 return false;
             }
-        }
-        else if (linkedRoom != null && !linkedRoom.isOpen()) {
+        } else if (linkedRoom != null && !linkedRoom.isOpen()) {
             return false;
         }
 
@@ -162,7 +156,7 @@ public class Spawnpoint {
      * @return true if the mob can spawn, false otherwise
      */
     public boolean canSpawn(@NotNull MobModel model, @NotNull Key spawnType,
-            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
+        @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
         if (!canSpawnAny(zombiesPlayers)) {
             return false;
         }
@@ -183,7 +177,7 @@ public class Spawnpoint {
      * @return the resulting {@link PhantazmMob} instance
      */
     public @NotNull PhantazmMob spawn(@NotNull MobModel model) {
-        Objects.requireNonNull(model, "model");
+        Objects.requireNonNull(model);
         return mobSpawner.spawn(instance, spawnPoint, model);
     }
 

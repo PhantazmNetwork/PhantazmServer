@@ -81,9 +81,9 @@ public class BasicEditorSession implements EditorSession {
      */
     public BasicEditorSession(@NotNull ObjectRenderer renderer, @NotNull Loader<MapInfo> loader,
             @NotNull Path mapFolder) {
-        this.renderer = Objects.requireNonNull(renderer, "renderer");
-        this.mapFolder = Objects.requireNonNull(mapFolder, "mapFolder");
-        this.loader = Objects.requireNonNull(loader, "loader");
+        this.renderer = Objects.requireNonNull(renderer);
+        this.mapFolder = Objects.requireNonNull(mapFolder);
+        this.loader = Objects.requireNonNull(loader);
         this.maps = new HashMap<>();
         this.unmodifiableMaps = Collections.unmodifiableMap(maps);
     }
@@ -225,7 +225,7 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public void addMap(@NotNull MapInfo map) {
-        Objects.requireNonNull(map, "map");
+        Objects.requireNonNull(map);
 
         Key id = map.settings().id();
         if (maps.containsKey(id)) {
@@ -237,13 +237,13 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public boolean containsMap(@NotNull Key id) {
-        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(id);
         return maps.containsKey(id);
     }
 
     @Override
     public void removeMap(@NotNull Key id) {
-        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(id);
         maps.remove(id);
 
         if (currentMap != null && currentMap.settings().id().equals(id)) {
@@ -253,13 +253,14 @@ public class BasicEditorSession implements EditorSession {
     }
 
     @Override
-    public @UnmodifiableView @NotNull Map<Key, MapInfo> mapView() {
+    public @UnmodifiableView
+    @NotNull Map<Key, MapInfo> mapView() {
         return unmodifiableMaps;
     }
 
     @Override
     public void setCurrent(@NotNull Key id) {
-        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(id);
 
         MapInfo newCurrent = maps.get(id);
         if (newCurrent == null) {

@@ -73,29 +73,29 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     private final KeyParser keyParser;
 
     public BasicMapObjectsSource(@NotNull MapInfo mapInfo, @NotNull ContextManager contextManager,
-            @NotNull MobSpawnerSource mobSpawnerSource, @NotNull Map<Key, MobModel> mobModels,
-            @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull KeyParser keyParser) {
-        this.mapInfo = Objects.requireNonNull(mapInfo, "mapInfo");
-        this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
-        this.mobSpawnerSource = Objects.requireNonNull(mobSpawnerSource, "mobSpawnerSource");
-        this.mobModels = Objects.requireNonNull(mobModels, "mobModels");
-        this.clientBlockHandlerSource = Objects.requireNonNull(clientBlockHandlerSource, "clientBlockHandlerSource");
-        this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+        @NotNull MobSpawnerSource mobSpawnerSource, @NotNull Map<Key, MobModel> mobModels,
+        @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull KeyParser keyParser) {
+        this.mapInfo = Objects.requireNonNull(mapInfo);
+        this.contextManager = Objects.requireNonNull(contextManager);
+        this.mobSpawnerSource = Objects.requireNonNull(mobSpawnerSource);
+        this.mobModels = Objects.requireNonNull(mobModels);
+        this.clientBlockHandlerSource = Objects.requireNonNull(clientBlockHandlerSource);
+        this.keyParser = Objects.requireNonNull(keyParser);
     }
 
     @Override
     public @NotNull MapObjects make(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
-            @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
-            @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
-            @NotNull SongPlayer songPlayer, @NotNull SongLoader songLoader,
-            @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam,
-            @NotNull Wrapper<Long> ticksSinceStart) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+        @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
+        @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
+        @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
+        @NotNull SongPlayer songPlayer, @NotNull SongLoader songLoader,
+        @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam,
+        @NotNull Wrapper<Long> ticksSinceStart) {
         Random random = new Random();
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor =
-                new BasicSpawnDistributor(mobModels::get, random, playerMap.values(), mobNoPushTeam);
+            new BasicSpawnDistributor(mobModels::get, random, playerMap.values(), mobNoPushTeam);
 
         Flaggable flaggable = new BasicFlaggable();
         if (mapInfo.settings().canWallshoot()) {
@@ -106,17 +106,17 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
         MapSettingsInfo mapSettingsInfo = mapInfo.settings();
         Pos respawnPos =
-                new Pos(VecUtils.toPoint(mapSettingsInfo.origin().add(mapSettingsInfo.spawn())), mapSettingsInfo.yaw(),
-                        mapSettingsInfo.pitch()).add(0.5, 0, 0.5);
+            new Pos(VecUtils.toPoint(mapSettingsInfo.origin().add(mapSettingsInfo.spawn())), mapSettingsInfo.yaw(),
+                mapSettingsInfo.pitch()).add(0.5, 0, 0.5);
 
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
         MobSpawner mobSpawner = mobSpawnerSource.make(random, mapObjectsWrapper, mobStore);
 
         Module module =
-                new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
-                        slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler,
-                        eventNode, mobStore, songPlayer, songLoader, corpseTeam, new BasicInteractorGroupHandler(),
-                        ticksSinceStart, mobModels::get);
+            new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
+                slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler,
+                eventNode, mobStore, songPlayer, songLoader, corpseTeam, new BasicInteractorGroupHandler(),
+                ticksSinceStart, mobModels::get);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -134,18 +134,18 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         BoundedTracker<Room> roomTracker = BoundedTracker.tracker(rooms);
 
         List<Window> windows =
-                buildWindows(origin, mapInfo.windows(), provider, instance, clientBlockHandler, roomTracker);
+            buildWindows(origin, mapInfo.windows(), provider, instance, clientBlockHandler, roomTracker);
         BoundedTracker<Window> windowTracker = BoundedTracker.tracker(windows);
 
         List<Spawnpoint> spawnpoints =
-                buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobSpawner, windowTracker,
-                        roomTracker);
+            buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobSpawner, windowTracker,
+                roomTracker);
 
         List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, spawnDistributor, playerMap);
 
         MapObjects mapObjects =
-                new BasicMapObjects(spawnpoints, windowTracker, shopTracker, doorTracker, roomTracker, rounds, provider,
-                        mobSpawner, origin, module, tickTaskScheduler, mobNoPushTeam, corpseTeam);
+            new BasicMapObjects(spawnpoints, windowTracker, shopTracker, doorTracker, roomTracker, rounds, provider,
+                mobSpawner, origin, module, tickTaskScheduler, mobNoPushTeam, corpseTeam);
         mapObjectsWrapper.set(mapObjects);
 
         return mapObjects;
@@ -163,73 +163,73 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     }
 
     private List<Spawnpoint> buildSpawnpoints(Point mapOrigin, List<SpawnpointInfo> spawnpointInfoList,
-            Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance, MobSpawner mobSpawner,
-            BoundedTracker<Window> windowTracker, BoundedTracker<Room> roomTracker) {
+        Map<Key, SpawnruleInfo> spawnruleInfoMap, Instance instance, MobSpawner mobSpawner,
+        BoundedTracker<Window> windowTracker, BoundedTracker<Room> roomTracker) {
         List<Spawnpoint> spawnpoints = new ArrayList<>(spawnpointInfoList.size());
         for (SpawnpointInfo spawnpointInfo : spawnpointInfoList) {
             spawnpoints.add(new Spawnpoint(mapOrigin, spawnpointInfo, instance, spawnruleInfoMap::get, mobSpawner,
-                    windowTracker, roomTracker));
+                windowTracker, roomTracker));
         }
 
         return spawnpoints;
     }
 
     private List<Window> buildWindows(Point mapOrigin, List<WindowInfo> windowInfoList,
-            DependencyProvider dependencyProvider, Instance instance, ClientBlockHandler clientBlockHandler,
-            BoundedTracker<Room> roomTracker) {
+        DependencyProvider dependencyProvider, Instance instance, ClientBlockHandler clientBlockHandler,
+        BoundedTracker<Room> roomTracker) {
 
         List<Window> windows = new ArrayList<>(windowInfoList.size());
         for (WindowInfo windowInfo : windowInfoList) {
             List<Action<Window>> repairActions = contextManager.makeContext(windowInfo.repairActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                                                     .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             List<Action<Window>> breakActions = contextManager.makeContext(windowInfo.breakActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                                                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             windows.add(new Window(mapOrigin, instance, windowInfo, clientBlockHandler, repairActions, breakActions,
-                    roomTracker));
+                roomTracker));
         }
 
         return windows;
     }
 
     private List<Shop> buildShops(Point mapOrigin, List<ShopInfo> shopInfoList, DependencyProvider dependencyProvider,
-            Instance instance) {
+        Instance instance) {
         List<Shop> shops = new ArrayList<>(shopInfoList.size());
         for (ShopInfo shopInfo : shopInfoList) {
             ElementContext shopContext = contextManager.makeContext(shopInfo.data());
 
             List<ShopPredicate> predicates =
-                    shopContext.provideCollection(ElementPath.of("predicates"), dependencyProvider, HANDLER);
+                shopContext.provideCollection(ElementPath.of("predicates"), dependencyProvider, HANDLER);
             List<ShopInteractor> successInteractors =
-                    shopContext.provideCollection(ElementPath.of("successInteractors"), dependencyProvider, HANDLER);
+                shopContext.provideCollection(ElementPath.of("successInteractors"), dependencyProvider, HANDLER);
             List<ShopInteractor> failureInteractors =
-                    shopContext.provideCollection(ElementPath.of("failureInteractors"), dependencyProvider, HANDLER);
+                shopContext.provideCollection(ElementPath.of("failureInteractors"), dependencyProvider, HANDLER);
             List<ShopDisplay> displays =
-                    shopContext.provideCollection(ElementPath.of("displays"), dependencyProvider, HANDLER);
+                shopContext.provideCollection(ElementPath.of("displays"), dependencyProvider, HANDLER);
 
             shops.add(new Shop(mapOrigin, shopInfo, instance, predicates, successInteractors, failureInteractors,
-                    displays));
+                displays));
         }
 
         return shops;
     }
 
     private List<Door> buildDoors(Point mapOrigin, List<DoorInfo> doorInfoList, DependencyProvider dependencyProvider,
-            Instance instance, Wrapper<MapObjects> mapObjectsWrapper) {
+        Instance instance, Wrapper<MapObjects> mapObjectsWrapper) {
         List<Door> doors = new ArrayList<>(doorInfoList.size());
         for (DoorInfo doorInfo : doorInfoList) {
             List<Action<Door>> openActions = contextManager.makeContext(doorInfo.openActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                                                 .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             List<Action<Door>> closeActions = contextManager.makeContext(doorInfo.closeActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                                                  .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             List<Action<Door>> failOpenActions = contextManager.makeContext(doorInfo.failOpenActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                                                     .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             doors.add(new Door(mapOrigin, doorInfo, instance, Block.AIR, openActions, closeActions, failOpenActions,
-                    mapObjectsWrapper));
+                mapObjectsWrapper));
         }
 
         return doors;
@@ -239,7 +239,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         List<Room> rooms = new ArrayList<>(roomInfoList.size());
         for (RoomInfo roomInfo : roomInfoList) {
             List<Action<Room>> openActions = contextManager.makeContext(roomInfo.openActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                                                 .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             rooms.add(new Room(mapOrigin, roomInfo, openActions));
         }
@@ -248,27 +248,28 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     }
 
     private List<Round> buildRounds(List<RoundInfo> roundInfoList, List<Spawnpoint> spawnpoints,
-            DependencyProvider dependencyProvider, SpawnDistributor spawnDistributor,
-            Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
+        DependencyProvider dependencyProvider, SpawnDistributor spawnDistributor,
+        Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
         List<Round> rounds = new ArrayList<>(roundInfoList.size());
         for (RoundInfo roundInfo : roundInfoList) {
             List<Action<Round>> startActions = contextManager.makeContext(roundInfo.startActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                                                   .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             List<Action<Round>> endActions = contextManager.makeContext(roundInfo.endActions())
-                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                                                 .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             List<WaveInfo> waveInfo = roundInfo.waves();
             List<Wave> waves = new ArrayList<>(waveInfo.size());
             for (WaveInfo wave : roundInfo.waves()) {
                 List<Action<List<PhantazmMob>>> spawnActions = contextManager.makeContext(wave.spawnActions())
-                        .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                                                                   .provideCollection(ElementPath.EMPTY,
+                                                                       dependencyProvider, HANDLER);
 
                 waves.add(new Wave(wave, spawnActions));
             }
 
             rounds.add(new Round(roundInfo, waves, startActions, endActions, spawnDistributor, spawnpoints,
-                    zombiesPlayers.values()));
+                zombiesPlayers.values()));
         }
 
         return rounds;
@@ -299,34 +300,34 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final Function<? super Key, ? extends MobModel> mobModelFunction;
 
         private Module(KeyParser keyParser, Instance instance, Random random,
-                Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
-                TransactionModifierSource transactionModifierSource, SlotDistributor slotDistributor,
-                Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
-                Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
-                Wrapper<WindowHandler> windowHandler, Wrapper<EventNode<Event>> eventNode, MobStore mobStore,
-                SongPlayer songPlayer, SongLoader songLoader, Team corpseTeam,
-                InteractorGroupHandler interactorGroupHandler, Wrapper<Long> ticksSinceStart,
-                Function<? super Key, ? extends MobModel> mobModelFunction) {
-            this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
-            this.instance = Objects.requireNonNull(instance, "instance");
-            this.random = Objects.requireNonNull(random, "random");
-            this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
-            this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
-            this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "modifierSource");
-            this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
-            this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
-            this.respawnPos = Objects.requireNonNull(respawnPos, "respawnPos");
-            this.mapObjectsSupplier = Objects.requireNonNull(mapObjectsSupplier, "mapObjectsSupplier");
-            this.powerupHandler = Objects.requireNonNull(powerupHandler, "powerupHandler");
-            this.windowHandler = Objects.requireNonNull(windowHandler, "windowHandler");
-            this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
-            this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
-            this.songPlayer = Objects.requireNonNull(songPlayer, "songPlayer");
-            this.songLoader = Objects.requireNonNull(songLoader, "songLoader");
-            this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
-            this.interactorGroupHandler = Objects.requireNonNull(interactorGroupHandler, "interactorGroupHandler");
-            this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
-            this.mobModelFunction = Objects.requireNonNull(mobModelFunction, "mobModelFunction");
+            Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
+            TransactionModifierSource transactionModifierSource, SlotDistributor slotDistributor,
+            Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
+            Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
+            Wrapper<WindowHandler> windowHandler, Wrapper<EventNode<Event>> eventNode, MobStore mobStore,
+            SongPlayer songPlayer, SongLoader songLoader, Team corpseTeam,
+            InteractorGroupHandler interactorGroupHandler, Wrapper<Long> ticksSinceStart,
+            Function<? super Key, ? extends MobModel> mobModelFunction) {
+            this.keyParser = Objects.requireNonNull(keyParser);
+            this.instance = Objects.requireNonNull(instance);
+            this.random = Objects.requireNonNull(random);
+            this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier);
+            this.flaggable = Objects.requireNonNull(flaggable);
+            this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource);
+            this.slotDistributor = Objects.requireNonNull(slotDistributor);
+            this.playerMap = Objects.requireNonNull(playerMap);
+            this.respawnPos = Objects.requireNonNull(respawnPos);
+            this.mapObjectsSupplier = Objects.requireNonNull(mapObjectsSupplier);
+            this.powerupHandler = Objects.requireNonNull(powerupHandler);
+            this.windowHandler = Objects.requireNonNull(windowHandler);
+            this.eventNode = Objects.requireNonNull(eventNode);
+            this.mobStore = Objects.requireNonNull(mobStore);
+            this.songPlayer = Objects.requireNonNull(songPlayer);
+            this.songLoader = Objects.requireNonNull(songLoader);
+            this.corpseTeam = Objects.requireNonNull(corpseTeam);
+            this.interactorGroupHandler = Objects.requireNonNull(interactorGroupHandler);
+            this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart);
+            this.mobModelFunction = Objects.requireNonNull(mobModelFunction);
         }
 
         @Override

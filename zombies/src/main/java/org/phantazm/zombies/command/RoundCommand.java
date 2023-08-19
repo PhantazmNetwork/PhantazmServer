@@ -26,25 +26,25 @@ public class RoundCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.round");
 
     public RoundCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper,
-            @NotNull SchedulerManager schedulerManager) {
+        @NotNull SchedulerManager schedulerManager) {
         super("round", PERMISSION);
-        Objects.requireNonNull(sceneMapper, "sceneMapper");
+        Objects.requireNonNull(sceneMapper);
 
         Argument<Integer> roundArgument =
-                ArgumentType.Integer("round-number").min(1).setSuggestionCallback((sender, context, suggestion) -> {
-                    UUID uuid = ((Player)sender).getUuid();
-                    sceneMapper.apply(uuid).ifPresent(scene -> {
-                        int count = scene.getMap().roundHandler().roundCount();
+            ArgumentType.Integer("round-number").min(1).setSuggestionCallback((sender, context, suggestion) -> {
+                UUID uuid = ((Player) sender).getUuid();
+                sceneMapper.apply(uuid).ifPresent(scene -> {
+                    int count = scene.getMap().roundHandler().roundCount();
 
-                        for (int i = 0; i < count; i++) {
-                            suggestion.addEntry(
-                                    new SuggestionEntry(Integer.toString(i + 1), Component.text("Round " + (i + 1))));
-                        }
-                    });
+                    for (int i = 0; i < count; i++) {
+                        suggestion.addEntry(
+                            new SuggestionEntry(Integer.toString(i + 1), Component.text("Round " + (i + 1))));
+                    }
                 });
+            });
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
-            UUID uuid = ((Player)sender).getUuid();
+            UUID uuid = ((Player) sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
                 RoundHandler handler = scene.getMap().roundHandler();
                 int roundCount = handler.roundCount();
@@ -52,7 +52,7 @@ public class RoundCommand extends PermissionLockedCommand {
 
                 if (roundIndex < 0 || roundIndex >= roundCount) {
                     sender.sendMessage(
-                            Component.text("Round " + (roundIndex + 1) + " is out of bounds!", NamedTextColor.RED));
+                        Component.text("Round " + (roundIndex + 1) + " is out of bounds!", NamedTextColor.RED));
                     return;
                 }
 
@@ -64,8 +64,7 @@ public class RoundCommand extends PermissionLockedCommand {
                         if (roundIndex != 0) {
                             handler.setCurrentRound(roundIndex);
                         }
-                    }
-                    else {
+                    } else {
                         handler.setCurrentRound(roundIndex);
                     }
                 });

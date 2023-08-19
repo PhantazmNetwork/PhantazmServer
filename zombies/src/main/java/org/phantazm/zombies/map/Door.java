@@ -61,13 +61,13 @@ public class Door extends BoundedBase {
      * @param instance the instance which this MapObject is in
      */
     public Door(@NotNull Point mapOrigin, @NotNull DoorInfo doorInfo, @NotNull Instance instance,
-            @NotNull Block fillBlock, @NotNull List<Action<Door>> openActions, @NotNull List<Action<Door>> closeActions,
-            @NotNull List<Action<Door>> failOpenActions, @NotNull Supplier<? extends MapObjects> mapObjects) {
+        @NotNull Block fillBlock, @NotNull List<Action<Door>> openActions, @NotNull List<Action<Door>> closeActions,
+        @NotNull List<Action<Door>> failOpenActions, @NotNull Supplier<? extends MapObjects> mapObjects) {
         super(mapOrigin, doorInfo.regions());
 
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.doorInfo = Objects.requireNonNull(doorInfo, "doorInfo");
-        this.fillBlock = Objects.requireNonNull(fillBlock, "fillBlock");
+        this.instance = Objects.requireNonNull(instance);
+        this.doorInfo = Objects.requireNonNull(doorInfo);
+        this.fillBlock = Objects.requireNonNull(fillBlock);
 
         List<Bounds3I> regions = doorInfo.regions();
         if (regions.isEmpty()) {
@@ -75,8 +75,7 @@ public class Door extends BoundedBase {
 
             enclosing = Bounds3I.immutable(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ(), 1, 1, 1);
             this.regions = List.of();
-        }
-        else {
+        } else {
             Bounds3I[] regionArray = doorInfo.regions().toArray(Bounds3I[]::new);
             for (int i = 0; i < regionArray.length; i++) {
                 regionArray[i] = regionArray[i].shift(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ());
@@ -94,9 +93,9 @@ public class Door extends BoundedBase {
         this.openActions = List.copyOf(openActions);
         this.closeActions = List.copyOf(closeActions);
         this.failOpenActions = List.copyOf(failOpenActions);
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+        this.mapObjects = Objects.requireNonNull(mapObjects);
         this.blockMappings = new HashVec3I2ObjectMap<>(enclosing.originX(), enclosing.originX(), enclosing.originZ(),
-                enclosing.lengthX(), enclosing.lengthY(), enclosing.lengthZ());
+            enclosing.lengthX(), enclosing.lengthY(), enclosing.lengthZ());
 
         this.sync = new Object();
     }
@@ -190,8 +189,7 @@ public class Door extends BoundedBase {
                             }
                         }
                     }
-                }
-                else {
+                } else {
                     LOGGER.warn("Tried to open nonexistent room " + key);
                 }
             }
@@ -204,8 +202,7 @@ public class Door extends BoundedBase {
         synchronized (sync) {
             if (isOpen) {
                 close(interactor);
-            }
-            else {
+            } else {
                 open(interactor);
             }
         }
@@ -252,8 +249,8 @@ public class Door extends BoundedBase {
     }
 
     /**
-     * Gets the enclosing region of this door, which is the smallest possible bounding box that encloses every
-     * subregion for this door.
+     * Gets the enclosing region of this door, which is the smallest possible bounding box that encloses every subregion
+     * for this door.
      *
      * @return the enclosing region for this door
      */
@@ -270,7 +267,8 @@ public class Door extends BoundedBase {
     }
 
     @Override
-    public @NotNull @Unmodifiable List<Bounds3I> bounds() {
+    public @NotNull
+    @Unmodifiable List<Bounds3I> bounds() {
         return regions;
     }
 

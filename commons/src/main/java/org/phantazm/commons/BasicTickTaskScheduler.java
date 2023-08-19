@@ -16,13 +16,13 @@ public class BasicTickTaskScheduler implements TickTaskScheduler {
 
     @Override
     public void scheduleTaskNow(@NotNull TickableTask tickableTask) {
-        Objects.requireNonNull(tickableTask, "tickableTask");
+        Objects.requireNonNull(tickableTask);
         tickableTasks.add(tickableTask);
     }
 
     @Override
     public void scheduleTaskAfter(@NotNull TickableTask tickableTask, long ticks) {
-        Objects.requireNonNull(tickableTask, "tickableTask");
+        Objects.requireNonNull(tickableTask);
         tickableTasks.add(new TickableTask() {
 
             private long duration = 0;

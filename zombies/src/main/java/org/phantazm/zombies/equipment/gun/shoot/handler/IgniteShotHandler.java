@@ -42,17 +42,17 @@ public class IgniteShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public IgniteShotHandler(@NotNull Data data, @NotNull MobStore mobStore) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
 
         UUID uuid = UUID.randomUUID();
         this.lastFireDamageTicksTag = Tag.Long("last_fire_damage_ticks" + uuid).defaultValue(-1L);
         this.targets = new ConcurrentLinkedDeque<>();
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        this.mobStore = Objects.requireNonNull(mobStore);
     }
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         setFire(shot.regularTargets(), data.normalFireTicks);
         setFire(shot.headshotTargets(), data.headshotFireTicks);
     }
@@ -104,10 +104,10 @@ public class IgniteShotHandler implements ShotHandler {
 
     @DataObject
     public record Data(int normalFireTicks,
-                       int headshotFireTicks,
-                       int damageInterval,
-                       float damage,
-                       boolean bypassArmor) {
+        int headshotFireTicks,
+        int damageInterval,
+        float damage,
+        boolean bypassArmor) {
 
     }
 

@@ -18,7 +18,7 @@ public class NearbyReviverPredicate implements Predicate<ZombiesPlayer> {
     private final double reviveRadius;
 
     public NearbyReviverPredicate(@NotNull PlayerView playerView, double reviveRadius) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.playerView = Objects.requireNonNull(playerView);
         this.reviveRadius = reviveRadius;
     }
 
@@ -41,7 +41,7 @@ public class NearbyReviverPredicate implements Predicate<ZombiesPlayer> {
         }
 
         return revivingPlayer.getPlayer()
-                .filter(player -> player.getPosition().distance(knockedPosition) <= reviveRadius).isPresent();
+                   .filter(player -> player.getPosition().distance(knockedPosition) <= reviveRadius).isPresent();
 
     }
 }

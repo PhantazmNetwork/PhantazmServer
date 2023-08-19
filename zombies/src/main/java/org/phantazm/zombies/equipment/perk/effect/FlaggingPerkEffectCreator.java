@@ -20,7 +20,7 @@ public class FlaggingPerkEffectCreator implements PerkEffectCreator {
 
     @FactoryMethod
     public FlaggingPerkEffectCreator(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

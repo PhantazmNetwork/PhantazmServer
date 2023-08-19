@@ -20,12 +20,12 @@ import java.util.UUID;
 
 public class ZombiesRejoinCommand extends Command {
     public ZombiesRejoinCommand(@NotNull ZombiesSceneRouter router, @NotNull PlayerViewProvider viewProvider,
-            @NotNull ZombiesJoinHelper joinHelper) {
+        @NotNull ZombiesJoinHelper joinHelper) {
         super("rejoin");
 
-        Objects.requireNonNull(router, "router");
-        Objects.requireNonNull(viewProvider, "viewProvider");
-        Objects.requireNonNull(joinHelper, "joinHelper");
+        Objects.requireNonNull(router);
+        Objects.requireNonNull(viewProvider);
+        Objects.requireNonNull(joinHelper);
 
         Argument<UUID> targetGameArgument = ArgumentType.UUID("target-game").setDefaultValue(() -> null);
 
@@ -46,7 +46,7 @@ public class ZombiesRejoinCommand extends Command {
                 }
 
                 SuggestionEntry entry =
-                        new SuggestionEntry(scene.getUUID().toString(), scene.getMapSettingsInfo().displayName());
+                    new SuggestionEntry(scene.getUUID().toString(), scene.getMapSettingsInfo().displayName());
                 suggestion.addEntry(entry);
             }
         });
@@ -84,8 +84,7 @@ public class ZombiesRejoinCommand extends Command {
                     sender.sendMessage(Component.text("Couldn't find a game to rejoin!", NamedTextColor.RED));
                     return;
                 }
-            }
-            else {
+            } else {
                 boolean anyMatch = false;
                 for (ZombiesScene scene : router.getScenesContainingPlayer(sender.identity().uuid())) {
                     if (currentScene.isPresent() && currentScene.get() == scene) {
@@ -104,7 +103,7 @@ public class ZombiesRejoinCommand extends Command {
                 }
             }
 
-            joinHelper.rejoinGame(((Player)sender), targetGame);
+            joinHelper.rejoinGame(((Player) sender), targetGame);
         }, targetGameArgument);
     }
 }

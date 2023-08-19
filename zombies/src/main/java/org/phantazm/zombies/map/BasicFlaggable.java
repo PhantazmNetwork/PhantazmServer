@@ -26,19 +26,19 @@ public class BasicFlaggable implements Flaggable {
 
     @Override
     public boolean hasFlag(@NotNull Key flag) {
-        Objects.requireNonNull(flag, "flag");
+        Objects.requireNonNull(flag);
         return flags.contains(flag);
     }
 
     @Override
     public void setFlag(@NotNull Key flag) {
-        Objects.requireNonNull(flag, "flag");
+        Objects.requireNonNull(flag);
         flags.add(flag);
     }
 
     @Override
     public void clearFlag(@NotNull Key flag) {
-        Objects.requireNonNull(flag, "flag");
+        Objects.requireNonNull(flag);
         flags.remove(flag);
     }
 }

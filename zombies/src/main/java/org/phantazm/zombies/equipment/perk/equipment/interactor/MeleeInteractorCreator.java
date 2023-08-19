@@ -31,9 +31,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Description("""
-        Interactor capable of hitting a mob in a Zombies game. Supports variable knockback, damage, and armor bypassing
-        capabilities.
-        """)
+    Interactor capable of hitting a mob in a Zombies game. Supports variable knockback, damage, and armor bypassing
+    capabilities.
+    """)
 @Model("zombies.perk.interactor.melee")
 @Cache(false)
 public class MeleeInteractorCreator implements PerkInteractorCreator {
@@ -43,8 +43,8 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
 
     @FactoryMethod
     public MeleeInteractorCreator(@NotNull Data data, @NotNull MobStore mobStore, @NotNull MapObjects mapObjects) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        this.data = Objects.requireNonNull(data);
+        this.mobStore = Objects.requireNonNull(mobStore);
         this.mapFlags = mapObjects.module().flags();
     }
 
@@ -60,10 +60,10 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
         private final Flaggable mapFlags;
 
         private Interactor(@NotNull Data data, @NotNull ZombiesPlayer zombiesPlayer, @NotNull MobStore mobStore,
-                Flaggable mapFlags) {
-            this.data = Objects.requireNonNull(data, "data");
-            this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
-            this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+            Flaggable mapFlags) {
+            this.data = Objects.requireNonNull(data);
+            this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
+            this.mobStore = Objects.requireNonNull(mobStore);
             this.mapFlags = mapFlags;
         }
 
@@ -107,8 +107,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 livingEntity.setTag(Tags.LAST_HIT_BY, player.getUuid());
                 livingEntity.kill();
                 isInstaKill = true;
-            }
-            else {
+            } else {
                 double angle = playerPosition.yaw() * (Math.PI / 180);
                 livingEntity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
                 livingEntity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
@@ -117,21 +116,21 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
 
             PlayerCoins coins = zombiesPlayer.module().getCoins();
             Collection<Transaction.Modifier> modifiers = zombiesPlayer.module().compositeTransactionModifiers()
-                    .modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
+                                                             .modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
 
-            coins.runTransaction(new Transaction(modifiers, isInstaKill ? data.instaKillCoins : data.coins))
-                    .applyIfAffordable(coins);
+            coins.runTransaction(new Transaction(modifiers, isInstaKill ? data.instaKillCoins:data.coins))
+                .applyIfAffordable(coins);
             return true;
         }
     }
 
     @DataObject
     public record Data(@Description("The damage it does on a successful hit") float damage,
-                       @Description("The amount of knockback the weapon deals; 0.4 is the vanilla knockback from an " +
-                               "unarmed hand") float knockback,
-                       @Description("The number of coins to give on a successful hit.") int coins,
-                       @Description("The number of coins to give when instakill is active.") int instaKillCoins,
-                       @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor) {
+        @Description("The amount of knockback the weapon deals; 0.4 is the vanilla knockback from an " +
+                         "unarmed hand") float knockback,
+        @Description("The number of coins to give on a successful hit.") int coins,
+        @Description("The number of coins to give when instakill is active.") int instaKillCoins,
+        @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor) {
         @Default("instaKillCoins")
         public static @NotNull ConfigElement defaultInstaKillCoins() {
             return ConfigPrimitive.of(50);

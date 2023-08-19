@@ -17,9 +17,9 @@ public class KnockbackEntitySkill implements Skill {
 
     @FactoryMethod
     public KnockbackEntitySkill(@NotNull Data data,
-            @NotNull @Child("selector") TargetSelector<? extends LivingEntity> selector) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.selector = Objects.requireNonNull(selector, "selector");
+        @NotNull @Child("selector") TargetSelector<? extends LivingEntity> selector) {
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class KnockbackEntitySkill implements Skill {
     public record Data(@NotNull @ChildPath("selector") String selector, float knockback) {
 
         public Data {
-            Objects.requireNonNull(selector, "selector");
+            Objects.requireNonNull(selector);
         }
 
     }

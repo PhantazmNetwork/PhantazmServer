@@ -14,7 +14,7 @@ public class GuildMemberManager<TMember extends GuildMember> {
     private final Map<UUID, TMember> immutableGuildMembers;
 
     public GuildMemberManager(@NotNull Map<UUID, TMember> guildMembers) {
-        this.guildMembers = Objects.requireNonNull(guildMembers, "guildMembers");
+        this.guildMembers = Objects.requireNonNull(guildMembers);
         this.immutableGuildMembers = Collections.unmodifiableMap(guildMembers);
     }
 

@@ -36,8 +36,8 @@ public class NBSSongLoader implements SongLoader {
     private Map<Key, List<SongPlayer.Note>> map;
 
     public NBSSongLoader(@NotNull Path rootPath, @NotNull KeyParser keyParser) {
-        this.rootPath = Objects.requireNonNull(rootPath, "rootPath");
-        this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+        this.rootPath = Objects.requireNonNull(rootPath);
+        this.keyParser = Objects.requireNonNull(keyParser);
     }
 
     @Override
@@ -45,8 +45,7 @@ public class NBSSongLoader implements SongLoader {
         Map<Key, List<SongPlayer.Note>> map = new HashMap<>();
         try {
             FileUtils.createDirectories(rootPath);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("Error creating song directory");
         }
 
@@ -72,14 +71,12 @@ public class NBSSongLoader implements SongLoader {
                                 LOGGER.warn("Duplicate song key {}", key);
                             }
                         }
-                    }
-                    else {
+                    } else {
                         LOGGER.warn("Failed to load song from {}", path);
                     }
                 }
             });
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("Exception listing files", e);
         }
 
@@ -112,8 +109,7 @@ public class NBSSongLoader implements SongLoader {
             }
 
             return OptionalInt.of(readByte(stream));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("Error inferring NBS file version from {}: {}", path, e);
         }
 
@@ -130,9 +126,9 @@ public class NBSSongLoader implements SongLoader {
         }
 
         /**
-         * Loads a file according to the OpenNBS spec 5.0 (reference <a href="https://opennbs.org/nbs">here</a>). Logs an
-         * error and returns an empty Optional if there is some problem. This will correctly read
-         * files encoded in Version 4 as well.
+         * Loads a file according to the OpenNBS spec 5.0 (reference <a href="https://opennbs.org/nbs">here</a>). Logs
+         * an error and returns an empty Optional if there is some problem. This will correctly read files encoded in
+         * Version 4 as well.
          *
          * @param path the file to load from
          * @return an empty {@link Optional} on error, otherwise a list of notes loaded from the NBS file
@@ -207,7 +203,7 @@ public class NBSSongLoader implements SongLoader {
 
                         actualLayer += jumpsToNextLayer;
 
-                        short delayTick = (short)(first ? normalizedActualTick - lastActualTick : 0);
+                        short delayTick = (short) (first ? normalizedActualTick - lastActualTick:0);
                         byte noteBlockInstrument = readByte(stream);
                         if (noteBlockInstrument < 0) {
                             LOGGER.warn("Negative note index in {}", path);
@@ -220,7 +216,7 @@ public class NBSSongLoader implements SongLoader {
                         short noteBlockPitch = readShort(stream);
 
                         notes.add(new NBSNote(delayTick, noteBlockInstrument,
-                                normalizeKey(noteBlockKey, noteBlockPitch)));
+                            normalizeKey(noteBlockKey, noteBlockPitch)));
                         first = false;
                     }
 
@@ -246,7 +242,7 @@ public class NBSSongLoader implements SongLoader {
 
                     if (!Key.parseable(instrumentName)) {
                         LOGGER.warn("Bad custom instrument {} in {}, must be a valid Minecraft resource key",
-                                instrumentName, path);
+                            instrumentName, path);
                         return Optional.empty();
                     }
 
@@ -258,8 +254,7 @@ public class NBSSongLoader implements SongLoader {
                     Key instrumentKey;
                     if (nbsNote.instrumentIndex < DEFAULT_INSTRUMENT_VALUES.length) {
                         instrumentKey = DEFAULT_INSTRUMENT_VALUES[nbsNote.instrumentIndex].key;
-                    }
-                    else {
+                    } else {
                         int index = nbsNote.instrumentIndex - DEFAULT_INSTRUMENT_VALUES.length;
                         if (index >= customInstrumentKeys.length) {
                             LOGGER.warn("Custom instrument index out of bounds in {}", path);
@@ -273,8 +268,7 @@ public class NBSSongLoader implements SongLoader {
                 }
 
                 return Optional.of(List.copyOf(actualNotes));
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOGGER.warn("IOException loading song in {}: {}", path, e);
             }
 
@@ -283,23 +277,22 @@ public class NBSSongLoader implements SongLoader {
     }
 
     private static float normalizeKey(int key, float detune) {
-        double uses = (key + (double)detune) - MIN_KEY;
-        return (float)Math.pow(2, (uses - 12) / 12D);
+        double uses = (key + (double) detune) - MIN_KEY;
+        return (float) Math.pow(2, (uses - 12) / 12D);
     }
 
     private static short normalizeTick(short tempo, short tick) {
-        double tempoTicks = ((double)tempo) / 100.0;
-        double result = ((double)tick) * (20.0 / tempoTicks);
+        double tempoTicks = ((double) tempo) / 100.0;
+        double result = ((double) tick) * (20.0 / tempoTicks);
 
-        return (short)Math.round(result);
+        return (short) Math.round(result);
     }
 
     private static String readPrefixedString(InputStream stream) throws IOException {
         int length = readInt(stream);
         if (length < 0) {
             throw new IOException("Invalid string length prefix");
-        }
-        else if (length == 0) {
+        } else if (length == 0) {
             return StringUtils.EMPTY;
         }
 
@@ -321,7 +314,7 @@ public class NBSSongLoader implements SongLoader {
             throw new EOFException();
         }
 
-        return (byte)result;
+        return (byte) result;
     }
 
     private static int readInt(InputStream stream) throws IOException {
@@ -356,7 +349,8 @@ public class NBSSongLoader implements SongLoader {
     }
 
     @Override
-    public @NotNull @Unmodifiable Set<Key> songs() {
+    public @NotNull
+    @Unmodifiable Set<Key> songs() {
         return map.keySet();
     }
 

@@ -19,10 +19,10 @@ public class KillAllCommand extends PermissionLockedCommand {
 
     public KillAllCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
         super("killall", PERMISSION);
-        Objects.requireNonNull(sceneMapper, "sceneMapper");
+        Objects.requireNonNull(sceneMapper);
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
             UUID uuid = player.getUuid();
             sceneMapper.apply(uuid).flatMap(scene -> scene.getMap().roundHandler().currentRound()).ifPresent(round -> {
                 for (PhantazmMob mob : round.getSpawnedMobs()) {

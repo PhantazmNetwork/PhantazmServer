@@ -22,10 +22,10 @@ public class ZombiesPlayerSection implements SidebarSection {
 
     @FactoryMethod
     public ZombiesPlayerSection(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull PlayerView playerView, @NotNull @Child("line_updater") PlayerUpdaterCreator creator) {
-        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.creator = Objects.requireNonNull(creator, "creator");
+        @NotNull PlayerView playerView, @NotNull @Child("line_updater") PlayerUpdaterCreator creator) {
+        this.playerMap = Objects.requireNonNull(playerMap);
+        this.playerView = Objects.requireNonNull(playerView);
+        this.creator = Objects.requireNonNull(creator);
     }
 
     @Override

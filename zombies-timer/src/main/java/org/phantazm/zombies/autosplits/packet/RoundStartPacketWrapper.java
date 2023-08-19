@@ -15,7 +15,7 @@ public record RoundStartPacketWrapper(@NotNull RoundStartPacket packet) implemen
                     RoundStartPacketWrapper::new);
 
     public RoundStartPacketWrapper {
-        Objects.requireNonNull(packet, "packet");
+        Objects.requireNonNull(packet);
     }
 
     @Override

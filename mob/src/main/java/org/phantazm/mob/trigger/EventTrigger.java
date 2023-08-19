@@ -30,9 +30,9 @@ public record EventTrigger<TEvent extends Event>(@NotNull Key key,
      * @param entityGetter A {@link Function} that returns the {@link Entity} associated with the {@link Event}
      */
     public EventTrigger {
-        Objects.requireNonNull(key, "key");
-        Objects.requireNonNull(eventClass, "eventClass");
-        Objects.requireNonNull(entityGetter, "entityGetter");
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(eventClass);
+        Objects.requireNonNull(entityGetter);
     }
 
     @Override

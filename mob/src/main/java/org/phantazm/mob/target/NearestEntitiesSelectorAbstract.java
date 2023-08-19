@@ -14,7 +14,7 @@ import java.util.*;
  * @param <TTarget>> A mapped type of the target {@link Entity}
  */
 public abstract class NearestEntitiesSelectorAbstract<TTarget extends Entity>
-        implements TargetSelector<Iterable<TTarget>> {
+    implements TargetSelector<Iterable<TTarget>> {
     private final double range;
     private final int targetLimit;
     private final TargetValidator targetValidator;
@@ -28,7 +28,7 @@ public abstract class NearestEntitiesSelectorAbstract<TTarget extends Entity>
     public NearestEntitiesSelectorAbstract(double range, int targetLimit, @NotNull TargetValidator targetValidator) {
         this.range = range;
         this.targetLimit = targetLimit;
-        this.targetValidator = Objects.requireNonNull(targetValidator, "targetValidator");
+        this.targetValidator = Objects.requireNonNull(targetValidator);
     }
 
     @Override

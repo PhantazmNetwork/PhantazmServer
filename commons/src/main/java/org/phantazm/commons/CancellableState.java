@@ -10,12 +10,13 @@ public interface CancellableState {
 
     void end();
 
-    @NotNull UUID id();
+    @NotNull
+    UUID id();
 
     static @NotNull CancellableState named(@NotNull UUID id, @NotNull Runnable start, @NotNull Runnable end) {
-        Objects.requireNonNull(id, "id");
-        Objects.requireNonNull(start, "start");
-        Objects.requireNonNull(end, "end");
+        Objects.requireNonNull(id);
+        Objects.requireNonNull(start);
+        Objects.requireNonNull(end);
 
         return new CancellableState() {
             @Override

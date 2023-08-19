@@ -31,12 +31,12 @@ public class PotionShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public PotionShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         for (GunHit target : shot.regularTargets()) {
             target.entity().addEffect(data.potion());
         }

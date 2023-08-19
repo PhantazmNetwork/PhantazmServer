@@ -34,9 +34,9 @@ public class BasicChatChannel implements ChatChannel {
      */
     public BasicChatChannel(@NotNull MiniMessage miniMessage, @NotNull String chatFormat,
             @NotNull Function<? super Player, ? extends CompletableFuture<Component>> nameFormatter) {
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
-        this.chatFormat = Objects.requireNonNull(chatFormat, "chatFormat");
-        this.nameFormatter = Objects.requireNonNull(nameFormatter, "nameFormatter");
+        this.miniMessage = Objects.requireNonNull(miniMessage);
+        this.chatFormat = Objects.requireNonNull(chatFormat);
+        this.nameFormatter = Objects.requireNonNull(nameFormatter);
     }
 
     @Override

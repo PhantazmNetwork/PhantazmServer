@@ -18,20 +18,19 @@ public class ApplyPotionSkill implements Skill {
 
     @FactoryMethod
     public ApplyPotionSkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<Object> selector) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.selector = Objects.requireNonNull(selector, "selector");
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
     }
 
     @Override
     public void use(@NotNull PhantazmMob self) {
         selector.selectTarget(self).ifPresent(livingEntity -> {
             if (livingEntity instanceof Iterable<?> iterable) {
-                Iterable<LivingEntity> entityIterable = (Iterable<LivingEntity>)iterable;
+                Iterable<LivingEntity> entityIterable = (Iterable<LivingEntity>) iterable;
                 for (LivingEntity entity : entityIterable) {
                     entity.addEffect(data.potion());
                 }
-            }
-            else if (livingEntity instanceof LivingEntity living) {
+            } else if (livingEntity instanceof LivingEntity living) {
                 living.addEffect(data.potion());
             }
         });
@@ -41,7 +40,7 @@ public class ApplyPotionSkill implements Skill {
     public record Data(@NotNull @ChildPath("selector") String selector, @NotNull Potion potion) {
 
         public Data {
-            Objects.requireNonNull(selector, "selector");
+            Objects.requireNonNull(selector);
         }
 
     }

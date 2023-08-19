@@ -36,8 +36,8 @@ public class ReviveAllInteractor implements ShopInteractor {
 
     @FactoryMethod
     public ReviveAllInteractor(@NotNull Data data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull Pos respawnPos) {
-        this.data = Objects.requireNonNull(data, "data");
+        @NotNull Pos respawnPos) {
+        this.data = Objects.requireNonNull(data);
         this.playerMap = playerMap;
         this.respawnPos = respawnPos;
     }
@@ -76,7 +76,7 @@ public class ReviveAllInteractor implements ShopInteractor {
                 }
 
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE,
-                        AlivePlayerStateContext.revive(reviveName, reviveLocation));
+                    AlivePlayerStateContext.revive(reviveName, reviveLocation));
                 ++reviveCount;
             }
         }

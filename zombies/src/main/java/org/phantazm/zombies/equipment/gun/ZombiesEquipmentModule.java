@@ -38,22 +38,22 @@ public class ZombiesEquipmentModule implements DependencyModule {
     private final Function<? super Key, ? extends MobModel> mobModelFunction;
 
     public ZombiesEquipmentModule(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull PlayerView playerView, @NotNull ZombiesPlayerMapStats mapStats,
-            @NotNull ZombiesPlayerActionBar actionBar, @NotNull MobSpawner mobSpawner,
-            @NotNull MobStore mobStore, @NotNull EventNode<Event> eventNode, @NotNull Random random,
-            @NotNull MapObjects mapObjects, @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayerSupplier,
-            @NotNull Function<? super Key, ? extends MobModel> mobModelFunction) {
-        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.mapStats = Objects.requireNonNull(mapStats, "mapStats");
-        this.actionBar = Objects.requireNonNull(actionBar, "actionBar");
-        this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
-        this.eventNode = Objects.requireNonNull(eventNode, "eventNode");
-        this.random = Objects.requireNonNull(random, "random");
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
-        this.zombiesPlayerSupplier = Objects.requireNonNull(zombiesPlayerSupplier, "zombiesPlayerSupplier");
-        this.mobModelFunction = Objects.requireNonNull(mobModelFunction, "mobModelFunction");
+        @NotNull PlayerView playerView, @NotNull ZombiesPlayerMapStats mapStats,
+        @NotNull ZombiesPlayerActionBar actionBar, @NotNull MobSpawner mobSpawner,
+        @NotNull MobStore mobStore, @NotNull EventNode<Event> eventNode, @NotNull Random random,
+        @NotNull MapObjects mapObjects, @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayerSupplier,
+        @NotNull Function<? super Key, ? extends MobModel> mobModelFunction) {
+        this.playerMap = Objects.requireNonNull(playerMap);
+        this.playerView = Objects.requireNonNull(playerView);
+        this.mapStats = Objects.requireNonNull(mapStats);
+        this.actionBar = Objects.requireNonNull(actionBar);
+        this.mobSpawner = Objects.requireNonNull(mobSpawner);
+        this.mobStore = Objects.requireNonNull(mobStore);
+        this.eventNode = Objects.requireNonNull(eventNode);
+        this.random = Objects.requireNonNull(random);
+        this.mapObjects = Objects.requireNonNull(mapObjects);
+        this.zombiesPlayerSupplier = Objects.requireNonNull(zombiesPlayerSupplier);
+        this.mobModelFunction = Objects.requireNonNull(mobModelFunction);
     }
 
     public @NotNull Map<? super UUID, ? extends ZombiesPlayer> getPlayerMap() {

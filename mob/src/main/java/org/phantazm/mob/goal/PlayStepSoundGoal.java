@@ -29,7 +29,7 @@ public class PlayStepSoundGoal implements GoalCreator {
 
     @FactoryMethod
     public PlayStepSoundGoal(@NotNull Random random) {
-        this.random = Objects.requireNonNull(random, "random");
+        this.random = Objects.requireNonNull(random);
     }
 
     @Override
@@ -62,8 +62,8 @@ public class PlayStepSoundGoal implements GoalCreator {
         private float lastChimeIntensity = 0;
 
         public Goal(@NotNull PhantazmMob mob, @NotNull Random random) {
-            this.mob = Objects.requireNonNull(mob, "mob");
-            this.random = Objects.requireNonNull(random, "random");
+            this.mob = Objects.requireNonNull(mob);
+            this.random = Objects.requireNonNull(random);
             this.lastPosition = mob.entity().getPosition();
         }
 
@@ -99,7 +99,7 @@ public class PlayStepSoundGoal implements GoalCreator {
             }
 
             Point pos = mob.entity().getPosition();
-            Vec landingPos = new Vec(pos.blockX(), (int)Math.floor(pos.y() - 0.2), pos.blockZ());
+            Vec landingPos = new Vec(pos.blockX(), (int) Math.floor(pos.y() - 0.2), pos.blockZ());
             Block landingBlock = instance.getBlock(landingPos);
             if (landingBlock.isAir()) {
                 Vec lowerPos = landingPos.sub(0, -1, 0);
@@ -111,12 +111,12 @@ public class PlayStepSoundGoal implements GoalCreator {
             }
 
             if (landingBlock.compare(Block.AMETHYST_BLOCK) || landingBlock.compare(Block.BUDDING_AMETHYST)) {
-                lastChimeIntensity *= (float)Math.pow(0.997, age - lastChimeAge);
+                lastChimeIntensity *= (float) Math.pow(0.997, age - lastChimeAge);
                 lastChimeIntensity = Math.min(1.0f, lastChimeIntensity + 0.07F);
                 float f = 0.5F + lastChimeIntensity * random.nextFloat() * 1.2F;
                 float g = 0.1F + lastChimeIntensity * 1.2F;
                 instance.playSound(Sound.sound(SoundEvent.BLOCK_AMETHYST_BLOCK_CHIME.key(), Sound.Source.HOSTILE, g, f),
-                        mob.entity().getPosition());
+                    mob.entity().getPosition());
                 lastChimeAge = age;
             }
 
@@ -132,7 +132,7 @@ public class PlayStepSoundGoal implements GoalCreator {
             }
 
             instance.playSound(Sound.sound(block.getStepSound().key(), Sound.Source.HOSTILE, 1.0F, 1.0F),
-                    mob.entity().getPosition());
+                mob.entity().getPosition());
         }
 
     }

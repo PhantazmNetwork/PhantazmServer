@@ -18,8 +18,8 @@ public class AddVelocitySkill implements Skill {
 
     @FactoryMethod
     public AddVelocitySkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<Object> selector) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.selector = Objects.requireNonNull(selector, "selector");
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
     }
 
     @Override
@@ -31,8 +31,7 @@ public class AddVelocitySkill implements Skill {
                         entity.setVelocity(entity.getVelocity().add(VecUtils.toPoint(data.delta())));
                     }
                 }
-            }
-            else if (target instanceof LivingEntity living) {
+            } else if (target instanceof LivingEntity living) {
                 living.setVelocity(living.getVelocity().add(VecUtils.toPoint(data.delta())));
             }
         });

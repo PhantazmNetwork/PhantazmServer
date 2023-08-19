@@ -23,10 +23,10 @@ public class BleedEntitiesSkill implements Skill {
 
     @FactoryMethod
     public BleedEntitiesSkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<?> selector,
-            @NotNull @Child("validator") TargetValidator validator) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.selector = Objects.requireNonNull(selector, "selector");
-        this.validator = Objects.requireNonNull(validator, "validator");
+        @NotNull @Child("validator") TargetValidator validator) {
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
+        this.validator = Objects.requireNonNull(validator);
     }
 
     @Override
@@ -34,8 +34,7 @@ public class BleedEntitiesSkill implements Skill {
         selector.selectTarget(self).ifPresent(target -> {
             if (target instanceof LivingEntity livingEntity) {
                 bleeding.add(new BleedContext(self, livingEntity, 0L));
-            }
-            else if (target instanceof Iterable<?> iterable) {
+            } else if (target instanceof Iterable<?> iterable) {
                 for (Object object : iterable) {
                     if (object instanceof LivingEntity livingEntity) {
                         bleeding.add(new BleedContext(self, livingEntity, 0L));
@@ -89,14 +88,14 @@ public class BleedEntitiesSkill implements Skill {
 
     @DataObject
     public record Data(@NotNull @ChildPath("selector") String selector,
-                       @NotNull @ChildPath("validator") String validator,
-                       float bleedDamage,
-                       boolean bypassArmor,
-                       long bleedInterval,
-                       long bleedTime) {
+        @NotNull @ChildPath("validator") String validator,
+        float bleedDamage,
+        boolean bypassArmor,
+        long bleedInterval,
+        long bleedTime) {
 
         public Data {
-            Objects.requireNonNull(selector, "selector");
+            Objects.requireNonNull(selector);
         }
 
     }

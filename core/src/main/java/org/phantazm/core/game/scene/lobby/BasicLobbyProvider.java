@@ -62,8 +62,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     /**
      * Creates a basic implementation of a {@link SceneProviderAbstract}.
      *
-     * @param newLobbyThreshold The weighting threshold for {@link Lobby}s. If no {@link Lobby}s are above
-     *                          this threshold, a new lobby will be created.
+     * @param newLobbyThreshold The weighting threshold for {@link Lobby}s. If no {@link Lobby}s are above this
+     *                          threshold, a new lobby will be created.
      * @param maximumLobbies    The maximum {@link Lobby}s in the provider.
      * @param instanceLoader    A {@link InstanceLoader} used to load {@link Instance}s
      * @param lobbyPaths        The paths that identify the {@link Lobby} for the {@link InstanceLoader}
@@ -71,18 +71,18 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
      * @param instanceConfig    The {@link InstanceConfig} for the {@link Lobby}s
      */
     public BasicLobbyProvider(@NotNull Executor executor, int maximumLobbies, int newLobbyThreshold,
-            @NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback,
-            @NotNull InstanceConfig instanceConfig, @NotNull ContextManager contextManager,
-            @NotNull ConfigList npcConfigs, @NotNull Collection<ItemStack> defaultItems,
-            @NotNull MiniMessage miniMessage, @NotNull String lobbyJoinFormat, boolean quittable,
-            @NotNull EventNode<Event> rootNode, @NotNull PlayerViewProvider playerViewProvider,
-            @NotNull Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler) {
+        @NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPaths, @NotNull SceneFallback fallback,
+        @NotNull InstanceConfig instanceConfig, @NotNull ContextManager contextManager,
+        @NotNull ConfigList npcConfigs, @NotNull Collection<ItemStack> defaultItems,
+        @NotNull MiniMessage miniMessage, @NotNull String lobbyJoinFormat, boolean quittable,
+        @NotNull EventNode<Event> rootNode, @NotNull PlayerViewProvider playerViewProvider,
+        @NotNull Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler) {
         super(executor, maximumLobbies, newLobbyThreshold);
 
-        this.instanceLoader = Objects.requireNonNull(instanceLoader, "instanceLoader");
-        this.lobbyPaths = List.copyOf(Objects.requireNonNull(lobbyPaths, "lobbyPaths"));
-        this.fallback = Objects.requireNonNull(fallback, "fallback");
-        this.instanceConfig = Objects.requireNonNull(instanceConfig, "instanceConfig");
+        this.instanceLoader = Objects.requireNonNull(instanceLoader);
+        this.lobbyPaths = List.copyOf(Objects.requireNonNull(lobbyPaths));
+        this.fallback = Objects.requireNonNull(fallback);
+        this.instanceConfig = Objects.requireNonNull(instanceConfig);
 
 
         List<ElementContext> npcContexts = new ArrayList<>(npcConfigs.size());
@@ -93,13 +93,13 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
         }
 
         this.npcContexts = List.copyOf(npcContexts);
-        this.defaultItems = Objects.requireNonNull(defaultItems, "defaultItems");
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
-        this.lobbyJoinFormat = Objects.requireNonNull(lobbyJoinFormat, "lobbyJoinFormat");
+        this.defaultItems = Objects.requireNonNull(defaultItems);
+        this.miniMessage = Objects.requireNonNull(miniMessage);
+        this.lobbyJoinFormat = Objects.requireNonNull(lobbyJoinFormat);
         this.quittable = quittable;
-        this.rootNode = Objects.requireNonNull(rootNode, "rootNode");
-        this.playerViewProvider = Objects.requireNonNull(playerViewProvider, "playerViewProvider");
-        this.displayNameStyler = Objects.requireNonNull(displayNameStyler, "displayNameStyler");
+        this.rootNode = Objects.requireNonNull(rootNode);
+        this.playerViewProvider = Objects.requireNonNull(playerViewProvider);
+        this.displayNameStyler = Objects.requireNonNull(displayNameStyler);
     }
 
     @Override
@@ -109,8 +109,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
             instance.setTimeRate(instanceConfig.timeRate());
 
             EventNode<InstanceEvent> instanceNode =
-                    EventNode.type("instance_npc_node_" + instance.getUniqueId(), EventFilter.INSTANCE,
-                            (e, v) -> v == instance);
+                EventNode.type("instance_npc_node_" + instance.getUniqueId(), EventFilter.INSTANCE,
+                    (e, v) -> v == instance);
 
             instanceNode.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
             instanceNode.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
@@ -140,8 +140,8 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
             }
 
             Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
-                    new NPCHandler(List.copyOf(npcs), instance, instanceNode), defaultItems, miniMessage,
-                    lobbyJoinFormat, quittable, playerViewProvider, displayNameStyler);
+                new NPCHandler(List.copyOf(npcs), instance, instanceNode), defaultItems, miniMessage,
+                lobbyJoinFormat, quittable, playerViewProvider, displayNameStyler);
             instanceNode.addListener(PlayerDisconnectEvent.class, event -> {
                 try (TransferResult result = lobby.leave(Collections.singleton(event.getPlayer().getUuid()))) {
                     result.executor().ifPresent(Runnable::run);

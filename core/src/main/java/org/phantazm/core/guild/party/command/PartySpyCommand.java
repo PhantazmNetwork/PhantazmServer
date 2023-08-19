@@ -32,11 +32,11 @@ public class PartySpyCommand {
     public static @NotNull Command spyCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
             @NotNull ConnectionManager connectionManager, @NotNull GuildHolder<Party> partyHolder,
             @NotNull PlayerViewProvider viewProvider) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(miniMessage, "miniMessage");
-        Objects.requireNonNull(connectionManager, "connectionManager");
-        Objects.requireNonNull(partyHolder, "partyHolder");
-        Objects.requireNonNull(viewProvider, "viewProvider");
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(miniMessage);
+        Objects.requireNonNull(connectionManager);
+        Objects.requireNonNull(partyHolder);
+        Objects.requireNonNull(viewProvider);
 
         Command command = new Command("spy");
         Argument<String> nameArgument = ArgumentType.String("name");
@@ -105,7 +105,8 @@ public class PartySpyCommand {
                     Component message;
                     if (nowSpying) {
                         message = miniMessage.deserialize(config.nowSpyingFormat(), targetPlaceholder);
-                    } else {
+                    }
+                    else {
                         message = miniMessage.deserialize(config.noLongerSpyingFormat(), targetPlaceholder);
                     }
 

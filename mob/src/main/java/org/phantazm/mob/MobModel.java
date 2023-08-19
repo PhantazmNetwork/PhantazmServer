@@ -35,19 +35,19 @@ public class MobModel implements Keyed {
     private final Object2FloatMap<String> attributes;
 
     public MobModel(@NotNull Key key, @NotNull EntityType entityType, @NotNull Pathfinding.Factory factory,
-            @NotNull ElementContext nodeContext, @NotNull ConfigNode metaNode, @NotNull ConfigNode extraNode,
-            @Nullable Component displayName, @Nullable Component hologramDisplayName,
-            @NotNull Map<EquipmentSlot, ItemStack> equipment, @NotNull Object2FloatMap<String> attributes) {
-        this.key = Objects.requireNonNull(key, "key");
-        this.entityType = Objects.requireNonNull(entityType, "entityType");
-        this.factory = Objects.requireNonNull(factory, "factory");
-        this.nodeContext = Objects.requireNonNull(nodeContext, "nodeContext");
+        @NotNull ElementContext nodeContext, @NotNull ConfigNode metaNode, @NotNull ConfigNode extraNode,
+        @Nullable Component displayName, @Nullable Component hologramDisplayName,
+        @NotNull Map<EquipmentSlot, ItemStack> equipment, @NotNull Object2FloatMap<String> attributes) {
+        this.key = Objects.requireNonNull(key);
+        this.entityType = Objects.requireNonNull(entityType);
+        this.factory = Objects.requireNonNull(factory);
+        this.nodeContext = Objects.requireNonNull(nodeContext);
         this.metaNode = metaNode.immutableCopy();
         this.extraNode = extraNode.immutableCopy();
         this.displayName = displayName;
         this.hologramDisplayName = hologramDisplayName;
-        this.equipment = Map.copyOf(Objects.requireNonNull(equipment, "equipment"));
-        this.attributes = Object2FloatMaps.unmodifiable(Objects.requireNonNull(attributes, "attributes"));
+        this.equipment = Map.copyOf(Objects.requireNonNull(equipment));
+        this.attributes = Object2FloatMaps.unmodifiable(Objects.requireNonNull(attributes));
     }
 
     /**
@@ -104,7 +104,8 @@ public class MobModel implements Keyed {
      *
      * @return The mob's equipment
      */
-    public @Unmodifiable @NotNull Map<EquipmentSlot, ItemStack> getEquipment() {
+    public @Unmodifiable
+    @NotNull Map<EquipmentSlot, ItemStack> getEquipment() {
         return equipment;
     }
 
@@ -113,7 +114,8 @@ public class MobModel implements Keyed {
      *
      * @return The mob's attributes
      */
-    public @NotNull @Unmodifiable Object2FloatMap<String> getAttributes() {
+    public @NotNull
+    @Unmodifiable Object2FloatMap<String> getAttributes() {
         return attributes;
     }
 }

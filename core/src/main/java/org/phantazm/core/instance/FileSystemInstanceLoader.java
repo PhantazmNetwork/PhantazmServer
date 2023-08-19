@@ -45,11 +45,11 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
      */
     public FileSystemInstanceLoader(@NotNull InstanceManager instanceManager, @NotNull Path rootPath,
             @NotNull ChunkSupplier chunkSupplier, @NotNull Executor executor) {
-        this.instanceManager = Objects.requireNonNull(instanceManager, "instanceManager");
-        this.rootPath = Objects.requireNonNull(rootPath, "rootPath");
-        this.chunkSupplier = Objects.requireNonNull(chunkSupplier, "chunkSupplier");
+        this.instanceManager = Objects.requireNonNull(instanceManager);
+        this.rootPath = Objects.requireNonNull(rootPath);
+        this.chunkSupplier = Objects.requireNonNull(chunkSupplier);
         this.instanceSources = new ConcurrentHashMap<>();
-        this.executor = Objects.requireNonNull(executor, "executorService");
+        this.executor = Objects.requireNonNull(executor);
     }
 
     // TODO: what if there are distinct spawnPos invocations?

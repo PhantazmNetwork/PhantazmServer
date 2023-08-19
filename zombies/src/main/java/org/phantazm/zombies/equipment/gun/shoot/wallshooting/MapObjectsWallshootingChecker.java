@@ -17,7 +17,7 @@ public class MapObjectsWallshootingChecker implements WallshootingChecker {
 
     @FactoryMethod
     public MapObjectsWallshootingChecker(@NotNull MapObjects mapObjects) {
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+        this.mapObjects = Objects.requireNonNull(mapObjects);
     }
 
     @Override

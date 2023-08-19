@@ -28,17 +28,17 @@ public class BasicSpawnDistributor implements SpawnDistributor {
     private final Team mobNoPushTeam;
 
     public BasicSpawnDistributor(@NotNull Function<? super Key, ? extends MobModel> modelFunction,
-            @NotNull Random random, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
-            @Nullable Team mobNoPushTeam) {
-        this.modelFunction = Objects.requireNonNull(modelFunction, "modelFunction");
-        this.random = Objects.requireNonNull(random, "random");
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        @NotNull Random random, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
+        @Nullable Team mobNoPushTeam) {
+        this.modelFunction = Objects.requireNonNull(modelFunction);
+        this.random = Objects.requireNonNull(random);
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
         this.mobNoPushTeam = mobNoPushTeam;
     }
 
     @Override
     public @NotNull List<PhantazmMob> distributeSpawns(@NotNull List<? extends Spawnpoint> spawnpoints,
-            @NotNull Collection<? extends SpawnInfo> spawns) {
+        @NotNull Collection<? extends SpawnInfo> spawns) {
         if (spawnpoints.isEmpty()) {
             return new ArrayList<>(0);
         }

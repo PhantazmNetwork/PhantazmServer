@@ -17,10 +17,10 @@ public abstract class MapTransactionAction extends PowerupActionBase {
     private Transaction.Modifier activeModifier;
 
     public MapTransactionAction(@NotNull DeactivationPredicate deactivationPredicate,
-            @NotNull TransactionModifierSource transactionModifierSource, @NotNull Key modifierGroup) {
+        @NotNull TransactionModifierSource transactionModifierSource, @NotNull Key modifierGroup) {
         super(deactivationPredicate);
-        this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "transactionModifierSource");
-        this.modifierGroup = Objects.requireNonNull(modifierGroup, "modifierGroup");
+        this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource);
+        this.modifierGroup = Objects.requireNonNull(modifierGroup);
     }
 
     @Override

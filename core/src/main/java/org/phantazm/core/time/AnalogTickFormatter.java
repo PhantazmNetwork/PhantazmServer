@@ -16,7 +16,7 @@ public class AnalogTickFormatter implements TickFormatter {
 
     @FactoryMethod
     public AnalogTickFormatter(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

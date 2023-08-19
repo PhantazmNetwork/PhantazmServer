@@ -17,8 +17,8 @@ public class InteractingPredicate implements ShopPredicate {
 
     @FactoryMethod
     public InteractingPredicate(@NotNull @Child("delegate") ShopPredicate delegate,
-            @NotNull @Child("interactors") List<ShopInteractor> interactors) {
-        this.delegate = Objects.requireNonNull(delegate, "delegate");
+        @NotNull @Child("interactors") List<ShopInteractor> interactors) {
+        this.delegate = Objects.requireNonNull(delegate);
         this.interactors = List.copyOf(interactors);
     }
 
@@ -37,6 +37,6 @@ public class InteractingPredicate implements ShopPredicate {
 
     @DataObject
     public record Data(@NotNull @ChildPath("delegate") String delegatePath,
-                       @NotNull @ChildPath("interactors") List<String> interactorPaths) {
+        @NotNull @ChildPath("interactors") List<String> interactorPaths) {
     }
 }

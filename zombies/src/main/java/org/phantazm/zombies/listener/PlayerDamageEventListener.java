@@ -34,11 +34,11 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
     private final MapSettingsInfo mapSettingsInfo;
 
     public PlayerDamageEventListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
-            @NotNull MapSettingsInfo mapSettingsInfo) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
+        @NotNull MapSettingsInfo mapSettingsInfo) {
         super(instance, zombiesPlayers);
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
-        this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
+        this.mapObjects = Objects.requireNonNull(mapObjects);
+        this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         Component roomName = getRoomName(deathPosition);
 
         zombiesPlayer.setState(ZombiesPlayerStateKeys.KNOCKED,
-                new KnockedPlayerStateContext(event.getInstance(), deathPosition, roomName, killer));
+            new KnockedPlayerStateContext(event.getInstance(), deathPosition, roomName, killer));
     }
 
     private Component getEntityName(@NotNull Entity entity) {
@@ -107,11 +107,9 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         Damage damage = event.getDamage();
         if (damage.getAttacker() != null) {
             return getEntityName(damage.getAttacker());
-        }
-        else if (damage.getSource() != null) {
+        } else if (damage.getSource() != null) {
             return getEntityName(damage.getSource());
-        }
-        else if (damage.hasTag(Tags.DAMAGE_NAME)) {
+        } else if (damage.hasTag(Tags.DAMAGE_NAME)) {
             return damage.tagHandler().getTag(Tags.DAMAGE_NAME);
         }
 
@@ -120,7 +118,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
     private Component getRoomName(@NotNull Pos deathPosition) {
         return mapObjects.roomTracker().atPoint(deathPosition).map(room -> room.getRoomInfo().displayName())
-                .orElse(Component.text("an unknown room"));
+                   .orElse(Component.text("an unknown room"));
     }
 
 }

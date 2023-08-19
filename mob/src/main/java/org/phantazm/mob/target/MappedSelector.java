@@ -22,7 +22,7 @@ public abstract class MappedSelector<TFrom, TTo> implements TargetSelector<TTo> 
      * @param delegate The delegate {@link TargetSelector} to map
      */
     public MappedSelector(@NotNull TargetSelector<TFrom> delegate) {
-        this.delegate = Objects.requireNonNull(delegate, "delegate");
+        this.delegate = Objects.requireNonNull(delegate);
     }
 
     /**

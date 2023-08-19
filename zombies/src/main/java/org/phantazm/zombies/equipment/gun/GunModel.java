@@ -21,8 +21,8 @@ public record GunModel(@NotNull Key rootLevel, @NotNull Map<Key, GunLevel> level
      * @param levels    A {@link Map} of level paths to the gun's possible {@link GunLevel}s
      */
     public GunModel {
-        Objects.requireNonNull(rootLevel, "rootLevel");
-        Objects.requireNonNull(levels, "levels");
+        Objects.requireNonNull(rootLevel);
+        Objects.requireNonNull(levels);
     }
 
 }

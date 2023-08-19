@@ -12,13 +12,13 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import java.util.*;
 
 @Description("""
-        Non-upgradeable perk level.
-                
-        Each level consists of:
-        * The level key for this level
-        * A single "perk equipment", which controls the visual and any interactive effects of the perk
-        * Any number of "perk effects", which control the persistent, passive effects granted by having the perk
-        """)
+    Non-upgradeable perk level.
+            
+    Each level consists of:
+    * The level key for this level
+    * A single "perk equipment", which controls the visual and any interactive effects of the perk
+    * Any number of "perk effects", which control the persistent, passive effects granted by having the perk
+    """)
 @Model("zombies.perk.level.non_upgradeable")
 @Cache(false)
 public class NonUpgradeablePerkLevelCreator implements PerkLevelCreator {
@@ -28,10 +28,10 @@ public class NonUpgradeablePerkLevelCreator implements PerkLevelCreator {
 
     @FactoryMethod
     public NonUpgradeablePerkLevelCreator(@NotNull Data data,
-            @NotNull @Child("equipment") PerkEquipmentCreator equipment,
-            @NotNull @Child("perk_effects") Collection<PerkEffectCreator> effects) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.equipment = Objects.requireNonNull(equipment, "equipment");
+        @NotNull @Child("equipment") PerkEquipmentCreator equipment,
+        @NotNull @Child("perk_effects") Collection<PerkEffectCreator> effects) {
+        this.data = Objects.requireNonNull(data);
+        this.equipment = Objects.requireNonNull(equipment);
         this.effects = List.copyOf(effects);
     }
 
@@ -53,9 +53,9 @@ public class NonUpgradeablePerkLevelCreator implements PerkLevelCreator {
 
     @DataObject
     public record Data(@NotNull @Description("The level key for this level") Key key,
-                       @NotNull @Description("The equipment controlling this perk's visuals") @ChildPath(
-                               "equipment") String equipment,
-                       @NotNull @Description("The perk effect(s) which are applied for this level") @ChildPath(
-                               "perk_effects") Collection<String> effects) {
+        @NotNull @Description("The equipment controlling this perk's visuals") @ChildPath(
+            "equipment") String equipment,
+        @NotNull @Description("The perk effect(s) which are applied for this level") @ChildPath(
+            "perk_effects") Collection<String> effects) {
     }
 }

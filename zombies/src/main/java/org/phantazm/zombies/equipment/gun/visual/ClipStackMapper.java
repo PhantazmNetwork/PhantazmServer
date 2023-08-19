@@ -24,7 +24,7 @@ public class ClipStackMapper implements GunStackMapper {
      */
     @FactoryMethod
     public ClipStackMapper(@NotNull @Child("reload_tester") ReloadTester reloadTester) {
-        this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
+        this.reloadTester = Objects.requireNonNull(reloadTester);
     }
 
     @Override

@@ -32,8 +32,8 @@ public class PlaySoundSkill implements Skill {
      */
     @FactoryMethod
     public PlaySoundSkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<Object> selector) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.selector = Objects.requireNonNull(selector, "selector");
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
         this.random = new Random();
     }
 
@@ -53,17 +53,14 @@ public class PlaySoundSkill implements Skill {
 
                     if (data.followAudience) {
                         player.playSound(randomize(), player.getPosition());
-                    }
-                    else {
+                    } else {
                         instance.playSound(randomize(), self.entity().getPosition());
                     }
                 }
-            }
-            else if (object instanceof Audience target) {
+            } else if (object instanceof Audience target) {
                 if (data.followAudience) {
                     target.playSound(randomize(), Sound.Emitter.self());
-                }
-                else {
+                } else {
                     Instance instance = self.entity().getInstance();
                     if (instance != null) {
                         instance.playSound(randomize(), Sound.Emitter.self());

@@ -17,15 +17,15 @@ public class PlayerQuitListener extends ZombiesPlayerEventListener<PlayerDisconn
     private final LeaveHandler leaveHandler;
 
     public PlayerQuitListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull LeaveHandler leaveHandler) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull LeaveHandler leaveHandler) {
         super(instance, zombiesPlayers);
-        this.leaveHandler = Objects.requireNonNull(leaveHandler, "leaveHandler");
+        this.leaveHandler = Objects.requireNonNull(leaveHandler);
     }
 
     @Override
     protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerDisconnectEvent event) {
         try (TransferResult result = leaveHandler.leave(
-                Collections.singleton(zombiesPlayer.module().getPlayerView().getUUID()))) {
+            Collections.singleton(zombiesPlayer.module().getPlayerView().getUUID()))) {
             result.executor().ifPresent(Runnable::run);
         }
     }

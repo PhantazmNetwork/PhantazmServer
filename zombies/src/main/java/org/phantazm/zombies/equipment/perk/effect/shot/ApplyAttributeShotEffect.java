@@ -27,9 +27,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Description("""
-        An entity action that applies a temporary attribute modification to an entity when it is hit by the player's
-        weapon shots.
-        """)
+    An entity action that applies a temporary attribute modification to an entity when it is hit by the player's
+    weapon shots.
+    """)
 @Model("zombies.perk.effect.shot_entity.apply_attribute")
 @Cache(false)
 public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
@@ -48,7 +48,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
     @FactoryMethod
     public ApplyAttributeShotEffect(@NotNull Data data, @NotNull MobStore mobStore) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
         this.attributeUUID = UUID.randomUUID();
         this.attributeName = this.attributeUUID.toString();
 
@@ -77,7 +77,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
         if (tag == 0) {
             livingEntity.getAttribute(attribute).addModifier(
-                    new AttributeModifier(attributeUUID, attributeName, data.amount, data.attributeOperation));
+                new AttributeModifier(attributeUUID, attributeName, data.amount, data.attributeOperation));
             entities.add(livingEntity);
         }
     }
@@ -103,8 +103,8 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
     @DataObject
     public record Data(@NotNull @Description("The attribute to apply") String attribute,
-                       @Description("The attribute amount") double amount,
-                       @NotNull @Description("The attribute operation") AttributeOperation attributeOperation,
-                       @Description("The duration the effect will exist") int duration) {
+        @Description("The attribute amount") double amount,
+        @NotNull @Description("The attribute operation") AttributeOperation attributeOperation,
+        @Description("The duration the effect will exist") int duration) {
     }
 }

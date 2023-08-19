@@ -35,8 +35,8 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
             @NotNull @Child("updating_item") UpdatingItem updatingItem,
             @NotNull @Child("click_interactor") ShopInteractor clickInteractor) {
         super(data, playerMap);
-        this.updatingItem = Objects.requireNonNull(updatingItem, "updatingItem");
-        this.clickInteractor = Objects.requireNonNull(clickInteractor, "clickInteractor");
+        this.updatingItem = Objects.requireNonNull(updatingItem);
+        this.clickInteractor = Objects.requireNonNull(clickInteractor);
         this.itemStack = updatingItem.currentItem();
     }
 

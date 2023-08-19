@@ -27,6 +27,7 @@ public class Mob extends ProximaEntity {
 
     private Reference<Entity> lastHitEntity;
     private Reference<Player> lastInteractingPlayer;
+    private Reference<Entity> shooter;
 
     public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
             MobCreator.@NotNull MobData data) {
@@ -39,18 +40,43 @@ public class Mob extends ProximaEntity {
 
         this.lastHitEntity = new WeakReference<>(null);
         this.lastInteractingPlayer = new WeakReference<>(null);
+        this.shooter = new WeakReference<>(null);
     }
 
+    /**
+     * Adds a skill to this mob. This will call its {@link Skill#init()}. Ensure that the skill is not assigned to any
+     * other mob.
+     * <p>
+     * <b>Thread Behavior</b>: It is not safe to call this method by any thread other than the owning's entity's
+     * current tick thread, unless proper synchronization is performed.
+     * <p>
+     * <b>Exception</b>: It is safe to add skills off of the tick thread when the mob has not yet been added to an
+     * instance; however, it is never safe to call this method with two or more threads concurrently.
+     *
+     * @param skill the skill to add
+     */
+    public void addSkill(@NotNull Skill skill) {
+        Objects.requireNonNull(skill);
+        addSkill0(skill);
+    }
+
+    /**
+     * Adds multiple skills to this mob. This will call {@link Skill#init()} for each skill in the collection. Ensure
+     * that none of the skills are assigned to any other mobs.
+     * <p>
+     * <b>Thread Behavior</b>: It is not safe to call this method by any thread other than the owning's entity's
+     * current tick thread, unless proper synchronization is performed.
+     * <p>
+     * <b>Exception</b>: It is safe to add skills off of the tick thread when the mob has not yet been added to an
+     * instance; however, it is never safe to call this method with two or more threads concurrently.
+     *
+     * @param skills the skills to add
+     */
     public void addSkills(@NotNull Collection<? extends Skill> skills) {
         Objects.requireNonNull(skills);
         for (Skill skill : skills) {
             addSkill0(skill);
         }
-    }
-
-    public void addSkill(@NotNull Skill skill) {
-        Objects.requireNonNull(skill);
-        addSkill0(skill);
     }
 
     public void removeSkill(@NotNull Skill skill) {
@@ -84,6 +110,10 @@ public class Mob extends ProximaEntity {
         return data;
     }
 
+    public @NotNull Optional<Entity> shooter() {
+        return Optional.ofNullable(shooter.get());
+    }
+
     public @NotNull Optional<Entity> lastHitEntity() {
         return Optional.ofNullable(lastHitEntity.get());
     }
@@ -95,6 +125,12 @@ public class Mob extends ProximaEntity {
     public void setLastHitEntity(@Nullable Entity entity) {
         if (lastHitEntity.get() != entity) {
             lastHitEntity = new WeakReference<>(entity);
+        }
+    }
+
+    public void setShooter(@Nullable Entity entity) {
+        if (shooter.get() != entity) {
+            shooter = new WeakReference<>(entity);
         }
     }
 
@@ -162,9 +198,11 @@ public class Mob extends ProximaEntity {
 
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
-        return super.setInstance(instance, spawnPosition).thenAccept((ignored) -> useIfPresent(Trigger.SPAWN));
+        return super.setInstance(instance, spawnPosition).thenAccept((ignored) -> {
+            getAcquirable().sync(ignored2 -> useIfPresent(Trigger.SPAWN));
+        });
     }
-
+    
     @Override
     public void kill() {
         useIfPresent(Trigger.DEATH);

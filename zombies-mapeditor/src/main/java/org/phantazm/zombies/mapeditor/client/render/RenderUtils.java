@@ -25,8 +25,8 @@ public final class RenderUtils {
      * @return a flat array which can be used to construct a RenderObject
      */
     public static Vec3d @NotNull [] arrayFromRegions(@NotNull List<? extends Bounds3I> regions, @NotNull Vec3I origin) {
-        Objects.requireNonNull(regions, "regions");
-        Objects.requireNonNull(origin, "origin");
+        Objects.requireNonNull(regions);
+        Objects.requireNonNull(origin);
 
         Vec3d[] boundsArray = new Vec3d[regions.size() * 2];
 
@@ -48,20 +48,20 @@ public final class RenderUtils {
      * @return {@code boundsArray}, for convenience
      */
     public static Vec3d @NotNull [] arrayFromRegion(@NotNull Bounds3I region, @NotNull Vec3I origin,
-            Vec3d @NotNull [] boundsArray, int offset) {
-        Objects.requireNonNull(region, "region");
-        Objects.requireNonNull(origin, "origin");
-        Objects.requireNonNull(boundsArray, "boundsArray");
+        Vec3d @NotNull [] boundsArray, int offset) {
+        Objects.requireNonNull(region);
+        Objects.requireNonNull(origin);
+        Objects.requireNonNull(boundsArray);
 
         Vec3I infoOrigin = region.immutableOrigin();
         Vec3I lengths = region.immutableLengths();
 
         boundsArray[offset] = new Vec3d(infoOrigin.x() + origin.x() - ObjectRenderer.EPSILON,
-                infoOrigin.y() + origin.y() - ObjectRenderer.EPSILON,
-                infoOrigin.z() + origin.z() - ObjectRenderer.EPSILON);
+            infoOrigin.y() + origin.y() - ObjectRenderer.EPSILON,
+            infoOrigin.z() + origin.z() - ObjectRenderer.EPSILON);
         boundsArray[offset + 1] =
-                new Vec3d(lengths.x() + ObjectRenderer.DOUBLE_EPSILON, lengths.y() + ObjectRenderer.DOUBLE_EPSILON,
-                        lengths.z() + ObjectRenderer.DOUBLE_EPSILON);
+            new Vec3d(lengths.x() + ObjectRenderer.DOUBLE_EPSILON, lengths.y() + ObjectRenderer.DOUBLE_EPSILON,
+                lengths.z() + ObjectRenderer.DOUBLE_EPSILON);
 
         return boundsArray;
     }

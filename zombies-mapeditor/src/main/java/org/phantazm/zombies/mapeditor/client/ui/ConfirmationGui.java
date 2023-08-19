@@ -25,18 +25,18 @@ public class ConfirmationGui extends SimplePanelGui {
      * @param height    the height of the dialog
      */
     public ConfirmationGui(@NotNull Text message, @NotNull Runnable onConfirm, @NotNull Runnable onDeny, int width,
-            int height) {
+        int height) {
         super(width, height);
 
-        Objects.requireNonNull(message, "message");
-        Objects.requireNonNull(onConfirm, "onConfirm");
-        Objects.requireNonNull(onDeny, "onDeny");
+        Objects.requireNonNull(message);
+        Objects.requireNonNull(onConfirm);
+        Objects.requireNonNull(onDeny);
 
         WText display = new WText(message);
         WButton confirm = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_YES));
         WButton deny = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_NO));
 
-        int textGridHeight = (int)Math.ceil((double)height / grid);
+        int textGridHeight = (int) Math.ceil((double) height / grid);
         gridPanelRoot.add(display, 0, 0, 7, textGridHeight);
         gridPanelRoot.add(confirm, 0, textGridHeight, 3, 1);
         gridPanelRoot.add(deny, 4, textGridHeight, 3, 1);

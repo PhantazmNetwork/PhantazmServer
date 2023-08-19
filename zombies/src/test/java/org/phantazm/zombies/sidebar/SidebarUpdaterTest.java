@@ -41,7 +41,7 @@ public class SidebarUpdaterTest {
     @Test
     public void testInitiallyEmptyWithEmptySection() {
         updater = new SidebarUpdater(sidebar,
-                Collections.singleton(new CollectionSidebarSection(Collections.emptyList())));
+            Collections.singleton(new CollectionSidebarSection(Collections.emptyList())));
 
         updater.start();
         updater.tick(0);
@@ -68,10 +68,10 @@ public class SidebarUpdaterTest {
     public void testLinesInOrder() {
         Component firstMessage = Component.text("First Line");
         SidebarLineUpdater firstUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
         Component secondMessage = Component.text("Second Line");
         SidebarLineUpdater secondUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
         SidebarSection section = new CollectionSidebarSection(List.of(firstUpdater, secondUpdater));
         updater = new SidebarUpdater(sidebar, Collections.singleton(section));
 
@@ -110,8 +110,9 @@ public class SidebarUpdaterTest {
         private final Collection<? extends SidebarLineUpdater> lineUpdaters;
 
         public MutableSidebarSection(@NotNull Collection<? extends SidebarLineUpdater> lineUpdaters) {
-            this.lineUpdaters = Objects.requireNonNull(lineUpdaters, "lineUpdaters");
+            this.lineUpdaters = Objects.requireNonNull(lineUpdaters);
         }
+
         @Override
         public void invalidateCache() {
             for (SidebarLineUpdater lineUpdater : lineUpdaters) {
@@ -138,13 +139,13 @@ public class SidebarUpdaterTest {
     public void testChangingSectionLengthInIntermediateSection() {
         Component firstMessage = Component.text("First Line");
         SidebarLineUpdater firstUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
         Component secondMessage = Component.text("Second Line");
         SidebarLineUpdater secondUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
         Component thirdMessage = Component.text("Third Line");
         SidebarLineUpdater thirdUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(thirdMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(thirdMessage));
         List<SidebarLineUpdater> intermediateLines = new ArrayList<>(2);
         intermediateLines.add(firstUpdater);
         SidebarSection firstSection = new MutableSidebarSection(intermediateLines);
@@ -169,13 +170,13 @@ public class SidebarUpdaterTest {
     public void testChangingSectionLengthInFinalSection() {
         Component firstMessage = Component.text("First Line");
         SidebarLineUpdater firstUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
         Component secondMessage = Component.text("Second Line");
         SidebarLineUpdater secondUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
         Component thirdMessage = Component.text("Third Line");
         SidebarLineUpdater thirdUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(thirdMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(thirdMessage));
         List<SidebarLineUpdater> finalLines = new ArrayList<>(2);
         finalLines.add(secondUpdater);
         SidebarSection firstSection = new CollectionSidebarSection(Collections.singleton(firstUpdater));
@@ -200,10 +201,10 @@ public class SidebarUpdaterTest {
     public void testRemoveStartFromSingleSection() {
         Component firstMessage = Component.text("First Line");
         SidebarLineUpdater firstUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
         Component secondMessage = Component.text("Second Line");
         SidebarLineUpdater secondUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
         Deque<SidebarLineUpdater> lineUpdaters = new ArrayDeque<>();
         lineUpdaters.push(firstUpdater);
         lineUpdaters.push(secondUpdater);
@@ -224,10 +225,10 @@ public class SidebarUpdaterTest {
     public void testRemoveEndFromSingleSection() {
         Component firstMessage = Component.text("First Line");
         SidebarLineUpdater firstUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
         Component secondMessage = Component.text("Second Line");
         SidebarLineUpdater secondUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
         Deque<SidebarLineUpdater> lineUpdaters = new ArrayDeque<>(2);
         lineUpdaters.push(firstUpdater);
         lineUpdaters.push(secondUpdater);
@@ -248,13 +249,13 @@ public class SidebarUpdaterTest {
     public void testRemoveMiddleFromSingleSection() {
         Component firstMessage = Component.text("First Line");
         SidebarLineUpdater firstUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
         Component secondMessage = Component.text("Second Line");
         SidebarLineUpdater secondUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
         Component thirdMessage = Component.text("Third Line");
         SidebarLineUpdater thirdUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(thirdMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(thirdMessage));
         List<SidebarLineUpdater> lineUpdaters = new ArrayList<>(3);
         lineUpdaters.add(firstUpdater);
         lineUpdaters.add(secondUpdater);
@@ -279,13 +280,13 @@ public class SidebarUpdaterTest {
     public void testRemoveMiddleFromMultipleSections() {
         Component firstMessage = Component.text("First Line");
         SidebarLineUpdater firstUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(firstMessage));
         Component secondMessage = Component.text("Second Line");
         SidebarLineUpdater secondUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(secondMessage));
         Component thirdMessage = Component.text("Third Line");
         SidebarLineUpdater thirdUpdater =
-                new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(thirdMessage));
+            new ConstantSidebarLineUpdater(new ConstantSidebarLineUpdater.Data(thirdMessage));
         Deque<SidebarLineUpdater> firstUpdaters = new ArrayDeque<>(2);
         firstUpdaters.push(firstUpdater);
         firstUpdaters.push(secondUpdater);

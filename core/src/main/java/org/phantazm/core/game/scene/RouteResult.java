@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public record RouteResult(@NotNull Optional<TransferResult> result,
-                          @NotNull Optional<Component> message) {
+    @NotNull Optional<Component> message) {
 
     public static RouteResult success(@NotNull TransferResult scene) {
         return new RouteResult(Optional.of(scene), Optional.empty());
@@ -18,8 +18,8 @@ public record RouteResult(@NotNull Optional<TransferResult> result,
     }
 
     public RouteResult {
-        Objects.requireNonNull(result, "scene");
-        Objects.requireNonNull(message, "message");
+        Objects.requireNonNull(result);
+        Objects.requireNonNull(message);
     }
 
 }

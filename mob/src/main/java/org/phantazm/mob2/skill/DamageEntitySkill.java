@@ -57,8 +57,10 @@ public class DamageEntitySkill implements SkillComponent {
 
         @Override
         protected void useOnTarget(@NotNull Target target) {
-            target.forType(LivingEntity.class,
-                    livingEntity -> livingEntity.damage(Damage.fromEntity(self, data.amount), data.armorBypassing));
+            target.forType(LivingEntity.class, livingEntity -> livingEntity.getAcquirable().sync(e -> {
+                LivingEntity entity = (LivingEntity)e;
+                entity.damage(Damage.fromEntity(self, data.amount), data.armorBypassing);
+            }));
         }
 
         @Override

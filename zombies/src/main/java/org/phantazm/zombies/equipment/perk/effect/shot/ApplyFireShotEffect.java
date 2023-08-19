@@ -24,8 +24,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Description("""
-        An entity action that sets an entity on fire for a configurable amount of time, health, and damage interval.
-        """)
+    An entity action that sets an entity on fire for a configurable amount of time, health, and damage interval.
+    """)
 @Model("zombies.perk.effect.shot_entity.apply_fire")
 @Cache(false)
 public class ApplyFireShotEffect implements ShotEffect, Tickable {
@@ -39,13 +39,13 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
     @FactoryMethod
     public ApplyFireShotEffect(@NotNull Data data, @NotNull MobStore mobStore) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
 
         UUID uuid = UUID.randomUUID();
         this.lastDamageTicksTag = Tag.Long("last_fire_damage_ticks_" + uuid).defaultValue(-1L);
 
         this.activeEntities = new ConcurrentLinkedDeque<>();
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        this.mobStore = Objects.requireNonNull(mobStore);
     }
 
     @Override
@@ -104,8 +104,8 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
     @DataObject
     public record Data(@Description("The number of ticks the hit entity will be set on fire") int fireTicks,
-                       @Description("The number of ticks between fire damage applications") int damageInterval,
-                       @Description("The amount of damage dealt on each application") float damage,
-                       @Description("Whether fire damage should bypass armor damage reduction") boolean bypassArmor) {
+        @Description("The number of ticks between fire damage applications") int damageInterval,
+        @Description("The amount of damage dealt on each application") float damage,
+        @Description("Whether fire damage should bypass armor damage reduction") boolean bypassArmor) {
     }
 }

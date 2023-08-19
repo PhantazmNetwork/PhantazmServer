@@ -26,10 +26,10 @@ public class BasicSongPlayer implements SongPlayer {
     @Override
     public @NotNull Song play(@NotNull Audience audience, @NotNull Sound.Source source, @NotNull Sound.Emitter emitter,
             @NotNull List<Note> notes, float volume, boolean loop) {
-        Objects.requireNonNull(audience, "audience");
-        Objects.requireNonNull(source, "source");
-        Objects.requireNonNull(emitter, "emitter");
-        Objects.requireNonNull(notes, "notes");
+        Objects.requireNonNull(audience);
+        Objects.requireNonNull(source);
+        Objects.requireNonNull(emitter);
+        Objects.requireNonNull(notes);
 
         SongImpl song = new SongImpl(audience, emitter, source, null, notes, volume, loop);
         if (song.nextNote != null) {
@@ -42,9 +42,9 @@ public class BasicSongPlayer implements SongPlayer {
     @Override
     public @NotNull Song play(@NotNull Audience audience, @NotNull Sound.Source source, double x, double y, double z,
             @NotNull List<Note> notes, float volume, boolean loop) {
-        Objects.requireNonNull(audience, "audience");
-        Objects.requireNonNull(source, "source");
-        Objects.requireNonNull(notes, "notes");
+        Objects.requireNonNull(audience);
+        Objects.requireNonNull(source);
+        Objects.requireNonNull(notes);
 
         SongImpl song = new SongImpl(audience, null, source, new Vec(x, y, z), notes, volume, loop);
         if (song.nextNote != null) {
@@ -72,7 +72,7 @@ public class BasicSongPlayer implements SongPlayer {
 
         private SongImpl(Audience audience, Sound.Emitter emitter, Sound.Source source, Point location,
                 List<Note> notes, float volume, boolean loop) {
-            this.audience = Objects.requireNonNull(audience, "audience");
+            this.audience = Objects.requireNonNull(audience);
             this.emitter = emitter;
             this.source = source;
             this.location = location;

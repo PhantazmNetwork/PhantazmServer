@@ -16,8 +16,8 @@ public class BasicRouterStore implements RouterStore {
     @SuppressWarnings("unchecked")
     @Override
     public <TScene extends Scene<?>, TRequest extends SceneJoinRequest, TRouter extends SceneRouter<TScene, TRequest>> @NotNull TRouter getRouter(
-            @NotNull RouterKey<TScene, TRequest, TRouter> routerKey) {
-        TRouter router = (TRouter)routerMap.get(routerKey);
+        @NotNull RouterKey<TScene, TRequest, TRouter> routerKey) {
+        TRouter router = (TRouter) routerMap.get(routerKey);
         if (router == null) {
             throw new IllegalArgumentException("No router of type " + routerKey.router().getName());
         }
@@ -27,9 +27,9 @@ public class BasicRouterStore implements RouterStore {
 
     @Override
     public <TScene extends Scene<?>, TRequest extends SceneJoinRequest, TRouter extends SceneRouter<TScene, TRequest>> void putRouter(
-            @NotNull RouterKey<TScene, TRequest, TRouter> key, @NotNull SceneRouter<TScene, TRequest> router) {
-        Objects.requireNonNull(key, "key");
-        Objects.requireNonNull(router, "router");
+        @NotNull RouterKey<TScene, TRequest, TRouter> key, @NotNull SceneRouter<TScene, TRequest> router) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(router);
 
         if (routerMap.putIfAbsent(key, router) != null) {
             throw new IllegalArgumentException("A router is already registered to type " + key.router().getName());
@@ -37,7 +37,8 @@ public class BasicRouterStore implements RouterStore {
     }
 
     @Override
-    public @NotNull @Unmodifiable Collection<SceneRouter<?, ?>> getRouters() {
+    public @NotNull
+    @Unmodifiable Collection<SceneRouter<?, ?>> getRouters() {
         return List.copyOf(routerMap.values());
     }
 

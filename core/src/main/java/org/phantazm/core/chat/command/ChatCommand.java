@@ -34,14 +34,14 @@ public class ChatCommand extends Command {
      * @param defaultChannelNameSupplier A {@link Supplier} of the default {@link ChatChannel} name
      */
     public ChatCommand(@NotNull Map<String, ChatChannel> channels, @NotNull Map<UUID, String> playerChannels,
-            @NotNull Map<String, String> aliasResolver,
-            @NotNull Supplier<String> defaultChannelNameSupplier) {
+        @NotNull Map<String, String> aliasResolver,
+        @NotNull Supplier<String> defaultChannelNameSupplier) {
         super(COMMAND_ID, "ch");
 
-        Objects.requireNonNull(channels, "channels");
-        Objects.requireNonNull(playerChannels, "playerChannels");
-        Objects.requireNonNull(aliasResolver, "aliasResolver");
-        Objects.requireNonNull(defaultChannelNameSupplier, "defaultChannelNameSupplier");
+        Objects.requireNonNull(channels);
+        Objects.requireNonNull(playerChannels);
+        Objects.requireNonNull(aliasResolver);
+        Objects.requireNonNull(defaultChannelNameSupplier);
 
         Argument<String> channelNameArgument = ArgumentType.String("channel");
         channelNameArgument.setSuggestionCallback((sender, context, suggestion) -> {
@@ -58,11 +58,11 @@ public class ChatCommand extends Command {
             sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
             return false;
         }, (sender, context) -> {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
 
             String channelName = context.get(channelNameArgument);
             String previousChannelName =
-                    playerChannels.computeIfAbsent(player.getUuid(), uuid -> defaultChannelNameSupplier.get());
+                playerChannels.computeIfAbsent(player.getUuid(), uuid -> defaultChannelNameSupplier.get());
 
             if (!aliasResolver.containsKey(channelName)) {
                 StringBuilder stringBuilder = new StringBuilder();
@@ -75,8 +75,7 @@ public class ChatCommand extends Command {
 
                     if (i < channels.size() - 2) {
                         stringBuilder.append(", ");
-                    }
-                    else if (i == channels.size() - 2) {
+                    } else if (i == channels.size() - 2) {
                         if (channels.size() != 2) {
                             stringBuilder.append(",");
                         }
@@ -93,16 +92,17 @@ public class ChatCommand extends Command {
             Component channelNameComponent = Component.text(channelName, NamedTextColor.GOLD);
             if (channelName.equals(previousChannelName)) {
                 Component message = Component.text()
-                        .append(Component.text("You are already in the "), channelNameComponent,
-                                Component.text(" channel!")).color(NamedTextColor.RED).build();
+                                        .append(Component.text("You are already in the "), channelNameComponent,
+                                            Component.text(" channel!")).color(NamedTextColor.RED).build();
                 sender.sendMessage(message);
                 return;
             }
 
             playerChannels.put(player.getUuid(), channelName);
             Component message = Component.text()
-                    .append(Component.text("Set chat channel to "), channelNameComponent, Component.text("."))
-                    .color(NamedTextColor.GREEN).build();
+                                    .append(Component.text("Set chat channel to "), channelNameComponent,
+                                        Component.text("."))
+                                    .color(NamedTextColor.GREEN).build();
             player.sendMessage(message);
         }, channelNameArgument);
     }

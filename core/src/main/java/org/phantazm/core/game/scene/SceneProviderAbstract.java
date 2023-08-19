@@ -29,7 +29,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
      * @param maximumScenes The maximum number of {@link Scene}s in the provider.
      */
     public SceneProviderAbstract(@NotNull Executor executor, int maximumScenes) {
-        this.executor = Objects.requireNonNull(executor, "executor");
+        this.executor = Objects.requireNonNull(executor);
         this.maximumScenes = maximumScenes;
     }
 
@@ -71,7 +71,8 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
     }
 
     @Override
-    public @UnmodifiableView @NotNull Collection<TScene> getScenes() {
+    public @UnmodifiableView
+    @NotNull Collection<TScene> getScenes() {
         return unmodifiableScenes;
     }
 

@@ -17,7 +17,7 @@ public class DurationTickFormatter implements TickFormatter {
 
     @FactoryMethod
     public DurationTickFormatter(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

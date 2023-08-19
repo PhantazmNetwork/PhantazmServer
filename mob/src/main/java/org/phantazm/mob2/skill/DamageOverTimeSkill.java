@@ -18,6 +18,7 @@ import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 import org.phantazm.mob2.Trigger;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.Objects;
@@ -65,13 +66,14 @@ public class DamageOverTimeSkill implements SkillComponent {
         private Internal(Data data, Mob self, Selector selector) {
             super(self, selector);
             this.data = data;
-            this.targets = new ConcurrentLinkedDeque<>();
+            this.targets = new ArrayDeque<>();
         }
 
         @Override
         protected void useOnTarget(@NotNull Target target) {
-            int startTicks = ticks;
-            target.forType(LivingEntity.class, livingEntity -> addDamageTarget(livingEntity, startTicks));
+            self.getAcquirable().sync(ignored -> {
+                target.forType(LivingEntity.class, livingEntity -> addDamageTarget(livingEntity, ticks));
+            });
         }
 
         @Override

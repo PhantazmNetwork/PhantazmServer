@@ -13,7 +13,8 @@ import org.phantazm.zombies.equipment.gun.GunState;
 import java.util.Objects;
 
 /**
- * A {@link ReloadActionBarChooser} which colors a {@link Component} based on reload progress with a gradient between two colors.
+ * A {@link ReloadActionBarChooser} which colors a {@link Component} based on reload progress with a gradient between
+ * two colors.
  */
 @Model("zombies.gun.action_bar_chooser.gradient")
 @Cache
@@ -28,7 +29,7 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
      */
     @FactoryMethod
     public GradientActionBarChooser(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

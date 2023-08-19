@@ -19,10 +19,10 @@ public class EntityDamageByGunEventListener extends PhantazmMobEventListener<Ent
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
     public EntityDamageByGunEventListener(@NotNull Instance instance, @NotNull MobStore mobStore,
-            @NotNull MapObjects mapObjects, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+        @NotNull MapObjects mapObjects, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
         super(instance, mobStore);
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
-        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
+        this.mapObjects = Objects.requireNonNull(mapObjects);
+        this.playerMap = Objects.requireNonNull(playerMap);
     }
 
     @Override
@@ -31,9 +31,8 @@ public class EntityDamageByGunEventListener extends PhantazmMobEventListener<Ent
             if (mobResistsInstakill(mob)) {
                 event.setInstakill(false);
             }
-        }
-        else if ((mapObjects.module().flags().hasFlag(Flags.INSTA_KILL) ||
-                playerHasInstakill(event.getShooter().getUuid())) && !mobResistsInstakill(mob)) {
+        } else if ((mapObjects.module().flags().hasFlag(Flags.INSTA_KILL) ||
+                        playerHasInstakill(event.getShooter().getUuid())) && !mobResistsInstakill(mob)) {
             event.setInstakill(true);
         }
     }

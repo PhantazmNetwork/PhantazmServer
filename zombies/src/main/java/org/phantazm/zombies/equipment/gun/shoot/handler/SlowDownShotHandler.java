@@ -42,8 +42,8 @@ public class SlowDownShotHandler implements ShotHandler {
 
     @FactoryMethod
     public SlowDownShotHandler(@NotNull Data data, @NotNull MobStore mobStore) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        this.data = Objects.requireNonNull(data);
+        this.mobStore = Objects.requireNonNull(mobStore);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class SlowDownShotHandler implements ShotHandler {
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         for (GunHit target : shot.regularTargets()) {
             PhantazmMob mob = mobStore.getMob(target.entity().getUuid());
             if (mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
@@ -83,8 +83,8 @@ public class SlowDownShotHandler implements ShotHandler {
             removalQueue.add(ObjectLongPair.of(target.entity().getUuid(), selfTick + data.headshotDuration()));
             latestTimeMap.put(target.entity().getUuid(), selfTick + data.duration());
             AttributeModifier modifier =
-                    new AttributeModifier(SLOW_DOWN_UUID, "slowdown_shot_handler", data.multiplier(),
-                            AttributeOperation.MULTIPLY_TOTAL);
+                new AttributeModifier(SLOW_DOWN_UUID, "slowdown_shot_handler", data.multiplier(),
+                    AttributeOperation.MULTIPLY_TOTAL);
             AttributeInstance attribute = target.entity().getAttribute(Attribute.MOVEMENT_SPEED);
             attribute.removeModifier(SLOW_DOWN_UUID);
             attribute.addModifier(modifier);
@@ -98,8 +98,8 @@ public class SlowDownShotHandler implements ShotHandler {
             removalQueue.add(ObjectLongPair.of(target.entity().getUuid(), selfTick + data.headshotDuration()));
             latestTimeMap.put(target.entity().getUuid(), selfTick + data.headshotDuration());
             AttributeModifier modifier =
-                    new AttributeModifier(SLOW_DOWN_UUID, "slowdown_shot_handler", data.headshotMultiplier(),
-                            AttributeOperation.MULTIPLY_TOTAL);
+                new AttributeModifier(SLOW_DOWN_UUID, "slowdown_shot_handler", data.headshotMultiplier(),
+                    AttributeOperation.MULTIPLY_TOTAL);
             AttributeInstance attribute = target.entity().getAttribute(Attribute.MOVEMENT_SPEED);
             attribute.removeModifier(SLOW_DOWN_UUID);
             attribute.addModifier(modifier);

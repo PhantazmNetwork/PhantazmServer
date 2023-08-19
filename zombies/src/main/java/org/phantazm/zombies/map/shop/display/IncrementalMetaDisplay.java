@@ -19,8 +19,8 @@ public class IncrementalMetaDisplay implements ShopDisplay {
 
     @FactoryMethod
     public IncrementalMetaDisplay(@NotNull Data data, @NotNull @Child("displays") List<ShopDisplay> displays) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.displays = Objects.requireNonNull(displays, "displays");
+        this.data = Objects.requireNonNull(data);
+        this.displays = Objects.requireNonNull(displays);
         this.displayIndex = 0;
     }
 
@@ -50,8 +50,7 @@ public class IncrementalMetaDisplay implements ShopDisplay {
             int nextDisplayIndex = displayIndex + 1;
             if (nextDisplayIndex < displays.size()) {
                 displayIndex = nextDisplayIndex;
-            }
-            else if (data.cycle) {
+            } else if (data.cycle) {
                 displayIndex = 0;
             }
 

@@ -18,7 +18,7 @@ public class BasicInventoryObject implements InventoryObject {
      * @param itemStack The initial {@link ItemStack} of the {@link InventoryObject}
      */
     public BasicInventoryObject(@NotNull ItemStack itemStack) {
-        this.itemStack = Objects.requireNonNull(itemStack, "itemStack");
+        this.itemStack = Objects.requireNonNull(itemStack);
     }
 
     @Override

@@ -13,8 +13,8 @@ public class MobBreakWindowEvent implements PhantazmMobInstanceEvent {
     private final int amount;
 
     public MobBreakWindowEvent(@NotNull PhantazmMob phantazmMob, @NotNull Window window, int amount) {
-        this.phantazmMob = Objects.requireNonNull(phantazmMob, "phantazmMob");
-        this.window = Objects.requireNonNull(window, "window");
+        this.phantazmMob = Objects.requireNonNull(phantazmMob);
+        this.window = Objects.requireNonNull(window);
         this.amount = amount;
     }
 

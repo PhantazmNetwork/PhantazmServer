@@ -21,8 +21,8 @@ public class PushEntitySkill implements Skill {
 
     @FactoryMethod
     public PushEntitySkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<Object> selector) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.selector = Objects.requireNonNull(selector, "selector");
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
     }
 
     @Override
@@ -34,8 +34,7 @@ public class PushEntitySkill implements Skill {
                         setVelocity(entity, self.entity());
                     }
                 }
-            }
-            else if (livingEntity instanceof LivingEntity living) {
+            } else if (livingEntity instanceof LivingEntity living) {
                 setVelocity(living, self.entity());
             }
         });
@@ -46,17 +45,16 @@ public class PushEntitySkill implements Skill {
 
         if (data.additive) {
             target.setVelocity(target.getVelocity().add(diff.mul(data.power).add(0, data.vertical, 0)));
-        }
-        else {
+        } else {
             target.setVelocity(diff.mul(data.power).add(0, data.vertical, 0));
         }
     }
 
     @DataObject
     public record Data(@NotNull @ChildPath("selector") String selector,
-                       double power,
-                       double vertical,
-                       boolean additive) {
+        double power,
+        double vertical,
+        boolean additive) {
         @Default("additive")
         public static @NotNull ConfigElement defaultAdditive() {
             return ConfigPrimitive.of(false);

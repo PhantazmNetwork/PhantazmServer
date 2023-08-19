@@ -34,18 +34,18 @@ public class BasicQuitStateActivable implements Activable {
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public BasicQuitStateActivable(@NotNull Instance instance, @NotNull PlayerView playerView,
-            @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList,
-            @NotNull BelowNameTag belowNameTag, @NotNull InventoryAccessRegistry accessRegistry,
-            @NotNull Map<UUID, CancellableState> stateMap, @NotNull TickTaskScheduler scheduler) {
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.settings = Objects.requireNonNull(settings, "settings");
-        this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
-        this.tabList = Objects.requireNonNull(tabList, "tabList");
-        this.belowNameTag = Objects.requireNonNull(belowNameTag, "belowNameTag");
-        this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
-        this.stateMap = Objects.requireNonNull(stateMap, "stateMap");
-        this.scheduler = Objects.requireNonNull(scheduler, "scheduler");
+        @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList,
+        @NotNull BelowNameTag belowNameTag, @NotNull InventoryAccessRegistry accessRegistry,
+        @NotNull Map<UUID, CancellableState> stateMap, @NotNull TickTaskScheduler scheduler) {
+        this.instance = Objects.requireNonNull(instance);
+        this.playerView = Objects.requireNonNull(playerView);
+        this.settings = Objects.requireNonNull(settings);
+        this.sidebar = Objects.requireNonNull(sidebar);
+        this.tabList = Objects.requireNonNull(tabList);
+        this.belowNameTag = Objects.requireNonNull(belowNameTag);
+        this.accessRegistry = Objects.requireNonNull(accessRegistry);
+        this.stateMap = Objects.requireNonNull(stateMap);
+        this.scheduler = Objects.requireNonNull(scheduler);
     }
 
     @Override

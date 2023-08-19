@@ -1,6 +1,12 @@
 package org.phantazm.mob2.skill;
 
+import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob2.Mob;
+
+import java.util.Objects;
+
 public abstract class TimerSkillAbstract implements Skill {
+    private final Mob self;
     private final Skill delegate;
     private final boolean requiresActivation;
     private final boolean resetOnActivation;
@@ -12,11 +18,10 @@ public abstract class TimerSkillAbstract implements Skill {
     private int ticksSinceLastActivation;
     private int uses;
 
-    private final Object lock = new Object();
-
-    public TimerSkillAbstract(Skill delegate, boolean requiresActivation, boolean resetOnActivation, int repeat,
-            int interval) {
-        this.delegate = delegate;
+    public TimerSkillAbstract(@NotNull Mob self, @NotNull Skill delegate, boolean requiresActivation,
+            boolean resetOnActivation, int repeat, int interval) {
+        this.self = Objects.requireNonNull(self);
+        this.delegate = Objects.requireNonNull(delegate);
         this.requiresActivation = requiresActivation;
         this.resetOnActivation = resetOnActivation;
         this.repeat = repeat;
@@ -46,7 +51,7 @@ public abstract class TimerSkillAbstract implements Skill {
             return;
         }
 
-        synchronized (lock) {
+        self.getAcquirable().sync(ignored -> {
             if (started && resetOnActivation) {
                 //case 1: timer is running, we reset on activation
                 reset(true);
@@ -57,7 +62,7 @@ public abstract class TimerSkillAbstract implements Skill {
                 //case 2: timer is not running, start it
                 started = true;
             }
-        }
+        });
     }
 
     @Override
@@ -66,44 +71,36 @@ public abstract class TimerSkillAbstract implements Skill {
             delegate.tick();
         }
 
-        boolean useDelegate = false;
-        synchronized (lock) {
-            if (!started) {
-                return;
-            }
-
-            if (ticksSinceLastActivation == interval) {
-                useDelegate = true;
-
-                if (repeat > -1 && ++uses >= repeat) {
-                    reset(false);
-                }
-                else {
-                    ticksSinceLastActivation = 0;
-                }
-
-                interval = computeInterval();
-            }
-            else {
-                ticksSinceLastActivation++;
-            }
+        if (!started) {
+            return;
         }
 
-        if (useDelegate) {
+        if (ticksSinceLastActivation == interval) {
+            if (repeat > -1 && ++uses >= repeat) {
+                reset(false);
+            }
+            else {
+                ticksSinceLastActivation = 0;
+            }
+
+            interval = computeInterval();
             delegate.use();
+        }
+        else {
+            ticksSinceLastActivation++;
         }
     }
 
     @Override
     public void end() {
-        synchronized (lock) {
+        self.getAcquirable().sync(ignored -> {
             if (!started) {
                 return;
             }
 
             reset(false);
             delegate.end();
-        }
+        });
     }
 
     @Override

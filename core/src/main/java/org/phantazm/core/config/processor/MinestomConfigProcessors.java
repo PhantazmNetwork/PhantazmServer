@@ -30,9 +30,9 @@ import java.util.function.Function;
  */
 public class MinestomConfigProcessors {
     private static final ConfigProcessor<Particle> PARTICLE =
-            new ProtocolObjectConfigProcessor<>(Particle::fromNamespaceId);
+        new ProtocolObjectConfigProcessor<>(Particle::fromNamespaceId);
     private static final ConfigProcessor<PotionEffect> POTION_EFFECT =
-            new ProtocolObjectConfigProcessor<>(PotionEffect::fromNamespaceId);
+        new ProtocolObjectConfigProcessor<>(PotionEffect::fromNamespaceId);
 
     private static final ConfigProcessor<Point> POINT = new ConfigProcessor<>() {
 
@@ -55,8 +55,7 @@ public class MinestomConfigProcessors {
             NBT nbt;
             try {
                 nbt = new SNBTParser(new StringReader(nbtString)).parse();
-            }
-            catch (NBTException e) {
+            } catch (NBTException e) {
                 throw new ConfigProcessException(e);
             }
 
@@ -71,20 +70,20 @@ public class MinestomConfigProcessors {
     private static final ConfigProcessor<VillagerMeta.VillagerData> VILLAGER_DATA = new ConfigProcessor<>() {
 
         private static final ConfigProcessor<VillagerMeta.Type> TYPE_PROCESSOR =
-                ConfigProcessor.enumProcessor(VillagerMeta.Type.class);
+            ConfigProcessor.enumProcessor(VillagerMeta.Type.class);
 
         private static final ConfigProcessor<VillagerMeta.Profession> PROFESSION_PROCESSOR =
-                ConfigProcessor.enumProcessor(VillagerMeta.Profession.class);
+            ConfigProcessor.enumProcessor(VillagerMeta.Profession.class);
 
         private static final ConfigProcessor<VillagerMeta.Level> LEVEL_PROCESSOR =
-                ConfigProcessor.enumProcessor(VillagerMeta.Level.class);
+            ConfigProcessor.enumProcessor(VillagerMeta.Level.class);
 
         @Override
         public @NotNull VillagerMeta.VillagerData dataFromElement(@NotNull ConfigElement element)
-                throws ConfigProcessException {
+            throws ConfigProcessException {
             VillagerMeta.Type type = TYPE_PROCESSOR.dataFromElement(element.getElementOrThrow("type"));
             VillagerMeta.Profession profession =
-                    PROFESSION_PROCESSOR.dataFromElement(element.getElementOrThrow("profession"));
+                PROFESSION_PROCESSOR.dataFromElement(element.getElementOrThrow("profession"));
             VillagerMeta.Level level = LEVEL_PROCESSOR.dataFromElement(element.getElementOrThrow("level"));
 
             return new VillagerMeta.VillagerData(type, profession, level);
@@ -92,10 +91,10 @@ public class MinestomConfigProcessors {
 
         @Override
         public @NotNull ConfigElement elementFromData(@NotNull VillagerMeta.VillagerData villagerData)
-                throws ConfigProcessException {
+            throws ConfigProcessException {
             return ConfigNode.of("type", TYPE_PROCESSOR.elementFromData(villagerData.getType()), "profession",
-                    PROFESSION_PROCESSOR.elementFromData(villagerData.getProfession()), "level",
-                    LEVEL_PROCESSOR.elementFromData(villagerData.getLevel()));
+                PROFESSION_PROCESSOR.elementFromData(villagerData.getProfession()), "level",
+                LEVEL_PROCESSOR.elementFromData(villagerData.getLevel()));
         }
     };
 
@@ -136,14 +135,14 @@ public class MinestomConfigProcessors {
 
     @SuppressWarnings("ClassCanBeRecord")
     private static class ProtocolObjectConfigProcessor<TObject extends ProtocolObject>
-            implements ConfigProcessor<TObject> {
+        implements ConfigProcessor<TObject> {
 
         private static final ConfigProcessor<Key> KEY_PROCESSOR = ConfigProcessors.key();
 
         private final Function<NamespaceID, TObject> registryLookup;
 
         public ProtocolObjectConfigProcessor(@NotNull Function<NamespaceID, TObject> registryLookup) {
-            this.registryLookup = Objects.requireNonNull(registryLookup, "registryLookup");
+            this.registryLookup = Objects.requireNonNull(registryLookup);
         }
 
         @Override

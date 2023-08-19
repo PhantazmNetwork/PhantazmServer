@@ -17,8 +17,8 @@ import java.util.function.Function;
 
 public class InstanceSpawner implements Spawner {
     public record InstanceSettings(@NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeLocal,
-                                   @NotNull EventNode<InstanceEvent> instanceNode,
-                                   @NotNull InstanceSpaceHandler spaceHandler) {
+        @NotNull EventNode<InstanceEvent> instanceNode,
+        @NotNull InstanceSpaceHandler spaceHandler) {
 
     }
 
@@ -26,18 +26,18 @@ public class InstanceSpawner implements Spawner {
     private final Function<? super Instance, ? extends InstanceSettings> settingsFunction;
 
     public InstanceSpawner(@NotNull Pathfinder pathfinder,
-            @NotNull Function<? super Instance, ? extends InstanceSettings> settingsFunction) {
-        this.pathfinder = Objects.requireNonNull(pathfinder, "pathfinder");
-        this.settingsFunction = Objects.requireNonNull(settingsFunction, "settingsFunction");
+        @NotNull Function<? super Instance, ? extends InstanceSettings> settingsFunction) {
+        this.pathfinder = Objects.requireNonNull(pathfinder);
+        this.settingsFunction = Objects.requireNonNull(settingsFunction);
     }
 
     @Override
     public @NotNull ProximaEntity spawn(@NotNull Instance instance, @NotNull Pos pos, @NotNull EntityType entityType,
-            @NotNull Pathfinding.Factory factory, @NotNull Consumer<? super ProximaEntity> init) {
+        @NotNull Pathfinding.Factory factory, @NotNull Consumer<? super ProximaEntity> init) {
         InstanceSettings settings = settingsFunction.apply(instance);
         if (settings == null) {
             throw new IllegalStateException(
-                    "Unable to spawn entity in instance " + instance.getUniqueId() + ", " + "missing InstanceSettings");
+                "Unable to spawn entity in instance " + instance.getUniqueId() + ", " + "missing InstanceSettings");
         }
 
         Pathfinding pathfinding = factory.make(pathfinder, settings.nodeLocal, settings.spaceHandler);

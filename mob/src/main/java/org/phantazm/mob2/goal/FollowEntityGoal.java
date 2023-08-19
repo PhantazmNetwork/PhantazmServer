@@ -23,8 +23,8 @@ public class FollowEntityGoal implements GoalCreator {
 
     @FactoryMethod
     public FollowEntityGoal(@NotNull Data data, @NotNull @Child("selector") Selector selector) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.selector = Objects.requireNonNull(selector, "selector");
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class FollowEntityGoal implements GoalCreator {
         private Goal(Data data, Selector selector, Mob self) {
             this.data = Objects.requireNonNull(data);
             this.self = Objects.requireNonNull(self);
-            this.selector = Objects.requireNonNull(selector, "selector");
+            this.selector = Objects.requireNonNull(selector);
             this.ticksSinceTargetChosen = data.retargetInterval();
         }
 
@@ -67,8 +67,7 @@ public class FollowEntityGoal implements GoalCreator {
 
             if (ticksSinceTargetChosen >= data.retargetInterval()) {
                 refreshTarget();
-            }
-            else {
+            } else {
                 ++ticksSinceTargetChosen;
             }
         }
@@ -92,7 +91,7 @@ public class FollowEntityGoal implements GoalCreator {
                 return;
             }
 
-            self.setDestination((PathTarget)null);
+            self.setDestination((PathTarget) null);
             this.target = null;
         }
     }

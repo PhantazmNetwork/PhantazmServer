@@ -13,7 +13,7 @@ public class BasicPlayerKills implements PlayerKills {
     private int kills = 0;
 
     public BasicPlayerKills(@NotNull ZombiesPlayerMapStats stats) {
-        this.stats = Objects.requireNonNull(stats, "stats");
+        this.stats = Objects.requireNonNull(stats);
     }
 
     @Override

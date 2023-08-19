@@ -19,8 +19,8 @@ public class BasicRoundHandler implements RoundHandler {
     private boolean hasEnded;
 
     public BasicRoundHandler(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull List<Round> rounds) {
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
-        this.rounds = Objects.requireNonNull(rounds, "rounds");
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
+        this.rounds = Objects.requireNonNull(rounds);
 
         if (rounds.isEmpty()) {
             hasEnded = true;
@@ -47,7 +47,7 @@ public class BasicRoundHandler implements RoundHandler {
             }
 
             zombiesPlayer.module().getStats()
-                    .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
+                .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
         }
 
         if (++roundIndex < rounds.size()) {
@@ -55,8 +55,7 @@ public class BasicRoundHandler implements RoundHandler {
             currentRound.startRound(time);
 
             this.currentRound = currentRound;
-        }
-        else {
+        } else {
             this.hasEnded = true;
             this.currentRound = null;
         }

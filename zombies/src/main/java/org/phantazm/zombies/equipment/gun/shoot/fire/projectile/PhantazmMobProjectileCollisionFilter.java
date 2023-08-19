@@ -25,7 +25,7 @@ public class PhantazmMobProjectileCollisionFilter implements ProjectileCollision
      */
     @FactoryMethod
     public PhantazmMobProjectileCollisionFilter(@NotNull MobStore mobStore) {
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        this.mobStore = Objects.requireNonNull(mobStore);
     }
 
     @Override

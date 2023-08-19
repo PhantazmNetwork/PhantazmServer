@@ -20,9 +20,9 @@ import java.util.Objects;
 import java.util.Set;
 
 @Description("""
-        An effect that adds some additional slots to specific equipment groups. Equipment groups for all players are
-        defined in the settings file for each particular map.
-        """)
+    An effect that adds some additional slots to specific equipment groups. Equipment groups for all players are
+    defined in the settings file for each particular map.
+    """)
 @Model("zombies.perk.effect.add_group_slots")
 @Cache(false)
 public class AddGroupSlotsCreator implements PerkEffectCreator {
@@ -30,7 +30,7 @@ public class AddGroupSlotsCreator implements PerkEffectCreator {
 
     @FactoryMethod
     public AddGroupSlotsCreator(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -103,8 +103,8 @@ public class AddGroupSlotsCreator implements PerkEffectCreator {
 
     @DataObject
     public record Data(@NotNull @Description("The equipment group key") Key group,
-                       @NotNull @Description(
-                               "The additional slots to add to this group") Set<Integer> additionalSlots) {
+        @NotNull @Description(
+            "The additional slots to add to this group") Set<Integer> additionalSlots) {
 
     }
 }

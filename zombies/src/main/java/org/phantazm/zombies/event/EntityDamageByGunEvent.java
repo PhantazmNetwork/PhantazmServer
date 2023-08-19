@@ -19,10 +19,10 @@ public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableE
     private boolean cancelled;
 
     public EntityDamageByGunEvent(@NotNull Gun gun, @NotNull Entity damagedEntity, @NotNull Entity shooter,
-            boolean isHeadshot, boolean isInstakill, float damage) {
-        this.gun = Objects.requireNonNull(gun, "gun");
-        this.damagedEntity = Objects.requireNonNull(damagedEntity, "damagedEntity");
-        this.shooter = Objects.requireNonNull(shooter, "shooter");
+        boolean isHeadshot, boolean isInstakill, float damage) {
+        this.gun = Objects.requireNonNull(gun);
+        this.damagedEntity = Objects.requireNonNull(damagedEntity);
+        this.shooter = Objects.requireNonNull(shooter);
         this.isHeadshot = isHeadshot;
         this.isInstakill = isInstakill;
         this.damage = damage;

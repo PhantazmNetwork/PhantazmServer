@@ -24,17 +24,17 @@ public class ZombiesMap implements Tickable {
     private final MobStore mobStore;
 
     public ZombiesMap(@NotNull MapObjects mapObjects, @NotNull SongPlayer songPlayer,
-            @NotNull PowerupHandler powerupHandler, @NotNull RoundHandler roundHandler,
-            @NotNull ShopHandler shopHandler, @NotNull WindowHandler windowHandler, @NotNull DoorHandler doorHandler,
-            @NotNull MobStore mobStore) {
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
-        this.songPlayer = Objects.requireNonNull(songPlayer, "songPlayer");
-        this.powerupHandler = Objects.requireNonNull(powerupHandler, "powerupHandler");
-        this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
-        this.shopHandler = Objects.requireNonNull(shopHandler, "shopHandler");
-        this.windowHandler = Objects.requireNonNull(windowHandler, "windowHandler");
-        this.doorHandler = Objects.requireNonNull(doorHandler, "doorHandler");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        @NotNull PowerupHandler powerupHandler, @NotNull RoundHandler roundHandler,
+        @NotNull ShopHandler shopHandler, @NotNull WindowHandler windowHandler, @NotNull DoorHandler doorHandler,
+        @NotNull MobStore mobStore) {
+        this.mapObjects = Objects.requireNonNull(mapObjects);
+        this.songPlayer = Objects.requireNonNull(songPlayer);
+        this.powerupHandler = Objects.requireNonNull(powerupHandler);
+        this.roundHandler = Objects.requireNonNull(roundHandler);
+        this.shopHandler = Objects.requireNonNull(shopHandler);
+        this.windowHandler = Objects.requireNonNull(windowHandler);
+        this.doorHandler = Objects.requireNonNull(doorHandler);
+        this.mobStore = Objects.requireNonNull(mobStore);
     }
 
     public @NotNull MapObjects mapObjects() {

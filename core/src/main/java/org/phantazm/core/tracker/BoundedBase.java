@@ -16,8 +16,8 @@ public class BoundedBase implements Bounded {
     protected final Point center;
 
     public BoundedBase(@NotNull Point shift, @NotNull Bounds3I... bounds) {
-        Objects.requireNonNull(shift, "shift");
-        Objects.requireNonNull(bounds, "bounds");
+        Objects.requireNonNull(shift);
+        Objects.requireNonNull(bounds);
 
         if (bounds.length == 0) {
             this.bounds = List.of(Bounds3I.immutable(shift.blockX(), shift.blockY(), shift.blockZ(), 1, 1, 1));
@@ -39,7 +39,8 @@ public class BoundedBase implements Bounded {
     }
 
     @Override
-    public @NotNull @Unmodifiable List<Bounds3I> bounds() {
+    public @NotNull
+    @Unmodifiable List<Bounds3I> bounds() {
         return bounds;
     }
 

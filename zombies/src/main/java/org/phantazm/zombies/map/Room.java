@@ -27,7 +27,7 @@ public class Room extends BoundedBase {
     public Room(@NotNull Point mapOrigin, @NotNull RoomInfo roomInfo, @NotNull List<Action<Room>> openActions) {
         super(mapOrigin, roomInfo.regions().toArray(EMPTY_BOUNDS_ARRAY));
         this.openActions = List.copyOf(openActions);
-        this.roomInfo = Objects.requireNonNull(roomInfo, "roomInfo");
+        this.roomInfo = Objects.requireNonNull(roomInfo);
         this.sync = new Object();
         this.flaggable = new BasicFlaggable();
     }

@@ -41,8 +41,8 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
 
     @FactoryMethod
     public CooldownInteractorCreator(@NotNull Data data, @NotNull @Child("delegate") PerkInteractorCreator delegate) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.delegate = Objects.requireNonNull(delegate, "delegate");
+        this.data = Objects.requireNonNull(data);
+        this.delegate = Objects.requireNonNull(delegate);
         this.flags = Arrays.stream(data.types).mapToInt(d -> d.bits).reduce(0, (l, r) -> l | r);
     }
 
@@ -59,8 +59,8 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
         private int lastActivatedTicks;
 
         private Interactor(@NotNull Data data, @NotNull @Child("delegate") PerkInteractor delegate, int flags) {
-            this.data = Objects.requireNonNull(data, "data");
-            this.delegate = Objects.requireNonNull(delegate, "delegate");
+            this.data = Objects.requireNonNull(data);
+            this.delegate = Objects.requireNonNull(delegate);
             this.flags = flags;
 
             this.lastActivatedTicks = -1;

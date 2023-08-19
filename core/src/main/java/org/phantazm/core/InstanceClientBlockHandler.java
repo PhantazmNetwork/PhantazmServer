@@ -45,8 +45,8 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
      * @param chunkFloor the minimum y-coordinate of chunks in this instance
      */
     public InstanceClientBlockHandler(@NotNull Instance instance, int chunkFloor, int chunkHeight,
-            @NotNull EventNode<InstanceEvent> instanceNode) {
-        this.instance = Objects.requireNonNull(instance, "instance");
+        @NotNull EventNode<InstanceEvent> instanceNode) {
+        this.instance = Objects.requireNonNull(instance);
         this.clientData = new Long2ObjectOpenHashMap<>();
         this.chunkFloor = chunkFloor;
         this.chunkHeight = chunkHeight;
@@ -79,15 +79,14 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
 
             if (data == null) {
                 data = new Data(new HashVec3I2ObjectMap<>(0, chunkFloor, 0, Chunk.CHUNK_SIZE_X, chunkHeight,
-                        Chunk.CHUNK_SIZE_Z));
+                    Chunk.CHUNK_SIZE_Z));
                 clientData.put(index, data);
             }
 
             PositionedBlock block = data.blocks.get(x, y, z);
             if (block == null) {
                 data.blocks.put(x, y, z, new PositionedBlock(type, x, y, z));
-            }
-            else {
+            } else {
                 block.block = type;
             }
 
@@ -120,7 +119,7 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
                     for (PositionedBlock block : blocks.values()) {
                         Block serverBlock = serverChunk.getBlock(block.x, block.y, block.z);
                         serverChunk.sendPacketToViewers(
-                                new BlockChangePacket(new Vec(block.x, block.y, block.z), serverBlock));
+                            new BlockChangePacket(new Vec(block.x, block.y, block.z), serverBlock));
                     }
                 }
 
@@ -240,7 +239,7 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
 
             if (data != null) {
                 PositionedBlock block =
-                        data.blocks.get(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ());
+                    data.blocks.get(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ());
 
                 if (block != null) {
                     if (event.getResult().success()) {

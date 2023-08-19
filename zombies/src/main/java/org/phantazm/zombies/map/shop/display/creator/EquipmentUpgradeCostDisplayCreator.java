@@ -34,8 +34,8 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
     @FactoryMethod
     public EquipmentUpgradeCostDisplayCreator(@NotNull Data data,
             @NotNull @Child("upgrade_path") UpgradePath upgradePath) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.upgradePath = Objects.requireNonNull(upgradePath, "upgradePath");
+        this.data = Objects.requireNonNull(data);
+        this.upgradePath = Objects.requireNonNull(upgradePath);
     }
 
     @Override
@@ -52,9 +52,9 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
 
         private Display(@NotNull Data data, @NotNull ZombiesPlayer zombiesPlayer, @NotNull UpgradePath upgradePath) {
             super(new ViewableHologram(Vec.ZERO, 0, player -> player.getUuid().equals(zombiesPlayer.getUUID())));
-            this.data = Objects.requireNonNull(data, "data");
-            this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
-            this.upgradePath = Objects.requireNonNull(upgradePath, "upgradePath");
+            this.data = Objects.requireNonNull(data);
+            this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
+            this.upgradePath = Objects.requireNonNull(upgradePath);
             this.updateTicks = -1;
         }
 

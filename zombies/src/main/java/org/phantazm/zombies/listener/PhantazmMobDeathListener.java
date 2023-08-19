@@ -54,13 +54,13 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
             @NotNull BoundedTracker<Window> windowTracker,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
         super(instance, mobStore);
-        this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
-        this.roundSupplier = Objects.requireNonNull(roundSupplier, "roundSupplier");
-        this.powerupHandler = Objects.requireNonNull(powerupHandler, "powerupHandler");
+        this.keyParser = Objects.requireNonNull(keyParser);
+        this.roundSupplier = Objects.requireNonNull(roundSupplier);
+        this.powerupHandler = Objects.requireNonNull(powerupHandler);
 
-        this.roomTracker = Objects.requireNonNull(roomTracker, "roomTracker");
-        this.windowTracker = Objects.requireNonNull(windowTracker, "windowTracker");
-        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
+        this.roomTracker = Objects.requireNonNull(roomTracker);
+        this.windowTracker = Objects.requireNonNull(windowTracker);
+        this.playerMap = Objects.requireNonNull(playerMap);
     }
 
     @Override

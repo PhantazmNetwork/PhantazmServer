@@ -27,8 +27,8 @@ public class ChargeAtEntityGoal implements GoalCreator {
     @FactoryMethod
     public ChargeAtEntityGoal(@NotNull Data data,
             @NotNull @Child("selector") TargetSelector<? extends Entity> selector) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.selector = Objects.requireNonNull(selector, "selector");
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
     }
 
     @Override
@@ -46,9 +46,9 @@ public class ChargeAtEntityGoal implements GoalCreator {
         private long ticksSinceCharge;
 
         public Goal(Data data, TargetSelector<? extends Entity> selector, PhantazmMob self) {
-            this.data = Objects.requireNonNull(data, "data");
-            this.selector = Objects.requireNonNull(selector, "selector");
-            this.self = Objects.requireNonNull(self, "self");
+            this.data = Objects.requireNonNull(data);
+            this.selector = Objects.requireNonNull(selector);
+            this.self = Objects.requireNonNull(self);
 
             this.ticksSinceTargetChosen = data.retargetInterval();
             this.ticksSinceCharge = data.chargeInterval();
@@ -136,7 +136,7 @@ public class ChargeAtEntityGoal implements GoalCreator {
                        double chargeSpeed) {
 
         public Data {
-            Objects.requireNonNull(selectorPath, "selectorPath");
+            Objects.requireNonNull(selectorPath);
         }
 
     }

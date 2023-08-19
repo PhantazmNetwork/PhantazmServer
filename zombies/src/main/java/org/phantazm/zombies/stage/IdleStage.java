@@ -31,13 +31,13 @@ public class IdleStage implements Stage {
     private long emptyTicks;
 
     public IdleStage(@NotNull Instance instance, @NotNull MapSettingsInfo settings,
-            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
-            long revertTicks) {
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.settings = Objects.requireNonNull(settings, "settings");
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
-        this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
+        @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
+        @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
+        long revertTicks) {
+        this.instance = Objects.requireNonNull(instance);
+        this.settings = Objects.requireNonNull(settings);
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
+        this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator);
         this.revertTicks = revertTicks;
     }
 
@@ -65,7 +65,8 @@ public class IdleStage implements Stage {
         zombiesPlayer.module().getPlayerView().getDisplayName().thenAccept(displayName -> {
             TagResolver joinerPlaceholder = Placeholder.component("joiner", displayName);
             Component message = MiniMessage.miniMessage()
-                    .deserialize(settings.gameJoinFormat(), joinerPlaceholder, countPlaceholder, maxPlayersPlaceholder);
+                                    .deserialize(settings.gameJoinFormat(), joinerPlaceholder, countPlaceholder,
+                                        maxPlayersPlaceholder);
             instance.sendMessage(message);
         });
     }
@@ -89,8 +90,7 @@ public class IdleStage implements Stage {
     public void tick(long time) {
         if (zombiesPlayers.isEmpty()) {
             ++emptyTicks;
-        }
-        else {
+        } else {
             emptyTicks = 0L;
 
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {

@@ -9,8 +9,8 @@ import java.util.Collection;
 import java.util.Objects;
 
 /**
- * Represents an individual gun shot. This should be produced by {@link Firer} implementations.
- * As such, it is associated with a gun's individual fire, not a complete volley of shots.
+ * Represents an individual gun shot. This should be produced by {@link Firer} implementations. As such, it is
+ * associated with a gun's individual fire, not a complete volley of shots.
  *
  * @param start           The start position of the shot
  * @param end             The end position of the shot
@@ -18,9 +18,9 @@ import java.util.Objects;
  * @param headshotTargets The headshot targets that were hit by the shot
  */
 public record GunShot(@NotNull Pos start,
-                      @NotNull Point end,
-                      @NotNull Collection<GunHit> regularTargets,
-                      @NotNull Collection<GunHit> headshotTargets) {
+    @NotNull Point end,
+    @NotNull Collection<GunHit> regularTargets,
+    @NotNull Collection<GunHit> headshotTargets) {
 
     /**
      * Creates a {@link GunShot}.
@@ -31,9 +31,9 @@ public record GunShot(@NotNull Pos start,
      * @param headshotTargets The headshot targets that were hit by the shot
      */
     public GunShot {
-        Objects.requireNonNull(start, "start");
-        Objects.requireNonNull(end, "end");
-        Objects.requireNonNull(regularTargets, "regularTargets");
-        Objects.requireNonNull(headshotTargets, "headshotTargets");
+        Objects.requireNonNull(start);
+        Objects.requireNonNull(end);
+        Objects.requireNonNull(regularTargets);
+        Objects.requireNonNull(headshotTargets);
     }
 }

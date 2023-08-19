@@ -16,7 +16,7 @@ public class PrecisionSecondTickFormatter implements TickFormatter {
 
     @FactoryMethod
     public PrecisionSecondTickFormatter(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

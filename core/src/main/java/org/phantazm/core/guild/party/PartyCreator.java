@@ -43,11 +43,11 @@ public class PartyCreator {
     private final int minimumJoinRank;
 
     public PartyCreator(@NotNull PartyNotificationConfig notificationConfig, @NotNull TickFormatter tickFormatter,
-            @NotNull MiniMessage miniMessage, int creatorRank, int defaultRank, long invitationDuration,
-            int minimumKickRank, int minimumInviteRank, int minimumJoinRank) {
-        this.notificationConfig = Objects.requireNonNull(notificationConfig, "notificationConfig");
-        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+        @NotNull MiniMessage miniMessage, int creatorRank, int defaultRank, long invitationDuration,
+        int minimumKickRank, int minimumInviteRank, int minimumJoinRank) {
+        this.notificationConfig = Objects.requireNonNull(notificationConfig);
+        this.tickFormatter = Objects.requireNonNull(tickFormatter);
+        this.miniMessage = Objects.requireNonNull(miniMessage);
         this.creatorRank = creatorRank;
         this.defaultRank = defaultRank;
         this.invitationDuration = invitationDuration;
@@ -69,16 +69,16 @@ public class PartyCreator {
         Audience audience = new PartyAudience(members.values());
         SpyAudience spyAudience = new SpyAudience();
         PartyNotification notification =
-                new PartyNotification(members.values(), ownerWrapper, notificationConfig, tickFormatter, miniMessage);
+            new PartyNotification(members.values(), ownerWrapper, notificationConfig, tickFormatter, miniMessage);
         InvitationManager<PartyMember> invitationManager =
-                new InvitationManager<>(memberManager, memberCreator, notification, invitationDuration);
+            new InvitationManager<>(memberManager, memberCreator, notification, invitationDuration);
         MultipleMemberPermission<PartyMember> kickPermission = new RankMultipleMemberPermission<>(minimumKickRank);
         SingleMemberPermission<PartyMember> invitePermission = new RankSingleMemberPermission<>(minimumInviteRank);
         SingleMemberPermission<PartyMember> joinPermission = new RankSingleMemberPermission<>(minimumJoinRank);
 
         return new Party(memberManager, memberCreator, audience, spyAudience, notification, invitationManager,
-                kickPermission,
-                invitePermission, joinPermission, ownerWrapper);
+            kickPermission,
+            invitePermission, joinPermission, ownerWrapper);
     }
 
     private PartyMember createMember(PlayerView playerView) {
@@ -110,7 +110,7 @@ public class PartyCreator {
         }
 
         public @NotNull Builder setNotificationConfig(@NotNull PartyNotificationConfig notificationConfig) {
-            this.notificationConfig = Objects.requireNonNull(notificationConfig, "notificationConfig");
+            this.notificationConfig = Objects.requireNonNull(notificationConfig);
             return this;
         }
 
@@ -119,7 +119,7 @@ public class PartyCreator {
         }
 
         public @NotNull Builder setTickFormatter(@NotNull TickFormatter tickFormatter) {
-            this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
+            this.tickFormatter = Objects.requireNonNull(tickFormatter);
             return this;
         }
 
@@ -128,7 +128,7 @@ public class PartyCreator {
         }
 
         public @NotNull Builder setMiniMessage(@NotNull MiniMessage miniMessage) {
-            this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+            this.miniMessage = Objects.requireNonNull(miniMessage);
             return this;
         }
 
@@ -188,7 +188,7 @@ public class PartyCreator {
 
         public @NotNull PartyCreator build() {
             return new PartyCreator(notificationConfig, tickFormatter, miniMessage, creatorRank, defaultRank,
-                    invitationDuration, minimumKickRank, minimumInviteRank, minimumJoinRank);
+                invitationDuration, minimumKickRank, minimumInviteRank, minimumJoinRank);
         }
 
     }

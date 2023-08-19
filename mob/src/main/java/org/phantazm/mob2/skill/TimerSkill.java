@@ -27,7 +27,7 @@ public class TimerSkill implements SkillComponent {
 
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, delegate);
+        return new Internal(data, delegate, mob);
     }
 
     @DataObject
@@ -62,8 +62,8 @@ public class TimerSkill implements SkillComponent {
         private final Data data;
         private final int interval;
 
-        public Internal(Data data, Skill delegate) {
-            super(delegate, data.requiresActivation, data.resetOnActivation, data.repeat, data.interval);
+        public Internal(Data data, Skill delegate, Mob self) {
+            super(self, delegate, data.requiresActivation, data.resetOnActivation, data.repeat, data.interval);
             this.data = data;
             this.interval = data.interval;
         }

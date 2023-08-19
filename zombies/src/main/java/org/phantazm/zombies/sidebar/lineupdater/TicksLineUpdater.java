@@ -23,10 +23,10 @@ public class TicksLineUpdater implements SidebarLineUpdater {
 
     @FactoryMethod
     public TicksLineUpdater(@NotNull Data data, @NotNull Wrapper<Long> ticksWrapper,
-            @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.ticksWrapper = Objects.requireNonNull(ticksWrapper, "ticksWrapper");
-        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
+        @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
+        this.data = Objects.requireNonNull(data);
+        this.ticksWrapper = Objects.requireNonNull(ticksWrapper);
+        this.tickFormatter = Objects.requireNonNull(tickFormatter);
     }
 
     @Override
@@ -50,7 +50,7 @@ public class TicksLineUpdater implements SidebarLineUpdater {
     public record Data(@NotNull String format, @NotNull @ChildPath("tick_formatter") String tickFormatterPath) {
 
         public Data {
-            Objects.requireNonNull(tickFormatterPath, "tickFormatterPath");
+            Objects.requireNonNull(tickFormatterPath);
         }
 
     }

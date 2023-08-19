@@ -19,7 +19,7 @@ public class ConstantSidebarLineUpdater implements SidebarLineUpdater {
 
     @FactoryMethod
     public ConstantSidebarLineUpdater(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class ConstantSidebarLineUpdater implements SidebarLineUpdater {
     public record Data(@NotNull Component component) {
 
         public Data {
-            Objects.requireNonNull(component, "component");
+            Objects.requireNonNull(component);
         }
 
     }

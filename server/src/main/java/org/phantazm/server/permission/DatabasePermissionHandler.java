@@ -40,19 +40,19 @@ public class DatabasePermissionHandler implements PermissionHandler {
     private final RoleStore roleStore;
 
     public DatabasePermissionHandler(@NotNull DataSource dataSource, @NotNull Executor executor,
-            @NotNull RoleStore roleStore) {
+        @NotNull RoleStore roleStore) {
         this.playerPermissionGroupCache =
-                Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
+            Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.groupPermissionCache =
-                Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
-        this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
-        this.executor = Objects.requireNonNull(executor, "executor");
-        this.roleStore = Objects.requireNonNull(roleStore, "roleStore");
+            Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
+        this.dataSource = Objects.requireNonNull(dataSource);
+        this.executor = Objects.requireNonNull(executor);
+        this.roleStore = Objects.requireNonNull(roleStore);
     }
 
     @Override
     public void applyPermissions(@NotNull Player target) {
-        Objects.requireNonNull(target, "target");
+        Objects.requireNonNull(target);
         executor.execute(() -> {
             applyPermissions0(target.getUuid(), target);
         });
@@ -72,8 +72,8 @@ public class DatabasePermissionHandler implements PermissionHandler {
                 String permissionName = permission.getPermissionName();
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).insertInto(table("permission_groups"), field("permission_group"),
-                                    field("permission")).values(group, permissionName).onDuplicateKeyUpdate()
-                            .set(field("permission"), permissionName).execute();
+                            field("permission")).values(group, permissionName).onDuplicateKeyUpdate()
+                        .set(field("permission"), permissionName).execute();
                 }
             });
 
@@ -89,7 +89,9 @@ public class DatabasePermissionHandler implements PermissionHandler {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).deleteFrom(table("permission_groups")).where(field("permission_group").eq(group)
-                            .and(field("permission").eq(permission.getPermissionName()))).execute();
+                                                                                       .and(field("permission").eq(
+                                                                                           permission.getPermissionName())))
+                        .execute();
                 }
             });
 
@@ -109,8 +111,8 @@ public class DatabasePermissionHandler implements PermissionHandler {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).insertInto(table("player_permission_groups"), field("player_uuid"),
-                                    field("player_group")).values(uuid, group).onDuplicateKeyUpdate()
-                            .set(field("player_group"), group).execute();
+                            field("player_group")).values(uuid, group).onDuplicateKeyUpdate()
+                        .set(field("player_group"), group).execute();
                 }
             });
 
@@ -130,7 +132,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).deleteFrom(table("player_permission_groups"))
-                            .where(field("player_uuid").eq(uuid).and(field("player_group").eq(group))).execute();
+                        .where(field("player_uuid").eq(uuid).and(field("player_group").eq(group))).execute();
                 }
             });
 
@@ -153,18 +155,16 @@ public class DatabasePermissionHandler implements PermissionHandler {
     private static void write(ThrowingRunnable<SQLException> supplier) {
         try {
             supplier.run();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             LOGGER.warn("Exception when writing to permission database", e);
         }
     }
 
     private static <T> T read(ThrowingSupplier<? extends Result<Record>, ? extends SQLException> reader,
-            Function<? super Result<Record>, ? extends T> mapper, Supplier<? extends T> defaultValue) {
+        Function<? super Result<Record>, ? extends T> mapper, Supplier<? extends T> defaultValue) {
         try {
             return mapper.apply(reader.get());
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             LOGGER.warn("Exception when querying permission database", e);
         }
 
@@ -175,7 +175,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
         return read(() -> {
             try (Connection connection = dataSource.getConnection()) {
                 return using(connection).selectFrom(table("player_permission_groups"))
-                        .where(field("player_uuid").eq(uuid)).fetch();
+                           .where(field("player_uuid").eq(uuid)).fetch();
             }
         }, DatabasePermissionHandler::groupsFromResult, CopyOnWriteArraySet::new);
     }
@@ -213,7 +213,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
             return read(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     return using(connection).selectFrom(table("permission_groups"))
-                            .where(field("permission_group").eq(key)).fetch();
+                               .where(field("permission_group").eq(key)).fetch();
                 }
             }, DatabasePermissionHandler::permissionsFromResult, CopyOnWriteArraySet::new);
         });
@@ -235,7 +235,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
 
         List<String> temp = new ArrayList<>(result.size());
         for (Record record : result) {
-            String group = (String)record.get("player_group");
+            String group = (String) record.get("player_group");
             if (group == null) {
                 continue;
             }
@@ -253,7 +253,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
 
         List<Permission> temp = new ArrayList<>(result.size());
         for (Record record : result) {
-            String permission = (String)record.get("permission");
+            String permission = (String) record.get("permission");
             if (permission == null) {
                 continue;
             }

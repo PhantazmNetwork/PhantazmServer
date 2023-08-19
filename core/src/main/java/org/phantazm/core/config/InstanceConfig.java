@@ -27,7 +27,7 @@ public record InstanceConfig(@NotNull Pos spawnPoint, long time, int timeRate, i
      * @param spawnPoint The spawn point for the {@link Instance}
      */
     public InstanceConfig {
-        Objects.requireNonNull(spawnPoint, "spawnPoint");
+        Objects.requireNonNull(spawnPoint);
     }
 
 }

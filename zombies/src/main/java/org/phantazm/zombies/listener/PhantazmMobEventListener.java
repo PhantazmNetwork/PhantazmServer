@@ -15,8 +15,8 @@ public abstract class PhantazmMobEventListener<TEvent extends EntityInstanceEven
     protected final MobStore mobStore;
 
     public PhantazmMobEventListener(@NotNull Instance instance, @NotNull MobStore mobStore) {
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        this.instance = Objects.requireNonNull(instance);
+        this.mobStore = Objects.requireNonNull(mobStore);
     }
 
     @Override

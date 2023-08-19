@@ -27,10 +27,10 @@ public class PartyTransferCommand {
     public static @NotNull Command transferCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
             @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull PlayerViewProvider viewProvider,
             int creatorRank, int defaultRank) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(miniMessage, "miniMessage");
-        Objects.requireNonNull(partyMap, "partyMap");
-        Objects.requireNonNull(viewProvider, "viewProvider");
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(miniMessage);
+        Objects.requireNonNull(partyMap);
+        Objects.requireNonNull(viewProvider);
 
         Command command = new Command("transfer");
         Argument<String> nameArgument = ArgumentType.Word("name");

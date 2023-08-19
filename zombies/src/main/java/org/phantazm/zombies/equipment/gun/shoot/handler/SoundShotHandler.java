@@ -30,19 +30,19 @@ public class SoundShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public SoundShotHandler(@NotNull Data data,
-            @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "actionBarSender");
+        @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
+        this.data = Objects.requireNonNull(data);
+        this.audienceProvider = Objects.requireNonNull(audienceProvider);
     }
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         audienceProvider.provideAudience().ifPresent(audience -> {
             Set<UUID> played = Collections.newSetFromMap(new IdentityHashMap<>(shot.regularTargets().size()));
             for (GunHit hit : shot.regularTargets()) {
                 if (played.add(hit.entity().getUuid())) {
-                    Pos pos = data.atShooter ? attacker.getPosition() : hit.entity().getPosition();
+                    Pos pos = data.atShooter ? attacker.getPosition():hit.entity().getPosition();
                     audience.playSound(data.sound(), pos.x(), pos.y(), pos.z());
                 }
             }
@@ -50,7 +50,7 @@ public class SoundShotHandler implements ShotHandler {
             played.clear();
             for (GunHit hit : shot.headshotTargets()) {
                 if (played.add(hit.entity().getUuid())) {
-                    Pos pos = data.atShooter ? attacker.getPosition() : hit.entity().getPosition();
+                    Pos pos = data.atShooter ? attacker.getPosition():hit.entity().getPosition();
                     audience.playSound(data.headshotSound(), pos.x(), pos.y(), pos.z());
                 }
             }
@@ -71,8 +71,8 @@ public class SoundShotHandler implements ShotHandler {
      */
     @DataObject
     public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider,
-                       @NotNull Sound sound,
-                       @NotNull Sound headshotSound,
-                       boolean atShooter) {
+        @NotNull Sound sound,
+        @NotNull Sound headshotSound,
+        boolean atShooter) {
     }
 }

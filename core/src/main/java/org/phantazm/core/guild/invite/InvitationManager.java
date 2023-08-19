@@ -28,11 +28,11 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
     private long ticks = 0;
 
     public InvitationManager(@NotNull GuildMemberManager<TMember> memberManager,
-            @NotNull Function<? super PlayerView, ? extends TMember> playerCreator,
-            @NotNull InvitationNotification<TMember> notification, long invitationDuration) {
-        this.memberManager = Objects.requireNonNull(memberManager, "memberManager");
-        this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
-        this.notification = Objects.requireNonNull(notification, "notification");
+        @NotNull Function<? super PlayerView, ? extends TMember> playerCreator,
+        @NotNull InvitationNotification<TMember> notification, long invitationDuration) {
+        this.memberManager = Objects.requireNonNull(memberManager);
+        this.playerCreator = Objects.requireNonNull(playerCreator);
+        this.notification = Objects.requireNonNull(notification);
         this.invitationDuration = invitationDuration;
     }
 

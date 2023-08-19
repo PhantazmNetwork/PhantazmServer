@@ -17,8 +17,8 @@ public class DamageEntitySkill implements Skill {
 
     @FactoryMethod
     public DamageEntitySkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<Object> selector) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.selector = Objects.requireNonNull(selector, "selector");
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
     }
 
     @Override
@@ -30,8 +30,7 @@ public class DamageEntitySkill implements Skill {
                         entity.damage(Damage.fromEntity(self.entity(), data.damage()), data.bypassArmor);
                     }
                 }
-            }
-            else if (livingEntity instanceof LivingEntity living) {
+            } else if (livingEntity instanceof LivingEntity living) {
                 living.damage(Damage.fromEntity(self.entity(), data.damage()), data.bypassArmor);
             }
         });

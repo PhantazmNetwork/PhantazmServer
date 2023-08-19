@@ -14,9 +14,9 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Description("""
-        A shop display that maintains multiple, independent displays for each player. Each player will only see the shop
-        display that belongs to them.
-        """)
+    A shop display that maintains multiple, independent displays for each player. Each player will only see the shop
+    display that belongs to them.
+    """)
 @Model("zombies.map.shop.display.player")
 @Cache(false)
 public class PlayerDisplay implements ShopDisplay {
@@ -27,15 +27,15 @@ public class PlayerDisplay implements ShopDisplay {
 
     @FactoryMethod
     public PlayerDisplay(@NotNull @Child("display_creator") PlayerDisplayCreator playerDisplayCreator,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
-        this.playerDisplayCreator = Objects.requireNonNull(playerDisplayCreator, "playerDisplayCreator");
-        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+        this.playerDisplayCreator = Objects.requireNonNull(playerDisplayCreator);
+        this.playerMap = Objects.requireNonNull(playerMap);
         this.playerDisplays = new LinkedHashMap<>();
     }
 
     private ShopDisplay displayFor(ZombiesPlayer zombiesPlayer) {
         return playerDisplays.computeIfAbsent(zombiesPlayer.getUUID(),
-                key -> playerDisplayCreator.forPlayer(zombiesPlayer));
+            key -> playerDisplayCreator.forPlayer(zombiesPlayer));
     }
 
     @Override

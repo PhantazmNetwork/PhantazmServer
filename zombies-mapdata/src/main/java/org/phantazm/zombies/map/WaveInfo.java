@@ -20,7 +20,7 @@ public record WaveInfo(long delayTicks, @NotNull List<SpawnInfo> spawns, @NotNul
      * @param spawns     the mobs to spawn on this wave
      */
     public WaveInfo {
-        Objects.requireNonNull(spawns, "spawns");
+        Objects.requireNonNull(spawns);
     }
 
     @Default("spawnActions")

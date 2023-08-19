@@ -66,20 +66,20 @@ public class BestTimeLeaderboard {
 
     @FactoryMethod
     public BestTimeLeaderboard(@NotNull Data data, @NotNull ZombiesDatabase database, @NotNull UUID viewer,
-            @NotNull Hologram hologram, double gap, @NotNull Entity armorStand, @NotNull MapSettingsInfo settings,
-            @NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage, @NotNull Executor executor,
-            @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.database = Objects.requireNonNull(database, "database");
-        this.viewer = Objects.requireNonNull(viewer, "viewer");
-        this.hologram = Objects.requireNonNull(hologram, "hologram");
+        @NotNull Hologram hologram, double gap, @NotNull Entity armorStand, @NotNull MapSettingsInfo settings,
+        @NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage, @NotNull Executor executor,
+        @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
+        this.data = Objects.requireNonNull(data);
+        this.database = Objects.requireNonNull(database);
+        this.viewer = Objects.requireNonNull(viewer);
+        this.hologram = Objects.requireNonNull(hologram);
         this.gap = gap;
-        this.armorStand = Objects.requireNonNull(armorStand, "armorStand");
-        this.settings = Objects.requireNonNull(settings, "settings");
-        this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
-        this.executor = Objects.requireNonNull(executor, "executor");
-        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
+        this.armorStand = Objects.requireNonNull(armorStand);
+        this.settings = Objects.requireNonNull(settings);
+        this.viewProvider = Objects.requireNonNull(viewProvider);
+        this.miniMessage = Objects.requireNonNull(miniMessage);
+        this.executor = Objects.requireNonNull(executor);
+        this.tickFormatter = Objects.requireNonNull(tickFormatter);
     }
 
     public void startIfNotActive() {
@@ -91,14 +91,14 @@ public class BestTimeLeaderboard {
 
                 for (int playerCount = 1; playerCount <= 4; ++playerCount) {
                     List<Component> page =
-                            new ArrayList<>(data.headerFormats().size() + data.length() + data.footerFormats().size());
+                        new ArrayList<>(data.headerFormats().size() + data.length() + data.footerFormats().size());
                     TagResolver mapNamePlaceholder = Placeholder.component("map_name", settings.displayName());
                     TagResolver viewerPlaceholder = Placeholder.component("viewer", data.initialMessage());
                     TagResolver playerCountPlaceholder = Formatter.choice("player_count", playerCount);
 
                     for (String headerFormat : data.headerFormats()) {
                         page.add(miniMessage.deserialize(headerFormat, mapNamePlaceholder, viewerPlaceholder,
-                                playerCountPlaceholder));
+                            playerCountPlaceholder));
                     }
                     for (int i = 0; i < data.length(); ++i) {
                         TagResolver placePlaceholder = Placeholder.component("place", Component.text(i + 1));
@@ -107,7 +107,7 @@ public class BestTimeLeaderboard {
                     }
                     for (String footerFormat : data.footerFormats()) {
                         page.add(miniMessage.deserialize(footerFormat, mapNamePlaceholder, viewerPlaceholder,
-                                playerCountPlaceholder));
+                            playerCountPlaceholder));
                     }
 
                     pages.put(playerCountToTabIndex(playerCount), page);
@@ -133,8 +133,7 @@ public class BestTimeLeaderboard {
 
                 if (tabIndex == playerCountToTabIndex(1)) {
                     tabIndex = playerCountToTabIndex(4);
-                }
-                else {
+                } else {
                     ++tabIndex;
                 }
                 renderTab(tabIndex);
@@ -155,8 +154,8 @@ public class BestTimeLeaderboard {
             hologram.set(i, page.get(i));
         }
         Pos armorStandLocation = Pos.fromPoint(hologram.getLocation().add(0,
-                ((gap * (hologram.size() - 1) + hologram.size() * InstanceHologram.MESSAGE_HEIGHT) / 2 -
-                        ((hologram.size() - 1) * (gap + InstanceHologram.MESSAGE_HEIGHT))), 0));
+            ((gap * (hologram.size() - 1) + hologram.size() * InstanceHologram.MESSAGE_HEIGHT) / 2 -
+                 ((hologram.size() - 1) * (gap + InstanceHologram.MESSAGE_HEIGHT))), 0));
         armorStand.teleport(armorStandLocation);
     }
 
@@ -200,15 +199,15 @@ public class BestTimeLeaderboard {
                     if (data.headerFormats().size() + bestTimeList.size() < page.size() - data.footerFormats().size()) {
                         if (tabIndex == pageIndex) {
                             hologram.subList(data.headerFormats().size() + bestTimeList.size(),
-                                    page.size() - data.footerFormats().size()).clear();
+                                page.size() - data.footerFormats().size()).clear();
                             Pos armorStandLocation = Pos.fromPoint(hologram.getLocation().add(0,
-                                    ((gap * (hologram.size() - 1) + hologram.size() * InstanceHologram.MESSAGE_HEIGHT) /
-                                            2 - ((hologram.size() - 1) * (gap + InstanceHologram.MESSAGE_HEIGHT))), 0));
+                                ((gap * (hologram.size() - 1) + hologram.size() * InstanceHologram.MESSAGE_HEIGHT) /
+                                     2 - ((hologram.size() - 1) * (gap + InstanceHologram.MESSAGE_HEIGHT))), 0));
                             armorStand.teleport(armorStandLocation);
                         }
 
                         page.subList(data.headerFormats().size() + bestTimeList.size(),
-                                page.size() - data.footerFormats().size()).clear();
+                            page.size() - data.footerFormats().size()).clear();
                     }
 
                     for (int i = 0; i < bestTimeList.size(); ++i) {
@@ -218,8 +217,7 @@ public class BestTimeLeaderboard {
                         Component line;
                         if (displayNameOptional.isPresent()) {
                             line = makePlaceNameTimeMessage(displayNameOptional.get(), bestTime);
-                        }
-                        else {
+                        } else {
                             line = makePlaceTimeMessage(bestTime);
                             loadBodyName(oldStamp, view, playerCount, bestTime);
                         }
@@ -229,7 +227,7 @@ public class BestTimeLeaderboard {
 
                     if (tabIndex == playerCountToTabIndex(playerCount)) {
                         for (int i = data.headerFormats().size(); i < data.headerFormats().size() + bestTimeList.size();
-                                ++i) {
+                             ++i) {
                             hologram.set(i, page.get(i));
                         }
                     }
@@ -291,8 +289,7 @@ public class BestTimeLeaderboard {
             if (!viewerBestTimes.containsKey(playerCount)) {
                 TagResolver playerNamePlaceholder = Placeholder.component("player_name", viewerName);
                 viewerLine = miniMessage.deserialize(data.noneNameFormat(), playerNamePlaceholder);
-            }
-            else {
+            } else {
                 viewerLine = makePlaceNameTimeMessage(viewerName, viewerBestTimes.get(playerCount));
             }
             TagResolver viewerPlaceholder = Placeholder.component("viewer", viewerLine);
@@ -300,13 +297,14 @@ public class BestTimeLeaderboard {
             for (int i = 0; i < data.headerFormats().size(); ++i) {
                 String headerFormat = data.headerFormats().get(i);
                 Component header = miniMessage.deserialize(headerFormat, mapNamePlaceholder, viewerPlaceholder,
-                        playerCountPlaceholder);
+                    playerCountPlaceholder);
                 page.set(i, header);
             }
 
             for (int i = 0; i < data.footerFormats().size(); ++i) {
                 String footerFormat = data.footerFormats().get(data.footerFormats().size() - 1 - i);
-                Component footer = miniMessage.deserialize(footerFormat, mapNamePlaceholder, viewerPlaceholder, playerCountPlaceholder);
+                Component footer = miniMessage.deserialize(footerFormat, mapNamePlaceholder, viewerPlaceholder,
+                    playerCountPlaceholder);
                 page.set(page.size() - 1 - i, footer);
             }
 
@@ -340,8 +338,8 @@ public class BestTimeLeaderboard {
     private Component makePlaceTimeMessage(BestTime bestTime) {
         TagResolver placePlaceholder = Placeholder.component("place", Component.text(bestTime.rank()));
         TagResolver timePlaceholder =
-                Placeholder.component("time", Component.text(tickFormatter.format(bestTime.time())));
-        TagResolver isViewerPlaceholder = Formatter.choice("is_viewer", bestTime.uuid().equals(viewer) ? 1 : 0);
+            Placeholder.component("time", Component.text(tickFormatter.format(bestTime.time())));
+        TagResolver isViewerPlaceholder = Formatter.choice("is_viewer", bestTime.uuid().equals(viewer) ? 1:0);
 
         return miniMessage.deserialize(data.placeTimeFormat(), placePlaceholder, timePlaceholder, isViewerPlaceholder);
     }
@@ -350,11 +348,11 @@ public class BestTimeLeaderboard {
         TagResolver placePlaceholder = Placeholder.component("place", Component.text(bestTime.rank()));
         TagResolver playerNamePlaceholder = Placeholder.component("player_name", playerName);
         TagResolver timePlaceholder =
-                Placeholder.component("time", Component.text(tickFormatter.format(bestTime.time())));
-        TagResolver isViewerPlaceholder = Formatter.choice("is_viewer", bestTime.uuid().equals(viewer) ? 1 : 0);
+            Placeholder.component("time", Component.text(tickFormatter.format(bestTime.time())));
+        TagResolver isViewerPlaceholder = Formatter.choice("is_viewer", bestTime.uuid().equals(viewer) ? 1:0);
 
         return miniMessage.deserialize(data.placeNameTimeFormat(), placePlaceholder, playerNamePlaceholder,
-                timePlaceholder, isViewerPlaceholder);
+            timePlaceholder, isViewerPlaceholder);
     }
 
     @Depend
@@ -379,17 +377,17 @@ public class BestTimeLeaderboard {
         private final Executor executor;
 
         public Module(@NotNull ZombiesDatabase database, @NotNull UUID viewer, @NotNull Hologram hologram, double gap,
-                @NotNull Entity armorStand, @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
-                @NotNull MiniMessage miniMessage, @NotNull Executor executor) {
-            this.database = Objects.requireNonNull(database, "database");
-            this.viewer = Objects.requireNonNull(viewer, "viewer");
-            this.hologram = Objects.requireNonNull(hologram, "hologram");
+            @NotNull Entity armorStand, @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
+            @NotNull MiniMessage miniMessage, @NotNull Executor executor) {
+            this.database = Objects.requireNonNull(database);
+            this.viewer = Objects.requireNonNull(viewer);
+            this.hologram = Objects.requireNonNull(hologram);
             this.gap = gap;
-            this.armorStand = Objects.requireNonNull(armorStand, "armorStand");
-            this.settings = Objects.requireNonNull(settings, "settings");
-            this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
-            this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
-            this.executor = Objects.requireNonNull(executor, "executor");
+            this.armorStand = Objects.requireNonNull(armorStand);
+            this.settings = Objects.requireNonNull(settings);
+            this.viewProvider = Objects.requireNonNull(viewProvider);
+            this.miniMessage = Objects.requireNonNull(miniMessage);
+            this.executor = Objects.requireNonNull(executor);
         }
 
         public @NotNull ZombiesDatabase getDatabase() {
@@ -431,15 +429,15 @@ public class BestTimeLeaderboard {
 
     @DataObject
     public record Data(@NotNull @ChildPath("tick_formatter") String tickFormatter,
-                       @NotNull List<String> headerFormats,
-                       @NotNull Component initialMessage,
-                       @NotNull String noneFormat,
-                       @NotNull String noneNameFormat,
-                       @NotNull String placeFormat,
-                       @NotNull String placeTimeFormat,
-                       @NotNull String placeNameTimeFormat,
-                       @NotNull List<String> footerFormats,
-                       int length) {
+        @NotNull List<String> headerFormats,
+        @NotNull Component initialMessage,
+        @NotNull String noneFormat,
+        @NotNull String noneNameFormat,
+        @NotNull String placeFormat,
+        @NotNull String placeTimeFormat,
+        @NotNull String placeNameTimeFormat,
+        @NotNull List<String> footerFormats,
+        int length) {
 
     }
 

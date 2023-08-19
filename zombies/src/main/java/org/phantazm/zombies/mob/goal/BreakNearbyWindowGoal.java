@@ -30,8 +30,8 @@ public class BreakNearbyWindowGoal implements GoalCreator {
 
     @FactoryMethod
     public BreakNearbyWindowGoal(@NotNull Data data, @NotNull Supplier<? extends MapObjects> mapObjects) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+        this.data = Objects.requireNonNull(data);
+        this.mapObjects = Objects.requireNonNull(mapObjects);
     }
 
     @Override

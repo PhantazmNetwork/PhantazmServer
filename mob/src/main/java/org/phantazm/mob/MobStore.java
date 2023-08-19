@@ -85,7 +85,7 @@ public class MobStore implements Tickable {
      * @param mob The {@link PhantazmMob} to register
      */
     public void onMobSpawn(@NotNull PhantazmMob mob) {
-        Objects.requireNonNull(mob, "mob");
+        Objects.requireNonNull(mob);
 
         UUID uuid = mob.entity().getUuid();
         if (uuidToMob.containsKey(uuid)) {
@@ -122,7 +122,7 @@ public class MobStore implements Tickable {
      * @return The {@link PhantazmMob} associated with the {@link UUID} or null if none exists
      */
     public PhantazmMob getMob(@NotNull UUID uuid) {
-        return uuidToMob.get(Objects.requireNonNull(uuid, "uuid"));
+        return uuidToMob.get(Objects.requireNonNull(uuid));
     }
 
     /**
@@ -132,7 +132,7 @@ public class MobStore implements Tickable {
      * @return Whether a {@link PhantazmMob} is associated with the {@link UUID} in the store
      */
     public boolean hasMob(@NotNull UUID uuid) {
-        return uuidToMob.containsKey(Objects.requireNonNull(uuid, "uuid"));
+        return uuidToMob.containsKey(Objects.requireNonNull(uuid));
     }
 
     @Override

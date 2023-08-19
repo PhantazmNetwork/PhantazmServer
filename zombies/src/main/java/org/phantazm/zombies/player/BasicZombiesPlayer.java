@@ -23,11 +23,11 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final TickTaskScheduler taskScheduler;
 
     public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module,
-            @NotNull Map<UUID, CancellableState> stateMap, @NotNull TickTaskScheduler taskScheduler) {
-        this.scene = Objects.requireNonNull(scene, "scene");
-        this.module = Objects.requireNonNull(module, "module");
-        this.stateMap = Objects.requireNonNull(stateMap, "stateMap");
-        this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
+        @NotNull Map<UUID, CancellableState> stateMap, @NotNull TickTaskScheduler taskScheduler) {
+        this.scene = Objects.requireNonNull(scene);
+        this.module = Objects.requireNonNull(module);
+        this.stateMap = Objects.requireNonNull(stateMap);
+        this.taskScheduler = Objects.requireNonNull(taskScheduler);
     }
 
     @Override
@@ -37,8 +37,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     @Override
     public long getReviveTime() {
-        return getPlayer().map(player -> (long)player.getAttributeValue(Attributes.REVIVE_TICKS))
-                .orElse((long)Attributes.REVIVE_TICKS.defaultValue());
+        return getPlayer().map(player -> (long) player.getAttributeValue(Attributes.REVIVE_TICKS))
+                   .orElse((long) Attributes.REVIVE_TICKS.defaultValue());
     }
 
     @Override

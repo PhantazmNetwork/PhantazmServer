@@ -17,11 +17,12 @@ public abstract class FilesystemLoader<T extends Keyed> implements Loader<T> {
     protected final Path root;
 
     public FilesystemLoader(@NotNull Path root) {
-        this.root = Objects.requireNonNull(root, "root");
+        this.root = Objects.requireNonNull(root);
     }
 
     @Override
-    public @NotNull @Unmodifiable List<String> loadableData() throws IOException {
+    public @NotNull
+    @Unmodifiable List<String> loadableData() throws IOException {
         FileUtils.createDirectories(root);
 
         try (Stream<Path> fileStream = Files.walk(root, FileVisitOption.FOLLOW_LINKS).filter(Files::isRegularFile)) {

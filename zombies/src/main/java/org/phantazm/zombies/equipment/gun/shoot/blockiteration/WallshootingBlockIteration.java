@@ -13,12 +13,10 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A {@link BlockIteration} method that employs a technique called "wallshooting".
- * If a shot intersects a block whose bounding box is not a cube,
- * the shot will pass through all future blocks until it reaches an endpoint.
- * This allows players to shoot through walls by shooting into blocks like slabs.
- * However, if this gun does not pass directly through a non-cube block, it will act the same as
- * a {@link BasicBlockIteration}.
+ * A {@link BlockIteration} method that employs a technique called "wallshooting". If a shot intersects a block whose
+ * bounding box is not a cube, the shot will pass through all future blocks until it reaches an endpoint. This allows
+ * players to shoot through walls by shooting into blocks like slabs. However, if this gun does not pass directly
+ * through a non-cube block, it will act the same as a {@link BasicBlockIteration}.
  */
 @Model("zombies.gun.block_iteration.wallshot")
 @Cache(false)
@@ -30,9 +28,9 @@ public class WallshootingBlockIteration implements BlockIteration {
 
     @FactoryMethod
     public WallshootingBlockIteration(@NotNull Data data,
-            @NotNull @Child("wallshooting_checker") WallshootingChecker wallshootingChecker) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.wallshootingChecker = Objects.requireNonNull(wallshootingChecker, "wallshootingChecker");
+        @NotNull @Child("wallshooting_checker") WallshootingChecker wallshootingChecker) {
+        this.data = Objects.requireNonNull(data);
+        this.wallshootingChecker = Objects.requireNonNull(wallshootingChecker);
     }
 
     @Override
@@ -55,7 +53,7 @@ public class WallshootingBlockIteration implements BlockIteration {
             public boolean acceptRaytracedBlock(@NotNull Vec intersection, @NotNull Block block) {
                 Shape blockShape = block.registry().collisionShape();
                 if (wallshootingChecker.canWallshoot() && ((!blockShape.isFullBlock() && !blockShape.isEmpty()) ||
-                        data.passableBlocks().contains(block.key()))) {
+                                                               data.passableBlocks().contains(block.key()))) {
                     wallshot = true;
                     return false;
                 }
@@ -68,6 +66,6 @@ public class WallshootingBlockIteration implements BlockIteration {
 
     @DataObject
     public record Data(@NotNull @ChildPath("wallshooting_checker") String wallshootingChecker,
-                       @NotNull Set<Key> passableBlocks) {
+        @NotNull Set<Key> passableBlocks) {
     }
 }

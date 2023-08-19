@@ -48,7 +48,7 @@ public class Gui extends Inventory implements Tickable {
      * @return the builder instance
      */
     public static @NotNull Builder builder(@NotNull InventoryType inventoryType,
-            @NotNull SlotDistributor slotDistributor) {
+        @NotNull SlotDistributor slotDistributor) {
         return new Builder(inventoryType, slotDistributor);
     }
 
@@ -60,7 +60,7 @@ public class Gui extends Inventory implements Tickable {
      * @param slot the slot to insert it at
      */
     public void insertItem(@NotNull GuiItem item, int slot) {
-        Objects.requireNonNull(item, "item");
+        Objects.requireNonNull(item);
         safeItemInsert(slot, item.getItemStack(), true);
 
         items.put(slot, item);
@@ -75,8 +75,8 @@ public class Gui extends Inventory implements Tickable {
     }
 
     /**
-     * Removes a {@link GuiItem} from the specified slot. Calls {@link GuiItem#onRemove(Gui, int)} on the previous
-     * item, if any is present.
+     * Removes a {@link GuiItem} from the specified slot. Calls {@link GuiItem#onRemove(Gui, int)} on the previous item,
+     * if any is present.
      *
      * @param slot the slot to remove the item from
      */
@@ -169,7 +169,7 @@ public class Gui extends Inventory implements Tickable {
         if (tickItems == null) {
             //create copy of entry set, otherwise it could change while we iterate
             Int2ObjectMap.Entry<GuiItem>[] entries =
-                    items.int2ObjectEntrySet().toArray(EMPTY_INT_2_OBJECT_MAP_ENTRY_ARRAY);
+                items.int2ObjectEntrySet().toArray(EMPTY_INT_2_OBJECT_MAP_ENTRY_ARRAY);
 
             SlottedItem[] newTickItems = new SlottedItem[entries.length];
             for (int i = 0; i < newTickItems.length; i++) {
@@ -209,8 +209,8 @@ public class Gui extends Inventory implements Tickable {
 
         private Builder(@NotNull InventoryType type, @NotNull SlotDistributor slotDistributor) {
             this.items = new ArrayList<>();
-            this.type = Objects.requireNonNull(type, "type");
-            this.slotDistributor = Objects.requireNonNull(slotDistributor, "slotDistributor");
+            this.type = Objects.requireNonNull(type);
+            this.slotDistributor = Objects.requireNonNull(slotDistributor);
         }
 
         /**
@@ -220,7 +220,7 @@ public class Gui extends Inventory implements Tickable {
          * @return this instance, for chaining
          */
         public @NotNull Builder withTitle(@NotNull Component component) {
-            this.title = Objects.requireNonNull(component, "component");
+            this.title = Objects.requireNonNull(component);
             return this;
         }
 
@@ -243,7 +243,7 @@ public class Gui extends Inventory implements Tickable {
          * @return this instance, for chaining
          */
         public @NotNull Builder withItem(@NotNull GuiItem item) {
-            items.add(Objects.requireNonNull(item, "item"));
+            items.add(Objects.requireNonNull(item));
             if (items.size() > type.getSize()) {
                 throw new IllegalArgumentException("too many items for InventoryType " + type);
             }

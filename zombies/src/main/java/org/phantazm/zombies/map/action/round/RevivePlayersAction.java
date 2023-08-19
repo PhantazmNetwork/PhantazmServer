@@ -23,8 +23,8 @@ public class RevivePlayersAction implements Action<Round> {
 
     @FactoryMethod
     public RevivePlayersAction(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap, @NotNull Pos respawnPos) {
-        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
-        this.respawnPos = Objects.requireNonNull(respawnPos, "respawnPoint");
+        this.playerMap = Objects.requireNonNull(playerMap);
+        this.respawnPos = Objects.requireNonNull(respawnPos);
     }
 
     @Override

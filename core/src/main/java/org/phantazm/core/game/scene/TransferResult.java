@@ -11,8 +11,8 @@ import java.util.Optional;
  * Represents the result of transferring a player to or from a {@link Scene}.
  */
 public record TransferResult(@NotNull Optional<Runnable> executor,
-                             @NotNull Runnable end,
-                             @NotNull Optional<Component> message) implements AutoCloseable {
+    @NotNull Runnable end,
+    @NotNull Optional<Component> message) implements AutoCloseable {
 
     /**
      * Creates a transfer result.
@@ -20,8 +20,8 @@ public record TransferResult(@NotNull Optional<Runnable> executor,
      * @param message A message relating to the routing
      */
     public TransferResult {
-        Objects.requireNonNull(executor, "executor");
-        Objects.requireNonNull(message, "message");
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(message);
     }
 
     public static @NotNull TransferResult success(@NotNull Runnable executor) {

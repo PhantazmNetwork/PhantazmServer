@@ -22,7 +22,7 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     private final PlayerView playerView;
 
     public BasicInventoryAccessRegistry(@NotNull PlayerView playerView) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.playerView = Objects.requireNonNull(playerView);
     }
 
     @Override
@@ -61,8 +61,8 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
 
     @Override
     public void registerAccess(@NotNull Key key, @NotNull InventoryAccess profile) {
-        Objects.requireNonNull(key, "key");
-        Objects.requireNonNull(profile, "profile");
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(profile);
 
         synchronized (sync) {
             if (accessMap.containsKey(key)) {

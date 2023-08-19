@@ -34,21 +34,21 @@ public class Party extends Guild<PartyMember> implements Tickable {
     private final Wrapper<PartyMember> owner;
 
     public Party(@NotNull GuildMemberManager<PartyMember> memberManager,
-            @NotNull Function<? super PlayerView, ? extends PartyMember> memberCreator, @NotNull Audience audience,
-            @NotNull SpyAudience spyAudience,
-            @NotNull PartyNotification notification, @NotNull InvitationManager<PartyMember> invitationManager,
-            @NotNull MultipleMemberPermission<PartyMember> kickPermission,
-            @NotNull SingleMemberPermission<PartyMember> invitePermission,
-            @NotNull SingleMemberPermission<PartyMember> joinPermission, @NotNull Wrapper<PartyMember> owner) {
+        @NotNull Function<? super PlayerView, ? extends PartyMember> memberCreator, @NotNull Audience audience,
+        @NotNull SpyAudience spyAudience,
+        @NotNull PartyNotification notification, @NotNull InvitationManager<PartyMember> invitationManager,
+        @NotNull MultipleMemberPermission<PartyMember> kickPermission,
+        @NotNull SingleMemberPermission<PartyMember> invitePermission,
+        @NotNull SingleMemberPermission<PartyMember> joinPermission, @NotNull Wrapper<PartyMember> owner) {
         super(memberManager, memberCreator);
-        this.audience = Objects.requireNonNull(audience, "audience");
-        this.spyAudience = Objects.requireNonNull(spyAudience, "spyAudience");
-        this.notification = Objects.requireNonNull(notification, "notification");
-        this.invitationManager = Objects.requireNonNull(invitationManager, "invitationManager");
-        this.kickPermission = Objects.requireNonNull(kickPermission, "kickPermission");
-        this.invitePermission = Objects.requireNonNull(invitePermission, "invitePermission");
-        this.joinPermission = Objects.requireNonNull(joinPermission, "joinPermission");
-        this.owner = Objects.requireNonNull(owner, "owner");
+        this.audience = Objects.requireNonNull(audience);
+        this.spyAudience = Objects.requireNonNull(spyAudience);
+        this.notification = Objects.requireNonNull(notification);
+        this.invitationManager = Objects.requireNonNull(invitationManager);
+        this.kickPermission = Objects.requireNonNull(kickPermission);
+        this.invitePermission = Objects.requireNonNull(invitePermission);
+        this.joinPermission = Objects.requireNonNull(joinPermission);
+        this.owner = Objects.requireNonNull(owner);
     }
 
     public @NotNull Audience getAudience() {

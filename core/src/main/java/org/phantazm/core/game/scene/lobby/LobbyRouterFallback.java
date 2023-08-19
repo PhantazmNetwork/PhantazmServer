@@ -25,8 +25,8 @@ public class LobbyRouterFallback implements SceneFallback {
      * @param lobbyName The name of the {@link Lobby} to fallback to
      */
     public LobbyRouterFallback(@NotNull LobbyRouter lobby, @NotNull String lobbyName) {
-        this.lobbyRouter = Objects.requireNonNull(lobby, "lobbyRouter");
-        this.lobbyName = Objects.requireNonNull(lobbyName, "lobbyName");
+        this.lobbyRouter = Objects.requireNonNull(lobby);
+        this.lobbyName = Objects.requireNonNull(lobbyName);
     }
 
     @Override

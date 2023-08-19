@@ -13,7 +13,7 @@ public class SceneTransferHelper {
     private final RouterStore routerStore;
 
     public SceneTransferHelper(@NotNull RouterStore routerStore) {
-        this.routerStore = Objects.requireNonNull(routerStore, "routerStore");
+        this.routerStore = Objects.requireNonNull(routerStore);
     }
 
     public void transfer(@NotNull TransferResult transferResult, @NotNull Collection<PlayerView> leavers,

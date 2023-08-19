@@ -63,22 +63,22 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private volatile int pendingPlayers = 0;
 
     public ZombiesScene(@NotNull UUID uuid, @NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
-            @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
-            @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
-            @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
-            @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
-            @NotNull EventNode<Event> sceneNode, @Nullable UUID allowedRequestUUID,
-            @NotNull PlayerViewProvider playerViewProvider) {
+        @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
+        @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
+        @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
+        @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
+        @NotNull EventNode<Event> sceneNode, @Nullable UUID allowedRequestUUID,
+        @NotNull PlayerViewProvider playerViewProvider) {
         super(uuid, instance, fallback, VecUtils.toPoint(mapSettingsInfo.spawn()), playerViewProvider);
-        this.map = Objects.requireNonNull(map, "map");
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
-        this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
-        this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
-        this.leaveHandler = Objects.requireNonNull(leaveHandler, "leaveHandler");
-        this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
-        this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
-        this.database = Objects.requireNonNull(database, "database");
-        this.sceneNode = Objects.requireNonNull(sceneNode, "sceneNode");
+        this.map = Objects.requireNonNull(map);
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
+        this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo);
+        this.stageTransition = Objects.requireNonNull(stageTransition);
+        this.leaveHandler = Objects.requireNonNull(leaveHandler);
+        this.playerCreator = Objects.requireNonNull(playerCreator);
+        this.taskScheduler = Objects.requireNonNull(taskScheduler);
+        this.database = Objects.requireNonNull(database);
+        this.sceneNode = Objects.requireNonNull(sceneNode);
         this.allowedRequestUUID = allowedRequestUUID;
     }
 
@@ -145,8 +145,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     if (zombiesPlayer.hasQuit()) {
                         oldPlayers.add(zombiesPlayer);
                     }
-                }
-                else {
+                } else {
                     newPlayers.add(player);
                 }
             }
@@ -162,11 +161,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             }
             if (stage.hasPermanentPlayers() && !newPlayers.isEmpty()) {
                 return TransferResult.failure(
-                        Component.text("The game is not accepting new players.", NamedTextColor.RED));
+                    Component.text("The game is not accepting new players.", NamedTextColor.RED));
             }
             if (!stage.canRejoin() && !oldPlayers.isEmpty()) {
                 return TransferResult.failure(
-                        Component.text("The game is not accepting rejoining players.", NamedTextColor.RED));
+                    Component.text("The game is not accepting rejoining players.", NamedTextColor.RED));
             }
 
             if (zombiesPlayers.size() + pendingPlayers + newPlayers.size() > mapSettingsInfo.maxPlayers()) {
@@ -183,7 +182,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             return TransferResult.success(() -> {
                 Vec3I spawn = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
                 Pos pos = new Pos(spawn.x() + 0.5, spawn.y(), spawn.z() + 0.5, mapSettingsInfo.yaw(),
-                        mapSettingsInfo.pitch());
+                    mapSettingsInfo.pitch());
                 List<Pair<Player, Instance>> teleportedPlayers = new ArrayList<>(oldPlayers.size() + newPlayers.size());
                 List<CompletableFuture<?>> futures = new ArrayList<>(oldPlayers.size() + newPlayers.size());
                 List<Runnable> runnables = new ArrayList<>(oldPlayers.size() + newPlayers.size());
@@ -243,7 +242,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     }
 
     private void teleportOrSetInstance(List<Pair<Player, Instance>> teleportedPlayers, Player player,
-            List<CompletableFuture<?>> futures, Pos pos) {
+        List<CompletableFuture<?>> futures, Pos pos) {
         teleportedPlayers.add(Pair.of(player, player.getInstance()));
         if (player.getInstance() == instance) {
             futures.add(player.teleport(pos));
@@ -252,7 +251,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         Instance oldInstance = player.getInstance();
         player.setInstanceAddCallback(() -> Utils.handleInstanceTransfer(oldInstance, instance, player,
-                newInstancePlayer -> !super.hasGhost(newInstancePlayer)));
+            newInstancePlayer -> !super.hasGhost(newInstancePlayer)));
         futures.add(player.setInstance(instance, pos));
     }
 
@@ -262,11 +261,12 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     }
 
     @Override
-    public @Unmodifiable @NotNull Map<UUID, PlayerView> getPlayers() {
+    public @Unmodifiable
+    @NotNull Map<UUID, PlayerView> getPlayers() {
         Map<UUID, ZombiesPlayer> playerViewCopy = Map.copyOf(zombiesPlayers);
 
         return playerViewCopy.entrySet().stream().collect(
-                Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> entry.getValue().module().getPlayerView()));
+            Collectors.toUnmodifiableMap(Map.Entry::getKey, entry -> entry.getValue().module().getPlayerView()));
     }
 
     @Override
@@ -298,11 +298,11 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
             if (hasMinimum && protocolVersion < mapSettingsInfo.minimumProtocolVersion()) {
                 return TransferResult.failure(
-                        Component.text("A player's Minecraft version is too old!", NamedTextColor.RED));
+                    Component.text("A player's Minecraft version is too old!", NamedTextColor.RED));
             }
             if (hasMaximum && protocolVersion > mapSettingsInfo.maximumProtocolVersion()) {
                 return TransferResult.failure(
-                        Component.text("A player's Minecraft version is too new!", NamedTextColor.RED));
+                    Component.text("A player's Minecraft version is too new!", NamedTextColor.RED));
             }
         }
 
@@ -325,8 +325,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             if (property.name().equals("protocolVersion")) {
                 try {
                     protocolVersion = Integer.parseInt(property.value());
-                }
-                catch (NumberFormatException ignored) {
+                } catch (NumberFormatException ignored) {
                 }
                 break;
             }
@@ -362,11 +361,12 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
             if (!zombiesPlayer.hasQuit()) {
                 fallbackFutures.add(fallback.fallback(zombiesPlayer.module().getPlayerView())
-                        .whenComplete((fallbackResult, throwable) -> {
-                            if (throwable != null) {
-                                LOGGER.warn("Failed to fallback {}", zombiesPlayer.getUUID(), throwable);
-                            }
-                        }));
+                                        .whenComplete((fallbackResult, throwable) -> {
+                                            if (throwable != null) {
+                                                LOGGER.warn("Failed to fallback {}", zombiesPlayer.getUUID(),
+                                                    throwable);
+                                            }
+                                        }));
             }
 
             zombiesPlayer.end();
@@ -377,7 +377,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
         //wait for all players to fallback before we actually shut down the scene
         CompletableFuture.allOf(fallbackFutures.toArray(CompletableFuture[]::new))
-                .whenComplete((ignored, error) -> super.shutdown());
+            .whenComplete((ignored, error) -> super.shutdown());
     }
 
     @Override

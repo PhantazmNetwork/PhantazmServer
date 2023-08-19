@@ -12,20 +12,27 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
 
     <T> boolean has(@NotNull Key<T> key);
 
-    @NotNull @Unmodifiable Set<@NotNull Key<?>> keys();
+    @NotNull
+    @Unmodifiable
+    Set<@NotNull Key<?>> keys();
 
-    @NotNull @Unmodifiable Collection<@NotNull Object> objects();
+    @NotNull
+    @Unmodifiable
+    Collection<@NotNull Object> objects();
 
     sealed interface Builder permits BuilderImpl {
         <T> @NotNull Builder with(@NotNull Key<T> key, @NotNull T object);
 
-        @NotNull InjectionStore build();
+        @NotNull
+        InjectionStore build();
     }
 
     sealed interface Key<T> permits InjectionStore.KeyImpl {
-        @NotNull Class<T> type();
+        @NotNull
+        Class<T> type();
 
-        @NotNull String id();
+        @NotNull
+        String id();
     }
 
     static @NotNull Builder builder() {
@@ -33,13 +40,13 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
     }
 
     static @NotNull <T> Key<T> key(@NotNull Class<T> clazz) {
-        Objects.requireNonNull(clazz, "clazz");
+        Objects.requireNonNull(clazz);
         return new KeyImpl<>(clazz, "");
     }
 
     static @NotNull <T> Key<T> key(@NotNull Class<T> clazz, @NotNull String id) {
-        Objects.requireNonNull(clazz, "clazz");
-        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(clazz);
+        Objects.requireNonNull(id);
         return new KeyImpl<>(clazz, id);
     }
 
@@ -203,12 +210,14 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
         }
 
         @Override
-        public @NotNull @Unmodifiable Set<Key<?>> keys() {
+        public @NotNull
+        @Unmodifiable Set<Key<?>> keys() {
             return mappings.keySet();
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<Object> objects() {
+        public @NotNull
+        @Unmodifiable Collection<Object> objects() {
             return mappings.values();
         }
     }

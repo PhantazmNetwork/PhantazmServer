@@ -22,10 +22,10 @@ public class SpawnParticleSkill implements Skill {
 
     @FactoryMethod
     public SpawnParticleSkill(@NotNull Data data, @NotNull Random random,
-            @NotNull @Child("particle") ParticleWrapper particle) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.random = Objects.requireNonNull(random, "random");
-        this.particle = Objects.requireNonNull(particle, "particle");
+        @NotNull @Child("particle") ParticleWrapper particle) {
+        this.data = Objects.requireNonNull(data);
+        this.random = Objects.requireNonNull(random);
+        this.particle = Objects.requireNonNull(particle);
     }
 
     @Override

@@ -35,11 +35,11 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
      * @param duration          the duration for which name-to-UUID mappings will be cached
      */
     public BasicPlayerViewProvider(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
-            @NotNull Duration duration) {
-        this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
+        @NotNull Duration duration) {
+        this.identitySource = Objects.requireNonNull(identitySource);
+        this.connectionManager = Objects.requireNonNull(connectionManager);
         this.uuidToView = Caffeine.newBuilder().weakValues().build();
-        this.nameToUuid = Caffeine.newBuilder().expireAfterWrite(Objects.requireNonNull(duration, "duration")).build();
+        this.nameToUuid = Caffeine.newBuilder().expireAfterWrite(Objects.requireNonNull(duration)).build();
     }
 
     /**
@@ -50,19 +50,19 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
      * @param connectionManager the {@link ConnectionManager} used by this server
      */
     public BasicPlayerViewProvider(@NotNull IdentitySource identitySource,
-            @NotNull ConnectionManager connectionManager) {
+        @NotNull ConnectionManager connectionManager) {
         this(identitySource, connectionManager, DEFAULT_TIMEOUT);
     }
 
     @Override
     public @NotNull PlayerView fromUUID(@NotNull UUID uuid) {
-        Objects.requireNonNull(uuid, "uuid");
+        Objects.requireNonNull(uuid);
         return uuidToView.get(uuid, key -> new BasicPlayerView(identitySource, connectionManager, key));
     }
 
     @Override
     public @NotNull CompletableFuture<Optional<PlayerView>> fromName(@NotNull String name) {
-        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(name);
         Player player = connectionManager.getPlayer(name);
         if (player != null) {
             //if player is online, use the player object
@@ -86,7 +86,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     @Override
     public @NotNull Optional<PlayerView> fromNameIfOnline(@NotNull String name) {
-        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(name);
         Player player = connectionManager.getPlayer(name);
         if (player == null) {
             return Optional.empty();
@@ -97,7 +97,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     @Override
     public @NotNull PlayerView fromPlayer(@NotNull Player player) {
-        Objects.requireNonNull(player, "player");
+        Objects.requireNonNull(player);
         return uuidToView.get(player.getUuid(), key -> new BasicPlayerView(identitySource, connectionManager, player));
     }
 

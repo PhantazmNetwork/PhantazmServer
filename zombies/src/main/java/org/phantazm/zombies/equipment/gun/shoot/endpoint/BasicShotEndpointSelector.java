@@ -38,9 +38,9 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
      */
     @FactoryMethod
     public BasicShotEndpointSelector(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> shooterSupplier,
-            @NotNull @Child("block_iterations") Collection<BlockIteration> blockIteration) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.entitySupplier = Objects.requireNonNull(shooterSupplier, "playerView");
+        @NotNull @Child("block_iterations") Collection<BlockIteration> blockIteration) {
+        this.data = Objects.requireNonNull(data);
+        this.entitySupplier = Objects.requireNonNull(shooterSupplier);
         this.blockIterations = List.copyOf(blockIteration);
     }
 

@@ -26,8 +26,8 @@ public class RoundSidebarLineUpdater implements SidebarLineUpdater {
 
     @FactoryMethod
     public RoundSidebarLineUpdater(@NotNull Data data, @NotNull RoundHandler roundHandler) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
+        this.data = Objects.requireNonNull(data);
+        this.roundHandler = Objects.requireNonNull(roundHandler);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class RoundSidebarLineUpdater implements SidebarLineUpdater {
         if ((lastRoundIndex == -1 || lastRoundIndex != newIndex) && newIndex != -1) {
             lastRoundIndex = newIndex;
             TagResolver roundPlaceholder = Placeholder.component("round", Component.text(Math.min(lastRoundIndex + 1,
-                    roundHandler.roundCount())));
+                roundHandler.roundCount())));
             return Optional.of(MiniMessage.miniMessage().deserialize(data.format, roundPlaceholder));
         }
 

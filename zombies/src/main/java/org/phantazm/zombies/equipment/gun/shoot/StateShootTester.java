@@ -32,11 +32,11 @@ public class StateShootTester implements ShootTester {
      */
     @FactoryMethod
     public StateShootTester(@NotNull @Child("stats") GunStats stats,
-            @NotNull @Child("reload_tester") ReloadTester reloadTester,
-            @NotNull Supplier<Optional<? extends Entity>> entitySupplier) {
-        this.stats = Objects.requireNonNull(stats, "stats");
-        this.reloadTester = Objects.requireNonNull(reloadTester, "reloadTester");
-        this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
+        @NotNull @Child("reload_tester") ReloadTester reloadTester,
+        @NotNull Supplier<Optional<? extends Entity>> entitySupplier) {
+        this.stats = Objects.requireNonNull(stats);
+        this.reloadTester = Objects.requireNonNull(reloadTester);
+        this.entitySupplier = Objects.requireNonNull(entitySupplier);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class StateShootTester implements ShootTester {
      */
     @DataObject
     public record Data(@NotNull @ChildPath("stats") String stats,
-                       @NotNull @ChildPath("reload_tester") String reloadTester) {
+        @NotNull @ChildPath("reload_tester") String reloadTester) {
 
         /**
          * Creates a {@link Data}.
@@ -81,8 +81,8 @@ public class StateShootTester implements ShootTester {
          * @param reloadTester A path to the gun's {@link ReloadTester}
          */
         public Data {
-            Objects.requireNonNull(stats, "stats");
-            Objects.requireNonNull(reloadTester, "reloadTester");
+            Objects.requireNonNull(stats);
+            Objects.requireNonNull(reloadTester);
         }
 
     }
