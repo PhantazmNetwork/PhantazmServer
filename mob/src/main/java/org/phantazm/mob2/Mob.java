@@ -198,8 +198,8 @@ public class Mob extends ProximaEntity {
 
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
-        return super.setInstance(instance, spawnPosition).thenAccept((ignored) -> {
-            getAcquirable().sync(ignored2 -> useIfPresent(Trigger.SPAWN));
+        return super.setInstance(instance, spawnPosition).thenRun(() -> {
+            getAcquirable().sync(ignored -> useIfPresent(Trigger.SPAWN));
         });
     }
 
