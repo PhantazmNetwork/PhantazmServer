@@ -9,8 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 @Description("""
-        Interactor that does nothing. Since all perks require an interactor, this is useful as a "placeholder" of sorts.
-        """)
+    Interactor that does nothing. Since all perks require an interactor, this is useful as a "placeholder" of sorts.
+    """)
 @Model("zombies.perk.interactor.none")
 @Cache
 public class NoInteractorCreator implements PerkInteractorCreator {

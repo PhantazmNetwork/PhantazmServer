@@ -33,7 +33,7 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
 
     @FactoryMethod
     public EquipmentUpgradeCostDisplayCreator(@NotNull Data data,
-            @NotNull @Child("upgrade_path") UpgradePath upgradePath) {
+        @NotNull @Child("upgrade_path") UpgradePath upgradePath) {
         this.data = Objects.requireNonNull(data);
         this.upgradePath = Objects.requireNonNull(upgradePath);
     }
@@ -88,7 +88,7 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
 
         private int applyModifiers(int cost) {
             Collection<Transaction.Modifier> modifiers =
-                    zombiesPlayer.module().compositeTransactionModifiers().modifiers(data.costModifier);
+                zombiesPlayer.module().compositeTransactionModifiers().modifiers(data.costModifier);
 
             return -zombiesPlayer.module().getCoins().runTransaction(new Transaction(modifiers, -cost)).change();
         }
@@ -100,8 +100,7 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
                 Component text = MiniMessage.miniMessage().deserialize(data.format, costPlaceholder);
                 if (hologram.isEmpty()) {
                     hologram.add(text);
-                }
-                else {
+                } else {
                     hologram.set(0, text);
                 }
             }
@@ -125,14 +124,15 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
     }
 
     @DataObject
-    public record Data(@NotNull Vec3D position,
-                       @NotNull String format,
-                       @NotNull Key equipmentKey,
-                       @NotNull Key groupKey,
-                       int baseCost,
-                       @NotNull Map<Key, Integer> upgradeCosts,
-                       @NotNull Key costModifier,
-                       int updateInterval,
-                       @NotNull @ChildPath("upgrade_path") String upgradePath) {
+    public record Data(
+        @NotNull Vec3D position,
+        @NotNull String format,
+        @NotNull Key equipmentKey,
+        @NotNull Key groupKey,
+        int baseCost,
+        @NotNull Map<Key, Integer> upgradeCosts,
+        @NotNull Key costModifier,
+        int updateInterval,
+        @NotNull @ChildPath("upgrade_path") String upgradePath) {
     }
 }

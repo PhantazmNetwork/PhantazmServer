@@ -51,9 +51,9 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     default void cancellableAttribute(@NotNull Attribute attribute, @NotNull AttributeModifier modifier) {
         registerCancellable(CancellableState.named(modifier.getId(),
-                        () -> getPlayer().ifPresent(player -> player.getAttribute(attribute).addModifier(modifier)),
-                        () -> getPlayer().ifPresent(player -> player.getAttribute(attribute).removeModifier(modifier.getId()))),
-                true);
+                () -> getPlayer().ifPresent(player -> player.getAttribute(attribute).addModifier(modifier)),
+                () -> getPlayer().ifPresent(player -> player.getAttribute(attribute).removeModifier(modifier.getId()))),
+            true);
     }
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
@@ -85,7 +85,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
         }
 
         Function<TContext, ZombiesPlayerState> stateFunction =
-                (Function<TContext, ZombiesPlayerState>)module().getStateFunctions().get(stateKey);
+            (Function<TContext, ZombiesPlayerState>) module().getStateFunctions().get(stateKey);
         if (stateFunction != null) {
             module().getStateSwitcher().setState(stateFunction.apply(context));
             return true;
@@ -182,8 +182,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
         PlayerView view = module().getPlayerView();
         try {
             return view.getUsername().get();
-        }
-        catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             return view.getUUID().toString();
         }
     }
@@ -191,13 +190,13 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     interface Source {
 
         @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
-                @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-                @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
-                @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
-                @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
-                @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-                @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
-                @NotNull BelowNameTag belowNameTag);
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+            @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
+            @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
+            @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
+            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
+            @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
+            @NotNull BelowNameTag belowNameTag);
 
     }
 

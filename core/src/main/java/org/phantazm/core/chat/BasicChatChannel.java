@@ -33,7 +33,7 @@ public class BasicChatChannel implements ChatChannel {
      * Creates a {@link BasicChatChannel}.
      */
     public BasicChatChannel(@NotNull MiniMessage miniMessage, @NotNull String chatFormat,
-            @NotNull Function<? super Player, ? extends CompletableFuture<Component>> nameFormatter) {
+        @NotNull Function<? super Player, ? extends CompletableFuture<Component>> nameFormatter) {
         this.miniMessage = Objects.requireNonNull(miniMessage);
         this.chatFormat = Objects.requireNonNull(chatFormat);
         this.nameFormatter = Objects.requireNonNull(nameFormatter);
@@ -41,7 +41,7 @@ public class BasicChatChannel implements ChatChannel {
 
     @Override
     public @NotNull CompletableFuture<Void> sendMessage(@NotNull Player from, @NotNull String message,
-            @NotNull Consumer<ObjectBooleanPair<Component>> onFailure) {
+        @NotNull Consumer<ObjectBooleanPair<Component>> onFailure) {
         Pair<Audience, ObjectBooleanPair<Component>> audiencePair = getAudience(from);
         if (audiencePair.left() == null) {
             onFailure.accept(audiencePair.right());
@@ -67,17 +67,16 @@ public class BasicChatChannel implements ChatChannel {
      *
      * @param player The {@link Player} to retrieve the {@link Audience} from
      * @return A {@link Pair} representing the result. If the left {@link Audience} is present, an {@link Audience} was
-     * successfully found. If the left {@link Audience} is null,
-     * then the right {@link Pair} has a {@link Component} provides an error message
-     * and a boolean that determines whether the chat channel is now invalid.
+     * successfully found. If the left {@link Audience} is null, then the right {@link Pair} has a {@link Component}
+     * provides an error message and a boolean that determines whether the chat channel is now invalid.
      */
     private @NotNull Pair<Audience, ObjectBooleanPair<Component>> getAudience(@NotNull Player player) {
         Instance instance = player.getInstance();
         if (instance == null) {
             return Pair.of(null,
-                    ObjectBooleanPair.of(Component.text("You are not in an instance.", NamedTextColor.RED), true));
+                ObjectBooleanPair.of(Component.text("You are not in an instance.", NamedTextColor.RED), true));
         }
 
-        return Pair.of((ForwardingAudience)() -> List.of(instance), null);
+        return Pair.of((ForwardingAudience) () -> List.of(instance), null);
     }
 }

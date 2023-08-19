@@ -44,6 +44,7 @@ public class ZombiesPlayerValidator implements TargetValidator {
     }
 
     @DataObject
-    public record Data(@NotNull Set<Key> states, boolean blacklist) {
+    public record Data(@NotNull Set<Key> states,
+        boolean blacklist) {
     }
 }

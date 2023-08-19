@@ -26,10 +26,10 @@ public class EquipmentStationInteractor implements ShopInteractor {
 
     @FactoryMethod
     public EquipmentStationInteractor(@NotNull Data data,
-            @NotNull @Child("success") List<ShopInteractor> successInteractors,
-            @NotNull @Child("holding") List<ShopInteractor> holdingInteractors,
-            @NotNull @Child("duplicate") List<ShopInteractor> duplicateInteractors,
-            @NotNull @Child("failure") List<ShopInteractor> failureInteractors) {
+        @NotNull @Child("success") List<ShopInteractor> successInteractors,
+        @NotNull @Child("holding") List<ShopInteractor> holdingInteractors,
+        @NotNull @Child("duplicate") List<ShopInteractor> duplicateInteractors,
+        @NotNull @Child("failure") List<ShopInteractor> failureInteractors) {
         this.data = data;
         this.successInteractors = successInteractors;
         this.holdingInteractors = holdingInteractors;
@@ -53,10 +53,10 @@ public class EquipmentStationInteractor implements ShopInteractor {
         }
 
         EquipmentHandler.Result result = interaction.player().module().getEquipmentHandler()
-                .addOrReplaceEquipment(data.groupKey, data.equipmentKey, data.allowReplace, data.specificSlot,
-                        data.allowDuplicate,
-                        () -> interaction.player().module().getEquipmentCreator().createEquipment(data.equipmentKey),
-                        playerOptional.get());
+            .addOrReplaceEquipment(data.groupKey, data.equipmentKey, data.allowReplace, data.specificSlot,
+                data.allowDuplicate,
+                () -> interaction.player().module().getEquipmentCreator().createEquipment(data.equipmentKey),
+                playerOptional.get());
 
         if (!result.success()) {
             Optional<Equipment> equipmentOptional = interaction.player().getHeldEquipment();
@@ -90,15 +90,16 @@ public class EquipmentStationInteractor implements ShopInteractor {
     }
 
     @DataObject
-    public record Data(@NotNull Key equipmentKey,
-                       @NotNull Key groupKey,
-                       boolean allowReplace,
-                       int specificSlot,
-                       boolean allowDuplicate,
-                       @NotNull @ChildPath("success") List<String> successInteractors,
-                       @NotNull @ChildPath("holding") List<String> holdingInteractors,
-                       @NotNull @ChildPath("duplicate") List<String> duplicateInteractors,
-                       @NotNull @ChildPath("failure") List<String> failureInteractors) {
+    public record Data(
+        @NotNull Key equipmentKey,
+        @NotNull Key groupKey,
+        boolean allowReplace,
+        int specificSlot,
+        boolean allowDuplicate,
+        @NotNull @ChildPath("success") List<String> successInteractors,
+        @NotNull @ChildPath("holding") List<String> holdingInteractors,
+        @NotNull @ChildPath("duplicate") List<String> duplicateInteractors,
+        @NotNull @ChildPath("failure") List<String> failureInteractors) {
         @Default("allowReplace")
         public static ConfigElement defaultAllowReplace() {
             return ConfigPrimitive.of(true);

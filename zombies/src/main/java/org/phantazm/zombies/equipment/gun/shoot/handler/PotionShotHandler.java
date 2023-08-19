@@ -57,6 +57,7 @@ public class PotionShotHandler implements ShotHandler {
      * @param headshotPotion The {@link Potion} to apply to headshot {@link Entity} targets
      */
     @DataObject
-    public record Data(@NotNull Potion potion, @NotNull Potion headshotPotion) {
+    public record Data(@NotNull Potion potion,
+        @NotNull Potion headshotPotion) {
     }
 }

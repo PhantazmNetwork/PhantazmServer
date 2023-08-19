@@ -18,7 +18,10 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Function;
 
 public class MobCreatorBase implements MobCreator {
@@ -34,9 +37,9 @@ public class MobCreatorBase implements MobCreator {
     private final Function<? super Instance, ? extends InstanceSettings> settingsFunction;
 
     public MobCreatorBase(@NotNull MobData data, Pathfinding.@NotNull Factory pathfinding,
-            @NotNull List<SkillComponent> skills, @NotNull List<GoalApplier> goalAppliers,
-            @NotNull Pathfinder pathfinder,
-            @NotNull Function<? super @NotNull Instance, ? extends @NotNull InstanceSettings> settingsFunction) {
+        @NotNull List<SkillComponent> skills, @NotNull List<GoalApplier> goalAppliers,
+        @NotNull Pathfinder pathfinder,
+        @NotNull Function<? super @NotNull Instance, ? extends @NotNull InstanceSettings> settingsFunction) {
         this.data = Objects.requireNonNull(data);
         this.pathfinding = Objects.requireNonNull(pathfinding);
         this.skills = List.copyOf(skills);
@@ -118,8 +121,7 @@ public class MobCreatorBase implements MobCreator {
 
             try {
                 method.invoke(meta, object);
-            }
-            catch (IllegalAccessException | InvocationTargetException e) {
+            } catch (IllegalAccessException | InvocationTargetException e) {
                 LOGGER.warn("failed to set meta value for meta key {} and method name {}", key, methodName, e);
             }
         }

@@ -3,9 +3,8 @@ package org.phantazm.messaging.serialization;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Represents a data output that can be converted to a byte array.
- * Implementations should typically be wrappers around provided binary writing libraries
- * that already exist on respective platforms.
+ * Represents a data output that can be converted to a byte array. Implementations should typically be wrappers around
+ * provided binary writing libraries that already exist on respective platforms.
  */
 public interface DataWriter {
 

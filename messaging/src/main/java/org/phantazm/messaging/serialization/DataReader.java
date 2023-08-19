@@ -1,9 +1,8 @@
 package org.phantazm.messaging.serialization;
 
 /**
- * Represents a data input.
- * Implementations should typically be wrappers around provided binary reading libraries
- * that already exist on respective platforms.
+ * Represents a data input. Implementations should typically be wrappers around provided binary reading libraries that
+ * already exist on respective platforms.
  */
 public interface DataReader {
 

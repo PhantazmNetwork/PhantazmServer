@@ -28,7 +28,7 @@ public class MiniMessageUtils {
     }
 
     public static @NotNull TagResolver list(@NotNull String key,
-            @NotNull Iterable<? extends ComponentLike> components) {
+        @NotNull Iterable<? extends ComponentLike> components) {
         return TagResolver.resolver(key, (argumentQueue, context) -> {
             String separatorString = argumentQueue.pop().value();
             Component separator = context.deserialize(separatorString);

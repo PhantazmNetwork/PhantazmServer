@@ -68,7 +68,8 @@ public class ReloadActionBarEffect implements GunEffect {
      * @param reloadActionBarChooser A path to the {@link ReloadActionBarEffect}'s {@link ReloadActionBarChooser}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("stats") String stats,
+    public record Data(
+        @NotNull @ChildPath("stats") String stats,
         @NotNull @ChildPath("action_bar_sender") String actionBarSender,
         @NotNull @ChildPath("reload_tester") String reloadTester,
         @NotNull @ChildPath("reload_action_bar_chooser") String reloadActionBarChooser) {

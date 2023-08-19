@@ -4,7 +4,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record ZombiesAutoSplitsConfig(@NotNull String host, int port, boolean useLiveSplits, boolean useInternal) {
+public record ZombiesAutoSplitsConfig(@NotNull String host,
+    int port,
+    boolean useLiveSplits,
+    boolean useInternal) {
 
     public static final String DEFAULT_HOST = "localhost";
 

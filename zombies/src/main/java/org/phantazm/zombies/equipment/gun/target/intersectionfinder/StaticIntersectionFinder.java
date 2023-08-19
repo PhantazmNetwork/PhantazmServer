@@ -26,7 +26,7 @@ public class StaticIntersectionFinder implements IntersectionFinder {
 
     @Override
     public @NotNull Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start, @NotNull Point end,
-            double distanceLimitSquared) {
+        double distanceLimitSquared) {
         BoundingBox boundingBox = entity.getBoundingBox();
         Pos position = entity.getPosition();
 

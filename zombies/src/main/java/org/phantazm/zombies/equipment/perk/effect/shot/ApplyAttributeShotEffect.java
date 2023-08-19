@@ -68,7 +68,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
         PhantazmMob mob = mobStore.getMob(entity.getUuid());
         if (mob != null && data.amount < 0 && attribute.equals(Attribute.MOVEMENT_SPEED) &&
-                mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
+            mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
             return;
         }
 
@@ -102,7 +102,8 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
     }
 
     @DataObject
-    public record Data(@NotNull @Description("The attribute to apply") String attribute,
+    public record Data(
+        @NotNull @Description("The attribute to apply") String attribute,
         @Description("The attribute amount") double amount,
         @NotNull @Description("The attribute operation") AttributeOperation attributeOperation,
         @Description("The duration the effect will exist") int duration) {

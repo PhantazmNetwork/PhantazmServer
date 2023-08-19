@@ -18,9 +18,8 @@ import java.util.Collection;
 import java.util.List;
 
 public class DatapackFeature {
-    public static Path DATAPACK_PATH = Path.of("./datapacks");
-
     private static final Logger LOGGER = LoggerFactory.getLogger(DatapackFeature.class);
+    public static Path DATAPACK_PATH = Path.of("./datapacks");
 
     private DatapackFeature() {
         throw new UnsupportedOperationException();
@@ -29,8 +28,7 @@ public class DatapackFeature {
     static void initialize() {
         try {
             FileUtils.createDirectories(DATAPACK_PATH);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -47,16 +45,14 @@ public class DatapackFeature {
                 try {
                     datapack = loadDatapackFromPath(loader, zipPath);
                     ++loadedDatapacks;
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     LOGGER.warn("Failed to load datapack at {}", zipPath, e);
                     continue;
                 }
 
                 biomes.addAll(datapack.biomes().values());
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 

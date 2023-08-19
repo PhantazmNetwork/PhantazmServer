@@ -11,15 +11,14 @@ public abstract class TimerSkillAbstract implements Skill {
     private final boolean requiresActivation;
     private final boolean resetOnActivation;
     private final int repeat;
-    private int interval;
-
     private final boolean tickDelegate;
+    private int interval;
     private boolean started;
     private int ticksSinceLastActivation;
     private int uses;
 
     public TimerSkillAbstract(@NotNull Mob self, @NotNull Skill delegate, boolean requiresActivation,
-            boolean resetOnActivation, int repeat, int interval) {
+        boolean resetOnActivation, int repeat, int interval) {
         this.self = Objects.requireNonNull(self);
         this.delegate = Objects.requireNonNull(delegate);
         this.requiresActivation = requiresActivation;
@@ -78,15 +77,13 @@ public abstract class TimerSkillAbstract implements Skill {
         if (ticksSinceLastActivation == interval) {
             if (repeat > -1 && ++uses >= repeat) {
                 reset(false);
-            }
-            else {
+            } else {
                 ticksSinceLastActivation = 0;
             }
 
             interval = computeInterval();
             delegate.use();
-        }
-        else {
+        } else {
             ticksSinceLastActivation++;
         }
     }

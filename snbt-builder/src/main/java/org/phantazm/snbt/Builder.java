@@ -21,10 +21,10 @@ public class Builder {
         List<String> lore = Arrays.stream(args, 2, args.length).toList();
 
         ItemStack itemStack =
-                ItemStack.builder(Objects.requireNonNullElse(Material.fromNamespaceId(material), Material.AIR))
-                        .displayName(MiniMessage.miniMessage().deserialize(name))
-                        .lore(lore.stream().map(string -> MiniMessage.miniMessage().deserialize(string)).toList())
-                        .build();
+            ItemStack.builder(Objects.requireNonNullElse(Material.fromNamespaceId(material), Material.AIR))
+                .displayName(MiniMessage.miniMessage().deserialize(name))
+                .lore(lore.stream().map(string -> MiniMessage.miniMessage().deserialize(string)).toList())
+                .build();
 
         System.out.println(itemStack.toItemNBT().toSNBT());
     }

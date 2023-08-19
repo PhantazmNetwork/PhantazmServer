@@ -53,7 +53,8 @@ public class SpawnParticleSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("particle") String particle, @NotNull Bounds3D bounds) {
+    public record Data(@NotNull @ChildPath("particle") String particle,
+        @NotNull Bounds3D bounds) {
 
     }
 

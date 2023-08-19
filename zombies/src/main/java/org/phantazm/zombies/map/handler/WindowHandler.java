@@ -18,15 +18,16 @@ public interface WindowHandler extends Tickable {
 
     interface Source {
         @NotNull WindowHandler make(@NotNull BoundedTracker<Window> windowTracker,
-                @NotNull BoundedTracker<Room> roomTracker, @NotNull MobStore mobStore,
-                @NotNull Collection<? extends ZombiesPlayer> players);
+            @NotNull BoundedTracker<Room> roomTracker, @NotNull MobStore mobStore,
+            @NotNull Collection<? extends ZombiesPlayer> players);
     }
 
-    record WindowMessages(@NotNull Component nearWindow,
-                          @NotNull Component startRepairing,
-                          @NotNull Component stopRepairing,
-                          @NotNull Component finishRepairing,
-                          @NotNull Component enemiesNearby) {
+    record WindowMessages(
+        @NotNull Component nearWindow,
+        @NotNull Component startRepairing,
+        @NotNull Component stopRepairing,
+        @NotNull Component finishRepairing,
+        @NotNull Component enemiesNearby) {
 
     }
 }

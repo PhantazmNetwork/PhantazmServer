@@ -32,8 +32,8 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
 
     @FactoryMethod
     public InteractingClickHandler(@NotNull Data data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull @Child("updating_item") UpdatingItem updatingItem,
-            @NotNull @Child("click_interactor") ShopInteractor clickInteractor) {
+        @NotNull @Child("updating_item") UpdatingItem updatingItem,
+        @NotNull @Child("click_interactor") ShopInteractor clickInteractor) {
         super(data, playerMap);
         this.updatingItem = Objects.requireNonNull(updatingItem);
         this.clickInteractor = Objects.requireNonNull(clickInteractor);
@@ -45,7 +45,7 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
         ZombiesPlayer zombiesPlayer = playerMap.get(player.getUuid());
         if (zombiesPlayer != null && data.clickTypes.contains(clickType) != data.blacklist) {
             boolean success = clickInteractor.handleInteraction(
-                    new BasicPlayerInteraction(zombiesPlayer, InteractionTypes.CLICK_INVENTORY));
+                new BasicPlayerInteraction(zombiesPlayer, InteractionTypes.CLICK_INVENTORY));
 
             if (data.closeOnInteract && success) {
                 player.closeInventory();
@@ -82,11 +82,12 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     }
 
     @DataObject
-    public record Data(@NotNull Set<ClickType> clickTypes,
-                       boolean blacklist,
-                       @NotNull @ChildPath("updating_item") String updatingItem,
-                       @NotNull @ChildPath("click_interactor") String clickInteractor,
-                       boolean closeOnInteract) {
+    public record Data(
+        @NotNull Set<ClickType> clickTypes,
+        boolean blacklist,
+        @NotNull @ChildPath("updating_item") String updatingItem,
+        @NotNull @ChildPath("click_interactor") String clickInteractor,
+        boolean closeOnInteract) {
         @Default("closeOnInteract")
         public static @NotNull ConfigElement defaultCloseOnInteract() {
             return ConfigPrimitive.of(true);

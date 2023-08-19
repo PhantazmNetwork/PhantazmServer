@@ -51,7 +51,8 @@ public class PushEntitySkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector,
+    public record Data(
+        @NotNull @ChildPath("selector") String selector,
         double power,
         double vertical,
         boolean additive) {

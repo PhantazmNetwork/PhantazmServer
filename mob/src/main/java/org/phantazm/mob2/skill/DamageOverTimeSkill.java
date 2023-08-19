@@ -14,15 +14,14 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
+import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
-import org.phantazm.mob2.Trigger;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class DamageOverTimeSkill implements SkillComponent {
     private final Data data;
@@ -40,12 +39,13 @@ public class DamageOverTimeSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger,
-                       @NotNull @ChildPath("selector") String selector,
-                       int damageInterval,
-                       int damageTime,
-                       float damageAmount,
-                       boolean bypassArmor) {
+    public record Data(
+        @Nullable Trigger trigger,
+        @NotNull @ChildPath("selector") String selector,
+        int damageInterval,
+        int damageTime,
+        float damageAmount,
+        boolean bypassArmor) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -111,7 +111,7 @@ public class DamageOverTimeSkill implements SkillComponent {
 
         private void damageTarget(LivingEntity target) {
             target.getAcquirable().sync(targetEntity -> {
-                LivingEntity livingEntity = (LivingEntity)targetEntity;
+                LivingEntity livingEntity = (LivingEntity) targetEntity;
                 livingEntity.damage(Damage.fromEntity(self, data.damageAmount), data.bypassArmor);
             });
         }
@@ -120,7 +120,8 @@ public class DamageOverTimeSkill implements SkillComponent {
             targets.add(new Entry(livingEntity, ticks));
         }
 
-        private record Entry(LivingEntity target, int start) {
+        private record Entry(LivingEntity target,
+            int start) {
         }
     }
 }

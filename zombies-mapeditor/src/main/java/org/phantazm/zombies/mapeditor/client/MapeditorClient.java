@@ -87,10 +87,10 @@ public class MapeditorClient implements ClientModInitializer {
                 Text message;
                 if (packet.packet().version() == MapSettingsInfo.MAP_DATA_VERSION) {
                     message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_SYNCED)
-                                  .formatted(Formatting.GREEN);
+                        .formatted(Formatting.GREEN);
                 } else {
                     message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED)
-                                  .formatted(Formatting.RED);
+                        .formatted(Formatting.RED);
                 }
                 player.sendMessage(message);
             });
@@ -153,6 +153,31 @@ public class MapeditorClient implements ClientModInitializer {
 
         private RenderObject[] bakedObjects;
         private TextObject[] bakedText;
+
+        private static <TObject extends Keyed> boolean tryUpdateInPlace(TObject newObject, TObject[] baked,
+            Map<Key, TObject> map) {
+            Key newKey = newObject.key();
+            TObject oldObject = map.get(newKey);
+            if (oldObject != null) {
+                if (baked != null) {
+                    int i = 0;
+                    for (TObject object : baked) {
+                        if (object.key().equals(newKey)) {
+                            if (oldObject != newObject) {
+                                map.put(newKey, newObject);
+                            }
+
+                            baked[i] = newObject;
+                            return false;
+                        }
+
+                        i++;
+                    }
+                }
+            }
+
+            return true;
+        }
 
         public void rendered(MatrixStack stack) {
             if (!enabled) {
@@ -274,31 +299,6 @@ public class MapeditorClient implements ClientModInitializer {
                 textObjects.put(value.key, value);
                 bakedText = null;
             }
-        }
-
-        private static <TObject extends Keyed> boolean tryUpdateInPlace(TObject newObject, TObject[] baked,
-            Map<Key, TObject> map) {
-            Key newKey = newObject.key();
-            TObject oldObject = map.get(newKey);
-            if (oldObject != null) {
-                if (baked != null) {
-                    int i = 0;
-                    for (TObject object : baked) {
-                        if (object.key().equals(newKey)) {
-                            if (oldObject != newObject) {
-                                map.put(newKey, newObject);
-                            }
-
-                            baked[i] = newObject;
-                            return false;
-                        }
-
-                        i++;
-                    }
-                }
-            }
-
-            return true;
         }
 
         @Override

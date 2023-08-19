@@ -37,6 +37,6 @@ public final class HashStrategies {
     @SuppressWarnings("unchecked")
     public static <T> Hash.@NotNull Strategy<T> identity() {
         //this cast is always safe, IDENTITY's methods don't care about the object type
-        return (Hash.Strategy<T>)IDENTITY;
+        return (Hash.Strategy<T>) IDENTITY;
     }
 }

@@ -89,7 +89,8 @@ public class HitScanFirer implements Firer {
      * @param shotHandlers A path to the {@link HitScanFirer}'s {@link ShotHandler}s
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("end_selector") String endSelector,
+    public record Data(
+        @NotNull @ChildPath("end_selector") String endSelector,
         @NotNull @ChildPath("target_finder") String targetFinder,
         @NotNull @ChildPath("shot_handlers") Collection<String> shotHandlers) {
     }

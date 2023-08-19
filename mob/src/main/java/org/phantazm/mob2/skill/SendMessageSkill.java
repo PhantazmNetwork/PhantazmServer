@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
+import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
-import org.phantazm.mob2.Trigger;
 
 import java.util.Objects;
 
@@ -36,9 +36,10 @@ public class SendMessageSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger,
-                       @NotNull @ChildPath("selector") String selector,
-                       @NotNull Component message) {
+    public record Data(
+        @Nullable Trigger trigger,
+        @NotNull @ChildPath("selector") String selector,
+        @NotNull Component message) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;

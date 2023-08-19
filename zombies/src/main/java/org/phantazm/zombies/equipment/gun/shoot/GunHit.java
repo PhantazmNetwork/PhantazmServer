@@ -12,7 +12,8 @@ import java.util.Objects;
  * @param entity   The target {@link LivingEntity} of the hit
  * @param location The location of the hit
  */
-public record GunHit(@NotNull LivingEntity entity, @NotNull Vec location) {
+public record GunHit(@NotNull LivingEntity entity,
+    @NotNull Vec location) {
 
     /**
      * Creates a {@link GunHit}.

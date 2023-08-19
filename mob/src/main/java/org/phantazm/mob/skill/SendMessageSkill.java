@@ -34,6 +34,7 @@ public class SendMessageSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull Component message, @NotNull @ChildPath("selector") String selector) {
+    public record Data(@NotNull Component message,
+        @NotNull @ChildPath("selector") String selector) {
     }
 }

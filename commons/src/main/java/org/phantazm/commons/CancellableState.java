@@ -6,13 +6,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 public interface CancellableState {
-    void start();
-
-    void end();
-
-    @NotNull
-    UUID id();
-
     static @NotNull CancellableState named(@NotNull UUID id, @NotNull Runnable start, @NotNull Runnable end) {
         Objects.requireNonNull(id);
         Objects.requireNonNull(start);
@@ -35,4 +28,11 @@ public interface CancellableState {
             }
         };
     }
+
+    void start();
+
+    void end();
+
+    @NotNull
+    UUID id();
 }

@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
+import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
-import org.phantazm.mob2.Trigger;
 
 import java.util.Objects;
 
@@ -36,11 +36,12 @@ public class RadialDamageSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger,
-                       @NotNull @ChildPath("selector") String selector,
-                       float damage,
-                       boolean bypassArmor,
-                       double range) {
+    public record Data(
+        @Nullable Trigger trigger,
+        @NotNull @ChildPath("selector") String selector,
+        float damage,
+        boolean bypassArmor,
+        double range) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -63,10 +64,10 @@ public class RadialDamageSkill implements SkillComponent {
         @Override
         protected void useOnTarget(@NotNull Target target) {
             target.forType(LivingEntity.class, livingEntity -> {
-                float damage = (float)calculateDamage(self.getDistance(livingEntity));
+                float damage = (float) calculateDamage(self.getDistance(livingEntity));
 
                 livingEntity.getAcquirable().sync(entity -> {
-                    LivingEntity targetEntity = (LivingEntity)entity;
+                    LivingEntity targetEntity = (LivingEntity) entity;
                     targetEntity.damage(Damage.fromEntity(self, damage), data.bypassArmor);
                 });
             });
@@ -74,7 +75,7 @@ public class RadialDamageSkill implements SkillComponent {
 
         private double calculateDamage(double distanceToEntity) {
             return ((data.damage * Math.sqrt(data.range)) / data.range) *
-                    (Math.sqrt(Math.max(0, -distanceToEntity + data.range)));
+                (Math.sqrt(Math.max(0, -distanceToEntity + data.range)));
         }
 
         @Override

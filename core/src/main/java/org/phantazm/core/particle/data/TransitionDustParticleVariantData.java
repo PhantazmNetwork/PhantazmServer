@@ -39,6 +39,8 @@ public class TransitionDustParticleVariantData implements ParticleVariantData {
     }
 
     @DataObject
-    public record Data(@NotNull RGBLike fromColor, @NotNull RGBLike toColor, float size) {
+    public record Data(@NotNull RGBLike fromColor,
+        @NotNull RGBLike toColor,
+        float size) {
     }
 }

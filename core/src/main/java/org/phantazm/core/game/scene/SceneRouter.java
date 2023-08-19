@@ -20,8 +20,7 @@ public interface SceneRouter<TScene extends Scene<?>, TRequest extends SceneJoin
     @NotNull Collection<TScene> getScenesContainingPlayer(@NotNull UUID playerUUID);
 
     /**
-     * Whether the scene is currently shutdown.
-     * Shutdown scenes should not allow more players.
+     * Whether the scene is currently shutdown. Shutdown scenes should not allow more players.
      *
      * @return Whether the scene is shutdown
      */
@@ -40,8 +39,7 @@ public interface SceneRouter<TScene extends Scene<?>, TRequest extends SceneJoin
     boolean isJoinable();
 
     /**
-     * Sets whether the scene should be considered joinable.
-     * Joinable is defined on an implementation basis.
+     * Sets whether the scene should be considered joinable. Joinable is defined on an implementation basis.
      *
      * @param joinable Whether the scene should be joinable
      */

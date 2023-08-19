@@ -25,8 +25,7 @@ public class PardonCommand extends PermissionLockedCommand {
                     if (loginValidator.isBanned(uuid)) {
                         loginValidator.pardon(uuid);
                         sender.sendMessage("Pardoned " + uuid + " (" + name + ")");
-                    }
-                    else {
+                    } else {
                         sender.sendMessage(uuid + " (" + name + ") is not banned");
                     }
                 });

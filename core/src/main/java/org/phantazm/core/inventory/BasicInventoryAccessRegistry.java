@@ -18,8 +18,8 @@ import java.util.Optional;
 public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     private final Map<Key, InventoryAccess> accessMap = new HashMap<>();
     private final Object sync = new Object();
-    private volatile InventoryAccess currentAccess = null;
     private final PlayerView playerView;
+    private volatile InventoryAccess currentAccess = null;
 
     public BasicInventoryAccessRegistry(@NotNull PlayerView playerView) {
         this.playerView = Objects.requireNonNull(playerView);
@@ -81,7 +81,7 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
 
     @Override
     public @Nullable InventoryObject replaceObject(@NotNull InventoryAccess access, int slot,
-            @NotNull InventoryObject newObject) {
+        @NotNull InventoryObject newObject) {
         InventoryProfile profile = access.profile();
         InventoryObject old = null;
         if (profile.hasInventoryObject(slot)) {

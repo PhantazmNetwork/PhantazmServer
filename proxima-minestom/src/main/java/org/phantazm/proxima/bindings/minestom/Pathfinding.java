@@ -32,30 +32,15 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiPredicate;
 
 public class Pathfinding {
-    public interface Penalty {
-        Penalty NONE = (x, y, z, h) -> h;
-
-        float calculate(int x, int y, int z, float h);
-    }
-
     public static final double PLAYER_PATH_EPSILON = 0.0005;
     public static final double MOB_PATH_EPSILON = 1E-6;
     public static final double PLAYER_PATH_EPSILON_DOWNWARDS = MOB_PATH_EPSILON;
-
-    public interface Factory {
-        @NotNull
-        Pathfinding make(@NotNull Pathfinder pathfinder,
-            @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler);
-    }
-
     protected final Pathfinder pathfinder;
     protected final ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal;
     protected final InstanceSpaceHandler spaceHandler;
-
     protected Entity self;
     protected Entity target;
     protected Penalty penalty;
-
     protected BoundingBox lastBoundingBox;
     protected Vec3IBiPredicate successPredicate;
     protected NodeSnapper nodeSnapper;
@@ -63,7 +48,6 @@ public class Pathfinding {
     protected Explorer explorer;
     protected Heuristic heuristic;
     protected NodeProcessor nodeProcessor;
-
     protected Navigator navigator;
     protected PathSettings pathSettings;
     protected Controller controller;
@@ -118,14 +102,14 @@ public class Pathfinding {
         if (lastBoundingBox != null && !boundingBox.equals(lastBoundingBox)) {
             cancel();
             return navigator =
-                       new BasicNavigator(pathfinder,
-                           pathSettings = generateSettings(this.lastBoundingBox = boundingBox));
+                new BasicNavigator(pathfinder,
+                    pathSettings = generateSettings(this.lastBoundingBox = boundingBox));
         }
 
         return Objects.requireNonNullElseGet(navigator, () -> navigator =
-                                                                  new BasicNavigator(pathfinder,
-                                                                      pathSettings = generateSettings(
-                                                                          this.lastBoundingBox = boundingBox)));
+            new BasicNavigator(pathfinder,
+                pathSettings = generateSettings(
+                    this.lastBoundingBox = boundingBox)));
     }
 
     public @NotNull PathSettings getSettings(@NotNull BoundingBox boundingBox) {
@@ -271,7 +255,19 @@ public class Pathfinding {
         //randomize path recalculation delay
         double factor = ThreadLocalRandom.current().nextDouble() + 0.5;
 
-        long count = pathResult.isSuccessful() ? pathResult.exploredCount():pathResult.exploredCount() * 2L;
+        long count = pathResult.isSuccessful() ? pathResult.exploredCount() : pathResult.exploredCount() * 2L;
         return Math.min((long) (count * factor), 3000);
+    }
+
+    public interface Penalty {
+        Penalty NONE = (x, y, z, h) -> h;
+
+        float calculate(int x, int y, int z, float h);
+    }
+
+    public interface Factory {
+        @NotNull
+        Pathfinding make(@NotNull Pathfinder pathfinder,
+            @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler);
     }
 }

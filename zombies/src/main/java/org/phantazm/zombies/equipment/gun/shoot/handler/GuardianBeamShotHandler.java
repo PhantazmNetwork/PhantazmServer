@@ -64,7 +64,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
                     throw new ConfigProcessException("beamTime must be greater than or equal to 0");
                 }
 
-                return new Data(isElder ? EntityType.ELDER_GUARDIAN:EntityType.GUARDIAN, beamTime);
+                return new Data(isElder ? EntityType.ELDER_GUARDIAN : EntityType.GUARDIAN, beamTime);
             }
 
             @Override
@@ -135,10 +135,12 @@ public class GuardianBeamShotHandler implements ShotHandler {
      * @param beamTime   The time in ticks the beam will last
      */
     @DataObject
-    public record Data(@NotNull EntityType entityType, long beamTime) {
+    public record Data(@NotNull EntityType entityType,
+        long beamTime) {
     }
 
-    private record Beam(@NotNull Reference<Instance> instance,
+    private record Beam(
+        @NotNull Reference<Instance> instance,
         @NotNull Entity guardian,
         @NotNull Entity armorStand,
         long ticks) {

@@ -30,7 +30,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
 
     @FactoryMethod
     public EntitiesInAreaSelector(@NotNull Data data, @NotNull @Child("origin") SelectorComponent originSelector,
-            @NotNull @Child("validator") ValidatorComponent validator) {
+        @NotNull @Child("validator") ValidatorComponent validator) {
         this.data = data;
         this.originSelector = originSelector;
         this.validator = validator;
@@ -42,12 +42,13 @@ public class EntitiesInAreaSelector implements SelectorComponent {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("origin") String originSelector,
-                       @NotNull @ChildPath("validator") String validator,
-                       boolean limitSelf,
-                       @NotNull TrackerTargetType target,
-                       double range,
-                       int limit) {
+    public record Data(
+        @NotNull @ChildPath("origin") String originSelector,
+        @NotNull @ChildPath("validator") String validator,
+        boolean limitSelf,
+        @NotNull TrackerTargetType target,
+        double range,
+        int limit) {
         @Default("limitSelf")
         public static @NotNull ConfigElement limitSelfDefault() {
             return ConfigPrimitive.of(true);
@@ -69,7 +70,10 @@ public class EntitiesInAreaSelector implements SelectorComponent {
         }
     }
 
-    private record Internal(Mob self, Selector originSelector, Validator validator, Data data) implements Selector {
+    private record Internal(Mob self,
+        Selector originSelector,
+        Validator validator,
+        Data data) implements Selector {
         @Override
         public @NotNull Target select() {
             Instance instance = self.getInstance();
@@ -90,10 +94,9 @@ public class EntitiesInAreaSelector implements SelectorComponent {
                 for (Entity target : instance.getEntityTracker().entities(data.target.target())) {
                     handleEntity(origin, target, targets);
                 }
-            }
-            else {
+            } else {
                 instance.getEntityTracker().nearbyEntities(origin, data.range, data.target.target(),
-                        target -> handleEntity(origin, target, targets));
+                    target -> handleEntity(origin, target, targets));
             }
 
             if (targets.isEmpty()) {

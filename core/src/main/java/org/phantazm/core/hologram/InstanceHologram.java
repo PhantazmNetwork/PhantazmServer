@@ -211,8 +211,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
             if (armorStand.getInstance() == instance) {
                 armorStand.teleport(pos).join();
-            }
-            else {
+            } else {
                 armorStand.setInstance(instance, pos).join();
             }
         }
@@ -229,7 +228,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      */
     protected @NotNull Entity constructEntity(@NotNull Component display) {
         Entity stand = new Entity(EntityType.ARMOR_STAND);
-        ArmorStandMeta meta = (ArmorStandMeta)stand.getEntityMeta();
+        ArmorStandMeta meta = (ArmorStandMeta) stand.getEntityMeta();
         meta.setMarker(true);
         meta.setHasNoGravity(true);
         meta.setCustomNameVisible(true);

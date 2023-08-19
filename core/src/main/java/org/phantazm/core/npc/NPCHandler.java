@@ -18,7 +18,7 @@ public class NPCHandler implements Tickable {
     private final EventNode<InstanceEvent> instanceNode;
 
     public NPCHandler(@NotNull List<NPC> npcs, @NotNull Instance instance,
-            @NotNull EventNode<InstanceEvent> instanceNode) {
+        @NotNull EventNode<InstanceEvent> instanceNode) {
         this.npcs = List.copyOf(npcs);
         this.instance = Objects.requireNonNull(instance);
         this.instanceNode = Objects.requireNonNull(instanceNode);

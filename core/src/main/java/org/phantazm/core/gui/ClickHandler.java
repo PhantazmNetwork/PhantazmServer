@@ -21,7 +21,8 @@ public interface ClickHandler {
     void handleClick(@NotNull Gui owner, @NotNull Player player, int slot, @NotNull GuiItem.ClickType clickType);
 
     /**
-     * Returns a new ClickHandler which will invoke the current ClickHandler only if the required ClickType is supplied.
+     * Returns a new ClickHandler which will invoke the current ClickHandler only if the required ClickType is
+     * supplied.
      *
      * @param requiredType the necessary ClickType
      * @return a new ClickHandler instance

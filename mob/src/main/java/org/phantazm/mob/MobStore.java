@@ -23,7 +23,7 @@ public class MobStore implements Tickable {
 
     private final Map<UUID, PhantazmMob> uuidToMob = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Pair<PhantazmMob, Collection<Skill>>> tickableSkills =
-            new ConcurrentHashMap<>();
+        new ConcurrentHashMap<>();
 
     /**
      * Attempts to activate triggers for an {@link Entity}.

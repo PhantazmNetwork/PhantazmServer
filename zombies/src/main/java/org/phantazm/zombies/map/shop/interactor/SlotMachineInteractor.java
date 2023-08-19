@@ -59,16 +59,16 @@ public class SlotMachineInteractor implements ShopInteractor {
 
     @FactoryMethod
     public SlotMachineInteractor(Data data, @NotNull @Child("roll_predicates") List<ShopPredicate> rollPredicates,
-            @NotNull @Child("tick_formatter") TickFormatter tickFormatter,
-            @NotNull @Child("delay_formula") DelayFormula delayFormula,
-            @NotNull @Child("frames") List<SlotMachineFrame> frames,
-            @NotNull @Child("roll_fail_interactors") List<ShopInteractor> rollFailInteractors,
-            @NotNull @Child("roll_start_interactors") List<ShopInteractor> rollStartInteractors,
-            @NotNull @Child("mismatched_player_interactors") List<ShopInteractor> mismatchedPlayerInteractors,
-            @NotNull @Child("while_rolling_interactors") List<ShopInteractor> whileRollingInteractors,
-            @NotNull @Child("timeout_expired_interactors") List<ShopInteractor> timeoutExpiredInteractors,
-            @NotNull @Child("item_claimed_interactors") List<ShopInteractor> itemClaimedInteractors,
-            @NotNull @Child("end_interactors") List<ShopInteractor> endInteractors, @NotNull Random random) {
+        @NotNull @Child("tick_formatter") TickFormatter tickFormatter,
+        @NotNull @Child("delay_formula") DelayFormula delayFormula,
+        @NotNull @Child("frames") List<SlotMachineFrame> frames,
+        @NotNull @Child("roll_fail_interactors") List<ShopInteractor> rollFailInteractors,
+        @NotNull @Child("roll_start_interactors") List<ShopInteractor> rollStartInteractors,
+        @NotNull @Child("mismatched_player_interactors") List<ShopInteractor> mismatchedPlayerInteractors,
+        @NotNull @Child("while_rolling_interactors") List<ShopInteractor> whileRollingInteractors,
+        @NotNull @Child("timeout_expired_interactors") List<ShopInteractor> timeoutExpiredInteractors,
+        @NotNull @Child("item_claimed_interactors") List<ShopInteractor> itemClaimedInteractors,
+        @NotNull @Child("end_interactors") List<ShopInteractor> endInteractors, @NotNull Random random) {
         this.data = data;
         this.rollPredicates = rollPredicates;
         this.tickFormatter = tickFormatter;
@@ -122,8 +122,8 @@ public class SlotMachineInteractor implements ShopInteractor {
                 }
 
                 rollInteraction.player().getPlayer().ifPresent(player -> player.sendMessage(MiniMessage.miniMessage()
-                        .deserialize(data.itemClaimedFormat,
-                                Placeholder.component("claimed_item", getItemName(currentFrame.getVisual())))));
+                    .deserialize(data.itemClaimedFormat,
+                        Placeholder.component("claimed_item", getItemName(currentFrame.getVisual())))));
             }
 
             ShopInteractor.handle(itemClaimedInteractors, rollInteraction);
@@ -186,12 +186,12 @@ public class SlotMachineInteractor implements ShopInteractor {
             rollFinishTicks = 0;
 
             TagResolver rolledItemPlaceholder = Placeholder.component("rolled_item",
-                    getItemName(frames.get((currentFrameIndex - 1) % frames.size()).getVisual()));
+                getItemName(frames.get((currentFrameIndex - 1) % frames.size()).getVisual()));
             if (!frames.isEmpty()) {
                 if (!rollInteraction.player().hasQuit()) {
                     rollInteraction.player().getPlayer().ifPresent(player -> {
                         Component message =
-                                MiniMessage.miniMessage().deserialize(data.itemRolledToSelfFormat, rolledItemPlaceholder);
+                            MiniMessage.miniMessage().deserialize(data.itemRolledToSelfFormat, rolledItemPlaceholder);
                         player.sendMessage(message);
                     });
                 }
@@ -203,7 +203,7 @@ public class SlotMachineInteractor implements ShopInteractor {
 
                     TagResolver rollerPlaceholder = Placeholder.component("roller", displayName);
                     Component message = MiniMessage.miniMessage()
-                            .deserialize(data.itemRolledToOthersFormat, rollerPlaceholder, rolledItemPlaceholder);
+                        .deserialize(data.itemRolledToOthersFormat, rollerPlaceholder, rolledItemPlaceholder);
                     filteredAudience.sendMessage(message);
                 });
             }
@@ -214,8 +214,8 @@ public class SlotMachineInteractor implements ShopInteractor {
         if (rollFinishTicks < data.gracePeriodTicks) {
             String timeString = tickFormatter.format(data.gracePeriodTicks - rollFinishTicks);
             TagResolver[] tags =
-                    getTagsForFrame(frames.isEmpty() ? null : frames.get((currentFrameIndex - 1) % frames.size()),
-                            Placeholder.unparsed("time_left", timeString));
+                getTagsForFrame(frames.isEmpty() ? null : frames.get((currentFrameIndex - 1) % frames.size()),
+                    Placeholder.unparsed("time_left", timeString));
 
             List<Component> newComponents = new ArrayList<>(data.gracePeriodFormats.size());
             for (String formatString : data.gracePeriodFormats) {
@@ -264,7 +264,7 @@ public class SlotMachineInteractor implements ShopInteractor {
         }
 
         item = new Entity(EntityType.ITEM);
-        ItemEntityMeta meta = (ItemEntityMeta)item.getEntityMeta();
+        ItemEntityMeta meta = (ItemEntityMeta) item.getEntityMeta();
         meta.setItem(frame.getVisual());
         meta.setHasNoGravity(true);
 
@@ -281,7 +281,7 @@ public class SlotMachineInteractor implements ShopInteractor {
 
     private TagResolver[] getTagsForFrame(@Nullable SlotMachineFrame frame, TagResolver... additionalTags) {
         TagResolver rollingPlayerTag = Placeholder.component("rolling_player",
-                rollInteraction.player().module().getPlayerView().getDisplayNameIfPresent());
+            rollInteraction.player().module().getPlayerView().getDisplayNameIfPresent());
 
         Component displayName = frame != null ? getItemName(frame.getVisual()) : Component.empty();
         TagResolver itemName = Placeholder.component("item_name", displayName);
@@ -365,12 +365,13 @@ public class SlotMachineInteractor implements ShopInteractor {
 
         @Override
         public int delay(int frameCount, int frame) {
-            return (int)Math.rint(
-                    ((double)(data.endDelay - data.startDelay) / (double)frameCount) * frame + data.startDelay);
+            return (int) Math.rint(
+                ((double) (data.endDelay - data.startDelay) / (double) frameCount) * frame + data.startDelay);
         }
 
         @DataObject
-        public record Data(int startDelay, int endDelay) {
+        public record Data(int startDelay,
+            int endDelay) {
         }
     }
 
@@ -382,7 +383,7 @@ public class SlotMachineInteractor implements ShopInteractor {
 
         @FactoryMethod
         public BasicSlotMachineFrame(@NotNull Data data,
-                @NotNull @Child("interactors") List<ShopInteractor> interactors) {
+            @NotNull @Child("interactors") List<ShopInteractor> interactors) {
             this.data = data;
             this.interactors = interactors;
         }
@@ -398,32 +399,34 @@ public class SlotMachineInteractor implements ShopInteractor {
         }
 
         @DataObject
-        public record Data(@NotNull ItemStack itemStack, @NotNull @ChildPath("interactors") List<String> interactors) {
+        public record Data(@NotNull ItemStack itemStack,
+            @NotNull @ChildPath("interactors") List<String> interactors) {
         }
     }
 
     @DataObject
-    public record Data(int frameCount,
-                       double hologramOffset,
-                       double itemOffset,
-                       int gracePeriodTicks,
-                       @NotNull String itemRolledToSelfFormat,
-                       @NotNull String itemRolledToOthersFormat,
-                       @NotNull String itemClaimedFormat,
-                       @NotNull List<String> frameHologramFormats,
-                       @NotNull Key rollingFlag,
-                       @NotNull List<String> gracePeriodFormats,
-                       @NotNull Evaluation evaluation,
-                       @NotNull @ChildPath("roll_predicates") List<String> rollPredicates,
-                       @NotNull @ChildPath("tick_formatter") String tickFormatter,
-                       @NotNull @ChildPath("delay_formula") String delayFormula,
-                       @NotNull @ChildPath("frames") List<String> frames,
-                       @NotNull @ChildPath("roll_fail_interactors") List<String> rollFailInteractors,
-                       @NotNull @ChildPath("roll_start_interactors") List<String> rollStartInteractors,
-                       @NotNull @ChildPath("mismatched_player_interactors") List<String> mismatchedPlayerInteractors,
-                       @NotNull @ChildPath("while_rolling_interactors") List<String> whileRollingInteractors,
-                       @NotNull @ChildPath("timeout_expired_interactors") List<String> timeoutExpiredInteractors,
-                       @NotNull @ChildPath("item_claimed_interactors") List<String> itemClaimedInteractors,
-                       @NotNull @ChildPath("end_interactors") List<String> endInteractors) {
+    public record Data(
+        int frameCount,
+        double hologramOffset,
+        double itemOffset,
+        int gracePeriodTicks,
+        @NotNull String itemRolledToSelfFormat,
+        @NotNull String itemRolledToOthersFormat,
+        @NotNull String itemClaimedFormat,
+        @NotNull List<String> frameHologramFormats,
+        @NotNull Key rollingFlag,
+        @NotNull List<String> gracePeriodFormats,
+        @NotNull Evaluation evaluation,
+        @NotNull @ChildPath("roll_predicates") List<String> rollPredicates,
+        @NotNull @ChildPath("tick_formatter") String tickFormatter,
+        @NotNull @ChildPath("delay_formula") String delayFormula,
+        @NotNull @ChildPath("frames") List<String> frames,
+        @NotNull @ChildPath("roll_fail_interactors") List<String> rollFailInteractors,
+        @NotNull @ChildPath("roll_start_interactors") List<String> rollStartInteractors,
+        @NotNull @ChildPath("mismatched_player_interactors") List<String> mismatchedPlayerInteractors,
+        @NotNull @ChildPath("while_rolling_interactors") List<String> whileRollingInteractors,
+        @NotNull @ChildPath("timeout_expired_interactors") List<String> timeoutExpiredInteractors,
+        @NotNull @ChildPath("item_claimed_interactors") List<String> itemClaimedInteractors,
+        @NotNull @ChildPath("end_interactors") List<String> endInteractors) {
     }
 }

@@ -42,21 +42,21 @@ public class InstanceSettingsFunction implements Function<Instance, InstanceSpaw
             int minY = dimensionType.getMinY(); //range (-2032, 2031)
 
             WorldBorder border = instance.getWorldBorder();
-            int centerX = (int)Math.floor(border.getCenterX());
-            int centerZ = (int)Math.floor(border.getCenterZ());
+            int centerX = (int) Math.floor(border.getCenterX());
+            int centerZ = (int) Math.floor(border.getCenterZ());
 
-            int diameter = Math.min((int)Math.floor(border.getDiameter() / 2), 60000000);
+            int diameter = Math.min((int) Math.floor(border.getDiameter() / 2), 60000000);
             int halfDiameter = diameter / 2;
 
             Bounds3I bounds = Bounds3I.immutable(centerX - halfDiameter, minY, centerZ - halfDiameter, diameter, height,
-                    diameter);
+                diameter);
 
             InstanceSpace instanceSpace = new InstanceSpace(instance);
             ThreadLocal<Vec3I2ObjectMap<Node>> local = ThreadLocal.withInitial(() -> new HashVec3I2ObjectMap<>(bounds));
 
             EventNode<InstanceEvent> node =
-                    EventNode.type("pathfinding_node_" + instance.getUniqueId(), EventFilter.INSTANCE,
-                            (e, v) -> v == instance);
+                EventNode.type("pathfinding_node_" + instance.getUniqueId(), EventFilter.INSTANCE,
+                    (e, v) -> v == instance);
             rootNode.addChild(node);
 
             BasicInstanceSpaceHandler instanceSpaceHandler = new BasicInstanceSpaceHandler(instanceSpace, node);

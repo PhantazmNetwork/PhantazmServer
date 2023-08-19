@@ -38,6 +38,7 @@ public class AddVelocitySkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector, @NotNull Vec3D delta) {
+    public record Data(@NotNull @ChildPath("selector") String selector,
+        @NotNull Vec3D delta) {
     }
 }

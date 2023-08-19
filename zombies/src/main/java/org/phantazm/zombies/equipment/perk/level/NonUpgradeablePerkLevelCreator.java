@@ -52,7 +52,8 @@ public class NonUpgradeablePerkLevelCreator implements PerkLevelCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @Description("The level key for this level") Key key,
+    public record Data(
+        @NotNull @Description("The level key for this level") Key key,
         @NotNull @Description("The equipment controlling this perk's visuals") @ChildPath(
             "equipment") String equipment,
         @NotNull @Description("The perk effect(s) which are applied for this level") @ChildPath(

@@ -65,13 +65,13 @@ public interface MapObjects {
 
     @NotNull interface Source {
         @NotNull MapObjects make(@NotNull Instance instance,
-                @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-                @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
-                @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
-                @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
-                @NotNull SongPlayer songPlayer, @NotNull SongLoader songLoader,
-                @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam,
-                @NotNull Wrapper<Long> ticksSinceStart);
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+            @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
+            @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
+            @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
+            @NotNull SongPlayer songPlayer, @NotNull SongLoader songLoader,
+            @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam,
+            @NotNull Wrapper<Long> ticksSinceStart);
     }
 
     interface Module {

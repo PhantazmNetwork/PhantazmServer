@@ -23,9 +23,8 @@ public class AnalogTickFormatter implements TickFormatter {
     public @NotNull String format(long ticks) {
         long elapsedSeconds;
         if (data.ceil) {
-            elapsedSeconds = (long)Math.ceil((double)ticks / MinecraftServer.TICK_PER_SECOND);
-        }
-        else {
+            elapsedSeconds = (long) Math.ceil((double) ticks / MinecraftServer.TICK_PER_SECOND);
+        } else {
             elapsedSeconds = ticks / MinecraftServer.TICK_PER_SECOND;
         }
         long hours = elapsedSeconds / 3600;

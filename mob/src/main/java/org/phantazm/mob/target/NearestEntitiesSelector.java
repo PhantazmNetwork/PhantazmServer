@@ -22,6 +22,8 @@ public class NearestEntitiesSelector extends NearestEntitiesSelectorAbstract<Ent
     }
 
     @DataObject
-    public record Data(double range, int targetLimit, @NotNull @ChildPath("validator") String targetValidator) {
+    public record Data(double range,
+        int targetLimit,
+        @NotNull @ChildPath("validator") String targetValidator) {
     }
 }

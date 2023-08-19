@@ -16,12 +16,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class InstanceSpawner implements Spawner {
-    public record InstanceSettings(@NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeLocal,
-        @NotNull EventNode<InstanceEvent> instanceNode,
-        @NotNull InstanceSpaceHandler spaceHandler) {
-
-    }
-
     private final Pathfinder pathfinder;
     private final Function<? super Instance, ? extends InstanceSettings> settingsFunction;
 
@@ -46,5 +40,12 @@ public class InstanceSpawner implements Spawner {
 
         entity.setInstance(instance, pos);
         return entity;
+    }
+
+    public record InstanceSettings(
+        @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeLocal,
+        @NotNull EventNode<InstanceEvent> instanceNode,
+        @NotNull InstanceSpaceHandler spaceHandler) {
+
     }
 }

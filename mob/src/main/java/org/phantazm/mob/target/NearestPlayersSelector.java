@@ -33,7 +33,9 @@ public class NearestPlayersSelector extends NearestEntitiesSelectorAbstract<Play
     }
 
     @DataObject
-    public record Data(double range, int targetLimit, @NotNull @ChildPath("validator") String targetValidator) {
+    public record Data(double range,
+        int targetLimit,
+        @NotNull @ChildPath("validator") String targetValidator) {
 
     }
 

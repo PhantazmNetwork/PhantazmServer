@@ -159,7 +159,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
             inventoryObjectGroupEntries[i] = Map.entry(entry.getKey(),
                 new BasicInventoryObjectGroup(livingProfile, groupInfo.slots(),
-                    itemStack == null ? null:new StaticInventoryObject(itemStack)));
+                    itemStack == null ? null : new StaticInventoryObject(itemStack)));
         }
 
         InventoryAccess livingInventoryAccess =
@@ -262,7 +262,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             new BestTimeLeaderboard.Module(database, playerView.getUUID(), hologram, leaderboardInfo.gap(),
                 armorStand, mapSettingsInfo, viewProvider, MiniMessage.miniMessage(), executor);
         BestTimeLeaderboard leaderboard = contextManager.makeContext(leaderboardInfo.data())
-                                              .provide(new ModuleDependencyProvider(keyParser, leaderboardModule));
+            .provide(new ModuleDependencyProvider(keyParser, leaderboardModule));
         eventNode.addListener(PlayerEntityInteractEvent.class, event -> {
             if (event.getPlayer().getUuid().equals(playerView.getUUID()) && event.getTarget() == armorStand) {
                 playerView.getPlayer().ifPresent(player -> player.playSound(leaderboardInfo.clickSound(), armorStand));

@@ -210,7 +210,7 @@ public class ProximaEntity extends LivingEntity {
                 currentPath = null;
             }
         } else if (destination != null && pathfinding.canPathfind(this) && (time - lastPathfind > recalculationDelay &&
-                                                                                (destination.hasChanged() || (currentPath == null || !currentPath.isSuccessful())))) {
+            (destination.hasChanged() || (currentPath == null || !currentPath.isSuccessful())))) {
             navigator.navigate(position.x(), position.y(), position.z(), destination);
             this.lastPathfind = time;
         }
@@ -267,7 +267,7 @@ public class ProximaEntity extends LivingEntity {
         current = closestNode;
 
         Node currentParent = closestNode.parent;
-        target = currentParent == null ? closestNode:currentParent;
+        target = currentParent == null ? closestNode : currentParent;
 
         return true;
     }
@@ -279,20 +279,14 @@ public class ProximaEntity extends LivingEntity {
 
         Pos position = getPosition();
         return position.distanceSquared(new Vec(node.x + 0.5, node.y + node.blockOffset, node.z + 0.5)) <
-                   NODE_REACH_DISTANCE_SQ && (int) Math.floor(position.y()) == node.y;
-    }
-
-    protected enum MoveResult {
-        CONTINUE,
-        CANCEL,
-        KEEP_DESTINATION
+            NODE_REACH_DISTANCE_SQ && (int) Math.floor(position.y()) == node.y;
     }
 
     protected MoveResult moveAlongPath(long time) {
         Point pos = getPosition();
 
         if (pos.distanceSquared(current.x + 0.5, current.y + current.blockOffset, current.z + 0.5) >
-                NODE_DEVIATION_DISTANCE_SQ && (current.parent != null && !current.equals(currentPath.head()))) {
+            NODE_DEVIATION_DISTANCE_SQ && (current.parent != null && !current.equals(currentPath.head()))) {
             return MoveResult.CANCEL;
         }
 
@@ -305,14 +299,14 @@ public class ProximaEntity extends LivingEntity {
 
         Node target = this.target;
         if (target == null && pathfinding.target != null && currentPath != null && (currentPath.isSuccessful() ||
-                                                                                        (pathfinding.useSynthetic() &&
-                                                                                             pathfinding.target.getDistanceSquared(
-                                                                                                 this) < NODE_DEVIATION_DISTANCE_SQ)) &&
-                pathfinding.useSynthetic()) {
+            (pathfinding.useSynthetic() &&
+                pathfinding.target.getDistanceSquared(
+                    this) < NODE_DEVIATION_DISTANCE_SQ)) &&
+            pathfinding.useSynthetic()) {
             Vec3I synthetic = PositionResolver.FLOORED.resolve(VecUtils.toDouble(pathfinding.target.getPosition()));
 
             if (!pathfinding.getSettings(getBoundingBox()).successPredicate()
-                     .test(synthetic.x(), synthetic.y(), synthetic.z(), current.x, current.y, current.z)) {
+                .test(synthetic.x(), synthetic.y(), synthetic.z(), current.x, current.y, current.z)) {
                 target = new Node(synthetic.x(), synthetic.y(), synthetic.z(), 0, 0,
                     (float) (pathfinding.target.getPosition().y() - pathfinding.target.getPosition().blockY()));
             }
@@ -327,8 +321,8 @@ public class ProximaEntity extends LivingEntity {
 
             if (!controller.hasControl()) {
                 if (!(MathUtils.fuzzyEquals(currentX, lastX, Pathfinding.MOB_PATH_EPSILON) &&
-                          MathUtils.fuzzyEquals(currentY, lastY, Pathfinding.MOB_PATH_EPSILON) &&
-                          MathUtils.fuzzyEquals(currentZ, lastZ, Pathfinding.MOB_PATH_EPSILON))) {
+                    MathUtils.fuzzyEquals(currentY, lastY, Pathfinding.MOB_PATH_EPSILON) &&
+                    MathUtils.fuzzyEquals(currentZ, lastZ, Pathfinding.MOB_PATH_EPSILON))) {
                     lastMoved = time;
                 } else if (time - lastMoved > pathfinding.immobileThreshold()) {
                     //if we don't have any movement, stop moving along this path
@@ -346,5 +340,11 @@ public class ProximaEntity extends LivingEntity {
         }
 
         return MoveResult.KEEP_DESTINATION;
+    }
+
+    protected enum MoveResult {
+        CONTINUE,
+        CANCEL,
+        KEEP_DESTINATION
     }
 }

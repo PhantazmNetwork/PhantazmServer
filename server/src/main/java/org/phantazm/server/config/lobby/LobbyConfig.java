@@ -19,7 +19,8 @@ import java.util.Objects;
  * @param maxPlayers     The maximum players possible for the {@link Lobby}
  * @param maxLobbies     The maximum number of {@link Lobby}s for this {@link Lobby} type
  */
-public record LobbyConfig(@NotNull InstanceConfig instanceConfig,
+public record LobbyConfig(
+    @NotNull InstanceConfig instanceConfig,
     @NotNull List<String> lobbyPaths,
     int maxPlayers,
     int maxLobbies,

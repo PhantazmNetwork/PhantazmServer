@@ -24,14 +24,6 @@ public interface TransactionModifierSource {
         }
     };
 
-    @NotNull
-    @UnmodifiableView
-    Collection<Transaction.Modifier> modifiers(@NotNull Key key);
-
-    void addModifier(@NotNull Key group, @NotNull Transaction.Modifier modifier);
-
-    void removeModifier(@NotNull Key group, @NotNull Transaction.Modifier modifier);
-
     static @NotNull TransactionModifierSource compositeView() {
         return EMPTY;
     }
@@ -101,4 +93,12 @@ public interface TransactionModifierSource {
             }
         };
     }
+
+    @NotNull
+    @UnmodifiableView
+    Collection<Transaction.Modifier> modifiers(@NotNull Key key);
+
+    void addModifier(@NotNull Key group, @NotNull Transaction.Modifier modifier);
+
+    void removeModifier(@NotNull Key group, @NotNull Transaction.Modifier modifier);
 }

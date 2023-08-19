@@ -27,7 +27,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
 
     @FactoryMethod
     public AttributeModifierAction(@NotNull Data data,
-            @NotNull @Child("predicate") DeactivationPredicateComponent deactivationPredicate) {
+        @NotNull @Child("predicate") DeactivationPredicateComponent deactivationPredicate) {
         this.data = data;
         this.deactivationPredicate = deactivationPredicate;
     }
@@ -38,11 +38,12 @@ public class AttributeModifierAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(@NotNull String attribute,
-                       double amount,
-                       @NotNull AttributeOperation attributeOperation,
-                       boolean global,
-                       @NotNull @ChildPath("predicate") String deactivationPredicate) {
+    public record Data(
+        @NotNull String attribute,
+        double amount,
+        @NotNull AttributeOperation attributeOperation,
+        boolean global,
+        @NotNull @ChildPath("predicate") String deactivationPredicate) {
 
     }
 
@@ -54,7 +55,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
         private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
         private Action(Data data, DeactivationPredicate deactivationPredicate,
-                Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+            Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
             super(deactivationPredicate);
             this.data = data;
             this.attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
@@ -67,7 +68,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
             player.registerCancellable(CancellableState.named(attributeUID, () -> {
                 player.getPlayer().ifPresent(p -> {
                     p.getAttribute(attribute).addModifier(
-                            new AttributeModifier(attributeUID, attributeName, data.amount, data.attributeOperation));
+                        new AttributeModifier(attributeUID, attributeName, data.amount, data.attributeOperation));
                 });
             }, () -> {
                 player.getPlayer().ifPresent(p -> {
@@ -92,8 +93,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
 
                     applyAttribute(zombiesPlayer);
                 }
-            }
-            else {
+            } else {
                 applyAttribute(player);
             }
         }
@@ -104,8 +104,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
                 for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
                     removeAttribute(zombiesPlayer);
                 }
-            }
-            else {
+            } else {
                 removeAttribute(player);
             }
         }

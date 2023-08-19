@@ -97,6 +97,7 @@ public class FollowEntityGoal implements GoalCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector, long retargetInterval) {
+    public record Data(@NotNull @ChildPath("selector") String selector,
+        long retargetInterval) {
     }
 }

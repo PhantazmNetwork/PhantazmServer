@@ -64,14 +64,14 @@ public final class MobFeature {
         processorMap.put(BooleanObjectPair.of(false, String.class.getName()), ConfigProcessor.STRING);
         processorMap.put(BooleanObjectPair.of(false, Component.class.getName()), ConfigProcessors.component());
         processorMap.put(BooleanObjectPair.of(true, Component.class.getName()),
-                ConfigProcessors.component().optionalProcessor());
+            ConfigProcessors.component().optionalProcessor());
         processorMap.put(BooleanObjectPair.of(false, ItemStack.class.getName()), ItemStackConfigProcessors.snbt());
         processorMap.put(BooleanObjectPair.of(false, boolean.class.getName()), ConfigProcessor.BOOLEAN);
         processorMap.put(BooleanObjectPair.of(false, Point.class.getName()), MinestomConfigProcessors.point());
         processorMap.put(BooleanObjectPair.of(true, Point.class.getName()),
-                MinestomConfigProcessors.point().optionalProcessor());
+            MinestomConfigProcessors.point().optionalProcessor());
         processorMap.put(BooleanObjectPair.of(false, Direction.class.getName()),
-                ConfigProcessor.enumProcessor(Direction.class));
+            ConfigProcessor.enumProcessor(Direction.class));
         processorMap.put(BooleanObjectPair.of(true, UUID.class.getName()), ConfigProcessors.uuid());
         processorMap.put(BooleanObjectPair.of(true, Integer.class.getName()), new ConfigProcessor<Integer>() {
 
@@ -97,9 +97,9 @@ public final class MobFeature {
         });
         processorMap.put(BooleanObjectPair.of(false, NBT.class.getName()), MinestomConfigProcessors.nbt());
         processorMap.put(BooleanObjectPair.of(false, VillagerMeta.VillagerData.class.getName()),
-                MinestomConfigProcessors.villagerData());
+            MinestomConfigProcessors.villagerData());
         processorMap.put(BooleanObjectPair.of(false, Entity.Pose.class.getName()),
-                ConfigProcessor.enumProcessor(Entity.Pose.class));
+            ConfigProcessor.enumProcessor(Entity.Pose.class));
 
         MobFeature.processorMap = Map.copyOf(processorMap);
 
@@ -120,22 +120,18 @@ public final class MobFeature {
                             MobModel model = Configuration.read(path, codec, getModelProcessor());
                             if (loadedModels.containsKey(model.key())) {
                                 LOGGER.warn("Duplicate key ({}), skipping...", model.key());
-                            }
-                            else {
+                            } else {
                                 loadedModels.put(model.key(), model);
                             }
-                        }
-                        catch (IOException e) {
+                        } catch (IOException e) {
                             LOGGER.warn("Could not load mob file", e);
                         }
                     }
                 });
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOGGER.warn("Could not list files in mob directory", e);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("Failed to create directory {}", MobFeature.MOBS_PATH);
         }
         models = Map.copyOf(loadedModels);

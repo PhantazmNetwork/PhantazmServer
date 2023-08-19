@@ -11,7 +11,9 @@ import java.util.Objects;
 /**
  * Defines a wave.
  */
-public record WaveInfo(long delayTicks, @NotNull List<SpawnInfo> spawns, @NotNull ConfigList spawnActions) {
+public record WaveInfo(long delayTicks,
+    @NotNull List<SpawnInfo> spawns,
+    @NotNull ConfigList spawnActions) {
     /**
      * Creates a new instance of this record.
      *

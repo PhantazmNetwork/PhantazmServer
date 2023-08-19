@@ -9,7 +9,7 @@ public interface PhantazmMobInstanceEvent extends PhantazmMobEvent, InstanceEven
     default @NotNull Instance getInstance() {
         Instance instance = getPhantazmMob().entity().getInstance();
         assert instance !=
-                null : "PhantazmMobInstanceEvent is only supported on events where the entity's instance is non-null!";
+            null : "PhantazmMobInstanceEvent is only supported on events where the entity's instance is non-null!";
         return instance;
     }
 }

@@ -20,7 +20,7 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
 
     @FactoryMethod
     public CountingInteractor(@NotNull Data data, @NotNull @Child("success") List<ShopInteractor> successInteractors,
-            @NotNull @Child("failure") List<ShopInteractor> failureInteractors) {
+        @NotNull @Child("failure") List<ShopInteractor> failureInteractors) {
         super(data);
         this.successInteractors = successInteractors;
         this.failureInteractors = failureInteractors;
@@ -56,8 +56,7 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
         if (nextUse >= data.maxUses) {
             success = false;
             ShopInteractor.handle(failureInteractors, interaction);
-        }
-        else {
+        } else {
             this.uses = nextUse;
         }
 
@@ -71,10 +70,11 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
     }
 
     @DataObject
-    public record Data(int maxUses,
-                       boolean reset,
-                       @NotNull @ChildPath("success") List<String> successInteractors,
-                       @NotNull @ChildPath("failure") List<String> failureInteractors) {
+    public record Data(
+        int maxUses,
+        boolean reset,
+        @NotNull @ChildPath("success") List<String> successInteractors,
+        @NotNull @ChildPath("failure") List<String> failureInteractors) {
         @Default("reset")
         public static @NotNull ConfigElement resetDefault() {
             return ConfigPrimitive.of(false);

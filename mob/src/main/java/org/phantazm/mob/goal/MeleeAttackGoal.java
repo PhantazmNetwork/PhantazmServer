@@ -98,6 +98,11 @@ public class MeleeAttackGoal implements GoalCreator {
         }
 
         @Override
+        public boolean shouldEnd() {
+            return true;
+        }
+
+        @Override
         public void start() {
             ProximaEntity self = mob.entity();
             Entity target = self.getTargetEntity();
@@ -131,11 +136,6 @@ public class MeleeAttackGoal implements GoalCreator {
             }
 
             ticksSinceAttack = 0;
-        }
-
-        @Override
-        public boolean shouldEnd() {
-            return true;
         }
 
         @Override

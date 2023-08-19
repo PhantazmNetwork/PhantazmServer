@@ -14,10 +14,9 @@ public class Room extends BoundedBase {
 
     private final List<Action<Room>> openActions;
     private final RoomInfo roomInfo;
-    private volatile boolean isOpen;
-
     private final Object sync;
     private final Flaggable flaggable;
+    private volatile boolean isOpen;
 
     /**
      * Constructs a new instance of this class.

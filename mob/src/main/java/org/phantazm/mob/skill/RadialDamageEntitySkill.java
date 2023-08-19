@@ -41,11 +41,12 @@ public class RadialDamageEntitySkill implements Skill {
 
     private double calculateDamage(double distanceToEntity) {
         return ((data.damage * Math.sqrt(data.range)) / data.range) *
-                   (Math.sqrt(Math.max(0, -distanceToEntity + data.range)));
+            (Math.sqrt(Math.max(0, -distanceToEntity + data.range)));
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector,
+    public record Data(
+        @NotNull @ChildPath("selector") String selector,
         float damage,
         boolean bypassArmor,
         double range) {

@@ -50,10 +50,12 @@ public class EquipmentCostPredicate implements EquipmentPredicate {
         PlayerCoins coins = playerInteraction.player().module().getCoins();
 
         return coins.runTransaction(new Transaction(transactionModifierSource.modifiers(data.modifier), -data.baseCost))
-                   .isAffordable(coins);
+            .isAffordable(coins);
     }
 
     @DataObject
-    public record Data(int baseCost, @NotNull Map<Key, Integer> upgradeCosts, @NotNull Key modifier) {
+    public record Data(int baseCost,
+        @NotNull Map<Key, Integer> upgradeCosts,
+        @NotNull Key modifier) {
     }
 }

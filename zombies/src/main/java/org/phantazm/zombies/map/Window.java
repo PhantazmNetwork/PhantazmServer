@@ -136,7 +136,7 @@ public class Window extends BoundedBase {
 
             if (newIndex < index) {
                 //play the break sound
-                instance.playSound(newIndex == 0 ? windowInfo.breakAllSound():windowInfo.breakSound(), center);
+                instance.playSound(newIndex == 0 ? windowInfo.breakAllSound() : windowInfo.breakSound(), center);
 
                 for (int i = index - 1; i >= newIndex; i--) {
                     Point breakLocation = indexToCoordinate(i);
@@ -149,7 +149,7 @@ public class Window extends BoundedBase {
                 }
             } else {
                 //play the repair sound
-                instance.playSound(newIndex == volume ? windowInfo.repairAllSound():windowInfo.repairSound(), center);
+                instance.playSound(newIndex == volume ? windowInfo.repairAllSound() : windowInfo.repairSound(), center);
 
                 for (int i = index; i < newIndex; i++) {
                     Point repairLocation = indexToCoordinate(i);
@@ -254,10 +254,10 @@ public class Window extends BoundedBase {
         Bounds3I frameRegion = windowInfo.frameRegion();
         if (frameRegion.lengthZ() > frameRegion.lengthX()) {
             return frameRelativeZ + (frameRelativeY * frameRegion.lengthZ()) +
-                       (frameRelativeX * frameRegion.lengthZ() * frameRegion.lengthY());
+                (frameRelativeX * frameRegion.lengthZ() * frameRegion.lengthY());
         }
 
         return frameRelativeX + (frameRelativeY * frameRegion.lengthX()) +
-                   (frameRelativeZ * frameRegion.lengthX() * frameRegion.lengthY());
+            (frameRelativeZ * frameRegion.lengthX() * frameRegion.lengthY());
     }
 }

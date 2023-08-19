@@ -20,7 +20,7 @@ public class BasicPlayerKillsTest {
     @BeforeEach
     public void setup() {
         ZombiesPlayerMapStats mapStats = BasicZombiesPlayerMapStats.createBasicStats(UUID.randomUUID(),
-                Key.key(Namespaces.PHANTAZM, "test_map"));
+            Key.key(Namespaces.PHANTAZM, "test_map"));
         kills = new BasicPlayerKills(mapStats);
     }
 

@@ -37,6 +37,8 @@ public class DamageEntitySkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector, float damage, boolean bypassArmor) {
+    public record Data(@NotNull @ChildPath("selector") String selector,
+        float damage,
+        boolean bypassArmor) {
     }
 }

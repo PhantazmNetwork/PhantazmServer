@@ -49,12 +49,13 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(double radius,
-                       @NotNull Key modifier,
-                       int coinsPerKill,
-                       @NotNull BossDamageType bossDamageType,
-                       float bossDamage,
-                       boolean bypassArmor) {
+    public record Data(
+        double radius,
+        @NotNull Key modifier,
+        int coinsPerKill,
+        @NotNull BossDamageType bossDamageType,
+        float bossDamage,
+        boolean bypassArmor) {
         @Default("bossDamageType")
         public static @NotNull ConfigElement defaultBossDamageType() {
             return ConfigPrimitive.of("HEALTH_FACTOR");
@@ -92,43 +93,43 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
             Player player = playerOptional.get();
 
             instance.getEntityTracker()
-                    .nearbyEntities(powerup.spawnLocation(), data.radius, EntityTracker.Target.LIVING_ENTITIES,
-                            entity -> {
-                                PhantazmMob mob = mobStore.getMob(entity.getUuid());
-                                if (mob == null) {
-                                    return;
-                                }
+                .nearbyEntities(powerup.spawnLocation(), data.radius, EntityTracker.Target.LIVING_ENTITIES,
+                    entity -> {
+                        PhantazmMob mob = mobStore.getMob(entity.getUuid());
+                        if (mob == null) {
+                            return;
+                        }
 
-                                entity.setTag(Tags.LAST_HIT_BY, player.getUuid());
+                        entity.setTag(Tags.LAST_HIT_BY, player.getUuid());
 
-                                if (mob.model().getExtraNode()
-                                        .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
-                                    switch (data.bossDamageType) {
-                                        case HEALTH_FACTOR -> entity.damage(
-                                                Damage.fromPlayer(player, entity.getMaxHealth() * data.bossDamage),
-                                                data.bypassArmor);
-                                        case CONSTANT -> entity.damage(Damage.fromPlayer(player, data.bossDamage),
-                                                data.bypassArmor);
-                                    }
+                        if (mob.model().getExtraNode()
+                            .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                            switch (data.bossDamageType) {
+                                case HEALTH_FACTOR -> entity.damage(
+                                    Damage.fromPlayer(player, entity.getMaxHealth() * data.bossDamage),
+                                    data.bypassArmor);
+                                case CONSTANT -> entity.damage(Damage.fromPlayer(player, data.bossDamage),
+                                    data.bypassArmor);
+                            }
 
-                                    if (entity.getHealth() <= 0) {
-                                        giveCoins(zombiesPlayer);
-                                    }
-
-                                    return;
-                                }
-
+                            if (entity.getHealth() <= 0) {
                                 giveCoins(zombiesPlayer);
-                                entity.kill();
-                            });
+                            }
+
+                            return;
+                        }
+
+                        giveCoins(zombiesPlayer);
+                        entity.kill();
+                    });
         }
 
         private void giveCoins(ZombiesPlayer zombiesPlayer) {
             PlayerCoins coins = zombiesPlayer.module().getCoins();
 
             TransactionResult result = coins.runTransaction(
-                    new Transaction(zombiesPlayer.module().compositeTransactionModifiers().modifiers(data.modifier),
-                            data.coinsPerKill));
+                new Transaction(zombiesPlayer.module().compositeTransactionModifiers().modifiers(data.modifier),
+                    data.coinsPerKill));
             result.applyIfAffordable(coins);
         }
     }

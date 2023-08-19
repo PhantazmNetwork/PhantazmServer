@@ -111,25 +111,25 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
                 mappingProcessorSource.processorFor(Token.ofClass(SpawnpointInfo.class)))));
 
         String sidebarSettingsPath =
-            "sidebar" + (codec.getPreferredExtensions().isEmpty() ? "":"." + codec.getPreferredExtension());
+            "sidebar" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         ConfigNode scoreboard = Configuration.read(mapDirectory.resolve(sidebarSettingsPath), codec).asNode();
 
         String corpsePath =
-            "corpse" + (codec.getPreferredExtensions().isEmpty() ? "":"." + codec.getPreferredExtension());
+            "corpse" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         ConfigNode corpse = Configuration.read(mapDirectory.resolve(corpsePath), codec).asNode();
 
         String coinsPath =
-            "coins" + (codec.getPreferredExtensions().isEmpty() ? "":"." + codec.getPreferredExtension());
+            "coins" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         PlayerCoinsInfo playerCoins = Configuration.read(mapDirectory.resolve(coinsPath), codec,
             mappingProcessorSource.processorFor(Token.ofClass(PlayerCoinsInfo.class)));
 
         String leaderboardPath =
-            "leaderboard" + (codec.getPreferredExtensions().isEmpty() ? "":"." + codec.getPreferredExtension());
+            "leaderboard" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         LeaderboardInfo leaderboard = Configuration.read(mapDirectory.resolve(leaderboardPath), codec,
             mappingProcessorSource.processorFor(Token.ofClass(LeaderboardInfo.class)));
 
         String webhookPath =
-            "webhook" + (codec.getPreferredExtensions().isEmpty() ? "":"." + codec.getPreferredExtension());
+            "webhook" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         WebhookInfo webhook = Configuration.read(mapDirectory.resolve(webhookPath), codec,
             mappingProcessorSource.processorFor(Token.ofClass(WebhookInfo.class)));
 
@@ -169,7 +169,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         FileUtils.createDirectories(paths.spawnrules);
         FileUtils.createDirectories(paths.spawnpoints);
 
-        String extension = codec.getPreferredExtensions().isEmpty() ? "":"." + codec.getPreferredExtension();
+        String extension = codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension();
         for (RoomInfo room : data.rooms()) {
             Configuration.write(paths.rooms.resolve(room.id().value() + extension), codec,
                 mappingProcessorSource.processorFor(Token.ofClass(RoomInfo.class)), room);
@@ -247,7 +247,8 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         return position.x() + "_" + position.y() + "_" + position.z();
     }
 
-    private record FolderPaths(Path rooms,
+    private record FolderPaths(
+        Path rooms,
         Path doors,
         Path shops,
         Path windows,

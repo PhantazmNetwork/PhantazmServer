@@ -47,7 +47,8 @@ public class TicksLineUpdater implements SidebarLineUpdater {
     }
 
     @DataObject
-    public record Data(@NotNull String format, @NotNull @ChildPath("tick_formatter") String tickFormatterPath) {
+    public record Data(@NotNull String format,
+        @NotNull @ChildPath("tick_formatter") String tickFormatterPath) {
 
         public Data {
             Objects.requireNonNull(tickFormatterPath);

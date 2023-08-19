@@ -58,7 +58,7 @@ public class PartyLeaveCommand {
                         }
                     }
 
-                    Collection<PartyMember> candidates = online.isEmpty() ? offline:online;
+                    Collection<PartyMember> candidates = online.isEmpty() ? offline : online;
                     int memberIndex = random.nextInt(candidates.size());
                     Iterator<PartyMember> memberIterator = candidates.iterator();
                     PartyMember newOwner = memberIterator.next();

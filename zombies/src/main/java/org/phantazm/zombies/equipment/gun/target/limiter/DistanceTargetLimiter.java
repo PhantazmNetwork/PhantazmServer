@@ -56,7 +56,8 @@ public class DistanceTargetLimiter implements TargetLimiter {
      *                          prioritized
      */
     @DataObject
-    public record Data(int targetLimit, boolean prioritizeClosest) {
+    public record Data(int targetLimit,
+        boolean prioritizeClosest) {
 
     }
 }

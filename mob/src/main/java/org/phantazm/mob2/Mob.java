@@ -30,7 +30,7 @@ public class Mob extends ProximaEntity {
     private Reference<Entity> shooter;
 
     public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
-            MobCreator.@NotNull MobData data) {
+        MobCreator.@NotNull MobData data) {
         super(entityType, uuid, pathfinding);
         this.allSkills = new ArrayList<>();
         this.tickableSkills = new ArrayList<>();
@@ -202,7 +202,7 @@ public class Mob extends ProximaEntity {
             getAcquirable().sync(ignored2 -> useIfPresent(Trigger.SPAWN));
         });
     }
-    
+
     @Override
     public void kill() {
         useIfPresent(Trigger.DEATH);

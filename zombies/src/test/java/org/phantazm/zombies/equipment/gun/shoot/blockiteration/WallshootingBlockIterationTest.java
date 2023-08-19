@@ -17,7 +17,7 @@ public class WallshootingBlockIterationTest {
     public void testAirDoesNotEndIteration() {
         WallshootingChecker wallshootingChecker = () -> true;
         BlockIteration blockIteration =
-                new WallshootingBlockIteration(new WallshootingBlockIteration.Data("", Set.of()), wallshootingChecker);
+            new WallshootingBlockIteration(new WallshootingBlockIteration.Data("", Set.of()), wallshootingChecker);
         BlockIteration.Context context = blockIteration.createContext();
 
         assertFalse(context.acceptRaytracedBlock(Vec.ZERO, Block.AIR));
@@ -27,7 +27,7 @@ public class WallshootingBlockIterationTest {
     public void testStoneIsInitiallyValidEndpoint() {
         WallshootingChecker wallshootingChecker = () -> true;
         BlockIteration blockIteration =
-                new WallshootingBlockIteration(new WallshootingBlockIteration.Data("", Set.of()), wallshootingChecker);
+            new WallshootingBlockIteration(new WallshootingBlockIteration.Data("", Set.of()), wallshootingChecker);
         BlockIteration.Context context = blockIteration.createContext();
 
         assertTrue(context.isValidEndpoint(Vec.ZERO, Block.STONE));
@@ -38,7 +38,7 @@ public class WallshootingBlockIterationTest {
         Block passable = Block.BARRIER;
         WallshootingChecker wallshootingChecker = () -> true;
         BlockIteration blockIteration = new WallshootingBlockIteration(
-                new WallshootingBlockIteration.Data("", Collections.singleton(passable.key())), wallshootingChecker);
+            new WallshootingBlockIteration.Data("", Collections.singleton(passable.key())), wallshootingChecker);
         BlockIteration.Context context = blockIteration.createContext();
 
         context.acceptRaytracedBlock(Vec.ZERO, passable);

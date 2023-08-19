@@ -9,7 +9,10 @@ import java.util.Objects;
 /**
  * Config for a single {@link Instance}.
  */
-public record InstanceConfig(@NotNull Pos spawnPoint, long time, int timeRate, int chunkLoadDistance) {
+public record InstanceConfig(@NotNull Pos spawnPoint,
+    long time,
+    int timeRate,
+    int chunkLoadDistance) {
     /**
      * The default spawn point {@link Pos}.
      */

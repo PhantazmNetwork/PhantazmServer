@@ -62,7 +62,8 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
         }
 
         @DataObject
-        public record Data(@NotNull @ChildPath("condition") String conditionPath,
+        public record Data(
+            @NotNull @ChildPath("condition") String conditionPath,
             @NotNull @ChildPath("updater") String updaterPath) {
 
             public Data {

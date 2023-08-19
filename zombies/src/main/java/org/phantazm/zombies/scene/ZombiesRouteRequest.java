@@ -8,7 +8,8 @@ import org.phantazm.core.game.scene.SceneJoinRequest;
 import java.util.Objects;
 import java.util.UUID;
 
-public record ZombiesRouteRequest(@Nullable Key targetMap,
+public record ZombiesRouteRequest(
+    @Nullable Key targetMap,
     @Nullable UUID targetGame,
     @NotNull ZombiesJoinRequest joinRequest) implements SceneJoinRequest {
 

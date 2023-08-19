@@ -103,7 +103,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
 
             boolean isInstaKill;
             if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
-                    (!hitMob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
+                (!hitMob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
                 livingEntity.setTag(Tags.LAST_HIT_BY, player.getUuid());
                 livingEntity.kill();
                 isInstaKill = true;
@@ -116,18 +116,19 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
 
             PlayerCoins coins = zombiesPlayer.module().getCoins();
             Collection<Transaction.Modifier> modifiers = zombiesPlayer.module().compositeTransactionModifiers()
-                                                             .modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
+                .modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
 
-            coins.runTransaction(new Transaction(modifiers, isInstaKill ? data.instaKillCoins:data.coins))
+            coins.runTransaction(new Transaction(modifiers, isInstaKill ? data.instaKillCoins : data.coins))
                 .applyIfAffordable(coins);
             return true;
         }
     }
 
     @DataObject
-    public record Data(@Description("The damage it does on a successful hit") float damage,
+    public record Data(
+        @Description("The damage it does on a successful hit") float damage,
         @Description("The amount of knockback the weapon deals; 0.4 is the vanilla knockback from an " +
-                         "unarmed hand") float knockback,
+            "unarmed hand") float knockback,
         @Description("The number of coins to give on a successful hit.") int coins,
         @Description("The number of coins to give when instakill is active.") int instaKillCoins,
         @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor) {

@@ -12,7 +12,8 @@ import java.util.Objects;
 /**
  * Defines a window.
  */
-public record WindowInfo(@NotNull Bounds3I frameRegion,
+public record WindowInfo(
+    @NotNull Bounds3I frameRegion,
     @NotNull Sound repairSound,
     @NotNull Sound repairAllSound,
     @NotNull Sound breakSound,

@@ -21,12 +21,11 @@ import java.util.concurrent.locks.StampedLock;
  * @param <TRequest>
  */
 public abstract class InstanceScene<TRequest extends SceneJoinRequest> implements Scene<TRequest> {
-    private final UUID uuid;
     protected final Instance instance;
     protected final SceneFallback fallback;
     protected final Point spawnPoint;
     protected final PlayerViewProvider playerViewProvider;
-
+    private final UUID uuid;
     private final Set<Player> ghosts;
     private final StampedLock ghostLock;
 

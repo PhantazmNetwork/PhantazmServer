@@ -28,13 +28,14 @@ public class ShowGuiInteractor implements Interactor {
     @Override
     public void interact(@NotNull Player player) {
         player.openInventory(
-                Gui.builder(data.inventoryType, new BasicSlotDistributor(data.padding)).withItems(guiItems).build());
+            Gui.builder(data.inventoryType, new BasicSlotDistributor(data.padding)).withItems(guiItems).build());
     }
 
     @DataObject
-    public record Data(@NotNull InventoryType inventoryType,
-                       int padding,
-                       @NotNull @ChildPath("gui_items") List<String> guiItems) {
+    public record Data(
+        @NotNull InventoryType inventoryType,
+        int padding,
+        @NotNull @ChildPath("gui_items") List<String> guiItems) {
         @Default("inventoryType")
         public static @NotNull ConfigElement defaultInventoryType() {
             return ConfigPrimitive.of("CHEST_3_ROW");

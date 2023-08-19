@@ -17,7 +17,7 @@ public class IncrementalMetaPlayerDisplayCreator implements PlayerDisplayCreator
 
     @FactoryMethod
     public IncrementalMetaPlayerDisplayCreator(@NotNull Data data,
-            @NotNull @Child("displays") List<PlayerDisplayCreator> steps) {
+        @NotNull @Child("displays") List<PlayerDisplayCreator> steps) {
         this.data = data;
         this.steps = steps;
     }
@@ -33,6 +33,7 @@ public class IncrementalMetaPlayerDisplayCreator implements PlayerDisplayCreator
     }
 
     @DataObject
-    public record Data(boolean cycle, @NotNull @ChildPath("displays") List<String> displays) {
+    public record Data(boolean cycle,
+        @NotNull @ChildPath("displays") List<String> displays) {
     }
 }

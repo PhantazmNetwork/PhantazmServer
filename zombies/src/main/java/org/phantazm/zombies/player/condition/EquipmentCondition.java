@@ -26,6 +26,7 @@ public class EquipmentCondition implements Predicate<ZombiesPlayer> {
     }
 
     @DataObject
-    public record Data(@NotNull Key groupKey, @NotNull Key equipmentKey) {
+    public record Data(@NotNull Key groupKey,
+        @NotNull Key equipmentKey) {
     }
 }

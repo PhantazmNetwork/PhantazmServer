@@ -30,7 +30,7 @@ public class AttributeModifyingSkill implements Skill {
 
     @FactoryMethod
     public AttributeModifyingSkill(@NotNull Data data, @NotNull @Child("selector") TargetSelector<?> targetSelector,
-            @NotNull MapObjects mapObjects) {
+        @NotNull MapObjects mapObjects) {
         this.data = data;
         this.uuid = UUID.randomUUID();
         this.uuidString = this.uuid.toString();
@@ -50,8 +50,7 @@ public class AttributeModifyingSkill implements Skill {
         Object target = targetOptional.get();
         if (target instanceof LivingEntity entity) {
             applyToEntity(entity);
-        }
-        else if (target instanceof Iterable<?> iterable) {
+        } else if (target instanceof Iterable<?> iterable) {
             for (Object object : iterable) {
                 if (object instanceof LivingEntity livingEntity) {
                     applyToEntity(livingEntity);
@@ -65,13 +64,13 @@ public class AttributeModifyingSkill implements Skill {
 
         if (zombiesPlayer != null) {
             zombiesPlayer.cancellableAttribute(attribute,
-                    new AttributeModifier(uuid, uuidString, data.amount, data.attributeOperation));
+                new AttributeModifier(uuid, uuidString, data.amount, data.attributeOperation));
             affectedEntities.add(entity);
             return;
         }
 
         entity.getAttribute(attribute)
-                .addModifier(new AttributeModifier(uuid, uuidString, data.amount, data.attributeOperation));
+            .addModifier(new AttributeModifier(uuid, uuidString, data.amount, data.attributeOperation));
         affectedEntities.add(entity);
     }
 
@@ -96,9 +95,10 @@ public class AttributeModifyingSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull String attribute,
-                       float amount,
-                       @NotNull AttributeOperation attributeOperation,
-                       @NotNull @ChildPath("selector") String selector) {
+    public record Data(
+        @NotNull String attribute,
+        float amount,
+        @NotNull AttributeOperation attributeOperation,
+        @NotNull @ChildPath("selector") String selector) {
     }
 }

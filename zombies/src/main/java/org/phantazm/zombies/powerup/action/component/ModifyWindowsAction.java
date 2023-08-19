@@ -28,7 +28,8 @@ public class ModifyWindowsAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(double radius, boolean shouldBreak) {
+    public record Data(double radius,
+        boolean shouldBreak) {
     }
 
     private static class Action extends InstantAction {
@@ -45,8 +46,7 @@ public class ModifyWindowsAction implements PowerupActionComponent {
             windowHandler.tracker().forEachInRangeToCenter(powerup.spawnLocation(), data.radius, window -> {
                 if (data.shouldBreak) {
                     window.updateIndex(0);
-                }
-                else {
+                } else {
                     window.updateIndex(window.getVolume());
                 }
             });

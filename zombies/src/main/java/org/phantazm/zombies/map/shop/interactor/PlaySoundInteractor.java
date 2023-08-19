@@ -38,6 +38,7 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
     }
 
     @DataObject
-    public record Data(@NotNull Sound sound, boolean broadcast) {
+    public record Data(@NotNull Sound sound,
+        boolean broadcast) {
     }
 }

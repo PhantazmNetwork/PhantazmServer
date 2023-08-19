@@ -31,7 +31,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Initializes features related to Ethylene.
@@ -46,16 +49,16 @@ public final class EthyleneFeature {
         EthyleneFeature.keyParser = Objects.requireNonNull(keyParser);
 
         mappingProcessorSource = Signatures.core(MappingProcessorSource.builder()).withCustomSignature(basicItemStack())
-                                     .withCustomSignature(pos()).withScalarSignature(key())
-                                     .withScalarSignature(itemStack())
-                                     .withScalarSignature(particle()).withScalarSignature(block())
-                                     .withScalarSignature(permission())
-                                     .withScalarSignature(entityType()).withScalarSignature(material())
-                                     .withScalarSignature(potionEffect())
-                                     .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
-                                     .withTypeImplementation(IntOpenHashSet.class, IntSet.class)
-                                     .withStandardSignatures()
-                                     .withStandardTypeImplementations().ignoringLengths().build();
+            .withCustomSignature(pos()).withScalarSignature(key())
+            .withScalarSignature(itemStack())
+            .withScalarSignature(particle()).withScalarSignature(block())
+            .withScalarSignature(permission())
+            .withScalarSignature(entityType()).withScalarSignature(material())
+            .withScalarSignature(potionEffect())
+            .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
+            .withTypeImplementation(IntOpenHashSet.class, IntSet.class)
+            .withStandardSignatures()
+            .withStandardTypeImplementations().ignoringLengths().build();
 
         LOGGER.info("Ethylene initialized.");
     }
@@ -63,7 +66,7 @@ public final class EthyleneFeature {
     @SuppressWarnings("PatternValidation")
     private static ScalarSignature<Key> key() {
         return ScalarSignature.of(Token.ofClass(Key.class), element -> keyParser.parseKey(element.asString()),
-            key -> key == null ? ConfigPrimitive.NULL:ConfigPrimitive.of(key.asString()));
+            key -> key == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(key.asString()));
     }
 
     @SuppressWarnings("unchecked")
@@ -93,7 +96,7 @@ public final class EthyleneFeature {
                 Map.entry("lore", SignatureParameter.parameter(new Token<List<Component>>() {
                 }, ConfigList.of())),
                 Map.entry("tag", SignatureParameter.parameter(Token.STRING, ConfigPrimitive.NULL))).matchingNames()
-                   .matchingTypeHints().build();
+            .matchingTypeHints().build();
     }
 
     private static Signature<Pos> pos() {
@@ -105,35 +108,34 @@ public final class EthyleneFeature {
                 Map.entry("z", SignatureParameter.parameter(Token.DOUBLE)),
                 Map.entry("yaw", SignatureParameter.parameter(Token.FLOAT)),
                 Map.entry("pitch", SignatureParameter.parameter(Token.FLOAT))).matchingNames().matchingTypeHints()
-                   .build();
+            .build();
     }
 
     private static ScalarSignature<PotionEffect> potionEffect() {
         return ScalarSignature.of(Token.ofClass(PotionEffect.class),
             effect -> PotionEffect.fromNamespaceId(effect.asString()),
-            effect -> effect == null ? ConfigPrimitive.NULL:ConfigPrimitive.of(effect.namespace().asString()));
+            effect -> effect == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(effect.namespace().asString()));
     }
 
     private static ScalarSignature<Permission> permission() {
         return ScalarSignature.of(Token.ofClass(Permission.class), element -> new Permission(element.asString()),
             permission -> permission == null
-                              ? ConfigPrimitive.NULL
-                              :ConfigPrimitive.of(permission.getPermissionName()));
+                ? ConfigPrimitive.NULL
+                : ConfigPrimitive.of(permission.getPermissionName()));
     }
 
     private static ScalarSignature<Material> material() {
         return ScalarSignature.of(Token.ofClass(Material.class),
             element -> Material.fromNamespaceId(element.asString()),
-            material -> material == null ? ConfigPrimitive.NULL:ConfigPrimitive.of(material.key().toString()));
+            material -> material == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(material.key().toString()));
     }
 
     private static ScalarSignature<Particle> particle() {
         return ScalarSignature.of(Token.ofClass(Particle.class),
             element -> Particle.fromNamespaceId(element.asString()),
-            particle -> particle == null ? ConfigPrimitive.NULL:ConfigPrimitive.of(particle.key().toString()));
+            particle -> particle == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(particle.key().toString()));
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private static ScalarSignature<ItemStack> itemStack() {
         return ScalarSignature.of(Token.ofClass(ItemStack.class), element -> {
             try {
@@ -143,21 +145,21 @@ public final class EthyleneFeature {
                 LOGGER.warn("Error deserializing SNBT", e);
                 return ItemStack.AIR;
             }
-        }, itemStack -> itemStack == null ? ConfigPrimitive.NULL:ConfigPrimitive.of(itemStack.toItemNBT().toSNBT()));
+        }, itemStack -> itemStack == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(itemStack.toItemNBT().toSNBT()));
     }
 
     private static ScalarSignature<EntityType> entityType() {
         return ScalarSignature.of(Token.ofClass(EntityType.class), element -> {
             return EntityType.fromNamespaceId(element.asString());
         }, entityType -> entityType == null
-                             ? ConfigPrimitive.NULL
-                             :ConfigPrimitive.of(entityType.namespace().asString()));
+            ? ConfigPrimitive.NULL
+            : ConfigPrimitive.of(entityType.namespace().asString()));
     }
 
     private static ScalarSignature<Block> block() {
         return ScalarSignature.of(Token.ofClass(Block.class), element -> {
             return Objects.requireNonNullElse(Block.fromNamespaceId(element.asString()), Block.AIR);
-        }, block -> block == null ? ConfigPrimitive.NULL:ConfigPrimitive.of(block.name()));
+        }, block -> block == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(block.name()));
     }
 
     public static @NotNull MappingProcessorSource getMappingProcessorSource() {

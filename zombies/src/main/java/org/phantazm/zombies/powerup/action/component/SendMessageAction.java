@@ -32,7 +32,8 @@ public class SendMessageAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(@NotNull String format, boolean broadcast) {
+    public record Data(@NotNull String format,
+        boolean broadcast) {
     }
 
     private static class Action extends InstantAction {
@@ -49,8 +50,7 @@ public class SendMessageAction implements PowerupActionComponent {
             Component component = getComponent(player);
             if (data.broadcast) {
                 instance.sendMessage(component);
-            }
-            else {
+            } else {
                 player.getPlayer().ifPresent(p -> p.sendMessage(component));
             }
         }

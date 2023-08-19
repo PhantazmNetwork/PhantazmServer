@@ -88,8 +88,8 @@ public class TemporalSkill implements Skill {
         }
 
         MinecraftServer.getSchedulerManager()
-                .scheduleTask(() -> delegate.end(self), TaskSchedule.tick((int)ticksRemaining), TaskSchedule.stop(),
-                        ExecutionType.SYNC);
+            .scheduleTask(() -> delegate.end(self), TaskSchedule.tick((int) ticksRemaining), TaskSchedule.stop(),
+                ExecutionType.SYNC);
     }
 
     @Override
@@ -98,6 +98,8 @@ public class TemporalSkill implements Skill {
     }
 
     @DataObject
-    public record Data(long minDuration, int maxDuration, @NotNull @ChildPath("delegate") String delegate) {
+    public record Data(long minDuration,
+        int maxDuration,
+        @NotNull @ChildPath("delegate") String delegate) {
     }
 }

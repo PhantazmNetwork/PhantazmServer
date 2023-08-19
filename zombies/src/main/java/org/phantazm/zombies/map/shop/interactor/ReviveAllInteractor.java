@@ -93,7 +93,8 @@ public class ReviveAllInteractor implements ShopInteractor {
     }
 
     @DataObject
-    public record Data(String messageFormat, boolean broadcast) {
+    public record Data(String messageFormat,
+        boolean broadcast) {
 
     }
 

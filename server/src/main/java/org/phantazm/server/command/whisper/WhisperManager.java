@@ -92,7 +92,7 @@ public class WhisperManager {
 
         Optional<Component> displayName = audience.get(Identity.DISPLAY_NAME);
         return displayName.map(component -> component.colorIfAbsent(whisperConfig.fallbackNameColor()))
-                   .orElse(whisperConfig.defaultName());
+            .orElse(whisperConfig.defaultName());
     }
 
     private @Nullable UUID resolveUUID(Audience audience) {

@@ -19,6 +19,18 @@ import java.util.Set;
 @Model("zombies.powerup.entity_effect.glow")
 @Cache(false)
 public class GlowingPowerupEffect implements PowerupEffectComponent {
+    private final PowerupEffect effect;
+
+    @FactoryMethod
+    public GlowingPowerupEffect(@NotNull Data data) {
+        this.effect = new Effect(data);
+    }
+
+    @Override
+    public @NotNull PowerupEffect apply(@NotNull ZombiesScene scene) {
+        return effect;
+    }
+
     //private, to prevent early initialization if something calls Class.forName
     private static class Container {
         private static final Map<String, Team> COLOR_TEAMS;
@@ -33,24 +45,12 @@ public class GlowingPowerupEffect implements PowerupEffectComponent {
             for (int i = 0; i < colors.size(); i++) {
                 NamedTextColor color = colorIterator.next();
                 Team team = MinecraftServer.getTeamManager().createBuilder("color-team-" + color).teamColor(color)
-                        .collisionRule(TeamsPacket.CollisionRule.NEVER).build();
+                    .collisionRule(TeamsPacket.CollisionRule.NEVER).build();
                 entries[i] = Map.entry(color.toString(), team);
             }
 
             COLOR_TEAMS = Map.ofEntries(entries);
         }
-    }
-
-    private final PowerupEffect effect;
-
-    @FactoryMethod
-    public GlowingPowerupEffect(@NotNull Data data) {
-        this.effect = new Effect(data);
-    }
-    
-    @Override
-    public @NotNull PowerupEffect apply(@NotNull ZombiesScene scene) {
-        return effect;
     }
 
     private record Effect(Data data) implements PowerupEffect {

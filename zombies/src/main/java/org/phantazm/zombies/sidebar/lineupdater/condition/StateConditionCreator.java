@@ -42,6 +42,7 @@ public class StateConditionCreator implements PlayerConditionCreator {
     }
 
     @DataObject
-    public record Data(@NotNull Key state, boolean requireAbsent) {
+    public record Data(@NotNull Key state,
+        boolean requireAbsent) {
     }
 }

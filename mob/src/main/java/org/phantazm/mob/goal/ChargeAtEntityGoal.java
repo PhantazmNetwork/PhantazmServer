@@ -70,6 +70,11 @@ public class ChargeAtEntityGoal implements GoalCreator {
         }
 
         @Override
+        public void end() {
+
+        }
+
+        @Override
         public void tick(long time) {
             if (target != null && target.isRemoved()) {
                 target = null;
@@ -91,11 +96,6 @@ public class ChargeAtEntityGoal implements GoalCreator {
             else {
                 ++ticksSinceCharge;
             }
-        }
-
-        @Override
-        public void end() {
-
         }
 
         private void refreshTarget() {

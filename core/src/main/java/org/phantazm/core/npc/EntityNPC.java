@@ -26,8 +26,8 @@ public class EntityNPC implements NPC {
 
     @FactoryMethod
     public EntityNPC(@NotNull Data data, @NotNull @Child("entity") Supplier<? extends Entity> entity,
-            @NotNull @Child("settings") Consumer<? super Entity> settings,
-            @NotNull @Child("ticker") EntityTicker ticker, @NotNull @Child("interactor") Interactor interactor) {
+        @NotNull @Child("settings") Consumer<? super Entity> settings,
+        @NotNull @Child("ticker") EntityTicker ticker, @NotNull @Child("interactor") Interactor interactor) {
         this.data = data;
         this.entity = entity;
         this.settings = settings;
@@ -77,10 +77,11 @@ public class EntityNPC implements NPC {
     }
 
     @DataObject
-    public record Data(@NotNull Pos location,
-                       @NotNull @ChildPath("entity") String entity,
-                       @NotNull @ChildPath("settings") String settings,
-                       @NotNull @ChildPath("ticker") String ticker,
-                       @NotNull @ChildPath("interactor") String interactor) {
+    public record Data(
+        @NotNull Pos location,
+        @NotNull @ChildPath("entity") String entity,
+        @NotNull @ChildPath("settings") String settings,
+        @NotNull @ChildPath("ticker") String ticker,
+        @NotNull @ChildPath("interactor") String interactor) {
     }
 }

@@ -47,12 +47,9 @@ public class Door extends BoundedBase {
     private final Supplier<? extends MapObjects> mapObjects;
 
     private final Vec3I2ObjectMap<Block> blockMappings;
-
-    private volatile boolean isOpen;
-
-    private volatile ZombiesPlayer lastInteractor;
-
     private final Object sync;
+    private volatile boolean isOpen;
+    private volatile ZombiesPlayer lastInteractor;
 
     /**
      * Constructs a new instance of this class.

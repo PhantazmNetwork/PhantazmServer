@@ -64,7 +64,8 @@ public class KnockbackShotHandler implements ShotHandler {
      * @param headshotKnockback The knockback to apply to headshots
      */
     @DataObject
-    public record Data(float knockback, float headshotKnockback) {
+    public record Data(float knockback,
+        float headshotKnockback) {
 
     }
 

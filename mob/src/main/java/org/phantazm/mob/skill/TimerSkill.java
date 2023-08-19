@@ -13,11 +13,11 @@ import org.phantazm.mob.PhantazmMob;
 import java.util.UUID;
 
 @Description("""
-        A timed meta skill that can activate another skill periodically after a delay, a set number of times, or
-        infinitely. Time is measured from the moment that the mob spawned. The timer can be set to start as soon as the
-        mob spawns, or it can start when this skill is activated. If a timer is activated while it is already counting
-        down, it can be configured to restart.
-        """)
+    A timed meta skill that can activate another skill periodically after a delay, a set number of times, or
+    infinitely. Time is measured from the moment that the mob spawned. The timer can be set to start as soon as the
+    mob spawns, or it can start when this skill is activated. If a timer is activated while it is already counting
+    down, it can be configured to restart.
+    """)
 @Model("mob.skill.timer")
 @Cache(false)
 public class TimerSkill implements Skill {
@@ -110,19 +110,20 @@ public class TimerSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@Description(
+    public record Data(
+        @Description(
             "The number of times this skill should repeat its action. A negative number will repeat " +
-                    "infinitely") int repeat,
+                "infinitely") int repeat,
 
-                       @Description("The duration of time between activations") long interval,
+        @Description("The duration of time between activations") long interval,
 
-                       @Description("Whether the timer will start in an activated state") boolean requiresActivation,
+        @Description("Whether the timer will start in an activated state") boolean requiresActivation,
 
-                       @Description(
-                               "Whether the timer should restart itself if it is activated while running") boolean resetOnActivation,
+        @Description(
+            "Whether the timer should restart itself if it is activated while running") boolean resetOnActivation,
 
-                       @Description("The skill to call when the timer activates") @ChildPath(
-                               "delegate") String delegate) {
+        @Description("The skill to call when the timer activates") @ChildPath(
+            "delegate") String delegate) {
         @Default("requiresActivation")
         public static @NotNull ConfigElement defaultRequiresActivation() {
             return ConfigPrimitive.of(false);

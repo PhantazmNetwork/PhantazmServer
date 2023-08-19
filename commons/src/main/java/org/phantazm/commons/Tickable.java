@@ -5,8 +5,7 @@ package org.phantazm.commons;
  */
 public interface Tickable {
     /**
-     * Executes a "tick".
-     * This enables implementations to run periodic behavior.
+     * Executes a "tick". This enables implementations to run periodic behavior.
      *
      * @param time the number of milliseconds that have elapsed
      */

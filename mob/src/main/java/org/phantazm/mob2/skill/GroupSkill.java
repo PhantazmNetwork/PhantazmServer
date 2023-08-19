@@ -43,18 +43,21 @@ public class GroupSkill implements SkillComponent {
         }
 
         return new Internal(data.trigger, delegateSkills,
-                tickables.isEmpty() ? EMPTY_SKILL_ARRAY : tickables.toArray(Skill[]::new));
+            tickables.isEmpty() ? EMPTY_SKILL_ARRAY : tickables.toArray(Skill[]::new));
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger, @NotNull @ChildPath("delegates") List<String> delegates) {
+    public record Data(@Nullable Trigger trigger,
+        @NotNull @ChildPath("delegates") List<String> delegates) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
         }
     }
 
-    private record Internal(Trigger trigger, Skill[] delegates, Skill[] tickables) implements Skill {
+    private record Internal(Trigger trigger,
+        Skill[] delegates,
+        Skill[] tickables) implements Skill {
         @Override
         public void init() {
             for (Skill skill : delegates) {

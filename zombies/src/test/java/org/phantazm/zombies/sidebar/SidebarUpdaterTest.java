@@ -104,37 +104,6 @@ public class SidebarUpdaterTest {
         assertEquals(SidebarUpdater.MAX_SIDEBAR_ROWS, sidebar.getLines().size());
     }
 
-    @SuppressWarnings("ClassCanBeRecord")
-    private static class MutableSidebarSection implements SidebarSection {
-
-        private final Collection<? extends SidebarLineUpdater> lineUpdaters;
-
-        public MutableSidebarSection(@NotNull Collection<? extends SidebarLineUpdater> lineUpdaters) {
-            this.lineUpdaters = Objects.requireNonNull(lineUpdaters);
-        }
-
-        @Override
-        public void invalidateCache() {
-            for (SidebarLineUpdater lineUpdater : lineUpdaters) {
-                lineUpdater.invalidateCache();
-            }
-        }
-
-        @Override
-        public int getSize() {
-            return lineUpdaters.size();
-        }
-
-        @Override
-        public @NotNull List<Optional<Component>> update(long time) {
-            List<Optional<Component>> updates = new ArrayList<>(lineUpdaters.size());
-            for (SidebarLineUpdater lineUpdater : lineUpdaters) {
-                updates.add(lineUpdater.tick(time));
-            }
-            return updates;
-        }
-    }
-
     @Test
     public void testChangingSectionLengthInIntermediateSection() {
         Component firstMessage = Component.text("First Line");
@@ -311,6 +280,37 @@ public class SidebarUpdaterTest {
     public void tearDown() {
         if (updater != null) {
             updater.end();
+        }
+    }
+
+    @SuppressWarnings("ClassCanBeRecord")
+    private static class MutableSidebarSection implements SidebarSection {
+
+        private final Collection<? extends SidebarLineUpdater> lineUpdaters;
+
+        public MutableSidebarSection(@NotNull Collection<? extends SidebarLineUpdater> lineUpdaters) {
+            this.lineUpdaters = Objects.requireNonNull(lineUpdaters);
+        }
+
+        @Override
+        public void invalidateCache() {
+            for (SidebarLineUpdater lineUpdater : lineUpdaters) {
+                lineUpdater.invalidateCache();
+            }
+        }
+
+        @Override
+        public int getSize() {
+            return lineUpdaters.size();
+        }
+
+        @Override
+        public @NotNull List<Optional<Component>> update(long time) {
+            List<Optional<Component>> updates = new ArrayList<>(lineUpdaters.size());
+            for (SidebarLineUpdater lineUpdater : lineUpdaters) {
+                updates.add(lineUpdater.tick(time));
+            }
+            return updates;
         }
     }
 

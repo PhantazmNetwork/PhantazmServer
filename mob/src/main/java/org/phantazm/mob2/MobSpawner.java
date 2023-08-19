@@ -14,5 +14,5 @@ public interface MobSpawner {
     }
 
     @NotNull Mob spawn(@NotNull Key identifier, @NotNull Instance instance, @NotNull Pos pos,
-            @NotNull Consumer<? super Mob> setup);
+        @NotNull Consumer<? super Mob> setup);
 }

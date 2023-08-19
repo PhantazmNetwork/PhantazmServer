@@ -25,12 +25,10 @@ public final class ConfigProcessors {
                 String string = ConfigProcessor.STRING.dataFromElement(element);
                 if (string.contains(":")) {
                     return Key.key(string);
-                }
-                else {
+                } else {
                     return Key.key(Namespaces.PHANTAZM, string);
                 }
-            }
-            catch (InvalidKeyException keyException) {
+            } catch (InvalidKeyException keyException) {
                 throw new ConfigProcessException(keyException);
             }
         }
@@ -60,8 +58,7 @@ public final class ConfigProcessors {
         public UUID dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
             try {
                 return UUID.fromString(ConfigProcessor.STRING.dataFromElement(element));
-            }
-            catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 throw new ConfigProcessException("invalid UUID string", e);
             }
         }

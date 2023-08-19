@@ -15,7 +15,8 @@ import java.util.Objects;
  * @param model  The model for the mob
  * @param entity The actual {@link ProximaEntity} instance of the mob
  */
-public record BasicPhantazmMob(@NotNull MobModel model,
+public record BasicPhantazmMob(
+    @NotNull MobModel model,
     @NotNull ProximaEntity entity,
     @NotNull Map<Key, Collection<Skill>> triggers) implements PhantazmMob {
 

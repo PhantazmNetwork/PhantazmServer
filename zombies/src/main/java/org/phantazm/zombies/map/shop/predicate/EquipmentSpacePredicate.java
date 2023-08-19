@@ -45,7 +45,7 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
 
                 if (sameType && equipment instanceof Upgradable upgradable) {
                     Optional<Key> upgradeKey = upgradePath.nextUpgrade(upgradable.currentLevel())
-                                                   .filter(key -> upgradable.getSuggestedUpgrades().contains(key));
+                        .filter(key -> upgradable.getSuggestedUpgrades().contains(key));
 
                     if (upgradeKey.isPresent()) {
                         return equipmentPredicate.canUpgrade(interaction, upgradable, upgradeKey.get());
@@ -85,7 +85,7 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
 
             if (data.allowUpgrade && equipment instanceof Upgradable upgradable) {
                 Optional<Key> upgradeKey = upgradePath.nextUpgrade(upgradable.currentLevel())
-                                               .filter(key -> upgradable.getSuggestedUpgrades().contains(key));
+                    .filter(key -> upgradable.getSuggestedUpgrades().contains(key));
 
                 if (upgradeKey.isPresent()) {
                     return equipmentPredicate.canUpgrade(interaction, upgradable, upgradeKey.get());
@@ -100,11 +100,12 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
 
         //check if there's room to add equipment to this group
         return module.getEquipmentHandler().canAddEquipment(data.groupKey) &&
-                   equipmentPredicate.canAdd(interaction, data.equipmentKey);
+            equipmentPredicate.canAdd(interaction, data.equipmentKey);
     }
 
     @DataObject
-    public record Data(@NotNull Key equipmentKey,
+    public record Data(
+        @NotNull Key equipmentKey,
         @NotNull Key groupKey,
         boolean allowUpgrade,
         boolean mustHoldItemToUpgrade,

@@ -16,9 +16,9 @@ import java.util.function.Function;
 public class PartyWarpCommand {
 
     public static @NotNull Command warpCommand(@NotNull Map<? super UUID, ? extends Party> partyMap,
-            @NotNull PlayerViewProvider viewProvider,
-            @NotNull Function<? super UUID, Optional<? extends Scene<?>>> sceneMapper,
-            @NotNull SceneTransferHelper transferHelper) {
+        @NotNull PlayerViewProvider viewProvider,
+        @NotNull Function<? super UUID, Optional<? extends Scene<?>>> sceneMapper,
+        @NotNull SceneTransferHelper transferHelper) {
         Objects.requireNonNull(partyMap);
         Objects.requireNonNull(viewProvider);
         Objects.requireNonNull(sceneMapper);

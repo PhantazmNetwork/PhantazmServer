@@ -300,6 +300,7 @@ public class Gui extends Inventory implements Tickable {
      * @param item the GuiItem
      * @param slot the slot it's in
      */
-    public record SlottedItem(@NotNull GuiItem item, int slot) {
+    public record SlottedItem(@NotNull GuiItem item,
+        int slot) {
     }
 }

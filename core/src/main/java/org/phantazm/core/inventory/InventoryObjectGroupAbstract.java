@@ -22,10 +22,11 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
      *
      * @param profile            The profile to which this group belongs
      * @param slots              The slots to use for the group
-     * @param unmodifiableMapper A mapper to make the provided slots as an unmodifiable view. The return type of the mapper will be the same as the object returned in {@link #getSlots()}
+     * @param unmodifiableMapper A mapper to make the provided slots as an unmodifiable view. The return type of the
+     *                           mapper will be the same as the object returned in {@link #getSlots()}
      */
     public InventoryObjectGroupAbstract(@NotNull InventoryProfile profile, @NotNull IntSet slots,
-            @NotNull Function<? super IntSet, ? extends IntSet> unmodifiableMapper) {
+        @NotNull Function<? super IntSet, ? extends IntSet> unmodifiableMapper) {
         this.profile = Objects.requireNonNull(profile);
         this.slots = new IntRBTreeSet(slots);
         this.unmodifiableSlots = Objects.requireNonNull(unmodifiableMapper.apply(this.slots), "mapped slots");

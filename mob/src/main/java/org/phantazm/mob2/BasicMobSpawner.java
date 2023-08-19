@@ -20,7 +20,7 @@ public class BasicMobSpawner implements MobSpawner {
 
     @Override
     public @NotNull Mob spawn(@NotNull Key identifier, @NotNull Instance instance, @NotNull Pos pos,
-            @NotNull Consumer<? super Mob> setup) {
+        @NotNull Consumer<? super Mob> setup) {
         MobCreator creator = mobCreators.get(identifier);
         if (creator == null) {
             throw new IllegalArgumentException("missing mob identifier " + identifier);

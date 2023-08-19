@@ -30,7 +30,9 @@ public class SendTitleAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(@NotNull Component message, @NotNull TitlePart<Component> titlePart, boolean broadcast) {
+    public record Data(@NotNull Component message,
+        @NotNull TitlePart<Component> titlePart,
+        boolean broadcast) {
     }
 
     private static class Action extends InstantAction {
@@ -46,8 +48,7 @@ public class SendTitleAction implements PowerupActionComponent {
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             if (data.broadcast) {
                 instance.sendTitlePart(data.titlePart, data.message);
-            }
-            else {
+            } else {
                 player.getPlayer().ifPresent(p -> p.sendTitlePart(data.titlePart, data.message));
             }
         }

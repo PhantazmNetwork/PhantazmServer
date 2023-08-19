@@ -134,7 +134,7 @@ public class BasicKnockedStateActivable implements Activable {
                         Integer.toString((int) Math.rint((mapSettingsInfo.coinsLostOnKnock() * 100))));
                     TagResolver amountTag = Placeholder.unparsed("amount", Integer.toString(amountLost));
                     player.sendMessage(MiniMessage.miniMessage()
-                                           .deserialize(mapSettingsInfo.coinLossFormat(), amountTag, percentTag));
+                        .deserialize(mapSettingsInfo.coinLossFormat(), amountTag, percentTag));
                 });
             }
         }

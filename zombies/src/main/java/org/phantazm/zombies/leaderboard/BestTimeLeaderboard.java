@@ -155,7 +155,7 @@ public class BestTimeLeaderboard {
         }
         Pos armorStandLocation = Pos.fromPoint(hologram.getLocation().add(0,
             ((gap * (hologram.size() - 1) + hologram.size() * InstanceHologram.MESSAGE_HEIGHT) / 2 -
-                 ((hologram.size() - 1) * (gap + InstanceHologram.MESSAGE_HEIGHT))), 0));
+                ((hologram.size() - 1) * (gap + InstanceHologram.MESSAGE_HEIGHT))), 0));
         armorStand.teleport(armorStandLocation);
     }
 
@@ -202,7 +202,7 @@ public class BestTimeLeaderboard {
                                 page.size() - data.footerFormats().size()).clear();
                             Pos armorStandLocation = Pos.fromPoint(hologram.getLocation().add(0,
                                 ((gap * (hologram.size() - 1) + hologram.size() * InstanceHologram.MESSAGE_HEIGHT) /
-                                     2 - ((hologram.size() - 1) * (gap + InstanceHologram.MESSAGE_HEIGHT))), 0));
+                                    2 - ((hologram.size() - 1) * (gap + InstanceHologram.MESSAGE_HEIGHT))), 0));
                             armorStand.teleport(armorStandLocation);
                         }
 
@@ -339,7 +339,7 @@ public class BestTimeLeaderboard {
         TagResolver placePlaceholder = Placeholder.component("place", Component.text(bestTime.rank()));
         TagResolver timePlaceholder =
             Placeholder.component("time", Component.text(tickFormatter.format(bestTime.time())));
-        TagResolver isViewerPlaceholder = Formatter.choice("is_viewer", bestTime.uuid().equals(viewer) ? 1:0);
+        TagResolver isViewerPlaceholder = Formatter.choice("is_viewer", bestTime.uuid().equals(viewer) ? 1 : 0);
 
         return miniMessage.deserialize(data.placeTimeFormat(), placePlaceholder, timePlaceholder, isViewerPlaceholder);
     }
@@ -349,7 +349,7 @@ public class BestTimeLeaderboard {
         TagResolver playerNamePlaceholder = Placeholder.component("player_name", playerName);
         TagResolver timePlaceholder =
             Placeholder.component("time", Component.text(tickFormatter.format(bestTime.time())));
-        TagResolver isViewerPlaceholder = Formatter.choice("is_viewer", bestTime.uuid().equals(viewer) ? 1:0);
+        TagResolver isViewerPlaceholder = Formatter.choice("is_viewer", bestTime.uuid().equals(viewer) ? 1 : 0);
 
         return miniMessage.deserialize(data.placeNameTimeFormat(), placePlaceholder, playerNamePlaceholder,
             timePlaceholder, isViewerPlaceholder);
@@ -428,7 +428,8 @@ public class BestTimeLeaderboard {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("tick_formatter") String tickFormatter,
+    public record Data(
+        @NotNull @ChildPath("tick_formatter") String tickFormatter,
         @NotNull List<String> headerFormats,
         @NotNull Component initialMessage,
         @NotNull String noneFormat,

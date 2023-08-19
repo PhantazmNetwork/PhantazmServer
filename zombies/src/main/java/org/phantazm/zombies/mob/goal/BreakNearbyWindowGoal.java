@@ -49,7 +49,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
         private long breakTicks = -1;
 
         private Goal(Data data, BoundedTracker<Window> windowTracker, BoundedTracker<Room> roomTracker,
-                PhantazmMob self) {
+            PhantazmMob self) {
             this.data = data;
             this.windowTracker = windowTracker;
             this.roomTracker = roomTracker;
@@ -70,7 +70,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
                 BoundingBox boundingBox = entity.getBoundingBox();
 
                 windowTracker.closestInRangeToBounds(entity.getPosition(), boundingBox.width(), boundingBox.height(),
-                        data.breakRadius).ifPresent(window -> {
+                    data.breakRadius).ifPresent(window -> {
                     int index = window.getIndex();
                     int targetIndex = index - data.breakCount;
 
@@ -102,6 +102,8 @@ public class BreakNearbyWindowGoal implements GoalCreator {
     }
 
     @DataObject
-    public record Data(int breakTicks, int breakCount, double breakRadius) {
+    public record Data(int breakTicks,
+        int breakCount,
+        double breakRadius) {
     }
 }

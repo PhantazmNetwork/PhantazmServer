@@ -168,7 +168,7 @@ public class BasicRoleStore implements RoleStore {
             Result<Record> result =
                 using(connection).selectFrom(table("player_roles")).where(field("player_uuid").eq(key)).fetch();
 
-            Set<Role> roleSet = new HashSet<>(result.size() + (defaultRole == null ? 0:1));
+            Set<Role> roleSet = new HashSet<>(result.size() + (defaultRole == null ? 0 : 1));
             for (Record record : result) {
                 String playerRole = (String) record.get("player_role");
                 if (playerRole == null) {
@@ -192,6 +192,6 @@ public class BasicRoleStore implements RoleStore {
             LOGGER.warn("Exception when fetching player roles", e);
         }
 
-        return defaultRole == null ? new CopyOnWriteArraySet<>():new CopyOnWriteArraySet<>(List.of(defaultRole));
+        return defaultRole == null ? new CopyOnWriteArraySet<>() : new CopyOnWriteArraySet<>(List.of(defaultRole));
     }
 }

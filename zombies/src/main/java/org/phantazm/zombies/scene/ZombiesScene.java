@@ -55,11 +55,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private final ZombiesDatabase database;
     private final EventNode<Event> sceneNode;
     private final UUID allowedRequestUUID;
-
-    private boolean joinable = true;
-
     private final Object joinLock = new Object();
-
+    private boolean joinable = true;
     private volatile int pendingPlayers = 0;
 
     public ZombiesScene(@NotNull UUID uuid, @NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
@@ -151,7 +148,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             }
 
             if (!newPlayers.isEmpty() && allowedRequestUUID != null &&
-                    !joinRequest.getUUID().equals(allowedRequestUUID)) {
+                !joinRequest.getUUID().equals(allowedRequestUUID)) {
                 return TransferResult.failure(Component.text("You aren't allowed to join this game."));
             }
 
@@ -309,7 +306,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         return null;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private int getActualProtocolVersion(PlayerConnection playerConnection) {
         int protocolVersion = MinecraftServer.PROTOCOL_VERSION;
         if (!(playerConnection instanceof PlayerSocketConnection socketConnection)) {
@@ -361,12 +357,12 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
 
             if (!zombiesPlayer.hasQuit()) {
                 fallbackFutures.add(fallback.fallback(zombiesPlayer.module().getPlayerView())
-                                        .whenComplete((fallbackResult, throwable) -> {
-                                            if (throwable != null) {
-                                                LOGGER.warn("Failed to fallback {}", zombiesPlayer.getUUID(),
-                                                    throwable);
-                                            }
-                                        }));
+                    .whenComplete((fallbackResult, throwable) -> {
+                        if (throwable != null) {
+                            LOGGER.warn("Failed to fallback {}", zombiesPlayer.getUUID(),
+                                throwable);
+                        }
+                    }));
             }
 
             zombiesPlayer.end();

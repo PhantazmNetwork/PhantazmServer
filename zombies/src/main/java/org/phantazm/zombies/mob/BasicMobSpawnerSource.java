@@ -20,7 +20,7 @@ public class BasicMobSpawnerSource implements MobSpawnerSource {
     private final KeyParser keyParser;
 
     public BasicMobSpawnerSource(@NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap,
-            @NotNull Spawner proximaSpawner, @NotNull KeyParser keyParser) {
+        @NotNull Spawner proximaSpawner, @NotNull KeyParser keyParser) {
         this.processorMap = Objects.requireNonNull(processorMap);
         this.proximaSpawner = Objects.requireNonNull(proximaSpawner);
         this.keyParser = Objects.requireNonNull(keyParser);
@@ -28,7 +28,7 @@ public class BasicMobSpawnerSource implements MobSpawnerSource {
 
     @Override
     public @NotNull MobSpawner make(@NotNull Random random, @NotNull Supplier<? extends MapObjects> mapObjects,
-            @NotNull MobStore mobStore) {
+        @NotNull MobStore mobStore) {
         return new BasicMobSpawner(processorMap, proximaSpawner, keyParser, random, mapObjects, mobStore);
     }
 }

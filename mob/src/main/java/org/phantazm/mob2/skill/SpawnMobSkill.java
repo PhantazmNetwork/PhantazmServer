@@ -15,12 +15,33 @@ import org.phantazm.mob2.*;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class SpawnMobSkill implements SkillComponent {
+    private final Data data;
+    private final SelectorComponent selector;
+    private final SpawnCallback callback;
+
+    @FactoryMethod
+    public SpawnMobSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector,
+        @NotNull @Child("callback") SpawnCallback callback) {
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
+        this.callback = Objects.requireNonNull(callback);
+    }
+
+    @Override
+    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+        return new Internal(mob, selector.apply(mob, injectionStore), data, injectionStore.get(Keys.MOB_SPAWNER),
+            callback);
+    }
+
     public interface SpawnCallbackComponent extends Function<@NotNull InjectionStore, @NotNull SpawnCallback> {
 
     }
@@ -44,31 +65,14 @@ public class SpawnMobSkill implements SkillComponent {
         }
     }
 
-    private final Data data;
-    private final SelectorComponent selector;
-    private final SpawnCallback callback;
-
-    @FactoryMethod
-    public SpawnMobSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector,
-            @NotNull @Child("callback") SpawnCallback callback) {
-        this.data = Objects.requireNonNull(data);
-        this.selector = Objects.requireNonNull(selector);
-        this.callback = Objects.requireNonNull(callback);
-    }
-
-    @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob, selector.apply(mob, injectionStore), data, injectionStore.get(Keys.MOB_SPAWNER),
-                callback);
-    }
-
     @DataObject
-    public record Data(@Nullable Trigger trigger,
-                       @NotNull @ChildPath("selector") String selector,
-                       @NotNull @ChildPath("callback") String callback,
-                       @NotNull Key identifier,
-                       int spawnAmount,
-                       int maxSpawn) {
+    public record Data(
+        @Nullable Trigger trigger,
+        @NotNull @ChildPath("selector") String selector,
+        @NotNull @ChildPath("callback") String callback,
+        @NotNull Key identifier,
+        int spawnAmount,
+        int maxSpawn) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -115,7 +119,7 @@ public class SpawnMobSkill implements SkillComponent {
                             return;
                         }
 
-                        self.getAcquirable().sync(e -> ((Mob)e).addSkill(new Skill() {
+                        self.getAcquirable().sync(e -> ((Mob) e).addSkill(new Skill() {
                             @Override
                             public void end() {
                                 spawnCount.decrementAndGet();

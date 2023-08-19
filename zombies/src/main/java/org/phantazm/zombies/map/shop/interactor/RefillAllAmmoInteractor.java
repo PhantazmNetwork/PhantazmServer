@@ -32,7 +32,7 @@ public class RefillAllAmmoInteractor implements ShopInteractor {
             }
 
             InventoryAccess access =
-                    zombiesPlayer.module().getInventoryAccessRegistry().getAccess(InventoryKeys.ALIVE_ACCESS);
+                zombiesPlayer.module().getInventoryAccessRegistry().getAccess(InventoryKeys.ALIVE_ACCESS);
 
             for (InventoryObject object : access.profile().objects()) {
                 if (object instanceof Gun gun) {

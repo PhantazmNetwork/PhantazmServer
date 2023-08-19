@@ -32,7 +32,7 @@ public class EntityDamageByGunEventListener extends PhantazmMobEventListener<Ent
                 event.setInstakill(false);
             }
         } else if ((mapObjects.module().flags().hasFlag(Flags.INSTA_KILL) ||
-                        playerHasInstakill(event.getShooter().getUuid())) && !mobResistsInstakill(mob)) {
+            playerHasInstakill(event.getShooter().getUuid())) && !mobResistsInstakill(mob)) {
             event.setInstakill(true);
         }
     }

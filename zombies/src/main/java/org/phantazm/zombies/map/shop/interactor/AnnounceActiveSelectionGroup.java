@@ -31,7 +31,7 @@ public class AnnounceActiveSelectionGroup implements ShopInteractor {
 
     @FactoryMethod
     public AnnounceActiveSelectionGroup(@NotNull Data data, @NotNull Supplier<? extends MapObjects> mapObjects,
-            @NotNull InteractorGroupHandler groupHandler) {
+        @NotNull InteractorGroupHandler groupHandler) {
         this.data = data;
         this.mapObjects = mapObjects;
         this.groupHandler = groupHandler;
@@ -62,8 +62,7 @@ public class AnnounceActiveSelectionGroup implements ShopInteractor {
         Component message = MiniMessage.miniMessage().deserialize(data.format, tag);
         if (data.broadcast) {
             mapObjects.get().module().instance().sendMessage(message);
-        }
-        else {
+        } else {
             interaction.player().getPlayer().ifPresent(player -> player.sendMessage(message));
         }
 
@@ -71,7 +70,9 @@ public class AnnounceActiveSelectionGroup implements ShopInteractor {
     }
 
     @DataObject
-    public record Data(@NotNull Key group, @NotNull String format, boolean broadcast) {
+    public record Data(@NotNull Key group,
+        @NotNull String format,
+        boolean broadcast) {
         @Default("broadcast")
         public static @NotNull ConfigElement defaultBroadcast() {
             return ConfigPrimitive.of(false);

@@ -59,17 +59,17 @@ public class GiveCoinsShotHandler implements ShotHandler {
 
         Collection<Component> displays = new ArrayList<>(2);
         if (!shot.regularTargets().isEmpty()) {
-            displays.add(Component.text((isInstaKill ? "Insta Kill ":"") + shot.regularTargets().size() + "x"));
+            displays.add(Component.text((isInstaKill ? "Insta Kill " : "") + shot.regularTargets().size() + "x"));
             for (GunHit ignored : shot.regularTargets()) {
-                change += isInstaKill ? data.instaKillCoins:data.normalCoins;
+                change += isInstaKill ? data.instaKillCoins : data.normalCoins;
             }
         }
 
         if (!shot.headshotTargets().isEmpty()) {
             displays.add(
-                Component.text((isInstaKill ? "Insta Kill ":"Critical Hit ") + shot.headshotTargets().size() + "x"));
+                Component.text((isInstaKill ? "Insta Kill " : "Critical Hit ") + shot.headshotTargets().size() + "x"));
             for (GunHit ignored : shot.headshotTargets()) {
-                change += isInstaKill ? data.instaKillCoins:data.headshotCoins;
+                change += isInstaKill ? data.instaKillCoins : data.headshotCoins;
             }
         }
 
@@ -77,6 +77,8 @@ public class GiveCoinsShotHandler implements ShotHandler {
     }
 
     @DataObject
-    public record Data(int normalCoins, int headshotCoins, int instaKillCoins) {
+    public record Data(int normalCoins,
+        int headshotCoins,
+        int instaKillCoins) {
     }
 }

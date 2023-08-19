@@ -15,6 +15,6 @@ import java.util.function.Consumer;
 public interface ChatChannel {
 
     @NotNull CompletableFuture<Void> sendMessage(@NotNull Player from, @NotNull String message,
-            @NotNull Consumer<ObjectBooleanPair<Component>> onFailure);
+        @NotNull Consumer<ObjectBooleanPair<Component>> onFailure);
 
 }

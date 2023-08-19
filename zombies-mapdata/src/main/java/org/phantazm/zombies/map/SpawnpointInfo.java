@@ -13,7 +13,8 @@ import java.util.Objects;
 /**
  * Defines a spawnpoint.
  */
-public record SpawnpointInfo(@NotNull Vec3I position,
+public record SpawnpointInfo(
+    @NotNull Vec3I position,
     @NotNull Key spawnRule,
     boolean linkToWindow,
     @Nullable Vec3I linkedWindowPosition) {

@@ -21,7 +21,7 @@ public class GodmodeCommand extends PermissionLockedCommand {
         super("godmode", PERMISSION);
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
             UUID uuid = player.getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
                 ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(uuid);
@@ -32,8 +32,7 @@ public class GodmodeCommand extends PermissionLockedCommand {
                     player.setAllowFlying(true);
                     player.setFlyingSpeed(0.05F);
                     player.sendMessage("Enabled godmode.");
-                }
-                else {
+                } else {
                     player.setAllowFlying(false);
                     player.setFlying(false);
                     player.sendMessage("Disabled godmode.");

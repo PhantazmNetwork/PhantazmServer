@@ -87,7 +87,8 @@ public class BleedEntitiesSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector,
+    public record Data(
+        @NotNull @ChildPath("selector") String selector,
         @NotNull @ChildPath("validator") String validator,
         float bleedDamage,
         boolean bypassArmor,

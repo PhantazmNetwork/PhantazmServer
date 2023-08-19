@@ -35,6 +35,7 @@ public class MapFlaggingInteractor extends InteractorBase<MapFlaggingInteractor.
     }
 
     @DataObject
-    public record Data(@NotNull Key flag, @NotNull FlagAction action) {
+    public record Data(@NotNull Key flag,
+        @NotNull FlagAction action) {
     }
 }

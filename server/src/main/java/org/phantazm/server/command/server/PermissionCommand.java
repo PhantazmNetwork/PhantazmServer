@@ -57,8 +57,7 @@ public class PermissionCommand extends PermissionLockedCommand {
                         UUID uuid = uuidOptional.get();
                         permissionHandler.addToGroup(uuid, group);
                         sender.sendMessage("Added " + uuid + " (" + player + ") to group " + group);
-                    }
-                    else {
+                    } else {
                         sender.sendMessage("Error when resolving player UUID");
                     }
                 });
@@ -78,8 +77,7 @@ public class PermissionCommand extends PermissionLockedCommand {
                         UUID uuid = uuidOptional.get();
                         permissionHandler.removeFromGroup(uuid, group);
                         sender.sendMessage("Removed " + uuid + " (" + player + ") from group " + group);
-                    }
-                    else {
+                    } else {
                         sender.sendMessage("Error when resolving player UUID");
                     }
                 });

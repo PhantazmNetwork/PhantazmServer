@@ -32,12 +32,7 @@ import java.util.List;
 @Model("zombies.corpse")
 @Cache(false)
 public class CorpseCreator {
-    public interface Source {
-        @NotNull CorpseCreator make(@NotNull DependencyProvider mapDependencyProvider);
-    }
-
     private static final String POSSIBLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
-
     private final Data data;
     private final List<CorpseLine> idleLines;
     private final List<CorpseLine> revivingLines;
@@ -45,7 +40,7 @@ public class CorpseCreator {
 
     @FactoryMethod
     public CorpseCreator(@NotNull Data data, @NotNull @Child("idle_lines") List<CorpseLine> idleLines,
-            @NotNull @Child("reviving_lines") List<CorpseLine> revivingLines, @NotNull Team corpseTeam) {
+        @NotNull @Child("reviving_lines") List<CorpseLine> revivingLines, @NotNull Team corpseTeam) {
         this.data = data;
         this.idleLines = List.copyOf(idleLines);
         this.revivingLines = List.copyOf(revivingLines);
@@ -53,11 +48,11 @@ public class CorpseCreator {
     }
 
     public @NotNull CorpseCreator.Corpse forPlayer(@NotNull Instance instance, @NotNull ZombiesPlayer zombiesPlayer,
-            @NotNull Point deathLocation, @NotNull ReviveHandler reviveHandler) {
+        @NotNull Point deathLocation, @NotNull ReviveHandler reviveHandler) {
         PlayerSkin skin = zombiesPlayer.getPlayer().map(Player::getSkin).orElse(null);
         String corpseUsername = RandomStringUtils.random(16, POSSIBLE_CHARACTERS);
         MinimalFakePlayer corpseEntity =
-                new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
+            new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
         zombiesPlayer.getPlayer().ifPresent(player -> {
             for (EquipmentSlot slot : EquipmentSlot.values()) {
                 corpseEntity.setEquipment(slot, player.getEquipment(slot));
@@ -73,12 +68,21 @@ public class CorpseCreator {
         return new Corpse(reviveHandler, hologram, corpseEntity, idleLines, revivingLines);
     }
 
+    public interface Source {
+        @NotNull CorpseCreator make(@NotNull DependencyProvider mapDependencyProvider);
+    }
+
+    public interface CorpseLine {
+        @NotNull Component update(@NotNull Corpse corpse, long time);
+    }
+
     @DataObject
-    public record Data(double hologramGap,
-                       double hologramHeightOffset,
-                       double corpseHeightOffset,
-                       @NotNull @ChildPath("idle_lines") List<String> idleLines,
-                       @NotNull @ChildPath("reviving_lines") List<String> revivingLines) {
+    public record Data(
+        double hologramGap,
+        double hologramHeightOffset,
+        double corpseHeightOffset,
+        @NotNull @ChildPath("idle_lines") List<String> idleLines,
+        @NotNull @ChildPath("reviving_lines") List<String> revivingLines) {
         @Default("hologramGap")
         public static ConfigElement defaultHologramGap() {
             return ConfigPrimitive.of(0.0);
@@ -93,10 +97,6 @@ public class CorpseCreator {
         public static ConfigElement defaultCorpseHeightOffset() {
             return ConfigPrimitive.of(0.25);
         }
-    }
-
-    public interface CorpseLine {
-        @NotNull Component update(@NotNull Corpse corpse, long time);
     }
 
     @Model("zombies.corpse.line.static")
@@ -135,14 +135,15 @@ public class CorpseCreator {
         @Override
         public @NotNull Component update(@NotNull Corpse corpse, long time) {
             TagResolver ticksUntilRevivePlaceholder = Placeholder.unparsed("time_until_revive",
-                    tickFormatter.format(corpse.reviveHandler.getTicksUntilRevive()));
+                tickFormatter.format(corpse.reviveHandler.getTicksUntilRevive()));
             TagResolver ticksUntilDeathPlaceholder = Placeholder.unparsed("time_until_death",
-                    tickFormatter.format(corpse.reviveHandler.getTicksUntilDeath()));
+                tickFormatter.format(corpse.reviveHandler.getTicksUntilDeath()));
             return miniMessage.deserialize(data.format, ticksUntilRevivePlaceholder, ticksUntilDeathPlaceholder);
         }
 
         @DataObject
-        public record Data(@NotNull String format, @NotNull @ChildPath("tick_formatter") String tickFormatter) {
+        public record Data(@NotNull String format,
+            @NotNull @ChildPath("tick_formatter") String tickFormatter) {
         }
     }
 
@@ -158,8 +159,8 @@ public class CorpseCreator {
         private List<CorpseLine> currentLines;
 
         private Corpse(@NotNull ReviveHandler reviveHandler, @NotNull Hologram hologram,
-                @NotNull MinimalFakePlayer corpseEntity, @NotNull List<CorpseLine> idleLines,
-                @NotNull List<CorpseLine> revivingLines) {
+            @NotNull MinimalFakePlayer corpseEntity, @NotNull List<CorpseLine> idleLines,
+            @NotNull List<CorpseLine> revivingLines) {
             this.reviveHandler = reviveHandler;
             this.hologram = hologram;
             this.corpseEntity = corpseEntity;

@@ -19,6 +19,15 @@ public sealed interface Role permits Role.RoleImpl {
     }, ignored -> {
     }, Integer.MIN_VALUE, Set.of());
 
+    static @NotNull Role of(@NotNull String identifier,
+        @NotNull Function<? super Player, ? extends Component> chatStyleFunction,
+        @NotNull Consumer<? super Player> displayNameStyler, int priority, @NotNull Set<Permission> permissions) {
+        Objects.requireNonNull(identifier);
+        Objects.requireNonNull(chatStyleFunction);
+        Objects.requireNonNull(displayNameStyler);
+        return new RoleImpl(identifier, chatStyleFunction, displayNameStyler, priority, Set.copyOf(permissions));
+    }
+
     @NotNull
     String identifier();
 
@@ -32,15 +41,6 @@ public sealed interface Role permits Role.RoleImpl {
     @NotNull
     @Unmodifiable
     Set<Permission> grantedPermissions();
-
-    static @NotNull Role of(@NotNull String identifier,
-        @NotNull Function<? super Player, ? extends Component> chatStyleFunction,
-        @NotNull Consumer<? super Player> displayNameStyler, int priority, @NotNull Set<Permission> permissions) {
-        Objects.requireNonNull(identifier);
-        Objects.requireNonNull(chatStyleFunction);
-        Objects.requireNonNull(displayNameStyler);
-        return new RoleImpl(identifier, chatStyleFunction, displayNameStyler, priority, Set.copyOf(permissions));
-    }
 
     final class RoleImpl implements Role {
         private final String identifier;
@@ -79,8 +79,7 @@ public sealed interface Role permits Role.RoleImpl {
         }
 
         @Override
-        public @NotNull
-        @Unmodifiable Set<Permission> grantedPermissions() {
+        public @NotNull @Unmodifiable Set<Permission> grantedPermissions() {
             return permissions;
         }
 

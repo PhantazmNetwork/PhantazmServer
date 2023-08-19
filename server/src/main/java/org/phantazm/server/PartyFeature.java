@@ -26,7 +26,7 @@ import java.util.*;
 public class PartyFeature {
 
     private static final GuildHolder<Party> partyHolder =
-            new GuildHolder<>(new HashMap<>(), Collections.newSetFromMap(new IdentityHashMap<>()));
+        new GuildHolder<>(new HashMap<>(), Collections.newSetFromMap(new IdentityHashMap<>()));
 
     private static PartyConfig config;
 
@@ -35,29 +35,28 @@ public class PartyFeature {
     }
 
     static void initialize(@NotNull CommandManager commandManager, @NotNull PlayerViewProvider viewProvider,
-            @NotNull SchedulerManager schedulerManager, @NotNull ContextManager contextManager,
-            @NotNull PartyConfig config, @NotNull ConfigCodec partyCodec) {
+        @NotNull SchedulerManager schedulerManager, @NotNull ContextManager contextManager,
+        @NotNull PartyConfig config, @NotNull ConfigCodec partyCodec) {
         PartyFeature.config = config;
 
         TickFormatter tickFormatter;
         try {
             ConfigElement partyConfigNode = Configuration.read(ConfigFeature.PARTY_CONFIG_PATH, partyCodec);
             tickFormatter = contextManager.makeContext(partyConfigNode.getNodeOrThrow("tickFormatter")).provide();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         MiniMessage miniMessage = MiniMessage.miniMessage();
         PartyCreator partyCreator = new PartyCreator.Builder().setNotificationConfig(config.notificationConfig())
-                .setTickFormatter(tickFormatter).setMiniMessage(miniMessage).setCreatorRank(config.creatorRank())
-                .setDefaultRank(config.defaultRank()).setInvitationDuration(config.invitationDuration())
-                .setMinimumKickRank(config.minimumKickRank()).setMinimumInviteRank(config.minimumInviteRank())
-                .setMinimumJoinRank(config.minimumJoinRank()).build();
+            .setTickFormatter(tickFormatter).setMiniMessage(miniMessage).setCreatorRank(config.creatorRank())
+            .setDefaultRank(config.defaultRank()).setInvitationDuration(config.invitationDuration())
+            .setMinimumKickRank(config.minimumKickRank()).setMinimumInviteRank(config.minimumInviteRank())
+            .setMinimumJoinRank(config.minimumJoinRank()).build();
         Command partyCommand =
-                PartyCommand.partyCommand(config.commandConfig(), MinecraftServer.getConnectionManager(), miniMessage,
-                        partyHolder, viewProvider, partyCreator, new Random(), config.creatorRank(),
-                        config.defaultRank());
+            PartyCommand.partyCommand(config.commandConfig(), MinecraftServer.getConnectionManager(), miniMessage,
+                partyHolder, viewProvider, partyCreator, new Random(), config.creatorRank(),
+                config.defaultRank());
         commandManager.register(partyCommand);
 
         schedulerManager.scheduleTask(() -> {

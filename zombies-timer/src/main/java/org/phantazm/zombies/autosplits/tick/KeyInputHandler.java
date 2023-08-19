@@ -43,10 +43,10 @@ public class KeyInputHandler implements ClientTickEvents.EndTick {
         }
 
         Text message = Text.empty()
-                           .formatted(Formatting.YELLOW)
-                           .append("Toggled AutoSplits ")
-                           .append(toggledComponent)
-                           .append("!");
+            .formatted(Formatting.YELLOW)
+            .append("Toggled AutoSplits ")
+            .append(toggledComponent)
+            .append("!");
         client.player.sendMessage(message, false);
     }
 

@@ -41,7 +41,7 @@ public class NearbyReviverPredicate implements Predicate<ZombiesPlayer> {
         }
 
         return revivingPlayer.getPlayer()
-                   .filter(player -> player.getPosition().distance(knockedPosition) <= reviveRadius).isPresent();
+            .filter(player -> player.getPosition().distance(knockedPosition) <= reviveRadius).isPresent();
 
     }
 }

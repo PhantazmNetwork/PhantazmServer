@@ -80,9 +80,9 @@ public class ModifierPerkEffectCreator implements PerkEffectCreator {
         @Override
         public void start() {
             zombiesPlayer.getPlayer().ifPresent(player -> player.getAttribute(attribute)
-                                                              .addModifier(
-                                                                  new AttributeModifier(uuid, name, data.amount,
-                                                                      data.attributeOperation)));
+                .addModifier(
+                    new AttributeModifier(uuid, name, data.amount,
+                        data.attributeOperation)));
         }
 
         @Override
@@ -98,7 +98,8 @@ public class ModifierPerkEffectCreator implements PerkEffectCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @Description("The modifier name") String attribute,
+    public record Data(
+        @NotNull @Description("The modifier name") String attribute,
         @Description("The amount by which to modify this attribute") double amount,
         @NotNull @Description(
             "The operation to use in order to modify this attribute") AttributeOperation attributeOperation) {

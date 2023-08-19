@@ -10,7 +10,8 @@ import java.util.Objects;
 /**
  * Defines the positional data for a shop.
  */
-public record ShopInfo(@NotNull Key id,
+public record ShopInfo(
+    @NotNull Key id,
     @NotNull Bounds3I trigger,
     @NotNull Evaluation predicateEvaluation,
     @NotNull ConfigNode data) {

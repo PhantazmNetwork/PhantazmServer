@@ -25,13 +25,13 @@ public class EventTriggers {
      * A {@link EventTrigger} for when an {@link Entity} is damaged.
      */
     public static final EventTrigger<EntityDamageEvent> DAMAGE_TRIGGER =
-            regularTrigger("damage", EntityDamageEvent.class);
+        regularTrigger("damage", EntityDamageEvent.class);
 
     /**
      * A {@link EventTrigger} for when a {@link Player} interacts with an {@link Entity}.
      */
     public static final EventTrigger<PlayerEntityInteractEvent> INTERACT_TRIGGER =
-            trigger("interact", PlayerEntityInteractEvent.class, PlayerEntityInteractEvent::getTarget);
+        trigger("interact", PlayerEntityInteractEvent.class, PlayerEntityInteractEvent::getTarget);
     /**
      * A {@link Collection} of default {@link EventTrigger}s.
      */
@@ -42,12 +42,12 @@ public class EventTriggers {
     }
 
     private static <TEvent extends Event> @NotNull EventTrigger<TEvent> trigger(@Subst("interact") @NotNull String name,
-            @NotNull Class<TEvent> eventClass, @NotNull Function<TEvent, Entity> entityGetter) {
+        @NotNull Class<TEvent> eventClass, @NotNull Function<TEvent, Entity> entityGetter) {
         return new EventTrigger<>(Key.key(Namespaces.PHANTAZM, name), eventClass, entityGetter);
     }
 
     private static <TEvent extends EntityEvent> @NotNull EventTrigger<TEvent> regularTrigger(
-            @Subst("damage") @NotNull String name, @NotNull Class<TEvent> eventClass) {
+        @Subst("damage") @NotNull String name, @NotNull Class<TEvent> eventClass) {
         return trigger(name, eventClass, EntityEvent::getEntity);
     }
 

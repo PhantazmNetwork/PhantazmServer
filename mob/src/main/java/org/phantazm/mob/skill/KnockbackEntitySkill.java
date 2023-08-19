@@ -33,7 +33,8 @@ public class KnockbackEntitySkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector, float knockback) {
+    public record Data(@NotNull @ChildPath("selector") String selector,
+        float knockback) {
 
         public Data {
             Objects.requireNonNull(selector);

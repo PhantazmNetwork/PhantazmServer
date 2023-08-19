@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
+import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
-import org.phantazm.mob2.Trigger;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -37,10 +37,11 @@ public class JumpTowardsTargetSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger,
-                       @NotNull @ChildPath("selector") String selector,
-                       double strength,
-                       float angle) {
+    public record Data(
+        @Nullable Trigger trigger,
+        @NotNull @ChildPath("selector") String selector,
+        double strength,
+        float angle) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -64,7 +65,7 @@ public class JumpTowardsTargetSkill implements SkillComponent {
 
             Vec unit = Vec.fromPoint(targetOptional.get()).sub(self.getPosition()).normalize();
             Vec yeet = new Vec(unit.x(), 0, unit.z()).rotateAroundNonUnitAxis(new Vec(-unit.z(), 0, unit.x()),
-                    Math.toRadians(data.angle)).mul(data.strength);
+                Math.toRadians(data.angle)).mul(data.strength);
 
             self.getAcquirable().sync(self -> self.setVelocity(self.getVelocity().add(yeet)));
         }

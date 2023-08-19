@@ -98,7 +98,8 @@ public class BasicTargetFinder implements TargetFinder {
      * @param targetLimiter      A path to the {@link BasicTargetFinder}'s {@link TargetLimiter}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("entity_finder") String entityFinder,
+    public record Data(
+        @NotNull @ChildPath("entity_finder") String entityFinder,
         @NotNull @ChildPath("target_tester") String targetTester,
         @NotNull @ChildPath("intersection_finder") String intersectionFinder,
         @NotNull @ChildPath("headshot_tester") String headshotTester,

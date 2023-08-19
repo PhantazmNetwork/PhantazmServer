@@ -34,14 +34,16 @@ public class CombiningArmorPlayerDisplayCreator implements PlayerDisplayCreator 
         return new Display(data, zombiesPlayer);
     }
 
-    public record TieredStack(@NotNull ItemStack stack, int tier) {
+    public record TieredStack(@NotNull ItemStack stack,
+        int tier) {
     }
 
     @DataObject
-    public record Data(@NotNull Direction face,
-                       boolean small,
-                       @NotNull Vec3D offset,
-                       @NotNull Map<EquipmentSlot, TieredStack> items) {
+    public record Data(
+        @NotNull Direction face,
+        boolean small,
+        @NotNull Vec3D offset,
+        @NotNull Map<EquipmentSlot, TieredStack> items) {
     }
 
     private static class Display implements ShopDisplay {
@@ -81,7 +83,6 @@ public class CombiningArmorPlayerDisplayCreator implements PlayerDisplayCreator 
             }
         }
 
-        @SuppressWarnings("UnstableApiUsage")
         @Override
         public void initialize(@NotNull Shop shop) {
             Entity oldArmorStand = this.armorStand;
@@ -92,7 +93,7 @@ public class CombiningArmorPlayerDisplayCreator implements PlayerDisplayCreator 
 
             LivingEntity armorStand = new LivingEntity(EntityType.ARMOR_STAND);
             armorStand.updateViewableRule(player -> player.getUuid().equals(zombiesPlayer.getUUID()));
-            ArmorStandMeta meta = (ArmorStandMeta)armorStand.getEntityMeta();
+            ArmorStandMeta meta = (ArmorStandMeta) armorStand.getEntityMeta();
             meta.setSmall(data.small);
             meta.setInvisible(true);
             meta.setHasNoBasePlate(true);
@@ -103,8 +104,8 @@ public class CombiningArmorPlayerDisplayCreator implements PlayerDisplayCreator 
             }
 
             armorStand.setInstance(shop.instance(),
-                    Pos.fromPoint(shop.center().add(data.offset.x(), data.offset.y(), data.offset.z()))
-                            .withDirection(new Vec(data.face.normalX(), data.face.normalY(), data.face.normalZ())));
+                Pos.fromPoint(shop.center().add(data.offset.x(), data.offset.y(), data.offset.z()))
+                    .withDirection(new Vec(data.face.normalX(), data.face.normalY(), data.face.normalZ())));
 
             this.armorStand = armorStand;
         }

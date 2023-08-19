@@ -78,7 +78,8 @@ public class SpreadFirer implements Firer {
      * @param angleVariance The maximum angle variance for each sub-{@link Firer}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("sub_firers") Collection<String> subFirers,
+    public record Data(
+        @NotNull @ChildPath("sub_firers") Collection<String> subFirers,
         int amount,
         float angleVariance) {
         @Default("amount")

@@ -54,7 +54,8 @@ public class AnimationTicker implements EntityTicker {
         }
 
         @DataObject
-        public record Data(long ticks, @NotNull @ChildPath("effect") String effect) {
+        public record Data(long ticks,
+            @NotNull @ChildPath("effect") String effect) {
         }
     }
 

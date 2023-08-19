@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Description("""
-        A meta skill that calls any number of delegates, in the order that they are declared.
-        """)
+    A meta skill that calls any number of delegates, in the order that they are declared.
+    """)
 @Model("mob.skill.group")
 @Cache(false)
 public class GroupSkill implements Skill {

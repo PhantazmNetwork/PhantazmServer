@@ -18,9 +18,10 @@ import java.util.function.Function;
  * @param entityGetter A {@link Function} that returns the {@link Entity} associated with the {@link Event}
  * @param <TEvent>     The event type associated with the trigger
  */
-public record EventTrigger<TEvent extends Event>(@NotNull Key key,
-                                                 @NotNull Class<TEvent> eventClass,
-                                                 @NotNull Function<TEvent, Entity> entityGetter) implements MobTrigger {
+public record EventTrigger<TEvent extends Event>(
+    @NotNull Key key,
+    @NotNull Class<TEvent> eventClass,
+    @NotNull Function<TEvent, Entity> entityGetter) implements MobTrigger {
 
     /**
      * Creates a {@link EventTrigger} instance.

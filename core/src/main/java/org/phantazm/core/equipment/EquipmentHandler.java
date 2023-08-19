@@ -153,7 +153,7 @@ public class EquipmentHandler {
             InventoryObject currentObject = profile.getInventoryObject(specificSlot);
             if (allowReplace || group.defaultObject() == currentObject) {
                 InventoryObject old = accessRegistry.replaceObject(specificSlot, equipment);
-                return old == null || old == group.defaultObject() ? Result.ADDED:Result.REPLACED;
+                return old == null || old == group.defaultObject() ? Result.ADDED : Result.REPLACED;
             }
 
             return Result.FAILED;
@@ -163,7 +163,7 @@ public class EquipmentHandler {
             return Result.FAILED;
         }
 
-        int targetSlot = specificSlot < 0 ? player.getHeldSlot():specificSlot;
+        int targetSlot = specificSlot < 0 ? player.getHeldSlot() : specificSlot;
 
         InventoryObjectGroup group = inventoryAccess.groups().get(groupKey);
         if (invalidGroupSlot(group, targetSlot)) {
@@ -177,7 +177,7 @@ public class EquipmentHandler {
 
         Equipment equipment = equipmentOptional.get();
         InventoryObject old = accessRegistry.replaceObject(targetSlot, equipment);
-        return old == null || old == group.defaultObject() ? Result.ADDED:Result.REPLACED;
+        return old == null || old == group.defaultObject() ? Result.ADDED : Result.REPLACED;
     }
 
     private boolean invalidGroupSlot(InventoryObjectGroup group, int slot) {

@@ -103,7 +103,8 @@ public class IgniteShotHandler implements ShotHandler {
     }
 
     @DataObject
-    public record Data(int normalFireTicks,
+    public record Data(
+        int normalFireTicks,
         int headshotFireTicks,
         int damageInterval,
         float damage,

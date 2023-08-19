@@ -8,33 +8,6 @@ import java.util.*;
 public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl {
     InjectionStore EMPTY = new InjectionStoreImpl(Map.of());
 
-    <T> @NotNull T get(@NotNull Key<T> key);
-
-    <T> boolean has(@NotNull Key<T> key);
-
-    @NotNull
-    @Unmodifiable
-    Set<@NotNull Key<?>> keys();
-
-    @NotNull
-    @Unmodifiable
-    Collection<@NotNull Object> objects();
-
-    sealed interface Builder permits BuilderImpl {
-        <T> @NotNull Builder with(@NotNull Key<T> key, @NotNull T object);
-
-        @NotNull
-        InjectionStore build();
-    }
-
-    sealed interface Key<T> permits InjectionStore.KeyImpl {
-        @NotNull
-        Class<T> type();
-
-        @NotNull
-        String id();
-    }
-
     static @NotNull Builder builder() {
         return new BuilderImpl();
     }
@@ -60,7 +33,7 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
     }
 
     static @NotNull <T, V> InjectionStore of(@NotNull Key<T> key1, @NotNull T object1, @NotNull Key<V> key2,
-            @NotNull V object2) {
+        @NotNull V object2) {
         InjectionStoreImpl.validateEntry(key1, object1);
         InjectionStoreImpl.validateEntry(key2, object2);
         return new InjectionStoreImpl(Map.of(key1, object1, key2, object2));
@@ -93,6 +66,33 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
         }
 
         return new InjectionStoreImpl(Map.ofEntries(newEntries));
+    }
+
+    <T> @NotNull T get(@NotNull Key<T> key);
+
+    <T> boolean has(@NotNull Key<T> key);
+
+    @NotNull
+    @Unmodifiable
+    Set<@NotNull Key<?>> keys();
+
+    @NotNull
+    @Unmodifiable
+    Collection<@NotNull Object> objects();
+
+    sealed interface Builder permits BuilderImpl {
+        <T> @NotNull Builder with(@NotNull Key<T> key, @NotNull T object);
+
+        @NotNull
+        InjectionStore build();
+    }
+
+    sealed interface Key<T> permits InjectionStore.KeyImpl {
+        @NotNull
+        Class<T> type();
+
+        @NotNull
+        String id();
     }
 
     final class BuilderImpl implements Builder {
@@ -196,7 +196,7 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
 
         @Override
         public <T> @NotNull T get(@NotNull Key<T> key) {
-            T object = (T)mappings.get(key);
+            T object = (T) mappings.get(key);
             if (object == null) {
                 throw new IllegalArgumentException(key + " not present in store");
             }

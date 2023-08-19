@@ -31,15 +31,17 @@ public class DamageAction implements ProjectileHitEntityAction {
         }
 
         if (livingEntity.damage(
-                Damage.fromProjectile(shooter == null ? null : shooter.entity(), projectile, data.damage),
-                data.bypassArmor)) {
+            Damage.fromProjectile(shooter == null ? null : shooter.entity(), projectile, data.damage),
+            data.bypassArmor)) {
             double yaw = Math.toRadians(projectile.getPosition().yaw());
             livingEntity.takeKnockback(data.knockback, Math.sin(yaw), -Math.cos(yaw));
         }
     }
 
     @DataObject
-    public record Data(float damage, float knockback, boolean bypassArmor) {
+    public record Data(float damage,
+        float knockback,
+        boolean bypassArmor) {
         @Default("bypassArmor")
         public static @NotNull ConfigElement defaultBypassArmor() {
             return ConfigPrimitive.of(false);

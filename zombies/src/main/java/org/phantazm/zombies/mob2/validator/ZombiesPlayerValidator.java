@@ -30,7 +30,8 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
     }
 
     @DataObject
-    public record Data(@NotNull Set<Key> states, boolean blacklist) {
+    public record Data(@NotNull Set<Key> states,
+        boolean blacklist) {
     }
 
     private static class Internal implements Validator {

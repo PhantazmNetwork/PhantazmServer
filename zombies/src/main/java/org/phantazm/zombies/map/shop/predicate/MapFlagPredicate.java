@@ -29,6 +29,7 @@ public class MapFlagPredicate extends PredicateBase<MapFlagPredicate.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull Key flag, boolean requireAbsent) {
+    public record Data(@NotNull Key flag,
+        boolean requireAbsent) {
     }
 }

@@ -14,7 +14,8 @@ import java.util.Objects;
 /**
  * Defines a door.
  */
-public record DoorInfo(@NotNull Key id,
+public record DoorInfo(
+    @NotNull Key id,
     @NotNull List<Key> opensTo,
     @NotNull List<Integer> costs,
     @NotNull List<HologramInfo> holograms,

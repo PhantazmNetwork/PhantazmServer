@@ -91,9 +91,9 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
         @NotNull Key mapKey) {
         return executeSQL(connection -> {
             Record result = using(connection).select().from(table("zombies_player_map_stats"))
-                                .where(field("player_uuid").eq(playerUUID.toString()))
-                                .and(field("map_key").eq(mapKey.asString()))
-                                .fetchOne();
+                .where(field("player_uuid").eq(playerUUID.toString()))
+                .and(field("map_key").eq(mapKey.asString()))
+                .fetchOne();
             if (result == null) {
                 return BasicZombiesPlayerMapStats.createBasicStats(playerUUID, mapKey);
             }
@@ -115,11 +115,11 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
             Int2ObjectMap<List<BestTime>> bestTimes = new Int2ObjectOpenHashMap<>(maxPlayerCount - minPlayerCount + 1);
             try (ResultSet resultSet = using(connection).select(field("player_uuid"), field("best_time"),
                     field("player_count")).from(table("zombies_player_map_best_time"))
-                                           .where(field("map_key").eq(mapKey.asString()))
-                                           .and(field("player_count").between(minPlayerCount, maxPlayerCount))
-                                           .and(field("category").eq(category))
-                                           .orderBy(field("best_time"), field("player_uuid"))
-                                           .fetchResultSet()) {
+                .where(field("map_key").eq(mapKey.asString()))
+                .and(field("player_count").between(minPlayerCount, maxPlayerCount))
+                .and(field("category").eq(category))
+                .orderBy(field("best_time"), field("player_uuid"))
+                .fetchResultSet()) {
                 while (resultSet.next()) {
                     int playerCount = resultSet.getInt("player_count");
                     List<BestTime> bestTimeList = bestTimes.computeIfAbsent(playerCount, unused -> new ArrayList<>());
@@ -153,8 +153,8 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
                         rowNumber().over(partitionBy(field("player_count")).orderBy(field("best_time"),
                             field("player_uuid"))).as("rank")).from(
                             table("zombies_player_map_best_time")).where(field("map_key").eq(mapKey.asString()))
-                              .and(field("player_count").between(minPlayerCount, maxPlayerCount))
-                              .and(field("category").eq(category)))
+                        .and(field("player_count").between(minPlayerCount, maxPlayerCount))
+                        .and(field("category").eq(category)))
                     .where(field("player_uuid").eq(playerUUID.toString())).fetch();
 
             Int2ObjectMap<BestTime> times = new Int2ObjectOpenHashMap<>(result.size());

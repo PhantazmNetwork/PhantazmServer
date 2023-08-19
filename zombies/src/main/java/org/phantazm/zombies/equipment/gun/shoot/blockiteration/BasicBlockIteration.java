@@ -29,11 +29,10 @@ public class BasicBlockIteration implements BlockIteration {
     @Override
     public @NotNull Context createContext() {
         return new Context() {
-            @SuppressWarnings("UnstableApiUsage")
             @Override
             public boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Block block) {
                 return !data.passableBlocks().contains(block.key()) && !block.registry().collisionShape().relativeEnd()
-                                                                            .isZero();
+                    .isZero();
             }
 
             @Override

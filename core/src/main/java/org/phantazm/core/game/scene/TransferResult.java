@@ -10,7 +10,8 @@ import java.util.Optional;
 /**
  * Represents the result of transferring a player to or from a {@link Scene}.
  */
-public record TransferResult(@NotNull Optional<Runnable> executor,
+public record TransferResult(
+    @NotNull Optional<Runnable> executor,
     @NotNull Runnable end,
     @NotNull Optional<Component> message) implements AutoCloseable {
 

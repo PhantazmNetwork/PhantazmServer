@@ -51,13 +51,13 @@ public class AttributeModifierAction implements ProjectileHitEntityAction {
             zombiesPlayer.registerCancellable(CancellableState.named(modifier, () -> {
                 zombiesPlayer.getPlayer().ifPresent(player -> {
                     player.getAttribute(Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
-                            .addModifier(new AttributeModifier(modifier, modifier.toString(), data.amount,
-                                    data.attributeOperation));
+                        .addModifier(new AttributeModifier(modifier, modifier.toString(), data.amount,
+                            data.attributeOperation));
                 });
             }, () -> {
                 zombiesPlayer.getPlayer().ifPresent(player -> {
                     player.getAttribute(Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
-                            .removeModifier(modifier);
+                        .removeModifier(modifier);
                 });
             }), true);
 
@@ -70,18 +70,19 @@ public class AttributeModifierAction implements ProjectileHitEntityAction {
         }
 
         livingEntity.getAttribute(Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
-                .addModifier(
-                        new AttributeModifier(modifier, modifier.toString(), data.amount, data.attributeOperation));
+            .addModifier(
+                new AttributeModifier(modifier, modifier.toString(), data.amount, data.attributeOperation));
         livingEntity.scheduler().scheduleTask(() -> {
             livingEntity.getAttribute(Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
-                    .removeModifier(modifier);
-        }, TaskSchedule.tick((int)data.duration), TaskSchedule.stop());
+                .removeModifier(modifier);
+        }, TaskSchedule.tick((int) data.duration), TaskSchedule.stop());
     }
 
     @DataObject
-    public record Data(@NotNull String attribute,
-                       float amount,
-                       @NotNull AttributeOperation attributeOperation,
-                       long duration) {
+    public record Data(
+        @NotNull String attribute,
+        float amount,
+        @NotNull AttributeOperation attributeOperation,
+        long duration) {
     }
 }

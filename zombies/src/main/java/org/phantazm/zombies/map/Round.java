@@ -38,8 +38,8 @@ public class Round implements Tickable {
      * @param roundInfo the backing data object
      */
     public Round(@NotNull RoundInfo roundInfo, @NotNull List<Wave> waves, @NotNull List<Action<Round>> startActions,
-            @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
-            @NotNull List<Spawnpoint> spawnpoints, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
+        @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
+        @NotNull List<Spawnpoint> spawnpoints, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.isEmpty()) {
             LOGGER.warn("Round {} has no waves", roundInfo);
@@ -81,8 +81,7 @@ public class Round implements Tickable {
         return totalMobCount;
     }
 
-    public @Unmodifiable
-    @NotNull List<Wave> getWaves() {
+    public @Unmodifiable @NotNull List<Wave> getWaves() {
         return waves;
     }
 
@@ -122,8 +121,7 @@ public class Round implements Tickable {
             for (Wave wave : waves) {
                 totalMobCount += wave.mobCount();
             }
-        }
-        else {
+        } else {
             endRound();
         }
     }
@@ -160,7 +158,7 @@ public class Round implements Tickable {
     }
 
     private @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
-            @NotNull SpawnDistributor spawnDistributor, boolean isWave) {
+        @NotNull SpawnDistributor spawnDistributor, boolean isWave) {
         if (!isActive) {
             throw new IllegalStateException("Round must be active to spawn mobs");
         }
@@ -174,8 +172,7 @@ public class Round implements Tickable {
             //adjust for mobs that may have failed to spawn
             //only reached when calling internally
             totalMobCount -= currentWave.mobCount() - spawns.size();
-        }
-        else {
+        } else {
             totalMobCount += spawns.size();
         }
 

@@ -45,6 +45,7 @@ public class DoorSendMessageAction implements Action<Door> {
     }
 
     @DataObject
-    public record Data(@NotNull List<Component> messages, boolean broadcast) {
+    public record Data(@NotNull List<Component> messages,
+        boolean broadcast) {
     }
 }

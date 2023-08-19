@@ -34,9 +34,6 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     private final Deque<DamageTarget> activeEntities;
     private final MobStore mobStore;
 
-    private record DamageTarget(UUID damager, LivingEntity target) {
-    }
-
     @FactoryMethod
     public ApplyFireShotEffect(@NotNull Data data, @NotNull MobStore mobStore) {
         this.data = Objects.requireNonNull(data);
@@ -102,8 +99,13 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         entity.removeTag(lastDamageTicksTag);
     }
 
+    private record DamageTarget(UUID damager,
+        LivingEntity target) {
+    }
+
     @DataObject
-    public record Data(@Description("The number of ticks the hit entity will be set on fire") int fireTicks,
+    public record Data(
+        @Description("The number of ticks the hit entity will be set on fire") int fireTicks,
         @Description("The number of ticks between fire damage applications") int damageInterval,
         @Description("The amount of damage dealt on each application") float damage,
         @Description("Whether fire damage should bypass armor damage reduction") boolean bypassArmor) {

@@ -75,7 +75,9 @@ public class PlaySoundSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector, @NotNull Sound sound, boolean followAudience) {
+    public record Data(@NotNull @ChildPath("selector") String selector,
+        @NotNull Sound sound,
+        boolean followAudience) {
         @Default("followAudience")
         public static @NotNull ConfigElement defaultFollowAudience() {
             return ConfigPrimitive.of(false);

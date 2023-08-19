@@ -178,11 +178,11 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             TeamManager teamManager = MinecraftServer.getTeamManager();
             Team mobNoPushTeam =
                 !settings.mobPlayerCollisions() ? teamManager.createBuilder(UUID.randomUUID().toString())
-                                                      .collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS)
-                                                      .build():null;
+                    .collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS)
+                    .build() : null;
             Team corpseTeam = teamManager.createBuilder(UUID.randomUUID().toString())
-                                  .collisionRule(TeamsPacket.CollisionRule.NEVER)
-                                  .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
+                .collisionRule(TeamsPacket.CollisionRule.NEVER)
+                .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
 
             MapObjects mapObjects =
                 createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, mobNoPushTeam, corpseTeam,
@@ -233,7 +233,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     belowNameTag);
             };
 
-            UUID allowedRequestUUID = request.isRestricted() ? request.getUUID():null;
+            UUID allowedRequestUUID = request.isRestricted() ? request.getUUID() : null;
             ZombiesScene scene =
                 new ZombiesScene(UUID.randomUUID(), map, zombiesPlayers, instance, sceneFallback, settings,
                     stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode,

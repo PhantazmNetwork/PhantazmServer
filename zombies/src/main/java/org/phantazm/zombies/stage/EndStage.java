@@ -184,12 +184,12 @@ public class EndStage implements Stage {
 
             ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
             int gunAccuracy = stats.getShots() <= 0
-                                  ? 100
-                                  :(int) Math.rint(((double) (stats.getRegularHits() + stats.getHeadshotHits()) /
-                                                        (double) stats.getShots()) * 100);
+                ? 100
+                : (int) Math.rint(((double) (stats.getRegularHits() + stats.getHeadshotHits()) /
+                (double) stats.getShots()) * 100);
             int headshotAccuracy = stats.getShots() <= 0
-                                       ? 100
-                                       :(int) Math.rint(
+                ? 100
+                : (int) Math.rint(
                 ((double) (stats.getHeadshotHits()) / (double) stats.getShots()) * 100);
             TagResolver[] tagResolvers = new TagResolver[]{Placeholder.component("map", settings.displayName()),
                 Placeholder.component("final_time", finalTime), roundPlaceholder,
@@ -236,9 +236,9 @@ public class EndStage implements Stage {
                 String output = MessageFormat.format(webhook.webhookFormat(), date, time, zombiesPlayers.size(),
                     playerList);
                 HttpRequest request = HttpRequest.newBuilder(URI.create(webhook.webhookURL()))
-                                          .header("Content-Type", "application/json")
-                                          .POST(HttpRequest.BodyPublishers.ofString(output))
-                                          .build();
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(output))
+                    .build();
                 return client.sendAsync(request, HttpResponse.BodyHandlers.discarding());
             }).whenComplete((ignored, throwable) -> {
                 if (throwable != null) {

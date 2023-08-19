@@ -90,8 +90,8 @@ final class EquipmentFeature {
                     }
 
                     String infoFileName = codec.getPreferredExtensions().isEmpty()
-                                              ? "settings"
-                                              :"settings." + codec.getPreferredExtension();
+                        ? "settings"
+                        : "settings." + codec.getPreferredExtension();
                     Path infoPath = gunDirectory.resolve(infoFileName);
                     if (!Files.isRegularFile(infoPath)) {
                         LOGGER.warn("No equipment settings file at {}.", infoPath);

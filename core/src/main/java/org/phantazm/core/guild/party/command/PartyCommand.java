@@ -18,26 +18,26 @@ public class PartyCommand {
     }
 
     public static @NotNull Command partyCommand(@NotNull PartyCommandConfig config,
-            @NotNull ConnectionManager connectionManager, @NotNull MiniMessage miniMessage,
-            @NotNull GuildHolder<Party> partyHolder, @NotNull PlayerViewProvider viewProvider,
-            @NotNull PartyCreator partyCreator, @NotNull Random random, int creatorRank, int defaultRank) {
+        @NotNull ConnectionManager connectionManager, @NotNull MiniMessage miniMessage,
+        @NotNull GuildHolder<Party> partyHolder, @NotNull PlayerViewProvider viewProvider,
+        @NotNull PartyCreator partyCreator, @NotNull Random random, int creatorRank, int defaultRank) {
         Command command = new Command("party", "p");
         command.addSubcommand(PartyCreateCommand.createCommand(config, partyHolder, viewProvider, partyCreator));
         command.addSubcommand(
-                PartyJoinCommand.joinCommand(config, miniMessage, partyHolder.uuidToGuild(), viewProvider));
+            PartyJoinCommand.joinCommand(config, miniMessage, partyHolder.uuidToGuild(), viewProvider));
         command.addSubcommand(PartyLeaveCommand.leaveCommand(config, partyHolder.uuidToGuild(), random, creatorRank));
         command.addSubcommand(
-                PartyKickCommand.kickCommand(config, miniMessage, partyHolder.uuidToGuild(), viewProvider));
+            PartyKickCommand.kickCommand(config, miniMessage, partyHolder.uuidToGuild(), viewProvider));
         command.addSubcommand(
-                PartyInviteCommand.inviteCommand(config, connectionManager, miniMessage, partyHolder, viewProvider,
-                        partyCreator));
+            PartyInviteCommand.inviteCommand(config, connectionManager, miniMessage, partyHolder, viewProvider,
+                partyCreator));
         command.addSubcommand(PartyListCommand.listCommand(config, miniMessage, partyHolder.uuidToGuild()));
         command.addSubcommand(
-                PartyTransferCommand.transferCommand(config, miniMessage, partyHolder.uuidToGuild(), viewProvider,
-                        creatorRank, defaultRank));
+            PartyTransferCommand.transferCommand(config, miniMessage, partyHolder.uuidToGuild(), viewProvider,
+                creatorRank, defaultRank));
         command.addSubcommand(PartyDisbandCommand.disbandCommand(config, partyHolder));
         command.addSubcommand(
-                PartySpyCommand.spyCommand(config, miniMessage, connectionManager, partyHolder, viewProvider));
+            PartySpyCommand.spyCommand(config, miniMessage, connectionManager, partyHolder, viewProvider));
 
         return command;
     }

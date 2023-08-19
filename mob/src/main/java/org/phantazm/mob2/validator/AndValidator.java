@@ -20,10 +20,6 @@ public class AndValidator implements ValidatorComponent {
         this.validators = validators;
     }
 
-    @DataObject
-    public record Data(@NotNull @ChildPath("validators") List<String> validators) {
-    }
-
     @Override
     public @NotNull Validator apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         List<Validator> validators = new ArrayList<>(this.validators.size());
@@ -32,6 +28,10 @@ public class AndValidator implements ValidatorComponent {
         }
 
         return new Internal(validators);
+    }
+
+    @DataObject
+    public record Data(@NotNull @ChildPath("validators") List<String> validators) {
     }
 
     private record Internal(List<Validator> validators) implements Validator {

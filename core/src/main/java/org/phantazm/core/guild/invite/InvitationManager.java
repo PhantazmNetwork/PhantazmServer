@@ -94,7 +94,8 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
         notification.notifyJoin(newMember);
     }
 
-    private record Invitation(@NotNull PlayerView invitee, long expirationTime) {
+    private record Invitation(@NotNull PlayerView invitee,
+        long expirationTime) {
 
     }
 

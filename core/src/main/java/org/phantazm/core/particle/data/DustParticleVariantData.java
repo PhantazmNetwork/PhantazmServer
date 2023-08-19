@@ -35,6 +35,7 @@ public class DustParticleVariantData implements ParticleVariantData {
     }
 
     @DataObject
-    public record Data(@NotNull RGBLike color, float size) {
+    public record Data(@NotNull RGBLike color,
+        float size) {
     }
 }

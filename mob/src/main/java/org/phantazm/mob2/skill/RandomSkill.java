@@ -34,7 +34,9 @@ public class RandomSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger, @NotNull @ChildPath("delegate") String delegate, double chance) {
+    public record Data(@Nullable Trigger trigger,
+        @NotNull @ChildPath("delegate") String delegate,
+        double chance) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;

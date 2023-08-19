@@ -74,7 +74,8 @@ public class ConditionalUpdaterCreator implements PlayerUpdaterCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("condition") String condition,
+    public record Data(
+        @NotNull @ChildPath("condition") String condition,
         @NotNull @ChildPath("success") String success,
         @NotNull @ChildPath("failure") String failure) {
     }

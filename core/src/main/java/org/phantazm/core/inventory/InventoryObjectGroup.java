@@ -34,16 +34,16 @@ public interface InventoryObjectGroup {
     @NotNull @UnmodifiableView IntSet getSlots();
 
     /**
-     * Checks whether the group within a profile is considered full.
-     * This means that no {@link InventoryObject}s may be pushed to the group.
+     * Checks whether the group within a profile is considered full. This means that no {@link InventoryObject}s may be
+     * pushed to the group.
      *
      * @return Whether the group is considered full
      */
     boolean isFull();
 
     /**
-     * Checks whether the group within a profile is considered empty.
-     * This means that no {@link InventoryObject}s may be popped from the group.
+     * Checks whether the group within a profile is considered empty. This means that no {@link InventoryObject}s may be
+     * popped from the group.
      *
      * @return Whether the group is considered empty
      */

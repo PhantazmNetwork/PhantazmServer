@@ -97,7 +97,8 @@ public class ChainShotHandler implements ShotHandler {
      * @param fireAttempts       The number of times the {@link ChainShotHandler} should try to shoot at new targets
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("finder") String finder,
+    public record Data(
+        @NotNull @ChildPath("finder") String finder,
         @NotNull @ChildPath("firer") String firer,
         boolean ignorePreviousHits,
         int fireAttempts) {

@@ -13,9 +13,9 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
+import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
-import org.phantazm.mob2.Trigger;
 
 import java.util.Objects;
 
@@ -35,7 +35,9 @@ public class DamageEntitySkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger, float amount, boolean armorBypassing) {
+    public record Data(@Nullable Trigger trigger,
+        float amount,
+        boolean armorBypassing) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -58,7 +60,7 @@ public class DamageEntitySkill implements SkillComponent {
         @Override
         protected void useOnTarget(@NotNull Target target) {
             target.forType(LivingEntity.class, livingEntity -> livingEntity.getAcquirable().sync(e -> {
-                LivingEntity entity = (LivingEntity)e;
+                LivingEntity entity = (LivingEntity) e;
                 entity.damage(Damage.fromEntity(self, data.amount), data.armorBypassing);
             }));
         }

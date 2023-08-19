@@ -13,9 +13,9 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
+import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
-import org.phantazm.mob2.Trigger;
 
 import java.util.Objects;
 
@@ -35,11 +35,12 @@ public class PushEntitySkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger,
-                       @NotNull @ChildPath("selector") String selector,
-                       double power,
-                       double vertical,
-                       boolean additive) {
+    public record Data(
+        @Nullable Trigger trigger,
+        @NotNull @ChildPath("selector") String selector,
+        double power,
+        double vertical,
+        boolean additive) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -69,9 +70,8 @@ public class PushEntitySkill implements SkillComponent {
             target.getAcquirable().sync(targetEntity -> {
                 if (data.additive) {
                     targetEntity.setVelocity(
-                            targetEntity.getVelocity().add(diff.mul(data.power).add(0, data.vertical, 0)));
-                }
-                else {
+                        targetEntity.getVelocity().add(diff.mul(data.power).add(0, data.vertical, 0)));
+                } else {
                     targetEntity.setVelocity(diff.mul(data.power).add(0, data.vertical, 0));
                 }
             });

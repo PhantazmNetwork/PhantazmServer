@@ -16,7 +16,7 @@ import java.util.concurrent.locks.StampedLock;
  * An abstract base for {@link SceneProvider}s.
  */
 public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TRequest extends SceneJoinRequest>
-        implements SceneProvider<TScene, TRequest> {
+    implements SceneProvider<TScene, TRequest> {
     private final List<TScene> scenes = new CopyOnWriteArrayList<>();
     private final Collection<TScene> unmodifiableScenes = Collections.unmodifiableCollection(scenes);
     private final StampedLock lock = new StampedLock();
@@ -63,8 +63,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
                 }
 
                 return Optional.empty();
-            }
-            finally {
+            } finally {
                 lock.unlockWrite(writeStamp);
             }
         }, executor);
@@ -98,8 +97,7 @@ public abstract class SceneProviderAbstract<TScene extends Scene<TRequest>, TReq
                 if (process != null) {
                     process.eventHandler().call(new SceneShutdownEvent(scene));
                 }
-            }
-            else {
+            } else {
                 scene.tick(time);
             }
         }

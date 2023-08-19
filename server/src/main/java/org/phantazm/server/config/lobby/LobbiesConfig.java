@@ -19,7 +19,8 @@ import java.util.Objects;
  * @param mainLobbyName The {@link String} name of the main lobby
  * @param lobbies       A {@link Map} of {@link String} lobby names to their respective {@link LobbyConfig}s
  */
-public record LobbiesConfig(@NotNull Path instancesPath,
+public record LobbiesConfig(
+    @NotNull Path instancesPath,
     @NotNull Component kickMessage,
     @NotNull String mainLobbyName,
     @NotNull Map<String, LobbyConfig> lobbies) {

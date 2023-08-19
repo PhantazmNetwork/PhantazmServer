@@ -12,7 +12,8 @@ import java.util.Objects;
  * @param authType    The type of authentication the server will use
  * @param proxySecret The secret used for authentication
  */
-public record ServerInfoConfig(@NotNull String serverIP,
+public record ServerInfoConfig(
+    @NotNull String serverIP,
     int port,
     boolean whitelist,
     @NotNull AuthType authType,
@@ -66,6 +67,6 @@ public record ServerInfoConfig(@NotNull String serverIP,
 
     public boolean isUnsafeConfiguration() {
         return (authType == AuthType.VELOCITY || authType == AuthType.BUNGEE) &&
-                   proxySecret.equals(ServerInfoConfig.DEFAULT_PROXY_SECRET);
+            proxySecret.equals(ServerInfoConfig.DEFAULT_PROXY_SECRET);
     }
 }

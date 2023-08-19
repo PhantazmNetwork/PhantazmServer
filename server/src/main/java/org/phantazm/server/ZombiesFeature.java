@@ -74,38 +74,34 @@ public final class ZombiesFeature {
     private static ZombiesSceneRouter sceneRouter;
     private static ZombiesDatabase database;
 
-    private record PreloadedMap(@NotNull List<String> instancePath, @NotNull Point spawn, int chunkLoadRange) {
-
-    }
-
     static void initialize(@NotNull ContextManager contextManager,
-            @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
-            @NotNull KeyParser keyParser,
-            @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
-            @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback sceneFallback,
-            @NotNull Map<? super UUID, ? extends Party> parties, @NotNull SceneTransferHelper sceneTransferHelper,
-            @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
-            @NotNull MappingProcessorSource mappingProcessorSource) {
+        @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
+        @NotNull KeyParser keyParser,
+        @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
+        @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback sceneFallback,
+        @NotNull Map<? super UUID, ? extends Party> parties, @NotNull SceneTransferHelper sceneTransferHelper,
+        @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
+        @NotNull MappingProcessorSource mappingProcessorSource) {
         Attributes.registerAll();
 
         ConfigCodec codec = new YamlCodec();
         ZombiesFeature.maps = loadFeature("map", new FileSystemMapLoader(MAPS_FOLDER, codec, mappingProcessorSource));
 
         ZombiesFeature.powerupHandlerSource = new BasicPowerupHandlerSource(loadFeature("powerup",
-                new FileSystemPowerupDataLoader(POWERUPS_FOLDER, codec,
-                        mappingProcessorSource.processorFor(Token.ofClass(PowerupData.class)))), contextManager);
+            new FileSystemPowerupDataLoader(POWERUPS_FOLDER, codec,
+                mappingProcessorSource.processorFor(Token.ofClass(PowerupData.class)))), contextManager);
 
         ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(processorMap, spawner, keyParser);
 
         InstanceLoader instanceLoader =
-                new AnvilFileSystemInstanceLoader(MinecraftServer.getInstanceManager(), INSTANCES_FOLDER,
-                        DynamicChunk::new, ExecutorFeature.getExecutor());
+            new AnvilFileSystemInstanceLoader(MinecraftServer.getInstanceManager(), INSTANCES_FOLDER,
+                DynamicChunk::new, ExecutorFeature.getExecutor());
 
         Set<PreloadedMap> instancePaths = new HashSet<>(maps.size());
         for (MapInfo mapInfo : maps.values()) {
             instancePaths.add(new PreloadedMap(mapInfo.settings().instancePath(),
-                    VecUtils.toPoint(mapInfo.settings().origin().add(mapInfo.settings().spawn())),
-                    mapInfo.settings().chunkLoadRange()));
+                VecUtils.toPoint(mapInfo.settings().origin().add(mapInfo.settings().spawn())),
+                mapInfo.settings().chunkLoadRange()));
         }
 
         LOGGER.info("Preloading {} map instances", instancePaths.size());
@@ -126,15 +122,15 @@ public final class ZombiesFeature {
         ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource(globalEventNode);
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
-                    new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
-                            instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
-                            ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(), clientBlockHandlerSource,
-                            contextManager, keyParser, database, viewProvider, ZombiesFeature.powerupHandlerSource(),
-                            new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,
-                                    EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
-                                    keyParser),
-                            mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
-                                    .provide(mapDependencyProvider), songLoader);
+                new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
+                    instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
+                    ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(), clientBlockHandlerSource,
+                    contextManager, keyParser, database, viewProvider, ZombiesFeature.powerupHandlerSource(),
+                    new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,
+                        EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
+                        keyParser),
+                    mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
+                        .provide(mapDependencyProvider), songLoader);
             providers.put(entry.getKey(), provider);
         }
 
@@ -145,17 +141,16 @@ public final class ZombiesFeature {
         }, TaskSchedule.immediate(), TaskSchedule.nextTick());
 
         MinecraftServer.getCommandManager().register(
-                new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider,
-                        MinecraftServer.getSchedulerManager(), sceneTransferHelper, sceneFallback,
-                        zombiesConfig.joinRatelimit()));
+            new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider,
+                MinecraftServer.getSchedulerManager(), sceneTransferHelper, sceneFallback,
+                zombiesConfig.joinRatelimit()));
     }
 
     private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) {
         List<String> dataNames;
         try {
             dataNames = loader.loadableData();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -167,12 +162,11 @@ public final class ZombiesFeature {
 
                 if (data.containsKey(id)) {
                     LOGGER.warn("Found duplicate " + featureName + " with id " + id + "; the previously loaded " +
-                            "version will be overwritten");
+                        "version will be overwritten");
                 }
 
                 data.put(id, feature);
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOGGER.warn("Exception when loading " + featureName, e);
             }
         }
@@ -199,7 +193,7 @@ public final class ZombiesFeature {
 
     public static @NotNull Optional<ZombiesPlayer> getZombiesPlayer(@NotNull UUID playerUUID) {
         return FeatureUtils.check(sceneRouter).getCurrentScene(playerUUID)
-                .map(scene -> scene.getZombiesPlayers().get(playerUUID));
+            .map(scene -> scene.getZombiesPlayers().get(playerUUID));
     }
 
     public static @NotNull ZombiesSceneRouter zombiesSceneRouter() {
@@ -208,6 +202,12 @@ public final class ZombiesFeature {
 
     public static @NotNull ZombiesDatabase getDatabase() {
         return FeatureUtils.check(database);
+    }
+
+    private record PreloadedMap(@NotNull List<String> instancePath,
+        @NotNull Point spawn,
+        int chunkLoadRange) {
+
     }
 
 }

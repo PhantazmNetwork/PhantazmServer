@@ -22,7 +22,7 @@ public final class ElementFeature {
         Objects.requireNonNull(keyParser);
 
         contextManager = ContextManager.builder(Namespaces.PHANTAZM).withKeyParserFunction((ignored) -> keyParser)
-                             .withMappingProcessorSourceSupplier(() -> mappingProcessorSource).build();
+            .withMappingProcessorSourceSupplier(() -> mappingProcessorSource).build();
         contextManager.registerElementClasses(ElementSearcher.getElementClassesInPackage(PHANTAZM_PACKAGE));
     }
 

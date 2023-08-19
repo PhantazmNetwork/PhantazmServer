@@ -22,8 +22,8 @@ public abstract class LobbyProviderAbstract extends SceneProviderAbstract<Lobby,
      * Creates an abstract {@link Lobby} {@link SceneProvider}.
      *
      * @param maximumLobbies    The maximum number {@link Lobby}s in the provider.
-     * @param newLobbyThreshold The weighting threshold for lobbies. If no lobbies are above this threshold,
-     *                          a new {@link Lobby} will be created.
+     * @param newLobbyThreshold The weighting threshold for lobbies. If no lobbies are above this threshold, a new
+     *                          {@link Lobby} will be created.
      */
     public LobbyProviderAbstract(@NotNull Executor executor, int maximumLobbies, int newLobbyThreshold) {
         super(executor, maximumLobbies);

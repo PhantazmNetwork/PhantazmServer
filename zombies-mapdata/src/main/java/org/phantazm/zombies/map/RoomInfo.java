@@ -15,7 +15,8 @@ import java.util.Objects;
 /**
  * Defines a room.
  */
-public record RoomInfo(@NotNull Key id,
+public record RoomInfo(
+    @NotNull Key id,
     boolean isSpawn,
     @NotNull Component displayName,
     @NotNull List<Bounds3I> regions,

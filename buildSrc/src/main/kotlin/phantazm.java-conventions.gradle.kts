@@ -79,9 +79,9 @@ tasks.getByName<Test>("test") {
 
 tasks.getByName<Javadoc>("javadoc") {
     (options as StandardJavadocDocletOptions).tags(
-        "apiNote:a:API Note:",
-        "implSpec:a:Implementation Requirements:",
-        "implNote:a:Implementation Note:"
+            "apiNote:a:API Note:",
+            "implSpec:a:Implementation Requirements:",
+            "implNote:a:Implementation Note:"
     )
 }
 

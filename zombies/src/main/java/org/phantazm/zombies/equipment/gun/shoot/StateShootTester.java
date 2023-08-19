@@ -71,7 +71,8 @@ public class StateShootTester implements ShootTester {
      * @param reloadTester A path to the gun's {@link ReloadTester}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("stats") String stats,
+    public record Data(
+        @NotNull @ChildPath("stats") String stats,
         @NotNull @ChildPath("reload_tester") String reloadTester) {
 
         /**

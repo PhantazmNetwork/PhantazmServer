@@ -38,7 +38,7 @@ public class DragonsWrathInteractor implements ShopInteractor {
 
     @FactoryMethod
     public DragonsWrathInteractor(@NotNull Data data, @NotNull Supplier<? extends RoundHandler> roundHandler,
-            @NotNull MobStore mobStore) {
+        @NotNull MobStore mobStore) {
         this.data = data;
         this.roundHandler = roundHandler;
         this.mobStore = mobStore;
@@ -61,27 +61,27 @@ public class DragonsWrathInteractor implements ShopInteractor {
         Round currentRound = currentRoundOptional.get();
         Wrapper<Integer> killCount = Wrapper.of(0);
         instance.getEntityTracker()
-                .nearbyEntities(shop.center(), data.radius, EntityTracker.Target.LIVING_ENTITIES, entity -> {
-                    if (!currentRound.hasMob(entity.getUuid())) {
-                        return;
-                    }
+            .nearbyEntities(shop.center(), data.radius, EntityTracker.Target.LIVING_ENTITIES, entity -> {
+                if (!currentRound.hasMob(entity.getUuid())) {
+                    return;
+                }
 
-                    PhantazmMob mob = mobStore.getMob(entity.getUuid());
-                    if (mob == null ||
-                            mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
-                        return;
-                    }
+                PhantazmMob mob = mobStore.getMob(entity.getUuid());
+                if (mob == null ||
+                    mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                    return;
+                }
 
-                    Entity lightningBolt = new Entity(EntityType.LIGHTNING_BOLT);
-                    lightningBolt.setInstance(instance, entity.getPosition());
-                    lightningBolt.scheduleRemove(20, TimeUnit.SERVER_TICK);
+                Entity lightningBolt = new Entity(EntityType.LIGHTNING_BOLT);
+                lightningBolt.setInstance(instance, entity.getPosition());
+                lightningBolt.scheduleRemove(20, TimeUnit.SERVER_TICK);
 
-                    instance.playSound(data.sound());
+                instance.playSound(data.sound());
 
-                    entity.setTag(Tags.LAST_HIT_BY, interaction.player().module().getPlayerView().getUUID());
-                    entity.kill();
-                    killCount.set(killCount.get() + 1);
-                });
+                entity.setTag(Tags.LAST_HIT_BY, interaction.player().module().getPlayerView().getUUID());
+                entity.kill();
+                killCount.set(killCount.get() + 1);
+            });
 
         TagResolver killCountPlaceholder = Placeholder.component("kill_count", Component.text(killCount.get()));
         Component message = MiniMessage.miniMessage().deserialize(data.messageFormat(), killCountPlaceholder);
@@ -95,6 +95,9 @@ public class DragonsWrathInteractor implements ShopInteractor {
     }
 
     @DataObject
-    public record Data(@NotNull Sound sound, @NotNull String messageFormat, boolean broadcast, double radius) {
+    public record Data(@NotNull Sound sound,
+        @NotNull String messageFormat,
+        boolean broadcast,
+        double radius) {
     }
 }

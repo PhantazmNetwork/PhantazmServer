@@ -88,7 +88,7 @@ public class CountdownStage implements Stage {
             }
 
             List<MessageWithDestination> messages = settings.introMessages()
-                                                        .get(random.nextInt(settings.introMessages().size()));
+                .get(random.nextInt(settings.introMessages().size()));
             for (MessageWithDestination message : messages) {
                 switch (message.destination()) {
                     case TITLE -> player.sendTitlePart(TitlePart.TITLE, message.component());
@@ -106,8 +106,8 @@ public class CountdownStage implements Stage {
         zombiesPlayer.module().getPlayerView().getDisplayName().thenAccept(displayName -> {
             TagResolver joinerPlaceholder = Placeholder.component("joiner", displayName);
             Component message = MiniMessage.miniMessage()
-                                    .deserialize(settings.gameJoinFormat(), joinerPlaceholder, countPlaceholder,
-                                        maxPlayersPlaceholder);
+                .deserialize(settings.gameJoinFormat(), joinerPlaceholder, countPlaceholder,
+                    maxPlayersPlaceholder);
             instance.sendMessage(message);
         });
     }
@@ -146,7 +146,7 @@ public class CountdownStage implements Stage {
                 }
 
                 List<MessageWithDestination> messages = settings.introMessages()
-                                                            .get(random.nextInt(settings.introMessages().size()));
+                    .get(random.nextInt(settings.introMessages().size()));
                 for (MessageWithDestination message : messages) {
                     switch (message.destination()) {
                         case TITLE -> player.sendTitlePart(TitlePart.TITLE, message.component());

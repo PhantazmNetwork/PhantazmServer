@@ -29,8 +29,7 @@ public class TitleInteractor extends InteractorBase<TitleInteractor.Data> {
 
         if (data.broadcast) {
             shop.instance().sendTitlePart(data.titlePart, data.message);
-        }
-        else {
+        } else {
             interaction.player().getPlayer().ifPresent(player -> player.sendTitlePart(data.titlePart, data.message));
         }
 
@@ -43,6 +42,8 @@ public class TitleInteractor extends InteractorBase<TitleInteractor.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull Component message, boolean broadcast, TitlePart<Component> titlePart) {
+    public record Data(@NotNull Component message,
+        boolean broadcast,
+        TitlePart<Component> titlePart) {
     }
 }

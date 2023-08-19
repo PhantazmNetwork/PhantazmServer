@@ -18,7 +18,7 @@ public class ConditionalDisplay implements ShopDisplay {
 
     @FactoryMethod
     public ConditionalDisplay(@NotNull @Child("success_displays") List<ShopDisplay> successDisplays,
-            @NotNull @Child("failure_displays") List<ShopDisplay> failureDisplays) {
+        @NotNull @Child("failure_displays") List<ShopDisplay> failureDisplays) {
         this.successDisplays = Objects.requireNonNull(successDisplays);
         this.failureDisplays = Objects.requireNonNull(failureDisplays);
     }
@@ -81,7 +81,8 @@ public class ConditionalDisplay implements ShopDisplay {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("success_displays") List<String> successDisplays,
-                       @NotNull @ChildPath("failure_displays") List<String> failureDisplays) {
+    public record Data(
+        @NotNull @ChildPath("success_displays") List<String> successDisplays,
+        @NotNull @ChildPath("failure_displays") List<String> failureDisplays) {
     }
 }

@@ -211,7 +211,8 @@ public class ProjectileFirer implements Firer {
      *                        automatically exploding
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("end_selector") String endSelector,
+    public record Data(
+        @NotNull @ChildPath("end_selector") String endSelector,
         @NotNull @ChildPath("target_finder") String targetFinder,
         @NotNull @ChildPath("collision_filter") String collisionFilter,
         @NotNull @ChildPath("shot_handlers") Collection<String> shotHandlers,
@@ -222,7 +223,8 @@ public class ProjectileFirer implements Firer {
         long maxAliveTime) {
     }
 
-    private record FiredShot(@NotNull Gun gun,
+    private record FiredShot(
+        @NotNull Gun gun,
         @NotNull GunState state,
         @NotNull Entity shooter,
         @NotNull Pos start,
@@ -237,7 +239,8 @@ public class ProjectileFirer implements Firer {
 
     }
 
-    private record AliveProjectile(@NotNull Reference<Entity> projectile, long ticks) {
+    private record AliveProjectile(@NotNull Reference<Entity> projectile,
+        long ticks) {
 
         private AliveProjectile {
             Objects.requireNonNull(projectile);

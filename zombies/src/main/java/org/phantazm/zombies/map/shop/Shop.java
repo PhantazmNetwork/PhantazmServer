@@ -38,8 +38,8 @@ public class Shop extends BoundedBase implements Tickable {
     private final Flaggable flaggable;
 
     public Shop(@NotNull Point mapOrigin, @NotNull ShopInfo shopInfo, @NotNull Instance instance,
-            @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> successInteractors,
-            @NotNull List<ShopInteractor> failureInteractors, @NotNull List<ShopDisplay> displays) {
+        @NotNull List<ShopPredicate> predicates, @NotNull List<ShopInteractor> successInteractors,
+        @NotNull List<ShopInteractor> failureInteractors, @NotNull List<ShopDisplay> displays) {
         super(mapOrigin, shopInfo.trigger());
 
         this.mapOrigin = mapOrigin;

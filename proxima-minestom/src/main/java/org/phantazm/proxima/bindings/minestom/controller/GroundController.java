@@ -56,68 +56,6 @@ public class GroundController implements Controller {
         this.trackerPredicate = new TrackerPredicate();
     }
 
-    private class TrackerPredicate implements Predicate<LivingEntity> {
-        private Point entityPos;
-        private double vX;
-        private double vZ;
-
-        private int count;
-        private Vec3D sum;
-        private int iterations;
-
-        private TrackerPredicate() {
-        }
-
-        private void set(Point entityPos, double vX, double vZ) {
-            this.entityPos = entityPos;
-            this.vX = vX;
-            this.vZ = vZ;
-
-            this.count = 0;
-            this.sum = null;
-            this.iterations = 0;
-        }
-
-        @Override
-        public boolean test(LivingEntity candidate) {
-            if (candidate != entity && !(candidate instanceof Player) &&
-                    candidate.getBoundingBox().intersectEntity(candidate.getPosition(), entity)) {
-                count++;
-                iterations++;
-
-                Pos pos = candidate.getPosition();
-                if (sum == null) {
-                    sum = Vec3D.mutable(pos.x(), 0, pos.z());
-                } else {
-                    sum.add(pos.x(), 0, pos.z());
-                }
-
-                double dx = pos.x() - entityPos.x();
-                double dz = pos.z() - entityPos.z();
-
-                double length = Math.sqrt(dx * dx + dz * dz);
-                double scaleFactor = 1D / Math.max(0.3, length);
-
-                Vec oldVelocity = entity.getVelocity();
-
-                if (length > 0.001) {
-                    candidate.setVelocity(new Vec(dx * scaleFactor, oldVelocity.y(), dz * scaleFactor));
-                } else {
-                    double pZ = -vX;
-                    if (iterations % 2 == 0) {
-                        candidate.setVelocity(new Vec(vZ * scaleFactor * ENTITY_COLLISION_FACTOR, oldVelocity.y(),
-                            pZ * scaleFactor * ENTITY_COLLISION_FACTOR));
-                    } else {
-                        candidate.setVelocity(new Vec(-vZ * scaleFactor * ENTITY_COLLISION_FACTOR, oldVelocity.y(),
-                            -pZ * scaleFactor * ENTITY_COLLISION_FACTOR));
-                    }
-                }
-            }
-
-            return iterations >= 5;
-        }
-    }
-
     @Override
     public void advance(@NotNull Node current, @NotNull Node target, @Nullable Entity targetEntity) {
         Chunk chunk = entity.getChunk();
@@ -304,6 +242,68 @@ public class GroundController implements Controller {
 
             double z = -Math.exp((x0 * (-x1 - x2) - h * x3) / (g * x0)) / g;
             return lastJumpVelocity = (-g * MathUtils.lambertW(-1, z) - x1) / b;
+        }
+    }
+
+    private class TrackerPredicate implements Predicate<LivingEntity> {
+        private Point entityPos;
+        private double vX;
+        private double vZ;
+
+        private int count;
+        private Vec3D sum;
+        private int iterations;
+
+        private TrackerPredicate() {
+        }
+
+        private void set(Point entityPos, double vX, double vZ) {
+            this.entityPos = entityPos;
+            this.vX = vX;
+            this.vZ = vZ;
+
+            this.count = 0;
+            this.sum = null;
+            this.iterations = 0;
+        }
+
+        @Override
+        public boolean test(LivingEntity candidate) {
+            if (candidate != entity && !(candidate instanceof Player) &&
+                candidate.getBoundingBox().intersectEntity(candidate.getPosition(), entity)) {
+                count++;
+                iterations++;
+
+                Pos pos = candidate.getPosition();
+                if (sum == null) {
+                    sum = Vec3D.mutable(pos.x(), 0, pos.z());
+                } else {
+                    sum.add(pos.x(), 0, pos.z());
+                }
+
+                double dx = pos.x() - entityPos.x();
+                double dz = pos.z() - entityPos.z();
+
+                double length = Math.sqrt(dx * dx + dz * dz);
+                double scaleFactor = 1D / Math.max(0.3, length);
+
+                Vec oldVelocity = entity.getVelocity();
+
+                if (length > 0.001) {
+                    candidate.setVelocity(new Vec(dx * scaleFactor, oldVelocity.y(), dz * scaleFactor));
+                } else {
+                    double pZ = -vX;
+                    if (iterations % 2 == 0) {
+                        candidate.setVelocity(new Vec(vZ * scaleFactor * ENTITY_COLLISION_FACTOR, oldVelocity.y(),
+                            pZ * scaleFactor * ENTITY_COLLISION_FACTOR));
+                    } else {
+                        candidate.setVelocity(new Vec(-vZ * scaleFactor * ENTITY_COLLISION_FACTOR, oldVelocity.y(),
+                            -pZ * scaleFactor * ENTITY_COLLISION_FACTOR));
+                    }
+                }
+            }
+
+            return iterations >= 5;
         }
     }
 }

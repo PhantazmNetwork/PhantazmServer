@@ -11,7 +11,10 @@ import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.PickupPredicate;
 import org.phantazm.zombies.powerup.visual.PowerupVisual;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 public class Powerup implements Tickable, Keyed {
     private final Key type;

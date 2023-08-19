@@ -37,13 +37,10 @@ public class ProjectileMovementGoal implements ProximaGoal {
     private final double power;
 
     private final double spread;
-
-    private Pos previousPos = null;
-
-    private boolean collided = false;
-
     private final int selfCollisionTickThreshold;
     private final int blockCollisionTickThreshold;
+    private Pos previousPos = null;
+    private boolean collided = false;
 
     public ProjectileMovementGoal(@NotNull Entity entity, @NotNull Entity shooter, @NotNull Point to, double power,
         double spread) {
@@ -130,7 +127,6 @@ public class ProjectileMovementGoal implements ProximaGoal {
         this.previousPos = currentPos;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private boolean checkStuck(Pos previousPos, Pos currentPos) {
         final Instance instance = entity.getInstance();
         if (instance == null) {

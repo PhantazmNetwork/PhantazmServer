@@ -12,7 +12,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public record PowerupComponents(@NotNull @Unmodifiable Collection<PowerupVisualComponent> visuals,
+public record PowerupComponents(
+    @NotNull @Unmodifiable Collection<PowerupVisualComponent> visuals,
     @NotNull @Unmodifiable Collection<PowerupActionComponent> actions,
     @NotNull DeactivationPredicateComponent deactivationPredicate,
     @NotNull PickupPredicateComponent pickupPredicateComponent,

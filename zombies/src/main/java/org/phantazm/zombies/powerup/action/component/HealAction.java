@@ -33,7 +33,8 @@ public class HealAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(float amount, boolean noTakeOnFull) {
+    public record Data(float amount,
+        boolean noTakeOnFull) {
         @Default("noTakeOnFull")
         public static @NotNull ConfigElement defaultNoTakeOnFull() {
             return ConfigPrimitive.of(true);

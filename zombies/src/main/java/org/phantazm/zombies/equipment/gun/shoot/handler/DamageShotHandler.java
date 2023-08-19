@@ -88,6 +88,13 @@ public class DamageShotHandler implements ShotHandler {
 
     }
 
+    public enum ArmorBehavior {
+        ALWAYS_BYPASS,
+        NEVER_BYPASS,
+        BYPASS_ON_HEADSHOT,
+        BYPASS_ON_NON_HEADSHOT
+    }
+
     /**
      * Data for a {@link DamageShotHandler}.
      *
@@ -95,14 +102,9 @@ public class DamageShotHandler implements ShotHandler {
      * @param headshotDamage The amount of damage to deal to headshots
      */
     @DataObject
-    public record Data(float damage, float headshotDamage, @NotNull ArmorBehavior armorBehavior) {
+    public record Data(float damage,
+        float headshotDamage,
+        @NotNull ArmorBehavior armorBehavior) {
 
-    }
-
-    public enum ArmorBehavior {
-        ALWAYS_BYPASS,
-        NEVER_BYPASS,
-        BYPASS_ON_HEADSHOT,
-        BYPASS_ON_NON_HEADSHOT
     }
 }

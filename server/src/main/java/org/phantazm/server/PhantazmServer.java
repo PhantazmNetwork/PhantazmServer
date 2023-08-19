@@ -64,9 +64,7 @@ public final class PhantazmServer {
     /**
      * Starting point for the server.
      *
-     * @param args Do you even know java?
-     *             I don't know java.
-     *             At all.
+     * @param args Do you even know java? I don't know java. At all.
      *             <p>
      *             - Thamid123
      */
@@ -97,36 +95,35 @@ public final class PhantazmServer {
             ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
             if (isUnsafe(args)) {
                 LOGGER.warn("""
-                                                
-                                                ██
-                                              ██░░██
-                                            ██░░░░░░██
-                                          ██░░░░░░░░░░██
-                                          ██░░░░░░░░░░██
-                                        ██░░░░░░░░░░░░░░██
-                                      ██░░░░░░██████░░░░░░██
-                                      ██░░░░░░██████░░░░░░██
-                                    ██░░░░░░░░██████░░░░░░░░██
-                                    ██░░░░░░░░██████░░░░░░░░██
-                                  ██░░░░░░░░░░██████░░░░░░░░░░██
-                                ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
-                                ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
-                              ██░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░██
-                              ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
-                            ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
-                            ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
-                          ██░░░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░░░██
-                          ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
-                            ██████████████████████████████████████████
-                        """);
+                                            
+                                            ██
+                                          ██░░██
+                                        ██░░░░░░██
+                                      ██░░░░░░░░░░██
+                                      ██░░░░░░░░░░██
+                                    ██░░░░░░░░░░░░░░██
+                                  ██░░░░░░██████░░░░░░██
+                                  ██░░░░░░██████░░░░░░██
+                                ██░░░░░░░░██████░░░░░░░░██
+                                ██░░░░░░░░██████░░░░░░░░██
+                              ██░░░░░░░░░░██████░░░░░░░░░░██
+                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
+                            ██░░░░░░░░░░░░██████░░░░░░░░░░░░██
+                          ██░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░██
+                          ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
+                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
+                        ██░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░██
+                      ██░░░░░░░░░░░░░░░░░░██████░░░░░░░░░░░░░░░░░░██
+                      ██░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░██
+                        ██████████████████████████████████████████
+                    """);
                 LOGGER.warn("Server starting in unsafe mode! Your proxy secret may be set to the default value " +
-                        "\"default\". Only use this option when running in a secure development environment.");
-            }
-            else if (serverInfoConfig.isUnsafeConfiguration()) {
+                    "\"default\". Only use this option when running in a secure development environment.");
+            } else if (serverInfoConfig.isUnsafeConfiguration()) {
                 LOGGER.error("When using authType " + serverInfoConfig.authType() + ", proxySecret must be set to a " +
-                        "value other than the default for security reasons.");
+                    "value other than the default for security reasons.");
                 LOGGER.error("If you are running in a development environment, you can use the 'unsafe' program " +
-                        "argument to force the server to start regardless.");
+                    "argument to force the server to start regardless.");
                 shutdown("error during startup");
                 return;
             }
@@ -141,8 +138,7 @@ public final class PhantazmServer {
             chatConfig = handler.loadDataNow(ConfigFeature.CHAT_CONFIG_KEY);
             zombiesConfig = handler.loadDataNow(ConfigFeature.ZOMBIES_CONFIG_KEY);
             LOGGER.info("Server configuration loaded successfully.");
-        }
-        catch (ConfigProcessException e) {
+        } catch (ConfigProcessException e) {
             LOGGER.error("Fatal error when loading configuration data", e);
             shutdown("error during startup");
             return;
@@ -152,10 +148,9 @@ public final class PhantazmServer {
         try {
             LOGGER.info("Initializing features.");
             initializeFeatures(keyParser, playerConfig, serverConfig, shutdownConfig, pathfinderConfig, lobbiesConfig,
-                    partyConfig, whisperConfig, chatConfig, zombiesConfig);
+                partyConfig, whisperConfig, chatConfig, zombiesConfig);
             LOGGER.info("Features initialized successfully.");
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             LOGGER.error("Fatal error during initialization", exception);
             shutdown("error during startup");
             return;
@@ -169,8 +164,7 @@ public final class PhantazmServer {
 
         try {
             startServer(node, minecraftServer, serverConfig, startupConfig);
-        }
-        catch (Exception exception) {
+        } catch (Exception exception) {
             LOGGER.error("Fatal error during server startup", exception);
             shutdown("error during startup");
         }
@@ -195,16 +189,16 @@ public final class PhantazmServer {
     }
 
     private static void initializeFeatures(KeyParser keyParser, PlayerConfig playerConfig, ServerConfig serverConfig,
-            ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
-            PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, ZombiesConfig zombiesConfig) {
+        ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
+        PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, ZombiesConfig zombiesConfig) {
         ConfigCodec yamlCodec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
-                () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
+            () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
         ConfigCodec tomlCodec = new TomlCodec();
 
         RouterStore routerStore = new BasicRouterStore();
         SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
         PlayerViewProvider viewProvider =
-                new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
+            new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
         CompletableFuture<?> independentFeatures = CompletableFuture.runAsync(() -> {
             DatapackFeature.initialize();
@@ -231,37 +225,37 @@ public final class PhantazmServer {
             ContextManager contextManager = ElementFeature.getContextManager();
 
             PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
-                    MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec);
+                MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec);
 
             RoleFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor(), yamlCodec,
-                    contextManager);
+                contextManager);
             ChatFeature.initialize(chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
-                    RoleFeature.roleStore());
+                RoleFeature.roleStore());
 
             LobbyFeature.initialize(viewProvider, lobbiesConfig, contextManager, RoleFeature.roleStore());
 
             MobFeature.initialize(contextManager, yamlCodec);
             EquipmentFeature.initialize(keyParser, contextManager, yamlCodec,
-                    mappingProcessorSource.processorFor(Token.ofClass(EquipmentData.class)));
+                mappingProcessorSource.processorFor(Token.ofClass(EquipmentData.class)));
 
             ProximaFeature.initialize(pathfinderConfig);
             SongFeature.initialize(keyParser);
 
             ZombiesFeature.initialize(contextManager, MobFeature.getProcessorMap(), ProximaFeature.getSpawner(),
-                    keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, new CompositeFallback(
-                            List.of(LobbyFeature.getFallback(), new KickFallback(
-                                    Component.text("Failed to send you to lobby!", NamedTextColor.RED)))),
-                    PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
-                    zombiesConfig, mappingProcessorSource);
+                keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, new CompositeFallback(
+                    List.of(LobbyFeature.getFallback(), new KickFallback(
+                        Component.text("Failed to send you to lobby!", NamedTextColor.RED)))),
+                PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
+                zombiesConfig, mappingProcessorSource);
 
             LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
             ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),
-                    serverConfig.serverInfoConfig().whitelist(), HikariFeature.getDataSource(),
-                    ExecutorFeature.getExecutor(), routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),
-                    viewProvider, transferHelper, RoleFeature.roleStore());
+                serverConfig.serverInfoConfig().whitelist(), HikariFeature.getDataSource(),
+                ExecutorFeature.getExecutor(), routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),
+                viewProvider, transferHelper, RoleFeature.roleStore());
 
             ValidationFeature.initialize(LoginValidatorFeature.loginValidator(),
-                    ServerCommandFeature.permissionHandler());
+                ServerCommandFeature.permissionHandler());
 
             CommandFeature.initialize(routerStore, viewProvider, LobbyFeature.getFallback());
 
@@ -273,7 +267,7 @@ public final class PhantazmServer {
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig,
-            StartupConfig startupConfig) {
+        StartupConfig startupConfig) {
         ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
 
         switch (infoConfig.authType()) {
@@ -286,7 +280,7 @@ public final class PhantazmServer {
         }
 
         node.addListener(ServerListPingEvent.class,
-                event -> event.getResponseData().setDescription(serverConfig.pingListConfig().description()));
+            event -> event.getResponseData().setDescription(serverConfig.pingListConfig().description()));
 
         server.start(infoConfig.serverIP(), infoConfig.port());
 
@@ -294,8 +288,7 @@ public final class PhantazmServer {
             ProcessBuilder processBuilder = new ProcessBuilder(startupConfig.command());
             try {
                 processBuilder.start();
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOGGER.warn("Failed to run startup command", e);
             }
         }

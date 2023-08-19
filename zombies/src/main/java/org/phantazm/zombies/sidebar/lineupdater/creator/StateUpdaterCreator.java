@@ -80,7 +80,7 @@ public class StateUpdaterCreator implements PlayerUpdaterCreator {
                 TagResolver playerPlaceholder = Placeholder.component("player", playerName);
                 TagResolver statePlaceholder = Placeholder.component("state", currentState.getDisplayName());
                 Component message = MiniMessage.miniMessage()
-                                        .deserialize(data.format, playerPlaceholder, statePlaceholder);
+                    .deserialize(data.format, playerPlaceholder, statePlaceholder);
                 return Optional.of(message);
             }
 

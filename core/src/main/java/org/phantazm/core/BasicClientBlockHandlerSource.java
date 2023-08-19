@@ -20,9 +20,6 @@ public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
     private final EventNode<Event> rootNode;
     private final Map<UUID, Node> map;
 
-    private record Node(@NotNull ClientBlockHandler handler, @NotNull EventNode<InstanceEvent> node) {
-    }
-
     public BasicClientBlockHandlerSource(@NotNull EventNode<Event> rootNode) {
         this.rootNode = rootNode;
         this.map = new ConcurrentHashMap<>();
@@ -38,12 +35,12 @@ public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
             }
 
             EventNode<InstanceEvent> instanceNode =
-                    EventNode.type("client_block_handler_" + instance.getUniqueId(), EventFilter.INSTANCE,
-                            (e, v) -> v == instance);
+                EventNode.type("client_block_handler_" + instance.getUniqueId(), EventFilter.INSTANCE,
+                    (e, v) -> v == instance);
             DimensionType type = instance.getDimensionType();
             Node node =
-                    new Node(new InstanceClientBlockHandler(instance, type.getMinY(), type.getHeight(), instanceNode),
-                            instanceNode);
+                new Node(new InstanceClientBlockHandler(instance, type.getMinY(), type.getHeight(), instanceNode),
+                    instanceNode);
 
             rootNode.addChild(instanceNode);
 
@@ -56,5 +53,9 @@ public class BasicClientBlockHandlerSource implements ClientBlockHandlerSource {
         if (node != null) {
             rootNode.removeChild(node.node);
         }
+    }
+
+    private record Node(@NotNull ClientBlockHandler handler,
+        @NotNull EventNode<InstanceEvent> node) {
     }
 }

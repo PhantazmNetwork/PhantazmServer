@@ -12,7 +12,7 @@ public class FlyCommand extends PermissionLockedCommand {
         super("fly", PERMISSION);
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), ((sender, context) -> {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
             boolean isAllowFlying = player.isAllowFlying();
             player.setAllowFlying(!isAllowFlying);
             if (isAllowFlying) {

@@ -143,13 +143,13 @@ public class MainGui extends SimplePanelGui {
     private void updateMapeditorToggle(WToggleButton mapeditorToggle, boolean enabled) {
         mapeditorToggle.setToggle(enabled);
         mapeditorToggle.setLabel(enabled
-                                     ? Text.translatable(TranslationKeys.GUI_MAPEDITOR_ENABLED)
-                                     :Text.translatable(TranslationKeys.GUI_MAPEDITOR_DISABLED));
+            ? Text.translatable(TranslationKeys.GUI_MAPEDITOR_ENABLED)
+            : Text.translatable(TranslationKeys.GUI_MAPEDITOR_DISABLED));
     }
 
     private void updateCurrentMap(EditorSession session, WText currentMap) {
         currentMap.setText(session.hasMap() ? Text.translatable(TranslationKeys.GUI_MAPEDITOR_CURRENT_MAP,
-            session.getMap().settings().id().value()):Text.translatable(TranslationKeys.GUI_MAPEDITOR_NO_MAP));
+            session.getMap().settings().id().value()) : Text.translatable(TranslationKeys.GUI_MAPEDITOR_NO_MAP));
     }
 
     private void refreshMainGui(EditorSession session) {

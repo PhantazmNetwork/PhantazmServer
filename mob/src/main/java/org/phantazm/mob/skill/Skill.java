@@ -4,13 +4,13 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob.PhantazmMob;
 
 /**
- * A skill which can be used by any number of {@link PhantazmMob}s by calling {@link Skill#use(PhantazmMob)}. Skills
- * are generally either activated by specific events that act as triggers for the skill, or are activated by other
- * skills. Skills that activate other skills are known as "meta skills". Some skills need their
- * {@link Skill#tick(long, PhantazmMob)} method to be called every tick in order to implement advanced behavior.
- * Since ticking skills need to be tracked separately from non-ticking skills, the skill must opt in to being ticked
- * by making {@link Skill#needsTicking()} return {@code true}. When this method returns false, its tick method should
- * generally not be called.
+ * A skill which can be used by any number of {@link PhantazmMob}s by calling {@link Skill#use(PhantazmMob)}. Skills are
+ * generally either activated by specific events that act as triggers for the skill, or are activated by other skills.
+ * Skills that activate other skills are known as "meta skills". Some skills need their
+ * {@link Skill#tick(long, PhantazmMob)} method to be called every tick in order to implement advanced behavior. Since
+ * ticking skills need to be tracked separately from non-ticking skills, the skill must opt in to being ticked by making
+ * {@link Skill#needsTicking()} return {@code true}. When this method returns false, its tick method should generally
+ * not be called.
  */
 public interface Skill {
     /**

@@ -30,7 +30,10 @@ import org.phantazm.zombies.powerup.PowerupHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDeathEvent> {
@@ -49,10 +52,10 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
     public PhantazmMobDeathListener(@NotNull KeyParser keyParser, @NotNull Instance instance,
-            @NotNull MobStore mobStore, @NotNull Supplier<Optional<Round>> roundSupplier,
-            @NotNull PowerupHandler powerupHandler, @NotNull BoundedTracker<Room> roomTracker,
-            @NotNull BoundedTracker<Window> windowTracker,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+        @NotNull MobStore mobStore, @NotNull Supplier<Optional<Round>> roundSupplier,
+        @NotNull PowerupHandler powerupHandler, @NotNull BoundedTracker<Room> roomTracker,
+        @NotNull BoundedTracker<Window> windowTracker,
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
         super(instance, mobStore);
         this.keyParser = Objects.requireNonNull(keyParser);
         this.roundSupplier = Objects.requireNonNull(roundSupplier);
@@ -110,11 +113,11 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         }
 
         Optional<Window> windowOptional = windowTracker.closestInRangeToBounds(position, POWERUP_BOUNDING_BOX.width(),
-                POWERUP_BOUNDING_BOX.height(), 10);
+            POWERUP_BOUNDING_BOX.height(), 10);
         if (windowOptional.isEmpty()) {
             Optional<Pair<Room, Vec>> nearestRoomOptional =
-                    roomTracker.closestInRangeToBoundsWithVec(position, POWERUP_BOUNDING_BOX.width(),
-                            POWERUP_BOUNDING_BOX.height(), 15);
+                roomTracker.closestInRangeToBoundsWithVec(position, POWERUP_BOUNDING_BOX.width(),
+                    POWERUP_BOUNDING_BOX.height(), 15);
             if (nearestRoomOptional.isEmpty()) {
                 Point targetPoint = seekDown(position);
                 LOGGER.warn("Failed to find nearby room or window for powerup spawn at " + targetPoint);
@@ -125,7 +128,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
             Pair<Room, Vec> nearestRoom = nearestRoomOptional.get();
             Vec roomVec = nearestRoom.right();
             powerupHandler.spawn(key,
-                    seekDown(roomVec.add(roomVec.sub(position).normalize().mul(ROOM_PENETRATION_DEPTH))));
+                seekDown(roomVec.add(roomVec.sub(position).normalize().mul(ROOM_PENETRATION_DEPTH))));
             return;
         }
 
@@ -138,18 +141,16 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         Vec normal = new Vec(xSmaller ? 1 : 0, 0, xSmaller ? 0 : 1);
 
         normal = normal.mul(xSmaller ? frameRegion.lengthX() / 2.0 : frameRegion.lengthZ() / 2.0)
-                .add(OFFSET.mul(normal));
+            .add(OFFSET.mul(normal));
 
         Vec otherNormal = normal.mul(-1);
 
         Vec targetNormal;
         if (roomTracker.atPoint(center.add(normal)).isPresent()) {
             targetNormal = normal;
-        }
-        else if (roomTracker.atPoint(center.add(otherNormal)).isPresent()) {
+        } else if (roomTracker.atPoint(center.add(otherNormal)).isPresent()) {
             targetNormal = otherNormal;
-        }
-        else {
+        } else {
             targetNormal = normal;
             LOGGER.warn("Unable to find matching room at window near " + center);
         }
@@ -169,7 +170,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         }
 
         PhysicsResult result = CollisionUtils.handlePhysics(instance, chunk, POWERUP_BOUNDING_BOX, Pos.fromPoint(point),
-                DOWNWARD_SEARCH_VECTOR, null);
+            DOWNWARD_SEARCH_VECTOR, null);
 
         if (!result.hasCollision()) {
             return point;

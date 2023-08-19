@@ -39,6 +39,7 @@ public class EquipmentTierPredicate implements ShopPredicate {
     }
 
     @DataObject
-    public record Data(int slot, int tier) {
+    public record Data(int slot,
+        int tier) {
     }
 }

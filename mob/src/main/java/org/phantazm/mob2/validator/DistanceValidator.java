@@ -26,7 +26,8 @@ public class DistanceValidator implements ValidatorComponent {
     public record Data(double distance) {
     }
 
-    private record Internal(Mob self, Data data) implements Validator {
+    private record Internal(Mob self,
+        Data data) implements Validator {
         @Override
         public boolean valid(@NotNull Entity entity) {
             return self.getDistanceSquared(entity) < data.distance * data.distance;

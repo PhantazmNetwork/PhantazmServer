@@ -34,12 +34,12 @@ public class ServerConfigProcessor implements ConfigProcessor<ServerConfig> {
 
         boolean whitelist = serverInfo.getBooleanOrThrow("whitelist");
         AuthType authType = AuthType.getByName(serverInfo.getStringOrThrow("authType").toUpperCase(Locale.ENGLISH))
-                .orElseThrow(() -> new ConfigProcessException(
-                        "Invalid AuthType, must be one of the following: " + Arrays.toString(AuthType.values())));
+            .orElseThrow(() -> new ConfigProcessException(
+                "Invalid AuthType, must be one of the following: " + Arrays.toString(AuthType.values())));
         String proxySecret = serverInfo.getStringOrThrow("proxySecret");
 
         ServerInfoConfig serverInfoConfig =
-                new ServerInfoConfig(serverAddress, port, whitelist, authType, proxySecret);
+            new ServerInfoConfig(serverAddress, port, whitelist, authType, proxySecret);
 
         ConfigNode pingList = element.getNodeOrThrow("pingList");
         Component description = COMPONENT_PROCESSOR.dataFromElement(pingList.getElementOrThrow("description"));

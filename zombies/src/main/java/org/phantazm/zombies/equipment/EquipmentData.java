@@ -12,7 +12,9 @@ import java.util.Objects;
  * @param name      The unique {@link Key} name of the equipment
  * @param rootLevel The initial level of the equipment
  */
-public record EquipmentData(@NotNull Key type, @NotNull Key name, @NotNull Key rootLevel) {
+public record EquipmentData(@NotNull Key type,
+    @NotNull Key name,
+    @NotNull Key rootLevel) {
     /**
      * Creates a {@link EquipmentData}.
      *

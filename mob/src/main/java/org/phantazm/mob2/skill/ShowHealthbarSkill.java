@@ -29,7 +29,7 @@ import java.util.Optional;
 public class ShowHealthbarSkill implements SkillComponent {
     private static final char HEX = '#';
     private static final Map<String, TextColor> COLOR_ALIASES =
-            Map.of("dark_grey", NamedTextColor.DARK_GRAY, "grey", NamedTextColor.GRAY);
+        Map.of("dark_grey", NamedTextColor.DARK_GRAY, "grey", NamedTextColor.GRAY);
 
     private final Data data;
 
@@ -44,7 +44,9 @@ public class ShowHealthbarSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger, @NotNull String bar, int barWidth) {
+    public record Data(@Nullable Trigger trigger,
+        @NotNull String bar,
+        int barWidth) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -61,6 +63,25 @@ public class ShowHealthbarSkill implements SkillComponent {
             this.self = self;
             this.data = data;
             this.lastAliveBars = -1;
+        }
+
+        static @NotNull TextColor resolveColor(@NotNull Context ctx, @NotNull String colorName)
+            throws ParsingException {
+            TextColor color;
+            if (COLOR_ALIASES.containsKey(colorName)) {
+                color = COLOR_ALIASES.get(colorName);
+            } else if (colorName.charAt(0) == HEX) {
+                color = TextColor.fromHexString(colorName);
+            } else {
+                color = NamedTextColor.NAMES.value(colorName);
+            }
+
+            if (color == null) {
+                throw ctx.newException(String.format(
+                    "Unable to parse a color from '%s'. Please use named colours or hex (#RRGGBB) colors.",
+                    colorName));
+            }
+            return color;
         }
 
         @Override
@@ -113,13 +134,13 @@ public class ShowHealthbarSkill implements SkillComponent {
 
                     switch (value) {
                         case "bar_component" ->
-                                barElement = argumentQueue.popOr(() -> "Missing bar_component argument value").value();
+                            barElement = argumentQueue.popOr(() -> "Missing bar_component argument value").value();
                         case "color_start" -> colorStart = resolveColor(context,
-                                argumentQueue.popOr(() -> "Missing color_start argument value").value());
+                            argumentQueue.popOr(() -> "Missing color_start argument value").value());
                         case "color_end" -> colorEnd = resolveColor(context,
-                                argumentQueue.popOr(() -> "Missing color_end argument value").value());
+                            argumentQueue.popOr(() -> "Missing color_end argument value").value());
                         case "missing_color" -> missingColor = resolveColor(context,
-                                argumentQueue.popOr(() -> "Missing missing_color argument value").value());
+                            argumentQueue.popOr(() -> "Missing missing_color argument value").value());
                     }
                 }
 
@@ -134,34 +155,13 @@ public class ShowHealthbarSkill implements SkillComponent {
 
                 Component aliveComponent = Component.text(alivePart, aliveColor);
                 Component deadComponent =
-                        missingPart.isEmpty() ? Component.empty() : Component.text(missingPart, missingColor);
+                    missingPart.isEmpty() ? Component.empty() : Component.text(missingPart, missingColor);
 
                 return Tag.selfClosingInserting(
-                        Component.join(JoinConfiguration.noSeparators(), aliveComponent, deadComponent));
+                    Component.join(JoinConfiguration.noSeparators(), aliveComponent, deadComponent));
             }));
 
             return Optional.of(MiniMessage.miniMessage().deserialize(data.bar, resolver));
-        }
-
-        static @NotNull TextColor resolveColor(@NotNull Context ctx, @NotNull String colorName)
-                throws ParsingException {
-            TextColor color;
-            if (COLOR_ALIASES.containsKey(colorName)) {
-                color = COLOR_ALIASES.get(colorName);
-            }
-            else if (colorName.charAt(0) == HEX) {
-                color = TextColor.fromHexString(colorName);
-            }
-            else {
-                color = NamedTextColor.NAMES.value(colorName);
-            }
-
-            if (color == null) {
-                throw ctx.newException(String.format(
-                        "Unable to parse a color from '%s'. Please use named colours or hex (#RRGGBB) colors.",
-                        colorName));
-            }
-            return color;
         }
     }
 }

@@ -26,7 +26,7 @@ public class ViewableHologram extends InstanceHologram {
      * @param canRender the predicate used to determine if this hologram should be visible
      */
     public ViewableHologram(@NotNull Point location, double gap, @NotNull Alignment alignment,
-            @NotNull Predicate<? super Player> canRender) {
+        @NotNull Predicate<? super Player> canRender) {
         super(location, gap, alignment);
         this.canRender = Objects.requireNonNull(canRender);
     }

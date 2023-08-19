@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public class PlayerInventoryPreClickListener extends ZombiesPlayerEventListener<InventoryPreClickEvent> {
     public PlayerInventoryPreClickListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
         super(instance, zombiesPlayers);
     }
 

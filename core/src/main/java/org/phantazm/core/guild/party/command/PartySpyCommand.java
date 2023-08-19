@@ -30,8 +30,8 @@ public class PartySpyCommand {
     }
 
     public static @NotNull Command spyCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
-            @NotNull ConnectionManager connectionManager, @NotNull GuildHolder<Party> partyHolder,
-            @NotNull PlayerViewProvider viewProvider) {
+        @NotNull ConnectionManager connectionManager, @NotNull GuildHolder<Party> partyHolder,
+        @NotNull PlayerViewProvider viewProvider) {
         Objects.requireNonNull(config);
         Objects.requireNonNull(miniMessage);
         Objects.requireNonNull(connectionManager);
@@ -84,17 +84,14 @@ public class PartySpyCommand {
                     nowSpying = !spyAudience.hasPlayerSpy(senderView.getUUID());
                     if (nowSpying) {
                         spyAudience.addPlayerSpy(senderView);
-                    }
-                    else {
+                    } else {
                         spyAudience.removePlayerSpy(senderView.getUUID());
                     }
-                }
-                else {
+                } else {
                     nowSpying = !spyAudience.hasExtraSpy(sender);
                     if (nowSpying) {
                         spyAudience.addExtraSpy(sender);
-                    }
-                    else {
+                    } else {
                         spyAudience.removeExtraSpy(sender);
                     }
                 }
@@ -105,8 +102,7 @@ public class PartySpyCommand {
                     Component message;
                     if (nowSpying) {
                         message = miniMessage.deserialize(config.nowSpyingFormat(), targetPlaceholder);
-                    }
-                    else {
+                    } else {
                         message = miniMessage.deserialize(config.noLongerSpyingFormat(), targetPlaceholder);
                     }
 

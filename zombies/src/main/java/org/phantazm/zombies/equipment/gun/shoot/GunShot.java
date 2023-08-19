@@ -17,7 +17,8 @@ import java.util.Objects;
  * @param regularTargets  The regular targets that were hit by the shot
  * @param headshotTargets The headshot targets that were hit by the shot
  */
-public record GunShot(@NotNull Pos start,
+public record GunShot(
+    @NotNull Pos start,
     @NotNull Point end,
     @NotNull Collection<GunHit> regularTargets,
     @NotNull Collection<GunHit> headshotTargets) {

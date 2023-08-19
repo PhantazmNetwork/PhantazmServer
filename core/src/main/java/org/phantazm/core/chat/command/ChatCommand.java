@@ -92,17 +92,17 @@ public class ChatCommand extends Command {
             Component channelNameComponent = Component.text(channelName, NamedTextColor.GOLD);
             if (channelName.equals(previousChannelName)) {
                 Component message = Component.text()
-                                        .append(Component.text("You are already in the "), channelNameComponent,
-                                            Component.text(" channel!")).color(NamedTextColor.RED).build();
+                    .append(Component.text("You are already in the "), channelNameComponent,
+                        Component.text(" channel!")).color(NamedTextColor.RED).build();
                 sender.sendMessage(message);
                 return;
             }
 
             playerChannels.put(player.getUuid(), channelName);
             Component message = Component.text()
-                                    .append(Component.text("Set chat channel to "), channelNameComponent,
-                                        Component.text("."))
-                                    .color(NamedTextColor.GREEN).build();
+                .append(Component.text("Set chat channel to "), channelNameComponent,
+                    Component.text("."))
+                .color(NamedTextColor.GREEN).build();
             player.sendMessage(message);
         }, channelNameArgument);
     }

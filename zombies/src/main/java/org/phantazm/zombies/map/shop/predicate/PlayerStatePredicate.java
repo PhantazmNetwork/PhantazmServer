@@ -20,10 +20,11 @@ public class PlayerStatePredicate extends PredicateBase<PlayerStatePredicate.Dat
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
         return data.blacklist !=
-                data.states.contains(interaction.player().module().getStateSwitcher().getState().key());
+            data.states.contains(interaction.player().module().getStateSwitcher().getState().key());
     }
 
     @DataObject
-    public record Data(@NotNull Set<Key> states, boolean blacklist) {
+    public record Data(@NotNull Set<Key> states,
+        boolean blacklist) {
     }
 }

@@ -46,7 +46,8 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull Component title,
+    public record Data(
+        @NotNull Component title,
         @NotNull InventoryType inventoryType,
         @NotNull @ChildPath("items") List<String> guiItems) {
 

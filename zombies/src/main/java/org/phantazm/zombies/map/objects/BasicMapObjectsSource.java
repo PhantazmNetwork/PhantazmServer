@@ -181,10 +181,10 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         List<Window> windows = new ArrayList<>(windowInfoList.size());
         for (WindowInfo windowInfo : windowInfoList) {
             List<Action<Window>> repairActions = contextManager.makeContext(windowInfo.repairActions())
-                                                     .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             List<Action<Window>> breakActions = contextManager.makeContext(windowInfo.breakActions())
-                                                    .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             windows.add(new Window(mapOrigin, instance, windowInfo, clientBlockHandler, repairActions, breakActions,
                 roomTracker));
@@ -220,13 +220,13 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         List<Door> doors = new ArrayList<>(doorInfoList.size());
         for (DoorInfo doorInfo : doorInfoList) {
             List<Action<Door>> openActions = contextManager.makeContext(doorInfo.openActions())
-                                                 .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             List<Action<Door>> closeActions = contextManager.makeContext(doorInfo.closeActions())
-                                                  .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             List<Action<Door>> failOpenActions = contextManager.makeContext(doorInfo.failOpenActions())
-                                                     .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             doors.add(new Door(mapOrigin, doorInfo, instance, Block.AIR, openActions, closeActions, failOpenActions,
                 mapObjectsWrapper));
@@ -239,7 +239,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         List<Room> rooms = new ArrayList<>(roomInfoList.size());
         for (RoomInfo roomInfo : roomInfoList) {
             List<Action<Room>> openActions = contextManager.makeContext(roomInfo.openActions())
-                                                 .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             rooms.add(new Room(mapOrigin, roomInfo, openActions));
         }
@@ -253,17 +253,17 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         List<Round> rounds = new ArrayList<>(roundInfoList.size());
         for (RoundInfo roundInfo : roundInfoList) {
             List<Action<Round>> startActions = contextManager.makeContext(roundInfo.startActions())
-                                                   .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             List<Action<Round>> endActions = contextManager.makeContext(roundInfo.endActions())
-                                                 .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
+                .provideCollection(ElementPath.EMPTY, dependencyProvider, HANDLER);
 
             List<WaveInfo> waveInfo = roundInfo.waves();
             List<Wave> waves = new ArrayList<>(waveInfo.size());
             for (WaveInfo wave : roundInfo.waves()) {
                 List<Action<List<PhantazmMob>>> spawnActions = contextManager.makeContext(wave.spawnActions())
-                                                                   .provideCollection(ElementPath.EMPTY,
-                                                                       dependencyProvider, HANDLER);
+                    .provideCollection(ElementPath.EMPTY,
+                        dependencyProvider, HANDLER);
 
                 waves.add(new Wave(wave, spawnActions));
             }

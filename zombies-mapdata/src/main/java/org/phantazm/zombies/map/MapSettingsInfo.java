@@ -17,7 +17,8 @@ import java.util.*;
 /**
  * Defines the general settings for a map.
  */
-public record MapSettingsInfo(int mapDataVersion,
+public record MapSettingsInfo(
+    int mapDataVersion,
     int chunkLoadRange,
     @NotNull Key id,
     @NotNull List<String> instancePath,

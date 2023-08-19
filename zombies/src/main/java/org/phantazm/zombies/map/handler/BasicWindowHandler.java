@@ -22,18 +22,6 @@ import java.util.*;
 
 public class BasicWindowHandler implements WindowHandler {
     private static final int POSITION_CHECK_INTERVAL = 4;
-
-    private static class RepairOperation {
-        private final ZombiesPlayer zombiesPlayer;
-        private final Window window;
-        private long repairTicks = 0;
-
-        private RepairOperation(ZombiesPlayer zombiesPlayer, Window window) {
-            this.zombiesPlayer = zombiesPlayer;
-            this.window = window;
-        }
-    }
-
     private final BoundedTracker<Window> windowTracker;
     private final BoundedTracker<Room> roomTracker;
     private final MobStore mobStore;
@@ -41,12 +29,9 @@ public class BasicWindowHandler implements WindowHandler {
     private final double repairRadius;
     private final long repairInterval;
     private final int coinsPerWindowBlock;
-
     private final Map<UUID, RepairOperation> repairOperationMap;
     private final Collection<RepairOperation> activeRepairs;
-
     private final WindowMessages windowMessages;
-
     private long positionCheckTicks;
 
     public BasicWindowHandler(@NotNull BoundedTracker<Window> windowTracker, @NotNull BoundedTracker<Room> roomTracker,
@@ -70,7 +55,7 @@ public class BasicWindowHandler implements WindowHandler {
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
 
         if (!crouching && playerOptional.isPresent() && zombiesPlayer.canRepairWindow() &&
-                zombiesPlayer.inStage(StageKeys.IN_GAME)) {
+            zombiesPlayer.inStage(StageKeys.IN_GAME)) {
             RepairOperation repairOperation = repairOperationMap.remove(zombiesPlayer.getUUID());
             if (repairOperation != null && !repairOperation.window.isFullyRepaired()) {
                 zombiesPlayer.sendMessage(windowMessages.stopRepairing());
@@ -80,7 +65,7 @@ public class BasicWindowHandler implements WindowHandler {
         }
 
         if (!crouching || playerOptional.isEmpty() || !zombiesPlayer.canRepairWindow() ||
-                !zombiesPlayer.inStage(StageKeys.IN_GAME)) {
+            !zombiesPlayer.inStage(StageKeys.IN_GAME)) {
             repairOperationMap.remove(zombiesPlayer.getUUID());
             return;
         }
@@ -244,6 +229,17 @@ public class BasicWindowHandler implements WindowHandler {
                     zombiesPlayer.sendMessage(windowMessages.finishRepairing());
                 }
             }
+        }
+    }
+
+    private static class RepairOperation {
+        private final ZombiesPlayer zombiesPlayer;
+        private final Window window;
+        private long repairTicks = 0;
+
+        private RepairOperation(ZombiesPlayer zombiesPlayer, Window window) {
+            this.zombiesPlayer = zombiesPlayer;
+            this.window = window;
         }
     }
 }

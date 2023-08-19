@@ -50,7 +50,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
         private BossBar bossBar;
 
         private Action(Data data, Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-                TickFormatter tickFormatter) {
+            TickFormatter tickFormatter) {
             this.data = data;
             this.instance = instance;
             this.predicate = new DeactivationPredicate() {
@@ -77,15 +77,15 @@ public class BossBarTimerAction implements PowerupActionComponent {
             }
 
             ++startTicks;
-            bossBar.name(createBossBarName(time));
-            bossBar.progress((float)MathUtils.clamp(1D - ((float)startTicks / (float)data.duration), 0, 1));
+            bossBar.name(createBossBarName());
+            bossBar.progress((float) MathUtils.clamp(1D - ((float) startTicks / (float) data.duration), 0, 1));
         }
 
         @Override
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             this.startTicks = 0;
 
-            BossBar bossBar = BossBar.bossBar(createBossBarName(time), 1.0F, data.color, data.overlay);
+            BossBar bossBar = BossBar.bossBar(createBossBarName(), 1.0F, data.color, data.overlay);
             instance.showBossBar(bossBar);
 
             this.bossBar = bossBar;
@@ -96,7 +96,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
             }
         }
 
-        private Component createBossBarName(long time) {
+        private Component createBossBarName() {
             long remainingTicks = data.duration - startTicks;
 
             TagResolver timePlaceholder = Placeholder.unparsed("time", tickFormatter.format(remainingTicks));
@@ -125,10 +125,11 @@ public class BossBarTimerAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(long duration,
-                       @NotNull String format,
-                       @NotNull BossBar.Color color,
-                       @NotNull BossBar.Overlay overlay,
-                       @NotNull @ChildPath("tick_formatter") String tickFormatter) {
+    public record Data(
+        long duration,
+        @NotNull String format,
+        @NotNull BossBar.Color color,
+        @NotNull BossBar.Overlay overlay,
+        @NotNull @ChildPath("tick_formatter") String tickFormatter) {
     }
 }

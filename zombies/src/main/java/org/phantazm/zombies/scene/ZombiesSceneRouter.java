@@ -89,8 +89,8 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
 
         return sceneProvider.provideScene(routeRequest.joinRequest()).thenApply(sceneOptional -> {
             return sceneOptional.map(RouteResult::success)
-                       .orElseGet(
-                           () -> RouteResult.failure(Component.text("No games are joinable.", NamedTextColor.RED)));
+                .orElseGet(
+                    () -> RouteResult.failure(Component.text("No games are joinable.", NamedTextColor.RED)));
         });
     }
 

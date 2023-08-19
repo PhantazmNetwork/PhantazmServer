@@ -25,6 +25,7 @@ public class UuidPredicate extends PredicateBase<UuidPredicate.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull Set<UUID> uuids, boolean blacklist) {
+    public record Data(@NotNull Set<UUID> uuids,
+        boolean blacklist) {
     }
 }

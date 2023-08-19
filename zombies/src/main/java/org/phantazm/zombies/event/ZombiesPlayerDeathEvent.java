@@ -36,11 +36,11 @@ public class ZombiesPlayerDeathEvent implements ZombiesPlayerEvent, CancellableE
         return damage;
     }
 
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
-    }
-
     public boolean isCancelled() {
         return this.cancelled;
+    }
+
+    public void setCancelled(boolean cancel) {
+        this.cancelled = cancel;
     }
 }

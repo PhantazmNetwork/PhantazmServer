@@ -9,13 +9,12 @@ import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.scene.ZombiesSceneRouter;
 
 public final class RouterKeys {
+    public static final RouterKey<ZombiesScene, ZombiesRouteRequest, ZombiesSceneRouter> ZOMBIES_SCENE_ROUTER =
+        new RouterKey<>(ZombiesSceneRouter.class);
+    public static final RouterKey<Lobby, LobbyRouteRequest, LobbyRouter> LOBBY_SCENE_ROUTER =
+        new RouterKey<>(LobbyRouter.class);
+
     private RouterKeys() {
         throw new UnsupportedOperationException();
     }
-
-    public static final RouterKey<ZombiesScene, ZombiesRouteRequest, ZombiesSceneRouter> ZOMBIES_SCENE_ROUTER =
-            new RouterKey<>(ZombiesSceneRouter.class);
-
-    public static final RouterKey<Lobby, LobbyRouteRequest, LobbyRouter> LOBBY_SCENE_ROUTER =
-            new RouterKey<>(LobbyRouter.class);
 }

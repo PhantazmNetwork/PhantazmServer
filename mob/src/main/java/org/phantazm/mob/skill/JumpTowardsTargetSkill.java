@@ -18,7 +18,7 @@ public class JumpTowardsTargetSkill implements Skill {
 
     @FactoryMethod
     public JumpTowardsTargetSkill(@NotNull Data data,
-            @NotNull @Child("selector") TargetSelector<? extends Entity> selector) {
+        @NotNull @Child("selector") TargetSelector<? extends Entity> selector) {
         this.data = data;
         this.selector = selector;
     }
@@ -41,13 +41,15 @@ public class JumpTowardsTargetSkill implements Skill {
         Vec unit = diff.div(length);
 
         Vec yeet = new Vec(unit.x(), 0, unit.z()).rotateAroundNonUnitAxis(new Vec(-unit.z(), 0, unit.x()),
-                Math.toRadians(data.angle)).mul(data.strength);
+            Math.toRadians(data.angle)).mul(data.strength);
 
         Vec velocity = selfEntity.getVelocity();
         selfEntity.setVelocity(velocity.add(yeet));
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector, double strength, float angle) {
+    public record Data(@NotNull @ChildPath("selector") String selector,
+        double strength,
+        float angle) {
     }
 }

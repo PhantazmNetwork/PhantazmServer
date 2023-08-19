@@ -53,6 +53,7 @@ public class MessagingInteractor extends InteractorBase<MessagingInteractor.Data
     }
 
     @DataObject
-    public record Data(@NotNull List<String> messages, boolean broadcast) {
+    public record Data(@NotNull List<String> messages,
+        boolean broadcast) {
     }
 }

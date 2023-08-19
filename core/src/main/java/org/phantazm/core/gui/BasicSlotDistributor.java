@@ -73,7 +73,7 @@ public class BasicSlotDistributor implements SlotDistributor {
         int size = width * height;
         if (itemCount > size) {
             throw new IllegalArgumentException(
-                    "Distributed item count " + itemCount + " cannot be greater than size " + size);
+                "Distributed item count " + itemCount + " cannot be greater than size " + size);
         }
 
         int actualPadding = padding;

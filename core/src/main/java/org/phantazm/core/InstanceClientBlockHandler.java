@@ -95,7 +95,6 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         }
     }
 
-    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     @Override
     public void clearClientBlocks() {
         Instance instance = this.instance;
@@ -168,17 +167,6 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         }
     }
 
-    private static class Data {
-        private final Vec3I2ObjectMap<PositionedBlock> blocks;
-        private DynamicChunk chunk;
-        private boolean dirty;
-
-        public Data(Vec3I2ObjectMap<PositionedBlock> blocks) {
-            this.blocks = blocks;
-        }
-    }
-
-    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     private void onPreSendChunk(PreSendChunkEvent event) {
         Instance instance = this.instance;
         if (instance == null) {
@@ -261,7 +249,7 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
             if (data != null) {
                 //remove the client block; no need to send something else as it will be updated soon
                 if (data.blocks.remove(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ()) !=
-                        null && data.blocks.isEmpty()) {
+                    null && data.blocks.isEmpty()) {
                     clientData.remove(index);
                 }
             }
@@ -280,6 +268,16 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
                     event.setSyncClient(false);
                 }
             }
+        }
+    }
+
+    private static class Data {
+        private final Vec3I2ObjectMap<PositionedBlock> blocks;
+        private DynamicChunk chunk;
+        private boolean dirty;
+
+        public Data(Vec3I2ObjectMap<PositionedBlock> blocks) {
+            this.blocks = blocks;
         }
     }
 

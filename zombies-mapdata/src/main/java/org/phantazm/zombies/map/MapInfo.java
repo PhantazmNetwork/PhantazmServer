@@ -11,7 +11,8 @@ import java.util.Objects;
 /**
  * Represents a Zombies map.
  */
-public record MapInfo(@NotNull MapSettingsInfo settings,
+public record MapInfo(
+    @NotNull MapSettingsInfo settings,
     @NotNull PlayerCoinsInfo playerCoins,
     @NotNull List<RoomInfo> rooms,
     @NotNull List<DoorInfo> doors,

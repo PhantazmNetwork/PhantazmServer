@@ -14,11 +14,11 @@ import org.phantazm.mob.PhantazmMob;
 import java.util.UUID;
 
 @Description("""
-        A timed meta skill that can activate another skill periodically after a delay, a set number of times, or
-        infinitely. Time is measured from the moment that the mob spawned. The timer can be set to start as soon as the
-        mob spawns, or it can start when this skill is activated. If a timer is activated while it is already counting
-        down, it can be configured to restart.
-        """)
+    A timed meta skill that can activate another skill periodically after a delay, a set number of times, or
+    infinitely. Time is measured from the moment that the mob spawned. The timer can be set to start as soon as the
+    mob spawns, or it can start when this skill is activated. If a timer is activated while it is already counting
+    down, it can be configured to restart.
+    """)
 @Model("mob.skill.timer_random")
 @Cache(false)
 public class RandomTimerSkill implements Skill {
@@ -42,7 +42,7 @@ public class RandomTimerSkill implements Skill {
         this.useCountTag = Tag.Integer("use_count_" + uuid).defaultValue(0);
         this.startedTag = Tag.Boolean("started_" + uuid).defaultValue(!data.requiresActivation);
         this.intervalTag = Tag.Long("interval_" + uuid).defaultValue(
-                data.requiresActivation ? -1L : MathUtils.randomInterval(data.minInterval, data.maxInterval));
+            data.requiresActivation ? -1L : MathUtils.randomInterval(data.minInterval, data.maxInterval));
         this.tickDelegate = delegate.needsTicking();
     }
 
@@ -123,21 +123,22 @@ public class RandomTimerSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@Description(
+    public record Data(
+        @Description(
             "The number of times this skill should repeat its action. A negative number will repeat " +
-                    "infinitely. Defaults to -1.") int repeat,
+                "infinitely. Defaults to -1.") int repeat,
 
-                       @Description("The minimum activation interval") long minInterval,
-                       @Description("The maximum activation interval") long maxInterval,
+        @Description("The minimum activation interval") long minInterval,
+        @Description("The maximum activation interval") long maxInterval,
 
-                       @Description(
-                               "Whether the timer will start in an activated state. Defaults to false.") boolean requiresActivation,
+        @Description(
+            "Whether the timer will start in an activated state. Defaults to false.") boolean requiresActivation,
 
-                       @Description(
-                               "Whether the timer should restart itself if it is activated while running. Defaults to false.") boolean resetOnActivation,
+        @Description(
+            "Whether the timer should restart itself if it is activated while running. Defaults to false.") boolean resetOnActivation,
 
-                       @Description("The skill to call when the timer activates") @ChildPath(
-                               "delegate") String delegate) {
+        @Description("The skill to call when the timer activates") @ChildPath(
+            "delegate") String delegate) {
         @Default("repeat")
         public static @NotNull ConfigElement repeatDefault() {
             return ConfigPrimitive.of(-1);

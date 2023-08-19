@@ -8,17 +8,13 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
-public record PowerupData(@NotNull Key id,
-                          @NotNull ConfigList visuals,
-                          @NotNull ConfigList actions,
-                          @NotNull ConfigNode deactivationPredicate,
-                          @NotNull ConfigNode pickupPredicate,
-                          @NotNull ConfigNode powerupEffect) implements Keyed {
-    @Override
-    public @NotNull Key key() {
-        return id;
-    }
-
+public record PowerupData(
+    @NotNull Key id,
+    @NotNull ConfigList visuals,
+    @NotNull ConfigList actions,
+    @NotNull ConfigNode deactivationPredicate,
+    @NotNull ConfigNode pickupPredicate,
+    @NotNull ConfigNode powerupEffect) implements Keyed {
     @Default("pickupPredicate")
     public static @NotNull ConfigElement defaultPickupPredicate() {
         return ConfigNode.of();
@@ -27,5 +23,10 @@ public record PowerupData(@NotNull Key id,
     @Default("powerupEffect")
     public static @NotNull ConfigElement defaultPowerupEffect() {
         return ConfigNode.of();
+    }
+
+    @Override
+    public @NotNull Key key() {
+        return id;
     }
 }

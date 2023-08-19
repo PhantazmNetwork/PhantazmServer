@@ -40,7 +40,7 @@ public class BasicTransactionMessager implements TransactionMessager {
 
     @Override
     public void sendMessage(@NotNull List<Component> displays, int change) {
-        TagResolver positivePlaceholder = Formatter.choice("positive", change >= 0 ? 1:0);
+        TagResolver positivePlaceholder = Formatter.choice("positive", change >= 0 ? 1 : 0);
         TagResolver changePlaceholder = Placeholder.component("change", Component.text(Math.abs(change)));
         TagResolver displaysPresentPlaceholder = MiniMessageUtils.optional("displays_present", !displays.isEmpty());
         Collection<Component> mappedDisplays = new ArrayList<>(displays.size());

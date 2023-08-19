@@ -92,7 +92,8 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
     }
 
     @DataObject
-    public record Data(@NotNull String nameFormat,
+    public record Data(
+        @NotNull String nameFormat,
         @NotNull String openedRoomsFormat,
         @NotNull String separator,
         @NotNull TitlePart<Component> nameTitlePart,

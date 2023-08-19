@@ -44,10 +44,10 @@ public class ShootProjectileSkill implements Skill {
 
     @FactoryMethod
     public ShootProjectileSkill(@NotNull Data data, @NotNull MapObjects mapObjects,
-            @NotNull @Child("target_selector") TargetSelector<? extends Entity> targetSelector,
-            @NotNull @Child("target_validator") TargetValidator targetValidator,
-            @NotNull @Child("hit_validator") TargetValidator hitValidator,
-            @NotNull @Child("actions") List<ProjectileHitEntityAction> actions) {
+        @NotNull @Child("target_selector") TargetSelector<? extends Entity> targetSelector,
+        @NotNull @Child("target_validator") TargetValidator targetValidator,
+        @NotNull @Child("hit_validator") TargetValidator hitValidator,
+        @NotNull @Child("actions") List<ProjectileHitEntityAction> actions) {
         this.data = data;
         this.mapObjects = mapObjects;
         this.targetSelector = targetSelector;
@@ -102,8 +102,7 @@ public class ShootProjectileSkill implements Skill {
     private void killOrRemove(Entity entity) {
         if (entity instanceof LivingEntity livingEntity) {
             livingEntity.kill();
-        }
-        else {
+        } else {
             entity.remove();
         }
     }
@@ -133,7 +132,7 @@ public class ShootProjectileSkill implements Skill {
 
         Pos selfPosition = selfEntity.getPosition();
         PhantazmMob mob = mapObjects.mobSpawner()
-                .spawn(mapObjects.module().instance(), selfPosition.add(0, selfEntity.getEyeHeight(), 0), model);
+            .spawn(mapObjects.module().instance(), selfPosition.add(0, selfEntity.getEyeHeight(), 0), model);
         if (data.addToRound) {
             mapObjects.module().roundHandlerSupplier().get().currentRound().ifPresent(round -> {
                 round.addMob(mob);
@@ -147,20 +146,21 @@ public class ShootProjectileSkill implements Skill {
 
         mobEntity.setNoGravity(!data.gravity);
         mobEntity.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(mob.entity(), selfEntity,
-                targetEntity.getPosition().add(0, targetEntity.getBoundingBox().height() / 2, 0), data.power(),
-                data.spread()))));
+            targetEntity.getPosition().add(0, targetEntity.getBoundingBox().height() / 2, 0), data.power(),
+            data.spread()))));
     }
 
     @DataObject
-    public record Data(@NotNull Key entity,
-                       double power,
-                       double spread,
-                       boolean gravity,
-                       boolean addToRound,
-                       @NotNull @ChildPath("target_selector") String targetSelector,
-                       @NotNull @ChildPath("target_validator") String targetValidator,
-                       @NotNull @ChildPath("hit_validator") String hitValidator,
-                       @NotNull @ChildPath("actions") List<String> hitEntityActions) {
+    public record Data(
+        @NotNull Key entity,
+        double power,
+        double spread,
+        boolean gravity,
+        boolean addToRound,
+        @NotNull @ChildPath("target_selector") String targetSelector,
+        @NotNull @ChildPath("target_validator") String targetValidator,
+        @NotNull @ChildPath("hit_validator") String hitValidator,
+        @NotNull @ChildPath("actions") List<String> hitEntityActions) {
         @Default("spread")
         public static @NotNull ConfigElement defaultSpread() {
             return ConfigPrimitive.of(0.0D);

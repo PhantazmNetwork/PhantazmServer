@@ -36,7 +36,8 @@ public class InteractingPredicate implements ShopPredicate {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("delegate") String delegatePath,
+    public record Data(
+        @NotNull @ChildPath("delegate") String delegatePath,
         @NotNull @ChildPath("interactors") List<String> interactorPaths) {
     }
 }

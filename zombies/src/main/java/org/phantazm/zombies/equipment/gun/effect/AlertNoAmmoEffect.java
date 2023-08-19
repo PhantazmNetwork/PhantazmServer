@@ -59,7 +59,8 @@ public class AlertNoAmmoEffect implements GunEffect {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider,
+    public record Data(
+        @NotNull @ChildPath("audience_provider") String audienceProvider,
         @NotNull MessageWithDestination message) {
     }
 

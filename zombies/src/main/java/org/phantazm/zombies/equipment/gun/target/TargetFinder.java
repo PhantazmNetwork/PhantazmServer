@@ -37,7 +37,8 @@ public interface TargetFinder {
      * @param regular  A {@link Collection} of regular {@link GunHit}s
      * @param headshot A {@link Collection} of {@link GunHit}s that should be considered "headshots"
      */
-    record Result(@NotNull Collection<GunHit> regular, @NotNull Collection<GunHit> headshot) {
+    record Result(@NotNull Collection<GunHit> regular,
+        @NotNull Collection<GunHit> headshot) {
 
         /**
          * Creates a {@link Result}.

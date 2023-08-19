@@ -8,7 +8,8 @@ import java.util.Objects;
 /**
  * A request to be routed to a {@link Lobby}.
  */
-public record LobbyRouteRequest(@NotNull String targetLobbyName, @NotNull LobbyJoinRequest joinRequest)
+public record LobbyRouteRequest(@NotNull String targetLobbyName,
+    @NotNull LobbyJoinRequest joinRequest)
     implements SceneJoinRequest {
 
     /**

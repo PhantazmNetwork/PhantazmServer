@@ -19,7 +19,7 @@ public class AddRoleCommand extends PermissionLockedCommand {
     private static final Argument<String> ROLE = ArgumentType.String("role");
 
     public AddRoleCommand(@NotNull IdentitySource identitySource, @NotNull RoleStore roleStore,
-            @NotNull PermissionHandler permissionHandler) {
+        @NotNull PermissionHandler permissionHandler) {
         super("add_role", PERMISSION);
 
         addSyntax((sender, context) -> {
@@ -31,8 +31,8 @@ public class AddRoleCommand extends PermissionLockedCommand {
                     roleStore.giveRole(uuid, role).whenComplete((result, error) -> {
                         if (error != null) {
                             sender.sendMessage(
-                                    Component.text("An internal error occured while executing " + "this command.")
-                                            .color(NamedTextColor.RED));
+                                Component.text("An internal error occured while executing " + "this command.")
+                                    .color(NamedTextColor.RED));
                             LOGGER.warn("An exception occurred while adding a role", error);
                             return;
                         }
@@ -40,10 +40,9 @@ public class AddRoleCommand extends PermissionLockedCommand {
                         if (result) {
                             sender.sendMessage("Gave " + uuid + " (" + name + ") role " + role);
                             permissionHandler.applyPermissions(uuid);
-                        }
-                        else {
+                        } else {
                             sender.sendMessage(Component.text("Failed to add role. The player may already " +
-                                    "have it, or it may not be a known role.", NamedTextColor.RED));
+                                "have it, or it may not be a known role.", NamedTextColor.RED));
                         }
                     });
                 });

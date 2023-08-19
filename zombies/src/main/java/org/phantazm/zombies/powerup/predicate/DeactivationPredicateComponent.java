@@ -6,5 +6,5 @@ import org.phantazm.zombies.scene.ZombiesScene;
 import java.util.function.Function;
 
 public interface DeactivationPredicateComponent
-        extends Function<@NotNull ZombiesScene, @NotNull DeactivationPredicate> {
+    extends Function<@NotNull ZombiesScene, @NotNull DeactivationPredicate> {
 }

@@ -50,14 +50,14 @@ public class MeleeAttackGoal implements GoalCreator {
                 attackSpeedMultiplier = self.getAttributeValue(attribute);
             }
 
-            if ((float)ticksSinceAttack++ * attackSpeedMultiplier >= data.cooldown()) {
+            if ((float) ticksSinceAttack++ * attackSpeedMultiplier >= data.cooldown()) {
                 Entity target = self.getTargetEntity();
                 if (target == null) {
                     return false;
                 }
 
                 return self.getBoundingBox().expand(data.range, data.range, data.range)
-                        .intersectEntity(self.getPosition(), target);
+                    .intersectEntity(self.getPosition(), target);
             }
 
             return false;
@@ -81,7 +81,7 @@ public class MeleeAttackGoal implements GoalCreator {
 
                 double angle = pos.yaw() * (Math.PI / 180);
                 livingEntity.getAcquirable().sync(entity -> {
-                    LivingEntity actualEntity = (LivingEntity)entity;
+                    LivingEntity actualEntity = (LivingEntity) entity;
                     boolean damaged = actualEntity.damage(Damage.fromEntity(self, damageAmount), data.bypassArmor);
 
                     if (!damaged) {
@@ -100,7 +100,11 @@ public class MeleeAttackGoal implements GoalCreator {
     }
 
     @DataObject
-    public record Data(long cooldown, double range, boolean swingHand, boolean bypassArmor, boolean horizontal) {
+    public record Data(long cooldown,
+        double range,
+        boolean swingHand,
+        boolean bypassArmor,
+        boolean horizontal) {
         @Default("swingHand")
         public static @NotNull ConfigElement defaultSwingHand() {
             return ConfigPrimitive.of(true);

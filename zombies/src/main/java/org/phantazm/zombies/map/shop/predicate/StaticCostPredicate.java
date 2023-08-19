@@ -29,10 +29,11 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
     public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
         PlayerCoins coins = interaction.player().module().getCoins();
         return coins.runTransaction(new Transaction(transactionModifierSource.modifiers(data.modifierType), -data.cost))
-                   .isAffordable(coins);
+            .isAffordable(coins);
     }
 
     @DataObject
-    public record Data(int cost, @NotNull Key modifierType) {
+    public record Data(int cost,
+        @NotNull Key modifierType) {
     }
 }

@@ -34,7 +34,8 @@ import java.util.Set;
  */
 @Model("zombies.gun.level")
 @Cache(false)
-public record GunLevel(@NotNull Data data,
+public record GunLevel(
+    @NotNull Data data,
     @NotNull @Child("stats") GunStats stats,
     @NotNull @Child("shoot_tester") ShootTester shootTester,
     @NotNull @Child("reload_tester") ReloadTester reloadTester,
@@ -92,7 +93,8 @@ public record GunLevel(@NotNull Data data,
     }
 
     @DataObject
-    public record Data(@NotNull Key key,
+    public record Data(
+        @NotNull Key key,
         @NotNull @ChildPath("stats") String stats,
         @NotNull @ChildPath("shoot_tester") String shootTester,
         @NotNull @ChildPath("reload_tester") String reloadTester,

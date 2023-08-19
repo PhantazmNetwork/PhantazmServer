@@ -31,8 +31,9 @@ public interface EditorSession {
      * @param blockHitResult the {@link BlockHitResult} for this interaction
      * @return the desired {@link ActionResult}
      */
-    @NotNull ActionResult handleBlockUse(@NotNull PlayerEntity player, @NotNull World world, @NotNull Hand hand,
-            @NotNull BlockHitResult blockHitResult);
+    @NotNull
+    ActionResult handleBlockUse(@NotNull PlayerEntity player, @NotNull World world, @NotNull Hand hand,
+        @NotNull BlockHitResult blockHitResult);
 
     /**
      * Called whenever the player changes what block they're looking at.
@@ -79,7 +80,8 @@ public interface EditorSession {
      * @throws IllegalStateException if there is no selection
      * @see EditorSession#hasSelection()
      */
-    @NotNull Vec3I getFirstSelection();
+    @NotNull
+    Vec3I getFirstSelection();
 
     /**
      * Gets the second selected block, which is the <i>second-last</i> block the player right-clicked. If there is no
@@ -89,14 +91,16 @@ public interface EditorSession {
      * @throws IllegalStateException if there is no selection
      * @see EditorSession#hasSelection()
      */
-    @NotNull Vec3I getSecondSelection();
+    @NotNull
+    Vec3I getSecondSelection();
 
     /**
      * Gets the region defined by both the first and second selections.
      *
      * @return the region encompassing both the first and second selections
      */
-    @NotNull Bounds3I getSelection();
+    @NotNull
+    Bounds3I getSelection();
 
     /**
      * Determines if this session has an active map.
@@ -110,7 +114,8 @@ public interface EditorSession {
      *
      * @return the currently active map
      */
-    @NotNull MapInfo getMap();
+    @NotNull
+    MapInfo getMap();
 
     /**
      * Adds some MapInfo to the maps held by this session.
@@ -139,7 +144,9 @@ public interface EditorSession {
      *
      * @return an unmodifiable view of the maps managed by this EditorSession
      */
-    @UnmodifiableView @NotNull Map<Key, MapInfo> mapView();
+    @UnmodifiableView
+    @NotNull
+    Map<Key, MapInfo> mapView();
 
     /**
      * Sets the current map to the managed map with the given id. If no map with this id exists, an
@@ -210,19 +217,22 @@ public interface EditorSession {
      *
      * @return the last edited room
      */
-    @Nullable RoomInfo lastRoom();
+    @Nullable
+    RoomInfo lastRoom();
 
     /**
      * Gets the last edited door; used for autofilling name information.
      *
      * @return the last edited door
      */
-    @Nullable DoorInfo lastDoor();
+    @Nullable
+    DoorInfo lastDoor();
 
     /**
      * Gets the id of the last edited spawnrule; used for autofilling name information.
      *
      * @return the id of the last edited spawnrule
      */
-    @Nullable Key lastSpawnrule();
+    @Nullable
+    Key lastSpawnrule();
 }

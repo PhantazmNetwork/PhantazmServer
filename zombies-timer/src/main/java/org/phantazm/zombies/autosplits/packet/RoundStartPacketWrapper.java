@@ -11,8 +11,8 @@ import java.util.Objects;
 public record RoundStartPacketWrapper(@NotNull RoundStartPacket packet) implements FabricPacket {
 
     public static final PacketType<RoundStartPacketWrapper> TYPE =
-            FabricPacketUtils.createPacketType(RoundStartPacket.ID, RoundStartPacket::read,
-                    RoundStartPacketWrapper::new);
+        FabricPacketUtils.createPacketType(RoundStartPacket.ID, RoundStartPacket::read,
+            RoundStartPacketWrapper::new);
 
     public RoundStartPacketWrapper {
         Objects.requireNonNull(packet);

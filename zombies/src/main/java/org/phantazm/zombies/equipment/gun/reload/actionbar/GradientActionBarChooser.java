@@ -45,6 +45,8 @@ public class GradientActionBarChooser implements ReloadActionBarChooser {
      * @param to      The ending color of the gradient
      */
     @DataObject
-    public record Data(@NotNull Component message, @NotNull RGBLike from, @NotNull RGBLike to) {
+    public record Data(@NotNull Component message,
+        @NotNull RGBLike from,
+        @NotNull RGBLike to) {
     }
 }

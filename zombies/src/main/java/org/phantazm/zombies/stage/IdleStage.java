@@ -65,8 +65,8 @@ public class IdleStage implements Stage {
         zombiesPlayer.module().getPlayerView().getDisplayName().thenAccept(displayName -> {
             TagResolver joinerPlaceholder = Placeholder.component("joiner", displayName);
             Component message = MiniMessage.miniMessage()
-                                    .deserialize(settings.gameJoinFormat(), joinerPlaceholder, countPlaceholder,
-                                        maxPlayersPlaceholder);
+                .deserialize(settings.gameJoinFormat(), joinerPlaceholder, countPlaceholder,
+                    maxPlayersPlaceholder);
             instance.sendMessage(message);
         });
     }

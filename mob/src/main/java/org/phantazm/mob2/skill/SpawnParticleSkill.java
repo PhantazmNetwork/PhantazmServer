@@ -15,9 +15,9 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
+import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
-import org.phantazm.mob2.Trigger;
 
 import java.util.Objects;
 import java.util.Random;
@@ -30,7 +30,7 @@ public class SpawnParticleSkill implements SkillComponent {
 
     @FactoryMethod
     public SpawnParticleSkill(@NotNull Data data, @NotNull ParticleWrapper particle,
-            @NotNull SelectorComponent selector) {
+        @NotNull SelectorComponent selector) {
         this.data = Objects.requireNonNull(data);
         this.particle = Objects.requireNonNull(particle);
         this.selector = Objects.requireNonNull(selector);
@@ -43,10 +43,11 @@ public class SpawnParticleSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger,
-                       @NotNull @ChildPath("selector") String selector,
-                       @NotNull @ChildPath("particle") String particle,
-                       @NotNull Bounds3D bounds) {
+    public record Data(
+        @Nullable Trigger trigger,
+        @NotNull @ChildPath("selector") String selector,
+        @NotNull @ChildPath("particle") String particle,
+        @NotNull Bounds3D bounds) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;

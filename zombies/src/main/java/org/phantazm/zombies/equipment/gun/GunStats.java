@@ -116,7 +116,12 @@ public final class GunStats {
      * @param shotInterval The interval between gun fire
      */
     @DataObject
-    public record Data(long shootSpeed, long reloadSpeed, int maxAmmo, int maxClip, int shots, long shotInterval) {
+    public record Data(long shootSpeed,
+        long reloadSpeed,
+        int maxAmmo,
+        int maxClip,
+        int shots,
+        long shotInterval) {
 
     }
 

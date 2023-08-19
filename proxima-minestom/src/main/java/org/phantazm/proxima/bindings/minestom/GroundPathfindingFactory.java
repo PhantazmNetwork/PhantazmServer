@@ -54,10 +54,10 @@ public class GroundPathfindingFactory implements Pathfinding.Factory {
             @Override
             protected @NotNull Vec3IBiPredicate successPredicate() {
                 return data.targetDeviation <= 0
-                           ? (x1, y1, z1, x2, y2, z2) -> x1 == x2 && y1 == y2 && z1 == z2
-                           :(x1, y1, z1, x2, y2, z2) -> {
+                    ? (x1, y1, z1, x2, y2, z2) -> x1 == x2 && y1 == y2 && z1 == z2
+                    : (x1, y1, z1, x2, y2, z2) -> {
                     if (Vec3D.distanceSquared(x1 + 0.5, y1, z1 + 0.5, x2 + 0.5, y2, z2 + 0.5) <=
-                            data.targetDeviation * data.targetDeviation) {
+                        data.targetDeviation * data.targetDeviation) {
                         if (!data.lineOfSight) {
                             return true;
                         }
@@ -92,7 +92,8 @@ public class GroundPathfindingFactory implements Pathfinding.Factory {
     }
 
     @DataObject
-    public record Data(float jumpHeight,
+    public record Data(
+        float jumpHeight,
         float fallTolerance,
         float stepHeight,
         double targetDeviation,

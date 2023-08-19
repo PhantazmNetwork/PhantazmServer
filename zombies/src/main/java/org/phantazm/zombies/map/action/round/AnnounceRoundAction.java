@@ -59,7 +59,8 @@ public class AnnounceRoundAction implements Action<Round> {
     }
 
     @DataObject
-    public record Data(@NotNull String format,
+    public record Data(
+        @NotNull String format,
         @NotNull ChatDestination destination,
         @NotNull @ChildPath("tick_formatter") String tickFormatter) {
 

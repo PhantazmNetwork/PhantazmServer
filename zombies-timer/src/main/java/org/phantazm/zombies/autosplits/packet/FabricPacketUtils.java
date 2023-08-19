@@ -28,8 +28,8 @@ public class FabricPacketUtils {
     }
 
     public static <TInnerPacket extends Packet, TWrapperPacket extends FabricPacket> @NotNull PacketType<TWrapperPacket> createPacketType(@NotNull Key key,
-            @NotNull Function<DataReader, TInnerPacket> innerCreator,
-            @NotNull Function<TInnerPacket, TWrapperPacket> wrapperCreator) {
+        @NotNull Function<DataReader, TInnerPacket> innerCreator,
+        @NotNull Function<TInnerPacket, TWrapperPacket> wrapperCreator) {
         return PacketType.create(identifierFromKey(key), buf -> {
             TInnerPacket innerPacket = innerCreator.apply(new PacketByteBufDataReader(buf));
             return wrapperCreator.apply(innerPacket);

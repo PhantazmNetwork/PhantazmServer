@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface MobCreator {
+    @NotNull Mob create(@NotNull Instance instance, @NotNull InjectionStore injectionStore);
+
     interface MobData {
         @NotNull EntityType type();
 
@@ -32,9 +34,8 @@ public interface MobCreator {
         @NotNull @Unmodifiable Map<String, Object> meta();
     }
 
-    record InstanceSettings(@NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeLocal,
-                            @NotNull InstanceSpaceHandler spaceHandler) {
+    record InstanceSettings(
+        @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeLocal,
+        @NotNull InstanceSpaceHandler spaceHandler) {
     }
-
-    @NotNull Mob create(@NotNull Instance instance, @NotNull InjectionStore injectionStore);
 }

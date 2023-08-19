@@ -22,7 +22,7 @@ public class GhostCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.ghost");
 
     public GhostCommand(@NotNull PlayerViewProvider viewProvider, @NotNull SceneTransferHelper transferHelper,
-            @NotNull RouterStore routerStore) {
+        @NotNull RouterStore routerStore) {
         super("ghost", PERMISSION);
 
         ArgumentUUID sceneArgument = ArgumentType.UUID("scene");
@@ -39,7 +39,7 @@ public class GhostCommand extends PermissionLockedCommand {
         });
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), ((sender, context) -> {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
             UUID argument = context.get(sceneArgument);
             for (SceneRouter<?, ?> router : routerStore.getRouters()) {
                 if (!router.isGame()) {

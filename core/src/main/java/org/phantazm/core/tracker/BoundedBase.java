@@ -22,8 +22,7 @@ public class BoundedBase implements Bounded {
         if (bounds.length == 0) {
             this.bounds = List.of(Bounds3I.immutable(shift.blockX(), shift.blockY(), shift.blockZ(), 1, 1, 1));
             this.center = new Vec(shift.x(), shift.y(), shift.z()).add(0.5);
-        }
-        else {
+        } else {
             Bounds3I[] temp = new Bounds3I[bounds.length];
             for (int i = 0; i < temp.length; i++) {
                 temp[i] = bounds[i].immutable().shift(shift.blockX(), shift.blockY(), shift.blockZ());

@@ -5,7 +5,7 @@ import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.Ranked;
 
 public class RankMultipleMemberPermission<TMember extends GuildMember & Ranked> implements
-        MultipleMemberPermission<TMember> {
+    MultipleMemberPermission<TMember> {
 
     private final int minimumKickRank;
 

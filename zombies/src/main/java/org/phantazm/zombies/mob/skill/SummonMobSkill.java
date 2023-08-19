@@ -36,7 +36,7 @@ public class SummonMobSkill implements Skill {
 
     @FactoryMethod
     public SummonMobSkill(@NotNull Data data, @NotNull MobSpawner mobSpawner, @NotNull MobStore mobStore,
-            @NotNull MapObjects mapObjects) {
+        @NotNull MapObjects mapObjects) {
         this.data = data;
         this.mobSpawner = mobSpawner;
 
@@ -94,7 +94,10 @@ public class SummonMobSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@NotNull Key mob, int spawnAmount, int maxSpawn, boolean addToRound) {
+    public record Data(@NotNull Key mob,
+        int spawnAmount,
+        int maxSpawn,
+        boolean addToRound) {
         @Default("addToRound")
         public static @NotNull ConfigElement defaultAddToRound() {
             return ConfigPrimitive.of(true);

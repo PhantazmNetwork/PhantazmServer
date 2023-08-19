@@ -21,18 +21,18 @@ public class PathfinderConfigProcessor implements ConfigProcessor<PathfinderConf
         int minimumRunnable = element.getNumberOrThrow("minimumRunnable").intValue();
         long keepAliveTime = element.getNumberOrThrow("keepAliveTime").longValue();
         TimeUnit keepAliveTimeUnit =
-                TIME_UNIT_PROCESSOR.dataFromElement(element.getElementOrThrow("keepAliveTimeUnit"));
+            TIME_UNIT_PROCESSOR.dataFromElement(element.getElementOrThrow("keepAliveTimeUnit"));
 
         return new PathfinderConfig(threads, asyncMode, corePoolSize, maximumPoolSize, minimumRunnable, keepAliveTime,
-                keepAliveTimeUnit);
+            keepAliveTimeUnit);
     }
 
     @Override
     public @NotNull ConfigElement elementFromData(PathfinderConfig pathfinderConfig) throws ConfigProcessException {
         return ConfigNode.of("threads", pathfinderConfig.threads(), "asyncMode", pathfinderConfig.asyncMode(),
-                "corePoolSize", pathfinderConfig.corePoolSize(), "maximumPoolSize", pathfinderConfig.maximumPoolSize(),
-                "minimumRunnable", pathfinderConfig.minimumRunnable(), "keepAliveTime",
-                pathfinderConfig.keepAliveTime(), "keepAliveTimeUnit",
-                TIME_UNIT_PROCESSOR.elementFromData(pathfinderConfig.keepAliveTimeUnit()));
+            "corePoolSize", pathfinderConfig.corePoolSize(), "maximumPoolSize", pathfinderConfig.maximumPoolSize(),
+            "minimumRunnable", pathfinderConfig.minimumRunnable(), "keepAliveTime",
+            pathfinderConfig.keepAliveTime(), "keepAliveTimeUnit",
+            TIME_UNIT_PROCESSOR.elementFromData(pathfinderConfig.keepAliveTimeUnit()));
     }
 }

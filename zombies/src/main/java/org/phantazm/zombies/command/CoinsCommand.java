@@ -20,13 +20,6 @@ import java.util.function.Function;
 
 public class CoinsCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.coins");
-
-    public enum CoinAction {
-        GIVE,
-        TAKE,
-        SET
-    }
-
     private static final Argument<CoinAction> COIN_ACTION_ARGUMENT =
         ArgumentType.Enum("action", CoinAction.class).setFormat(ArgumentEnum.Format.LOWER_CASED);
     private static final Argument<Integer> COIN_AMOUNT_ARGUMENT = ArgumentType.Integer("amount");
@@ -59,5 +52,11 @@ public class CoinsCommand extends PermissionLockedCommand {
                 }
             });
         }, COIN_ACTION_ARGUMENT, COIN_AMOUNT_ARGUMENT);
+    }
+
+    public enum CoinAction {
+        GIVE,
+        TAKE,
+        SET
     }
 }

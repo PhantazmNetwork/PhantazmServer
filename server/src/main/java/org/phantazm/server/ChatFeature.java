@@ -46,7 +46,7 @@ public final class ChatFeature {
      * @param parties    A map of player {@link UUID}s to {@link Party} instances
      */
     static void initialize(@NotNull ChatConfig chatConfig, @NotNull Map<? super UUID, ? extends Party> parties,
-            @NotNull RoleStore roleStore) {
+        @NotNull RoleStore roleStore) {
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {
@@ -65,22 +65,22 @@ public final class ChatFeature {
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         CommandManager commandManager = MinecraftServer.getCommandManager();
         ChatChannel defaultChannel =
-                new BasicChatChannel(MiniMessage.miniMessage(), chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME),
-                        nameFormatter);
+            new BasicChatChannel(MiniMessage.miniMessage(), chatConfig.chatFormats().get(DEFAULT_CHAT_CHANNEL_NAME),
+                nameFormatter);
         channels.put(DEFAULT_CHAT_CHANNEL_NAME, defaultChannel);
         commandManager.register(ChatChannelSendCommand.chatChannelSend("ac", defaultChannel));
         ChatChannel partyChannel = new PartyChatChannel(parties, MiniMessage.miniMessage(),
-                chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME), PartyFeature.getConfig().spyChatFormat(),
-                nameFormatter);
+            chatConfig.chatFormats().get(PartyChatChannel.CHANNEL_NAME), PartyFeature.getConfig().spyChatFormat(),
+            nameFormatter);
         channels.put(PartyChatChannel.CHANNEL_NAME, partyChannel);
         commandManager.register(ChatChannelSendCommand.chatChannelSend("pc", partyChannel));
 
         Map<UUID, String> playerChannels = new HashMap<>();
         Map<String, String> aliasResolver = Map.of(
-                DEFAULT_CHAT_CHANNEL_NAME.substring(0, 1), DEFAULT_CHAT_CHANNEL_NAME,
-                PartyChatChannel.CHANNEL_NAME.substring(0, 1), PartyChatChannel.CHANNEL_NAME,
-                DEFAULT_CHAT_CHANNEL_NAME, DEFAULT_CHAT_CHANNEL_NAME,
-                PartyChatChannel.CHANNEL_NAME, PartyChatChannel.CHANNEL_NAME
+            DEFAULT_CHAT_CHANNEL_NAME.substring(0, 1), DEFAULT_CHAT_CHANNEL_NAME,
+            PartyChatChannel.CHANNEL_NAME.substring(0, 1), PartyChatChannel.CHANNEL_NAME,
+            DEFAULT_CHAT_CHANNEL_NAME, DEFAULT_CHAT_CHANNEL_NAME,
+            PartyChatChannel.CHANNEL_NAME, PartyChatChannel.CHANNEL_NAME
         );
         commandManager.register(new ChatCommand(channels, playerChannels, aliasResolver, () -> DEFAULT_CHAT_CHANNEL_NAME));
         node.addListener(PlayerLoginEvent.class, event -> {
@@ -102,8 +102,8 @@ public final class ChatFeature {
                 player.sendMessage(failure.left());
                 if (failure.rightBoolean()) {
                     player.sendMessage(Component.text().append(Component.text("Set channel to "),
-                                    Component.text(DEFAULT_CHAT_CHANNEL_NAME, NamedTextColor.GOLD), Component.text("."))
-                            .color(NamedTextColor.GREEN));
+                            Component.text(DEFAULT_CHAT_CHANNEL_NAME, NamedTextColor.GOLD), Component.text("."))
+                        .color(NamedTextColor.GREEN));
                     playerChannels.put(player.getUuid(), DEFAULT_CHAT_CHANNEL_NAME);
                 }
             });

@@ -8,10 +8,10 @@ import org.phantazm.mob.PhantazmMob;
 import java.util.Random;
 
 @Description("""
-        A meta skill that has a configurable random chance to trigger another meta skill. The chance is a decimal value
-        ranging from 0 to 1. Values less than or equal 0 will never trigger; values greater than or equal to 1 will
-        always trigger.
-        """)
+    A meta skill that has a configurable random chance to trigger another meta skill. The chance is a decimal value
+    ranging from 0 to 1. Values less than or equal 0 will never trigger; values greater than or equal to 1 will
+    always trigger.
+    """)
 @Model("mob.skill.random")
 @Cache(false)
 public class RandomSkill implements Skill {
@@ -55,9 +55,10 @@ public class RandomSkill implements Skill {
     }
 
     @DataObject
-    public record Data(@Description("Chance that this skill will call its delegate") double chance,
-                       @Description("The delegate to call on a successful roll") @NotNull @ChildPath(
-                               "delegate") String delegate) {
+    public record Data(
+        @Description("Chance that this skill will call its delegate") double chance,
+        @Description("The delegate to call on a successful roll") @NotNull @ChildPath(
+            "delegate") String delegate) {
 
     }
 }

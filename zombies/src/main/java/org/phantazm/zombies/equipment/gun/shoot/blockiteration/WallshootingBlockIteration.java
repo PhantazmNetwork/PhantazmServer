@@ -48,12 +48,11 @@ public class WallshootingBlockIteration implements BlockIteration {
                 return true;
             }
 
-            @SuppressWarnings("UnstableApiUsage")
             @Override
             public boolean acceptRaytracedBlock(@NotNull Vec intersection, @NotNull Block block) {
                 Shape blockShape = block.registry().collisionShape();
                 if (wallshootingChecker.canWallshoot() && ((!blockShape.isFullBlock() && !blockShape.isEmpty()) ||
-                                                               data.passableBlocks().contains(block.key()))) {
+                    data.passableBlocks().contains(block.key()))) {
                     wallshot = true;
                     return false;
                 }
@@ -65,7 +64,8 @@ public class WallshootingBlockIteration implements BlockIteration {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("wallshooting_checker") String wallshootingChecker,
+    public record Data(
+        @NotNull @ChildPath("wallshooting_checker") String wallshootingChecker,
         @NotNull Set<Key> passableBlocks) {
     }
 }

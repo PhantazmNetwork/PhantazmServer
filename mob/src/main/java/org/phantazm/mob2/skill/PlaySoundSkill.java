@@ -17,9 +17,9 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
+import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
-import org.phantazm.mob2.Trigger;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -43,10 +43,11 @@ public class PlaySoundSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@Nullable Trigger trigger,
-                       @ChildPath("target") String selector,
-                       @NotNull Sound sound,
-                       boolean broadcast) {
+    public record Data(
+        @Nullable Trigger trigger,
+        @ChildPath("target") String selector,
+        @NotNull Sound sound,
+        boolean broadcast) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -84,8 +85,7 @@ public class PlaySoundSkill implements SkillComponent {
                 for (Entity entity : entities) {
                     if (!data.broadcast && entity instanceof Player player) {
                         player.playSound(randomize(data.sound), entity.getPosition());
-                    }
-                    else {
+                    } else {
                         instance.playSound(randomize(data.sound), entity.getPosition());
                     }
                 }

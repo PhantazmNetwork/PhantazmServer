@@ -107,7 +107,10 @@ public class SlowDownShotHandler implements ShotHandler {
     }
 
     @DataObject
-    public record Data(double multiplier, double headshotMultiplier, long duration, long headshotDuration) {
+    public record Data(double multiplier,
+        double headshotMultiplier,
+        long duration,
+        long headshotDuration) {
 
     }
 

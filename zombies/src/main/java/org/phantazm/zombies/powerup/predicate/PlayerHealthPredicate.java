@@ -21,7 +21,7 @@ public class PlayerHealthPredicate implements PickupPredicateComponent {
         Player player = playerOptional.get();
         return player.getHealth() < player.getMaxHealth();
     };
-    
+
     @FactoryMethod
     public PlayerHealthPredicate() {
     }

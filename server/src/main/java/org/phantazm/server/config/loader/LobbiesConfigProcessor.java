@@ -50,12 +50,12 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
 
                 long time = instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_TIME, "time").longValue();
                 int timeRate =
-                        instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_TIME_RATE, "timeRate").intValue();
+                    instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_TIME_RATE, "timeRate").intValue();
                 int chunkLoadRange =
-                        instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_CHUNK_LOAD_RANGE, "chunkLoadRange")
-                                .intValue();
+                    instanceConfigNode.getNumberOrDefault(InstanceConfig.DEFAULT_CHUNK_LOAD_RANGE, "chunkLoadRange")
+                        .intValue();
                 InstanceConfig instanceConfig =
-                        new InstanceConfig(new Pos(x, y, z, yaw, pitch), time, timeRate, chunkLoadRange);
+                    new InstanceConfig(new Pos(x, y, z, yaw, pitch), time, timeRate, chunkLoadRange);
 
                 ConfigList lobbyPathsList = lobby.getValue().getListOrThrow("lobbyPaths");
                 List<String> lobbyPaths = new ArrayList<>(lobbyPathsList.size());
@@ -69,18 +69,17 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
                 String lobbyJoinFormat = lobby.getValue().getStringOrThrow("lobbyJoinFormat");
 
                 Collection<ItemStack> defaultItems = ItemStackConfigProcessors.snbt().collectionProcessor()
-                        .dataFromElement(lobby.getValue().getElementOrThrow("defaultItems"));
+                    .dataFromElement(lobby.getValue().getElementOrThrow("defaultItems"));
 
                 ConfigList npcs = lobby.getValue().getListOrDefault(ConfigList::of, "npcs");
 
                 lobbies.put(lobby.getKey(),
-                        new LobbyConfig(instanceConfig, lobbyPaths, maxPlayers, maxLobbies, defaultItems,
-                                lobbyJoinFormat, npcs));
+                    new LobbyConfig(instanceConfig, lobbyPaths, maxPlayers, maxLobbies, defaultItems,
+                        lobbyJoinFormat, npcs));
             }
 
             return new LobbiesConfig(instancesPath, kickMessage, mainLobbyName, lobbies);
-        }
-        catch (InvalidPathException e) {
+        } catch (InvalidPathException e) {
             throw new ConfigProcessException(e);
         }
     }
@@ -114,7 +113,7 @@ public class LobbiesConfigProcessor implements ConfigProcessor<LobbiesConfig> {
             lobbyNode.putNumber("maxPlayers", lobby.getValue().maxPlayers());
             lobbyNode.putNumber("maxLobbies", lobby.getValue().maxLobbies());
             lobbyNode.put("defaultItems", ItemStackConfigProcessors.snbt().collectionProcessor()
-                    .elementFromData(lobby.getValue().defaultItems()));
+                .elementFromData(lobby.getValue().defaultItems()));
             lobbyNode.putString("lobbyJoinFormat", lobby.getValue().lobbyJoinFormat());
             lobbyNode.put("npcs", lobby.getValue().npcs());
 

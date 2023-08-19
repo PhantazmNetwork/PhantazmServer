@@ -21,7 +21,7 @@ public class PrecisionSecondTickFormatter implements TickFormatter {
 
     @Override
     public @NotNull String format(long ticks) {
-        return String.format("%." + data.decimalPlaces + "f", ((double)ticks / MinecraftServer.TICK_PER_SECOND));
+        return String.format("%." + data.decimalPlaces + "f", ((double) ticks / MinecraftServer.TICK_PER_SECOND));
     }
 
     @DataObject

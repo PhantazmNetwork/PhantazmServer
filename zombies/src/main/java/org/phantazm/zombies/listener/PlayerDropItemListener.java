@@ -11,7 +11,7 @@ import java.util.UUID;
 public class PlayerDropItemListener extends ZombiesPlayerEventListener<ItemDropEvent> {
 
     public PlayerDropItemListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
         super(instance, zombiesPlayers);
     }
 

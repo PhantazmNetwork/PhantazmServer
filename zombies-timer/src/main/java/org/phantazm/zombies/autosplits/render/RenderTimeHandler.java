@@ -13,10 +13,8 @@ import java.util.Objects;
 public class RenderTimeHandler implements HudRenderCallback {
 
     private final MinecraftClient client;
-
-    private InternalSplitter internalSplitter;
-
     private final int color;
+    private InternalSplitter internalSplitter;
 
     public RenderTimeHandler(@NotNull MinecraftClient client, int color) {
         this.client = Objects.requireNonNull(client);

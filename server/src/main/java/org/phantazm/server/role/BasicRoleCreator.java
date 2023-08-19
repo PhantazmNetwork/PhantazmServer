@@ -29,7 +29,7 @@ public class BasicRoleCreator implements RoleCreator {
     @Override
     public @NotNull Role get() {
         return Role.of(data.identifier, this::styleChat, this::styleDisplayName, data.priority,
-                data.permissions.stream().map(Permission::new).collect(Collectors.toUnmodifiableSet()));
+            data.permissions.stream().map(Permission::new).collect(Collectors.toUnmodifiableSet()));
     }
 
     private Component styleChat(Player player) {
@@ -47,11 +47,12 @@ public class BasicRoleCreator implements RoleCreator {
     }
 
     @DataObject
-    public record Data(@NotNull String identifier,
-                       @NotNull String chatFormat,
-                       @Nullable String displayNameFormat,
-                       int priority,
-                       @NotNull Set<String> permissions) {
+    public record Data(
+        @NotNull String identifier,
+        @NotNull String chatFormat,
+        @Nullable String displayNameFormat,
+        int priority,
+        @NotNull Set<String> permissions) {
 
     }
 }
