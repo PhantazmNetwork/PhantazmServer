@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Flags;
-import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
@@ -111,25 +110,27 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
             Player player = playerOptional.get();
             Pos playerPosition = player.getPosition();
 
-            boolean isInstaKill;
-            if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
-                (!hitMob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
-                livingEntity.setTag(Tags.LAST_HIT_BY, player.getUuid());
-                livingEntity.kill();
-                isInstaKill = true;
-            } else {
-                double angle = playerPosition.yaw() * (Math.PI / 180);
-                livingEntity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
-                livingEntity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
-                isInstaKill = false;
-            }
+            livingEntity.getAcquirable().sync(ignored -> {
+                boolean isInstaKill;
+                if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
+                    (!hitMob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
+                    livingEntity.damage(Damage.fromPlayer(player, livingEntity.getHealth()), true);
+                    isInstaKill = true;
+                } else {
+                    double angle = playerPosition.yaw() * (Math.PI / 180);
+                    livingEntity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
+                    livingEntity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
+                    isInstaKill = false;
+                }
 
-            PlayerCoins coins = zombiesPlayer.module().getCoins();
-            Collection<Transaction.Modifier> modifiers = zombiesPlayer.module().compositeTransactionModifiers()
-                .modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
+                PlayerCoins coins = zombiesPlayer.module().getCoins();
+                Collection<Transaction.Modifier> modifiers = zombiesPlayer.module().compositeTransactionModifiers()
+                    .modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
 
-            coins.runTransaction(new Transaction(modifiers, isInstaKill ? data.instaKillCoins : data.coins))
-                .applyIfAffordable(coins);
+                coins.runTransaction(new Transaction(modifiers, isInstaKill ? data.instaKillCoins : data.coins))
+                    .applyIfAffordable(coins);
+            });
+
             return true;
         }
     }

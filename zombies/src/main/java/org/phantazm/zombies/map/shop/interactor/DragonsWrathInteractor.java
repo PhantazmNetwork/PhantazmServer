@@ -12,13 +12,13 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
-import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
@@ -76,8 +76,12 @@ public class DragonsWrathInteractor implements ShopInteractor {
 
                 instance.playSound(data.sound());
 
-                entity.setTag(Tags.LAST_HIT_BY, interaction.player().module().getPlayerView().getUUID());
-                entity.kill();
+                interaction.player().getPlayer().ifPresent(player -> {
+                    entity.getAcquirable().sync(ignored -> {
+                        entity.damage(Damage.fromPlayer(player, entity.getHealth()), true);
+                    });
+                });
+
                 killCount.set(killCount.get() + 1);
             });
 

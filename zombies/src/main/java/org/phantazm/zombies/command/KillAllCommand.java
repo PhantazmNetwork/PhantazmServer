@@ -1,6 +1,7 @@
 package org.phantazm.zombies.command;
 
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
@@ -25,8 +26,9 @@ public class KillAllCommand extends PermissionLockedCommand {
             UUID uuid = player.getUuid();
             sceneMapper.apply(uuid).flatMap(scene -> scene.getMap().roundHandler().currentRound()).ifPresent(round -> {
                 for (Mob mob : round.getSpawnedMobs()) {
-                    mob.setLastHitEntity(player);
-                    mob.kill();
+                    mob.getAcquirable().sync(ignored -> {
+                        mob.damage(Damage.fromPlayer(player, mob.getHealth()), true);
+                    });
                 }
             });
         });

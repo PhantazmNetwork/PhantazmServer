@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
-import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Deque;
@@ -63,7 +62,9 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         entity.setTag(lastDamageTicksTag, 0L);
 
         if (!alreadyActive) {
-            activeEntities.add(new DamageTarget(zombiesPlayer.getUUID(), livingEntity));
+            zombiesPlayer.getPlayer().ifPresent(player -> {
+                activeEntities.add(new DamageTarget(player, livingEntity));
+            });
         }
     }
 
@@ -88,10 +89,8 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         });
     }
 
-    private void doDamage(LivingEntity entity, UUID damager) {
-        Damage damage = new Damage(DamageType.ON_FIRE, null, null, null, data.damage);
-        damage.setTag(Tags.LAST_HIT_BY, damager);
-
+    private void doDamage(LivingEntity entity, Entity damager) {
+        Damage damage = new Damage(DamageType.ON_FIRE, null, damager, null, data.damage);
         entity.damage(damage, data.bypassArmor);
     }
 
@@ -99,7 +98,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         entity.removeTag(lastDamageTicksTag);
     }
 
-    private record DamageTarget(UUID damager,
+    private record DamageTarget(Entity damager,
         LivingEntity target) {
     }
 

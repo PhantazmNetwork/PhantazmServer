@@ -15,7 +15,6 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
-import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
@@ -96,26 +95,26 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
                             return;
                         }
 
-                        entity.setTag(Tags.LAST_HIT_BY, player.getUuid());
+                        entity.getAcquirable().sync(ignored -> {
+                            if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                                switch (data.bossDamageType) {
+                                    case HEALTH_FACTOR -> entity.damage(
+                                        Damage.fromPlayer(player, entity.getMaxHealth() * data.bossDamage),
+                                        data.bypassArmor);
+                                    case CONSTANT -> entity.damage(Damage.fromPlayer(player, data.bossDamage),
+                                        data.bypassArmor);
+                                }
 
-                        if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
-                            switch (data.bossDamageType) {
-                                case HEALTH_FACTOR -> entity.damage(
-                                    Damage.fromPlayer(player, entity.getMaxHealth() * data.bossDamage),
-                                    data.bypassArmor);
-                                case CONSTANT -> entity.damage(Damage.fromPlayer(player, data.bossDamage),
-                                    data.bypassArmor);
+                                if (entity.getHealth() <= 0) {
+                                    giveCoins(zombiesPlayer);
+                                }
+
+                                return;
                             }
 
-                            if (entity.getHealth() <= 0) {
-                                giveCoins(zombiesPlayer);
-                            }
-
-                            return;
-                        }
-
-                        giveCoins(zombiesPlayer);
-                        entity.kill();
+                            giveCoins(zombiesPlayer);
+                            entity.damage(Damage.fromPlayer(player, entity.getHealth()), true);
+                        });
                     });
         }
 
