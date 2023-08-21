@@ -41,6 +41,11 @@ public class BasicMobSpawner implements MobSpawner {
     }
 
     @Override
+    public boolean canSpawn(@NotNull Key identifier) {
+        return mobCreators.containsKey(identifier);
+    }
+
+    @Override
     public void init() {
         buildDependencies(builder);
         this.injectionStore = builder.build();

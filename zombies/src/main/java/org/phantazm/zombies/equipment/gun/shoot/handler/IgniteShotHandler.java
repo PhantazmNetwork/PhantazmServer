@@ -9,8 +9,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
@@ -27,13 +26,12 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * A {@link ShotHandler} that sets {@link Entity}s on fire.
  */
 @Model("zombies.gun.shot_handler.ignite")
-@Cache
+@Cache(false)
 public class IgniteShotHandler implements ShotHandler {
     private final Data data;
 
     private final Tag<Long> lastFireDamageTicksTag;
     private final Deque<LivingEntity> targets;
-    private final MobStore mobStore;
 
     /**
      * Creates an {@link IgniteShotHandler}.
@@ -41,13 +39,12 @@ public class IgniteShotHandler implements ShotHandler {
      * @param data The {@link IgniteShotHandler}'s {@link Data}
      */
     @FactoryMethod
-    public IgniteShotHandler(@NotNull Data data, @NotNull MobStore mobStore) {
+    public IgniteShotHandler(@NotNull Data data) {
         this.data = Objects.requireNonNull(data);
 
         UUID uuid = UUID.randomUUID();
         this.lastFireDamageTicksTag = Tag.Long("last_fire_damage_ticks" + uuid).defaultValue(-1L);
         this.targets = new ConcurrentLinkedDeque<>();
-        this.mobStore = Objects.requireNonNull(mobStore);
     }
 
     @Override
@@ -60,8 +57,11 @@ public class IgniteShotHandler implements ShotHandler {
     private void setFire(Collection<GunHit> hits, int duration) {
         for (GunHit target : hits) {
             LivingEntity entity = target.entity();
-            PhantazmMob mob = mobStore.getMob(entity.getUuid());
-            if (mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_FIRE)) {
+            if (!(entity instanceof Mob mob)) {
+                return;
+            }
+
+            if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_FIRE)) {
                 continue;
             }
 

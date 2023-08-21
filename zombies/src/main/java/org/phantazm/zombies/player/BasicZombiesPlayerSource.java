@@ -40,9 +40,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.time.TickFormatter;
-import org.phantazm.mob.MobModel;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.spawner.MobSpawner;
+import org.phantazm.mob2.MobSpawner;
 import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
@@ -90,8 +88,6 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
     private final Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction;
 
-    private final Map<Key, MobModel> mobModelMap;
-
     private final ContextManager contextManager;
 
     private final KeyParser keyParser;
@@ -99,13 +95,11 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
     public BasicZombiesPlayerSource(@NotNull ZombiesDatabase database, @NotNull Executor executor,
         @NotNull PlayerViewProvider viewProvider,
         @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
-        @NotNull Map<Key, MobModel> mobModelMap, @NotNull ContextManager contextManager,
-        @NotNull KeyParser keyParser) {
+        @NotNull ContextManager contextManager, @NotNull KeyParser keyParser) {
         this.database = Objects.requireNonNull(database);
         this.executor = Objects.requireNonNull(executor);
         this.viewProvider = Objects.requireNonNull(viewProvider);
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction);
-        this.mobModelMap = Objects.requireNonNull(mobModelMap);
         this.contextManager = Objects.requireNonNull(contextManager);
         this.keyParser = Objects.requireNonNull(keyParser);
     }
@@ -118,7 +112,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
         @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
         @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-        @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
+        @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
         @NotNull BelowNameTag belowNameTag) {
         TransactionModifierSource playerTransactionModifierSource = new BasicTransactionModifierSource();
 
@@ -174,8 +168,8 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         Wrapper<ZombiesPlayer> zombiesPlayerWrapper = Wrapper.ofNull();
         ZombiesEquipmentModule equipmentModule =
-            new ZombiesEquipmentModule(zombiesPlayers, playerView, stats, actionBar, mobSpawner, mobStore,
-                eventNode, random, mapObjects, zombiesPlayerWrapper, mobModelMap::get);
+            new ZombiesEquipmentModule(zombiesPlayers, playerView, stats, actionBar, mobSpawner,
+                eventNode, random, mapObjects, zombiesPlayerWrapper);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(equipmentModule);
 
         Sidebar sidebar = new Sidebar(mapSettingsInfo.scoreboardHeader());

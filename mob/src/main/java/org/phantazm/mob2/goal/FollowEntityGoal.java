@@ -9,6 +9,7 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
+import org.phantazm.mob2.selector.SelectorComponent;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
 import java.util.Objects;
@@ -18,17 +19,17 @@ import java.util.Optional;
 @Cache
 public class FollowEntityGoal implements GoalCreator {
     private final Data data;
-    private final Selector selector;
+    private final SelectorComponent selector;
 
     @FactoryMethod
-    public FollowEntityGoal(@NotNull Data data, @NotNull @Child("selector") Selector selector) {
+    public FollowEntityGoal(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector) {
         this.data = Objects.requireNonNull(data);
         this.selector = Objects.requireNonNull(selector);
     }
 
     @Override
     public @NotNull ProximaGoal create(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Goal(data, selector, mob);
+        return new Goal(data, selector.apply(mob, injectionStore), mob);
     }
 
     private static class Goal implements ProximaGoal {

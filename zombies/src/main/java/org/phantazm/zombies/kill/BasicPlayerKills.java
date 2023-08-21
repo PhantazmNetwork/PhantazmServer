@@ -1,7 +1,7 @@
 package org.phantazm.zombies.kill;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.Objects;
@@ -17,7 +17,7 @@ public class BasicPlayerKills implements PlayerKills {
     }
 
     @Override
-    public void onKill(@NotNull PhantazmMob mob) {
+    public void onKill(@NotNull Mob mob) {
         ++kills;
         stats.setKills(stats.getKills() + 1);
     }

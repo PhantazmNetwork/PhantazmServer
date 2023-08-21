@@ -11,6 +11,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityDeathEvent;
 import net.minestom.server.instance.Chunk;
@@ -18,8 +19,7 @@ import net.minestom.server.instance.Instance;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.event.PhantazmMobDeathEvent;
 import org.phantazm.zombies.map.Room;
@@ -52,11 +52,11 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
     public PhantazmMobDeathListener(@NotNull KeyParser keyParser, @NotNull Instance instance,
-        @NotNull MobStore mobStore, @NotNull Supplier<Optional<Round>> roundSupplier,
+        @NotNull Supplier<Optional<Round>> roundSupplier,
         @NotNull PowerupHandler powerupHandler, @NotNull BoundedTracker<Room> roomTracker,
         @NotNull BoundedTracker<Window> windowTracker,
         @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
-        super(instance, mobStore);
+        super(instance);
         this.keyParser = Objects.requireNonNull(keyParser);
         this.roundSupplier = Objects.requireNonNull(roundSupplier);
         this.powerupHandler = Objects.requireNonNull(powerupHandler);
@@ -67,7 +67,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     }
 
     @Override
-    public void accept(@NotNull PhantazmMob mob, @NotNull EntityDeathEvent event) {
+    public void accept(@NotNull Mob mob, @NotNull EntityDeathEvent event) {
         EventDispatcher.call(new PhantazmMobDeathEvent(mob));
 
         roundSupplier.get().ifPresent(round -> {
@@ -76,14 +76,18 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
         trySpawnPowerups(event.getEntity());
 
-        UUID killer = mob.entity().getTag(Tags.LAST_HIT_BY);
-        if (killer != null) {
-            ZombiesPlayer player = playerMap.get(killer);
-            player.module().getKills().onKill(mob);
+        Damage damage = mob.getLastDamageSource();
+        if (damage != null) {
+            Entity attacker = damage.getAttacker();
+            if (attacker != null) {
+                ZombiesPlayer player = playerMap.get(attacker.getUuid());
+                if (player != null) {
+                    player.module().getKills().onKill(mob);
+                }
+            }
         }
 
-        getMobStore().onMobDeath(event);
-        mob.entity().setCustomNameVisible(false);
+        mob.setCustomNameVisible(false);
     }
 
     private void trySpawnPowerups(Entity entity) {

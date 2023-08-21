@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
 import org.phantazm.core.tracker.BoundedTracker;
-import org.phantazm.mob.MobStore;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -18,8 +17,7 @@ public interface WindowHandler extends Tickable {
 
     interface Source {
         @NotNull WindowHandler make(@NotNull BoundedTracker<Window> windowTracker,
-            @NotNull BoundedTracker<Room> roomTracker, @NotNull MobStore mobStore,
-            @NotNull Collection<? extends ZombiesPlayer> players);
+            @NotNull BoundedTracker<Room> roomTracker, @NotNull Collection<? extends ZombiesPlayer> players);
     }
 
     record WindowMessages(

@@ -1,18 +1,25 @@
 package org.phantazm.zombies.event;
 
+import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.PhantazmMob;
-import org.phantazm.mob.PhantazmMobInstanceEvent;
+import org.phantazm.mob2.Mob;
 
-public class PhantazmMobDeathEvent implements PhantazmMobInstanceEvent {
-    private final PhantazmMob phantazmMob;
+import java.util.Objects;
 
-    public PhantazmMobDeathEvent(@NotNull PhantazmMob phantazmMob) {
-        this.phantazmMob = phantazmMob;
+public class PhantazmMobDeathEvent implements ZombiesMobDeathEvent {
+    private final Mob mob;
+
+    public PhantazmMobDeathEvent(@NotNull Mob mob) {
+        this.mob = Objects.requireNonNull(mob);
     }
 
     @Override
-    public @NotNull PhantazmMob getPhantazmMob() {
-        return phantazmMob;
+    public @NotNull Entity getEntity() {
+        return mob;
+    }
+
+    @Override
+    public @NotNull Mob mob() {
+        return mob;
     }
 }

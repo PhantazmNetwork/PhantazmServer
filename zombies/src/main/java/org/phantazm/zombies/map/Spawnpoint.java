@@ -8,9 +8,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
-import org.phantazm.mob.MobModel;
-import org.phantazm.mob.PhantazmMob;
-import org.phantazm.mob.spawner.MobSpawner;
+import org.phantazm.mob2.Mob;
+import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +19,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
-/**
- * Represents a particular position where {@link PhantazmMob} instances may be spawned.
- */
 public class Spawnpoint {
     private static final Logger LOGGER = LoggerFactory.getLogger(Spawnpoint.class);
 
@@ -35,14 +31,6 @@ public class Spawnpoint {
     private final Window linkedWindow;
     private final Room linkedRoom;
 
-    /**
-     * Constructs a new instance of this class.
-     *
-     * @param spawnInfo         the backing data object
-     * @param instance          the instance which this MapObject is in
-     * @param spawnruleFunction the function used to resolve {@link SpawnruleInfo} data from keys
-     * @param mobSpawner        the function used to actually spawn mobs in the world
-     */
     public Spawnpoint(@NotNull Point mapOrigin, @NotNull SpawnpointInfo spawnInfo, @NotNull Instance instance,
         @NotNull Function<? super Key, ? extends SpawnruleInfo> spawnruleFunction, @NotNull MobSpawner mobSpawner,
         @NotNull BoundedTracker<Window> windowTracker, @NotNull BoundedTracker<Room> roomTracker) {
@@ -97,12 +85,6 @@ public class Spawnpoint {
         return spawnPoint;
     }
 
-    /**
-     * Check if this spawnpoint is capable of spawning any mobs.
-     *
-     * @param zombiesPlayers the zombies players in the game
-     * @return true if this spawnpoint can spawn at least one kind of mob; false otherwise
-     */
     public boolean canSpawnAny(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
         if (linkedWindow != null) {
             Optional<Room> linkedRoom = linkedWindow.getLinkedRoom();
@@ -147,15 +129,7 @@ public class Spawnpoint {
         return inRange;
     }
 
-    /**
-     * Determines if this spawnpoint may spawn a {@link MobModel}.
-     *
-     * @param model          the model to spawn
-     * @param spawnType      the spawntype, which must match the spawnrule's spawn type
-     * @param zombiesPlayers the players in the map
-     * @return true if the mob can spawn, false otherwise
-     */
-    public boolean canSpawn(@NotNull MobModel model, @NotNull Key spawnType,
+    public boolean canSpawn(@NotNull Key identifier, @NotNull Key spawnType,
         @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
         if (!canSpawnAny(zombiesPlayers)) {
             return false;
@@ -166,19 +140,11 @@ public class Spawnpoint {
             return false;
         }
 
-        return spawnrule.isBlacklist() != spawnrule.spawns().contains(model.key());
+        return spawnrule.isBlacklist() != spawnrule.spawns().contains(identifier);
     }
 
-    /**
-     * Spawns the mob at the spawnpoint, regardless of if the mob should be able to spawn here. Query
-     * {@link Spawnpoint#canSpawn(MobModel, Key, Collection)} to determine if the mob should be able to spawn.
-     *
-     * @param model the model of the mob to spawn
-     * @return the resulting {@link PhantazmMob} instance
-     */
-    public @NotNull PhantazmMob spawn(@NotNull MobModel model) {
-        Objects.requireNonNull(model);
-        return mobSpawner.spawn(instance, spawnPoint, model);
+    public @NotNull Mob spawn(@NotNull Key identifier) {
+        return mobSpawner.spawn(identifier, instance, spawnPoint);
     }
 
     public @NotNull SpawnpointInfo getSpawnInfo() {

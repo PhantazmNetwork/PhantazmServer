@@ -31,10 +31,8 @@ import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.core.tracker.BoundedTracker;
-import org.phantazm.mob.MobModel;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
-import org.phantazm.mob.spawner.MobSpawner;
+import org.phantazm.mob2.Mob;
+import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.coin.BasicTransactionModifierSource;
 import org.phantazm.zombies.coin.TransactionModifierSource;
@@ -48,9 +46,10 @@ import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.display.ShopDisplay;
 import org.phantazm.zombies.map.shop.interactor.ShopInteractor;
 import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
-import org.phantazm.zombies.mob.MobSpawnerSource;
+import org.phantazm.zombies.mob2.MobSpawnerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
+import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.spawn.BasicSpawnDistributor;
 import org.phantazm.zombies.spawn.SpawnDistributor;
 import org.slf4j.Logger;
@@ -58,7 +57,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class BasicMapObjectsSource implements MapObjects.Source {
@@ -68,34 +66,35 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     private final MapInfo mapInfo;
     private final ContextManager contextManager;
     private final MobSpawnerSource mobSpawnerSource;
-    private final Map<Key, MobModel> mobModels;
     private final ClientBlockHandlerSource clientBlockHandlerSource;
     private final KeyParser keyParser;
 
     public BasicMapObjectsSource(@NotNull MapInfo mapInfo, @NotNull ContextManager contextManager,
-        @NotNull MobSpawnerSource mobSpawnerSource, @NotNull Map<Key, MobModel> mobModels,
+        @NotNull MobSpawnerSource mobSpawnerSource,
         @NotNull ClientBlockHandlerSource clientBlockHandlerSource, @NotNull KeyParser keyParser) {
         this.mapInfo = Objects.requireNonNull(mapInfo);
         this.contextManager = Objects.requireNonNull(contextManager);
         this.mobSpawnerSource = Objects.requireNonNull(mobSpawnerSource);
-        this.mobModels = Objects.requireNonNull(mobModels);
         this.clientBlockHandlerSource = Objects.requireNonNull(clientBlockHandlerSource);
         this.keyParser = Objects.requireNonNull(keyParser);
     }
 
     @Override
-    public @NotNull MapObjects make(@NotNull Instance instance,
+    public @NotNull MapObjects make(@NotNull Supplier<ZombiesScene> scene, @NotNull Instance instance,
         @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-        @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
+        @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier,
         @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
         @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
         @NotNull SongPlayer songPlayer, @NotNull SongLoader songLoader,
         @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam,
         @NotNull Wrapper<Long> ticksSinceStart) {
+        Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
+
         Random random = new Random();
+        MobSpawner mobSpawner = mobSpawnerSource.make(scene);
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor =
-            new BasicSpawnDistributor(mobModels::get, random, playerMap.values(), mobNoPushTeam);
+            new BasicSpawnDistributor(mobSpawner, random, playerMap.values(), mobNoPushTeam);
 
         Flaggable flaggable = new BasicFlaggable();
         if (mapInfo.settings().canWallshoot()) {
@@ -109,14 +108,12 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             new Pos(VecUtils.toPoint(mapSettingsInfo.origin().add(mapSettingsInfo.spawn())), mapSettingsInfo.yaw(),
                 mapSettingsInfo.pitch()).add(0.5, 0, 0.5);
 
-        Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
-        MobSpawner mobSpawner = mobSpawnerSource.make(random, mapObjectsWrapper, mobStore);
 
         Module module =
             new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
                 slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler,
-                eventNode, mobStore, songPlayer, songLoader, corpseTeam, new BasicInteractorGroupHandler(),
-                ticksSinceStart, mobModels::get);
+                eventNode, songPlayer, songLoader, corpseTeam, new BasicInteractorGroupHandler(),
+                ticksSinceStart);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -261,7 +258,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             List<WaveInfo> waveInfo = roundInfo.waves();
             List<Wave> waves = new ArrayList<>(waveInfo.size());
             for (WaveInfo wave : roundInfo.waves()) {
-                List<Action<List<PhantazmMob>>> spawnActions = contextManager.makeContext(wave.spawnActions())
+                List<Action<List<Mob>>> spawnActions = contextManager.makeContext(wave.spawnActions())
                     .provideCollection(ElementPath.EMPTY,
                         dependencyProvider, HANDLER);
 
@@ -291,23 +288,20 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final Wrapper<PowerupHandler> powerupHandler;
         private final Wrapper<WindowHandler> windowHandler;
         private final Wrapper<EventNode<Event>> eventNode;
-        private final MobStore mobStore;
         private final SongPlayer songPlayer;
         private final SongLoader songLoader;
         private final Team corpseTeam;
         private final InteractorGroupHandler interactorGroupHandler;
         private final Wrapper<Long> ticksSinceStart;
-        private final Function<? super Key, ? extends MobModel> mobModelFunction;
 
         private Module(KeyParser keyParser, Instance instance, Random random,
             Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
             TransactionModifierSource transactionModifierSource, SlotDistributor slotDistributor,
             Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
             Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
-            Wrapper<WindowHandler> windowHandler, Wrapper<EventNode<Event>> eventNode, MobStore mobStore,
+            Wrapper<WindowHandler> windowHandler, Wrapper<EventNode<Event>> eventNode,
             SongPlayer songPlayer, SongLoader songLoader, Team corpseTeam,
-            InteractorGroupHandler interactorGroupHandler, Wrapper<Long> ticksSinceStart,
-            Function<? super Key, ? extends MobModel> mobModelFunction) {
+            InteractorGroupHandler interactorGroupHandler, Wrapper<Long> ticksSinceStart) {
             this.keyParser = Objects.requireNonNull(keyParser);
             this.instance = Objects.requireNonNull(instance);
             this.random = Objects.requireNonNull(random);
@@ -321,13 +315,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.powerupHandler = Objects.requireNonNull(powerupHandler);
             this.windowHandler = Objects.requireNonNull(windowHandler);
             this.eventNode = Objects.requireNonNull(eventNode);
-            this.mobStore = Objects.requireNonNull(mobStore);
             this.songPlayer = Objects.requireNonNull(songPlayer);
             this.songLoader = Objects.requireNonNull(songLoader);
             this.corpseTeam = Objects.requireNonNull(corpseTeam);
             this.interactorGroupHandler = Objects.requireNonNull(interactorGroupHandler);
             this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart);
-            this.mobModelFunction = Objects.requireNonNull(mobModelFunction);
         }
 
         @Override
@@ -401,11 +393,6 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         }
 
         @Override
-        public @NotNull MobStore mobStore() {
-            return mobStore;
-        }
-
-        @Override
         public @NotNull SongPlayer songPlayer() {
             return songPlayer;
         }
@@ -428,11 +415,6 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         @Override
         public @NotNull Wrapper<Long> ticksSinceStart() {
             return ticksSinceStart;
-        }
-
-        @Override
-        public @NotNull Function<? super Key, ? extends MobModel> mobModelFunction() {
-            return mobModelFunction;
         }
     }
 }

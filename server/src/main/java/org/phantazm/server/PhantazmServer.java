@@ -234,19 +234,21 @@ public final class PhantazmServer {
 
             LobbyFeature.initialize(viewProvider, lobbiesConfig, contextManager, RoleFeature.roleStore());
 
-            MobFeature.initialize(contextManager, yamlCodec);
+            ProximaFeature.initialize(pathfinderConfig);
+            MobFeature.initialize(yamlCodec, mappingProcessorSource, contextManager, ProximaFeature.getPathfinder(),
+                ProximaFeature.instanceSettingsFunction());
             EquipmentFeature.initialize(keyParser, contextManager, yamlCodec,
                 mappingProcessorSource.processorFor(Token.ofClass(EquipmentData.class)));
 
-            ProximaFeature.initialize(pathfinderConfig);
+
             SongFeature.initialize(keyParser);
 
-            ZombiesFeature.initialize(contextManager, MobFeature.getProcessorMap(), ProximaFeature.getSpawner(),
+            ZombiesFeature.initialize(contextManager, ProximaFeature.getSpawner(),
                 keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, new CompositeFallback(
                     List.of(LobbyFeature.getFallback(), new KickFallback(
                         Component.text("Failed to send you to lobby!", NamedTextColor.RED)))),
                 PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
-                zombiesConfig, mappingProcessorSource);
+                zombiesConfig, mappingProcessorSource, MobFeature.getMobCreators());
 
             LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
             ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),

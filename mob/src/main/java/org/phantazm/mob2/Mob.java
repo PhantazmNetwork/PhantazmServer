@@ -23,14 +23,14 @@ public class Mob extends ProximaEntity {
     private final List<Skill> tickableSkills;
     private final List<Skill> useOnTick;
     private final Map<Trigger, List<Skill>> triggeredSkills;
-    private final MobCreator.MobData data;
+    private final MobData data;
 
     private Reference<Entity> lastHitEntity;
     private Reference<Player> lastInteractingPlayer;
     private Reference<Entity> shooter;
 
     public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
-        MobCreator.@NotNull MobData data) {
+        @NotNull MobData data) {
         super(entityType, uuid, pathfinding);
         this.allSkills = new ArrayList<>();
         this.tickableSkills = new ArrayList<>();
@@ -106,7 +106,7 @@ public class Mob extends ProximaEntity {
         }
     }
 
-    public @NotNull MobCreator.MobData data() {
+    public @NotNull MobData data() {
         return data;
     }
 

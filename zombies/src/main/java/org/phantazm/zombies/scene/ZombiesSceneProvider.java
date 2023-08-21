@@ -9,7 +9,6 @@ import com.github.steanky.proxima.solid.Solid;
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
@@ -42,10 +41,6 @@ import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.core.time.AnalogTickFormatter;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.tracker.BoundedTracker;
-import org.phantazm.mob.MobModel;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.trigger.EventTrigger;
-import org.phantazm.mob.trigger.EventTriggers;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.corpse.CorpseCreator;
@@ -56,7 +51,7 @@ import org.phantazm.zombies.map.handler.*;
 import org.phantazm.zombies.map.objects.BasicMapObjectsSource;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.map.shop.Shop;
-import org.phantazm.zombies.mob.MobSpawnerSource;
+import org.phantazm.zombies.mob2.MobSpawnerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.sidebar.ElementSidebarUpdaterCreator;
@@ -95,7 +90,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
         @NotNull MapInfo mapInfo, @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
         @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
-        @NotNull Map<Key, MobModel> mobModels, @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
+        @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
         @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull ZombiesDatabase database,
         @NotNull PlayerViewProvider playerViewProvider, @NotNull PowerupHandler.Source powerupHandlerSource,
         @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource,
@@ -113,7 +108,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
         MapSettingsInfo settingsInfo = mapInfo.settings();
 
-        this.mapObjectSource = new BasicMapObjectsSource(mapInfo, contextManager, mobSpawnerSource, mobModels,
+        this.mapObjectSource = new BasicMapObjectsSource(mapInfo, contextManager, mobSpawnerSource,
             clientBlockHandlerSource, keyParser);
         this.zombiesPlayerSource = Objects.requireNonNull(zombiesPlayerSource);
         this.powerupHandlerSource = Objects.requireNonNull(powerupHandlerSource);
@@ -169,8 +164,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             instance.setTimeRate(0);
 
             Map<UUID, ZombiesPlayer> zombiesPlayers = new ConcurrentHashMap<>(settings.maxPlayers());
-
-            MobStore mobStore = new MobStore();
             TickTaskScheduler tickTaskScheduler = new BasicTickTaskScheduler();
 
             SongPlayer songPlayer = new BasicSongPlayer();
@@ -185,9 +178,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
 
             MapObjects mapObjects =
-                createMapObjects(instance, zombiesPlayers, roundHandlerWrapper, mobStore, mobNoPushTeam, corpseTeam,
-                    powerupHandlerWrapper, windowHandlerWrapper, eventNodeWrapper, songPlayer, songLoader,
-                    tickTaskScheduler, ticksSinceStart);
+                createMapObjects(sceneWrapper.unmodifiableView(), instance, zombiesPlayers, roundHandlerWrapper,
+                    mobNoPushTeam, corpseTeam, powerupHandlerWrapper, windowHandlerWrapper, eventNodeWrapper,
+                    songPlayer, songLoader, tickTaskScheduler, ticksSinceStart);
 
             RoundHandler roundHandler = new BasicRoundHandler(zombiesPlayers.values(), mapObjects.rounds());
             roundHandlerWrapper.set(roundHandler);
@@ -198,15 +191,14 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             ShopHandler shopHandler = createShopHandler(mapObjects.shopTracker(), mapObjects.roomTracker());
 
             WindowHandler windowHandler =
-                createWindowHandler(mapObjects.windowTracker(), mapObjects.roomTracker(), mobStore,
-                    zombiesPlayers.values());
+                createWindowHandler(mapObjects.windowTracker(), mapObjects.roomTracker(), zombiesPlayers.values());
             windowHandlerWrapper.set(windowHandler);
 
             DoorHandler doorHandler = createDoorHandler(mapObjects.doorTracker(), mapObjects.roomTracker());
 
             ZombiesMap map =
                 new ZombiesMap(mapObjects, songPlayer, powerupHandler, roundHandler, shopHandler, windowHandler,
-                    doorHandler, mobStore);
+                    doorHandler);
 
             SidebarModule sidebarModule =
                 new SidebarModule(zombiesPlayers, zombiesPlayers.values(), roundHandler, ticksSinceStart,
@@ -219,8 +211,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
             LeaveHandler leaveHandler = new LeaveHandler(stageTransition, zombiesPlayers);
             EventNode<Event> childNode =
                 createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
-                    doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, mobStore,
-                    leaveHandler);
+                    doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, leaveHandler);
             eventNodeWrapper.set(childNode);
 
             CorpseCreator corpseCreator = createCorpseCreator(mapObjects.mapDependencyProvider());
@@ -229,7 +220,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings,
                     mapInfo.playerCoins(), mapInfo.leaderboard(), instance, playerView,
                     mapObjects.module().modifierSource(), new BasicFlaggable(), childNode,
-                    mapObjects.module().random(), mapObjects, mobStore, mapObjects.mobSpawner(), corpseCreator,
+                    mapObjects.module().random(), mapObjects, mapObjects.mobSpawner(), corpseCreator,
                     belowNameTag);
             };
 
@@ -250,6 +241,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                 return null;
             });
 
+            map.mapObjects().mobSpawner().init();
             return scene;
         });
     }
@@ -274,12 +266,12 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         return corpseCreatorSource.make(mapDependencyProvider);
     }
 
-    private MapObjects createMapObjects(Instance instance, Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-        Supplier<? extends RoundHandler> roundHandlerSupplier, MobStore mobStore, Team mobNoPushTeam,
+    private MapObjects createMapObjects(Supplier<ZombiesScene> scene, Instance instance, Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+        Supplier<? extends RoundHandler> roundHandlerSupplier, Team mobNoPushTeam,
         Team corpseTeam, Wrapper<PowerupHandler> powerupHandler, Wrapper<WindowHandler> windowHandler,
         Wrapper<EventNode<Event>> eventNode, SongPlayer songPlayer, SongLoader songLoader,
         TickTaskScheduler tickTaskScheduler, Wrapper<Long> ticksSinceStart) {
-        return mapObjectSource.make(instance, zombiesPlayers, roundHandlerSupplier, mobStore, mobNoPushTeam,
+        return mapObjectSource.make(scene, instance, zombiesPlayers, roundHandlerSupplier, mobNoPushTeam,
             powerupHandler, windowHandler, eventNode, songPlayer, songLoader, tickTaskScheduler, corpseTeam,
             ticksSinceStart);
     }
@@ -289,8 +281,8 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     }
 
     private WindowHandler createWindowHandler(BoundedTracker<Window> windowTracker, BoundedTracker<Room> roomTracker,
-        MobStore mobStore, Collection<? extends ZombiesPlayer> players) {
-        return windowHandlerSource.make(windowTracker, roomTracker, mobStore, players);
+        Collection<? extends ZombiesPlayer> players) {
+        return windowHandlerSource.make(windowTracker, roomTracker, players);
     }
 
     private DoorHandler createDoorHandler(BoundedTracker<Door> doorTracker, BoundedTracker<Room> roomTracker) {
@@ -302,24 +294,23 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         @NotNull RoundHandler roundHandler, @NotNull ShopHandler shopHandler, @NotNull WindowHandler windowHandler,
         @NotNull DoorHandler doorHandler, @NotNull BoundedTracker<Room> roomTracker,
         @NotNull BoundedTracker<Window> windowTracker, @NotNull PowerupHandler powerupHandler,
-        @NotNull MobStore mobStore, @NotNull LeaveHandler leaveHandler) {
+        @NotNull LeaveHandler leaveHandler) {
         EventNode<Event> node = EventNode.all("phantazm_zombies_instance_" + instance.getUniqueId());
         MapSettingsInfo settings = mapInfo.settings();
 
         //entity events
         node.addListener(EntityDeathEvent.class,
-            new PhantazmMobDeathListener(keyParser, instance, mobStore, roundHandler::currentRound, powerupHandler,
+            new PhantazmMobDeathListener(keyParser, instance, roundHandler::currentRound, powerupHandler,
                 roomTracker, windowTracker, zombiesPlayers));
-        node.addListener(EntityDamageEvent.class, new PlayerDamageMobListener(instance, mobStore, zombiesPlayers));
         node.addListener(EntityDamageByGunEvent.class,
-            new EntityDamageByGunEventListener(instance, mobStore, mapObjects, zombiesPlayers));
+            new EntityDamageByGunEventListener(instance, mapObjects, zombiesPlayers));
 
         //player events
         node.addListener(EntityDamageEvent.class,
             new PlayerDamageEventListener(instance, zombiesPlayers, mapObjects, settings));
         node.addListener(PlayerHandAnimationEvent.class, new PlayerLeftClickListener(instance, zombiesPlayers));
         PlayerAttackEntityListener attackEntityListener =
-            new PlayerAttackEntityListener(instance, zombiesPlayers, mobStore, settings.punchDamage(),
+            new PlayerAttackEntityListener(instance, zombiesPlayers, settings.punchDamage(),
                 settings.punchCooldown(), settings.punchKnockback());
 
         node.addListener(EntityAttackEvent.class, attackEntityListener);
@@ -349,10 +340,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         //inventory
         node.addListener(InventoryPreClickEvent.class, new PlayerInventoryPreClickListener(instance, zombiesPlayers));
         node.addListener(PlayerPreEatEvent.class, new PlayerEatItemEventListener(instance, zombiesPlayers));
-
-        for (EventTrigger<?> trigger : EventTriggers.TRIGGERS) {
-            trigger.initialize(node, mobStore);
-        }
 
         return node;
     }

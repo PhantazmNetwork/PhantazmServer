@@ -4,20 +4,20 @@ import com.github.steanky.proxima.path.Pathfinder;
 import it.unimi.dsi.fastutil.objects.Object2FloatArrayMap;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.entity.EquipmentSlot;
+import net.minestom.server.entity.metadata.AgeableMobMeta;
 import net.minestom.server.entity.metadata.EntityMeta;
+import net.minestom.server.entity.metadata.animal.tameable.TameableAnimalMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.goal.GoalApplier;
 import org.phantazm.mob2.skill.SkillComponent;
+import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,12 +34,12 @@ public class MobCreatorBase implements MobCreator {
     private final List<GoalApplier> goalAppliers;
 
     private final Pathfinder pathfinder;
-    private final Function<? super Instance, ? extends InstanceSettings> settingsFunction;
+    private final Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction;
 
     public MobCreatorBase(@NotNull MobData data, Pathfinding.@NotNull Factory pathfinding,
         @NotNull List<SkillComponent> skills, @NotNull List<GoalApplier> goalAppliers,
         @NotNull Pathfinder pathfinder,
-        @NotNull Function<? super @NotNull Instance, ? extends @NotNull InstanceSettings> settingsFunction) {
+        @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction) {
         this.data = Objects.requireNonNull(data);
         this.pathfinding = Objects.requireNonNull(pathfinding);
         this.skills = List.copyOf(skills);
@@ -51,7 +51,7 @@ public class MobCreatorBase implements MobCreator {
 
     @Override
     public @NotNull Mob create(@NotNull Instance instance, @NotNull InjectionStore injectionStore) {
-        InstanceSettings settings = settingsFunction.apply(instance);
+        InstanceSpawner.InstanceSettings settings = settingsFunction.apply(instance);
 
         Pathfinding pathfinding = this.pathfinding.make(pathfinder, settings.nodeLocal(), settings.spaceHandler());
         Mob mob = new Mob(data.type(), UUID.randomUUID(), pathfinding, data);
@@ -65,18 +65,10 @@ public class MobCreatorBase implements MobCreator {
     }
 
     protected void setup(@NotNull Mob mob, @NotNull InjectionStore store) {
-        setDisplayName(mob);
         setEquipment(mob);
         setAttributes(mob);
         setMeta(mob);
         setGoals(mob, store);
-    }
-
-    protected void setDisplayName(@NotNull Mob mob) {
-        data.hologramDisplayName().ifPresent(component -> {
-            mob.setCustomName(component);
-            mob.setCustomNameVisible(true);
-        });
     }
 
     protected void setEquipment(@NotNull Mob mob) {
@@ -99,31 +91,22 @@ public class MobCreatorBase implements MobCreator {
     protected void setMeta(@NotNull Mob mob) {
         EntityMeta meta = mob.getEntityMeta();
 
-        for (Method method : meta.getClass().getMethods()) {
-            if (!Modifier.isPublic(method.getModifiers()) || method.getReturnType() != void.class) {
-                continue;
-            }
+        MobMeta dataMeta = data.meta();
+        if (dataMeta == null) {
+            return;
+        }
 
-            if (method.getParameterCount() != 1) {
-                continue;
-            }
+        meta.setCustomName(dataMeta.customName());
+        meta.setCustomNameVisible(dataMeta.customNameVisible());
+        meta.setHasGlowingEffect(dataMeta.isGlowing());
+        meta.setInvisible(dataMeta.isInvisible());
 
-            String methodName = method.getName();
-            if (!methodName.startsWith("set") || methodName.length() < 4) {
-                continue;
-            }
+        if (meta instanceof AgeableMobMeta ageableMobMeta) {
+            ageableMobMeta.setBaby(dataMeta.isBaby());
+        }
 
-            String key = Character.toLowerCase(methodName.charAt(3)) + methodName.substring(4);
-            Object object = data.meta().get(key);
-            if (object == null) {
-                continue;
-            }
-
-            try {
-                method.invoke(meta, object);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                LOGGER.warn("failed to set meta value for meta key {} and method name {}", key, methodName, e);
-            }
+        if (meta instanceof TameableAnimalMeta tameableAnimalMeta) {
+            tameableAnimalMeta.setAggressive(dataMeta.isAggressive());
         }
     }
 

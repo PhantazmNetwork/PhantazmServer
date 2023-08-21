@@ -16,8 +16,7 @@ import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.map.Round;
@@ -33,15 +32,12 @@ import java.util.function.Supplier;
 public class DragonsWrathInteractor implements ShopInteractor {
     private final Data data;
     private final Supplier<? extends RoundHandler> roundHandler;
-    private final MobStore mobStore;
     private Shop shop;
 
     @FactoryMethod
-    public DragonsWrathInteractor(@NotNull Data data, @NotNull Supplier<? extends RoundHandler> roundHandler,
-        @NotNull MobStore mobStore) {
+    public DragonsWrathInteractor(@NotNull Data data, @NotNull Supplier<? extends RoundHandler> roundHandler) {
         this.data = data;
         this.roundHandler = roundHandler;
-        this.mobStore = mobStore;
     }
 
     @Override
@@ -66,9 +62,11 @@ public class DragonsWrathInteractor implements ShopInteractor {
                     return;
                 }
 
-                PhantazmMob mob = mobStore.getMob(entity.getUuid());
-                if (mob == null ||
-                    mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                if (!(entity instanceof Mob mob)) {
+                    return;
+                }
+
+                if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
                     return;
                 }
 

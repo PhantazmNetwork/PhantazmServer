@@ -1,12 +1,8 @@
 package org.phantazm.mob2.goal;
 
-import com.github.steanky.element.core.annotation.Child;
-import com.github.steanky.element.core.annotation.ChildPath;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.*;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob.goal.CollectionGoalGroup;
 import org.phantazm.mob2.Mob;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
@@ -14,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+@Model("mob.goal_applier.collection")
+@Cache
 public class CollectionGoalApplier implements GoalApplier {
     private final Collection<GoalCreator> creators;
 

@@ -17,8 +17,7 @@ import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.spawner.MobSpawner;
+import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.map.*;
@@ -195,7 +194,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
             @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
             @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-            @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
+            @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
             @NotNull BelowNameTag belowNameTag);
 
     }

@@ -2,7 +2,6 @@ package org.phantazm.zombies.map.handler;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
-import org.phantazm.mob.MobStore;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -26,9 +25,8 @@ public class BasicWindowHandlerSource implements WindowHandler.Source {
 
     @Override
     public @NotNull WindowHandler make(@NotNull BoundedTracker<Window> windowTracker,
-        @NotNull BoundedTracker<Room> roomTracker, @NotNull MobStore mobStore,
-        @NotNull Collection<? extends ZombiesPlayer> players) {
-        return new BasicWindowHandler(windowTracker, roomTracker, mobStore, players, repairRadius, repairInterval,
+        @NotNull BoundedTracker<Room> roomTracker, @NotNull Collection<? extends ZombiesPlayer> players) {
+        return new BasicWindowHandler(windowTracker, roomTracker, players, repairRadius, repairInterval,
             coinsPerWindowBlock, windowMessages);
     }
 }

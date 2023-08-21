@@ -13,8 +13,7 @@ import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.coin.PlayerCoins;
@@ -40,7 +39,7 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
 
     @Override
     public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
-        return new Action(data, scene.instance(), scene.getMap().mapObjects().module().mobStore());
+        return new Action(data, scene.instance());
     }
 
     public enum BossDamageType {
@@ -75,12 +74,10 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
     private static class Action extends InstantAction {
         private final Data data;
         private final Instance instance;
-        private final MobStore mobStore;
 
-        private Action(Data data, Instance instance, MobStore mobStore) {
+        private Action(Data data, Instance instance) {
             this.instance = instance;
             this.data = data;
-            this.mobStore = mobStore;
         }
 
         @Override
@@ -95,15 +92,13 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
             instance.getEntityTracker()
                 .nearbyEntities(powerup.spawnLocation(), data.radius, EntityTracker.Target.LIVING_ENTITIES,
                     entity -> {
-                        PhantazmMob mob = mobStore.getMob(entity.getUuid());
-                        if (mob == null) {
+                        if (!(entity instanceof Mob mob)) {
                             return;
                         }
 
                         entity.setTag(Tags.LAST_HIT_BY, player.getUuid());
 
-                        if (mob.model().getExtraNode()
-                            .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                        if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
                             switch (data.bossDamageType) {
                                 case HEALTH_FACTOR -> entity.damage(
                                     Damage.fromPlayer(player, entity.getMaxHealth() * data.bossDamage),

@@ -13,8 +13,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -44,10 +43,8 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
     private final Deque<LivingEntity> entities;
     private final Tag<Long> applyTicksTag;
 
-    private final MobStore mobStore;
-
     @FactoryMethod
-    public ApplyAttributeShotEffect(@NotNull Data data, @NotNull MobStore mobStore) {
+    public ApplyAttributeShotEffect(@NotNull Data data) {
         this.data = Objects.requireNonNull(data);
         this.attributeUUID = UUID.randomUUID();
         this.attributeName = this.attributeUUID.toString();
@@ -57,7 +54,6 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
         String name = NAMES.computeIfAbsent(data, ignored -> UUID.randomUUID().toString());
         this.entities = new ConcurrentLinkedDeque<>();
         this.applyTicksTag = Tag.Long(name).defaultValue(-1L);
-        this.mobStore = mobStore;
     }
 
     @Override
@@ -66,9 +62,12 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
             return;
         }
 
-        PhantazmMob mob = mobStore.getMob(entity.getUuid());
-        if (mob != null && data.amount < 0 && attribute.equals(Attribute.MOVEMENT_SPEED) &&
-            mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
+        if (!(livingEntity instanceof Mob mob)) {
+            return;
+        }
+
+        if (data.amount < 0 && attribute.equals(Attribute.MOVEMENT_SPEED) &&
+            mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
             return;
         }
 

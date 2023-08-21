@@ -24,31 +24,37 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
 public class ProjectileMovementGoal implements ProximaGoal {
     private static final double MAGIC = 0.007499999832361937D; //what is this? nobody knows...
 
     private final Entity entity;
-
     private final Entity shooter;
-
     private final Point to;
 
     private final double power;
-
     private final double spread;
+
+    private final Consumer<? super ProjectileCollideWithBlockEvent> blockCollideCallback;
+    private final Consumer<? super ProjectileCollideWithEntityEvent> projectileCollideCallback;
+
     private final int selfCollisionTickThreshold;
     private final int blockCollisionTickThreshold;
+
     private Pos previousPos = null;
     private boolean collided = false;
 
     public ProjectileMovementGoal(@NotNull Entity entity, @NotNull Entity shooter, @NotNull Point to, double power,
-        double spread) {
+        double spread, @NotNull Consumer<? super ProjectileCollideWithBlockEvent> blockCollideCallback,
+        @NotNull Consumer<? super ProjectileCollideWithEntityEvent> projectileCollideCallback) {
         this.entity = Objects.requireNonNull(entity);
         this.shooter = Objects.requireNonNull(shooter);
         this.to = Objects.requireNonNull(to);
         this.power = power;
         this.spread = spread;
+        this.blockCollideCallback = Objects.requireNonNull(blockCollideCallback);
+        this.projectileCollideCallback = Objects.requireNonNull(projectileCollideCallback);
 
         //power is in blocks/s
         this.selfCollisionTickThreshold = (int) Math.ceil(
@@ -111,7 +117,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
     @Override
     public void tick(long time) {
         Pos currentPos = entity.getPosition();
-        if (checkStuck(previousPos == null ? currentPos:previousPos, currentPos)) {
+        if (checkStuck(previousPos == null ? currentPos : previousPos, currentPos)) {
             if (collided) {
                 return;
             }
@@ -142,9 +148,9 @@ public class ProjectileMovementGoal implements ProximaGoal {
         if (previousPos.samePoint(currentPos)) {
             Block block = instance.getBlock(previousPos);
             return block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= blockCollisionTickThreshold &&
-                       block.registry().collisionShape().intersectBox(
-                           previousPos.sub(previousPos.blockX(), previousPos.blockY(), previousPos.blockZ()),
-                           entity.getBoundingBox());
+                block.registry().collisionShape().intersectBox(
+                    previousPos.sub(previousPos.blockX(), previousPos.blockY(), previousPos.blockZ()),
+                    entity.getBoundingBox());
         }
 
         final BoundingBox bb = entity.getBoundingBox();
@@ -158,18 +164,20 @@ public class ProjectileMovementGoal implements ProximaGoal {
         Point blockPos = null;
         for (int i = 0; i < parts; ++i) {
             // If we're at last part, we can't just add another direction-vector, because we can exceed the end point.
-            previousPos = (i == parts - 1) ? currentPos:previousPos.add(direction);
+            previousPos = (i == parts - 1) ? currentPos : previousPos.add(direction);
             if (block == null || !previousPos.sameBlock(blockPos)) {
                 block = instance.getBlock(previousPos);
                 blockPos = previousPos;
             }
             if (block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= blockCollisionTickThreshold &&
-                    block.registry().collisionShape()
-                        .intersectBox(previousPos.sub(blockPos.blockX(), blockPos.blockY(), blockPos.blockZ()),
-                            entity.getBoundingBox())) {
+                block.registry().collisionShape()
+                    .intersectBox(previousPos.sub(blockPos.blockX(), blockPos.blockY(), blockPos.blockZ()),
+                        entity.getBoundingBox())) {
 
                 final ProjectileCollideWithBlockEvent event =
                     new ProjectileCollideWithBlockEvent(entity, previousPos, block);
+                blockCollideCallback.accept(event);
+
                 EventDispatcher.call(event);
                 if (!event.isCancelled()) {
                     entity.teleport(previousPos);
@@ -178,17 +186,19 @@ public class ProjectileMovementGoal implements ProximaGoal {
             }
 
             Collection<LivingEntity> entities = instance.getEntityTracker()
-                                                    .chunkEntities(chunk.getChunkX(), chunk.getChunkZ(),
-                                                        EntityTracker.Target.LIVING_ENTITIES);
+                .chunkEntities(chunk.getChunkX(), chunk.getChunkZ(),
+                    EntityTracker.Target.LIVING_ENTITIES);
 
             for (Entity victim : entities) {
                 if (victim == this.entity || (victim == shooter && aliveTicks < selfCollisionTickThreshold) ||
-                        !bb.intersectEntity(previousPos, victim)) {
+                    !bb.intersectEntity(previousPos, victim)) {
                     continue;
                 }
 
                 final ProjectileCollideWithEntityEvent event =
                     new ProjectileCollideWithEntityEvent(entity, previousPos, victim);
+                projectileCollideCallback.accept(event);
+
                 EventDispatcher.call(event);
                 if (!event.isCancelled()) {
                     return collided || entity.isOnGround();

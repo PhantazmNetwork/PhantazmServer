@@ -12,8 +12,7 @@ import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -32,17 +31,15 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     private final Data data;
     private final Tag<Long> lastDamageTicksTag;
     private final Deque<DamageTarget> activeEntities;
-    private final MobStore mobStore;
 
     @FactoryMethod
-    public ApplyFireShotEffect(@NotNull Data data, @NotNull MobStore mobStore) {
+    public ApplyFireShotEffect(@NotNull Data data) {
         this.data = Objects.requireNonNull(data);
 
         UUID uuid = UUID.randomUUID();
         this.lastDamageTicksTag = Tag.Long("last_fire_damage_ticks_" + uuid).defaultValue(-1L);
 
         this.activeEntities = new ConcurrentLinkedDeque<>();
-        this.mobStore = Objects.requireNonNull(mobStore);
     }
 
     @Override
@@ -52,8 +49,11 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             return;
         }
 
-        PhantazmMob mob = mobStore.getMob(entity.getUuid());
-        if (mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_FIRE)) {
+        if (!(livingEntity instanceof Mob mob)) {
+            return;
+        }
+
+        if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_FIRE)) {
             return;
         }
 

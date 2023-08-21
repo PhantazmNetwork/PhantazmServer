@@ -7,7 +7,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.EntityTracker;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
-import org.phantazm.mob.MobStore;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
@@ -24,7 +24,6 @@ public class BasicWindowHandler implements WindowHandler {
     private static final int POSITION_CHECK_INTERVAL = 4;
     private final BoundedTracker<Window> windowTracker;
     private final BoundedTracker<Room> roomTracker;
-    private final MobStore mobStore;
     private final Collection<? extends ZombiesPlayer> players;
     private final double repairRadius;
     private final long repairInterval;
@@ -35,11 +34,10 @@ public class BasicWindowHandler implements WindowHandler {
     private long positionCheckTicks;
 
     public BasicWindowHandler(@NotNull BoundedTracker<Window> windowTracker, @NotNull BoundedTracker<Room> roomTracker,
-        @NotNull MobStore mobStore, @NotNull Collection<? extends ZombiesPlayer> players, double repairRadius,
+        @NotNull Collection<? extends ZombiesPlayer> players, double repairRadius,
         long repairInterval, int coinsPerWindowBlock, @NotNull WindowMessages windowMessages) {
         this.windowTracker = Objects.requireNonNull(windowTracker);
         this.roomTracker = Objects.requireNonNull(roomTracker);
-        this.mobStore = Objects.requireNonNull(mobStore);
         this.players = Objects.requireNonNull(players);
         this.repairRadius = repairRadius;
         this.repairInterval = repairInterval;
@@ -169,8 +167,7 @@ public class BasicWindowHandler implements WindowHandler {
                 targetWindow.instance().getEntityTracker()
                     .nearbyEntitiesUntil(targetWindow.center(), 5, EntityTracker.Target.LIVING_ENTITIES,
                         candidate -> {
-                            if (!mobStore.hasMob(candidate.getUuid())) {
-                                //entities not in the mob store don't prevent repairs
+                            if (!(candidate instanceof Mob)) {
                                 return false;
                             }
 

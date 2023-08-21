@@ -123,32 +123,21 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
     final class KeyImpl<T> implements Key<T> {
         private final Class<T> clazz;
         private final String id;
-
-        private int hash;
-        private boolean hashIsZero;
+        private final int hash;
 
         private KeyImpl(Class<T> clazz, String id) {
             this.clazz = clazz;
             this.id = id;
-        }
-
-        @Override
-        public int hashCode() {
-            int h = hash;
-            if (h == 0 && !hashIsZero) {
-                h = computeHash(clazz, id);
-                if (h == 0) {
-                    hashIsZero = true;
-                } else {
-                    hash = h;
-                }
-            }
-
-            return h;
+            this.hash = computeHash(clazz, id);
         }
 
         private static int computeHash(Class<?> clazz, String id) {
             return 31 * (31 + clazz.hashCode()) + id.hashCode();
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
         }
 
         @Override

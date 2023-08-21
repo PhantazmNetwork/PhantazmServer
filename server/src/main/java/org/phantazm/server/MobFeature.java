@@ -1,30 +1,28 @@
 package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
+import com.github.steanky.element.core.context.ElementContext;
+import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.bridge.Configuration;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
+import com.github.steanky.ethylene.mapper.MappingProcessorSource;
+import com.github.steanky.ethylene.mapper.type.Token;
+import com.github.steanky.proxima.path.Pathfinder;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.metadata.villager.VillagerMeta;
-import net.minestom.server.item.ItemStack;
-import net.minestom.server.utils.Direction;
+import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.phantazm.commons.ConfigProcessors;
 import org.phantazm.commons.FileUtils;
-import org.phantazm.core.config.processor.ItemStackConfigProcessors;
-import org.phantazm.core.config.processor.MinestomConfigProcessors;
-import org.phantazm.mob.MobModel;
-import org.phantazm.mob.config.MobModelConfigProcessor;
+import org.phantazm.mob2.MobCreator;
+import org.phantazm.mob2.MobData;
+import org.phantazm.mob2.goal.GoalApplier;
+import org.phantazm.mob2.skill.SkillComponent;
+import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
+import org.phantazm.proxima.bindings.minestom.Pathfinding;
+import org.phantazm.zombies.mob2.ZombiesMobCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,81 +31,27 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-/**
- * Main entrypoint for PhantazmMob related features.
- */
 public final class MobFeature {
     public static final Path MOBS_PATH = Path.of("./mobs");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MobFeature.class);
 
-    private static ConfigProcessor<MobModel> MODEL_PROCESSOR;
-    private static Map<Key, MobModel> models;
-    private static Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
+    private static Map<Key, MobCreator> creators;
 
     private MobFeature() {
         throw new UnsupportedOperationException();
     }
 
-    @SuppressWarnings("SameParameterValue")
-    static void initialize(@NotNull ContextManager contextManager, @NotNull ConfigCodec codec) {
-        MODEL_PROCESSOR = new MobModelConfigProcessor(contextManager, ItemStackConfigProcessors.snbt());
-
-        Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap = new HashMap<>();
-        processorMap.put(BooleanObjectPair.of(false, byte.class.getName()), ConfigProcessor.BYTE);
-        processorMap.put(BooleanObjectPair.of(false, int.class.getName()), ConfigProcessor.INTEGER);
-        processorMap.put(BooleanObjectPair.of(false, float.class.getName()), ConfigProcessor.FLOAT);
-        processorMap.put(BooleanObjectPair.of(false, String.class.getName()), ConfigProcessor.STRING);
-        processorMap.put(BooleanObjectPair.of(false, Component.class.getName()), ConfigProcessors.component());
-        processorMap.put(BooleanObjectPair.of(true, Component.class.getName()),
-            ConfigProcessors.component().optionalProcessor());
-        processorMap.put(BooleanObjectPair.of(false, ItemStack.class.getName()), ItemStackConfigProcessors.snbt());
-        processorMap.put(BooleanObjectPair.of(false, boolean.class.getName()), ConfigProcessor.BOOLEAN);
-        processorMap.put(BooleanObjectPair.of(false, Point.class.getName()), MinestomConfigProcessors.point());
-        processorMap.put(BooleanObjectPair.of(true, Point.class.getName()),
-            MinestomConfigProcessors.point().optionalProcessor());
-        processorMap.put(BooleanObjectPair.of(false, Direction.class.getName()),
-            ConfigProcessor.enumProcessor(Direction.class));
-        processorMap.put(BooleanObjectPair.of(true, UUID.class.getName()), ConfigProcessors.uuid());
-        processorMap.put(BooleanObjectPair.of(true, Integer.class.getName()), new ConfigProcessor<Integer>() {
-
-            private final ConfigProcessor<Integer> delegate = ConfigProcessor.INTEGER;
-
-            @Override
-            public @Nullable Integer dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                if (element.isNull()) {
-                    return null;
-                }
-
-                return delegate.dataFromElement(element);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@Nullable Integer integer) throws ConfigProcessException {
-                if (integer == null) {
-                    return ConfigPrimitive.NULL;
-                }
-
-                return delegate.elementFromData(integer);
-            }
-        });
-        processorMap.put(BooleanObjectPair.of(false, NBT.class.getName()), MinestomConfigProcessors.nbt());
-        processorMap.put(BooleanObjectPair.of(false, VillagerMeta.VillagerData.class.getName()),
-            MinestomConfigProcessors.villagerData());
-        processorMap.put(BooleanObjectPair.of(false, Entity.Pose.class.getName()),
-            ConfigProcessor.enumProcessor(Entity.Pose.class));
-
-        MobFeature.processorMap = Map.copyOf(processorMap);
-
-        loadModels(codec);
-    }
-
-    private static void loadModels(@NotNull ConfigCodec codec) {
-        Map<Key, MobModel> loadedModels = new HashMap<>();
+    static void initialize(@NotNull ConfigCodec codec, @NotNull MappingProcessorSource processorSource,
+        @NotNull ContextManager contextManager, @NotNull Pathfinder pathfinder,
+        @NotNull Function<? super @NotNull Instance, ? extends InstanceSpawner.InstanceSettings> instanceSettingsFunction) {
+        ConfigProcessor<MobData> mobDataProcessor = processorSource.processorFor(Token.ofClass(MobData.class));
+        Map<Key, MobCreator> loadedCreators = new HashMap<>();
         try {
             FileUtils.createDirectories(MobFeature.MOBS_PATH);
 
@@ -117,12 +61,31 @@ public final class MobFeature {
                 paths.forEach(path -> {
                     if (matcher.matches(path) && Files.isRegularFile(path)) {
                         try {
-                            MobModel model = Configuration.read(path, codec, getModelProcessor());
-                            if (loadedModels.containsKey(model.key())) {
-                                LOGGER.warn("Duplicate key ({}), skipping...", model.key());
-                            } else {
-                                loadedModels.put(model.key(), model);
+                            ConfigElement element = Configuration.read(path, codec);
+                            if (!element.isNode()) {
+                                LOGGER.warn("Non-node mob file " + path);
+                                return;
                             }
+
+                            ConfigNode node = element.asNode();
+                            ElementContext context = contextManager.makeContext(node);
+
+                            MobData data = mobDataProcessor.dataFromElement(node);
+
+                            if (loadedCreators.containsKey(data.key())) {
+                                LOGGER.warn("Duplicate key ({}), skipping...", data.key());
+                                return;
+                            }
+
+                            Pathfinding.Factory pathfinding = context.provide(ElementPath.of("/pathfinding"));
+                            List<SkillComponent> skills = context.provide(ElementPath.of("/skills"));
+                            List<GoalApplier> goals = context.provide(ElementPath.of("/goals"));
+
+                            MobCreator creator = new ZombiesMobCreator(data, pathfinding, skills, goals, pathfinder,
+                                instanceSettingsFunction);
+
+                            loadedCreators.put(data.key(), creator);
+
                         } catch (IOException e) {
                             LOGGER.warn("Could not load mob file", e);
                         }
@@ -134,30 +97,12 @@ public final class MobFeature {
         } catch (IOException e) {
             LOGGER.warn("Failed to create directory {}", MobFeature.MOBS_PATH);
         }
-        models = Map.copyOf(loadedModels);
-        LOGGER.info("Loaded {} mob files.", models.size());
+        creators = Map.copyOf(loadedCreators);
+        LOGGER.info("Loaded {} mob files.", creators.size());
     }
 
-    /**
-     * Gets a {@link ConfigProcessor} for {@link MobModel}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link MobModel}s.
-     */
-    public static @NotNull ConfigProcessor<MobModel> getModelProcessor() {
-        return MODEL_PROCESSOR;
-    }
-
-    /**
-     * Gets the loaded {@link MobModel}s.
-     *
-     * @return The loaded {@link MobModel}s
-     */
     @SuppressWarnings("unused")
-    public static @NotNull @Unmodifiable Map<Key, MobModel> getModels() {
-        return FeatureUtils.check(models);
-    }
-
-    public static @NotNull @Unmodifiable Map<BooleanObjectPair<String>, ConfigProcessor<?>> getProcessorMap() {
-        return FeatureUtils.check(processorMap);
+    public static @NotNull @Unmodifiable Map<Key, MobCreator> getMobCreators() {
+        return FeatureUtils.check(creators);
     }
 }

@@ -4,10 +4,8 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
-import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.MinecraftServer;
@@ -29,6 +27,7 @@ import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.sound.SongLoader;
+import org.phantazm.mob2.MobCreator;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
@@ -39,8 +38,8 @@ import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
-import org.phantazm.zombies.mob.BasicMobSpawnerSource;
-import org.phantazm.zombies.mob.MobSpawnerSource;
+import org.phantazm.zombies.mob2.BasicMobSpawnerSource;
+import org.phantazm.zombies.mob2.MobSpawnerSource;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.BasicPowerupHandlerSource;
@@ -74,14 +73,13 @@ public final class ZombiesFeature {
     private static ZombiesSceneRouter sceneRouter;
     private static ZombiesDatabase database;
 
-    static void initialize(@NotNull ContextManager contextManager,
-        @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap, @NotNull Spawner spawner,
+    static void initialize(@NotNull ContextManager contextManager, @NotNull Spawner spawner,
         @NotNull KeyParser keyParser,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
         @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback sceneFallback,
         @NotNull Map<? super UUID, ? extends Party> parties, @NotNull SceneTransferHelper sceneTransferHelper,
         @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
-        @NotNull MappingProcessorSource mappingProcessorSource) {
+        @NotNull MappingProcessorSource mappingProcessorSource, @NotNull Map<Key, MobCreator> mobCreatorMap) {
         Attributes.registerAll();
 
         ConfigCodec codec = new YamlCodec();
@@ -91,7 +89,7 @@ public final class ZombiesFeature {
             new FileSystemPowerupDataLoader(POWERUPS_FOLDER, codec,
                 mappingProcessorSource.processorFor(Token.ofClass(PowerupData.class)))), contextManager);
 
-        ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(processorMap, spawner, keyParser);
+        ZombiesFeature.mobSpawnerSource = new BasicMobSpawnerSource(mobCreatorMap);
 
         InstanceLoader instanceLoader =
             new AnvilFileSystemInstanceLoader(MinecraftServer.getInstanceManager(), INSTANCES_FOLDER,
@@ -124,10 +122,10 @@ public final class ZombiesFeature {
             ZombiesSceneProvider provider =
                 new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
                     instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
-                    ZombiesFeature.mobSpawnerSource(), MobFeature.getModels(), clientBlockHandlerSource,
+                    ZombiesFeature.mobSpawnerSource(), clientBlockHandlerSource,
                     contextManager, keyParser, database, viewProvider, ZombiesFeature.powerupHandlerSource(),
                     new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,
-                        EquipmentFeature::createEquipmentCreator, MobFeature.getModels(), contextManager,
+                        EquipmentFeature::createEquipmentCreator, contextManager,
                         keyParser),
                     mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
                         .provide(mapDependencyProvider), songLoader);

@@ -15,14 +15,9 @@ import org.phantazm.mob2.*;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Model("mob.skill.spawn_mob")
 @Cache
@@ -43,29 +38,6 @@ public class SpawnMobSkill implements SkillComponent {
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         return new Internal(mob, selector.apply(mob, injectionStore), data, injectionStore.get(Keys.MOB_SPAWNER),
             callback.apply(mob, injectionStore));
-    }
-
-    public interface SpawnCallbackComponent extends BiFunction<@NotNull Mob, @NotNull InjectionStore, @NotNull SpawnCallback> {
-
-    }
-
-    public interface SpawnCallback extends Consumer<@NotNull Mob> {
-    }
-
-    @Model("mob.skill.spawn_mob.callback.none")
-    @Cache
-    public static class NoCallback implements SpawnCallbackComponent {
-        private static final SpawnCallback INSTANCE = mob -> {
-        };
-
-        @FactoryMethod
-        public NoCallback() {
-        }
-
-        @Override
-        public @NotNull SpawnCallback apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-            return INSTANCE;
-        }
     }
 
     @DataObject
@@ -110,8 +82,6 @@ public class SpawnMobSkill implements SkillComponent {
                 return;
             }
 
-            List<Mob> spawnList = new ArrayList<>(points.size());
-
             boolean unlimited = data.maxSpawn < 0;
 
             outer:
@@ -130,16 +100,11 @@ public class SpawnMobSkill implements SkillComponent {
                         }));
                     });
 
-                    spawnList.add(mob);
+                    callback.accept(mob);
                     if (!unlimited && spawnCount.incrementAndGet() >= data.maxSpawn) {
                         break outer;
                     }
                 }
-            }
-
-
-            for (Mob mob : spawnList) {
-                callback.accept(mob);
             }
         }
 

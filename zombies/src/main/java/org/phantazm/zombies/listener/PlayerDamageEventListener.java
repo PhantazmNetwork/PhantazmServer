@@ -13,7 +13,8 @@ import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.PhysicsUtils;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
+import org.phantazm.mob2.MobMeta;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.event.ZombiesPlayerDeathEvent;
@@ -89,10 +90,14 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
     }
 
     private Component getEntityName(@NotNull Entity entity) {
-        PhantazmMob mob = mapObjects.module().mobStore().getMob(entity.getUuid());
-        Optional<Component> displayNameOptional;
-        if (mob != null && (displayNameOptional = mob.model().getDisplayName()).isPresent()) {
-            return displayNameOptional.get();
+        if (entity instanceof Mob hitMob) {
+            MobMeta meta = hitMob.data().meta();
+            if (meta != null) {
+                Component component = meta.customName();
+                if (component != null) {
+                    return component;
+                }
+            }
         }
 
         Component message = entity.getCustomName();
