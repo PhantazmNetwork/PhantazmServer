@@ -5,6 +5,7 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
@@ -16,6 +17,7 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobSpawner;
+import org.phantazm.mob2.Target;
 import org.phantazm.mob2.goal.CollectionGoalGroup;
 import org.phantazm.mob2.goal.ProjectileMovementGoal;
 import org.phantazm.mob2.selector.Selector;
@@ -70,23 +72,12 @@ public class ShootProjectileSkill implements SkillComponent {
         }
     }
 
-    private static class Internal implements Skill {
-        private final Data data;
-        private final Mob self;
-        private final Selector targetSelector;
-        private final Validator hitValidator;
-        private final SpawnCallback callback;
-        private final MobSpawner spawner;
-
-        public Internal(Data data, Mob self, Selector targetSelector, Validator hitValidator, SpawnCallback callback,
-            MobSpawner spawner) {
-            this.data = data;
-            this.self = self;
-            this.targetSelector = targetSelector;
-            this.hitValidator = hitValidator;
-            this.callback = callback;
-            this.spawner = spawner;
-        }
+    private record Internal(Data data,
+        Mob self,
+        Selector targetSelector,
+        Validator hitValidator,
+        SpawnCallback callback,
+        MobSpawner spawner) implements Skill {
 
         private void onCollideWithBlock(ProjectileCollideWithBlockEvent event) {
             killOrRemove(event.getEntity());
@@ -116,23 +107,35 @@ public class ShootProjectileSkill implements SkillComponent {
                 return;
             }
 
-            Optional<? extends Entity> targetOptional = targetSelector.select().target();
-            if (targetOptional.isEmpty()) {
+            Target target = targetSelector.select();
+            Optional<? extends Entity> targetEntityOptional = target.target();
+            if (targetEntityOptional.isPresent()) {
+                Entity targetEntity = targetEntityOptional.get();
+                if (!hitValidator.valid(targetEntity)) {
+                    return;
+                }
+
+                shootAtPoint(instance, targetEntity.getPosition()
+                    .add(0, targetEntity.getBoundingBox().height() / 2, 0));
                 return;
             }
 
-            Entity targetEntity = targetOptional.get();
-            if (!hitValidator.valid(targetEntity)) {
+            Optional<? extends Point> targetPointOptional = target.location();
+            if (targetPointOptional.isEmpty()) {
                 return;
             }
 
-            Pos selfPosition = targetEntity.getPosition();
+            shootAtPoint(instance, targetPointOptional.get());
+        }
+
+        private void shootAtPoint(Instance instance, Point target) {
+            Pos selfPosition = self.getPosition();
+
             Mob mob = spawner.spawn(data.entity, instance, selfPosition.add(0, self.getEyeHeight(), 0));
             callback.accept(mob);
 
             mob.setNoGravity(!data.gravity);
-            mob.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(mob, self,
-                targetEntity.getPosition().add(0, targetEntity.getBoundingBox().height() / 2, 0), data.power(),
+            mob.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(mob, self, target, data.power(),
                 data.spread(), this::onCollideWithBlock, this::onCollideWithEntity))));
         }
     }

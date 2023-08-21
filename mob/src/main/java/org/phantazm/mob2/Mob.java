@@ -8,7 +8,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.phantazm.mob2.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
@@ -27,7 +26,6 @@ public class Mob extends ProximaEntity {
 
     private Reference<Entity> lastHitEntity;
     private Reference<Player> lastInteractingPlayer;
-    private Reference<Entity> shooter;
 
     public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
         @NotNull MobData data) {
@@ -40,7 +38,6 @@ public class Mob extends ProximaEntity {
 
         this.lastHitEntity = new WeakReference<>(null);
         this.lastInteractingPlayer = new WeakReference<>(null);
-        this.shooter = new WeakReference<>(null);
     }
 
     /**
@@ -110,28 +107,12 @@ public class Mob extends ProximaEntity {
         return data;
     }
 
-    public @NotNull Optional<Entity> shooter() {
-        return Optional.ofNullable(shooter.get());
-    }
-
     public @NotNull Optional<Entity> lastHitEntity() {
         return Optional.ofNullable(lastHitEntity.get());
     }
 
     public @NotNull Optional<Entity> lastInteractingPlayer() {
         return Optional.ofNullable(lastInteractingPlayer.get());
-    }
-
-    public void setLastHitEntity(@Nullable Entity entity) {
-        if (lastHitEntity.get() != entity) {
-            lastHitEntity = new WeakReference<>(entity);
-        }
-    }
-
-    public void setShooter(@Nullable Entity entity) {
-        if (shooter.get() != entity) {
-            shooter = new WeakReference<>(entity);
-        }
     }
 
     private void addSkill0(Skill skill) {
