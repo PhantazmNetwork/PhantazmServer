@@ -17,13 +17,13 @@ public class SelfTargetSelector implements SelectorComponent {
 
     @Override
     public @NotNull Selector apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new SelfSelector(mob);
+        return new SelfSelector(Target.entities(mob));
     }
 
-    private record SelfSelector(Mob self) implements Selector {
+    private record SelfSelector(Target target) implements Selector {
         @Override
         public @NotNull Target select() {
-            return Target.entities(self);
+            return target;
         }
     }
 }

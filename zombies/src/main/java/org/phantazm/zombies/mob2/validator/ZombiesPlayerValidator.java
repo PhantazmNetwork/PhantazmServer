@@ -12,7 +12,6 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.validator.Validator;
 import org.phantazm.mob2.validator.ValidatorComponent;
-import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.mob2.Keys;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
@@ -46,12 +45,11 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
 
         @Override
         public boolean valid(@NotNull Entity entity) {
-            MapObjects mapObjects = scene.getMap().mapObjects();
             if (!(entity instanceof Player)) {
                 return false;
             }
 
-            ZombiesPlayer player = mapObjects.module().playerMap().get(entity.getUuid());
+            ZombiesPlayer player = scene.getMap().mapObjects().module().playerMap().get(entity.getUuid());
             if (player == null) {
                 return false;
             }

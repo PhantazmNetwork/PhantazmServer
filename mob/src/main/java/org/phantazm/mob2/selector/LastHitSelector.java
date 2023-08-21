@@ -3,16 +3,11 @@ package org.phantazm.mob2.selector;
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.Tags;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
-
-import java.util.UUID;
 
 @Model("mob.selector.last_hit")
 @Cache

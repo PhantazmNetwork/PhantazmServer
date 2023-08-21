@@ -6,7 +6,6 @@ import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
@@ -129,9 +128,7 @@ public class ShootProjectileSkill implements SkillComponent {
         }
 
         private void shootAtPoint(Instance instance, Point target) {
-            Pos selfPosition = self.getPosition();
-
-            Mob mob = spawner.spawn(data.entity, instance, selfPosition.add(0, self.getEyeHeight(), 0));
+            Mob mob = spawner.spawn(data.entity, instance, self.getPosition().add(0, self.getEyeHeight(), 0));
             callback.accept(mob);
 
             mob.setNoGravity(!data.gravity);
