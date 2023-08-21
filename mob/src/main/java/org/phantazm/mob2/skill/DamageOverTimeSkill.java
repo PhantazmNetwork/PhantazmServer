@@ -110,8 +110,7 @@ public class DamageOverTimeSkill implements SkillComponent {
 
         private void damageTarget(LivingEntity target) {
             target.getAcquirable().sync(targetEntity -> {
-                LivingEntity livingEntity = (LivingEntity) targetEntity;
-                livingEntity.damage(Damage.fromEntity(self, data.damageAmount), data.bypassArmor);
+                ((LivingEntity) targetEntity).damage(Damage.fromEntity(self, data.damageAmount), data.bypassArmor);
             });
         }
 

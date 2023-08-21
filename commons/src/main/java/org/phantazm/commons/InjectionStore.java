@@ -125,7 +125,7 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
         private final String id;
 
         private int hash;
-        private boolean hashed;
+        private boolean hashIsZero;
 
         private KeyImpl(Class<T> clazz, String id) {
             this.clazz = clazz;
@@ -134,13 +134,21 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
 
         @Override
         public int hashCode() {
-            if (hashed) {
-                return hash;
+            int h = hash;
+            if (h == 0 && !hashIsZero) {
+                h = computeHash(clazz, id);
+                if (h == 0) {
+                    hashIsZero = true;
+                } else {
+                    hash = h;
+                }
             }
 
-            hash = Objects.hash(clazz, id);
-            hashed = true;
-            return hash;
+            return h;
+        }
+
+        private static int computeHash(Class<?> clazz, String id) {
+            return 31 * (31 + clazz.hashCode()) + id.hashCode();
         }
 
         @Override
@@ -176,7 +184,6 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
         }
     }
 
-    @SuppressWarnings("unchecked")
     final class InjectionStoreImpl implements InjectionStore {
         private final Map<Key<?>, Object> mappings;
 
@@ -195,6 +202,7 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public <T> @NotNull T get(@NotNull Key<T> key) {
             T object = (T) mappings.get(key);
             if (object == null) {
