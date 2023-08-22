@@ -108,6 +108,11 @@ public class ModifyAttributeSkill implements SkillComponent {
         }
 
         @Override
+        public @Nullable Trigger trigger() {
+            return data.trigger;
+        }
+
+        @Override
         public void use() {
             if (attribute == null) {
                 return;

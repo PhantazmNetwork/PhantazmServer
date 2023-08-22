@@ -12,11 +12,9 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEve
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob2.Keys;
-import org.phantazm.mob2.Mob;
-import org.phantazm.mob2.MobSpawner;
-import org.phantazm.mob2.Target;
+import org.phantazm.mob2.*;
 import org.phantazm.mob2.goal.CollectionGoalGroup;
 import org.phantazm.mob2.goal.ProjectileMovementGoal;
 import org.phantazm.mob2.selector.Selector;
@@ -53,13 +51,19 @@ public class ShootProjectileSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("target_selector") String targetSelector,
+    public record Data(@Nullable Trigger trigger,
+        @NotNull @ChildPath("target_selector") String targetSelector,
         @NotNull @ChildPath("hit_validator") String hitValidator,
         @NotNull @ChildPath("callback") String callback,
         @NotNull Key entity,
         double power,
         double spread,
         boolean gravity) {
+        @Default("trigger")
+        public static @NotNull ConfigElement defaultTrigger() {
+            return ConfigPrimitive.NULL;
+        }
+
         @Default("spread")
         public static @NotNull ConfigElement defaultSpread() {
             return ConfigPrimitive.of(0.0D);
@@ -99,6 +103,20 @@ public class ShootProjectileSkill implements SkillComponent {
             }
         }
 
+        private void shootAtPoint(Instance instance, Point target) {
+            Mob mob = spawner.spawn(data.entity, instance, self.getPosition().add(0, self.getEyeHeight(), 0));
+            callback.accept(mob);
+
+            mob.setNoGravity(!data.gravity);
+            mob.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(mob, self, target, data.power(),
+                data.spread(), this::onCollideWithBlock, this::onCollideWithEntity))));
+        }
+
+        @Override
+        public @Nullable Trigger trigger() {
+            return data.trigger;
+        }
+
         @Override
         public void use() {
             Instance instance = self.getInstance();
@@ -125,15 +143,6 @@ public class ShootProjectileSkill implements SkillComponent {
             }
 
             shootAtPoint(instance, targetPointOptional.get());
-        }
-
-        private void shootAtPoint(Instance instance, Point target) {
-            Mob mob = spawner.spawn(data.entity, instance, self.getPosition().add(0, self.getEyeHeight(), 0));
-            callback.accept(mob);
-
-            mob.setNoGravity(!data.gravity);
-            mob.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(mob, self, target, data.power(),
-                data.spread(), this::onCollideWithBlock, this::onCollideWithEntity))));
         }
     }
 }

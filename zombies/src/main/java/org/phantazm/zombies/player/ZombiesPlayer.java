@@ -2,8 +2,6 @@ package org.phantazm.zombies.player;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.attribute.Attribute;
-import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -12,7 +10,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.BelowNameTag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
-import org.phantazm.commons.CancellableState;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
@@ -43,17 +40,6 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     long getReviveTime();
 
     @NotNull ZombiesScene getScene();
-
-    void registerCancellable(@NotNull CancellableState cancellable, boolean endOld);
-
-    void removeCancellable(@NotNull UUID id);
-
-    default void cancellableAttribute(@NotNull Attribute attribute, @NotNull AttributeModifier modifier) {
-        registerCancellable(CancellableState.named(modifier.getId(),
-                () -> getPlayer().ifPresent(player -> player.getAttribute(attribute).addModifier(modifier)),
-                () -> getPlayer().ifPresent(player -> player.getAttribute(attribute).removeModifier(modifier.getId()))),
-            true);
-    }
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
         Optional<Player> playerOptional = module().getPlayerView().getPlayer();

@@ -28,7 +28,6 @@ import org.jglrxavpok.hephaistos.nbt.NBTException;
 import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.phantazm.commons.Activable;
 import org.phantazm.commons.BasicTickTaskScheduler;
-import org.phantazm.commons.CancellableState;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.EquipmentCreator;
@@ -71,7 +70,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -226,13 +224,12 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                         }
                     }));
         };
-        Map<UUID, CancellableState> stateMap = new ConcurrentHashMap<>();
         TickTaskScheduler taskScheduler = new BasicTickTaskScheduler();
         Function<QuitPlayerStateContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT").color(NamedTextColor.RED),
                 ZombiesPlayerStateKeys.QUIT.key(),
                 List.of(new BasicQuitStateActivable(instance, playerView, mapSettingsInfo, sidebar, tabList,
-                    belowNameTag, accessRegistry, stateMap, taskScheduler)));
+                    belowNameTag, accessRegistry, taskScheduler)));
         };
 
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
@@ -275,7 +272,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                 accessRegistry, stateSwitcher, stateFunctions, sidebar, tabList, mapTransactionModifierSource,
                 playerTransactionModifierSource, flaggable, stats, leaderboard);
 
-        ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module, stateMap, taskScheduler);
+        ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module, taskScheduler);
         zombiesPlayerWrapper.set(zombiesPlayer);
         return zombiesPlayer;
     }

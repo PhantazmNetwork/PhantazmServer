@@ -34,8 +34,7 @@ public class AddToRoundCallback implements SpawnCallbackComponent {
                 return;
             }
 
-            Round round = roundOptional.get();
-            round.addMob(mob);
+            roundOptional.get().addMob(mob);
         }
     }
 }

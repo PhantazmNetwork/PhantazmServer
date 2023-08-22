@@ -7,17 +7,22 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
+import net.minestom.server.entity.state.CancellableState;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.CancellableState;
 import org.phantazm.commons.MathUtils;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.scene.ZombiesScene;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -44,7 +49,8 @@ public class BossBarTimerAction implements PowerupActionComponent {
         private final DeactivationPredicate predicate;
         private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
         private final TickFormatter tickFormatter;
-        private final UUID id;
+
+        private final List<CancellableState<Entity>> states;
 
         private long startTicks = -1;
         private BossBar bossBar;
@@ -66,7 +72,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
             };
             this.playerMap = playerMap;
             this.tickFormatter = tickFormatter;
-            this.id = UUID.randomUUID();
+            this.states = new ArrayList<>();
         }
 
         @Override
@@ -91,8 +97,14 @@ public class BossBarTimerAction implements PowerupActionComponent {
             this.bossBar = bossBar;
 
             for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                zombiesPlayer.registerCancellable(CancellableState.named(id, () -> {
-                }, () -> zombiesPlayer.getPlayer().ifPresent(actualPlayer -> actualPlayer.hideBossBar(bossBar))), true);
+                zombiesPlayer.getPlayer().ifPresent(actualPlayer -> {
+                    CancellableState<Entity> state = CancellableState.builder((Entity) actualPlayer).end(entity -> {
+                        ((Player) entity).hideBossBar(bossBar);
+                    }).build();
+
+                    states.add(state);
+                    actualPlayer.stateHolder().registerState(Stages.ZOMBIES_GAME, state);
+                });
             }
         }
 
@@ -110,12 +122,13 @@ public class BossBarTimerAction implements PowerupActionComponent {
                 return;
             }
 
-            for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                zombiesPlayer.removeCancellable(id);
+            for (CancellableState<Entity> state : states) {
+                state.self().stateHolder().removeState(Stages.ZOMBIES_GAME, state);
             }
 
             MinecraftServer.getBossBarManager().destroyBossBar(bossBar);
             this.bossBar = null;
+            states.clear();
         }
 
         @Override

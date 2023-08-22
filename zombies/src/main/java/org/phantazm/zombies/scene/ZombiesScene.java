@@ -26,6 +26,7 @@ import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -57,6 +58,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private final UUID allowedRequestUUID;
     private final Object joinLock = new Object();
     private boolean joinable = true;
+
     private volatile int pendingPlayers = 0;
 
     public ZombiesScene(@NotNull UUID uuid, @NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
@@ -187,6 +189,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     zombiesPlayer.getPlayer().ifPresent(player -> {
                         teleportOrSetInstance(teleportedPlayers, player, futures, pos);
                         runnables.add(() -> {
+                            player.stateHolder().setStage(Stages.ZOMBIES_GAME);
+                            
                             zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
                         });
                     });
@@ -195,6 +199,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                     view.getPlayer().ifPresent(player -> {
                         teleportOrSetInstance(teleportedPlayers, player, futures, pos);
                         runnables.add(() -> {
+                            player.stateHolder().setStage(Stages.ZOMBIES_GAME);
+
                             ZombiesPlayer zombiesPlayer = playerCreator.apply(view);
                             zombiesPlayer.start();
                             zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, AlivePlayerStateContext.regular());
