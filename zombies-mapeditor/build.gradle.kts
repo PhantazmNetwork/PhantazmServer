@@ -56,10 +56,10 @@ dependencies {
     include(projects.phantazmCommons)
     include(projects.phantazmMessaging)
     include(projects.phantazmZombiesMapdata)
-    include(libs.vector.core)
     include(libs.adventure.api)
     include(libs.adventure.key)
     include(libs.adventure.text.minimessage)
+    include(libs.caffeine)
     include(libs.ethylene.core)
     include(libs.ethylene.yaml)
     include(libs.ethylene.mapper)
@@ -68,6 +68,7 @@ dependencies {
     include(libs.snakeyaml)
     include(libs.toolkit.collection)
     include(libs.toolkit.function)
+    include(libs.vector.core)
 }
 
 tasks.processResources {
