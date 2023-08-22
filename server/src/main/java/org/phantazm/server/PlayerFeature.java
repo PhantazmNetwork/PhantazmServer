@@ -5,6 +5,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.event.player.PlayerDeathEvent;
 import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +34,9 @@ public final class PlayerFeature {
             if (event.getIdentifier().equals("minecraft:brand") && event.getMessageString().contains("optifine")) {
                 event.getPlayer().sendMessage(playerConfig.optifineMessage());
             }
+        });
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerDeathEvent.class, event -> {
+            event.setChatMessage(null);
         });
     }
 
