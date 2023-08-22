@@ -62,6 +62,7 @@ dependencies {
     include(libs.adventure.text.minimessage)
     include(libs.ethylene.core)
     include(libs.ethylene.yaml)
+    include(libs.ethylene.mapper)
     include(libs.examination.api)
     include(libs.examination.string)
     include(libs.snakeyaml)
