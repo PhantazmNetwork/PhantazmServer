@@ -78,8 +78,9 @@ public final class MobFeature {
                             }
 
                             Pathfinding.Factory pathfinding = context.provide(ElementPath.of("/pathfinding"));
-                            List<SkillComponent> skills = context.provide(ElementPath.of("/skills"));
-                            List<GoalApplier> goals = context.provide(ElementPath.of("/goals"));
+
+                            List<SkillComponent> skills = data.skills().isEmpty() ? List.of() : context.provideCollection(ElementPath.of("/skills"));
+                            List<GoalApplier> goals = data.goals().isEmpty() ? List.of() : context.provideCollection(ElementPath.of("/goals"));
 
                             MobCreator creator = new ZombiesMobCreator(data, pathfinding, skills, goals, pathfinder,
                                 instanceSettingsFunction);

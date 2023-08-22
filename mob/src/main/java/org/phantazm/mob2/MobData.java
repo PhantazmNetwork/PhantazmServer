@@ -19,6 +19,7 @@ import java.util.Map;
 
 public record MobData(@NotNull Key key,
     @NotNull EntityType type,
+    @NotNull ConfigNode pathfinding,
     @NotNull Map<EquipmentSlot, ItemStack> equipment,
     @NotNull Object2FloatMap<String> attributes,
     @Nullable MobMeta meta,

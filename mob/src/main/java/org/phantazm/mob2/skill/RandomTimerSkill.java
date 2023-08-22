@@ -20,7 +20,7 @@ public class RandomTimerSkill implements SkillComponent {
     private final SkillComponent delegate;
 
     @FactoryMethod
-    public RandomTimerSkill(@NotNull Data data, @NotNull SkillComponent delegate) {
+    public RandomTimerSkill(@NotNull Data data, @NotNull @Child("delegate") SkillComponent delegate) {
         this.data = Objects.requireNonNull(data);
         this.delegate = Objects.requireNonNull(delegate);
     }

@@ -10,6 +10,8 @@ import com.github.steanky.ethylene.mapper.signature.SignatureParameter;
 import com.github.steanky.ethylene.mapper.type.Token;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.kyori.adventure.key.Key;
@@ -31,10 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Initializes features related to Ethylene.
@@ -56,6 +55,7 @@ public final class EthyleneFeature {
             .withScalarSignature(entityType()).withScalarSignature(material())
             .withScalarSignature(potionEffect())
             .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
+            .withTypeImplementation(Object2FloatOpenHashMap.class, Object2FloatMap.class)
             .withTypeImplementation(IntOpenHashSet.class, IntSet.class)
             .withStandardSignatures()
             .withStandardTypeImplementations().ignoringLengths().build();
