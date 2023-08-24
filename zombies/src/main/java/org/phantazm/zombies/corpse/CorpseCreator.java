@@ -16,7 +16,6 @@ import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.scoreboard.Team;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
@@ -36,15 +35,13 @@ public class CorpseCreator {
     private final Data data;
     private final List<CorpseLine> idleLines;
     private final List<CorpseLine> revivingLines;
-    private final Team corpseTeam;
 
     @FactoryMethod
     public CorpseCreator(@NotNull Data data, @NotNull @Child("idle_lines") List<CorpseLine> idleLines,
-        @NotNull @Child("reviving_lines") List<CorpseLine> revivingLines, @NotNull Team corpseTeam) {
+        @NotNull @Child("reviving_lines") List<CorpseLine> revivingLines) {
         this.data = data;
         this.idleLines = List.copyOf(idleLines);
         this.revivingLines = List.copyOf(revivingLines);
-        this.corpseTeam = corpseTeam;
     }
 
     public @NotNull CorpseCreator.Corpse forPlayer(@NotNull Instance instance, @NotNull ZombiesPlayer zombiesPlayer,
@@ -63,8 +60,6 @@ public class CorpseCreator {
 
         hologram.setInstance(instance);
         corpseEntity.setInstance(instance, deathLocation.add(0, data.corpseHeightOffset, 0));
-        corpseTeam.addMember(corpseUsername);
-
         return new Corpse(reviveHandler, hologram, corpseEntity, idleLines, revivingLines);
     }
 
