@@ -29,8 +29,8 @@ public class SpawnParticleSkill implements SkillComponent {
     private final Random random;
 
     @FactoryMethod
-    public SpawnParticleSkill(@NotNull Data data, @NotNull ParticleWrapper particle,
-        @NotNull SelectorComponent selector) {
+    public SpawnParticleSkill(@NotNull Data data, @NotNull @Child("particle") ParticleWrapper particle,
+        @NotNull @Child("selector") SelectorComponent selector) {
         this.data = Objects.requireNonNull(data);
         this.particle = Objects.requireNonNull(particle);
         this.selector = Objects.requireNonNull(selector);

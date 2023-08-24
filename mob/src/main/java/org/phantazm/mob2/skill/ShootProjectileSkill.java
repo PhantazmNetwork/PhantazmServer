@@ -36,8 +36,9 @@ public class ShootProjectileSkill implements SkillComponent {
     private final SpawnCallbackComponent callback;
 
     @FactoryMethod
-    public ShootProjectileSkill(@NotNull Data data, @NotNull SelectorComponent targetSelector,
-        @NotNull ValidatorComponent hitValidator, @NotNull SpawnCallbackComponent callback) {
+    public ShootProjectileSkill(@NotNull Data data, @NotNull @Child("target_selector") SelectorComponent targetSelector,
+        @NotNull @Child("hit_validator") ValidatorComponent hitValidator,
+        @NotNull @Child("callback") SpawnCallbackComponent callback) {
         this.data = Objects.requireNonNull(data);
         this.targetSelector = Objects.requireNonNull(targetSelector);
         this.hitValidator = Objects.requireNonNull(hitValidator);

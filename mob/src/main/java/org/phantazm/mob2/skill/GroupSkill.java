@@ -23,7 +23,7 @@ public class GroupSkill implements SkillComponent {
     private final List<SkillComponent> delegates;
 
     @FactoryMethod
-    public GroupSkill(@NotNull Data data, @NotNull List<SkillComponent> delegates) {
+    public GroupSkill(@NotNull Data data, @NotNull @Child("delegates") List<SkillComponent> delegates) {
         this.data = Objects.requireNonNull(data);
         this.delegates = List.copyOf(delegates);
     }

@@ -24,7 +24,7 @@ public class PushEntitySkill implements SkillComponent {
     private final SelectorComponent selector;
 
     @FactoryMethod
-    public PushEntitySkill(@NotNull Data data, @NotNull SelectorComponent selector) {
+    public PushEntitySkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector) {
         this.data = Objects.requireNonNull(data);
         this.selector = Objects.requireNonNull(selector);
     }

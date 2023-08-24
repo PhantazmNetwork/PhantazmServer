@@ -30,7 +30,7 @@ public class PlaySoundSkill implements SkillComponent {
     private final Random random;
 
     @FactoryMethod
-    public PlaySoundSkill(@NotNull Data data, @NotNull @Child("target") SelectorComponent targetSelector) {
+    public PlaySoundSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent targetSelector) {
         this.data = Objects.requireNonNull(data);
         this.targetSelector = Objects.requireNonNull(targetSelector);
         this.random = new Random();
@@ -44,7 +44,7 @@ public class PlaySoundSkill implements SkillComponent {
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        @ChildPath("target") String selector,
+        @ChildPath("selector") String selector,
         @NotNull Sound sound,
         boolean broadcast) {
         @Default("trigger")
