@@ -6,6 +6,7 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -16,6 +17,8 @@ import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.CachedPacket;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
@@ -27,10 +30,14 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Model("zombies.corpse")
 @Cache(false)
 public class CorpseCreator {
+    private static final AtomicLong CORPSE_COUNTER = new AtomicLong();
+    private static final String CORPSE_TEAM_PREFIX = "c-";
+
     private static final String POSSIBLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
     private final Data data;
     private final List<CorpseLine> idleLines;
@@ -47,9 +54,14 @@ public class CorpseCreator {
     public @NotNull CorpseCreator.Corpse forPlayer(@NotNull Instance instance, @NotNull ZombiesPlayer zombiesPlayer,
         @NotNull Point deathLocation, @NotNull ReviveHandler reviveHandler) {
         PlayerSkin skin = zombiesPlayer.getPlayer().map(Player::getSkin).orElse(null);
+
         String corpseUsername = RandomStringUtils.random(16, POSSIBLE_CHARACTERS);
-        MinimalFakePlayer corpseEntity =
-            new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin);
+        String teamName = CORPSE_TEAM_PREFIX + Long.toString(CORPSE_COUNTER.getAndIncrement(), 16);
+        if (teamName.length() > 16) {
+            teamName = teamName.substring(0, 16);
+        }
+
+        MinimalFakePlayer corpseEntity = getMinimalFakePlayer(teamName, corpseUsername, skin);
         zombiesPlayer.getPlayer().ifPresent(player -> {
             for (EquipmentSlot slot : EquipmentSlot.values()) {
                 corpseEntity.setEquipment(slot, player.getEquipment(slot));
@@ -61,6 +73,32 @@ public class CorpseCreator {
         hologram.setInstance(instance);
         corpseEntity.setInstance(instance, deathLocation.add(0, data.corpseHeightOffset, 0));
         return new Corpse(reviveHandler, hologram, corpseEntity, idleLines, revivingLines);
+    }
+
+    private static MinimalFakePlayer getMinimalFakePlayer(String teamName, String corpseUsername, PlayerSkin skin) {
+        return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), corpseUsername, skin) {
+            private final CachedPacket corpseTeamPacketCreate = new CachedPacket(() -> {
+                return new TeamsPacket(teamName, new TeamsPacket.CreateTeamAction(Component.empty(), (byte) 0x0,
+                    TeamsPacket.NameTagVisibility.NEVER, TeamsPacket.CollisionRule.NEVER, NamedTextColor.WHITE,
+                    Component.empty(), Component.empty(), List.of(getUuid().toString())));
+            });
+
+            private final CachedPacket corpseTeamPacketDestroy = new CachedPacket(() -> {
+                return new TeamsPacket(teamName, new TeamsPacket.RemoveTeamAction());
+            });
+
+            @Override
+            public void updateNewViewer(@NotNull Player player) {
+                super.updateNewViewer(player);
+                player.sendPacket(corpseTeamPacketCreate);
+            }
+
+            @Override
+            public void updateOldViewer(@NotNull Player player) {
+                super.updateOldViewer(player);
+                player.sendPacket(corpseTeamPacketDestroy);
+            }
+        };
     }
 
     public interface Source {
