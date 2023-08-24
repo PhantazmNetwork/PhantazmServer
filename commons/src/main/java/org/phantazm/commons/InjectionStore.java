@@ -185,7 +185,7 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
             Objects.requireNonNull(object);
 
             Class<?> objectClass = object.getClass();
-            if (!key.getClass().isAssignableFrom(objectClass)) {
+            if (!key.type().isAssignableFrom(objectClass)) {
                 throw new IllegalArgumentException("bad type " + objectClass + " not assignable to " + key);
             }
         }

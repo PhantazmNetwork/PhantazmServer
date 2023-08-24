@@ -2,6 +2,7 @@ package org.phantazm.mob2;
 
 import com.github.steanky.proxima.path.Pathfinder;
 import it.unimi.dsi.fastutil.objects.Object2FloatArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.AgeableMobMeta;
@@ -36,10 +37,14 @@ public class MobCreatorBase implements MobCreator {
     private final Pathfinder pathfinder;
     private final Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction;
 
+    private final Map<EquipmentSlot, ItemStack> equipmentMap;
+    private final Object2FloatMap<String> attributeMap;
+
     public MobCreatorBase(@NotNull MobData data, Pathfinding.@NotNull Factory pathfinding,
         @NotNull List<SkillComponent> skills, @NotNull List<GoalApplier> goalAppliers,
         @NotNull Pathfinder pathfinder,
-        @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction) {
+        @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction,
+        @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap) {
         this.data = Objects.requireNonNull(data);
         this.pathfinding = Objects.requireNonNull(pathfinding);
         this.skills = List.copyOf(skills);
@@ -47,6 +52,9 @@ public class MobCreatorBase implements MobCreator {
 
         this.pathfinder = Objects.requireNonNull(pathfinder);
         this.settingsFunction = Objects.requireNonNull(settingsFunction);
+
+        this.equipmentMap = Map.copyOf(equipmentMap);
+        this.attributeMap = Objects.requireNonNull(attributeMap);
     }
 
     @Override
@@ -72,13 +80,13 @@ public class MobCreatorBase implements MobCreator {
     }
 
     protected void setEquipment(@NotNull Mob mob) {
-        for (Map.Entry<EquipmentSlot, ItemStack> entry : data.equipment().entrySet()) {
+        for (Map.Entry<EquipmentSlot, ItemStack> entry : equipmentMap.entrySet()) {
             mob.setEquipment(entry.getKey(), entry.getValue());
         }
     }
 
     protected void setAttributes(@NotNull Mob mob) {
-        for (Object2FloatArrayMap.Entry<String> entry : data.attributes().object2FloatEntrySet()) {
+        for (Object2FloatArrayMap.Entry<String> entry : attributeMap.object2FloatEntrySet()) {
             Attribute attribute = Attribute.fromKey(entry.getKey());
             if (attribute != null) {
                 mob.getAttribute(attribute).setBaseValue(entry.getFloatValue());

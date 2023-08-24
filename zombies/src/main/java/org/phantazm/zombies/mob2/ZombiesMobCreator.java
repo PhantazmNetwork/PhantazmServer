@@ -3,10 +3,13 @@ package org.phantazm.zombies.mob2;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.proxima.path.Pathfinder;
 import com.github.steanky.toolkit.collection.Wrapper;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
+import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +27,7 @@ import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -32,8 +36,9 @@ public class ZombiesMobCreator extends MobCreatorBase {
     public ZombiesMobCreator(@NotNull MobData data, Pathfinding.@NotNull Factory pathfinding,
         @NotNull List<SkillComponent> skills, @NotNull List<GoalApplier> goalAppliers,
         @NotNull Pathfinder pathfinder,
-        @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction) {
-        super(data, pathfinding, skills, goalAppliers, pathfinder, settingsFunction);
+        @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction,
+        @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap) {
+        super(data, pathfinding, skills, goalAppliers, pathfinder, settingsFunction, equipmentMap, attributeMap);
     }
 
     @Override
