@@ -7,7 +7,7 @@ import net.minestom.server.attribute.Attribute;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.AgeableMobMeta;
 import net.minestom.server.entity.metadata.EntityMeta;
-import net.minestom.server.entity.metadata.animal.tameable.TameableAnimalMeta;
+import net.minestom.server.entity.metadata.animal.tameable.WolfMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -113,8 +113,8 @@ public class MobCreatorBase implements MobCreator {
             ageableMobMeta.setBaby(dataMeta.isBaby());
         }
 
-        if (meta instanceof TameableAnimalMeta tameableAnimalMeta) {
-            tameableAnimalMeta.setAggressive(dataMeta.isAggressive());
+        if (meta instanceof WolfMeta wolfMeta) {
+            wolfMeta.setAngerTime(dataMeta.angerTime());
         }
     }
 
