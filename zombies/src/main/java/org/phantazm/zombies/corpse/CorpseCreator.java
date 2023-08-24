@@ -80,7 +80,7 @@ public class CorpseCreator {
             private final CachedPacket corpseTeamPacketCreate = new CachedPacket(() -> {
                 return new TeamsPacket(teamName, new TeamsPacket.CreateTeamAction(Component.empty(), (byte) 0x0,
                     TeamsPacket.NameTagVisibility.NEVER, TeamsPacket.CollisionRule.NEVER, NamedTextColor.WHITE,
-                    Component.empty(), Component.empty(), List.of(getUuid().toString())));
+                    Component.empty(), Component.empty(), List.of(corpseUsername)));
             });
 
             private final CachedPacket corpseTeamPacketDestroy = new CachedPacket(() -> {
