@@ -40,7 +40,6 @@ public class ProjectileMovementGoal implements ProximaGoal {
     private final Consumer<? super ProjectileCollideWithEntityEvent> projectileCollideCallback;
 
     private final int selfCollisionTickThreshold;
-    private final int blockCollisionTickThreshold;
 
     private Pos previousPos = null;
     private boolean collided = false;
@@ -60,9 +59,6 @@ public class ProjectileMovementGoal implements ProximaGoal {
         this.selfCollisionTickThreshold = (int) Math.ceil(
             ((entity.getBoundingBox().width() / 2) + (shooter.getBoundingBox().width() / 2) / power) *
                 MinecraftServer.TICK_PER_SECOND);
-
-        this.blockCollisionTickThreshold =
-            (int) Math.ceil(((entity.getBoundingBox().width() / 2) / power) * MinecraftServer.TICK_PER_SECOND);
     }
 
     @Override
@@ -147,7 +143,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
         final long aliveTicks = entity.getAliveTicks();
         if (previousPos.samePoint(currentPos)) {
             Block block = instance.getBlock(previousPos);
-            return block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= blockCollisionTickThreshold &&
+            return block.isSolid() && !block.compare(Block.BARRIER) &&
                 block.registry().collisionShape().intersectBox(
                     previousPos.sub(previousPos.blockX(), previousPos.blockY(), previousPos.blockZ()),
                     entity.getBoundingBox());
@@ -169,10 +165,9 @@ public class ProjectileMovementGoal implements ProximaGoal {
                 block = instance.getBlock(previousPos);
                 blockPos = previousPos;
             }
-            if (block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= blockCollisionTickThreshold &&
-                block.registry().collisionShape()
-                    .intersectBox(previousPos.sub(blockPos.blockX(), blockPos.blockY(), blockPos.blockZ()),
-                        entity.getBoundingBox())) {
+            if (block.isSolid() && !block.compare(Block.BARRIER) && block.registry().collisionShape()
+                .intersectBox(previousPos.sub(blockPos.blockX(), blockPos.blockY(), blockPos.blockZ()),
+                    entity.getBoundingBox())) {
 
                 final ProjectileCollideWithBlockEvent event =
                     new ProjectileCollideWithBlockEvent(entity, previousPos, block);
