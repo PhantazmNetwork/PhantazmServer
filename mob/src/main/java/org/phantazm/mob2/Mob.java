@@ -51,7 +51,7 @@ public class Mob extends ProximaEntity {
         Component teamPrefix,
         Component teamSuffix) {
         private static final TeamSettings DEFAULT = new TeamSettings(Component.empty(), (byte) 0x0,
-            TeamsPacket.NameTagVisibility.HIDE_FOR_OWN_TEAM, TeamsPacket.CollisionRule.NEVER, NamedTextColor.WHITE,
+            TeamsPacket.NameTagVisibility.ALWAYS, TeamsPacket.CollisionRule.ALWAYS, NamedTextColor.WHITE,
             Component.empty(), Component.empty());
 
         private TeamSettings withCollisionRule(TeamsPacket.CollisionRule collisionRule) {
