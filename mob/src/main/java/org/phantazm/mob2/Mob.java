@@ -1,5 +1,7 @@
 package org.phantazm.mob2;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -7,6 +9,8 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.CachedPacket;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
@@ -16,16 +20,48 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Mob extends ProximaEntity {
+    private static final AtomicLong MOB_COUNTER = new AtomicLong();
+    private static final String TEAM_PREFIX = "m-";
+
     private final List<Skill> allSkills;
     private final List<Skill> tickableSkills;
     private final List<Skill> useOnTick;
     private final Map<Trigger, List<Skill>> triggeredSkills;
     private final MobData data;
 
+
+    private final String uniqueTeamName;
+
+    private TeamSettings teamSettings;
+    private final CachedPacket cachedCreateTeamPacket;
+    private final CachedPacket cachedUpdateTeamPacket;
+    private final CachedPacket cachedRemoveTeamPacket;
+
     private Reference<Entity> lastHitEntity;
     private Reference<Player> lastInteractingPlayer;
+
+    private record TeamSettings(Component displayName,
+        byte friendlyFlags,
+        TeamsPacket.NameTagVisibility nameTagVisibility,
+        TeamsPacket.CollisionRule collisionRule,
+        NamedTextColor teamColor,
+        Component teamPrefix,
+        Component teamSuffix) {
+        private static final TeamSettings DEFAULT = new TeamSettings(Component.empty(), (byte) 0x0,
+            TeamsPacket.NameTagVisibility.HIDE_FOR_OWN_TEAM, TeamsPacket.CollisionRule.NEVER, NamedTextColor.WHITE,
+            Component.empty(), Component.empty());
+
+        private TeamSettings withCollisionRule(TeamsPacket.CollisionRule collisionRule) {
+            return new TeamSettings(displayName, friendlyFlags, nameTagVisibility, collisionRule, teamColor, teamPrefix, teamSuffix);
+        }
+
+        private TeamSettings withTeamColor(NamedTextColor teamColor) {
+            return new TeamSettings(displayName, friendlyFlags, nameTagVisibility, collisionRule, teamColor, teamPrefix, teamSuffix);
+        }
+    }
 
     public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
         @NotNull MobData data) {
@@ -38,6 +74,19 @@ public class Mob extends ProximaEntity {
 
         this.lastHitEntity = new WeakReference<>(null);
         this.lastInteractingPlayer = new WeakReference<>(null);
+
+        String name = TEAM_PREFIX + Long.toString(MOB_COUNTER.getAndIncrement(), 16);
+        if (name.length() > 16) {
+            name = name.substring(0, 16);
+        }
+
+        this.uniqueTeamName = name;
+
+        this.teamSettings = TeamSettings.DEFAULT;
+        this.cachedCreateTeamPacket = new CachedPacket(() -> createTeamPacket(this.teamSettings, false));
+        this.cachedUpdateTeamPacket = new CachedPacket(() -> createTeamPacket(this.teamSettings, true));
+        this.cachedRemoveTeamPacket = new CachedPacket(() -> new TeamsPacket(this.uniqueTeamName,
+            new TeamsPacket.RemoveTeamAction()));
     }
 
     /**
@@ -209,5 +258,47 @@ public class Mob extends ProximaEntity {
         for (Skill skill : useOnTick) {
             skill.use();
         }
+    }
+
+    private TeamsPacket createTeamPacket(TeamSettings newSettings, boolean update) {
+        if (update) {
+            TeamsPacket.Action action = new TeamsPacket.UpdateTeamAction(newSettings.displayName, newSettings.friendlyFlags,
+                newSettings.nameTagVisibility, newSettings.collisionRule, newSettings.teamColor, newSettings.teamPrefix,
+                newSettings.teamSuffix);
+            return new TeamsPacket(this.uniqueTeamName, action);
+        }
+
+        TeamsPacket.Action action = new TeamsPacket.CreateTeamAction(newSettings.displayName, newSettings.friendlyFlags,
+            newSettings.nameTagVisibility, newSettings.collisionRule, newSettings.teamColor, newSettings.teamPrefix,
+            newSettings.teamSuffix, List.of(getUuid().toString()));
+        return new TeamsPacket(this.uniqueTeamName, action);
+    }
+
+    private void invalidateAndUpdateTeam() {
+        this.cachedCreateTeamPacket.invalidate();
+        this.cachedUpdateTeamPacket.invalidate();
+        sendPacketToViewers(this.cachedUpdateTeamPacket);
+    }
+
+    public void setTeamColor(@NotNull NamedTextColor namedTextColor) {
+        this.teamSettings = this.teamSettings.withTeamColor(namedTextColor);
+        invalidateAndUpdateTeam();
+    }
+
+    public void setCollisionRule(@NotNull TeamsPacket.CollisionRule collisionRule) {
+        this.teamSettings = this.teamSettings.withCollisionRule(collisionRule);
+        invalidateAndUpdateTeam();
+    }
+
+    @Override
+    public void updateNewViewer(@NotNull Player player) {
+        super.updateNewViewer(player);
+        player.sendPacket(cachedCreateTeamPacket);
+    }
+
+    @Override
+    public void updateOldViewer(@NotNull Player player) {
+        super.updateOldViewer(player);
+        player.sendPacket(cachedRemoveTeamPacket);
     }
 }

@@ -1,9 +1,11 @@
 package org.phantazm.zombies.mob2;
 
 import net.kyori.adventure.key.Key;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.BasicMobSpawner;
+import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.zombies.scene.ZombiesScene;
 
@@ -23,5 +25,16 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
     public void buildDependencies(InjectionStore.@NotNull Builder builder) {
         super.buildDependencies(builder);
         builder.with(Keys.SCENE, Objects.requireNonNull(scene.get()));
+    }
+
+    @Override
+    public void postSetup(@NotNull Mob mob) {
+        super.postSetup(mob);
+
+        ZombiesScene scene = this.scene.get();
+        boolean mobPlayerCollisions = scene.getMapSettingsInfo().mobPlayerCollisions();
+        if (mobPlayerCollisions) {
+            mob.setCollisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS);
+        }
     }
 }

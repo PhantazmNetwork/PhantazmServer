@@ -9,7 +9,6 @@ import com.github.steanky.proxima.solid.Solid;
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -20,10 +19,7 @@ import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.BelowNameTag;
-import net.minestom.server.scoreboard.Team;
-import net.minestom.server.scoreboard.TeamManager;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.BasicTickTaskScheduler;
 import org.phantazm.commons.TickTaskScheduler;
@@ -168,18 +164,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
             SongPlayer songPlayer = new BasicSongPlayer();
 
-            TeamManager teamManager = MinecraftServer.getTeamManager();
-            Team mobNoPushTeam =
-                !settings.mobPlayerCollisions() ? teamManager.createBuilder(UUID.randomUUID().toString())
-                    .collisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS)
-                    .build() : null;
-            Team corpseTeam = teamManager.createBuilder(UUID.randomUUID().toString())
-                .collisionRule(TeamsPacket.CollisionRule.NEVER)
-                .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER).build();
-
             MapObjects mapObjects =
                 createMapObjects(sceneWrapper.unmodifiableView(), instance, zombiesPlayers, roundHandlerWrapper,
-                    mobNoPushTeam, corpseTeam, powerupHandlerWrapper, windowHandlerWrapper, eventNodeWrapper,
+                    powerupHandlerWrapper, windowHandlerWrapper, eventNodeWrapper,
                     songPlayer, songLoader, tickTaskScheduler, ticksSinceStart);
 
             RoundHandler roundHandler = new BasicRoundHandler(zombiesPlayers.values(), mapObjects.rounds());
@@ -249,17 +236,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     @Override
     protected void cleanupScene(@NotNull ZombiesScene scene) {
         rootNode.removeChild(scene.getSceneNode());
-        MapObjects mapObjects = scene.getMap().mapObjects();
-
-        Team mobNoPush = mapObjects.mobNoPushTeam();
-        Team corpseTeam = mapObjects.corpseTeam();
-
-        TeamManager manager = MinecraftServer.getTeamManager();
-        if (mobNoPush != null) {
-            manager.deleteTeam(mobNoPush);
-        }
-
-        manager.deleteTeam(corpseTeam);
     }
 
     private CorpseCreator createCorpseCreator(DependencyProvider mapDependencyProvider) {
@@ -267,12 +243,12 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     }
 
     private MapObjects createMapObjects(Supplier<ZombiesScene> scene, Instance instance, Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-        Supplier<? extends RoundHandler> roundHandlerSupplier, Team mobNoPushTeam,
-        Team corpseTeam, Wrapper<PowerupHandler> powerupHandler, Wrapper<WindowHandler> windowHandler,
+        Supplier<? extends RoundHandler> roundHandlerSupplier,
+        Wrapper<PowerupHandler> powerupHandler, Wrapper<WindowHandler> windowHandler,
         Wrapper<EventNode<Event>> eventNode, SongPlayer songPlayer, SongLoader songLoader,
         TickTaskScheduler tickTaskScheduler, Wrapper<Long> ticksSinceStart) {
-        return mapObjectSource.make(scene, instance, zombiesPlayers, roundHandlerSupplier, mobNoPushTeam,
-            powerupHandler, windowHandler, eventNode, songPlayer, songLoader, tickTaskScheduler, corpseTeam,
+        return mapObjectSource.make(scene, instance, zombiesPlayers, roundHandlerSupplier,
+            powerupHandler, windowHandler, eventNode, songPlayer, songLoader, tickTaskScheduler,
             ticksSinceStart);
     }
 

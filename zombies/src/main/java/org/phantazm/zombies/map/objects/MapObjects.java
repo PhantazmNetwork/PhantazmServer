@@ -9,9 +9,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.gui.SlotDistributor;
@@ -57,19 +55,14 @@ public interface MapObjects {
 
     @NotNull TickTaskScheduler taskScheduler();
 
-    @Nullable Team mobNoPushTeam();
-
-    @NotNull Team corpseTeam();
-
     @NotNull interface Source {
         @NotNull MapObjects make(@NotNull Supplier<ZombiesScene> scene, @NotNull Instance instance,
             @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier,
-            @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
+            @NotNull Wrapper<PowerupHandler> powerupHandler,
             @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
             @NotNull SongPlayer songPlayer, @NotNull SongLoader songLoader,
-            @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam,
-            @NotNull Wrapper<Long> ticksSinceStart);
+            @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Wrapper<Long> ticksSinceStart);
     }
 
     interface Module {
@@ -104,8 +97,6 @@ public interface MapObjects {
         @NotNull SongLoader songLoader();
 
         @NotNull SongPlayer songPlayer();
-
-        @NotNull Team corpseTeam();
 
         @NotNull InteractorGroupHandler interactorGroupHandler();
 

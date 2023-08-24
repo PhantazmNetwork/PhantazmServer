@@ -18,9 +18,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.ClientBlockHandler;
 import org.phantazm.core.ClientBlockHandlerSource;
@@ -83,18 +81,17 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     public @NotNull MapObjects make(@NotNull Supplier<ZombiesScene> scene, @NotNull Instance instance,
         @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
         @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier,
-        @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
+        @NotNull Wrapper<PowerupHandler> powerupHandler,
         @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
         @NotNull SongPlayer songPlayer, @NotNull SongLoader songLoader,
-        @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam,
-        @NotNull Wrapper<Long> ticksSinceStart) {
+        @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Wrapper<Long> ticksSinceStart) {
         Wrapper<MapObjects> mapObjectsWrapper = Wrapper.ofNull();
 
         Random random = new Random();
         MobSpawner mobSpawner = mobSpawnerSource.make(scene);
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
         SpawnDistributor spawnDistributor =
-            new BasicSpawnDistributor(mobSpawner, random, playerMap.values(), mobNoPushTeam);
+            new BasicSpawnDistributor(mobSpawner, random, playerMap.values());
 
         Flaggable flaggable = new BasicFlaggable();
         if (mapInfo.settings().canWallshoot()) {
@@ -108,12 +105,10 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             new Pos(VecUtils.toPoint(mapSettingsInfo.origin().add(mapSettingsInfo.spawn())), mapSettingsInfo.yaw(),
                 mapSettingsInfo.pitch()).add(0.5, 0, 0.5);
 
-
         Module module =
             new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
-                slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler,
-                eventNode, songPlayer, songLoader, corpseTeam, new BasicInteractorGroupHandler(),
-                ticksSinceStart);
+                slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler, eventNode,
+                songPlayer, songLoader, new BasicInteractorGroupHandler(), ticksSinceStart);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -142,7 +137,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
         MapObjects mapObjects =
             new BasicMapObjects(spawnpoints, windowTracker, shopTracker, doorTracker, roomTracker, rounds, provider,
-                mobSpawner, origin, module, tickTaskScheduler, mobNoPushTeam, corpseTeam);
+                mobSpawner, origin, module, tickTaskScheduler);
         mapObjectsWrapper.set(mapObjects);
 
         return mapObjects;
@@ -290,7 +285,6 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final Wrapper<EventNode<Event>> eventNode;
         private final SongPlayer songPlayer;
         private final SongLoader songLoader;
-        private final Team corpseTeam;
         private final InteractorGroupHandler interactorGroupHandler;
         private final Wrapper<Long> ticksSinceStart;
 
@@ -300,8 +294,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
             Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
             Wrapper<WindowHandler> windowHandler, Wrapper<EventNode<Event>> eventNode,
-            SongPlayer songPlayer, SongLoader songLoader, Team corpseTeam,
-            InteractorGroupHandler interactorGroupHandler, Wrapper<Long> ticksSinceStart) {
+            SongPlayer songPlayer, SongLoader songLoader, InteractorGroupHandler interactorGroupHandler,
+            Wrapper<Long> ticksSinceStart) {
             this.keyParser = Objects.requireNonNull(keyParser);
             this.instance = Objects.requireNonNull(instance);
             this.random = Objects.requireNonNull(random);
@@ -317,7 +311,6 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.eventNode = Objects.requireNonNull(eventNode);
             this.songPlayer = Objects.requireNonNull(songPlayer);
             this.songLoader = Objects.requireNonNull(songLoader);
-            this.corpseTeam = Objects.requireNonNull(corpseTeam);
             this.interactorGroupHandler = Objects.requireNonNull(interactorGroupHandler);
             this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart);
         }
@@ -400,11 +393,6 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         @Override
         public @NotNull SongLoader songLoader() {
             return songLoader;
-        }
-
-        @Override
-        public @NotNull Team corpseTeam() {
-            return corpseTeam;
         }
 
         @Override

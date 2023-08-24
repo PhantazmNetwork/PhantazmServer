@@ -13,7 +13,7 @@ public class BasicMobSpawner implements MobSpawner {
     private final Map<Key, MobCreator> mobCreators;
     private final InjectionStore.Builder builder;
 
-    private InjectionStore injectionStore;
+    private volatile InjectionStore injectionStore;
 
     public BasicMobSpawner(@NotNull Map<Key, MobCreator> mobCreators) {
         this.mobCreators = Map.copyOf(mobCreators);
@@ -36,7 +36,8 @@ public class BasicMobSpawner implements MobSpawner {
         Mob mob = creator.create(instance, store);
         setup.accept(mob);
 
-        mob.setInstance(instance, pos);
+        mob.setInstance(instance, pos).join();
+        postSetup(mob);
         return mob;
     }
 
@@ -54,5 +55,15 @@ public class BasicMobSpawner implements MobSpawner {
     @Override
     public void buildDependencies(InjectionStore.@NotNull Builder builder) {
         builder.with(Keys.MOB_SPAWNER, this);
+    }
+
+    /**
+     * Called directly after the mob is added to an instance. Can be used for applying global settings. Does nothing by
+     * default, but can be overridden by subclasses if desired.
+     *
+     * @param mob the mob to set up
+     */
+    public void postSetup(@NotNull Mob mob) {
+        //no-op
     }
 }
