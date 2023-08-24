@@ -43,10 +43,9 @@ public class ProjectileMovementGoal implements ProximaGoal {
     private boolean collided = false;
 
     private final int selfCollisionTickThreshold;
-    private final int blockCollisionTickThreshold;
 
     public ProjectileMovementGoal(@NotNull Entity entity, @NotNull Entity shooter, @NotNull Point to, double power,
-            double spread) {
+        double spread) {
         this.entity = Objects.requireNonNull(entity, "entity");
         this.shooter = Objects.requireNonNull(shooter, "shooter");
         this.to = Objects.requireNonNull(to, "to");
@@ -54,12 +53,9 @@ public class ProjectileMovementGoal implements ProximaGoal {
         this.spread = spread;
 
         //power is in blocks/s
-        this.selfCollisionTickThreshold = (int)Math.ceil(
-                ((entity.getBoundingBox().width() / 2) + (shooter.getBoundingBox().width() / 2) / power) *
-                        MinecraftServer.TICK_PER_SECOND);
-
-        this.blockCollisionTickThreshold =
-                (int)Math.ceil(((entity.getBoundingBox().width() / 2) / power) * MinecraftServer.TICK_PER_SECOND);
+        this.selfCollisionTickThreshold = (int) Math.ceil(
+            ((entity.getBoundingBox().width() / 2) + (shooter.getBoundingBox().width() / 2) / power) *
+                MinecraftServer.TICK_PER_SECOND);
     }
 
     @Override
@@ -107,8 +103,8 @@ public class ProjectileMovementGoal implements ProximaGoal {
 
         final double mul = MinecraftServer.TICK_PER_SECOND * power;
         entity.setVelocity(new Vec(dx * mul, dy * mul, dz * mul));
-        entity.setView((float)Math.toDegrees(Math.atan2(dx, dz)),
-                (float)Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz))));
+        entity.setView((float) Math.toDegrees(Math.atan2(dx, dz)),
+            (float) Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz))));
     }
 
     @Override
@@ -121,8 +117,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
             collided = true;
             entity.setVelocity(Vec.ZERO);
             entity.setNoGravity(true);
-        }
-        else if (collided) {
+        } else if (collided) {
             collided = false;
             entity.setNoGravity(false);
             EventDispatcher.call(new ProjectileUncollideEvent(entity));
@@ -146,17 +141,17 @@ public class ProjectileMovementGoal implements ProximaGoal {
         final long aliveTicks = entity.getAliveTicks();
         if (previousPos.samePoint(currentPos)) {
             Block block = instance.getBlock(previousPos);
-            return block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= blockCollisionTickThreshold &&
-                    block.registry().collisionShape().intersectBox(
-                            previousPos.sub(previousPos.blockX(), previousPos.blockY(), previousPos.blockZ()),
-                            entity.getBoundingBox());
+            return block.isSolid() && !block.compare(Block.BARRIER) &&
+                block.registry().collisionShape().intersectBox(
+                    previousPos.sub(previousPos.blockX(), previousPos.blockY(), previousPos.blockZ()),
+                    entity.getBoundingBox());
         }
 
         final BoundingBox bb = entity.getBoundingBox();
 
         final double part = bb.width() / 2;
         final Vec dir = currentPos.sub(previousPos).asVec();
-        final int parts = (int)Math.ceil(dir.length() / part);
+        final int parts = (int) Math.ceil(dir.length() / part);
         final Pos direction = dir.normalize().mul(part).asPosition();
 
         Block block = null;
@@ -168,13 +163,13 @@ public class ProjectileMovementGoal implements ProximaGoal {
                 block = instance.getBlock(previousPos);
                 blockPos = previousPos;
             }
-            if (block.isSolid() && !block.compare(Block.BARRIER) && aliveTicks >= blockCollisionTickThreshold &&
-                    block.registry().collisionShape()
-                            .intersectBox(previousPos.sub(blockPos.blockX(), blockPos.blockY(), blockPos.blockZ()),
-                                    entity.getBoundingBox())) {
+            if (block.isSolid() && !block.compare(Block.BARRIER) &&
+                block.registry().collisionShape()
+                    .intersectBox(previousPos.sub(blockPos.blockX(), blockPos.blockY(), blockPos.blockZ()),
+                        entity.getBoundingBox())) {
 
                 final ProjectileCollideWithBlockEvent event =
-                        new ProjectileCollideWithBlockEvent(entity, previousPos, block);
+                    new ProjectileCollideWithBlockEvent(entity, previousPos, block);
                 EventDispatcher.call(event);
                 if (!event.isCancelled()) {
                     entity.teleport(previousPos);
@@ -183,16 +178,16 @@ public class ProjectileMovementGoal implements ProximaGoal {
             }
 
             Collection<LivingEntity> entities = instance.getEntityTracker()
-                    .chunkEntities(chunk.getChunkX(), chunk.getChunkZ(), EntityTracker.Target.LIVING_ENTITIES);
+                .chunkEntities(chunk.getChunkX(), chunk.getChunkZ(), EntityTracker.Target.LIVING_ENTITIES);
 
             for (Entity victim : entities) {
                 if (victim == this.entity || (victim == shooter && aliveTicks < selfCollisionTickThreshold) ||
-                        !bb.intersectEntity(previousPos, victim)) {
+                    !bb.intersectEntity(previousPos, victim)) {
                     continue;
                 }
 
                 final ProjectileCollideWithEntityEvent event =
-                        new ProjectileCollideWithEntityEvent(entity, previousPos, victim);
+                    new ProjectileCollideWithEntityEvent(entity, previousPos, victim);
                 EventDispatcher.call(event);
                 if (!event.isCancelled()) {
                     return collided || entity.isOnGround();
