@@ -7,6 +7,7 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.BasicMobSpawner;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobCreator;
+import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.Map;
@@ -25,6 +26,13 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
     public void buildDependencies(InjectionStore.@NotNull Builder builder) {
         super.buildDependencies(builder);
         builder.with(Keys.SCENE, Objects.requireNonNull(scene.get()));
+    }
+
+    @Override
+    public void preSetup(@NotNull Mob mob) {
+        super.preSetup(mob);
+
+        mob.stateHolder().setStage(Stages.ZOMBIES_GAME);
     }
 
     @Override

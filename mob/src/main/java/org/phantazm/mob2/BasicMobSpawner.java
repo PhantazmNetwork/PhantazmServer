@@ -36,8 +36,10 @@ public class BasicMobSpawner implements MobSpawner {
         Mob mob = creator.create(instance, store);
         setup.accept(mob);
 
+        preSetup(mob);
         mob.setInstance(instance, pos).join();
         postSetup(mob);
+
         return mob;
     }
 
@@ -55,6 +57,16 @@ public class BasicMobSpawner implements MobSpawner {
     @Override
     public void buildDependencies(InjectionStore.@NotNull Builder builder) {
         builder.with(Keys.MOB_SPAWNER, this);
+    }
+
+    /**
+     * Called directly before the mob is added to an instance. Does nothing by default, but can be overridden by
+     * subclasses.
+     *
+     * @param mob the mob to set up
+     */
+    public void preSetup(@NotNull Mob mob) {
+
     }
 
     /**
