@@ -280,11 +280,25 @@ public class Mob extends ProximaEntity {
         sendPacketToViewers(this.cachedUpdateTeamPacket);
     }
 
+    /**
+     * Sets the color of this entity's personal team.
+     * <p>
+     * <b>Thread Behavior</b>: It is necessary to acquire this entity before calling this method.
+     *
+     * @param namedTextColor the color to set
+     */
     public void setTeamColor(@NotNull NamedTextColor namedTextColor) {
         this.teamSettings = this.teamSettings.withTeamColor(namedTextColor);
         invalidateAndUpdateTeam();
     }
 
+    /**
+     * Sets the collision rule for this entity's personal team.
+     * <p>
+     * <b>Thread Behavior</b>: It is necessary to acquire this entity before calling this method.
+     *
+     * @param collisionRule the color to set
+     */
     public void setCollisionRule(@NotNull TeamsPacket.CollisionRule collisionRule) {
         this.teamSettings = this.teamSettings.withCollisionRule(collisionRule);
         invalidateAndUpdateTeam();
