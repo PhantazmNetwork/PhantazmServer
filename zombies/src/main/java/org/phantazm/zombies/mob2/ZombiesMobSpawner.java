@@ -34,7 +34,9 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
         ZombiesScene scene = this.scene.get();
         boolean mobPlayerCollisions = scene.getMapSettingsInfo().mobPlayerCollisions();
         if (mobPlayerCollisions) {
-            mob.setCollisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS);
+            mob.getAcquirable().sync(self -> {
+                ((Mob) self).setCollisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS);
+            });
         }
     }
 }

@@ -32,7 +32,9 @@ public class GlowingPowerupEffect implements PowerupEffectComponent {
         @Override
         public void apply(@NotNull LivingEntity entity) {
             if (entity instanceof Mob mob) {
-                mob.setTeamColor(data.glowColor);
+                mob.getAcquirable().sync(self -> {
+                    ((Mob) self).setTeamColor(data.glowColor);
+                });
             }
 
             entity.setGlowing(true);
