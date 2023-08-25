@@ -75,7 +75,7 @@ public class DamageSkill implements SkillComponent {
             target.forType(LivingEntity.class, livingEntity -> livingEntity.getAcquirable().sync(e -> {
                 LivingEntity entity = (LivingEntity) e;
                 if (data.knockback > 0) {
-                    double angle = self.getPosition().yaw() * (Math.PI / 180);
+                    double angle = self.getPosition().withLookAt(entity.getPosition()).yaw() * (Math.PI / 180);
                     entity.takeKnockback(data.knockback, data.horizontal, Math.sin(angle), -Math.cos(angle));
                 }
 

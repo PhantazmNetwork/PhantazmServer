@@ -17,14 +17,14 @@ import org.phantazm.mob2.selector.SelectorComponent;
 
 import java.util.Objects;
 
-@Model("mob.skill.push_entity")
+@Model("mob.skill.push")
 @Cache
-public class PushEntitySkill implements SkillComponent {
+public class PushSkill implements SkillComponent {
     private final Data data;
     private final SelectorComponent selector;
 
     @FactoryMethod
-    public PushEntitySkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector) {
+    public PushSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector) {
         this.data = Objects.requireNonNull(data);
         this.selector = Objects.requireNonNull(selector);
     }

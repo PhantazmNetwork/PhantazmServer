@@ -94,11 +94,6 @@ public class ShowHealthbarSkill implements SkillComponent {
         }
 
         @Override
-        public void init() {
-            self.setCustomNameVisible(true);
-        }
-
-        @Override
         public void tick() {
             healthbarFor(self).ifPresent(self::setCustomName);
         }
@@ -111,7 +106,6 @@ public class ShowHealthbarSkill implements SkillComponent {
         @Override
         public void end() {
             self.setCustomName(null);
-            self.setCustomNameVisible(false);
         }
 
         private Optional<Component> healthbarFor(LivingEntity entity) {

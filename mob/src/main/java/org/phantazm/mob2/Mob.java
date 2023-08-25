@@ -12,6 +12,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.mob2.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
@@ -60,6 +61,10 @@ public class Mob extends ProximaEntity {
 
         private TeamSettings withTeamColor(NamedTextColor teamColor) {
             return new TeamSettings(displayName, friendlyFlags, nameTagVisibility, collisionRule, teamColor, teamPrefix, teamSuffix);
+        }
+
+        private TeamSettings withNameTagVisibility(TeamsPacket.NameTagVisibility visibility) {
+            return new TeamSettings(displayName, friendlyFlags, visibility, collisionRule, teamColor, teamPrefix, teamSuffix);
         }
     }
 
@@ -168,6 +173,12 @@ public class Mob extends ProximaEntity {
         }
 
         return Optional.of(entity);
+    }
+
+    public void setLastHitEntity(@Nullable Entity entity) {
+        if (lastHitEntity.get() != entity) {
+            this.lastHitEntity = new WeakReference<>(entity);
+        }
     }
 
     public @NotNull Optional<Entity> lastInteractingPlayer() {
@@ -311,6 +322,18 @@ public class Mob extends ProximaEntity {
      */
     public void setCollisionRule(@NotNull TeamsPacket.CollisionRule collisionRule) {
         this.teamSettings = this.teamSettings.withCollisionRule(collisionRule);
+        invalidateAndUpdateTeam();
+    }
+
+    /**
+     * Sets the setNameTagVisibility for this entity's personal team.
+     * <p>
+     * <b>Thread Behavior</b>: It is necessary to acquire this entity before calling this method.
+     *
+     * @param visibility the visibility rule to set
+     */
+    public void setNameTagVisibility(@NotNull TeamsPacket.NameTagVisibility visibility) {
+        this.teamSettings = this.teamSettings.withNameTagVisibility(visibility);
         invalidateAndUpdateTeam();
     }
 

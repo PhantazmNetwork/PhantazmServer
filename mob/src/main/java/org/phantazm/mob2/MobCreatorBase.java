@@ -11,6 +11,7 @@ import net.minestom.server.entity.metadata.animal.tameable.WolfMeta;
 import net.minestom.server.entity.metadata.other.SlimeMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.goal.GoalApplier;
@@ -78,6 +79,7 @@ public class MobCreatorBase implements MobCreator {
         setAttributes(mob);
         setMeta(mob);
         setGoals(mob, store);
+        setTeam(mob);
     }
 
     protected void setEquipment(@NotNull Mob mob) {
@@ -98,12 +100,12 @@ public class MobCreatorBase implements MobCreator {
     }
 
     protected void setMeta(@NotNull Mob mob) {
-        EntityMeta meta = mob.getEntityMeta();
-
         MobMeta dataMeta = data.meta();
         if (dataMeta == null) {
             return;
         }
+
+        EntityMeta meta = mob.getEntityMeta();
 
         meta.setCustomName(dataMeta.customName());
         meta.setCustomNameVisible(dataMeta.customNameVisible());
@@ -126,6 +128,12 @@ public class MobCreatorBase implements MobCreator {
     protected void setGoals(@NotNull Mob mob, @NotNull InjectionStore store) {
         for (GoalApplier applier : goalAppliers) {
             applier.apply(mob, store);
+        }
+    }
+
+    protected void setTeam(@NotNull Mob mob) {
+        if (!data.showNameTag()) {
+            mob.setNameTagVisibility(TeamsPacket.NameTagVisibility.NEVER);
         }
     }
 }

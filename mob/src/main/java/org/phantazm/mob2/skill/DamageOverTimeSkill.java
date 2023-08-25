@@ -14,6 +14,8 @@ import org.phantazm.mob2.Target;
 import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
+import org.phantazm.mob2.validator.Validator;
+import org.phantazm.mob2.validator.ValidatorComponent;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -25,22 +27,26 @@ import java.util.Objects;
 public class DamageOverTimeSkill implements SkillComponent {
     private final Data data;
     private final SelectorComponent selector;
+    private final ValidatorComponent validator;
 
     @FactoryMethod
-    public DamageOverTimeSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector) {
+    public DamageOverTimeSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector,
+        @NotNull @Child("validator") ValidatorComponent validator) {
         this.data = Objects.requireNonNull(data);
         this.selector = Objects.requireNonNull(selector);
+        this.validator = Objects.requireNonNull(validator);
     }
 
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, mob, selector.apply(mob, injectionStore));
+        return new Internal(data, mob, selector.apply(mob, injectionStore), validator.apply(mob, injectionStore));
     }
 
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
         @NotNull @ChildPath("selector") String selector,
+        @NotNull @ChildPath("validator") String validator,
         int damageInterval,
         int damageTime,
         float damageAmount,
@@ -59,19 +65,27 @@ public class DamageOverTimeSkill implements SkillComponent {
     private static class Internal extends TargetedSkill {
         private final Data data;
         private final Deque<Entry> targets;
+        private final Validator validator;
 
         private int ticks;
 
-        private Internal(Data data, Mob self, Selector selector) {
+        private Internal(Data data, Mob self, Selector selector, Validator validator) {
             super(self, selector);
             this.data = data;
             this.targets = new ArrayDeque<>();
+            this.validator = validator;
         }
 
         @Override
         protected void useOnTarget(@NotNull Target target) {
             self.getAcquirable().sync(ignored -> {
-                target.forType(LivingEntity.class, livingEntity -> addDamageTarget(livingEntity, ticks));
+                target.forType(LivingEntity.class, livingEntity -> {
+                    if (!validator.valid(livingEntity)) {
+                        return;
+                    }
+
+                    addDamageTarget(livingEntity, ticks);
+                });
             });
         }
 
@@ -85,7 +99,7 @@ public class DamageOverTimeSkill implements SkillComponent {
             Iterator<Entry> iterator = targets.iterator();
             while (iterator.hasNext()) {
                 Entry entry = iterator.next();
-                if (entry.target.isDead() || entry.target.isRemoved()) {
+                if (entry.target.isDead() || entry.target.isRemoved() || !validator.valid(entry.target)) {
                     iterator.remove();
                     continue;
                 }

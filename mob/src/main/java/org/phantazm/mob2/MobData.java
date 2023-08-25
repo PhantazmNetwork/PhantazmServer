@@ -16,12 +16,18 @@ import java.util.List;
 public record MobData(@NotNull Key key,
     @NotNull EntityType type,
     @NotNull ConfigNode pathfinding,
+    boolean showNameTag,
     @NotNull ConfigNode equipment,
     @NotNull ConfigNode attributes,
     @Nullable MobMeta meta,
     @NotNull List<ConfigNode> skills,
     @NotNull List<ConfigNode> goals,
     @NotNull ConfigNode extra) implements Keyed {
+    @Default("showNameTag")
+    public static @NotNull ConfigElement defaultShowNameTag() {
+        return ConfigPrimitive.of(false);
+    }
+
     @Default("equipment")
     public static @NotNull ConfigElement defaultEquipment() {
         return ConfigNode.of();
