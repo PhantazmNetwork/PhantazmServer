@@ -75,7 +75,7 @@ public class ModifyAttributeSkill implements SkillComponent {
             this.uuidString = this.uuid.toString();
             this.attribute = Attribute.fromKey(data.attribute);
             this.selector = selector;
-            this.affectedEntities = Collections.newSetFromMap(new WeakHashMap<>());
+            this.affectedEntities = new HashSet<>();
         }
 
         private void removeFromEntity(LivingEntity entity, CancellableState<Entity> state) {
