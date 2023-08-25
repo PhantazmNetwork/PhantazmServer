@@ -57,6 +57,7 @@ public class BasicQuitStateActivable implements Activable {
             player.sendActionBar(Component.empty());
             player.stopSound(SoundStop.all());
             player.stateHolder().setStage(null);
+            player.setLastDamageSource(null);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
             TagResolver quitterPlaceholder = Placeholder.component("quitter", displayName);
