@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map;
 
+import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Tickable;
@@ -38,8 +39,8 @@ public class Round implements Tickable {
      * @param roundInfo the backing data object
      */
     public Round(@NotNull RoundInfo roundInfo, @NotNull List<Wave> waves, @NotNull List<Action<Round>> startActions,
-        @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
-        @NotNull List<Spawnpoint> spawnpoints, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
+            @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
+            @NotNull List<Spawnpoint> spawnpoints, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.isEmpty()) {
             LOGGER.warn("Round {} has no waves", roundInfo);
@@ -72,8 +73,7 @@ public class Round implements Tickable {
         }
     }
 
-    public @Unmodifiable
-    @NotNull List<Mob> getSpawnedMobs() {
+    public @Unmodifiable @NotNull List<Mob> getSpawnedMobs() {
         return List.copyOf(spawnedMobs.values());
     }
 
@@ -121,7 +121,8 @@ public class Round implements Tickable {
             for (Wave wave : waves) {
                 totalMobCount += wave.mobCount();
             }
-        } else {
+        }
+        else {
             endRound();
         }
     }
@@ -145,7 +146,9 @@ public class Round implements Tickable {
             Mob mob = spawnedIterator.next();
             spawnedIterator.remove();
 
-            mob.kill();
+            mob.getAcquirable().sync(self -> {
+                ((LivingEntity)self).kill();
+            });
         }
     }
 
@@ -157,8 +160,8 @@ public class Round implements Tickable {
         return spawnedMobs.containsKey(uuid);
     }
 
-    private @NotNull List<Mob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
-        @NotNull SpawnDistributor spawnDistributor, boolean isWave) {
+    private @NotNull List<Mob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo, @NotNull SpawnDistributor spawnDistributor,
+            boolean isWave) {
         if (!isActive) {
             throw new IllegalStateException("Round must be active to spawn mobs");
         }
@@ -172,7 +175,8 @@ public class Round implements Tickable {
             //adjust for mobs that may have failed to spawn
             //only reached when calling internally
             totalMobCount -= currentWave.mobCount() - spawns.size();
-        } else {
+        }
+        else {
             totalMobCount += spawns.size();
         }
 
