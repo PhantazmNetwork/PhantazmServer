@@ -10,6 +10,6 @@ public interface InvitationNotification<TMember extends GuildMember> {
 
     void notifyInvitation(@NotNull TMember inviter, @NotNull PlayerView invitee, long invitationDuration);
 
-    void notifyExpiry(@NotNull PlayerView invitee);
+    void notifyExpiry(@NotNull PlayerView inviter, @NotNull PlayerView invitee);
 
 }
