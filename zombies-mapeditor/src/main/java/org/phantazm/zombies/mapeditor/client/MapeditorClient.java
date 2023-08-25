@@ -1,8 +1,13 @@
 package org.phantazm.zombies.mapeditor.client;
 
+import com.github.steanky.element.core.key.BasicKeyParser;
+import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
+import com.github.steanky.ethylene.mapper.signature.ScalarSignature;
+import com.github.steanky.ethylene.mapper.type.Token;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import me.x150.renderer.event.RenderEvents;
 import me.x150.renderer.render.Renderer3d;
@@ -28,6 +33,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.commons.Signatures;
 import org.phantazm.messaging.packet.player.MapDataVersionQueryPacket;
 import org.phantazm.zombies.map.FileSystemMapLoader;
@@ -55,6 +61,7 @@ public class MapeditorClient implements ClientModInitializer {
      */
     private static final String MAPEDITOR_PATH = "mapeditor";
 
+    @SuppressWarnings("PatternValidation")
     @Override
     public void onInitializeClient() {
         ConfigCodec codec = new YamlCodec();
@@ -64,36 +71,41 @@ public class MapeditorClient implements ClientModInitializer {
         RenderEvents.WORLD.register(renderer::rendered);
         RenderEvents.HUD.register(renderer::hudRender);
 
+        KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
         EditorSession editorSession = new BasicEditorSession(renderer,
-            new FileSystemMapLoader(defaultMapDirectory, codec,
-                Signatures.core(MappingProcessorSource.builder()).withStandardSignatures()
-                    .withStandardTypeImplementations().ignoringLengths().build()), defaultMapDirectory);
+                new FileSystemMapLoader(defaultMapDirectory, codec, Signatures.core(MappingProcessorSource.builder())
+                        .withScalarSignature(ScalarSignature.of(Token.ofClass(Key.class),
+                                element -> keyParser.parseKey(element.asString()),
+                                key -> key == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(key.asString())))
+                        .withStandardSignatures().withStandardTypeImplementations().ignoringLengths().build()),
+                defaultMapDirectory);
         editorSession.loadMapsFromDisk();
 
         UseBlockCallback.EVENT.register(editorSession::handleBlockUse);
 
         KeyBinding mapeditorBinding = KeyBindingHelper.registerKeyBinding(
-            new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M,
-                TranslationKeys.CATEGORY_MAPEDITOR_ALL));
+                new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M,
+                        TranslationKeys.CATEGORY_MAPEDITOR_ALL));
         KeyBinding newObject = KeyBindingHelper.registerKeyBinding(
-            new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N,
-                TranslationKeys.CATEGORY_MAPEDITOR_ALL));
+                new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N,
+                        TranslationKeys.CATEGORY_MAPEDITOR_ALL));
 
         ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
             FabricPacketUtils.sendPacket(sender, new MapDataVersionQueryPacket());
         }));
         ClientPlayNetworking.registerGlobalReceiver(MapDataVersionResponsePacketWrapper.TYPE,
-            (packet, player, responseSender) -> {
-                Text message;
-                if (packet.packet().version() == MapSettingsInfo.MAP_DATA_VERSION) {
-                    message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_SYNCED)
-                        .formatted(Formatting.GREEN);
-                } else {
-                    message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED)
-                        .formatted(Formatting.RED);
-                }
-                player.sendMessage(message);
-            });
+                (packet, player, responseSender) -> {
+                    Text message;
+                    if (packet.packet().version() == MapSettingsInfo.MAP_DATA_VERSION) {
+                        message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_SYNCED)
+                                .formatted(Formatting.GREEN);
+                    }
+                    else {
+                        message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED)
+                                .formatted(Formatting.RED);
+                    }
+                    player.sendMessage(message);
+                });
         ClientTickEvents.END_CLIENT_TICK.register(new ClientTickEvents.EndTick() {
             private BlockHitResult lastBlockLook;
 
@@ -106,7 +118,7 @@ public class MapeditorClient implements ClientModInitializer {
 
                 HitResult hitResult = client.crosshairTarget;
                 if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
-                    BlockHitResult blockHitResult = (BlockHitResult) hitResult;
+                    BlockHitResult blockHitResult = (BlockHitResult)hitResult;
                     if (lastBlockLook == null || !lastBlockLook.getBlockPos().equals(blockHitResult.getBlockPos())) {
                         editorSession.handleBlockLookChange(blockHitResult);
                         lastBlockLook = blockHitResult;
@@ -120,16 +132,17 @@ public class MapeditorClient implements ClientModInitializer {
 
                 if (mapeditorBinding.wasPressed()) {
                     MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(editorSession)));
-                } else if (newObject.wasPressed()) {
+                }
+                else if (newObject.wasPressed()) {
                     if (!editorSession.hasMap()) {
                         player.sendMessage(Text.translatable(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_ACTIVE_MAP),
-                            true);
+                                true);
                         return;
                     }
 
                     if (!editorSession.hasSelection()) {
                         player.sendMessage(Text.translatable(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_SELECTION),
-                            true);
+                                true);
                         return;
                     }
 
@@ -153,31 +166,6 @@ public class MapeditorClient implements ClientModInitializer {
 
         private RenderObject[] bakedObjects;
         private TextObject[] bakedText;
-
-        private static <TObject extends Keyed> boolean tryUpdateInPlace(TObject newObject, TObject[] baked,
-            Map<Key, TObject> map) {
-            Key newKey = newObject.key();
-            TObject oldObject = map.get(newKey);
-            if (oldObject != null) {
-                if (baked != null) {
-                    int i = 0;
-                    for (TObject object : baked) {
-                        if (object.key().equals(newKey)) {
-                            if (oldObject != newObject) {
-                                map.put(newKey, newObject);
-                            }
-
-                            baked[i] = newObject;
-                            return false;
-                        }
-
-                        i++;
-                    }
-                }
-            }
-
-            return true;
-        }
 
         public void rendered(MatrixStack stack) {
             if (!enabled) {
@@ -251,7 +239,7 @@ public class MapeditorClient implements ClientModInitializer {
 
         @Override
         public void removeObject(@NotNull Key key) {
-            Objects.requireNonNull(key);
+            Objects.requireNonNull(key, "key");
             if (renderObjects.remove(key) != null) {
                 bakedObjects = null;
             }
@@ -259,7 +247,7 @@ public class MapeditorClient implements ClientModInitializer {
 
         @Override
         public void removeText(@NotNull Key key) {
-            Objects.requireNonNull(key);
+            Objects.requireNonNull(key, "key");
             if (textObjects.remove(key) != null) {
                 bakedText = null;
             }
@@ -267,7 +255,7 @@ public class MapeditorClient implements ClientModInitializer {
 
         @Override
         public void removeObjectIf(@NotNull Predicate<? super Key> keyPredicate) {
-            Objects.requireNonNull(keyPredicate);
+            Objects.requireNonNull(keyPredicate, "keyPredicate");
             if (renderObjects.keySet().removeIf(keyPredicate)) {
                 bakedObjects = null;
             }
@@ -275,7 +263,7 @@ public class MapeditorClient implements ClientModInitializer {
 
         @Override
         public void forEachObject(@NotNull Consumer<? super RenderObject> consumer) {
-            Objects.requireNonNull(consumer);
+            Objects.requireNonNull(consumer, "object");
             for (RenderObject sample : objectValues) {
                 consumer.accept(sample);
             }
@@ -283,7 +271,7 @@ public class MapeditorClient implements ClientModInitializer {
 
         @Override
         public void putObject(@NotNull RenderObject value) {
-            Objects.requireNonNull(value);
+            Objects.requireNonNull(value, "value");
 
             if (tryUpdateInPlace(value, bakedObjects, renderObjects)) {
                 renderObjects.put(value.key, value);
@@ -293,12 +281,37 @@ public class MapeditorClient implements ClientModInitializer {
 
         @Override
         public void putText(@NotNull TextObject value) {
-            Objects.requireNonNull(value);
+            Objects.requireNonNull(value, "value");
 
             if (tryUpdateInPlace(value, bakedText, textObjects)) {
                 textObjects.put(value.key, value);
                 bakedText = null;
             }
+        }
+
+        private static <TObject extends Keyed> boolean tryUpdateInPlace(TObject newObject, TObject[] baked,
+                Map<Key, TObject> map) {
+            Key newKey = newObject.key();
+            TObject oldObject = map.get(newKey);
+            if (oldObject != null) {
+                if (baked != null) {
+                    int i = 0;
+                    for (TObject object : baked) {
+                        if (object.key().equals(newKey)) {
+                            if (oldObject != newObject) {
+                                map.put(newKey, newObject);
+                            }
+
+                            baked[i] = newObject;
+                            return false;
+                        }
+
+                        i++;
+                    }
+                }
+            }
+
+            return true;
         }
 
         @Override

@@ -142,7 +142,7 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
     }
 
     @Override
-    public void notifyExpiry(@NotNull PlayerView invitee) {
+    public void notifyExpiry(@NotNull PlayerView inviter, @NotNull PlayerView invitee) {
         invitee.getDisplayName().whenComplete((displayName, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Exception while sending invitation message", throwable);
@@ -154,15 +154,15 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
             audience.sendMessage(message);
         });
 
-        owner.get().getPlayerView().getDisplayName().whenComplete((displayName, throwable) -> {
+        inviter.getDisplayName().whenComplete((displayName, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Exception while sending invitation expiry message", throwable);
                 return;
             }
 
             invitee.getPlayer().ifPresent(player -> {
-                TagResolver ownerPlaceholder = Placeholder.component("owner", displayName);
-                Component message = miniMessage.deserialize(config.expiryToInviteeFormat(), ownerPlaceholder);
+                TagResolver inviterPlaceholder = Placeholder.component("inviter", displayName);
+                Component message = miniMessage.deserialize(config.expiryToInviteeFormat(), inviterPlaceholder);
                 player.sendMessage(message);
             });
         });

@@ -65,7 +65,7 @@ public class InvitationManagerIntegrationTest {
             }
 
             @Override
-            public void notifyExpiry(@NotNull PlayerView invitee) {
+            public void notifyExpiry(@NotNull PlayerView inviter, @NotNull PlayerView invitee) {
 
             }
         };
