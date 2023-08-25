@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Round implements Tickable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Round.class);
@@ -51,7 +52,7 @@ public class Round implements Tickable {
         this.endActions = List.copyOf(endActions);
         this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
 
-        this.spawnedMobs = new HashMap<>();
+        this.spawnedMobs = new ConcurrentHashMap<>();
         this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
     }
