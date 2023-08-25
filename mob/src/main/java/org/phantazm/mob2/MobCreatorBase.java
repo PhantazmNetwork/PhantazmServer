@@ -8,6 +8,7 @@ import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.AgeableMobMeta;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.entity.metadata.animal.tameable.WolfMeta;
+import net.minestom.server.entity.metadata.other.SlimeMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -115,6 +116,10 @@ public class MobCreatorBase implements MobCreator {
 
         if (meta instanceof WolfMeta wolfMeta) {
             wolfMeta.setAngerTime(dataMeta.angerTime());
+        }
+
+        if (meta instanceof SlimeMeta slimeMeta) {
+            slimeMeta.setSize(dataMeta.size());
         }
     }
 

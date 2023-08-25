@@ -12,7 +12,8 @@ public record MobMeta(@Nullable Component customName,
     boolean isInvisible,
     boolean isGlowing,
     int angerTime,
-    boolean isBaby) {
+    boolean isBaby,
+    int size) {
     @Default("customName")
     public static @NotNull ConfigElement defaultCustomName() {
         return ConfigPrimitive.NULL;
@@ -41,5 +42,10 @@ public record MobMeta(@Nullable Component customName,
     @Default("isBaby")
     public static @NotNull ConfigElement defaultIsBaby() {
         return ConfigPrimitive.of(false);
+    }
+
+    @Default("size")
+    public static @NotNull ConfigElement defaultSize() {
+        return ConfigPrimitive.of(0);
     }
 }
