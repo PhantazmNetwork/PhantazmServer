@@ -128,10 +128,6 @@ public class SelectBombedRoom implements Action<Round> {
             public void end() {
                 for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
                     removeStateFor(zombiesPlayer, true);
-
-                    zombiesPlayer.getPlayer().ifPresent(player -> {
-                        player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
-                    });
                 }
 
                 states.clear();
@@ -210,10 +206,10 @@ public class SelectBombedRoom implements Action<Round> {
                                         applyModifiers(zombiesPlayer);
                                     }
                                 } else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
-                                    removeStateFor(zombiesPlayer, false);
+                                    removeStateFor(zombiesPlayer, true);
                                 }
                             } else {
-                                removeStateFor(zombiesPlayer, false);
+                                removeStateFor(zombiesPlayer, true);
                             }
                         });
                     }
