@@ -220,11 +220,7 @@ public class Window extends BoundedBase {
      * @return true if the block is broken, false otherwise
      */
     public boolean isBlockBroken(int x, int y, int z) {
-        int index = coordinateToIndex(x, y, z);
-
-        synchronized (sync) {
-            return index >= this.index;
-        }
+        return coordinateToIndex(x, y, z) >= this.index;
     }
 
     private Point indexToCoordinate(int index) {
