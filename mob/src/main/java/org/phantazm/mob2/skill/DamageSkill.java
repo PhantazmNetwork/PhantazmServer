@@ -36,11 +36,24 @@ public class DamageSkill implements SkillComponent {
 
     @DataObject
     public record Data(@Nullable Trigger trigger,
+        @NotNull @ChildPath("selector") String selector,
         float amount,
+        float knockback,
+        boolean horizontal,
         boolean armorBypassing) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
+        }
+
+        @Default("knockback")
+        public static @NotNull ConfigElement defaultKnockback() {
+            return ConfigPrimitive.of(0);
+        }
+
+        @Default("horizontal")
+        public static @NotNull ConfigElement defaultHorizontal() {
+            return ConfigPrimitive.of(true);
         }
 
         @Default("armorBypassing")
@@ -61,6 +74,11 @@ public class DamageSkill implements SkillComponent {
         protected void useOnTarget(@NotNull Target target) {
             target.forType(LivingEntity.class, livingEntity -> livingEntity.getAcquirable().sync(e -> {
                 LivingEntity entity = (LivingEntity) e;
+                if (data.knockback > 0) {
+                    double angle = self.getPosition().yaw() * (Math.PI / 180);
+                    entity.takeKnockback(data.knockback, data.horizontal, Math.sin(angle), -Math.cos(angle));
+                }
+
                 entity.damage(Damage.fromEntity(self, data.amount), data.armorBypassing);
             }));
         }

@@ -157,7 +157,17 @@ public class Mob extends ProximaEntity {
     }
 
     public @NotNull Optional<Entity> lastHitEntity() {
-        return Optional.ofNullable(lastHitEntity.get());
+        Entity entity = lastHitEntity.get();
+        if (entity == null) {
+            return Optional.empty();
+        }
+
+        if (entity.isRemoved()) {
+            lastHitEntity.clear();
+            return Optional.empty();
+        }
+
+        return Optional.of(entity);
     }
 
     public @NotNull Optional<Entity> lastInteractingPlayer() {

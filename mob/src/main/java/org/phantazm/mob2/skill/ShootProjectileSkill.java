@@ -7,7 +7,6 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.instance.Instance;
@@ -53,7 +52,7 @@ public class ShootProjectileSkill implements SkillComponent {
 
     @DataObject
     public record Data(@Nullable Trigger trigger,
-        @NotNull @ChildPath("target_selector") String targetSelector,
+        @NotNull @ChildPath("target_selector") String selector,
         @NotNull @ChildPath("hit_validator") String hitValidator,
         @NotNull @ChildPath("callback") String callback,
         @NotNull Key entity,
@@ -84,7 +83,7 @@ public class ShootProjectileSkill implements SkillComponent {
         MobSpawner spawner) implements Skill {
 
         private void onCollideWithBlock(ProjectileCollideWithBlockEvent event) {
-            killOrRemove(event.getEntity());
+            ((Mob) event.getEntity()).kill();
         }
 
         private void onCollideWithEntity(ProjectileCollideWithEntityEvent event) {
@@ -92,25 +91,22 @@ public class ShootProjectileSkill implements SkillComponent {
                 return;
             }
 
-            self.attack(event.getTarget());
-            killOrRemove(event.getEntity());
-        }
+            Mob projectile = (Mob) event.getEntity();
 
-        private void killOrRemove(Entity entity) {
-            if (entity instanceof LivingEntity livingEntity) {
-                livingEntity.kill();
-            } else {
-                entity.remove();
-            }
+            Entity target = event.getTarget();
+            projectile.attack(target);
+            self.attack(target);
+
+            projectile.kill();
         }
 
         private void shootAtPoint(Instance instance, Point target) {
-            Mob mob = spawner.spawn(data.entity, instance, self.getPosition().add(0, self.getEyeHeight(), 0));
-            callback.accept(mob);
+            Mob projectile = spawner.spawn(data.entity, instance, self.getPosition().add(0, self.getEyeHeight(), 0));
+            callback.accept(projectile);
 
-            mob.setNoGravity(!data.gravity);
-            mob.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(mob, self, target, data.power(),
-                data.spread(), this::onCollideWithBlock, this::onCollideWithEntity))));
+            projectile.setNoGravity(!data.gravity);
+            projectile.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(projectile, self, target,
+                data.power(), data.spread(), this::onCollideWithBlock, this::onCollideWithEntity))));
         }
 
         @Override
