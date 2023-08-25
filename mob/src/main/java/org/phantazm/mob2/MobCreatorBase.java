@@ -8,6 +8,7 @@ import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.AgeableMobMeta;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.entity.metadata.animal.tameable.WolfMeta;
+import net.minestom.server.entity.metadata.monster.zombie.ZombieMeta;
 import net.minestom.server.entity.metadata.other.SlimeMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
@@ -114,6 +115,10 @@ public class MobCreatorBase implements MobCreator {
 
         if (meta instanceof AgeableMobMeta ageableMobMeta) {
             ageableMobMeta.setBaby(dataMeta.isBaby());
+        }
+
+        if (meta instanceof ZombieMeta zombieMeta) {
+            zombieMeta.setBaby(dataMeta.isBaby());
         }
 
         if (meta instanceof WolfMeta wolfMeta) {
