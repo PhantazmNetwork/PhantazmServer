@@ -66,7 +66,7 @@ public class ModifyAttributeSkill implements SkillComponent {
         private final Attribute attribute;
         private final Selector selector;
 
-        private final Set<Pair<LivingEntity, CancellableState<Entity>>> affectedEntities;
+        private final List<Pair<LivingEntity, CancellableState<Entity>>> affectedEntities;
 
         private Internal(Data data, Mob self, Selector selector) {
             this.data = data;
@@ -75,7 +75,7 @@ public class ModifyAttributeSkill implements SkillComponent {
             this.uuidString = this.uuid.toString();
             this.attribute = Attribute.fromKey(data.attribute);
             this.selector = selector;
-            this.affectedEntities = new HashSet<>();
+            this.affectedEntities = new ArrayList<>();
         }
 
         private void removeFromEntity(LivingEntity entity, CancellableState<Entity> state) {
