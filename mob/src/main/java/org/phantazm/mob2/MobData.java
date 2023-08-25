@@ -24,12 +24,12 @@ public record MobData(@NotNull Key key,
     @NotNull ConfigNode extra) implements Keyed {
     @Default("equipment")
     public static @NotNull ConfigElement defaultEquipment() {
-        return ConfigList.of();
+        return ConfigNode.of();
     }
 
     @Default("attributes")
     public static @NotNull ConfigElement defaultAttributes() {
-        return ConfigList.of();
+        return ConfigNode.of();
     }
 
     @Default("meta")

@@ -20,7 +20,7 @@ import org.phantazm.zombies.scene.ZombiesScene;
 import java.util.Objects;
 import java.util.Set;
 
-@Model("zombies.mob.target_validator.zombies_player")
+@Model("zombies.mob.validator.zombies_player")
 @Cache
 public class ZombiesPlayerValidator implements ValidatorComponent {
     private final Data data;

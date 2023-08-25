@@ -1,5 +1,6 @@
 package org.phantazm.server;
 
+import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.path.ElementPath;
@@ -40,6 +41,7 @@ import java.nio.file.PathMatcher;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -91,15 +93,19 @@ public final class MobFeature {
                             Pathfinding.Factory pathfinding = context.provide(PATHFINDING);
 
                             Map<EquipmentSlot, ItemStack> equipmentMap = equipmentMap(data.equipment(), processorSource);
-                            Object2FloatMap<String> attributeMap = attributeMap(data.attributes(), processorSource);
+                            Object2FloatMap<String> attributeMap = attributeMap(data.attributes());
 
-                            List<SkillComponent> skills = data.skills().isEmpty() ? List.of() : context.provideCollection(SKILLS);
-                            List<GoalApplier> goals = data.goals().isEmpty() ? List.of() : context.provideCollection(GOALS);
+                            List<SkillComponent> skills = data.skills().isEmpty() ? List.of() : context
+                                .provideCollection(SKILLS, (Consumer<ElementException>) e ->
+                                    LOGGER.warn("ElementException when loading mob skills in " + path, e));
+                            List<GoalApplier> goals = data.goals().isEmpty() ? List.of() : context
+                                .provideCollection(GOALS, (Consumer<ElementException>) e ->
+                                    LOGGER.warn("ElementException when loading mob AI goals in " + path, e));
 
                             loadedCreators.put(data.key(), new ZombiesMobCreator(data, pathfinding, skills, goals,
                                 pathfinder, instanceSettingsFunction, equipmentMap, attributeMap));
                         } catch (IOException e) {
-                            LOGGER.warn("Could not load mob file", e);
+                            LOGGER.warn("Could not load mob file " + path, e);
                         }
                     }
                 });
@@ -129,7 +135,7 @@ public final class MobFeature {
         return Map.ofEntries(entries);
     }
 
-    private static Object2FloatMap<String> attributeMap(ConfigNode node, MappingProcessorSource processorSource) throws ConfigProcessException {
+    private static Object2FloatMap<String> attributeMap(ConfigNode node) throws ConfigProcessException {
         Object2FloatMap<String> map = new Object2FloatOpenHashMap<>(node.size());
         for (ConfigEntry entry : node.entryCollection()) {
             String attribute = entry.getKey();
