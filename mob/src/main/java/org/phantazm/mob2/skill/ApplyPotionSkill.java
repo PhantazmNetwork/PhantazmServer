@@ -17,7 +17,7 @@ import org.phantazm.mob2.selector.SelectorComponent;
 
 import java.util.Objects;
 
-@Model("mob.skill.apply_potion")
+@Model("mob.skill.potion")
 @Cache
 public class ApplyPotionSkill implements SkillComponent {
     private final Data data;
