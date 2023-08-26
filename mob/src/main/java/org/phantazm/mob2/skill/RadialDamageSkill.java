@@ -66,8 +66,9 @@ public class RadialDamageSkill implements SkillComponent {
                 float damage = (float) calculateDamage(self.getDistance(livingEntity));
 
                 livingEntity.getAcquirable().sync(entity -> {
-                    LivingEntity targetEntity = (LivingEntity) entity;
-                    targetEntity.damage(Damage.fromEntity(self, damage), data.bypassArmor);
+                    entity.scheduleNextTick(self -> {
+                        ((LivingEntity) self).damage(Damage.fromEntity(this.self, damage), data.bypassArmor);
+                    });
                 });
             });
         }
