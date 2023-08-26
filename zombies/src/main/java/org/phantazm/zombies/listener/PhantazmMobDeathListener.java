@@ -23,6 +23,7 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.Mob;
+import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.event.PhantazmMobDeathEvent;
 import org.phantazm.zombies.map.MapSettingsInfo;
@@ -101,7 +102,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         player.getPlayer().ifPresent(actualPlayer -> {
             player.module().getKills().onKill(mob);
 
-            if (!mob.data().announceKill()) {
+            if (!mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.ANNOUNCE_KILL)) {
                 return;
             }
 

@@ -8,6 +8,7 @@ public final class ExtraNodeKeys {
     public static final String SPEEDUP_INCREMENTS = "speedupIncrements";
     public static final String SPEEDUP_INTERVAL = "speedupInterval";
     public static final String SPEEDUP_AMOUNT = "speedupAmount";
+    public static final String ANNOUNCE_KILL = "announceKill";
 
     private ExtraNodeKeys() {
     }
