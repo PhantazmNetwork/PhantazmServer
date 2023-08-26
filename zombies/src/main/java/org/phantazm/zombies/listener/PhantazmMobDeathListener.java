@@ -4,7 +4,6 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.vector.Bounds3I;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -85,28 +84,32 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         trySpawnPowerups(event.getEntity());
 
         Damage damage = mob.getLastDamageSource();
-        if (damage != null) {
-            Entity attacker = damage.getAttacker();
-            if (attacker != null) {
-                ZombiesPlayer player = playerMap.get(attacker.getUuid());
-                if (player != null) {
-                    player.getPlayer().ifPresent(actualPlayer -> {
-                        player.module().getKills().onKill(mob);
-
-                        if (mob.data().announceKill()) {
-                            TagResolver mobTag = Placeholder.component("mob", mob.name());
-                            TagResolver playerTag = Placeholder.component("player", actualPlayer.getName());
-
-                            Component killMessage = MiniMessage.miniMessage().deserialize(settingsInfo.killMobFormat(),
-                                mobTag, playerTag);
-                            instance.sendMessage(killMessage);
-                        }
-                    });
-                }
-            }
+        if (damage == null) {
+            return;
         }
 
-        mob.setCustomNameVisible(false);
+        Entity attacker = damage.getAttacker();
+        if (attacker == null) {
+            return;
+        }
+
+        ZombiesPlayer player = playerMap.get(attacker.getUuid());
+        if (player == null) {
+            return;
+        }
+
+        player.getPlayer().ifPresent(actualPlayer -> {
+            player.module().getKills().onKill(mob);
+
+            if (!mob.data().announceKill()) {
+                return;
+            }
+
+            TagResolver mobTag = Placeholder.component("mob", mob.name());
+            TagResolver playerTag = Placeholder.component("player", actualPlayer.getName());
+
+            instance.sendMessage(MiniMessage.miniMessage().deserialize(settingsInfo.killMobFormat(), mobTag, playerTag));
+        });
     }
 
     private void trySpawnPowerups(Entity entity) {
