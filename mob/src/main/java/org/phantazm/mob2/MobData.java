@@ -17,6 +17,7 @@ public record MobData(@NotNull Key key,
     @NotNull EntityType type,
     @NotNull ConfigNode pathfinding,
     boolean showNameTag,
+    boolean announceKill,
     @NotNull ConfigNode equipment,
     @NotNull ConfigNode attributes,
     @Nullable MobMeta meta,
@@ -25,6 +26,11 @@ public record MobData(@NotNull Key key,
     @NotNull ConfigNode extra) implements Keyed {
     @Default("showNameTag")
     public static @NotNull ConfigElement defaultShowNameTag() {
+        return ConfigPrimitive.of(false);
+    }
+
+    @Default("announceKill")
+    public static @NotNull ConfigElement defaultAnnounceKill() {
         return ConfigPrimitive.of(false);
     }
 

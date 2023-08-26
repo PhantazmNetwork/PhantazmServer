@@ -33,7 +33,6 @@ public class Mob extends ProximaEntity {
     private final Map<Trigger, List<Skill>> triggeredSkills;
     private final MobData data;
 
-
     private final String uniqueTeamName;
 
     private TeamSettings teamSettings;
@@ -344,6 +343,23 @@ public class Mob extends ProximaEntity {
     public void setNameTagVisibility(@NotNull TeamsPacket.NameTagVisibility visibility) {
         this.teamSettings = this.teamSettings.withNameTagVisibility(visibility);
         invalidateAndUpdateTeam();
+    }
+
+    public @NotNull Component name() {
+        MobMeta meta = data.meta();
+        if (meta != null) {
+            Component component = meta.customName();
+            if (component != null) {
+                return component;
+            }
+        }
+
+        Component message = getCustomName();
+        if (message == null) {
+            message = Component.translatable(getEntityType().registry().translationKey());
+        }
+
+        return message;
     }
 
     @Override

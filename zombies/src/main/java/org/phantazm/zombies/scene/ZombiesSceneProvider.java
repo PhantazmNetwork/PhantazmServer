@@ -277,7 +277,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         //entity events
         node.addListener(EntityDeathEvent.class,
             new PhantazmMobDeathListener(keyParser, instance, roundHandler::currentRound, powerupHandler,
-                roomTracker, windowTracker, zombiesPlayers));
+                roomTracker, windowTracker, zombiesPlayers, settings));
         node.addListener(EntityDamageByGunEvent.class,
             new EntityDamageByGunEventListener(instance, mapObjects, zombiesPlayers));
 

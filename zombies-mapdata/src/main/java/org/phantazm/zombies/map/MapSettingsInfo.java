@@ -92,7 +92,8 @@ public record MapSettingsInfo(
     @NotNull Component enemiesNearbyMessage,
     @NotNull Component healthDisplay,
     @NotNull String gameJoinFormat,
-    @NotNull String coinLossFormat) {
+    @NotNull String coinLossFormat,
+    @NotNull String killMobFormat) {
 
     public static final int MAP_DATA_VERSION = 1;
 
@@ -160,7 +161,7 @@ public record MapSettingsInfo(
             Component.text("Stopped repairing.", NamedTextColor.RED),
             Component.text("Fully repaired!", NamedTextColor.GREEN),
             Component.text("You cannot repair that window while enemies are nearby!", NamedTextColor.RED),
-            Component.text("❤", NamedTextColor.RED), "", "");
+            Component.text("❤", NamedTextColor.RED), "", "", "<player> killed <mob>!");
     }
 
     @Default("chunkLoadRange")
@@ -191,5 +192,10 @@ public record MapSettingsInfo(
     @Default("reviveInvulnerabilityTicks")
     public static @NotNull ConfigElement defaultReviveInvulnerabilityTicks() {
         return ConfigPrimitive.of(15);
+    }
+
+    @Default("killMobFormat")
+    public static @NotNull ConfigElement defaultKillMobFormat() {
+        return ConfigPrimitive.of("<player> killed <mob>!");
     }
 }

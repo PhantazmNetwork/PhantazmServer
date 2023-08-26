@@ -4,6 +4,10 @@ import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.vector.Bounds3I;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
@@ -22,6 +26,7 @@ import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.event.PhantazmMobDeathEvent;
+import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.Window;
@@ -51,11 +56,13 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     private final BoundedTracker<Window> windowTracker;
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
+    private final MapSettingsInfo settingsInfo;
+
     public PhantazmMobDeathListener(@NotNull KeyParser keyParser, @NotNull Instance instance,
         @NotNull Supplier<Optional<Round>> roundSupplier,
         @NotNull PowerupHandler powerupHandler, @NotNull BoundedTracker<Room> roomTracker,
         @NotNull BoundedTracker<Window> windowTracker,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap, @NotNull MapSettingsInfo settingsInfo) {
         super(instance);
         this.keyParser = Objects.requireNonNull(keyParser);
         this.roundSupplier = Objects.requireNonNull(roundSupplier);
@@ -64,6 +71,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         this.roomTracker = Objects.requireNonNull(roomTracker);
         this.windowTracker = Objects.requireNonNull(windowTracker);
         this.playerMap = Objects.requireNonNull(playerMap);
+        this.settingsInfo = Objects.requireNonNull(settingsInfo);
     }
 
     @Override
@@ -82,7 +90,18 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
             if (attacker != null) {
                 ZombiesPlayer player = playerMap.get(attacker.getUuid());
                 if (player != null) {
-                    player.module().getKills().onKill(mob);
+                    player.getPlayer().ifPresent(actualPlayer -> {
+                        player.module().getKills().onKill(mob);
+
+                        if (mob.data().announceKill()) {
+                            TagResolver mobTag = Placeholder.component("mob", mob.name());
+                            TagResolver playerTag = Placeholder.component("player", actualPlayer.getName());
+
+                            Component killMessage = MiniMessage.miniMessage().deserialize(settingsInfo.killMobFormat(),
+                                mobTag, playerTag);
+                            instance.sendMessage(killMessage);
+                        }
+                    });
                 }
             }
         }
