@@ -223,6 +223,7 @@ public class Mob extends ProximaEntity {
     @Override
     public boolean damage(@NotNull Damage damage, boolean bypassArmor) {
         boolean result = super.damage(damage, bypassArmor);
+
         useIfPresent(Trigger.DAMAGED);
         return result;
     }
@@ -256,12 +257,20 @@ public class Mob extends ProximaEntity {
 
     @Override
     public void kill() {
+        if (isDead || !isActive() || isRemoved()) {
+            return;
+        }
+
         useIfPresent(Trigger.DEATH);
         super.kill();
     }
 
     @Override
     public void remove() {
+        if (isRemoved()) {
+            return;
+        }
+
         super.remove();
         for (Skill skill : allSkills) {
             skill.end();
