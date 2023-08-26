@@ -20,7 +20,7 @@ public class PacketByteBufDataWriter implements DataWriter {
      * @param packetByteBuf The {@link PacketByteBuf} to write to
      */
     public PacketByteBufDataWriter(@NotNull PacketByteBuf packetByteBuf) {
-        this.packetByteBuf = Objects.requireNonNull(packetByteBuf, "packetByteBuf");
+        this.packetByteBuf = Objects.requireNonNull(packetByteBuf);
     }
 
     public PacketByteBufDataWriter() {

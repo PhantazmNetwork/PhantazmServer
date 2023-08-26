@@ -20,23 +20,16 @@ import java.util.function.Function;
 
 public class CoinsCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.coins");
-
-    public enum CoinAction {
-        GIVE,
-        TAKE,
-        SET
-    }
-
     private static final Argument<CoinAction> COIN_ACTION_ARGUMENT =
-            ArgumentType.Enum("action", CoinAction.class).setFormat(ArgumentEnum.Format.LOWER_CASED);
+        ArgumentType.Enum("action", CoinAction.class).setFormat(ArgumentEnum.Format.LOWER_CASED);
     private static final Argument<Integer> COIN_AMOUNT_ARGUMENT = ArgumentType.Integer("amount");
 
     public CoinsCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
         super("coins", PERMISSION);
-        Objects.requireNonNull(sceneMapper, "sceneMapper");
+        Objects.requireNonNull(sceneMapper);
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
-            UUID uuid = ((Player)sender).getUuid();
+            UUID uuid = ((Player) sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
                 ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(uuid);
                 if (zombiesPlayer == null) {
@@ -59,5 +52,11 @@ public class CoinsCommand extends PermissionLockedCommand {
                 }
             });
         }, COIN_ACTION_ARGUMENT, COIN_AMOUNT_ARGUMENT);
+    }
+
+    public enum CoinAction {
+        GIVE,
+        TAKE,
+        SET
     }
 }

@@ -15,7 +15,7 @@ public class PermissionLockedCommand extends Command {
 
     public PermissionLockedCommand(@NotNull String name, @NotNull Permission permission, @Nullable String... aliases) {
         super(name, aliases);
-        this.permission = Objects.requireNonNull(permission, "permission");
+        this.permission = Objects.requireNonNull(permission);
         this.setCondition(this::checkPermission);
     }
 

@@ -12,13 +12,13 @@ public class GamemodeCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.gamemode");
 
     private static final ArgumentEnum<GameMode> GAMEMODE =
-            ArgumentType.Enum("gamemode", GameMode.class).setFormat(ArgumentEnum.Format.LOWER_CASED);
+        ArgumentType.Enum("gamemode", GameMode.class).setFormat(ArgumentEnum.Format.LOWER_CASED);
 
     public GamemodeCommand() {
         super("gamemode", PERMISSION);
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
             player.setGameMode(context.get(GAMEMODE));
         }, GAMEMODE);
     }

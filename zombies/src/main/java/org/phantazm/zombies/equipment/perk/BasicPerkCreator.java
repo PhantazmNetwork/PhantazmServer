@@ -17,9 +17,9 @@ public class BasicPerkCreator implements PerkCreator {
     private final Map<Key, PerkLevelCreator> perkLevelCreators;
 
     public BasicPerkCreator(@NotNull Key equipmentKey, @NotNull Key rootLevel,
-            @NotNull Map<Key, PerkLevelCreator> perkLevelCreators) {
-        this.equipmentKey = Objects.requireNonNull(equipmentKey, "equipmentKey");
-        this.rootLevel = Objects.requireNonNull(rootLevel, "rootLevel");
+        @NotNull Map<Key, PerkLevelCreator> perkLevelCreators) {
+        this.equipmentKey = Objects.requireNonNull(equipmentKey);
+        this.rootLevel = Objects.requireNonNull(rootLevel);
         this.perkLevelCreators = Map.copyOf(perkLevelCreators);
 
         if (!this.perkLevelCreators.containsKey(rootLevel)) {
@@ -42,7 +42,7 @@ public class BasicPerkCreator implements PerkCreator {
 
     private static class Basic extends LeveledEquipment<PerkLevel> implements Perk {
         private Basic(@NotNull Key equipmentKey, @NotNull Key rootLevel,
-                @NotNull Map<Key, ? extends PerkLevel> levelMap) {
+            @NotNull Map<Key, ? extends PerkLevel> levelMap) {
             super(equipmentKey, rootLevel, levelMap);
         }
     }

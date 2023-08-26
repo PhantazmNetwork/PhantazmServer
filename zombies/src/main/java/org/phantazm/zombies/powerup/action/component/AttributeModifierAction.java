@@ -4,9 +4,12 @@ import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
+import net.minestom.server.entity.state.CancellableState;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.CancellableState;
 import org.phantazm.zombies.Attributes;
+import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.action.PowerupAction;
@@ -15,9 +18,7 @@ import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.scene.ZombiesScene;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Model("zombies.powerup.action.attribute_modifier")
 @Cache(false)
@@ -27,7 +28,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
 
     @FactoryMethod
     public AttributeModifierAction(@NotNull Data data,
-            @NotNull @Child("predicate") DeactivationPredicateComponent deactivationPredicate) {
+        @NotNull @Child("predicate") DeactivationPredicateComponent deactivationPredicate) {
         this.data = data;
         this.deactivationPredicate = deactivationPredicate;
     }
@@ -38,11 +39,12 @@ public class AttributeModifierAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(@NotNull String attribute,
-                       double amount,
-                       @NotNull AttributeOperation attributeOperation,
-                       boolean global,
-                       @NotNull @ChildPath("predicate") String deactivationPredicate) {
+    public record Data(
+        @NotNull String attribute,
+        double amount,
+        @NotNull AttributeOperation attributeOperation,
+        boolean global,
+        @NotNull @ChildPath("predicate") String deactivationPredicate) {
 
     }
 
@@ -53,31 +55,32 @@ public class AttributeModifierAction implements PowerupActionComponent {
         private final String attributeName;
         private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
+        private final List<CancellableState<Entity>> states;
+
         private Action(Data data, DeactivationPredicate deactivationPredicate,
-                Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+            Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
             super(deactivationPredicate);
             this.data = data;
             this.attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
             this.attributeUID = UUID.randomUUID();
             this.attributeName = attributeUID.toString();
             this.playerMap = playerMap;
+
+            this.states = new ArrayList<>();
         }
 
-        private void applyAttribute(ZombiesPlayer player) {
-            player.registerCancellable(CancellableState.named(attributeUID, () -> {
-                player.getPlayer().ifPresent(p -> {
-                    p.getAttribute(attribute).addModifier(
-                            new AttributeModifier(attributeUID, attributeName, data.amount, data.attributeOperation));
+        private void applyAttribute(ZombiesPlayer zombiesPlayer) {
+            zombiesPlayer.getPlayer().ifPresent(actualPlayer -> {
+                CancellableState<Entity> state = CancellableState.state(actualPlayer, entity -> {
+                    ((Player) entity).getAttribute(attribute).addModifier(
+                        new AttributeModifier(attributeUID, attributeName, data.amount, data.attributeOperation));
+                }, entity -> {
+                    ((Player) entity).getAttribute(attribute).removeModifier(attributeUID);
                 });
-            }, () -> {
-                player.getPlayer().ifPresent(p -> {
-                    p.getAttribute(attribute).removeModifier(attributeUID);
-                });
-            }), true);
-        }
 
-        private void removeAttribute(ZombiesPlayer player) {
-            player.removeCancellable(attributeUID);
+                actualPlayer.stateHolder().registerState(Stages.ZOMBIES_GAME, state);
+                states.add(state);
+            });
         }
 
         @Override
@@ -92,22 +95,18 @@ public class AttributeModifierAction implements PowerupActionComponent {
 
                     applyAttribute(zombiesPlayer);
                 }
-            }
-            else {
+            } else {
                 applyAttribute(player);
             }
         }
 
         @Override
         public void deactivate(@NotNull ZombiesPlayer player) {
-            if (data.global) {
-                for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                    removeAttribute(zombiesPlayer);
-                }
+            for (CancellableState<Entity> state : states) {
+                state.self().stateHolder().removeState(Stages.ZOMBIES_GAME, state);
             }
-            else {
-                removeAttribute(player);
-            }
+
+            states.clear();
         }
     }
 }

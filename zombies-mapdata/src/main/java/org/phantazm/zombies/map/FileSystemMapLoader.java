@@ -44,17 +44,16 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
      * @param codec the codec used to serialize/deserialize map data files
      */
     public FileSystemMapLoader(@NotNull Path root, @NotNull ConfigCodec codec,
-            @NotNull MappingProcessorSource mappingProcessorSource) {
+        @NotNull MappingProcessorSource mappingProcessorSource) {
         super(root);
-        this.codec = Objects.requireNonNull(codec, "codec");
-        this.mappingProcessorSource = Objects.requireNonNull(mappingProcessorSource, "mappingProcessorSource");
+        this.codec = Objects.requireNonNull(codec);
+        this.mappingProcessorSource = Objects.requireNonNull(mappingProcessorSource);
 
         Set<String> preferredExtensions = codec.getPreferredExtensions();
         if (preferredExtensions.isEmpty()) {
             this.configPredicate = (path, attrs) -> true;
             this.mapInfoName = "settings";
-        }
-        else {
+        } else {
             this.configPredicate = (path, attr) -> {
                 if (!attr.isRegularFile()) {
                     return false;
@@ -88,58 +87,58 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         List<SpawnpointInfo> spawnpoints = new ArrayList<>();
 
         FileUtils.forEachFileMatching(paths.rooms, configPredicate, file -> rooms.add(
-                Configuration.read(file, codec, mappingProcessorSource.processorFor(Token.ofClass(RoomInfo.class)))));
+            Configuration.read(file, codec, mappingProcessorSource.processorFor(Token.ofClass(RoomInfo.class)))));
 
         FileUtils.forEachFileMatching(paths.doors, configPredicate, file -> doors.add(
-                Configuration.read(file, codec, mappingProcessorSource.processorFor(Token.ofClass(DoorInfo.class)))));
+            Configuration.read(file, codec, mappingProcessorSource.processorFor(Token.ofClass(DoorInfo.class)))));
 
         FileUtils.forEachFileMatching(paths.shops, configPredicate, file -> shops.add(
-                Configuration.read(file, codec, mappingProcessorSource.processorFor(Token.ofClass(ShopInfo.class)))));
+            Configuration.read(file, codec, mappingProcessorSource.processorFor(Token.ofClass(ShopInfo.class)))));
 
         FileUtils.forEachFileMatching(paths.windows, configPredicate, file -> windows.add(
-                Configuration.read(file, codec, mappingProcessorSource.processorFor(Token.ofClass(WindowInfo.class)))));
+            Configuration.read(file, codec, mappingProcessorSource.processorFor(Token.ofClass(WindowInfo.class)))));
 
         FileUtils.forEachFileMatching(paths.rounds, configPredicate, file -> rounds.add(
-                Configuration.read(file, codec, mappingProcessorSource.processorFor(Token.ofClass(RoundInfo.class)))));
+            Configuration.read(file, codec, mappingProcessorSource.processorFor(Token.ofClass(RoundInfo.class)))));
         rounds.sort(Comparator.comparingInt(RoundInfo::round));
 
         FileUtils.forEachFileMatching(paths.spawnrules, configPredicate, file -> spawnrules.add(
-                Configuration.read(file, codec,
-                        mappingProcessorSource.processorFor(Token.ofClass(SpawnruleInfo.class)))));
+            Configuration.read(file, codec,
+                mappingProcessorSource.processorFor(Token.ofClass(SpawnruleInfo.class)))));
 
         FileUtils.forEachFileMatching(paths.spawnpoints, configPredicate, file -> spawnpoints.add(
-                Configuration.read(file, codec,
-                        mappingProcessorSource.processorFor(Token.ofClass(SpawnpointInfo.class)))));
+            Configuration.read(file, codec,
+                mappingProcessorSource.processorFor(Token.ofClass(SpawnpointInfo.class)))));
 
         String sidebarSettingsPath =
-                "sidebar" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
+            "sidebar" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         ConfigNode scoreboard = Configuration.read(mapDirectory.resolve(sidebarSettingsPath), codec).asNode();
 
         String corpsePath =
-                "corpse" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
+            "corpse" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         ConfigNode corpse = Configuration.read(mapDirectory.resolve(corpsePath), codec).asNode();
 
         String coinsPath =
-                "coins" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
+            "coins" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         PlayerCoinsInfo playerCoins = Configuration.read(mapDirectory.resolve(coinsPath), codec,
-                mappingProcessorSource.processorFor(Token.ofClass(PlayerCoinsInfo.class)));
+            mappingProcessorSource.processorFor(Token.ofClass(PlayerCoinsInfo.class)));
 
         String leaderboardPath =
-                "leaderboard" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
+            "leaderboard" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         LeaderboardInfo leaderboard = Configuration.read(mapDirectory.resolve(leaderboardPath), codec,
-                mappingProcessorSource.processorFor(Token.ofClass(LeaderboardInfo.class)));
+            mappingProcessorSource.processorFor(Token.ofClass(LeaderboardInfo.class)));
 
         String webhookPath =
-                "webhook" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
+            "webhook" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         WebhookInfo webhook = Configuration.read(mapDirectory.resolve(webhookPath), codec,
-                mappingProcessorSource.processorFor(Token.ofClass(WebhookInfo.class)));
+            mappingProcessorSource.processorFor(Token.ofClass(WebhookInfo.class)));
 
 
         MapSettingsInfo mapSettingsInfo = Configuration.read(mapInfoFile, codec,
-                mappingProcessorSource.processorFor(Token.ofClass(MapSettingsInfo.class)));
+            mappingProcessorSource.processorFor(Token.ofClass(MapSettingsInfo.class)));
 
         return new MapInfo(mapSettingsInfo, playerCoins, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints,
-                leaderboard, scoreboard, corpse, webhook);
+            leaderboard, scoreboard, corpse, webhook);
     }
 
     @Override
@@ -149,8 +148,8 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
 
         MapSettingsInfo mapSettingsInfo = data.settings();
         Configuration.write(mapDirectory.resolve(mapInfoName),
-                mappingProcessorSource.processorFor(Token.ofClass(MapSettingsInfo.class))
-                        .elementFromData(mapSettingsInfo), codec);
+            mappingProcessorSource.processorFor(Token.ofClass(MapSettingsInfo.class))
+                .elementFromData(mapSettingsInfo), codec);
 
         FolderPaths paths = new FolderPaths(mapDirectory);
 
@@ -173,19 +172,19 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         String extension = codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension();
         for (RoomInfo room : data.rooms()) {
             Configuration.write(paths.rooms.resolve(room.id().value() + extension), codec,
-                    mappingProcessorSource.processorFor(Token.ofClass(RoomInfo.class)), room);
+                mappingProcessorSource.processorFor(Token.ofClass(RoomInfo.class)), room);
         }
 
         for (DoorInfo door : data.doors()) {
             Configuration.write(paths.doors.resolve(door.id().value() + extension),
-                    mappingProcessorSource.processorFor(Token.ofClass(DoorInfo.class)).elementFromData(door), codec);
+                mappingProcessorSource.processorFor(Token.ofClass(DoorInfo.class)).elementFromData(door), codec);
         }
 
         for (ShopInfo shop : data.shops()) {
             Bounds3I trigger = shop.trigger();
             Vec3I origin = Vec3I.immutable(trigger.originX(), trigger.originY(), trigger.originZ());
             Configuration.write(paths.shops.resolve(getPositionString(origin) + "-" + shop.id().value() + extension),
-                    mappingProcessorSource.processorFor(Token.ofClass(ShopInfo.class)).elementFromData(shop), codec);
+                mappingProcessorSource.processorFor(Token.ofClass(ShopInfo.class)).elementFromData(shop), codec);
         }
 
         List<WindowInfo> windows = data.windows();
@@ -194,28 +193,28 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
             Bounds3I frameRegion = window.frameRegion();
             Vec3I origin = Vec3I.immutable(frameRegion.originX(), frameRegion.originY(), frameRegion.originZ());
             Configuration.write(paths.windows.resolve(getPositionString(origin) + "-" + i + extension),
-                    mappingProcessorSource.processorFor(Token.ofClass(WindowInfo.class)).elementFromData(window),
-                    codec);
+                mappingProcessorSource.processorFor(Token.ofClass(WindowInfo.class)).elementFromData(window),
+                codec);
         }
 
         for (RoundInfo round : data.rounds()) {
             Configuration.write(paths.rounds.resolve(round.round() + extension),
-                    mappingProcessorSource.processorFor(Token.ofClass(RoundInfo.class)).elementFromData(round), codec);
+                mappingProcessorSource.processorFor(Token.ofClass(RoundInfo.class)).elementFromData(round), codec);
         }
 
         for (SpawnruleInfo spawnrule : data.spawnrules()) {
             Configuration.write(paths.spawnrules.resolve(spawnrule.id().value() + extension),
-                    mappingProcessorSource.processorFor(Token.ofClass(SpawnruleInfo.class)).elementFromData(spawnrule),
-                    codec);
+                mappingProcessorSource.processorFor(Token.ofClass(SpawnruleInfo.class)).elementFromData(spawnrule),
+                codec);
         }
 
         List<SpawnpointInfo> spawnpoints = data.spawnpoints();
         for (int i = 0; i < spawnpoints.size(); i++) {
             SpawnpointInfo spawnpoint = spawnpoints.get(i);
             Configuration.write(
-                    paths.spawnpoints.resolve(getPositionString(spawnpoint.position()) + "-" + i + extension),
-                    mappingProcessorSource.processorFor(Token.ofClass(SpawnpointInfo.class))
-                            .elementFromData(spawnpoint), codec);
+                paths.spawnpoints.resolve(getPositionString(spawnpoint.position()) + "-" + i + extension),
+                mappingProcessorSource.processorFor(Token.ofClass(SpawnpointInfo.class))
+                    .elementFromData(spawnpoint), codec);
         }
 
         Configuration.write(mapDirectory.resolve("sidebar" + extension), data.scoreboard(), codec);
@@ -228,7 +227,8 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
     }
 
     @Override
-    public @NotNull @Unmodifiable List<String> loadableData() throws IOException {
+    public @NotNull
+    @Unmodifiable List<String> loadableData() throws IOException {
         if (!Files.exists(root)) {
             FileUtils.createDirectories(root);
         }
@@ -240,24 +240,25 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
 
     private Path mapDirectoryFromName(String mapName) throws IOException {
         return FileUtils.findFirstOrThrow(root, (path, attr) -> attr.isDirectory() && path.endsWith(mapName),
-                () -> "Unable to find map folder for " + mapName);
+            () -> "Unable to find map folder for " + mapName);
     }
 
     private String getPositionString(Vec3I position) {
         return position.x() + "_" + position.y() + "_" + position.z();
     }
 
-    private record FolderPaths(Path rooms,
-                               Path doors,
-                               Path shops,
-                               Path windows,
-                               Path rounds,
-                               Path spawnrules,
-                               Path spawnpoints) {
+    private record FolderPaths(
+        Path rooms,
+        Path doors,
+        Path shops,
+        Path windows,
+        Path rounds,
+        Path spawnrules,
+        Path spawnpoints) {
         private FolderPaths(Path root) {
             this(root.resolve(ROOMS_PATH), root.resolve(DOORS_PATH), root.resolve(SHOPS_PATH),
-                    root.resolve(WINDOWS_PATH), root.resolve(ROUNDS_PATH), root.resolve(SPAWNRULES_PATH),
-                    root.resolve(SPAWNPOINTS_PATH));
+                root.resolve(WINDOWS_PATH), root.resolve(ROUNDS_PATH), root.resolve(SPAWNRULES_PATH),
+                root.resolve(SPAWNPOINTS_PATH));
         }
     }
 }

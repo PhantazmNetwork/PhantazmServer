@@ -3,8 +3,8 @@ package org.phantazm.zombies.equipment.gun;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * The state of a gun. This class is immutable and may be updated with the {@link Builder}.
- * If necessary, {@link GunState} can be stored since it will not mutate with time.
+ * The state of a gun. This class is immutable and may be updated with the {@link Builder}. If necessary,
+ * {@link GunState} can be stored since it will not mutate with time.
  *
  * @param ticksSinceLastShot   The number of ticks since the last shot began
  * @param ticksSinceLastFire   The number of ticks since the last gun's last fire
@@ -14,14 +14,15 @@ import org.jetbrains.annotations.NotNull;
  * @param isMainEquipment      Whether the gun is the main equipment
  * @param queuedShots          The number of shots queued to be fired
  */
-public record GunState(long ticksSinceLastShot,
-                       long ticksSinceLastFire,
-                       long ticksSinceLastReload,
-                       boolean reloadComplete,
-                       int ammo,
-                       int clip,
-                       boolean isMainEquipment,
-                       int queuedShots) {
+public record GunState(
+    long ticksSinceLastShot,
+    long ticksSinceLastFire,
+    long ticksSinceLastReload,
+    boolean reloadComplete,
+    int ammo,
+    int clip,
+    boolean isMainEquipment,
+    int queuedShots) {
 
     /**
      * Converts the {@link GunState} to a {@link Builder}.
@@ -30,8 +31,8 @@ public record GunState(long ticksSinceLastShot,
      */
     public @NotNull GunState.Builder toBuilder() {
         return new Builder().setTicksSinceLastShot(ticksSinceLastShot).setTicksSinceLastFire(ticksSinceLastFire)
-                .setTicksSinceLastReload(ticksSinceLastReload).setReloadComplete(reloadComplete).setAmmo(ammo)
-                .setClip(clip).setMainEquipment(isMainEquipment).setQueuedShots(queuedShots);
+            .setTicksSinceLastReload(ticksSinceLastReload).setReloadComplete(reloadComplete).setAmmo(ammo)
+            .setClip(clip).setMainEquipment(isMainEquipment).setQueuedShots(queuedShots);
     }
 
     /**
@@ -211,7 +212,7 @@ public record GunState(long ticksSinceLastShot,
          */
         public @NotNull GunState build() {
             return new GunState(ticksSinceLastShot, ticksSinceLastFire, ticksSinceLastReload, reloadComplete, ammo,
-                    clip, isMainEquipment, queuedShots);
+                clip, isMainEquipment, queuedShots);
         }
 
     }

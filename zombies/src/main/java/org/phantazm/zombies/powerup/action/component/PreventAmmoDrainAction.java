@@ -23,7 +23,7 @@ public class PreventAmmoDrainAction implements PowerupActionComponent {
 
     @FactoryMethod
     public PreventAmmoDrainAction(
-            @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
+        @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
         this.deactivationPredicate = deactivationPredicate;
     }
 

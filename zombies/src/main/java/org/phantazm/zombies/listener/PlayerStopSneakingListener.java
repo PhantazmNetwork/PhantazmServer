@@ -14,9 +14,9 @@ public class PlayerStopSneakingListener extends ZombiesPlayerEventListener<Playe
     private final WindowHandler windowHandler;
 
     public PlayerStopSneakingListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull WindowHandler windowHandler) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull WindowHandler windowHandler) {
         super(instance, zombiesPlayers);
-        this.windowHandler = Objects.requireNonNull(windowHandler, "windowHandler");
+        this.windowHandler = Objects.requireNonNull(windowHandler);
     }
 
     @Override

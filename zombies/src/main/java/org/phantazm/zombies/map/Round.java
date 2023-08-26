@@ -1,11 +1,12 @@
 package org.phantazm.zombies.map;
 
+import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.Tickable;
 import org.phantazm.core.packet.MinestomPacketUtils;
 import org.phantazm.messaging.packet.server.RoundStartPacket;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.spawn.SpawnDistributor;
@@ -24,7 +25,7 @@ public class Round implements Tickable {
     private final List<Action<Round>> endActions;
     private final SpawnDistributor spawnDistributor;
     private final List<Spawnpoint> spawnpoints;
-    private final Map<UUID, PhantazmMob> spawnedMobs;
+    private final Map<UUID, Mob> spawnedMobs;
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
 
     private boolean isActive;
@@ -46,34 +47,34 @@ public class Round implements Tickable {
             LOGGER.warn("Round {} has no waves", roundInfo);
         }
 
-        this.roundInfo = Objects.requireNonNull(roundInfo, "roundInfo");
+        this.roundInfo = Objects.requireNonNull(roundInfo);
         this.waves = List.copyOf(waves);
         this.startActions = List.copyOf(startActions);
         this.endActions = List.copyOf(endActions);
-        this.spawnDistributor = Objects.requireNonNull(spawnDistributor, "spawnDistributor");
+        this.spawnDistributor = Objects.requireNonNull(spawnDistributor);
 
         this.spawnedMobs = new ConcurrentHashMap<>();
-        this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        this.spawnpoints = Objects.requireNonNull(spawnpoints);
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
     }
 
     public @NotNull RoundInfo getRoundInfo() {
         return roundInfo;
     }
 
-    public void removeMob(@NotNull PhantazmMob mob) {
-        if (spawnedMobs.remove(mob.entity().getUuid()) != null) {
+    public void removeMob(@NotNull Mob mob) {
+        if (spawnedMobs.remove(mob.getUuid()) != null) {
             totalMobCount--;
         }
     }
 
-    public void addMob(@NotNull PhantazmMob mob) {
-        if (spawnedMobs.put(mob.entity().getUuid(), mob) == null) {
+    public void addMob(@NotNull Mob mob) {
+        if (spawnedMobs.put(mob.getUuid(), mob) == null) {
             totalMobCount++;
         }
     }
 
-    public @Unmodifiable @NotNull List<PhantazmMob> getSpawnedMobs() {
+    public @Unmodifiable @NotNull List<Mob> getSpawnedMobs() {
         return List.copyOf(spawnedMobs.values());
     }
 
@@ -141,16 +142,18 @@ public class Round implements Tickable {
         waveTicks = 0;
         totalMobCount = 0;
 
-        Iterator<PhantazmMob> spawnedIterator = spawnedMobs.values().iterator();
+        Iterator<Mob> spawnedIterator = spawnedMobs.values().iterator();
         while (spawnedIterator.hasNext()) {
-            PhantazmMob mob = spawnedIterator.next();
+            Mob mob = spawnedIterator.next();
             spawnedIterator.remove();
 
-            mob.entity().kill();
+            mob.getAcquirable().sync(self -> {
+                ((LivingEntity)self).kill();
+            });
         }
     }
 
-    public @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo) {
+    public @NotNull List<Mob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo) {
         return spawnMobs(spawnInfo, spawnDistributor, false);
     }
 
@@ -158,15 +161,15 @@ public class Round implements Tickable {
         return spawnedMobs.containsKey(uuid);
     }
 
-    private @NotNull List<PhantazmMob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo,
-            @NotNull SpawnDistributor spawnDistributor, boolean isWave) {
+    private @NotNull List<Mob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo, @NotNull SpawnDistributor spawnDistributor,
+            boolean isWave) {
         if (!isActive) {
             throw new IllegalStateException("Round must be active to spawn mobs");
         }
 
-        List<PhantazmMob> spawns = spawnDistributor.distributeSpawns(spawnpoints, spawnInfo);
-        for (PhantazmMob spawn : spawns) {
-            spawnedMobs.put(spawn.entity().getUuid(), spawn);
+        List<Mob> spawns = spawnDistributor.distributeSpawns(spawnpoints, spawnInfo);
+        for (Mob spawn : spawns) {
+            spawnedMobs.put(spawn.getUuid(), spawn);
         }
 
         if (isWave) {
@@ -191,7 +194,7 @@ public class Round implements Tickable {
 
             ++waveTicks;
             if (waveIndex < waves.size() && waveTicks > currentWave.getWaveInfo().delayTicks()) {
-                List<PhantazmMob> mobs = spawnMobs(currentWave.getWaveInfo().spawns(), spawnDistributor, true);
+                List<Mob> mobs = spawnMobs(currentWave.getWaveInfo().spawns(), spawnDistributor, true);
                 currentWave.onSpawn(mobs);
 
                 waveTicks = 0;

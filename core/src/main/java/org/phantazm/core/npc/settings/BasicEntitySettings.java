@@ -58,15 +58,16 @@ public class BasicEntitySettings implements Consumer<Entity> {
     }
 
     @DataObject
-    public record Data(@NotNull Component displayName,
-                       boolean hasGravity,
-                       boolean hasPhysics,
-                       boolean onFire,
-                       boolean invisible,
-                       boolean small,
-                       boolean glowing,
-                       @NotNull Entity.Pose pose,
-                       @NotNull Map<EquipmentSlot, ItemStack> equipment) {
+    public record Data(
+        @NotNull Component displayName,
+        boolean hasGravity,
+        boolean hasPhysics,
+        boolean onFire,
+        boolean invisible,
+        boolean small,
+        boolean glowing,
+        @NotNull Entity.Pose pose,
+        @NotNull Map<EquipmentSlot, ItemStack> equipment) {
         @Default("displayName")
         public static ConfigElement defaultDisplayName() {
             return ConfigPrimitive.of("");

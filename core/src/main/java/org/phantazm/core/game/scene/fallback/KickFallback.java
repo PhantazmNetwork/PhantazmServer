@@ -22,7 +22,7 @@ public class KickFallback implements SceneFallback {
      * @param kickMessage The message used for kicks
      */
     public KickFallback(@NotNull Component kickMessage) {
-        this.kickMessage = Objects.requireNonNull(kickMessage, "kickMessage");
+        this.kickMessage = Objects.requireNonNull(kickMessage);
     }
 
     @Override

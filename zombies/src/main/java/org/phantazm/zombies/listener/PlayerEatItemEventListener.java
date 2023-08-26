@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public class PlayerEatItemEventListener extends ZombiesPlayerEventListener<PlayerPreEatEvent> {
     public PlayerEatItemEventListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
         super(instance, zombiesPlayers);
     }
 

@@ -10,7 +10,7 @@ public enum Evaluation {
     ANY_TRUE;
 
     public <T, V> boolean evaluate(@NotNull Iterable<? extends BiPredicate<T, V>> predicates, T type, V second) {
-        Objects.requireNonNull(predicates, "predicates");
+        Objects.requireNonNull(predicates);
 
         return switch (this) {
             case ALL_TRUE -> {

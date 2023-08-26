@@ -9,7 +9,7 @@ public class SceneShutdownEvent implements SceneEvent {
     private final Scene<?> scene;
 
     public SceneShutdownEvent(@NotNull Scene<?> scene) {
-        this.scene = Objects.requireNonNull(scene, "scene");
+        this.scene = Objects.requireNonNull(scene);
     }
 
     @Override

@@ -27,11 +27,12 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
      * @param players The players in the request
      */
     public BasicLobbyJoinRequest(@NotNull Collection<PlayerView> players) {
-        this.players = Objects.requireNonNull(players, "players");
+        this.players = Objects.requireNonNull(players);
     }
 
     @Override
-    public @UnmodifiableView @NotNull Collection<PlayerView> getPlayers() {
+    public @UnmodifiableView
+    @NotNull Collection<PlayerView> getPlayers() {
         return players;
     }
 
@@ -44,11 +45,10 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
 
                 if (player.getInstance() == instance) {
                     futures.add(player.teleport(instanceConfig.spawnPoint()));
-                }
-                else {
+                } else {
                     Instance oldInstance = player.getInstance();
                     player.setInstanceAddCallback(() -> Utils.handleInstanceTransfer(oldInstance, instance, player,
-                            newInstancePlayer -> !lobby.hasGhost(newInstancePlayer)));
+                        newInstancePlayer -> !lobby.hasGhost(newInstancePlayer)));
                     futures.add(player.setInstance(instance, instanceConfig.spawnPoint()));
                 }
             });

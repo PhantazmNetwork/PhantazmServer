@@ -33,9 +33,9 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
 
     @FactoryMethod
     public EquipmentUpgradeCostDisplayCreator(@NotNull Data data,
-            @NotNull @Child("upgrade_path") UpgradePath upgradePath) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.upgradePath = Objects.requireNonNull(upgradePath, "upgradePath");
+        @NotNull @Child("upgrade_path") UpgradePath upgradePath) {
+        this.data = Objects.requireNonNull(data);
+        this.upgradePath = Objects.requireNonNull(upgradePath);
     }
 
     @Override
@@ -52,9 +52,9 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
 
         private Display(@NotNull Data data, @NotNull ZombiesPlayer zombiesPlayer, @NotNull UpgradePath upgradePath) {
             super(new ViewableHologram(Vec.ZERO, 0, player -> player.getUuid().equals(zombiesPlayer.getUUID())));
-            this.data = Objects.requireNonNull(data, "data");
-            this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
-            this.upgradePath = Objects.requireNonNull(upgradePath, "upgradePath");
+            this.data = Objects.requireNonNull(data);
+            this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
+            this.upgradePath = Objects.requireNonNull(upgradePath);
             this.updateTicks = -1;
         }
 
@@ -88,7 +88,7 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
 
         private int applyModifiers(int cost) {
             Collection<Transaction.Modifier> modifiers =
-                    zombiesPlayer.module().compositeTransactionModifiers().modifiers(data.costModifier);
+                zombiesPlayer.module().compositeTransactionModifiers().modifiers(data.costModifier);
 
             return -zombiesPlayer.module().getCoins().runTransaction(new Transaction(modifiers, -cost)).change();
         }
@@ -100,8 +100,7 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
                 Component text = MiniMessage.miniMessage().deserialize(data.format, costPlaceholder);
                 if (hologram.isEmpty()) {
                     hologram.add(text);
-                }
-                else {
+                } else {
                     hologram.set(0, text);
                 }
             }
@@ -125,14 +124,15 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
     }
 
     @DataObject
-    public record Data(@NotNull Vec3D position,
-                       @NotNull String format,
-                       @NotNull Key equipmentKey,
-                       @NotNull Key groupKey,
-                       int baseCost,
-                       @NotNull Map<Key, Integer> upgradeCosts,
-                       @NotNull Key costModifier,
-                       int updateInterval,
-                       @NotNull @ChildPath("upgrade_path") String upgradePath) {
+    public record Data(
+        @NotNull Vec3D position,
+        @NotNull String format,
+        @NotNull Key equipmentKey,
+        @NotNull Key groupKey,
+        int baseCost,
+        @NotNull Map<Key, Integer> upgradeCosts,
+        @NotNull Key costModifier,
+        int updateInterval,
+        @NotNull @ChildPath("upgrade_path") String upgradePath) {
     }
 }

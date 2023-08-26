@@ -19,24 +19,28 @@ public sealed interface Role permits Role.RoleImpl {
     }, ignored -> {
     }, Integer.MIN_VALUE, Set.of());
 
-    @NotNull String identifier();
+    static @NotNull Role of(@NotNull String identifier,
+        @NotNull Function<? super Player, ? extends Component> chatStyleFunction,
+        @NotNull Consumer<? super Player> displayNameStyler, int priority, @NotNull Set<Permission> permissions) {
+        Objects.requireNonNull(identifier);
+        Objects.requireNonNull(chatStyleFunction);
+        Objects.requireNonNull(displayNameStyler);
+        return new RoleImpl(identifier, chatStyleFunction, displayNameStyler, priority, Set.copyOf(permissions));
+    }
 
-    @Nullable Component styleChatName(@NotNull Player player);
+    @NotNull
+    String identifier();
+
+    @Nullable
+    Component styleChatName(@NotNull Player player);
 
     void styleDisplayName(@NotNull Player player);
 
     int priority();
 
-    @NotNull @Unmodifiable Set<Permission> grantedPermissions();
-
-    static @NotNull Role of(@NotNull String identifier,
-            @NotNull Function<? super Player, ? extends Component> chatStyleFunction,
-            @NotNull Consumer<? super Player> displayNameStyler, int priority, @NotNull Set<Permission> permissions) {
-        Objects.requireNonNull(identifier, "identifier");
-        Objects.requireNonNull(chatStyleFunction, "chatStyleFunction");
-        Objects.requireNonNull(displayNameStyler, "displayNameStyler");
-        return new RoleImpl(identifier, chatStyleFunction, displayNameStyler, priority, Set.copyOf(permissions));
-    }
+    @NotNull
+    @Unmodifiable
+    Set<Permission> grantedPermissions();
 
     final class RoleImpl implements Role {
         private final String identifier;
@@ -46,7 +50,7 @@ public sealed interface Role permits Role.RoleImpl {
         private final Set<Permission> permissions;
 
         private RoleImpl(String identifier, Function<? super Player, ? extends Component> chatStyleFunction,
-                Consumer<? super Player> displayNameStyler, int priority, Set<Permission> permissions) {
+            Consumer<? super Player> displayNameStyler, int priority, Set<Permission> permissions) {
             this.identifier = identifier;
             this.chatStyleFunction = chatStyleFunction;
             this.displayNameStyler = displayNameStyler;

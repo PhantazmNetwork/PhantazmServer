@@ -16,8 +16,8 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
 
     @FactoryMethod
     public AddEquipmentInteractor(@NotNull Data data,
-            @NotNull @Child("success") List<ShopInteractor> successInteractors,
-            @NotNull @Child("failure") List<ShopInteractor> failureInteractors) {
+        @NotNull @Child("success") List<ShopInteractor> successInteractors,
+        @NotNull @Child("failure") List<ShopInteractor> failureInteractors) {
         super(data);
         this.successInteractors = successInteractors;
         this.failureInteractors = failureInteractors;
@@ -38,10 +38,10 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
 
     private boolean addOrReplaceEquipment(PlayerInteraction interaction) {
         return interaction.player().module().getEquipmentHandler()
-                .addOrReplaceEquipment(data.groupKey, data.equipmentKey, data.allowReplace, data.specificSlot,
-                        data.allowDuplicate,
-                        () -> interaction.player().module().getEquipmentCreator().createEquipment(data.equipmentKey),
-                        interaction.player().getPlayer().orElse(null)).success();
+            .addOrReplaceEquipment(data.groupKey, data.equipmentKey, data.allowReplace, data.specificSlot,
+                data.allowDuplicate,
+                () -> interaction.player().module().getEquipmentCreator().createEquipment(data.equipmentKey),
+                interaction.player().getPlayer().orElse(null)).success();
     }
 
     @Override
@@ -51,12 +51,13 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
     }
 
     @DataObject
-    public record Data(@NotNull Key equipmentKey,
-                       @NotNull Key groupKey,
-                       boolean allowReplace,
-                       boolean allowDuplicate,
-                       int specificSlot,
-                       @NotNull @ChildPath("success") List<String> successInteractors,
-                       @NotNull @ChildPath("failure") List<String> failureInteractors) {
+    public record Data(
+        @NotNull Key equipmentKey,
+        @NotNull Key groupKey,
+        boolean allowReplace,
+        boolean allowDuplicate,
+        int specificSlot,
+        @NotNull @ChildPath("success") List<String> successInteractors,
+        @NotNull @ChildPath("failure") List<String> failureInteractors) {
     }
 }

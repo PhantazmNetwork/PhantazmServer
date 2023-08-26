@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public record PlayerJoinLobbyEvent(Player player) implements PlayerEvent {
     public PlayerJoinLobbyEvent(@NotNull Player player) {
-        this.player = Objects.requireNonNull(player, "player");
+        this.player = Objects.requireNonNull(player);
     }
 
     @Override

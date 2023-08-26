@@ -24,10 +24,9 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
 
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @NotNull Collection<LivingEntity> findEntities(@NotNull Instance instance, @NotNull Pos start,
-            @NotNull Point end) {
+        @NotNull Point end) {
         Collection<LivingEntity> entities = new ArrayList<>();
         instance.getEntityTracker().raytraceCandidates(start, end, EntityTracker.Target.LIVING_ENTITIES, entities::add);
 

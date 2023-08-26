@@ -11,15 +11,12 @@ import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
-import org.phantazm.commons.CancellableState;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.MapSettingsInfo;
 
-import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 public class BasicQuitStateActivable implements Activable {
     private final Instance instance;
@@ -29,23 +26,21 @@ public class BasicQuitStateActivable implements Activable {
     private final TabList tabList;
     private final BelowNameTag belowNameTag;
     private final InventoryAccessRegistry accessRegistry;
-    private final Map<UUID, CancellableState> stateMap;
     private final TickTaskScheduler scheduler;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public BasicQuitStateActivable(@NotNull Instance instance, @NotNull PlayerView playerView,
-            @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList,
-            @NotNull BelowNameTag belowNameTag, @NotNull InventoryAccessRegistry accessRegistry,
-            @NotNull Map<UUID, CancellableState> stateMap, @NotNull TickTaskScheduler scheduler) {
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.settings = Objects.requireNonNull(settings, "settings");
-        this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
-        this.tabList = Objects.requireNonNull(tabList, "tabList");
-        this.belowNameTag = Objects.requireNonNull(belowNameTag, "belowNameTag");
-        this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
-        this.stateMap = Objects.requireNonNull(stateMap, "stateMap");
-        this.scheduler = Objects.requireNonNull(scheduler, "scheduler");
+        @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList,
+        @NotNull BelowNameTag belowNameTag, @NotNull InventoryAccessRegistry accessRegistry,
+        @NotNull TickTaskScheduler scheduler) {
+        this.instance = Objects.requireNonNull(instance);
+        this.playerView = Objects.requireNonNull(playerView);
+        this.settings = Objects.requireNonNull(settings);
+        this.sidebar = Objects.requireNonNull(sidebar);
+        this.tabList = Objects.requireNonNull(tabList);
+        this.belowNameTag = Objects.requireNonNull(belowNameTag);
+        this.accessRegistry = Objects.requireNonNull(accessRegistry);
+        this.scheduler = Objects.requireNonNull(scheduler);
     }
 
     @Override
@@ -61,6 +56,8 @@ public class BasicQuitStateActivable implements Activable {
             player.resetTitle();
             player.sendActionBar(Component.empty());
             player.stopSound(SoundStop.all());
+            player.stateHolder().setStage(null);
+            player.setLastDamageSource(null);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
             TagResolver quitterPlaceholder = Placeholder.component("quitter", displayName);
@@ -69,11 +66,6 @@ public class BasicQuitStateActivable implements Activable {
 
         accessRegistry.switchAccess(null);
 
-        for (CancellableState state : stateMap.values()) {
-            state.end();
-        }
-
         scheduler.end();
-        stateMap.clear();
     }
 }

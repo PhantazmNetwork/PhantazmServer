@@ -23,11 +23,11 @@ public class PartyJoinCommand {
     }
 
     public static @NotNull Command joinCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
-            @NotNull Map<? super UUID, Party> partyMap, @NotNull PlayerViewProvider viewProvider) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(miniMessage, "miniMessage");
-        Objects.requireNonNull(partyMap, "partyMap");
-        Objects.requireNonNull(viewProvider, "viewProvider");
+        @NotNull Map<? super UUID, Party> partyMap, @NotNull PlayerViewProvider viewProvider) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(miniMessage);
+        Objects.requireNonNull(partyMap);
+        Objects.requireNonNull(viewProvider);
 
         Argument<String> nameArgument = ArgumentType.Word("name");
         Command command = new Command("join");
@@ -62,7 +62,7 @@ public class PartyJoinCommand {
                         return;
                     }
 
-                    Player player = (Player)sender;
+                    Player player = (Player) sender;
                     if (!party.getInvitationManager().hasInvitation(player.getUuid())) {
                         sender.sendMessage(config.noInvite());
                         return;

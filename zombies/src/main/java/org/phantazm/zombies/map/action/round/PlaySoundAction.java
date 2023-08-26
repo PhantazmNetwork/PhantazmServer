@@ -23,7 +23,7 @@ public class PlaySoundAction implements Action<Round> {
 
     @FactoryMethod
     public PlaySoundAction(@NotNull Data data, @NotNull Random random,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
         this.data = data;
         this.random = random;
         this.playerMap = playerMap;
@@ -34,7 +34,7 @@ public class PlaySoundAction implements Action<Round> {
         for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
             if (!zombiesPlayer.hasQuit()) {
                 zombiesPlayer.getPlayer()
-                        .ifPresent(player -> player.playSound(Sound.sound(data.sound).seed(random.nextLong()).build()));
+                    .ifPresent(player -> player.playSound(Sound.sound(data.sound).seed(random.nextLong()).build()));
             }
         }
     }

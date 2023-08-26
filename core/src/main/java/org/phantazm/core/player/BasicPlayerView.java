@@ -49,10 +49,10 @@ class BasicPlayerView implements PlayerView {
      * @param uuid              The {@link UUID} of the {@link Player} to store
      */
     BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
-            @NotNull UUID uuid) {
-        this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
-        this.uuid = Objects.requireNonNull(uuid, "player");
+        @NotNull UUID uuid) {
+        this.identitySource = Objects.requireNonNull(identitySource);
+        this.connectionManager = Objects.requireNonNull(connectionManager);
+        this.uuid = Objects.requireNonNull(uuid);
         this.playerReference = new WeakReference<>(null);
     }
 
@@ -64,9 +64,9 @@ class BasicPlayerView implements PlayerView {
      * @param player            the player, whose UUID and username will be cached immediately
      */
     BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
-            @NotNull Player player) {
-        this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
+        @NotNull Player player) {
+        this.identitySource = Objects.requireNonNull(identitySource);
+        this.connectionManager = Objects.requireNonNull(connectionManager);
         this.uuid = player.getUuid();
         this.playerReference = new WeakReference<>(player);
         this.username = player.getUsername();
@@ -156,8 +156,7 @@ class BasicPlayerView implements PlayerView {
         if (player == null) {
             playerReference = NULL_REFERENCE;
             return Optional.empty();
-        }
-        else {
+        } else {
             playerReference = new WeakReference<>(player);
             return Optional.of(player);
         }

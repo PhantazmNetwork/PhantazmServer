@@ -16,13 +16,10 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
 
     private long ticks = 0;
 
-    private record Interaction(long startTicks, PlayerInteraction interaction) {
-    }
-
     @FactoryMethod
     public DelayedInteractor(@NotNull Data data, @NotNull @Child("target") List<ShopInteractor> interactors) {
         super(data);
-        this.interactors = Objects.requireNonNull(interactors, "interactors");
+        this.interactors = Objects.requireNonNull(interactors);
         this.interactions = new ArrayDeque<>();
     }
 
@@ -55,8 +52,13 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
         ShopInteractor.tick(interactors, time);
     }
 
+    private record Interaction(long startTicks,
+        PlayerInteraction interaction) {
+    }
+
     @DataObject
-    public record Data(@ChildPath("target") List<String> interactors, int delayTicks) {
+    public record Data(@ChildPath("target") List<String> interactors,
+        int delayTicks) {
 
     }
 }

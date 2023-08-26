@@ -13,7 +13,8 @@ import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.PhysicsUtils;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
+import org.phantazm.mob2.MobMeta;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.event.ZombiesPlayerDeathEvent;
@@ -34,11 +35,11 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
     private final MapSettingsInfo mapSettingsInfo;
 
     public PlayerDamageEventListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
-            @NotNull MapSettingsInfo mapSettingsInfo) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
+        @NotNull MapSettingsInfo mapSettingsInfo) {
         super(instance, zombiesPlayers);
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
-        this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo, "mapSettingsInfo");
+        this.mapObjects = Objects.requireNonNull(mapObjects);
+        this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo);
     }
 
     @Override
@@ -85,14 +86,18 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         Component roomName = getRoomName(deathPosition);
 
         zombiesPlayer.setState(ZombiesPlayerStateKeys.KNOCKED,
-                new KnockedPlayerStateContext(event.getInstance(), deathPosition, roomName, killer));
+            new KnockedPlayerStateContext(event.getInstance(), deathPosition, roomName, killer));
     }
 
     private Component getEntityName(@NotNull Entity entity) {
-        PhantazmMob mob = mapObjects.module().mobStore().getMob(entity.getUuid());
-        Optional<Component> displayNameOptional;
-        if (mob != null && (displayNameOptional = mob.model().getDisplayName()).isPresent()) {
-            return displayNameOptional.get();
+        if (entity instanceof Mob hitMob) {
+            MobMeta meta = hitMob.data().meta();
+            if (meta != null) {
+                Component component = meta.customName();
+                if (component != null) {
+                    return component;
+                }
+            }
         }
 
         Component message = entity.getCustomName();
@@ -107,11 +112,9 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         Damage damage = event.getDamage();
         if (damage.getAttacker() != null) {
             return getEntityName(damage.getAttacker());
-        }
-        else if (damage.getSource() != null) {
+        } else if (damage.getSource() != null) {
             return getEntityName(damage.getSource());
-        }
-        else if (damage.hasTag(Tags.DAMAGE_NAME)) {
+        } else if (damage.hasTag(Tags.DAMAGE_NAME)) {
             return damage.tagHandler().getTag(Tags.DAMAGE_NAME);
         }
 
@@ -120,7 +123,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
     private Component getRoomName(@NotNull Pos deathPosition) {
         return mapObjects.roomTracker().atPoint(deathPosition).map(room -> room.getRoomInfo().displayName())
-                .orElse(Component.text("an unknown room"));
+            .orElse(Component.text("an unknown room"));
     }
 
 }

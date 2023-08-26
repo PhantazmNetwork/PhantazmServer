@@ -19,21 +19,21 @@ import java.util.UUID;
 
 public class ZombiesCommand extends Command {
     public ZombiesCommand(@NotNull Map<? super UUID, ? extends Party> parties, @NotNull ZombiesSceneRouter router,
-            @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
-            @NotNull SchedulerManager schedulerManager, @NotNull SceneTransferHelper transferHelper,
-            @NotNull SceneFallback fallback, long joinRatelimit) {
+        @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
+        @NotNull SchedulerManager schedulerManager, @NotNull SceneTransferHelper transferHelper,
+        @NotNull SceneFallback fallback, long joinRatelimit) {
         super("zombies");
 
-        Objects.requireNonNull(parties, "parties");
-        Objects.requireNonNull(router, "router");
-        Objects.requireNonNull(keyParser, "keyParser");
-        Objects.requireNonNull(maps, "maps");
-        Objects.requireNonNull(viewProvider, "viewProvider");
-        Objects.requireNonNull(fallback, "fallback");
+        Objects.requireNonNull(parties);
+        Objects.requireNonNull(router);
+        Objects.requireNonNull(keyParser);
+        Objects.requireNonNull(maps);
+        Objects.requireNonNull(viewProvider);
+        Objects.requireNonNull(fallback);
 
         ZombiesJoinHelper joinHelper = new ZombiesJoinHelper(viewProvider, router, schedulerManager, transferHelper);
         addSubcommand(new ZombiesJoinCommand(parties, viewProvider, keyParser, maps, joinHelper,
-                joinRatelimit));
+            joinRatelimit));
         addSubcommand(new CoinsCommand(router::getCurrentScene));
         addSubcommand(new RoundCommand(router::getCurrentScene, schedulerManager));
         addSubcommand(new KillAllCommand(router::getCurrentScene));

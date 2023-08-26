@@ -10,6 +10,8 @@ import com.github.steanky.ethylene.mapper.signature.SignatureParameter;
 import com.github.steanky.ethylene.mapper.type.Token;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.kyori.adventure.key.Key;
@@ -43,15 +45,20 @@ public final class EthyleneFeature {
     private static KeyParser keyParser;
 
     static void initialize(@NotNull KeyParser keyParser) {
-        EthyleneFeature.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+        EthyleneFeature.keyParser = Objects.requireNonNull(keyParser);
 
         mappingProcessorSource = Signatures.core(MappingProcessorSource.builder()).withCustomSignature(basicItemStack())
-                .withCustomSignature(pos()).withScalarSignature(key()).withScalarSignature(itemStack())
-                .withScalarSignature(particle()).withScalarSignature(block()).withScalarSignature(permission())
-                .withScalarSignature(entityType()).withScalarSignature(material()).withScalarSignature(potionEffect())
-                .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
-                .withTypeImplementation(IntOpenHashSet.class, IntSet.class).withStandardSignatures()
-                .withStandardTypeImplementations().ignoringLengths().build();
+            .withCustomSignature(pos()).withScalarSignature(key())
+            .withScalarSignature(itemStack())
+            .withScalarSignature(particle()).withScalarSignature(block())
+            .withScalarSignature(permission())
+            .withScalarSignature(entityType()).withScalarSignature(material())
+            .withScalarSignature(potionEffect())
+            .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
+            .withTypeImplementation(Object2FloatOpenHashMap.class, Object2FloatMap.class)
+            .withTypeImplementation(IntOpenHashSet.class, IntSet.class)
+            .withStandardSignatures()
+            .withStandardTypeImplementations().ignoringLengths().build();
 
         LOGGER.info("Ethylene initialized.");
     }
@@ -59,84 +66,82 @@ public final class EthyleneFeature {
     @SuppressWarnings("PatternValidation")
     private static ScalarSignature<Key> key() {
         return ScalarSignature.of(Token.ofClass(Key.class), element -> keyParser.parseKey(element.asString()),
-                key -> key == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(key.asString()));
+            key -> key == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(key.asString()));
     }
 
     @SuppressWarnings("unchecked")
     private static Signature<ItemStack> basicItemStack() {
         return Signature.builder(Token.ofClass(ItemStack.class), (ignored, args) -> {
-                            ItemStack.Builder builder = ItemStack.builder(args.get(0));
-                            String meta = args.get(3);
-                            if (meta != null) {
-                                try {
-                                    builder.meta((NBTCompound)new SNBTParser(new StringReader(meta)).parse());
-                                }
-                                catch (NBTException ignored1) {
-                                }
-                            }
+                    ItemStack.Builder builder = ItemStack.builder(args.get(0));
+                    String meta = args.get(3);
+                    if (meta != null) {
+                        try {
+                            builder.meta((NBTCompound) new SNBTParser(new StringReader(meta)).parse());
+                        } catch (NBTException ignored1) {
+                        }
+                    }
 
-                            builder.displayName(args.get(1)).lore((List<? extends Component>)args.get(2));
-                            return builder.build();
-                        }, itemStack -> {
-                            List<Object> list = new ArrayList<>(4);
-                            list.add(itemStack.material());
-                            list.add(itemStack.getDisplayName());
-                            list.add(itemStack.getLore());
-                            list.add(itemStack.meta().toSNBT());
+                    builder.displayName(args.get(1)).lore((List<? extends Component>) args.get(2));
+                    return builder.build();
+                }, itemStack -> {
+                    List<Object> list = new ArrayList<>(4);
+                    list.add(itemStack.material());
+                    list.add(itemStack.getDisplayName());
+                    list.add(itemStack.getLore());
+                    list.add(itemStack.meta().toSNBT());
 
-                            return list;
-                        }, Map.entry("material", SignatureParameter.parameter(Token.ofClass(Material.class))), Map.entry("displayName",
-                                SignatureParameter.parameter(Token.ofClass(Component.class), ConfigPrimitive.NULL)),
-                        Map.entry("lore", SignatureParameter.parameter(new Token<List<Component>>() {
-                        }, ConfigList.of())),
-                        Map.entry("tag", SignatureParameter.parameter(Token.STRING, ConfigPrimitive.NULL))).matchingNames()
-                .matchingTypeHints().build();
+                    return list;
+                }, Map.entry("material", SignatureParameter.parameter(Token.ofClass(Material.class))), Map.entry("displayName",
+                    SignatureParameter.parameter(Token.ofClass(Component.class), ConfigPrimitive.NULL)),
+                Map.entry("lore", SignatureParameter.parameter(new Token<List<Component>>() {
+                }, ConfigList.of())),
+                Map.entry("tag", SignatureParameter.parameter(Token.STRING, ConfigPrimitive.NULL))).matchingNames()
+            .matchingTypeHints().build();
     }
 
     private static Signature<Pos> pos() {
         return Signature.builder(Token.ofClass(Pos.class),
-                        (ignored, args) -> new Pos(args.get(0), args.get(1), args.get(2), args.get(3), args.get(4)),
-                        pos -> List.of(pos.x(), pos.y(), pos.z(), pos.yaw(), pos.pitch()),
-                        Map.entry("x", SignatureParameter.parameter(Token.DOUBLE)),
-                        Map.entry("y", SignatureParameter.parameter(Token.DOUBLE)),
-                        Map.entry("z", SignatureParameter.parameter(Token.DOUBLE)),
-                        Map.entry("yaw", SignatureParameter.parameter(Token.FLOAT)),
-                        Map.entry("pitch", SignatureParameter.parameter(Token.FLOAT))).matchingNames().matchingTypeHints()
-                .build();
+                (ignored, args) -> new Pos(args.get(0), args.get(1), args.get(2), args.get(3), args.get(4)),
+                pos -> List.of(pos.x(), pos.y(), pos.z(), pos.yaw(), pos.pitch()),
+                Map.entry("x", SignatureParameter.parameter(Token.DOUBLE)),
+                Map.entry("y", SignatureParameter.parameter(Token.DOUBLE)),
+                Map.entry("z", SignatureParameter.parameter(Token.DOUBLE)),
+                Map.entry("yaw", SignatureParameter.parameter(Token.FLOAT)),
+                Map.entry("pitch", SignatureParameter.parameter(Token.FLOAT))).matchingNames().matchingTypeHints()
+            .build();
     }
 
     private static ScalarSignature<PotionEffect> potionEffect() {
         return ScalarSignature.of(Token.ofClass(PotionEffect.class),
-                effect -> PotionEffect.fromNamespaceId(effect.asString()),
-                effect -> effect == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(effect.namespace().asString()));
+            effect -> PotionEffect.fromNamespaceId(effect.asString()),
+            effect -> effect == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(effect.namespace().asString()));
     }
 
     private static ScalarSignature<Permission> permission() {
         return ScalarSignature.of(Token.ofClass(Permission.class), element -> new Permission(element.asString()),
-                permission -> permission == null
-                              ? ConfigPrimitive.NULL
-                              : ConfigPrimitive.of(permission.getPermissionName()));
+            permission -> permission == null
+                ? ConfigPrimitive.NULL
+                : ConfigPrimitive.of(permission.getPermissionName()));
     }
 
     private static ScalarSignature<Material> material() {
         return ScalarSignature.of(Token.ofClass(Material.class),
-                element -> Material.fromNamespaceId(element.asString()),
-                material -> material == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(material.key().toString()));
+            element -> Material.fromNamespaceId(element.asString()),
+            material -> material == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(material.key().toString()));
     }
 
     private static ScalarSignature<Particle> particle() {
         return ScalarSignature.of(Token.ofClass(Particle.class),
-                element -> Particle.fromNamespaceId(element.asString()),
-                particle -> particle == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(particle.key().toString()));
+            element -> Particle.fromNamespaceId(element.asString()),
+            particle -> particle == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(particle.key().toString()));
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private static ScalarSignature<ItemStack> itemStack() {
         return ScalarSignature.of(Token.ofClass(ItemStack.class), element -> {
             try {
-                return ItemStack.fromItemNBT((NBTCompound)new SNBTParser(new StringReader(element.asString())).parse());
-            }
-            catch (NBTException e) {
+                return ItemStack.fromItemNBT(
+                    (NBTCompound) new SNBTParser(new StringReader(element.asString())).parse());
+            } catch (NBTException e) {
                 LOGGER.warn("Error deserializing SNBT", e);
                 return ItemStack.AIR;
             }
@@ -147,8 +152,8 @@ public final class EthyleneFeature {
         return ScalarSignature.of(Token.ofClass(EntityType.class), element -> {
             return EntityType.fromNamespaceId(element.asString());
         }, entityType -> entityType == null
-                         ? ConfigPrimitive.NULL
-                         : ConfigPrimitive.of(entityType.namespace().asString()));
+            ? ConfigPrimitive.NULL
+            : ConfigPrimitive.of(entityType.namespace().asString()));
     }
 
     private static ScalarSignature<Block> block() {

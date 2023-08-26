@@ -15,11 +15,12 @@ import java.util.Objects;
 /**
  * Defines a room.
  */
-public record RoomInfo(@NotNull Key id,
-                       boolean isSpawn,
-                       @NotNull Component displayName,
-                       @NotNull List<Bounds3I> regions,
-                       @NotNull ConfigList openActions) {
+public record RoomInfo(
+    @NotNull Key id,
+    boolean isSpawn,
+    @NotNull Component displayName,
+    @NotNull List<Bounds3I> regions,
+    @NotNull ConfigList openActions) {
     /**
      * Creates a new instance of this record.
      *
@@ -28,10 +29,10 @@ public record RoomInfo(@NotNull Key id,
      * @param regions     the regions that make up the room
      */
     public RoomInfo {
-        Objects.requireNonNull(id, "id");
-        Objects.requireNonNull(displayName, "displayName");
-        Objects.requireNonNull(regions, "regions");
-        Objects.requireNonNull(openActions, "openActions");
+        Objects.requireNonNull(id);
+        Objects.requireNonNull(displayName);
+        Objects.requireNonNull(regions);
+        Objects.requireNonNull(openActions);
     }
 
     @Default("isSpawn")

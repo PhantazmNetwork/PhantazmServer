@@ -16,9 +16,9 @@ public class PartyDisbandCommand {
     }
 
     public static @NotNull Command disbandCommand(@NotNull PartyCommandConfig config,
-            @NotNull GuildHolder<Party> partyHolder) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(partyHolder, "partyHolder");
+        @NotNull GuildHolder<Party> partyHolder) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(partyHolder);
 
         Command command = new Command("disband");
         command.addConditionalSyntax((sender, commandString) -> {
@@ -44,7 +44,7 @@ public class PartyDisbandCommand {
 
             return true;
         }, (sender, context) -> {
-            UUID uuid = ((Player)sender).getUuid();
+            UUID uuid = ((Player) sender).getUuid();
             Party party = partyHolder.uuidToGuild().get(uuid);
 
             party.getNotification().notifyDisband();

@@ -18,8 +18,8 @@ public class KeyInputHandler implements ClientTickEvents.EndTick {
     private final CompositeSplitter compositeSplitter;
 
     public KeyInputHandler(@NotNull KeyBinding keyBinding, @NotNull CompositeSplitter compositeSplitter) {
-        this.keyBinding = Objects.requireNonNull(keyBinding, "keyBinding");
-        this.compositeSplitter = Objects.requireNonNull(compositeSplitter, "compositeSplitter");
+        this.keyBinding = Objects.requireNonNull(keyBinding);
+        this.compositeSplitter = Objects.requireNonNull(compositeSplitter);
     }
 
     @Override
@@ -38,16 +38,15 @@ public class KeyInputHandler implements ClientTickEvents.EndTick {
 
         if (toggled) {
             toggledComponent = Text.literal("ON").formatted(Formatting.GREEN);
-        }
-        else {
+        } else {
             toggledComponent = Text.literal("OFF").formatted(Formatting.RED);
         }
 
         Text message = Text.empty()
-                .formatted(Formatting.YELLOW)
-                .append("Toggled AutoSplits ")
-                .append(toggledComponent)
-                .append("!");
+            .formatted(Formatting.YELLOW)
+            .append("Toggled AutoSplits ")
+            .append(toggledComponent)
+            .append("!");
         client.player.sendMessage(message, false);
     }
 

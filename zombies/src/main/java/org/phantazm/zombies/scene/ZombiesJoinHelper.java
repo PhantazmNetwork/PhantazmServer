@@ -31,28 +31,28 @@ public class ZombiesJoinHelper {
     private final SceneTransferHelper transferHelper;
 
     public ZombiesJoinHelper(@NotNull PlayerViewProvider viewProvider,
-            @NotNull SceneRouter<ZombiesScene, ZombiesRouteRequest> router,
-            @NotNull SchedulerManager schedulerManager,
-            @NotNull SceneTransferHelper transferHelper) {
-        this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
-        this.router = Objects.requireNonNull(router, "router");
-        this.schedulerManager = Objects.requireNonNull(schedulerManager, "schedulerManager");
-        this.transferHelper = Objects.requireNonNull(transferHelper, "transferHelper");
+        @NotNull SceneRouter<ZombiesScene, ZombiesRouteRequest> router,
+        @NotNull SchedulerManager schedulerManager,
+        @NotNull SceneTransferHelper transferHelper) {
+        this.viewProvider = Objects.requireNonNull(viewProvider);
+        this.router = Objects.requireNonNull(router);
+        this.schedulerManager = Objects.requireNonNull(schedulerManager);
+        this.transferHelper = Objects.requireNonNull(transferHelper);
     }
 
     public void joinGame(@NotNull Player joiner, @NotNull Collection<PlayerView> playerViews, @NotNull Key targetMap,
-            boolean isRestricted) {
+        boolean isRestricted) {
         joinInternal(joiner, playerViews, joinRequest -> ZombiesRouteRequest.joinGame(targetMap, joinRequest),
-                isRestricted);
+            isRestricted);
     }
 
     public void rejoinGame(@NotNull Player joiner, @NotNull UUID targetGame) {
         joinInternal(joiner, Collections.singleton(viewProvider.fromPlayer(joiner)),
-                joinRequest -> ZombiesRouteRequest.rejoinGame(targetGame, joinRequest), false);
+            joinRequest -> ZombiesRouteRequest.rejoinGame(targetGame, joinRequest), false);
     }
 
     private void joinInternal(@NotNull Player joiner, @NotNull Collection<PlayerView> playerViews,
-            @NotNull Function<ZombiesJoinRequest, ZombiesRouteRequest> routeRequestCreator, boolean isRestricted) {
+        @NotNull Function<ZombiesJoinRequest, ZombiesRouteRequest> routeRequestCreator, boolean isRestricted) {
         UUID uuid = UUID.randomUUID();
         ZombiesJoinRequest joinRequest = new ZombiesJoinRequest() {
             @Override
@@ -78,8 +78,7 @@ public class ZombiesJoinHelper {
 
             if (routeResult.message().isPresent()) {
                 joiner.sendMessage(routeResult.message().get());
-            }
-            else if (routeResult.result().isPresent()) {
+            } else if (routeResult.result().isPresent()) {
                 schedulerManager.scheduleNextProcess(() -> {
                     try (TransferResult transferResult = routeResult.result().get()) {
                         transferHelper.transfer(transferResult, playerViews, viewProvider.fromPlayer(joiner));

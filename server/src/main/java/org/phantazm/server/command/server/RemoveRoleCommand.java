@@ -22,7 +22,7 @@ public class RemoveRoleCommand extends PermissionLockedCommand {
     private static final Argument<String> ROLE = ArgumentType.String("role");
 
     public RemoveRoleCommand(@NotNull IdentitySource identitySource, @NotNull RoleStore roleStore,
-            @NotNull PermissionHandler permissionHandler) {
+        @NotNull PermissionHandler permissionHandler) {
         super("remove_role", PERMISSION);
 
         addSyntax((sender, context) -> {
@@ -34,8 +34,8 @@ public class RemoveRoleCommand extends PermissionLockedCommand {
                     roleStore.removeRole(uuid, role).whenComplete((result, error) -> {
                         if (error != null) {
                             sender.sendMessage(
-                                    Component.text("An internal error occured while executing " + "this command.")
-                                            .color(NamedTextColor.RED));
+                                Component.text("An internal error occured while executing " + "this command.")
+                                    .color(NamedTextColor.RED));
                             LOGGER.warn("An exception occurred while removing a role", error);
                             return;
                         }
@@ -43,10 +43,9 @@ public class RemoveRoleCommand extends PermissionLockedCommand {
                         if (result) {
                             sender.sendMessage("Removed role " + role + " from " + uuid + " (" + name + ")");
                             permissionHandler.applyPermissions(uuid);
-                        }
-                        else {
+                        } else {
                             sender.sendMessage(Component.text("Failed to remove role. The player may not " +
-                                    "have it, or it may not be a known role.", NamedTextColor.RED));
+                                "have it, or it may not be a known role.", NamedTextColor.RED));
                         }
                     });
                 });

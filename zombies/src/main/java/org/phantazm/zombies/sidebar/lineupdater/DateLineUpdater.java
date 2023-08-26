@@ -22,7 +22,7 @@ public class DateLineUpdater implements SidebarLineUpdater {
 
     @FactoryMethod
     public DateLineUpdater(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "date");
+        this.data = Objects.requireNonNull(data);
         this.cached = null;
     }
 

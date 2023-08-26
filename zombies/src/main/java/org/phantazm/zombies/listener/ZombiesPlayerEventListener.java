@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-@SuppressWarnings("UnstableApiUsage")
 public abstract class ZombiesPlayerEventListener<TEvent extends EntityInstanceEvent> implements Consumer<TEvent> {
 
     private final Instance instance;
@@ -18,9 +17,9 @@ public abstract class ZombiesPlayerEventListener<TEvent extends EntityInstanceEv
     private final Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers;
 
     public ZombiesPlayerEventListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
+        this.instance = Objects.requireNonNull(instance);
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
     }
 
     @Override

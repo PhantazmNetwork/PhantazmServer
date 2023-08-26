@@ -16,7 +16,7 @@ public class EquipmentHandler {
     private final InventoryAccessRegistry accessRegistry;
 
     public EquipmentHandler(@NotNull InventoryAccessRegistry accessRegistry) {
-        this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
+        this.accessRegistry = Objects.requireNonNull(accessRegistry);
     }
 
     public @NotNull InventoryAccessRegistry accessRegistry() {
@@ -24,8 +24,8 @@ public class EquipmentHandler {
     }
 
     public void addEquipment(@NotNull Equipment equipment, @NotNull Key groupKey) {
-        Objects.requireNonNull(equipment, "equipment");
-        Objects.requireNonNull(groupKey, "groupKey");
+        Objects.requireNonNull(equipment);
+        Objects.requireNonNull(groupKey);
 
         if (!accessRegistry.canPushTo(groupKey)) {
             throw new IllegalArgumentException("Can't push to group " + groupKey);
@@ -56,12 +56,13 @@ public class EquipmentHandler {
     }
 
     public boolean canAddEquipment(@NotNull Key groupKey) {
-        Objects.requireNonNull(groupKey, "groupKey");
+        Objects.requireNonNull(groupKey);
 
         return accessRegistry.canPushTo(groupKey);
     }
 
-    public @NotNull @Unmodifiable Collection<Equipment> getEquipment(@NotNull Key groupKey) {
+    public @NotNull
+    @Unmodifiable Collection<Equipment> getEquipment(@NotNull Key groupKey) {
         Optional<InventoryAccess> accessOptional = accessRegistry.getCurrentAccess();
         if (accessOptional.isEmpty()) {
             return List.of();
@@ -108,8 +109,8 @@ public class EquipmentHandler {
     }
 
     public @NotNull Result addOrReplaceEquipment(Key groupKey, Key equipmentKey, boolean allowReplace, int specificSlot,
-            boolean allowDuplicate, @NotNull Supplier<? extends Optional<? extends Equipment>> equipmentSupplier,
-            @Nullable Player player) {
+        boolean allowDuplicate, @NotNull Supplier<? extends Optional<? extends Equipment>> equipmentSupplier,
+        @Nullable Player player) {
         if (!allowDuplicate && hasEquipment(groupKey, equipmentKey)) {
             return Result.DUPLICATE;
         }

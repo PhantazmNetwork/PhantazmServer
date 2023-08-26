@@ -31,7 +31,7 @@ public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
      * @param lobbyProviders The {@link SceneProvider}s for lobbies mapped based on lobby name.
      */
     public LobbyRouter(@NotNull Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders) {
-        this.lobbyProviders = Objects.requireNonNull(lobbyProviders, "lobbyProviders");
+        this.lobbyProviders = Objects.requireNonNull(lobbyProviders);
     }
 
     @Override
@@ -66,23 +66,23 @@ public class LobbyRouter implements SceneRouter<Lobby, LobbyRouteRequest> {
     public @NotNull CompletableFuture<RouteResult> findScene(@NotNull LobbyRouteRequest routeRequest) {
         if (isShutdown()) {
             return CompletableFuture.completedFuture(
-                    RouteResult.failure(Component.text("This game has shut down.", NamedTextColor.RED)));
+                RouteResult.failure(Component.text("This game has shut down.", NamedTextColor.RED)));
         }
         if (!isJoinable()) {
             return CompletableFuture.completedFuture(
-                    RouteResult.failure(Component.text("This game is not joinable.", NamedTextColor.RED)));
+                RouteResult.failure(Component.text("This game is not joinable.", NamedTextColor.RED)));
         }
 
         SceneProvider<Lobby, LobbyJoinRequest> lobbyProvider = lobbyProviders.get(routeRequest.targetLobbyName());
         if (lobbyProvider == null) {
             return CompletableFuture.completedFuture(RouteResult.failure(
-                    Component.text("No lobbies exist under the name " + routeRequest.targetLobbyName() + ".",
-                            NamedTextColor.RED)));
+                Component.text("No lobbies exist under the name " + routeRequest.targetLobbyName() + ".",
+                    NamedTextColor.RED)));
         }
 
         return lobbyProvider.provideScene(routeRequest.joinRequest()).thenApply(sceneOptional -> {
             return sceneOptional.map(RouteResult::success).orElseGet(
-                    () -> RouteResult.failure(Component.text("No lobbies are joinable.", NamedTextColor.RED)));
+                () -> RouteResult.failure(Component.text("No lobbies are joinable.", NamedTextColor.RED)));
         });
     }
 

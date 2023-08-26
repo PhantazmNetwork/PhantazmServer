@@ -23,7 +23,7 @@ public class StateReloadTester implements ReloadTester {
      */
     @FactoryMethod
     public StateReloadTester(@NotNull @Child("stats") GunStats stats) {
-        this.stats = Objects.requireNonNull(stats, "stats");
+        this.stats = Objects.requireNonNull(stats);
     }
 
     @Override

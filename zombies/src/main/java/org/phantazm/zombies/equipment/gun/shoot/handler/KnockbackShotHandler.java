@@ -32,23 +32,23 @@ public class KnockbackShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public KnockbackShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         Pos attackerPos = attacker.getPosition();
         for (GunHit target : shot.regularTargets()) {
             Entity entity = target.entity();
             entity.takeKnockback(data.knockback, true, Math.sin(attackerPos.yaw() * (Math.PI / 180)),
-                    -Math.cos(attackerPos.yaw() * (Math.PI / 180)));
+                -Math.cos(attackerPos.yaw() * (Math.PI / 180)));
         }
 
         for (GunHit target : shot.headshotTargets()) {
             Entity entity = target.entity();
             entity.takeKnockback(data.headshotKnockback, true, Math.sin(attackerPos.yaw() * (Math.PI / 180)),
-                    -Math.cos(attackerPos.yaw() * (Math.PI / 180)));
+                -Math.cos(attackerPos.yaw() * (Math.PI / 180)));
         }
     }
 
@@ -64,7 +64,8 @@ public class KnockbackShotHandler implements ShotHandler {
      * @param headshotKnockback The knockback to apply to headshots
      */
     @DataObject
-    public record Data(float knockback, float headshotKnockback) {
+    public record Data(float knockback,
+        float headshotKnockback) {
 
     }
 

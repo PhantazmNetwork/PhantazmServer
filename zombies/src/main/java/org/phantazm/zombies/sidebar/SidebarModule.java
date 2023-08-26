@@ -29,12 +29,12 @@ public class SidebarModule implements DependencyModule {
     private final int maxPlayers;
 
     public SidebarModule(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull RoundHandler roundHandler,
-            @NotNull Wrapper<Long> ticksSinceStart, int maxPlayers) {
-        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
-        this.roundHandler = Objects.requireNonNull(roundHandler, "roundHandler");
-        this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
+        @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull RoundHandler roundHandler,
+        @NotNull Wrapper<Long> ticksSinceStart, int maxPlayers) {
+        this.playerMap = Objects.requireNonNull(playerMap);
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
+        this.roundHandler = Objects.requireNonNull(roundHandler);
+        this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart);
         this.maxPlayers = maxPlayers;
     }
 

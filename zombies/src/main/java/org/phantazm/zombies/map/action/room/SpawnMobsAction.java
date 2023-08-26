@@ -28,8 +28,8 @@ public class SpawnMobsAction implements Action<Room> {
 
     @FactoryMethod
     public SpawnMobsAction(@NotNull Data data, @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier, "roundHandlerSupplier");
+        this.data = Objects.requireNonNull(data);
+        this.roundHandlerSupplier = Objects.requireNonNull(roundHandlerSupplier);
     }
 
     @Override
@@ -37,8 +37,7 @@ public class SpawnMobsAction implements Action<Room> {
         Optional<Round> currentRound = roundHandlerSupplier.get().currentRound();
         if (currentRound.isPresent()) {
             currentRound.get().spawnMobs(data.mobSpawns);
-        }
-        else {
+        } else {
             LOGGER.warn("Tried to spawn {} mobs but there is no active round", data.mobSpawns.size());
         }
     }

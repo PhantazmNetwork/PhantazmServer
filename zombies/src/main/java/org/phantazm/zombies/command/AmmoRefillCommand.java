@@ -23,13 +23,13 @@ public class AmmoRefillCommand extends PermissionLockedCommand {
         super("ammo_refill", PERMISSION);
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
 
             UUID uuid = player.getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
                 ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(uuid);
                 Optional<InventoryAccess> acccessOptional =
-                        zombiesPlayer.module().getEquipmentHandler().accessRegistry().getCurrentAccess();
+                    zombiesPlayer.module().getEquipmentHandler().accessRegistry().getCurrentAccess();
 
                 if (acccessOptional.isPresent()) {
                     InventoryProfile profile = acccessOptional.get().profile();

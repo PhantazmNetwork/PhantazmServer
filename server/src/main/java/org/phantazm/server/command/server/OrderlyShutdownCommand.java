@@ -30,9 +30,9 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
     private long shutdownStart;
 
     public OrderlyShutdownCommand(@NotNull RouterStore routerStore, @NotNull ShutdownConfig shutdownConfig,
-            @NotNull EventNode<Event> globalNode) {
+        @NotNull EventNode<Event> globalNode) {
         super("orderly_shutdown", PERMISSION);
-        this.routerStore = Objects.requireNonNull(routerStore, "routerStore");
+        this.routerStore = Objects.requireNonNull(routerStore);
 
         addSyntax((sender, context) -> {
             if (initialized) {
@@ -68,8 +68,7 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
                 long elapsedMs = System.currentTimeMillis() - shutdownStart;
                 if (elapsedMs > shutdownConfig.forceShutdownWarningTime()) {
                     Audiences.all().sendMessage(shutdownConfig.forceShutdownMessage());
-                }
-                else {
+                } else {
                     Audiences.all().sendMessage(shutdownConfig.shutdownMessage());
                 }
             }, TaskSchedule.immediate(), TaskSchedule.millis(shutdownConfig.warningInterval()));

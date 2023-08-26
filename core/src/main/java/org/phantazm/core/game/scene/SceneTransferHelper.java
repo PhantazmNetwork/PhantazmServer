@@ -13,18 +13,18 @@ public class SceneTransferHelper {
     private final RouterStore routerStore;
 
     public SceneTransferHelper(@NotNull RouterStore routerStore) {
-        this.routerStore = Objects.requireNonNull(routerStore, "routerStore");
+        this.routerStore = Objects.requireNonNull(routerStore);
     }
 
     public void transfer(@NotNull TransferResult transferResult, @NotNull Collection<PlayerView> leavers,
-            @NotNull PlayerView leader) {
+        @NotNull PlayerView leader) {
         BooleanObjectPair<Collection<Runnable>> result = leaveOldScenes(leavers);
 
         if (result.firstBoolean()) {
             leader.getPlayer().ifPresent(leaderPlayer -> {
                 leaderPlayer.sendMessage(
-                        Component.text("Failed to join because not all players could leave their " + "previous scenes.",
-                                NamedTextColor.RED));
+                    Component.text("Failed to join because not all players could leave their " + "previous scenes.",
+                        NamedTextColor.RED));
             });
             return;
         }
@@ -35,8 +35,7 @@ public class SceneTransferHelper {
             }
 
             transferResult.executor().get().run();
-        }
-        else if (transferResult.message().isPresent()) {
+        } else if (transferResult.message().isPresent()) {
             leader.getPlayer().ifPresent(leaderPlayer -> {
                 leaderPlayer.sendMessage(transferResult.message().get());
             });
@@ -56,8 +55,7 @@ public class SceneTransferHelper {
             try (TransferResult leaveResult = oldScene.leave(Collections.singleton(leaver.getUUID()))) {
                 if (leaveResult.executor().isPresent()) {
                     leaveExecutors.add(leaveResult.executor().get());
-                }
-                else {
+                } else {
                     anyFailures = true;
                     leaveResult.message().ifPresent(message -> {
                         leaver.getPlayer().ifPresent(player -> player.sendMessage(message));
@@ -74,8 +72,8 @@ public class SceneTransferHelper {
         if (result.firstBoolean()) {
             ghoster.getPlayer().ifPresent(ghosterPlayer -> {
                 ghosterPlayer.sendMessage(
-                        Component.text("Failed to join because not all players could leave their " + "previous scenes.",
-                                NamedTextColor.RED));
+                    Component.text("Failed to join because not all players could leave their " + "previous scenes.",
+                        NamedTextColor.RED));
             });
             return;
         }

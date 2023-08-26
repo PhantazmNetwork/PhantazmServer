@@ -62,6 +62,7 @@ public class AnimatedItemDisplay extends ItemDisplayBase {
     }
 
     @DataObject
-    public record Data(@NotNull Vec3D offset, @NotNull List<ItemAnimationFrame> frames) {
+    public record Data(@NotNull Vec3D offset,
+        @NotNull List<ItemAnimationFrame> frames) {
     }
 }

@@ -30,7 +30,7 @@ public class DebugCommand extends PermissionLockedCommand {
             addSyntax((sender, context) -> {
                 for (Instance instance : MinecraftServer.getInstanceManager().getInstances()) {
                     sender.sendMessage(instance.getUniqueId() + ": " +
-                            instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS).size() + " player");
+                        instance.getEntityTracker().entities(EntityTracker.Target.PLAYERS).size() + " player");
                 }
             });
         }

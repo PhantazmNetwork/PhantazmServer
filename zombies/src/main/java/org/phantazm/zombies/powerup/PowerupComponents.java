@@ -12,20 +12,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-public record PowerupComponents(@NotNull @Unmodifiable Collection<PowerupVisualComponent> visuals,
-                                @NotNull @Unmodifiable Collection<PowerupActionComponent> actions,
-                                @NotNull DeactivationPredicateComponent deactivationPredicate,
-                                @NotNull PickupPredicateComponent pickupPredicateComponent,
-                                @NotNull PowerupEffectComponent powerupEffectComponent) {
+public record PowerupComponents(
+    @NotNull @Unmodifiable Collection<PowerupVisualComponent> visuals,
+    @NotNull @Unmodifiable Collection<PowerupActionComponent> actions,
+    @NotNull DeactivationPredicateComponent deactivationPredicate,
+    @NotNull PickupPredicateComponent pickupPredicateComponent,
+    @NotNull PowerupEffectComponent powerupEffectComponent) {
     public PowerupComponents(@NotNull Collection<PowerupVisualComponent> visuals,
-            @NotNull Collection<PowerupActionComponent> actions,
-            @NotNull DeactivationPredicateComponent deactivationPredicate,
-            @NotNull PickupPredicateComponent pickupPredicateComponent,
-            @NotNull PowerupEffectComponent powerupEffectComponent) {
+        @NotNull Collection<PowerupActionComponent> actions,
+        @NotNull DeactivationPredicateComponent deactivationPredicate,
+        @NotNull PickupPredicateComponent pickupPredicateComponent,
+        @NotNull PowerupEffectComponent powerupEffectComponent) {
         this.visuals = List.copyOf(visuals);
         this.actions = List.copyOf(actions);
-        this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate, "deactivationPredicate");
-        this.pickupPredicateComponent = Objects.requireNonNull(pickupPredicateComponent, "pickupPredicateComponent");
-        this.powerupEffectComponent = Objects.requireNonNull(powerupEffectComponent, "powerupEffectComponent");
+        this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate);
+        this.pickupPredicateComponent = Objects.requireNonNull(pickupPredicateComponent);
+        this.powerupEffectComponent = Objects.requireNonNull(powerupEffectComponent);
     }
 }

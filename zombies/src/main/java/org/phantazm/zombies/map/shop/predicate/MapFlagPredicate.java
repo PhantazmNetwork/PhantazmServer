@@ -20,7 +20,7 @@ public class MapFlagPredicate extends PredicateBase<MapFlagPredicate.Data> {
     @FactoryMethod
     public MapFlagPredicate(@NotNull Data data, @NotNull Flaggable flaggable) {
         super(data);
-        this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
+        this.flaggable = Objects.requireNonNull(flaggable);
     }
 
     @Override
@@ -29,6 +29,7 @@ public class MapFlagPredicate extends PredicateBase<MapFlagPredicate.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull Key flag, boolean requireAbsent) {
+    public record Data(@NotNull Key flag,
+        boolean requireAbsent) {
     }
 }

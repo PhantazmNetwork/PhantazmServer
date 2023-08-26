@@ -16,7 +16,7 @@ import java.util.UUID;
 
 public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHandAnimationEvent> {
     public PlayerLeftClickListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
         super(instance, zombiesPlayers);
     }
 

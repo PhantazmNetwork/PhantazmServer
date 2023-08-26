@@ -2,8 +2,7 @@ package org.phantazm.zombies.listener;
 
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.event.EntityDamageByGunEvent;
@@ -18,22 +17,21 @@ public class EntityDamageByGunEventListener extends PhantazmMobEventListener<Ent
     private final MapObjects mapObjects;
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
 
-    public EntityDamageByGunEventListener(@NotNull Instance instance, @NotNull MobStore mobStore,
-            @NotNull MapObjects mapObjects, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
-        super(instance, mobStore);
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
-        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
+    public EntityDamageByGunEventListener(@NotNull Instance instance,
+        @NotNull MapObjects mapObjects, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+        super(instance);
+        this.mapObjects = Objects.requireNonNull(mapObjects);
+        this.playerMap = Objects.requireNonNull(playerMap);
     }
 
     @Override
-    protected void accept(@NotNull PhantazmMob mob, @NotNull EntityDamageByGunEvent event) {
+    protected void accept(@NotNull Mob mob, @NotNull EntityDamageByGunEvent event) {
         if (event.isInstakill()) {
             if (mobResistsInstakill(mob)) {
                 event.setInstakill(false);
             }
-        }
-        else if ((mapObjects.module().flags().hasFlag(Flags.INSTA_KILL) ||
-                playerHasInstakill(event.getShooter().getUuid())) && !mobResistsInstakill(mob)) {
+        } else if ((mapObjects.module().flags().hasFlag(Flags.INSTA_KILL) ||
+            playerHasInstakill(event.getShooter().getUuid())) && !mobResistsInstakill(mob)) {
             event.setInstakill(true);
         }
     }
@@ -43,7 +41,7 @@ public class EntityDamageByGunEventListener extends PhantazmMobEventListener<Ent
         return player != null && player.module().flags().hasFlag(Flags.INSTA_KILL);
     }
 
-    private boolean mobResistsInstakill(PhantazmMob mob) {
-        return mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL);
+    private boolean mobResistsInstakill(Mob mob) {
+        return mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL);
     }
 }

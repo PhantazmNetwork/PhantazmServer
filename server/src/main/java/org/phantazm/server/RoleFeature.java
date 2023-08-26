@@ -21,9 +21,8 @@ import java.nio.file.Path;
 import java.util.concurrent.Executor;
 
 public final class RoleFeature {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoleFeature.class);
     public static final Path ROLE_FOLDER = Path.of("./roles");
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleFeature.class);
     private static RoleStore roleStore;
 
     private RoleFeature() {
@@ -31,7 +30,7 @@ public final class RoleFeature {
     }
 
     static void initialize(@NotNull DataSource dataSource, @NotNull Executor executor, @NotNull ConfigCodec codec,
-            @NotNull ContextManager contextManager) {
+        @NotNull ContextManager contextManager) {
         roleStore = new BasicRoleStore(dataSource, executor);
 
         try {
@@ -42,8 +41,7 @@ public final class RoleFeature {
                     loadFile(path, codec, contextManager);
                 }
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("IOException when loading roles", e);
         }
     }

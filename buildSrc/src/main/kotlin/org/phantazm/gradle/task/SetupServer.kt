@@ -16,16 +16,16 @@ abstract class SetupServer : DefaultTask() {
         if (runFolder.exists() && !runFolder.listFiles().isNullOrEmpty()) {
             if (!project.hasProperty("forceSetup")) {
                 logger.lifecycle(
-                    "No action was taken because the run folder already exists. To force the setup task " +
-                            "to run, use -PforceSetup."
+                        "No action was taken because the run folder already exists. To force the setup task " +
+                                "to run, use -PforceSetup."
                 )
                 return
             }
 
             logger.lifecycle(
-                "You are forcing server setup. This will delete EVERYTHING in the run folder. Type \"Y\"" +
-                        " without quotation marks (case-sensitive) and hit enter if you wish to proceed; otherwise, type " +
-                        "any other character to cancel."
+                    "You are forcing server setup. This will delete EVERYTHING in the run folder. Type \"Y\"" +
+                            " without quotation marks (case-sensitive) and hit enter if you wish to proceed; otherwise, type " +
+                            "any other character to cancel."
             )
             if (readLine() != "Y") {
                 logger.lifecycle("Cancelled server setup; no files have been changed.")

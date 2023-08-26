@@ -19,22 +19,24 @@ public class PlayerInteractEntityListener extends ZombiesPlayerEventListener<Pla
     private final PlayerRightClickListener rightClickListener;
 
     public PlayerInteractEntityListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
-            @NotNull PlayerRightClickListener rightClickListener) {
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
+        @NotNull PlayerRightClickListener rightClickListener) {
         super(instance, zombiesPlayers);
-        this.shopHandler = Objects.requireNonNull(shopHandler, "shopHandler");
-        this.rightClickListener = Objects.requireNonNull(rightClickListener, "rightClickListener");
+        this.shopHandler = Objects.requireNonNull(shopHandler);
+        this.rightClickListener = Objects.requireNonNull(rightClickListener);
     }
 
     @Override
     public void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerEntityInteractEvent event) {
-        if (event.getHand() == Player.Hand.MAIN) {
-            if (shopHandler.handleInteraction(zombiesPlayer, event.getTarget().getPosition(),
-                    InteractionTypes.RIGHT_CLICK_ENTITY)) {
-                return;
-            }
-
-            rightClickListener.onRightClick(zombiesPlayer, event.getPlayer().getHeldSlot());
+        if (event.getHand() != Player.Hand.MAIN) {
+            return;
         }
+
+        if (shopHandler.handleInteraction(zombiesPlayer, event.getTarget().getPosition(),
+            InteractionTypes.RIGHT_CLICK_ENTITY)) {
+            return;
+        }
+
+        rightClickListener.onRightClick(zombiesPlayer, event.getPlayer().getHeldSlot());
     }
 }

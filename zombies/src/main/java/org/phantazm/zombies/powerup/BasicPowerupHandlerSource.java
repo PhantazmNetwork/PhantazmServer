@@ -31,23 +31,22 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
     private final Map<Key, PowerupComponents> powerups;
 
     public BasicPowerupHandlerSource(@NotNull Map<Key, PowerupData> powerupData,
-            @NotNull ContextManager contextManager) {
+        @NotNull ContextManager contextManager) {
         Map<Key, PowerupComponents> powerupMap = new HashMap<>(powerupData.size());
 
         for (Map.Entry<Key, PowerupData> dataEntry : powerupData.entrySet()) {
             PowerupData data = dataEntry.getValue();
 
             Collection<PowerupVisualComponent> visuals =
-                    contextManager.makeContext(data.visuals()).provideCollection(ElementPath.EMPTY, HANDLER);
+                contextManager.makeContext(data.visuals()).provideCollection(ElementPath.EMPTY, HANDLER);
 
             Collection<PowerupActionComponent> actions =
-                    contextManager.makeContext(data.actions()).provideCollection(ElementPath.EMPTY, HANDLER);
+                contextManager.makeContext(data.actions()).provideCollection(ElementPath.EMPTY, HANDLER);
 
             DeactivationPredicateComponent deactivationPredicate;
             try {
                 deactivationPredicate = contextManager.makeContext(data.deactivationPredicate()).provide();
-            }
-            catch (ElementException e) {
+            } catch (ElementException e) {
                 HANDLER.accept(e);
                 deactivationPredicate = (scene) -> ImmediateDeactivationPredicate.INSTANCE;
             }
@@ -55,12 +54,10 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
             PickupPredicateComponent pickupPredicateComponent;
             if (data.pickupPredicate().isEmpty()) {
                 pickupPredicateComponent = scene -> AlwaysPickupPredicate.INSTANCE;
-            }
-            else {
+            } else {
                 try {
                     pickupPredicateComponent = contextManager.makeContext(data.pickupPredicate()).provide();
-                }
-                catch (ElementException e) {
+                } catch (ElementException e) {
                     HANDLER.accept(e);
                     pickupPredicateComponent = scene -> AlwaysPickupPredicate.INSTANCE;
                 }
@@ -69,20 +66,18 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
             PowerupEffectComponent powerupEffectComponent;
             if (data.powerupEffect().isEmpty()) {
                 powerupEffectComponent = scene -> NoPowerupEffect.INSTANCE;
-            }
-            else {
+            } else {
                 try {
                     powerupEffectComponent = contextManager.makeContext(data.powerupEffect()).provide();
-                }
-                catch (ElementException e) {
+                } catch (ElementException e) {
                     HANDLER.accept(e);
                     powerupEffectComponent = scene -> NoPowerupEffect.INSTANCE;
                 }
             }
 
             powerupMap.put(dataEntry.getKey(),
-                    new PowerupComponents(visuals, actions, deactivationPredicate, pickupPredicateComponent,
-                            powerupEffectComponent));
+                new PowerupComponents(visuals, actions, deactivationPredicate, pickupPredicateComponent,
+                    powerupEffectComponent));
         }
 
         this.powerups = Map.copyOf(powerupMap);

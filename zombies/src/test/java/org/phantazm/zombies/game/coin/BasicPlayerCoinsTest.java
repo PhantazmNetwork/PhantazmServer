@@ -35,11 +35,11 @@ public class BasicPlayerCoinsTest {
         when(playerView.getPlayer()).thenReturn(Optional.of(player));
         ZombiesPlayerActionBar actionBar = new ZombiesPlayerActionBar(playerView);
         TransactionMessager componentCreator = new BasicTransactionMessager(actionBar, MiniMessage.miniMessage(),
-                new PlayerCoinsInfo("", "", NamedTextColor.WHITE, NamedTextColor.WHITE, 20L));
+            new PlayerCoinsInfo("", "", NamedTextColor.WHITE, NamedTextColor.WHITE, 20L));
 
         coins = new BasicPlayerCoins(
-                BasicZombiesPlayerMapStats.createBasicStats(UUID.randomUUID(), Key.key("phantazm:test")),
-                componentCreator, initialCoins);
+            BasicZombiesPlayerMapStats.createBasicStats(UUID.randomUUID(), Key.key("phantazm:test")),
+            componentCreator, initialCoins);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class BasicPlayerCoinsTest {
         setup(0);
         int delta = 10;
         TransactionResult result = coins.runTransaction(new Transaction(
-                List.of(Transaction.modifier(Component.empty(), Transaction.Modifier.Action.ADD, delta)), delta));
+            List.of(Transaction.modifier(Component.empty(), Transaction.Modifier.Action.ADD, delta)), delta));
         assertEquals(delta * 2, result.change());
     }
 
@@ -80,10 +80,10 @@ public class BasicPlayerCoinsTest {
         setup(0);
         int delta = 10;
         Transaction.Modifier modifier1 =
-                Transaction.modifier(Component.empty(), Transaction.Modifier.Action.ADD, delta);
+            Transaction.modifier(Component.empty(), Transaction.Modifier.Action.ADD, delta);
         int changedValue = 100;
         Transaction.Modifier modifier2 =
-                Transaction.modifier(Component.empty(), Transaction.Modifier.Action.SET, changedValue, 1);
+            Transaction.modifier(Component.empty(), Transaction.Modifier.Action.SET, changedValue, 1);
         TransactionResult result = coins.runTransaction(new Transaction(List.of(modifier1, modifier2), delta));
         assertEquals(changedValue + delta, result.change());
     }

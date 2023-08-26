@@ -14,8 +14,9 @@ public class BasicTransactionModifierSource implements TransactionModifierSource
     }
 
     @Override
-    public @NotNull @UnmodifiableView Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
-        Objects.requireNonNull(key, "key");
+    public @NotNull
+    @UnmodifiableView Collection<Transaction.Modifier> modifiers(@NotNull Key key) {
+        Objects.requireNonNull(key);
 
         String namespace = key.namespace();
         String value = key.value();
@@ -39,16 +40,16 @@ public class BasicTransactionModifierSource implements TransactionModifierSource
 
     @Override
     public void addModifier(@NotNull Key group, Transaction.@NotNull Modifier modifier) {
-        Objects.requireNonNull(group, "group");
-        Objects.requireNonNull(modifier, "modifier");
+        Objects.requireNonNull(group);
+        Objects.requireNonNull(modifier);
 
         modifierSources.computeIfAbsent(group.asString(), (ignored) -> new ArrayList<>(4)).add(modifier);
     }
 
     @Override
     public void removeModifier(@NotNull Key group, Transaction.@NotNull Modifier modifier) {
-        Objects.requireNonNull(group, "group");
-        Objects.requireNonNull(modifier, "modifier");
+        Objects.requireNonNull(group);
+        Objects.requireNonNull(modifier);
 
         Collection<Transaction.Modifier> modifiers = modifierSources.get(group.asString());
         if (modifiers != null) {

@@ -29,7 +29,7 @@ public class EntityInstanceAudienceProvider implements AudienceProvider {
     @FactoryMethod
     public EntityInstanceAudienceProvider(@NotNull @Depend("zombies.dependency.gun.entity_supplier")
     Supplier<Optional<? extends Entity>> entitySupplier) {
-        this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
+        this.entitySupplier = Objects.requireNonNull(entitySupplier);
     }
 
     @Override

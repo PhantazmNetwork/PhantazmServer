@@ -3,12 +3,6 @@ package org.phantazm.commons;
 import org.jetbrains.annotations.NotNull;
 
 public interface TickableTask extends Tickable {
-    boolean isFinished();
-
-    default void end() {
-
-    }
-
     static @NotNull TickableTask afterTicks(long ticks, @NotNull Runnable action, @NotNull Runnable endAction) {
         long start = System.currentTimeMillis();
         return new TickableTask() {
@@ -34,5 +28,11 @@ public interface TickableTask extends Tickable {
                 }
             }
         };
+    }
+
+    boolean isFinished();
+
+    default void end() {
+
     }
 }

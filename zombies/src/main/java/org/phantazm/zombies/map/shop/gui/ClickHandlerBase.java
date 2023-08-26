@@ -19,8 +19,8 @@ public abstract class ClickHandlerBase<TData> implements GuiItem, ShopInteractor
     protected Shop shop;
 
     public ClickHandlerBase(@NotNull TData data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
+        this.data = Objects.requireNonNull(data);
+        this.playerMap = Objects.requireNonNull(playerMap);
     }
 
     @Override

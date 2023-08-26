@@ -17,7 +17,8 @@ public interface InventoryProfile {
     boolean hasInventoryObject(int slot);
 
     /**
-     * Gets the {@link InventoryObject} within a certain slot. This should be checked first with {@link #hasInventoryObject(int)}.
+     * Gets the {@link InventoryObject} within a certain slot. This should be checked first with
+     * {@link #hasInventoryObject(int)}.
      *
      * @param slot The slot to get the {@link InventoryObject} from
      * @return The {@link InventoryObject}

@@ -25,24 +25,24 @@ import java.util.*;
 
 public class ZombiesJoinCommand extends Command {
     public ZombiesJoinCommand(@NotNull Map<? super UUID, ? extends Party> partyMap,
-            @NotNull PlayerViewProvider viewProvider, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
-            @NotNull ZombiesJoinHelper joinHelper, long ratelimit) {
+        @NotNull PlayerViewProvider viewProvider, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
+        @NotNull ZombiesJoinHelper joinHelper, long ratelimit) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.String("map-key");
         Argument<Boolean> restrictedArgument = ArgumentType.Boolean("restricted").setDefaultValue(false);
 
-        Objects.requireNonNull(partyMap, "partyMap");
-        Objects.requireNonNull(viewProvider, "viewProvider");
-        Objects.requireNonNull(keyParser, "keyParser");
-        Objects.requireNonNull(maps, "maps");
-        Objects.requireNonNull(joinHelper, "joinHelper");
+        Objects.requireNonNull(partyMap);
+        Objects.requireNonNull(viewProvider);
+        Objects.requireNonNull(keyParser);
+        Objects.requireNonNull(maps);
+        Objects.requireNonNull(joinHelper);
 
         Object2LongMap<UUID> lastUsageTimes = new Object2LongOpenHashMap<>();
         mapKeyArgument.setSuggestionCallback((sender, context, suggestion) -> {
             for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
                 suggestion.addEntry(
-                        new SuggestionEntry(entry.getKey().asString(), entry.getValue().settings().displayName()));
+                    new SuggestionEntry(entry.getKey().asString(), entry.getValue().settings().displayName()));
             }
         });
         addConditionalSyntax((sender, commandString) -> {
@@ -60,17 +60,18 @@ public class ZombiesJoinCommand extends Command {
                 PartyMember member = party.getMemberManager().getMember(player.getUuid());
                 if (!party.getJoinPermission().hasPermission(member)) {
                     sender.sendMessage(Component.text("You don't have permission in your party to join games!",
-                            NamedTextColor.RED));
+                        NamedTextColor.RED));
                     return false;
                 }
             }
 
             return true;
         }, (sender, context) -> {
-            Player joiner = (Player)sender;
+            Player joiner = (Player) sender;
             UUID joinerUUID = joiner.getUuid();
             long currentTime = System.currentTimeMillis();
-            if (lastUsageTimes.containsKey(joinerUUID) && currentTime - lastUsageTimes.getLong(joinerUUID) < ratelimit) {
+            if (lastUsageTimes.containsKey(joinerUUID) && currentTime - lastUsageTimes.getLong(
+                joinerUUID) < ratelimit) {
                 joiner.sendMessage(Component.text("You're using that command too quickly!", NamedTextColor.RED));
                 return;
             } else {
@@ -94,8 +95,7 @@ public class ZombiesJoinCommand extends Command {
             Collection<PlayerView> playerViews;
             if (party == null) {
                 playerViews = Collections.singleton(viewProvider.fromPlayer(joiner));
-            }
-            else {
+            } else {
                 playerViews = new ArrayList<>(party.getMemberManager().getMembers().size());
                 for (GuildMember guildMember : party.getMemberManager().getMembers().values()) {
                     playerViews.add(guildMember.getPlayerView());

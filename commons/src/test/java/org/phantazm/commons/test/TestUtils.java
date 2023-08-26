@@ -6,8 +6,8 @@ import java.util.function.Supplier;
 
 public final class TestUtils {
     public static void comparativeBenchmark(Supplier<Consumer<String>> first, Supplier<Consumer<String>> second,
-            Function<Integer, String> stringFunction, String firstName, String secondName, String operationName,
-            int reps, int iters) {
+        Function<Integer, String> stringFunction, String firstName, String secondName, String operationName,
+        int reps, int iters) {
         long[] secondTimes = new long[reps];
         long[] firstTimes = new long[reps];
 
@@ -36,12 +36,12 @@ public final class TestUtils {
             secondSum += secondTimes[i];
         }
 
-        double secondAvg = ((double)secondSum / (double)reps);
-        double firstAvg = ((double)firstSum / (double)reps);
+        double secondAvg = ((double) secondSum / (double) reps);
+        double firstAvg = ((double) firstSum / (double) reps);
 
         System.out.println(firstName + " average: " + firstAvg + "ns for " + iters + " " + operationName);
         System.out.println(secondName + " average: " + secondAvg + "ns for " + iters + " " + operationName);
         System.out.println(firstName + " is " + secondAvg / firstAvg + "x faster than " + secondName + " over " + reps +
-                " repetitions");
+            " repetitions");
     }
 }

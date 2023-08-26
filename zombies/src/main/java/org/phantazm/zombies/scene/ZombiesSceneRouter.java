@@ -22,8 +22,8 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     private boolean joinable = true;
 
     public ZombiesSceneRouter(
-            @NotNull Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders) {
-        this.sceneProviders = Objects.requireNonNull(sceneProviders, "sceneProviders");
+        @NotNull Map<Key, ? extends SceneProvider<ZombiesScene, ZombiesJoinRequest>> sceneProviders) {
+        this.sceneProviders = Objects.requireNonNull(sceneProviders);
     }
 
     @Override
@@ -66,11 +66,11 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
     public @NotNull CompletableFuture<RouteResult> findScene(@NotNull ZombiesRouteRequest routeRequest) {
         if (isShutdown()) {
             return CompletableFuture.completedFuture(
-                    RouteResult.failure(Component.text("This game has shut down.", NamedTextColor.RED)));
+                RouteResult.failure(Component.text("This game has shut down.", NamedTextColor.RED)));
         }
         if (!isJoinable()) {
             return CompletableFuture.completedFuture(
-                    RouteResult.failure(Component.text("This game is not " + "joinable.", NamedTextColor.RED)));
+                RouteResult.failure(Component.text("This game is not " + "joinable.", NamedTextColor.RED)));
         }
 
         if (routeRequest.targetMap() != null) {
@@ -84,12 +84,13 @@ public class ZombiesSceneRouter implements SceneRouter<ZombiesScene, ZombiesRout
         SceneProvider<ZombiesScene, ZombiesJoinRequest> sceneProvider = sceneProviders.get(routeRequest.targetMap());
         if (sceneProvider == null) {
             return CompletableFuture.completedFuture(RouteResult.failure(
-                    Component.text("No games exist with key " + routeRequest.targetMap() + ".", NamedTextColor.RED)));
+                Component.text("No games exist with key " + routeRequest.targetMap() + ".", NamedTextColor.RED)));
         }
 
         return sceneProvider.provideScene(routeRequest.joinRequest()).thenApply(sceneOptional -> {
             return sceneOptional.map(RouteResult::success)
-                    .orElseGet(() -> RouteResult.failure(Component.text("No games are joinable.", NamedTextColor.RED)));
+                .orElseGet(
+                    () -> RouteResult.failure(Component.text("No games are joinable.", NamedTextColor.RED)));
         });
     }
 

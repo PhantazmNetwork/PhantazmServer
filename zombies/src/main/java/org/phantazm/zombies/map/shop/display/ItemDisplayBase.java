@@ -15,8 +15,8 @@ public abstract class ItemDisplayBase implements ShopDisplay {
     protected ItemEntity itemEntity;
 
     public ItemDisplayBase(@NotNull ItemStack itemStack, @NotNull Point offset) {
-        this.itemStack = Objects.requireNonNull(itemStack, "itemStack");
-        this.offset = Objects.requireNonNull(offset, "offset");
+        this.itemStack = Objects.requireNonNull(itemStack);
+        this.offset = Objects.requireNonNull(offset);
     }
 
     @Override

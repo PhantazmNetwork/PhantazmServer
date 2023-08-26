@@ -20,7 +20,7 @@ public class MapFlaggingAction implements PowerupActionComponent {
 
     @FactoryMethod
     public MapFlaggingAction(@NotNull Data data,
-            @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
+        @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
         this.data = data;
         this.deactivationPredicate = deactivationPredicate;
     }
@@ -31,7 +31,8 @@ public class MapFlaggingAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(@NotNull Key flag, @NotNull @ChildPath("deactivation_predicate") String deactivationPredicate) {
+    public record Data(@NotNull Key flag,
+        @NotNull @ChildPath("deactivation_predicate") String deactivationPredicate) {
     }
 
     private static class Action extends PowerupActionBase {

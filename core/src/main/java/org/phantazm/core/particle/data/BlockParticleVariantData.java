@@ -16,7 +16,7 @@ import java.util.Set;
 @Cache
 public final class BlockParticleVariantData implements ParticleVariantData {
     private static final Set<Key> VALID_KEYS =
-            Set.of(Particle.BLOCK.key(), Particle.BLOCK_MARKER.key(), Particle.FALLING_DUST.key());
+        Set.of(Particle.BLOCK.key(), Particle.BLOCK_MARKER.key(), Particle.FALLING_DUST.key());
 
     private final Data data;
 

@@ -25,13 +25,13 @@ public class EquipmentCostPredicate implements EquipmentPredicate {
 
     @FactoryMethod
     public EquipmentCostPredicate(@NotNull Data data, @NotNull TransactionModifierSource transactionModifierSource) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "transactionModifierSource");
+        this.data = Objects.requireNonNull(data);
+        this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource);
     }
 
     @Override
     public boolean canUpgrade(@NotNull PlayerInteraction playerInteraction, @NotNull Upgradable upgradeTarget,
-            @NotNull Key chosenUpgrade) {
+        @NotNull Key chosenUpgrade) {
         PlayerCoins coins = playerInteraction.player().module().getCoins();
 
         Integer cost = data.upgradeCosts.get(chosenUpgrade);
@@ -40,8 +40,8 @@ public class EquipmentCostPredicate implements EquipmentPredicate {
         }
 
         TransactionResult result =
-                coins.runTransaction(new Transaction(transactionModifierSource.modifiers(data.modifier),
-                        Collections.emptyList(), -cost));
+            coins.runTransaction(new Transaction(transactionModifierSource.modifiers(data.modifier),
+                Collections.emptyList(), -cost));
         return result.isAffordable(coins);
     }
 
@@ -50,10 +50,12 @@ public class EquipmentCostPredicate implements EquipmentPredicate {
         PlayerCoins coins = playerInteraction.player().module().getCoins();
 
         return coins.runTransaction(new Transaction(transactionModifierSource.modifiers(data.modifier), -data.baseCost))
-                .isAffordable(coins);
+            .isAffordable(coins);
     }
 
     @DataObject
-    public record Data(int baseCost, @NotNull Map<Key, Integer> upgradeCosts, @NotNull Key modifier) {
+    public record Data(int baseCost,
+        @NotNull Map<Key, Integer> upgradeCosts,
+        @NotNull Key modifier) {
     }
 }

@@ -32,19 +32,19 @@ public class InventoryAccessRegistryTest {
     @Test
     public void testDuplicateRegistration() {
         InventoryAccessRegistry inventoryAccessRegistry =
-                new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
+            new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
         InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
 
         inventoryAccessRegistry.registerAccess(firstKey, newAccess(inventoryProfile));
 
         assertThrowsExactly(IllegalArgumentException.class,
-                () -> inventoryAccessRegistry.registerAccess(firstKey, newAccess(inventoryProfile)));
+            () -> inventoryAccessRegistry.registerAccess(firstKey, newAccess(inventoryProfile)));
     }
 
     @Test
     public void testSwitchInitialProfile() {
         InventoryAccessRegistry inventoryAccessRegistry =
-                new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
+            new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
         InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
         inventoryAccessRegistry.registerAccess(firstKey, newAccess(inventoryProfile));
 
@@ -56,7 +56,7 @@ public class InventoryAccessRegistryTest {
     @Test
     public void testSwitchNewProfile() {
         InventoryAccessRegistry inventoryAccessRegistry =
-                new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
+            new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
         InventoryProfile firstInventoryProfile = new BasicInventoryProfile(1);
         InventoryProfile secondInventoryProfile = new BasicInventoryProfile(1);
         inventoryAccessRegistry.registerAccess(firstKey, newAccess(firstInventoryProfile));
@@ -71,7 +71,7 @@ public class InventoryAccessRegistryTest {
     @Test
     public void testSwitchUnregisteredProfile() {
         InventoryAccessRegistry inventoryAccessRegistry =
-                new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
+            new BasicInventoryAccessRegistry(Mockito.mock(PlayerView.class));
         InventoryProfile inventoryProfile = new BasicInventoryProfile(1);
         inventoryAccessRegistry.registerAccess(firstKey, newAccess(inventoryProfile));
 

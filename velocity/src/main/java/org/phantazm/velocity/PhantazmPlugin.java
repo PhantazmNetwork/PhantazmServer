@@ -18,7 +18,7 @@ import java.util.Collections;
  * A velocity plugin used to communicate information to the Phantazm server.
  */
 @Plugin(id = "phantazm", name = "Phantazm", version = "1.0-SNAPSHOT",
-        description = "A velocity plugin used to communicate information to the Phantazm server.", authors = {"thamid"})
+    description = "A velocity plugin used to communicate information to the Phantazm server.", authors = {"thamid"})
 public class PhantazmPlugin {
 
     private final ProxyServer server;

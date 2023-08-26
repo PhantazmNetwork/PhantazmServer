@@ -66,9 +66,9 @@ public final class VectorConfigProcessors {
         public @NotNull ConfigElement elementFromData(Bounds3I region3I) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(2);
             node.put("origin",
-                    vec3I.elementFromData(Vec3I.immutable(region3I.originX(), region3I.originY(), region3I.originZ())));
+                vec3I.elementFromData(Vec3I.immutable(region3I.originX(), region3I.originY(), region3I.originZ())));
             node.put("lengths",
-                    vec3I.elementFromData(Vec3I.immutable(region3I.lengthX(), region3I.lengthY(), region3I.lengthZ())));
+                vec3I.elementFromData(Vec3I.immutable(region3I.lengthX(), region3I.lengthY(), region3I.lengthZ())));
             return node;
         }
     };
@@ -85,9 +85,9 @@ public final class VectorConfigProcessors {
         public @NotNull ConfigElement elementFromData(Bounds3D region3D) throws ConfigProcessException {
             ConfigNode node = new LinkedConfigNode(2);
             node.put("origin",
-                    vec3D.elementFromData(Vec3D.immutable(region3D.originX(), region3D.originY(), region3D.originZ())));
+                vec3D.elementFromData(Vec3D.immutable(region3D.originX(), region3D.originY(), region3D.originZ())));
             node.put("lengths",
-                    vec3D.elementFromData(Vec3D.immutable(region3D.lengthX(), region3D.lengthY(), region3D.lengthZ())));
+                vec3D.elementFromData(Vec3D.immutable(region3D.lengthX(), region3D.lengthY(), region3D.lengthZ())));
             return node;
         }
     };

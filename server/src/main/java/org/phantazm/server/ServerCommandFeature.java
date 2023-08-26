@@ -28,9 +28,9 @@ public final class ServerCommandFeature {
     }
 
     static void initialize(@NotNull LoginValidator validator, boolean whitelist, @NotNull DataSource dataSource,
-            @NotNull Executor executor, @NotNull RouterStore store, @NotNull ShutdownConfig shutdownConfig,
-            @NotNull ZombiesGamereportConfig zombiesGamereportConfig, @NotNull PlayerViewProvider playerViewProvider,
-            @NotNull SceneTransferHelper sceneTransferHelper, @NotNull RoleStore roleStore) {
+        @NotNull Executor executor, @NotNull RouterStore store, @NotNull ShutdownConfig shutdownConfig,
+        @NotNull ZombiesGamereportConfig zombiesGamereportConfig, @NotNull PlayerViewProvider playerViewProvider,
+        @NotNull SceneTransferHelper sceneTransferHelper, @NotNull RoleStore roleStore) {
         ServerCommandFeature.permissionHandler = new DatabasePermissionHandler(dataSource, executor, roleStore);
 
         CommandManager manager = MinecraftServer.getCommandManager();

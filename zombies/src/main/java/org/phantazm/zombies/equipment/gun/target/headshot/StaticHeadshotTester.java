@@ -26,7 +26,7 @@ public class StaticHeadshotTester implements HeadshotTester {
      */
     @FactoryMethod
     public StaticHeadshotTester(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

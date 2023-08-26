@@ -29,6 +29,7 @@ public class PlayerFlaggingInteractor extends InteractorBase<PlayerFlaggingInter
     }
 
     @DataObject
-    public record Data(@NotNull Key flag, @NotNull FlagAction action) {
+    public record Data(@NotNull Key flag,
+        @NotNull FlagAction action) {
     }
 }

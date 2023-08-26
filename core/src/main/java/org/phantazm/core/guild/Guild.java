@@ -13,9 +13,9 @@ public class Guild<TMember extends GuildMember> {
     private final Function<? super PlayerView, ? extends TMember> memberCreator;
 
     public Guild(@NotNull GuildMemberManager<TMember> memberManager,
-            @NotNull Function<? super PlayerView, ? extends TMember> memberCreator) {
-        this.memberManager = Objects.requireNonNull(memberManager, "memberManager");
-        this.memberCreator = Objects.requireNonNull(memberCreator, "memberCreator");
+        @NotNull Function<? super PlayerView, ? extends TMember> memberCreator) {
+        this.memberManager = Objects.requireNonNull(memberManager);
+        this.memberCreator = Objects.requireNonNull(memberCreator);
     }
 
     public @NotNull GuildMemberManager<TMember> getMemberManager() {

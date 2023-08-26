@@ -26,14 +26,14 @@ public class PartyInviteCommand {
     }
 
     public static @NotNull Command inviteCommand(@NotNull PartyCommandConfig config,
-            @NotNull ConnectionManager connectionManager, @NotNull MiniMessage miniMessage,
-            @NotNull GuildHolder<Party> partyHolder, @NotNull PlayerViewProvider viewProvider,
-            @NotNull PartyCreator partyCreator) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(miniMessage, "miniMessage");
-        Objects.requireNonNull(partyHolder, "partyHolder");
-        Objects.requireNonNull(viewProvider, "viewProvider");
-        Objects.requireNonNull(partyCreator, "partyCreator");
+        @NotNull ConnectionManager connectionManager, @NotNull MiniMessage miniMessage,
+        @NotNull GuildHolder<Party> partyHolder, @NotNull PlayerViewProvider viewProvider,
+        @NotNull PartyCreator partyCreator) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(miniMessage);
+        Objects.requireNonNull(partyHolder);
+        Objects.requireNonNull(viewProvider);
+        Objects.requireNonNull(partyCreator);
 
         Argument<String> nameArgument = ArgumentType.Word("name");
         nameArgument.setSuggestionCallback((sender, context, suggestion) -> {
@@ -93,7 +93,7 @@ public class PartyInviteCommand {
         }, (sender, context) -> {
             String name = context.get(nameArgument);
 
-            Player player = ((Player)sender);
+            Player player = ((Player) sender);
             Party tempParty = partyHolder.uuidToGuild().get(player.getUuid());
             if (tempParty == null) {
                 tempParty = partyCreator.createPartyFor(viewProvider.fromPlayer(player));
@@ -118,7 +118,7 @@ public class PartyInviteCommand {
                         playerView.getDisplayName().thenAccept(displayName -> {
                             TagResolver inviteePlaceholder = Placeholder.component("invitee", displayName);
                             Component message =
-                                    miniMessage.deserialize(config.inviteeAlreadyInPartyFormat(), inviteePlaceholder);
+                                miniMessage.deserialize(config.inviteeAlreadyInPartyFormat(), inviteePlaceholder);
                             sender.sendMessage(message);
                         });
                         return;
@@ -128,7 +128,7 @@ public class PartyInviteCommand {
                         playerView.getDisplayName().thenAccept(displayName -> {
                             TagResolver playerPlaceholder = Placeholder.component("player", displayName);
                             sender.sendMessage(
-                                    miniMessage.deserialize(config.playerNotOnlineFormat(), playerPlaceholder));
+                                miniMessage.deserialize(config.playerNotOnlineFormat(), playerPlaceholder));
                         });
                         return;
                     }
@@ -137,7 +137,7 @@ public class PartyInviteCommand {
                         playerView.getDisplayName().thenAccept(displayName -> {
                             TagResolver inviteePlaceholder = Placeholder.component("invitee", displayName);
                             Component message = miniMessage.deserialize(config.inviteeAlreadyInvitedFormat(),
-                                    inviteePlaceholder);
+                                inviteePlaceholder);
                             sender.sendMessage(message);
                         });
                         return;

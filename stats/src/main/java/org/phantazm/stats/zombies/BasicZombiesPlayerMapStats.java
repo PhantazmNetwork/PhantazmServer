@@ -38,10 +38,11 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
 
     private int headshotHits;
 
-    public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey, int gamesPlayed, int wins, int bestRound, int roundsSurvived, int kills, int knocks, long coinsGained,
-            long coinsSpent, int deaths, int revives, int shots, int regularHits, int headshotHits) {
-        this.playerUUID = Objects.requireNonNull(playerUUID, "playerUUID");
-        this.mapKey = Objects.requireNonNull(mapKey, "mapKey");
+    public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey, int gamesPlayed, int wins,
+        int bestRound, int roundsSurvived, int kills, int knocks, long coinsGained,
+        long coinsSpent, int deaths, int revives, int shots, int regularHits, int headshotHits) {
+        this.playerUUID = Objects.requireNonNull(playerUUID);
+        this.mapKey = Objects.requireNonNull(mapKey);
         this.gamesPlayed = gamesPlayed;
         this.wins = wins;
         this.bestRound = bestRound;

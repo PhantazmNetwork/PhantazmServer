@@ -26,9 +26,9 @@ public final class QuitCommand {
     }
 
     public static @NotNull Command quitCommand(@NotNull RouterStore routerStore,
-            @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback defaultFallback) {
-        Objects.requireNonNull(routerStore, "routerStore");
-        Objects.requireNonNull(viewProvider, "viewProvider");
+        @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback defaultFallback) {
+        Objects.requireNonNull(routerStore);
+        Objects.requireNonNull(viewProvider);
 
         Command command = new Command("quit", "leave", "l");
         command.addConditionalSyntax((sender, commandString) -> {
@@ -43,7 +43,7 @@ public final class QuitCommand {
 
             return true;
         }, (sender, context) -> {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
             Optional<? extends Scene<?>> sceneOptional = routerStore.getCurrentScene(player.getUuid());
             if (sceneOptional.isPresent()) {
                 Scene<?> scene = sceneOptional.get();
@@ -56,17 +56,15 @@ public final class QuitCommand {
                 if (result.executor().isPresent()) {
                     result.executor().get().run();
                     scene.getFallback().fallback(viewProvider.fromPlayer(player))
-                            .whenComplete((fallbackResult, throwable) -> {
-                                if (throwable != null) {
-                                    LOGGER.warn("Failed to fallback", throwable);
-                                }
-                            });
-                }
-                else {
+                        .whenComplete((fallbackResult, throwable) -> {
+                            if (throwable != null) {
+                                LOGGER.warn("Failed to fallback", throwable);
+                            }
+                        });
+                } else {
                     result.message().ifPresent(sender::sendMessage);
                 }
-            }
-            else {
+            } else {
                 defaultFallback.fallback(viewProvider.fromPlayer(player)).whenComplete((fallbackResult, throwable) -> {
                     if (throwable != null) {
                         LOGGER.warn("Failed to fallback", throwable);

@@ -13,10 +13,8 @@ import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
-import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
@@ -40,7 +38,7 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
 
     @Override
     public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
-        return new Action(data, scene.instance(), scene.getMap().mapObjects().module().mobStore());
+        return new Action(data, scene.instance());
     }
 
     public enum BossDamageType {
@@ -49,12 +47,13 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(double radius,
-                       @NotNull Key modifier,
-                       int coinsPerKill,
-                       @NotNull BossDamageType bossDamageType,
-                       float bossDamage,
-                       boolean bypassArmor) {
+    public record Data(
+        double radius,
+        @NotNull Key modifier,
+        int coinsPerKill,
+        @NotNull BossDamageType bossDamageType,
+        float bossDamage,
+        boolean bypassArmor) {
         @Default("bossDamageType")
         public static @NotNull ConfigElement defaultBossDamageType() {
             return ConfigPrimitive.of("HEALTH_FACTOR");
@@ -74,12 +73,10 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
     private static class Action extends InstantAction {
         private final Data data;
         private final Instance instance;
-        private final MobStore mobStore;
 
-        private Action(Data data, Instance instance, MobStore mobStore) {
+        private Action(Data data, Instance instance) {
             this.instance = instance;
             this.data = data;
-            this.mobStore = mobStore;
         }
 
         @Override
@@ -92,43 +89,41 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
             Player player = playerOptional.get();
 
             instance.getEntityTracker()
-                    .nearbyEntities(powerup.spawnLocation(), data.radius, EntityTracker.Target.LIVING_ENTITIES,
-                            entity -> {
-                                PhantazmMob mob = mobStore.getMob(entity.getUuid());
-                                if (mob == null) {
-                                    return;
+                .nearbyEntities(powerup.spawnLocation(), data.radius, EntityTracker.Target.LIVING_ENTITIES,
+                    entity -> {
+                        if (!(entity instanceof Mob mob)) {
+                            return;
+                        }
+
+                        entity.getAcquirable().sync(ignored -> {
+                            if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                                switch (data.bossDamageType) {
+                                    case HEALTH_FACTOR -> entity.damage(
+                                        Damage.fromPlayer(player, entity.getMaxHealth() * data.bossDamage),
+                                        data.bypassArmor);
+                                    case CONSTANT -> entity.damage(Damage.fromPlayer(player, data.bossDamage),
+                                        data.bypassArmor);
                                 }
 
-                                entity.setTag(Tags.LAST_HIT_BY, player.getUuid());
-
-                                if (mob.model().getExtraNode()
-                                        .getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
-                                    switch (data.bossDamageType) {
-                                        case HEALTH_FACTOR -> entity.damage(
-                                                Damage.fromPlayer(player, entity.getMaxHealth() * data.bossDamage),
-                                                data.bypassArmor);
-                                        case CONSTANT -> entity.damage(Damage.fromPlayer(player, data.bossDamage),
-                                                data.bypassArmor);
-                                    }
-
-                                    if (entity.getHealth() <= 0) {
-                                        giveCoins(zombiesPlayer);
-                                    }
-
-                                    return;
+                                if (entity.getHealth() <= 0) {
+                                    giveCoins(zombiesPlayer);
                                 }
 
-                                giveCoins(zombiesPlayer);
-                                entity.kill();
-                            });
+                                return;
+                            }
+
+                            giveCoins(zombiesPlayer);
+                            entity.damage(Damage.fromPlayer(player, entity.getHealth()), true);
+                        });
+                    });
         }
 
         private void giveCoins(ZombiesPlayer zombiesPlayer) {
             PlayerCoins coins = zombiesPlayer.module().getCoins();
 
             TransactionResult result = coins.runTransaction(
-                    new Transaction(zombiesPlayer.module().compositeTransactionModifiers().modifiers(data.modifier),
-                            data.coinsPerKill));
+                new Transaction(zombiesPlayer.module().compositeTransactionModifiers().modifiers(data.modifier),
+                    data.coinsPerKill));
             result.applyIfAffordable(coins);
         }
     }

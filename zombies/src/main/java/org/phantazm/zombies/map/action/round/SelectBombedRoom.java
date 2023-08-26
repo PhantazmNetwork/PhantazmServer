@@ -16,18 +16,21 @@ import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
+import net.minestom.server.entity.state.CancellableState;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.CancellableState;
 import org.phantazm.commons.TickableTask;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.Flags;
+import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Round;
@@ -42,7 +45,7 @@ import java.util.function.Supplier;
 @Model("zombies.map.round.action.select_bombed")
 @Cache(false)
 public class SelectBombedRoom implements Action<Round> {
-    private static final Potion NAUSEA = new Potion(PotionEffect.NAUSEA, (byte)3, 360000);
+    private static final Potion NAUSEA = new Potion(PotionEffect.NAUSEA, (byte) 3, 360000);
 
     private final Data data;
     private final Supplier<? extends MapObjects> supplier;
@@ -50,14 +53,13 @@ public class SelectBombedRoom implements Action<Round> {
     private final Instance instance;
     private final ParticleWrapper particle;
     private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
-    private final UUID stateId;
 
     private final List<TargetedAttribute> modifiers;
 
     @FactoryMethod
     public SelectBombedRoom(@NotNull Data data, @NotNull Supplier<? extends MapObjects> supplier,
-            @NotNull Random random, @NotNull Instance instance, @NotNull @Child("particle") ParticleWrapper particle,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+        @NotNull Random random, @NotNull Instance instance, @NotNull @Child("particle") ParticleWrapper particle,
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
         this.data = data;
         this.supplier = supplier;
         this.random = random;
@@ -69,19 +71,18 @@ public class SelectBombedRoom implements Action<Round> {
         for (Modifier modifier : data.modifiers) {
             UUID uuid = UUID.randomUUID();
             modifiers.add(new TargetedAttribute(modifier.attribute,
-                    new AttributeModifier(uuid, uuid.toString(), modifier.amount, modifier.attributeOperation)));
+                new AttributeModifier(uuid, uuid.toString(), modifier.amount, modifier.attributeOperation)));
         }
 
         this.modifiers = List.copyOf(modifiers);
-        this.stateId = UUID.randomUUID();
     }
 
     @Override
     public void perform(@NotNull Round round) {
         MapObjects objects = supplier.get();
         List<Room> candidateRooms = objects.roomTracker().items().stream()
-                .filter(room -> room.isOpen() && !room.flags().hasFlag(Flags.BOMBED_ROOM) &&
-                        !data.exemptRooms.contains(room.getRoomInfo().id())).toList();
+            .filter(room -> room.isOpen() && !room.flags().hasFlag(Flags.BOMBED_ROOM) &&
+                !data.exemptRooms.contains(room.getRoomInfo().id())).toList();
         if (candidateRooms.isEmpty()) {
             return;
         }
@@ -98,9 +99,25 @@ public class SelectBombedRoom implements Action<Round> {
         bombDamage.tagHandler().setTag(Tags.DAMAGE_NAME, data.bombingDamageName);
 
         objects.taskScheduler().scheduleTaskAfter(new TickableTask() {
+            private final List<CancellableState<Entity>> states = new ArrayList<>();
+
             private boolean flagSet;
             private int ticks;
             private boolean finished;
+
+            private void removeStateFor(ZombiesPlayer zombiesPlayer, boolean clearBombTag) {
+                zombiesPlayer.getPlayer().ifPresent(player -> {
+                    for (CancellableState<Entity> state : states) {
+                        if (state.self() == player) {
+                            player.stateHolder().removeState(Stages.ZOMBIES_GAME, state);
+                        }
+                    }
+
+                    if (clearBombTag) {
+                        player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
+                    }
+                });
+            }
 
             @Override
             public boolean isFinished() {
@@ -110,9 +127,10 @@ public class SelectBombedRoom implements Action<Round> {
             @Override
             public void end() {
                 for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                    zombiesPlayer.removeCancellable(stateId);
-                    zombiesPlayer.getPlayer().ifPresent(player -> player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM));
+                    removeStateFor(zombiesPlayer, true);
                 }
+
+                states.clear();
             }
 
             @Override
@@ -126,7 +144,7 @@ public class SelectBombedRoom implements Action<Round> {
                 int roundsElapsed = roundHandler.currentRoundIndex() - startRoundIndex;
                 if (roundsElapsed >= data.duration) {
                     Component completionMessage =
-                            MiniMessage.miniMessage().deserialize(data.bombingCompleteFormat, roomPlaceholder);
+                        MiniMessage.miniMessage().deserialize(data.bombingCompleteFormat, roomPlaceholder);
                     instance.sendMessage(completionMessage);
 
                     room.flags().clearFlag(Flags.BOMBED_ROOM);
@@ -135,21 +153,17 @@ public class SelectBombedRoom implements Action<Round> {
 
                     for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
                         zombiesPlayer.getPlayer().ifPresent(player -> {
-                            player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
-
                             if (!zombiesPlayer.canDoGenericActions()) {
-                                zombiesPlayer.removeCancellable(stateId);
-                            }
-                            else {
+                                removeStateFor(zombiesPlayer, true);
+                            } else {
                                 Optional<Room> roomOptional = objects.roomTracker().atPoint(player.getPosition());
                                 if (roomOptional.isPresent()) {
                                     Room currentRoom = roomOptional.get();
                                     if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
-                                        zombiesPlayer.removeCancellable(stateId);
+                                        removeStateFor(zombiesPlayer, true);
                                     }
-                                }
-                                else {
-                                    zombiesPlayer.removeCancellable(stateId);
+                                } else {
+                                    removeStateFor(zombiesPlayer, true);
                                 }
                             }
                         });
@@ -164,7 +178,7 @@ public class SelectBombedRoom implements Action<Round> {
                 if (++ticks % 4 == 0) {
                     for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
                         if (!zombiesPlayer.canDoGenericActions() || zombiesPlayer.flags().hasFlag(Flags.GODMODE)) {
-                            zombiesPlayer.removeCancellable(stateId);
+                            removeStateFor(zombiesPlayer, false);
                             continue;
                         }
 
@@ -180,7 +194,7 @@ public class SelectBombedRoom implements Action<Round> {
                                     long lastEnterBombedRoom = player.getTag(Tags.LAST_ENTER_BOMBED_ROOM);
                                     if (lastEnterBombedRoom == -1) {
                                         player.setTag(Tags.LAST_ENTER_BOMBED_ROOM, lastEnterBombedRoom =
-                                                MinecraftServer.currentTick());
+                                            MinecraftServer.currentTick());
                                     }
                                     long ticksSinceEnter = MinecraftServer.currentTick() - lastEnterBombedRoom;
 
@@ -191,51 +205,49 @@ public class SelectBombedRoom implements Action<Round> {
                                     if (ticksSinceEnter >= data.effectDelay) {
                                         applyModifiers(zombiesPlayer);
                                     }
+                                } else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
+                                    removeStateFor(zombiesPlayer, true);
                                 }
-                                else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
-                                    zombiesPlayer.removeCancellable(stateId);
-                                    player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
-                                }
-                            }
-                            else {
-                                zombiesPlayer.removeCancellable(stateId);
-                                player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
+                            } else {
+                                removeStateFor(zombiesPlayer, true);
                             }
                         });
                     }
                 }
             }
-        }, (long)data.gracePeriod);
-    }
 
-    private void applyModifiers(ZombiesPlayer player) {
-        player.registerCancellable(CancellableState.named(stateId, () -> {
-            player.getPlayer().ifPresent(actualPlayer -> {
-                for (TargetedAttribute modifier : modifiers) {
-                    actualPlayer.getAttribute(
-                                    Objects.requireNonNullElse(Attribute.fromKey(modifier.attribute), Attributes.NIL))
-                            .addModifier(modifier.modifier);
-                }
+            private void applyModifiers(ZombiesPlayer zombiesPlayer) {
+                zombiesPlayer.getPlayer().ifPresent(actualPlayer -> {
+                    CancellableState<Entity> state = CancellableState.state(actualPlayer,
+                        entity -> {
+                            for (TargetedAttribute modifier : modifiers) {
+                                ((Player) entity).getAttribute(Objects.requireNonNullElse(Attribute.fromKey(modifier.attribute),
+                                    Attributes.NIL)).addModifier(modifier.modifier);
+                            }
 
-                for (TimedPotion potion : actualPlayer.getActiveEffects()) {
-                    if (potion.getPotion() == NAUSEA) {
-                        return;
-                    }
-                }
+                            for (TimedPotion potion : entity.getActiveEffects()) {
+                                if (potion.getPotion() == NAUSEA) {
+                                    return;
+                                }
+                            }
 
-                actualPlayer.addEffect(NAUSEA);
-            });
-        }, () -> {
-            player.getPlayer().ifPresent(actualPlayer -> {
-                for (TargetedAttribute modifier : modifiers) {
-                    actualPlayer.getAttribute(
-                                    Objects.requireNonNullElse(Attribute.fromKey(modifier.attribute), Attributes.NIL))
-                            .removeModifier(modifier.modifier.getId());
-                }
+                            entity.addEffect(NAUSEA);
+                        }, entity -> {
+                            Player player = (Player) entity;
+                            for (TargetedAttribute modifier : modifiers) {
+                                player.getAttribute(
+                                        Objects.requireNonNullElse(Attribute.fromKey(modifier.attribute), Attributes.NIL))
+                                    .removeModifier(modifier.modifier.getId());
+                            }
 
-                actualPlayer.removeEffect(PotionEffect.NAUSEA);
-            });
-        }), false);
+                            player.removeEffect(PotionEffect.NAUSEA);
+                        });
+
+                    states.add(state);
+                    actualPlayer.stateHolder().registerState(Stages.ZOMBIES_GAME, state);
+                });
+            }
+        }, data.gracePeriod);
     }
 
     private Vec3D randomPoint(Point origin, Room room) {
@@ -265,25 +277,29 @@ public class SelectBombedRoom implements Action<Round> {
         return Vec3D.immutable(xOffset + origin.x(), yOffset + origin.y(), zOffset + origin.z());
     }
 
-    public record Modifier(@NotNull String attribute, float amount, @NotNull AttributeOperation attributeOperation) {
+    public record Modifier(@NotNull String attribute,
+        float amount,
+        @NotNull AttributeOperation attributeOperation) {
     }
 
-    private record TargetedAttribute(@NotNull String attribute, @NotNull AttributeModifier modifier) {
+    private record TargetedAttribute(@NotNull String attribute,
+        @NotNull AttributeModifier modifier) {
     }
 
     @DataObject
-    public record Data(@NotNull String warningFormatMessage,
-                       @NotNull String bombingCompleteFormat,
-                       @NotNull Component inAreaMessage,
-                       @NotNull Component bombingDamageName,
-                       float damage,
-                       int gracePeriod,
-                       long damageDelay,
-                       long effectDelay,
-                       int duration,
-                       @NotNull List<Key> exemptRooms,
-                       @NotNull List<Modifier> modifiers,
-                       @NotNull @ChildPath("particle") String particle) {
+    public record Data(
+        @NotNull String warningFormatMessage,
+        @NotNull String bombingCompleteFormat,
+        @NotNull Component inAreaMessage,
+        @NotNull Component bombingDamageName,
+        float damage,
+        int gracePeriod,
+        long damageDelay,
+        long effectDelay,
+        int duration,
+        @NotNull List<Key> exemptRooms,
+        @NotNull List<Modifier> modifiers,
+        @NotNull @ChildPath("particle") String particle) {
         @Default("bombingDamageName")
         public static @NotNull ConfigElement defaultBombingDamageName() {
             return ConfigPrimitive.of("<red>Bombing");

@@ -24,7 +24,7 @@ public class SidebarUpdater implements Activable {
 
     @FactoryMethod
     public SidebarUpdater(@NotNull Sidebar sidebar, @NotNull @Child("sections") Collection<SidebarSection> sections) {
-        this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
+        this.sidebar = Objects.requireNonNull(sidebar);
         this.sections = List.copyOf(sections);
         this.sizes = new int[sections.size()];
     }
@@ -103,8 +103,7 @@ public class SidebarUpdater implements Activable {
                 for (int i = oldClampedSize; i < newClampedSize; ++i) {
                     sidebar.createLine(new Sidebar.ScoreboardLine(lineId(i), Component.empty(), newClampedSize - i));
                 }
-            }
-            else if (oldClampedSize > newClampedSize) {
+            } else if (oldClampedSize > newClampedSize) {
                 for (int i = oldClampedSize - 1; i >= newClampedSize; i--) {
                     sidebar.removeLine(lineId(i));
                 }
@@ -122,7 +121,7 @@ public class SidebarUpdater implements Activable {
     public record Data(@NotNull @ChildPath("sections") Collection<String> sectionPaths) {
 
         public Data {
-            Objects.requireNonNull(sectionPaths, "sectionPaths");
+            Objects.requireNonNull(sectionPaths);
         }
 
     }

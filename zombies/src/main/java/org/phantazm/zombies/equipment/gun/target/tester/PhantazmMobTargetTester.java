@@ -23,6 +23,6 @@ public class PhantazmMobTargetTester implements TargetTester {
     @Override
     public boolean useTarget(@NotNull Entity target, @NotNull Collection<UUID> previousHits) {
         return mapObjects.module().roundHandlerSupplier().get().currentRound()
-                .map(round -> round.hasMob(target.getUuid())).orElse(false);
+            .map(round -> round.hasMob(target.getUuid())).orElse(false);
     }
 }

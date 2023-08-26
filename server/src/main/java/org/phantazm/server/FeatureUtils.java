@@ -23,9 +23,8 @@ final class FeatureUtils {
 
         try {
             throw new IllegalStateException(
-                    "Feature '" + Class.forName(caller.getClassName()).getSimpleName() + "' not yet initialized");
-        }
-        catch (ClassNotFoundException e) {
+                "Feature '" + Class.forName(caller.getClassName()).getSimpleName() + "' not yet initialized");
+        } catch (ClassNotFoundException e) {
             throw new IllegalStateException(caller.getClassName() + " not initialized yet");
         }
     }

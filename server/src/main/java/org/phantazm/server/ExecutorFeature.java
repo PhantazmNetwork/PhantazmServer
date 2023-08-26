@@ -30,23 +30,21 @@ public class ExecutorFeature {
 
         try {
             LOGGER.info(
-                    "Shutting down executor. Please allow for one minute before shutdown completes.");
+                "Shutting down executor. Please allow for one minute before shutdown completes.");
             executorService.shutdown();
             if (!executorService.awaitTermination(1L, TimeUnit.MINUTES)) {
                 executorService.shutdownNow();
 
                 LOGGER.warn(
-                        "Not all tasks completed. Please allow for one minute for tasks to be canceled.");
+                    "Not all tasks completed. Please allow for one minute for tasks to be canceled.");
                 if (!executorService.awaitTermination(1L, TimeUnit.MINUTES)) {
                     LOGGER.warn("Database tasks failed to cancel.");
                 }
             }
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

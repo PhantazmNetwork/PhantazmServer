@@ -38,13 +38,12 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
      */
     @FactoryMethod
     public BasicShotEndpointSelector(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> shooterSupplier,
-            @NotNull @Child("block_iterations") Collection<BlockIteration> blockIteration) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.entitySupplier = Objects.requireNonNull(shooterSupplier, "playerView");
+        @NotNull @Child("block_iterations") Collection<BlockIteration> blockIteration) {
+        this.data = Objects.requireNonNull(data);
+        this.entitySupplier = Objects.requireNonNull(shooterSupplier);
         this.blockIterations = List.copyOf(blockIteration);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public @NotNull Optional<Point> getEnd(@NotNull Pos start) {
         return entitySupplier.get().map(player -> {
@@ -110,6 +109,7 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
      * @param maxDistance     The maximum distance of the endpoint from the start
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("block_iterations") Collection<String> blockIterations, int maxDistance) {
+    public record Data(@NotNull @ChildPath("block_iterations") Collection<String> blockIterations,
+        int maxDistance) {
     }
 }

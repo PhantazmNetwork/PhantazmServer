@@ -27,7 +27,7 @@ public class FlagConditionalDisplay implements ShopDisplay {
 
     @FactoryMethod
     public FlagConditionalDisplay(@NotNull Data data, @NotNull @Child("success") List<ShopDisplay> success,
-            @NotNull @Child("failure") List<ShopDisplay> failure, @NotNull Flaggable flags) {
+        @NotNull @Child("failure") List<ShopDisplay> failure, @NotNull Flaggable flags) {
         this.data = data;
         this.success = success;
         this.failure = failure;
@@ -116,10 +116,11 @@ public class FlagConditionalDisplay implements ShopDisplay {
     }
 
     @DataObject
-    public record Data(@NotNull Key flag,
-                       @NotNull ShopFlagSource source,
-                       @NotNull @ChildPath("success") List<String> success,
-                       @NotNull @ChildPath("failure") List<String> failure) {
+    public record Data(
+        @NotNull Key flag,
+        @NotNull ShopFlagSource source,
+        @NotNull @ChildPath("success") List<String> success,
+        @NotNull @ChildPath("failure") List<String> failure) {
         @Default("source")
         public static @NotNull ConfigElement defaultShopFlagSource() {
             return ConfigPrimitive.of("MAP");

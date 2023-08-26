@@ -20,16 +20,16 @@ public class BasicSongPlayer implements SongPlayer {
 
     @Override
     public void tick(long time) {
-        songDeque.removeIf(song -> song.tick(time));
+        songDeque.removeIf(SongImpl::tick);
     }
 
     @Override
     public @NotNull Song play(@NotNull Audience audience, @NotNull Sound.Source source, @NotNull Sound.Emitter emitter,
-            @NotNull List<Note> notes, float volume, boolean loop) {
-        Objects.requireNonNull(audience, "audience");
-        Objects.requireNonNull(source, "source");
-        Objects.requireNonNull(emitter, "emitter");
-        Objects.requireNonNull(notes, "notes");
+        @NotNull List<Note> notes, float volume, boolean loop) {
+        Objects.requireNonNull(audience);
+        Objects.requireNonNull(source);
+        Objects.requireNonNull(emitter);
+        Objects.requireNonNull(notes);
 
         SongImpl song = new SongImpl(audience, emitter, source, null, notes, volume, loop);
         if (song.nextNote != null) {
@@ -41,10 +41,10 @@ public class BasicSongPlayer implements SongPlayer {
 
     @Override
     public @NotNull Song play(@NotNull Audience audience, @NotNull Sound.Source source, double x, double y, double z,
-            @NotNull List<Note> notes, float volume, boolean loop) {
-        Objects.requireNonNull(audience, "audience");
-        Objects.requireNonNull(source, "source");
-        Objects.requireNonNull(notes, "notes");
+        @NotNull List<Note> notes, float volume, boolean loop) {
+        Objects.requireNonNull(audience);
+        Objects.requireNonNull(source);
+        Objects.requireNonNull(notes);
 
         SongImpl song = new SongImpl(audience, null, source, new Vec(x, y, z), notes, volume, loop);
         if (song.nextNote != null) {
@@ -71,8 +71,8 @@ public class BasicSongPlayer implements SongPlayer {
         private long lastNoteTicks;
 
         private SongImpl(Audience audience, Sound.Emitter emitter, Sound.Source source, Point location,
-                List<Note> notes, float volume, boolean loop) {
-            this.audience = Objects.requireNonNull(audience, "audience");
+            List<Note> notes, float volume, boolean loop) {
+            this.audience = Objects.requireNonNull(audience);
             this.emitter = emitter;
             this.source = source;
             this.location = location;
@@ -102,7 +102,7 @@ public class BasicSongPlayer implements SongPlayer {
             return this.stopped;
         }
 
-        private boolean tick(long time) {
+        private boolean tick() {
             if (this.stopped) {
                 return true;
             }
@@ -121,20 +121,18 @@ public class BasicSongPlayer implements SongPlayer {
                 do {
                     if (this.emitter != null) {
                         this.audience.playSound(
-                                this.currentSound = Sound.sound(nextNote.soundType(), source, volume, nextNote.pitch()),
-                                this.emitter);
-                    }
-                    else {
+                            this.currentSound = Sound.sound(nextNote.soundType(), source, volume, nextNote.pitch()),
+                            this.emitter);
+                    } else {
                         this.audience.playSound(
-                                this.currentSound = Sound.sound(nextNote.soundType(), source, volume, nextNote.pitch()),
-                                location.x(), location.y(), location.z());
+                            this.currentSound = Sound.sound(nextNote.soundType(), source, volume, nextNote.pitch()),
+                            location.x(), location.y(), location.z());
                     }
 
                     nextNoteIndex = ++this.noteIndex;
                     if (nextNoteIndex < this.notes.size()) {
                         this.nextNote = nextNote = this.notes.get(nextNoteIndex);
-                    }
-                    else {
+                    } else {
                         if (this.loop) {
                             this.noteIndex = -1;
                             this.nextNote = this.notes.get(0);

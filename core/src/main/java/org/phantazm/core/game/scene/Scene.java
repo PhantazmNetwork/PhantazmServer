@@ -18,8 +18,7 @@ import java.util.UUID;
 public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
 
     /**
-     * Gets the {@link PlayerView}s that are associated with the scene.
-     * Some players might not be in game.
+     * Gets the {@link PlayerView}s that are associated with the scene. Some players might not be in game.
      *
      * @return A view of the {@link PlayerView}s associated the scene.
      */
@@ -32,16 +31,16 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
     @NotNull TransferResult leave(@NotNull Iterable<UUID> leavers);
 
     /**
-     * Gets the number of players that are considered "ingame" in the scene.
-     * This count may differ from the number of entries in
+     * Gets the number of players that are considered "ingame" in the scene. This count may differ from the number of
+     * entries in
      *
      * @return The number of players ingame
      */
     int getIngamePlayerCount();
 
     /**
-     * Gets a reported value as a weight for join requests.
-     * Greater values indicate that this scene should be preferred for joins.
+     * Gets a reported value as a weight for join requests. Greater values indicate that this scene should be preferred
+     * for joins.
      *
      * @param request The join request used to determine the scene's weight
      * @return The reported weight value
@@ -49,8 +48,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
     int getJoinWeight(@NotNull TRequest request);
 
     /**
-     * Whether the scene is currently shutdown.
-     * Shutdown scenes should not allow more players.
+     * Whether the scene is currently shutdown. Shutdown scenes should not allow more players.
      *
      * @return Whether the scene is shutdown
      */
@@ -69,8 +67,7 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
     boolean isJoinable();
 
     /**
-     * Sets whether the scene should be considered joinable.
-     * Joinable is defined on an implementation basis.
+     * Sets whether the scene should be considered joinable. Joinable is defined on an implementation basis.
      *
      * @param joinable Whether the scene should be joinable
      */

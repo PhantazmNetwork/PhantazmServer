@@ -17,12 +17,12 @@ public class PartyCreateCommand {
     }
 
     public static @NotNull Command createCommand(@NotNull PartyCommandConfig config,
-            @NotNull GuildHolder<Party> partyHolder, @NotNull PlayerViewProvider viewProvider,
-            @NotNull PartyCreator partyCreator) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(partyHolder, "partyHolder");
-        Objects.requireNonNull(viewProvider, "viewProvider");
-        Objects.requireNonNull(partyCreator, "partyCreator");
+        @NotNull GuildHolder<Party> partyHolder, @NotNull PlayerViewProvider viewProvider,
+        @NotNull PartyCreator partyCreator) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(partyHolder);
+        Objects.requireNonNull(viewProvider);
+        Objects.requireNonNull(partyCreator);
 
         Command command = new Command("create");
         command.addConditionalSyntax((sender, commandString) -> {
@@ -43,7 +43,7 @@ public class PartyCreateCommand {
 
             return true;
         }, (sender, context) -> {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
             Party party = partyCreator.createPartyFor(viewProvider.fromPlayer(player));
             partyHolder.guilds().add(party);
             partyHolder.uuidToGuild().put(player.getUuid(), party);

@@ -29,12 +29,11 @@ public class RayTraceIntersectionFinder implements IntersectionFinder {
 
     @Override
     public @NotNull Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start, @NotNull Point end,
-            double distanceLimitSquared) {
+        double distanceLimitSquared) {
         float expand;
         if (entity instanceof LivingEntity livingEntity) {
             expand = livingEntity.getAttributeValue(Attributes.HITBOX_EXPANSION);
-        }
-        else {
+        } else {
             expand = 0;
         }
 

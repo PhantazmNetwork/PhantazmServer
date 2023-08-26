@@ -51,11 +51,12 @@ public class TransactionModifierPerkEffectCreator implements PerkEffectCreator {
     }
 
     @DataObject
-    public record Data(@NotNull Key group,
-                       @NotNull Component modifierName,
-                       @NotNull Transaction.Modifier.Action modifierAction,
-                       double amount,
-                       int priority) {
+    public record Data(
+        @NotNull Key group,
+        @NotNull Component modifierName,
+        @NotNull Transaction.Modifier.Action modifierAction,
+        double amount,
+        int priority) {
         @Default("priority")
         public static @NotNull ConfigElement priorityDefault() {
             return ConfigPrimitive.of(0);

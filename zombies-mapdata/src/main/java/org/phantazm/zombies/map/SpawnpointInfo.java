@@ -13,10 +13,11 @@ import java.util.Objects;
 /**
  * Defines a spawnpoint.
  */
-public record SpawnpointInfo(@NotNull Vec3I position,
-                             @NotNull Key spawnRule,
-                             boolean linkToWindow,
-                             @Nullable Vec3I linkedWindowPosition) {
+public record SpawnpointInfo(
+    @NotNull Vec3I position,
+    @NotNull Key spawnRule,
+    boolean linkToWindow,
+    @Nullable Vec3I linkedWindowPosition) {
     /**
      * Creates a new instance of this record.
      *
@@ -25,8 +26,8 @@ public record SpawnpointInfo(@NotNull Vec3I position,
      * @param linkToWindow whether to try and link this spawnpoint up with the closest window
      */
     public SpawnpointInfo {
-        Objects.requireNonNull(position, "position");
-        Objects.requireNonNull(spawnRule, "spawnRule");
+        Objects.requireNonNull(position);
+        Objects.requireNonNull(spawnRule);
     }
 
     @Default("linkToWindow")

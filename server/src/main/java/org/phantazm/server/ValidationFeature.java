@@ -30,8 +30,7 @@ public class ValidationFeature {
                 }
 
                 permissionHandler.applyPermissions(event.getPlayer());
-            }
-            catch (Throwable e) {
+            } catch (Throwable e) {
                 LOGGER.warn("Error during AsyncPlayerPreLoginEvent", e);
             }
         });

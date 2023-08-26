@@ -26,7 +26,7 @@ public class AmmoLevelEffect implements GunEffect {
      */
     @FactoryMethod
     public AmmoLevelEffect(@NotNull PlayerView playerView) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.playerView = Objects.requireNonNull(playerView);
     }
 
     @Override
@@ -34,8 +34,7 @@ public class AmmoLevelEffect implements GunEffect {
         if (state.isMainEquipment()) {
             currentlyActive = true;
             playerView.getPlayer().ifPresent(player -> player.setLevel(state.ammo()));
-        }
-        else if (currentlyActive) {
+        } else if (currentlyActive) {
             playerView.getPlayer().ifPresent(player -> player.setLevel(0));
             currentlyActive = false;
         }

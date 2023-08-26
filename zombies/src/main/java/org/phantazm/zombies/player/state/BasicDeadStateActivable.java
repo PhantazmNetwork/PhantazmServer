@@ -44,19 +44,19 @@ public class BasicDeadStateActivable implements Activable {
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public BasicDeadStateActivable(@NotNull InventoryAccessRegistry accessRegistry,
-            @NotNull DeadPlayerStateContext context, @NotNull Instance instance, @NotNull PlayerView playerView,
-            @NotNull ZombiesPlayerMeta meta, @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar,
-            @NotNull TabList tabList, @NotNull BelowNameTag belowNameTag, @NotNull ZombiesPlayerMapStats stats) {
-        this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
-        this.context = Objects.requireNonNull(context, "context");
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.meta = Objects.requireNonNull(meta, "meta");
-        this.settings = Objects.requireNonNull(settings, "settings");
-        this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
-        this.tabList = Objects.requireNonNull(tabList, "tabList");
-        this.belowNameTag = Objects.requireNonNull(belowNameTag, "belowNameTag");
-        this.stats = Objects.requireNonNull(stats, "stats");
+        @NotNull DeadPlayerStateContext context, @NotNull Instance instance, @NotNull PlayerView playerView,
+        @NotNull ZombiesPlayerMeta meta, @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar,
+        @NotNull TabList tabList, @NotNull BelowNameTag belowNameTag, @NotNull ZombiesPlayerMapStats stats) {
+        this.accessRegistry = Objects.requireNonNull(accessRegistry);
+        this.context = Objects.requireNonNull(context);
+        this.instance = Objects.requireNonNull(instance);
+        this.playerView = Objects.requireNonNull(playerView);
+        this.meta = Objects.requireNonNull(meta);
+        this.settings = Objects.requireNonNull(settings);
+        this.sidebar = Objects.requireNonNull(sidebar);
+        this.tabList = Objects.requireNonNull(tabList);
+        this.belowNameTag = Objects.requireNonNull(belowNameTag);
+        this.stats = Objects.requireNonNull(stats);
     }
 
     @Override
@@ -108,8 +108,7 @@ public class BasicDeadStateActivable implements Activable {
                 for (int slot : group.getSlots()) {
                     if (defaultObject == null) {
                         accessRegistry.removeObject(aliveAccess, slot);
-                    }
-                    else {
+                    } else {
                         accessRegistry.replaceObject(aliveAccess, slot, defaultObject);
                     }
                 }

@@ -23,11 +23,11 @@ public class FlagToggleCommand extends PermissionLockedCommand {
     private static final ArgumentString FLAG_ARGUMENT = ArgumentType.String("flag");
 
     public FlagToggleCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper,
-            @NotNull KeyParser keyParser) {
+        @NotNull KeyParser keyParser) {
         super("toggle_flag", PERMISSION);
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
-            Player player = (Player)sender;
+            Player player = (Player) sender;
             UUID uuid = player.getUuid();
 
             sceneMapper.apply(uuid).ifPresent(scene -> {
@@ -39,8 +39,7 @@ public class FlagToggleCommand extends PermissionLockedCommand {
 
                     boolean res = scene.getMap().mapObjects().module().flags().toggleFlag(key);
                     sender.sendMessage("Toggled flag " + key + " to " + res);
-                }
-                else {
+                } else {
                     sender.sendMessage("Invalid key " + flag);
                 }
             });

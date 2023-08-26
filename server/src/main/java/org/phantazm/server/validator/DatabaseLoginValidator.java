@@ -8,7 +8,11 @@ import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
@@ -16,12 +20,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
-
-import org.jooq.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.sql.DataSource;
 
 import static org.jooq.impl.DSL.*;
 
@@ -37,8 +35,37 @@ public class DatabaseLoginValidator implements LoginValidator {
     public DatabaseLoginValidator(@NotNull DataSource dataSource, @NotNull Executor executor) {
         this.banCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.whitelistCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
-        this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
-        this.executor = Objects.requireNonNull(executor, "executor");
+        this.dataSource = Objects.requireNonNull(dataSource);
+        this.executor = Objects.requireNonNull(executor);
+    }
+
+    private static void write(ThrowingRunnable<SQLException> supplier) {
+        try {
+            supplier.run();
+        } catch (SQLException e) {
+            LOGGER.warn("Exception when writing to ban database", e);
+        }
+    }
+
+    private static <T> T read(ThrowingSupplier<? extends Record, ? extends SQLException> reader,
+        Function<? super Record, ? extends T> mapper, T defaultValue) {
+        try {
+            return mapper.apply(reader.get());
+        } catch (SQLException e) {
+            LOGGER.warn("Exception when querying ban database", e);
+        }
+
+        return defaultValue;
+    }
+
+    private static BooleanObjectPair<Component> fromRecord(Record result) {
+        if (result == null) {
+            return UNBANNED;
+        }
+
+        String banReason = result.get("ban_reason", String.class);
+        return BooleanObjectPair.of(false,
+            banReason == null ? Component.empty() : MiniMessage.miniMessage().deserialize(banReason));
     }
 
     @Override
@@ -47,7 +74,7 @@ public class DatabaseLoginValidator implements LoginValidator {
             return read(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     return using(connection).selectFrom(table("player_bans")).where(field("player_uuid").eq(key))
-                            .fetchOne();
+                        .fetchOne();
                 }
             }, DatabaseLoginValidator::fromRecord, UNBANNED);
         });
@@ -67,8 +94,8 @@ public class DatabaseLoginValidator implements LoginValidator {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).insertInto(table("player_bans"), field("player_uuid"), field("ban_reason"))
-                            .values(uuid, finalBanReason).onDuplicateKeyUpdate()
-                            .set(field("ban_reason"), finalBanReason).execute();
+                        .values(uuid, finalBanReason).onDuplicateKeyUpdate()
+                        .set(field("ban_reason"), finalBanReason).execute();
                 }
             });
         });
@@ -80,7 +107,7 @@ public class DatabaseLoginValidator implements LoginValidator {
             return read(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     return using(connection).selectFrom(table("player_bans")).where(field("player_uuid").eq(key))
-                            .fetchOne();
+                        .fetchOne();
                 }
             }, DatabaseLoginValidator::fromRecord, UNBANNED);
         });
@@ -109,7 +136,7 @@ public class DatabaseLoginValidator implements LoginValidator {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).insertInto(table("player_whitelist"), field("player_uuid")).values(uuid)
-                            .onDuplicateKeyUpdate().set(field("player_uuid"), uuid).execute();
+                        .onDuplicateKeyUpdate().set(field("player_uuid"), uuid).execute();
                 }
             });
         });
@@ -121,7 +148,7 @@ public class DatabaseLoginValidator implements LoginValidator {
             return read(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     return using(connection).selectFrom(table("player_whitelist")).where(field("player_uuid").eq(key))
-                            .fetchOne();
+                        .fetchOne();
                 }
             }, Objects::nonNull, true);
         });
@@ -135,40 +162,9 @@ public class DatabaseLoginValidator implements LoginValidator {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).deleteFrom(table("player_whitelist")).where(field("player_uuid").eq(uuid))
-                            .execute();
+                        .execute();
                 }
             });
         });
-    }
-
-    private static void write(ThrowingRunnable<SQLException> supplier) {
-        try {
-            supplier.run();
-        }
-        catch (SQLException e) {
-            LOGGER.warn("Exception when writing to ban database", e);
-        }
-    }
-
-    private static <T> T read(ThrowingSupplier<? extends Record, ? extends SQLException> reader,
-            Function<? super Record, ? extends T> mapper, T defaultValue) {
-        try {
-            return mapper.apply(reader.get());
-        }
-        catch (SQLException e) {
-            LOGGER.warn("Exception when querying ban database", e);
-        }
-
-        return defaultValue;
-    }
-
-    private static BooleanObjectPair<Component> fromRecord(Record result) {
-        if (result == null) {
-            return UNBANNED;
-        }
-
-        String banReason = result.get("ban_reason", String.class);
-        return BooleanObjectPair.of(false,
-                banReason == null ? Component.empty() : MiniMessage.miniMessage().deserialize(banReason));
     }
 }

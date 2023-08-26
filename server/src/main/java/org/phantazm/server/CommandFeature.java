@@ -13,9 +13,9 @@ public final class CommandFeature {
     }
 
     static void initialize(@NotNull RouterStore routerStore, @NotNull PlayerViewProvider viewProvider,
-            @NotNull SceneFallback defaultFallback) {
+        @NotNull SceneFallback defaultFallback) {
         MinecraftServer.getCommandManager()
-                .register(QuitCommand.quitCommand(routerStore, viewProvider, defaultFallback));
+            .register(QuitCommand.quitCommand(routerStore, viewProvider, defaultFallback));
     }
 
 }

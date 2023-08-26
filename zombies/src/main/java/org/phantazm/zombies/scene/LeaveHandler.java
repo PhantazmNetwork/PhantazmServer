@@ -20,9 +20,9 @@ public class LeaveHandler {
     private final Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers;
 
     public LeaveHandler(@NotNull StageTransition stageTransition,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
-        this.stageTransition = Objects.requireNonNull(stageTransition, "stageTransition");
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
+        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
+        this.stageTransition = Objects.requireNonNull(stageTransition);
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
     }
 
     /**

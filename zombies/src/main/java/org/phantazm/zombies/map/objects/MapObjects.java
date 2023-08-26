@@ -9,18 +9,14 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.core.tracker.BoundedTracker;
-import org.phantazm.mob.MobModel;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.spawner.MobSpawner;
+import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.handler.RoundHandler;
@@ -29,9 +25,9 @@ import org.phantazm.zombies.map.shop.InteractorGroupHandler;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface MapObjects {
@@ -59,19 +55,14 @@ public interface MapObjects {
 
     @NotNull TickTaskScheduler taskScheduler();
 
-    @Nullable Team mobNoPushTeam();
-
-    @NotNull Team corpseTeam();
-
     @NotNull interface Source {
-        @NotNull MapObjects make(@NotNull Instance instance,
-                @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-                @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier, @NotNull MobStore mobStore,
-                @Nullable Team mobNoPushTeam, @NotNull Wrapper<PowerupHandler> powerupHandler,
-                @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
-                @NotNull SongPlayer songPlayer, @NotNull SongLoader songLoader,
-                @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Team corpseTeam,
-                @NotNull Wrapper<Long> ticksSinceStart);
+        @NotNull MapObjects make(@NotNull Supplier<ZombiesScene> scene, @NotNull Instance instance,
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+            @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier,
+            @NotNull Wrapper<PowerupHandler> powerupHandler,
+            @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
+            @NotNull SongPlayer songPlayer, @NotNull SongLoader songLoader,
+            @NotNull TickTaskScheduler tickTaskScheduler, @NotNull Wrapper<Long> ticksSinceStart);
     }
 
     interface Module {
@@ -103,18 +94,12 @@ public interface MapObjects {
 
         @NotNull Supplier<? extends EventNode<Event>> eventNode();
 
-        @NotNull MobStore mobStore();
-
         @NotNull SongLoader songLoader();
 
         @NotNull SongPlayer songPlayer();
 
-        @NotNull Team corpseTeam();
-
         @NotNull InteractorGroupHandler interactorGroupHandler();
 
         @NotNull Wrapper<Long> ticksSinceStart();
-
-        @NotNull Function<? super Key, ? extends MobModel> mobModelFunction();
     }
 }

@@ -11,19 +11,20 @@ import java.util.Objects;
 /**
  * Represents a Zombies map.
  */
-public record MapInfo(@NotNull MapSettingsInfo settings,
-                      @NotNull PlayerCoinsInfo playerCoins,
-                      @NotNull List<RoomInfo> rooms,
-                      @NotNull List<DoorInfo> doors,
-                      @NotNull List<ShopInfo> shops,
-                      @NotNull List<WindowInfo> windows,
-                      @NotNull List<RoundInfo> rounds,
-                      @NotNull List<SpawnruleInfo> spawnrules,
-                      @NotNull List<SpawnpointInfo> spawnpoints,
-                      @NotNull LeaderboardInfo leaderboard,
-                      @NotNull ConfigNode scoreboard,
-                      @NotNull ConfigNode corpse,
-                      @NotNull WebhookInfo webhook) implements Keyed {
+public record MapInfo(
+    @NotNull MapSettingsInfo settings,
+    @NotNull PlayerCoinsInfo playerCoins,
+    @NotNull List<RoomInfo> rooms,
+    @NotNull List<DoorInfo> doors,
+    @NotNull List<ShopInfo> shops,
+    @NotNull List<WindowInfo> windows,
+    @NotNull List<RoundInfo> rounds,
+    @NotNull List<SpawnruleInfo> spawnrules,
+    @NotNull List<SpawnpointInfo> spawnpoints,
+    @NotNull LeaderboardInfo leaderboard,
+    @NotNull ConfigNode scoreboard,
+    @NotNull ConfigNode corpse,
+    @NotNull WebhookInfo webhook) implements Keyed {
     /**
      * Constructs a new instances of this record.
      *
@@ -38,23 +39,23 @@ public record MapInfo(@NotNull MapSettingsInfo settings,
      * @param scoreboard  this map's scoreboard info
      */
     public MapInfo(@NotNull MapSettingsInfo settings, @NotNull PlayerCoinsInfo playerCoins,
-            @NotNull List<RoomInfo> rooms, @NotNull List<DoorInfo> doors, @NotNull List<ShopInfo> shops,
-            @NotNull List<WindowInfo> windows, @NotNull List<RoundInfo> rounds, @NotNull List<SpawnruleInfo> spawnrules,
-            @NotNull List<SpawnpointInfo> spawnpoints, @NotNull LeaderboardInfo leaderboard,
-            @NotNull ConfigNode scoreboard, @NotNull ConfigNode corpse, @NotNull WebhookInfo webhook) {
-        this.settings = Objects.requireNonNull(settings, "settings");
-        this.playerCoins = Objects.requireNonNull(playerCoins, "playerCoins");
-        this.rooms = Objects.requireNonNull(rooms, "rooms");
-        this.doors = Objects.requireNonNull(doors, "doors");
-        this.shops = Objects.requireNonNull(shops, "shops");
-        this.windows = Objects.requireNonNull(windows, "windows");
-        this.rounds = Objects.requireNonNull(rounds, "rounds");
-        this.spawnrules = Objects.requireNonNull(spawnrules, "spawnrules");
-        this.spawnpoints = Objects.requireNonNull(spawnpoints, "spawnpoints");
-        this.leaderboard = Objects.requireNonNull(leaderboard, "leaderboard");
-        this.scoreboard = Objects.requireNonNull(scoreboard, "scoreboard");
-        this.corpse = Objects.requireNonNull(corpse, "corpse");
-        this.webhook = Objects.requireNonNull(webhook, "webhook");
+        @NotNull List<RoomInfo> rooms, @NotNull List<DoorInfo> doors, @NotNull List<ShopInfo> shops,
+        @NotNull List<WindowInfo> windows, @NotNull List<RoundInfo> rounds, @NotNull List<SpawnruleInfo> spawnrules,
+        @NotNull List<SpawnpointInfo> spawnpoints, @NotNull LeaderboardInfo leaderboard,
+        @NotNull ConfigNode scoreboard, @NotNull ConfigNode corpse, @NotNull WebhookInfo webhook) {
+        this.settings = Objects.requireNonNull(settings);
+        this.playerCoins = Objects.requireNonNull(playerCoins);
+        this.rooms = Objects.requireNonNull(rooms);
+        this.doors = Objects.requireNonNull(doors);
+        this.shops = Objects.requireNonNull(shops);
+        this.windows = Objects.requireNonNull(windows);
+        this.rounds = Objects.requireNonNull(rounds);
+        this.spawnrules = Objects.requireNonNull(spawnrules);
+        this.spawnpoints = Objects.requireNonNull(spawnpoints);
+        this.leaderboard = Objects.requireNonNull(leaderboard);
+        this.scoreboard = Objects.requireNonNull(scoreboard);
+        this.corpse = Objects.requireNonNull(corpse);
+        this.webhook = Objects.requireNonNull(webhook);
     }
 
     @Override

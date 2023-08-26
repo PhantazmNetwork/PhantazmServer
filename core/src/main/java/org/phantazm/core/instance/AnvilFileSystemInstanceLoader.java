@@ -22,7 +22,7 @@ public class AnvilFileSystemInstanceLoader extends FileSystemInstanceLoader {
      * @param chunkSupplier the {@link ChunkSupplier} used to create chunks
      */
     public AnvilFileSystemInstanceLoader(@NotNull InstanceManager instanceManager, @NotNull Path rootPath,
-            @NotNull ChunkSupplier chunkSupplier, @NotNull Executor executor) {
+        @NotNull ChunkSupplier chunkSupplier, @NotNull Executor executor) {
         super(instanceManager, rootPath, chunkSupplier, executor);
     }
 

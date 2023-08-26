@@ -21,7 +21,7 @@ public class AnimatedUpdatingItem implements UpdatingItem {
 
     @FactoryMethod
     public AnimatedUpdatingItem(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
         if (data.frames.isEmpty()) {
             throw new IllegalArgumentException("must have at least one animation frame");
         }

@@ -34,8 +34,8 @@ public class BasicPowerupHandler implements PowerupHandler {
     private long pickupCheckTicks = 0L;
 
     public BasicPowerupHandler(@NotNull Supplier<? extends @NotNull ZombiesScene> scene,
-            @NotNull Map<Key, PowerupComponents> components) {
-        this.scene = Objects.requireNonNull(scene, "scene");
+        @NotNull Map<Key, PowerupComponents> components) {
+        this.scene = Objects.requireNonNull(scene);
         this.components = Map.copyOf(components);
         this.spawnedOrActivePowerups = new ArrayList<>(16);
         this.powerupView = Collections.unmodifiableCollection(this.spawnedOrActivePowerups);
@@ -61,8 +61,7 @@ public class BasicPowerupHandler implements PowerupHandler {
 
             if (!active && !spawned) {
                 spawnedOrActivePowerups.remove(i);
-            }
-            else {
+            } else {
                 if (spawned && pickupCheckTick) {
                     maybePickup(powerup, time);
                 }
@@ -77,25 +76,25 @@ public class BasicPowerupHandler implements PowerupHandler {
 
         double powerupPickupRadius = scene.getMapSettingsInfo().powerupPickupRadius();
         scene.instance().getEntityTracker()
-                .nearbyEntitiesUntil(powerup.spawnLocation(), powerupPickupRadius + 2, EntityTracker.Target.PLAYERS,
-                        player -> {
-                            Point powerupSpawnLocation = powerup.spawnLocation();
-                            Pos playerPosition = player.getPosition();
-                            double horizontalDistanceSquared =
-                                    Vec3D.distanceSquared(playerPosition.x(), 0, playerPosition.z(),
-                                            powerupSpawnLocation.x(), 0, powerupSpawnLocation.z());
-                            if (horizontalDistanceSquared > powerupPickupRadius * powerupPickupRadius) {
-                                return false;
-                            }
+            .nearbyEntitiesUntil(powerup.spawnLocation(), powerupPickupRadius + 2, EntityTracker.Target.PLAYERS,
+                player -> {
+                    Point powerupSpawnLocation = powerup.spawnLocation();
+                    Pos playerPosition = player.getPosition();
+                    double horizontalDistanceSquared =
+                        Vec3D.distanceSquared(playerPosition.x(), 0, playerPosition.z(),
+                            powerupSpawnLocation.x(), 0, powerupSpawnLocation.z());
+                    if (horizontalDistanceSquared > powerupPickupRadius * powerupPickupRadius) {
+                        return false;
+                    }
 
-                            ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(player.getUuid());
-                            if (zombiesPlayer != null && zombiesPlayer.canPickupPowerup(powerup)) {
-                                powerup.activate(zombiesPlayer, time);
-                                return true;
-                            }
+                    ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(player.getUuid());
+                    if (zombiesPlayer != null && zombiesPlayer.canPickupPowerup(powerup)) {
+                        powerup.activate(zombiesPlayer, time);
+                        return true;
+                    }
 
-                            return false;
-                        });
+                    return false;
+                });
     }
 
     @Override
@@ -124,7 +123,7 @@ public class BasicPowerupHandler implements PowerupHandler {
         }
 
         Powerup newPowerup = new Powerup(powerupType, visuals, actions, deactivationPredicateComponent.apply(scene),
-                pickupPredicateComponent.apply(scene), new Vec(x, y, z));
+            pickupPredicateComponent.apply(scene), new Vec(x, y, z));
         newPowerup.spawn();
 
         spawnedOrActivePowerups.add(newPowerup);
@@ -162,7 +161,8 @@ public class BasicPowerupHandler implements PowerupHandler {
     }
 
     @Override
-    public @NotNull @UnmodifiableView Collection<Powerup> spawnedOrActivePowerups() {
+    public @NotNull
+    @UnmodifiableView Collection<Powerup> spawnedOrActivePowerups() {
         return powerupView;
     }
 }

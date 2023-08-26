@@ -32,14 +32,14 @@ public class MessageShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public MessageShotHandler(@NotNull Data data,
-            @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "actionBarSender");
+        @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
+        this.data = Objects.requireNonNull(data);
+        this.audienceProvider = Objects.requireNonNull(audienceProvider);
     }
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         audienceProvider.provideAudience().ifPresent(audience -> {
             for (GunHit ignored : shot.regularTargets()) {
                 audience.sendMessage(data.message());
@@ -63,8 +63,9 @@ public class MessageShotHandler implements ShotHandler {
      * @param headshotMessage  The message to send for headshots
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider,
-                       @NotNull Component message,
-                       @NotNull Component headshotMessage) {
+    public record Data(
+        @NotNull @ChildPath("audience_provider") String audienceProvider,
+        @NotNull Component message,
+        @NotNull Component headshotMessage) {
     }
 }

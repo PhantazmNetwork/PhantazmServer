@@ -14,8 +14,8 @@ import java.util.Objects;
 import java.util.function.Function;
 
 /**
- * A {@link ConfigProcessor} which processes {@link TValue}s.
- * This can be used to process inheritance and identifies variants based on {@link Keyed#key()}.
+ * A {@link ConfigProcessor} which processes {@link TValue}s. This can be used to process inheritance and identifies
+ * variants based on {@link Keyed#key()}.
  *
  * @param <TValue> The type of {@link TValue} to process
  */
@@ -28,11 +28,11 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
     /**
      * Creates a new {@link VariantConfigProcessor}.
      *
-     * @param subprocessorProvider A {@link Function} that provides {@link ConfigProcessor} based on a {@link Key},
-     *                             or null if no such {@link ConfigProcessor} is available
+     * @param subprocessorProvider A {@link Function} that provides {@link ConfigProcessor} based on a {@link Key}, or
+     *                             null if no such {@link ConfigProcessor} is available
      */
     public VariantConfigProcessor(@NotNull Function<Key, ConfigProcessor<? extends TValue>> subprocessorProvider) {
-        this.subProcessors = Objects.requireNonNull(subprocessorProvider, "subProcessors");
+        this.subProcessors = Objects.requireNonNull(subprocessorProvider);
     }
 
     @Override
@@ -47,12 +47,10 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
         ConfigElement serialData = element.getElement("serialData");
         if (serialData == null || serialData.isNull()) {
             return processor.dataFromElement(element);
-        }
-        else if (serialData.isNode()) {
+        } else if (serialData.isNode()) {
             element.asNode().putAll(serialData.asNode());
             return processor.dataFromElement(element);
-        }
-        else {
+        } else {
             return processor.dataFromElement(serialData);
         }
     }
@@ -60,7 +58,7 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
     @SuppressWarnings("unchecked")
     @Override
     public @NotNull ConfigElement elementFromData(@NotNull TValue data) throws ConfigProcessException {
-        ConfigProcessor<TValue> processor = (ConfigProcessor<TValue>)subProcessors.apply(data.key());
+        ConfigProcessor<TValue> processor = (ConfigProcessor<TValue>) subProcessors.apply(data.key());
         if (processor == null) {
             throw new ConfigProcessException("No subprocessor for key " + data.key());
         }
@@ -69,8 +67,7 @@ public class VariantConfigProcessor<TValue extends Keyed> implements ConfigProce
         if (element.isNode()) {
             element.asNode().put("serialKey", KEY_PROCESSOR.elementFromData(data.key()));
             return element;
-        }
-        else {
+        } else {
             ConfigNode node = new LinkedConfigNode(2);
             node.put("serialKey", KEY_PROCESSOR.elementFromData(data.key()));
             node.put("serialData", element);

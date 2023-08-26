@@ -26,16 +26,17 @@ public class EquipmentPresentPredicate extends PredicateBase<EquipmentPresentPre
     private boolean isPresent(PlayerInteraction interaction) {
         if (data.requireHeld) {
             return interaction.player().getHeldEquipment().map(equipment -> equipment.key().equals(data.equipmentKey))
-                    .orElse(false);
+                .orElse(false);
         }
 
         return interaction.player().module().getEquipmentHandler().hasEquipment(data.equipmentGroup, data.equipmentKey);
     }
 
     @DataObject
-    public record Data(@NotNull Key equipmentGroup,
-                       @NotNull Key equipmentKey,
-                       boolean requirePresent,
-                       boolean requireHeld) {
+    public record Data(
+        @NotNull Key equipmentGroup,
+        @NotNull Key equipmentKey,
+        boolean requirePresent,
+        boolean requireHeld) {
     }
 }

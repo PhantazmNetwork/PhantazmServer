@@ -34,7 +34,7 @@ public final class ProximaFeature {
         TimeUnit keepAliveTimeUnit = pathfinderConfig.keepAliveTimeUnit();
 
         ForkJoinPool fjp = new ForkJoinPool(threads, ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, asyncMode,
-                corePoolSize, maximumPoolSize, minimumRunnable, forkJoinPool -> true, keepAliveTime, keepAliveTimeUnit);
+            corePoolSize, maximumPoolSize, minimumRunnable, forkJoinPool -> true, keepAliveTime, keepAliveTimeUnit);
 
         pathfinder = new BasicAsyncPathfinder(fjp, BasicPathOperation::new, 1000000);
         settingsFunction = new InstanceSettingsFunction(MinecraftServer.getGlobalEventHandler());

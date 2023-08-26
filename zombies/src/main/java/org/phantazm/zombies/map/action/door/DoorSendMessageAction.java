@@ -23,8 +23,8 @@ public class DoorSendMessageAction implements Action<Door> {
 
     @FactoryMethod
     public DoorSendMessageAction(@NotNull Data data, @NotNull Instance instance) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.instance = Objects.requireNonNull(instance, "instance");
+        this.data = Objects.requireNonNull(data);
+        this.instance = Objects.requireNonNull(instance);
     }
 
     @Override
@@ -38,14 +38,14 @@ public class DoorSendMessageAction implements Action<Door> {
             Optional<ZombiesPlayer> interactorOptional = door.lastInteractor();
             if (interactorOptional.isPresent()) {
                 interactorOptional.get().sendMessage(component);
-            }
-            else {
+            } else {
                 instance.sendMessage(component);
             }
         }
     }
 
     @DataObject
-    public record Data(@NotNull List<Component> messages, boolean broadcast) {
+    public record Data(@NotNull List<Component> messages,
+        boolean broadcast) {
     }
 }

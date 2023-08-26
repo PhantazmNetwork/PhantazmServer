@@ -29,12 +29,13 @@ public class ItemVisual implements PowerupVisualComponent {
     }
 
     @DataObject
-    public record Data(@NotNull ItemStack stack,
-                       long interval,
-                       long period,
-                       long periodOffset,
-                       double amplitude,
-                       double heightOffset) {
+    public record Data(
+        @NotNull ItemStack stack,
+        long interval,
+        long period,
+        long periodOffset,
+        double amplitude,
+        double heightOffset) {
 
     }
 
@@ -60,7 +61,7 @@ public class ItemVisual implements PowerupVisualComponent {
             ++ticks;
             if (ticks >= data.interval) {
                 double o = (Math.sin((2 * Math.PI * ((ticks + data.periodOffset) % data.period)) / data.period) *
-                        data.amplitude) + data.heightOffset;
+                    data.amplitude) + data.heightOffset;
                 Pos pos = entity.getPosition();
                 entity.teleport(new Pos(pos.x(), baseY + o, pos.z()));
                 ticks = 0;

@@ -25,7 +25,7 @@ public class ZombiesPlayerActionBar implements Tickable {
     private int highestPriority = Integer.MIN_VALUE;
 
     public ZombiesPlayerActionBar(@NotNull PlayerView playerView) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.playerView = Objects.requireNonNull(playerView);
     }
 
     @Override
@@ -41,7 +41,7 @@ public class ZombiesPlayerActionBar implements Tickable {
     }
 
     public void sendActionBar(@NotNull Component component, int priority) {
-        Objects.requireNonNull(component, "component");
+        Objects.requireNonNull(component);
         if (priority > highestPriority) {
             message = component;
             highestPriority = priority;

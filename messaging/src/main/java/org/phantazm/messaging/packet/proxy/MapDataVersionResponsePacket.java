@@ -19,7 +19,7 @@ public record MapDataVersionResponsePacket(int version) implements Packet {
     public static final Key ID = Key.key(Namespaces.PHANTAZM, "proxy/mapdata_version_response");
 
     public static @NotNull MapDataVersionResponsePacket read(@NotNull DataReader reader) {
-        Objects.requireNonNull(reader, "reader");
+        Objects.requireNonNull(reader);
         return new MapDataVersionResponsePacket(reader.readInt());
     }
 

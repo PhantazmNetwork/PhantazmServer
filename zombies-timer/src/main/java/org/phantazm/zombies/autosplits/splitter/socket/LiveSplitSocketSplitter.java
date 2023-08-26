@@ -21,8 +21,8 @@ public class LiveSplitSocketSplitter implements AutoSplitSplitter {
     private final int port;
 
     public LiveSplitSocketSplitter(@NotNull Executor executor, @NotNull String host, int port) {
-        this.executor = Objects.requireNonNull(executor, "executor");
-        this.host = Objects.requireNonNull(host, "host");
+        this.executor = Objects.requireNonNull(executor);
+        this.host = Objects.requireNonNull(host);
         this.port = port;
     }
 

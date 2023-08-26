@@ -20,9 +20,9 @@ public class BasicPerkLevel implements PerkLevel {
     private final Collection<PerkEffect> effects;
 
     public BasicPerkLevel(@NotNull Set<Key> upgrades, @NotNull PerkEquipment equipment,
-            @NotNull Collection<PerkEffect> effects) {
+        @NotNull Collection<PerkEffect> effects) {
         this.upgrades = Set.copyOf(upgrades);
-        this.equipment = Objects.requireNonNull(equipment, "equipment");
+        this.equipment = Objects.requireNonNull(equipment);
         this.effects = List.copyOf(effects);
     }
 
@@ -79,7 +79,8 @@ public class BasicPerkLevel implements PerkLevel {
     }
 
     @Override
-    public @Unmodifiable @NotNull Set<Key> upgrades() {
+    public @Unmodifiable
+    @NotNull Set<Key> upgrades() {
         return upgrades;
     }
 

@@ -21,11 +21,11 @@ public class BinaryDataWriter implements DataWriter {
      * @param binaryWriter The delegate {@link BinaryWriter}
      */
     public BinaryDataWriter(@NotNull BinaryWriter binaryWriter) {
-        this.binaryWriter = Objects.requireNonNull(binaryWriter, "binaryWriter");
+        this.binaryWriter = Objects.requireNonNull(binaryWriter);
     }
 
     public static @NotNull BinaryDataWriter fromNetworkBuffer(@NotNull NetworkBuffer networkBuffer) {
-        return new BinaryDataWriter(new BinaryWriter(Objects.requireNonNull(networkBuffer, "networkBuffer")));
+        return new BinaryDataWriter(new BinaryWriter(Objects.requireNonNull(networkBuffer)));
     }
 
     @Override

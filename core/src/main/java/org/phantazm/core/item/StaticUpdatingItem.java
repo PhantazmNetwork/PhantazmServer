@@ -16,7 +16,7 @@ public class StaticUpdatingItem implements UpdatingItem {
 
     @FactoryMethod
     public StaticUpdatingItem(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

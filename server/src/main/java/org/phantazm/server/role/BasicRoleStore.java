@@ -33,8 +33,8 @@ public class BasicRoleStore implements RoleStore {
     private final Map<String, Role> roleMap;
 
     public BasicRoleStore(@NotNull DataSource dataSource, @NotNull Executor executor) {
-        this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
-        this.executor = Objects.requireNonNull(executor, "executor");
+        this.dataSource = Objects.requireNonNull(dataSource);
+        this.executor = Objects.requireNonNull(executor);
         this.roleCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
 
         this.roleMap = new ConcurrentHashMap<>();
@@ -84,10 +84,9 @@ public class BasicRoleStore implements RoleStore {
 
             try (Connection connection = dataSource.getConnection()) {
                 using(connection).insertInto(table("player_roles"), field("player_uuid"), field("player_role"))
-                        .values(uuid, identifier).onDuplicateKeyUpdate().set(field("player_uuid"), uuid)
-                        .set(field("player_role"), identifier).execute();
-            }
-            catch (SQLException e) {
+                    .values(uuid, identifier).onDuplicateKeyUpdate().set(field("player_uuid"), uuid)
+                    .set(field("player_role"), identifier).execute();
+            } catch (SQLException e) {
                 LOGGER.warn("SQLException when writing role update to database", e);
             }
 
@@ -115,9 +114,8 @@ public class BasicRoleStore implements RoleStore {
             boolean removed = roles.remove(role);
             try (Connection connection = dataSource.getConnection()) {
                 using(connection).deleteFrom(table("player_roles"))
-                        .where(field("player_uuid").eq(uuid).and(field("player_role").eq(identifier))).execute();
-            }
-            catch (SQLException e) {
+                    .where(field("player_uuid").eq(uuid).and(field("player_role").eq(identifier))).execute();
+            } catch (SQLException e) {
                 LOGGER.warn("SQLException when deleting player role from database", e);
             }
 
@@ -168,11 +166,11 @@ public class BasicRoleStore implements RoleStore {
 
         try (Connection connection = dataSource.getConnection()) {
             Result<Record> result =
-                    using(connection).selectFrom(table("player_roles")).where(field("player_uuid").eq(key)).fetch();
+                using(connection).selectFrom(table("player_roles")).where(field("player_uuid").eq(key)).fetch();
 
             Set<Role> roleSet = new HashSet<>(result.size() + (defaultRole == null ? 0 : 1));
             for (Record record : result) {
-                String playerRole = (String)record.get("player_role");
+                String playerRole = (String) record.get("player_role");
                 if (playerRole == null) {
                     continue;
                 }
@@ -190,8 +188,7 @@ public class BasicRoleStore implements RoleStore {
             }
 
             return new CopyOnWriteArraySet<>(roleSet);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.warn("Exception when fetching player roles", e);
         }
 

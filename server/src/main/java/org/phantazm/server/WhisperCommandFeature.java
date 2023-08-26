@@ -15,8 +15,8 @@ public class WhisperCommandFeature {
         ConnectionManager connectionManager = MinecraftServer.getConnectionManager();
         CommandManager commandManager = MinecraftServer.getCommandManager();
         WhisperManager whisperManager =
-                new WhisperManager(connectionManager, commandManager.getConsoleSender(), whisperConfig,
-                        MiniMessage.miniMessage());
+            new WhisperManager(connectionManager, commandManager.getConsoleSender(), whisperConfig,
+                MiniMessage.miniMessage());
 
         commandManager.register(WhisperCommand.whisperCommand(connectionManager, whisperManager));
         commandManager.register(ReplyCommand.replyCommand(whisperManager));

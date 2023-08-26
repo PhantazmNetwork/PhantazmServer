@@ -26,7 +26,7 @@ public class ShotEffectCreator implements PerkEffectCreator {
 
     @FactoryMethod
     public ShotEffectCreator(@NotNull EventNode<Event> rootNode,
-            @NotNull @Child("action") Collection<ShotEffect> actions) {
+        @NotNull @Child("action") Collection<ShotEffect> actions) {
         this.rootNode = rootNode;
         this.actions = List.copyOf(actions);
     }
@@ -64,8 +64,8 @@ public class ShotEffectCreator implements PerkEffectCreator {
             };
 
             this.tickableActions =
-                    actions.stream().filter(action -> action instanceof Tickable).map(action -> (Tickable)action)
-                            .toArray(Tickable[]::new);
+                actions.stream().filter(action -> action instanceof Tickable).map(action -> (Tickable) action)
+                    .toArray(Tickable[]::new);
         }
 
         @Override
@@ -101,7 +101,8 @@ public class ShotEffectCreator implements PerkEffectCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @Description(
+    public record Data(
+        @NotNull @Description(
             "The actions to be executed on the entities that are hit by gun shots") @ChildPath(
             "action") Collection<String> actions) {
     }

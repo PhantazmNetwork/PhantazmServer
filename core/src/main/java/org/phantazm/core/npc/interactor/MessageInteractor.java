@@ -28,18 +28,17 @@ public class MessageInteractor implements Interactor {
             Instance instance = player.getInstance();
             if (instance != null) {
                 instance.sendMessage(data.message);
-            }
-            else {
+            } else {
                 player.sendMessage(data.message);
             }
-        }
-        else {
+        } else {
             player.sendMessage(data.message);
         }
     }
 
     @DataObject
-    public record Data(@NotNull Component message, boolean broadcast) {
+    public record Data(@NotNull Component message,
+        boolean broadcast) {
         @Default("broadcast")
         public static @NotNull ConfigElement broadcastDefault() {
             return ConfigPrimitive.of(false);

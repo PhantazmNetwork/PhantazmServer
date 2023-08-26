@@ -29,12 +29,13 @@ public class LoginLobbyJoinRequest implements LobbyJoinRequest {
      * @param viewProvider The {@link PlayerViewProvider} for the server
      */
     public LoginLobbyJoinRequest(@NotNull PlayerLoginEvent event, @NotNull PlayerViewProvider viewProvider) {
-        this.event = Objects.requireNonNull(event, "event");
-        this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
+        this.event = Objects.requireNonNull(event);
+        this.viewProvider = Objects.requireNonNull(viewProvider);
     }
 
     @Override
-    public @UnmodifiableView @NotNull Collection<PlayerView> getPlayers() {
+    public @UnmodifiableView
+    @NotNull Collection<PlayerView> getPlayers() {
         return List.of(viewProvider.fromPlayer(event.getPlayer()));
     }
 

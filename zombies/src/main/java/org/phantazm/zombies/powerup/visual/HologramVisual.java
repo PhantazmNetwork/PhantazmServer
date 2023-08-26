@@ -33,17 +33,19 @@ public class HologramVisual implements PowerupVisualComponent {
     }
 
     @DataObject
-    public record Data(@NotNull List<Component> lines,
-                       long timeUntilBlink,
-                       @NotNull List<Frame> blinkFrames,
-                       double heightOffset) {
+    public record Data(
+        @NotNull List<Component> lines,
+        long timeUntilBlink,
+        @NotNull List<Frame> blinkFrames,
+        double heightOffset) {
         @Default("heightOffset")
         public static @NotNull ConfigElement heightOffsetDefault() {
             return ConfigPrimitive.of(0.0);
         }
     }
 
-    public record Frame(@NotNull List<Component> components, long delay) {
+    public record Frame(@NotNull List<Component> components,
+        long delay) {
     }
 
     private static class Visual implements PowerupVisual {

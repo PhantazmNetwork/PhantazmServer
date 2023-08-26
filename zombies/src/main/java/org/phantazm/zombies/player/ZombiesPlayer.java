@@ -2,8 +2,6 @@ package org.phantazm.zombies.player;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.attribute.Attribute;
-import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -12,13 +10,11 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.BelowNameTag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
-import org.phantazm.commons.CancellableState;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.spawner.MobSpawner;
+import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.map.*;
@@ -44,17 +40,6 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     long getReviveTime();
 
     @NotNull ZombiesScene getScene();
-
-    void registerCancellable(@NotNull CancellableState cancellable, boolean endOld);
-
-    void removeCancellable(@NotNull UUID id);
-
-    default void cancellableAttribute(@NotNull Attribute attribute, @NotNull AttributeModifier modifier) {
-        registerCancellable(CancellableState.named(modifier.getId(),
-                        () -> getPlayer().ifPresent(player -> player.getAttribute(attribute).addModifier(modifier)),
-                        () -> getPlayer().ifPresent(player -> player.getAttribute(attribute).removeModifier(modifier.getId()))),
-                true);
-    }
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
         Optional<Player> playerOptional = module().getPlayerView().getPlayer();
@@ -85,7 +70,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
         }
 
         Function<TContext, ZombiesPlayerState> stateFunction =
-                (Function<TContext, ZombiesPlayerState>)module().getStateFunctions().get(stateKey);
+            (Function<TContext, ZombiesPlayerState>) module().getStateFunctions().get(stateKey);
         if (stateFunction != null) {
             module().getStateSwitcher().setState(stateFunction.apply(context));
             return true;
@@ -182,8 +167,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
         PlayerView view = module().getPlayerView();
         try {
             return view.getUsername().get();
-        }
-        catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             return view.getUUID().toString();
         }
     }
@@ -191,13 +175,13 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     interface Source {
 
         @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
-                @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-                @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
-                @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
-                @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
-                @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-                @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
-                @NotNull BelowNameTag belowNameTag);
+            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+            @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
+            @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
+            @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
+            @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
+            @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
+            @NotNull BelowNameTag belowNameTag);
 
     }
 

@@ -10,11 +10,12 @@ import java.util.Set;
  * Defines a spawnrule, which acts as a whitelist/blacklist filter for determining whether a mob may spawn at a
  * spawnpoint.
  */
-public record SpawnruleInfo(@NotNull Key id,
-                            @NotNull Key spawnType,
-                            @NotNull Set<Key> spawns,
-                            boolean isBlacklist,
-                            int sla) {
+public record SpawnruleInfo(
+    @NotNull Key id,
+    @NotNull Key spawnType,
+    @NotNull Set<Key> spawns,
+    boolean isBlacklist,
+    int sla) {
     /**
      * Creates a new instance of this record.
      *
@@ -24,9 +25,9 @@ public record SpawnruleInfo(@NotNull Key id,
      * @param isBlacklist whether this spawnrule is considered a blacklist or whitelist
      */
     public SpawnruleInfo {
-        Objects.requireNonNull(id, "id");
-        Objects.requireNonNull(spawnType, "spawnType");
-        Objects.requireNonNull(spawns, "spawns");
+        Objects.requireNonNull(id);
+        Objects.requireNonNull(spawnType);
+        Objects.requireNonNull(spawns);
     }
 
     /**

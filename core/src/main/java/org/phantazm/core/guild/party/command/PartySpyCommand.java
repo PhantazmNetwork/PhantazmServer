@@ -30,13 +30,13 @@ public class PartySpyCommand {
     }
 
     public static @NotNull Command spyCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
-            @NotNull ConnectionManager connectionManager, @NotNull GuildHolder<Party> partyHolder,
-            @NotNull PlayerViewProvider viewProvider) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(miniMessage, "miniMessage");
-        Objects.requireNonNull(connectionManager, "connectionManager");
-        Objects.requireNonNull(partyHolder, "partyHolder");
-        Objects.requireNonNull(viewProvider, "viewProvider");
+        @NotNull ConnectionManager connectionManager, @NotNull GuildHolder<Party> partyHolder,
+        @NotNull PlayerViewProvider viewProvider) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(miniMessage);
+        Objects.requireNonNull(connectionManager);
+        Objects.requireNonNull(partyHolder);
+        Objects.requireNonNull(viewProvider);
 
         Command command = new Command("spy");
         Argument<String> nameArgument = ArgumentType.String("name");
@@ -84,17 +84,14 @@ public class PartySpyCommand {
                     nowSpying = !spyAudience.hasPlayerSpy(senderView.getUUID());
                     if (nowSpying) {
                         spyAudience.addPlayerSpy(senderView);
-                    }
-                    else {
+                    } else {
                         spyAudience.removePlayerSpy(senderView.getUUID());
                     }
-                }
-                else {
+                } else {
                     nowSpying = !spyAudience.hasExtraSpy(sender);
                     if (nowSpying) {
                         spyAudience.addExtraSpy(sender);
-                    }
-                    else {
+                    } else {
                         spyAudience.removeExtraSpy(sender);
                     }
                 }

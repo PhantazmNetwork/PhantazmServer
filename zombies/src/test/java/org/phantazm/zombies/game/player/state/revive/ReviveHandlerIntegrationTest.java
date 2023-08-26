@@ -59,8 +59,8 @@ public class ReviveHandlerIntegrationTest {
         KnockedPlayerStateContext context = new KnockedPlayerStateContext(env.createFlatInstance(), Vec.ZERO, null, null);
         long initialDeathTime = 20L;
         ReviveHandler reviveHandler =
-                new ReviveHandler(context, zombiesPlayers, ignored -> aliveState, () -> deathState, ignored -> false,
-                        initialDeathTime);
+            new ReviveHandler(context, zombiesPlayers, ignored -> aliveState, () -> deathState, ignored -> false,
+                initialDeathTime);
 
         reviveHandler.tick(0L);
 
@@ -76,8 +76,8 @@ public class ReviveHandlerIntegrationTest {
         when(reviver.getReviveTime()).thenReturn(reviveTime);
         long initialDeathTime = 20L;
         ReviveHandler reviveHandler =
-                new ReviveHandler(context, zombiesPlayers, ignored -> aliveState, () -> deathState,
-                        candidate -> candidate == reviver, initialDeathTime);
+            new ReviveHandler(context, zombiesPlayers, ignored -> aliveState, () -> deathState,
+                candidate -> candidate == reviver, initialDeathTime);
 
         reviveHandler.tick(0L);
 
@@ -92,8 +92,8 @@ public class ReviveHandlerIntegrationTest {
         KnockedPlayerStateContext context = new KnockedPlayerStateContext(env.createFlatInstance(), Vec.ZERO, null, null);
         long initialDeathTime = 0L;
         ReviveHandler reviveHandler =
-                new ReviveHandler(context, zombiesPlayers, ignored -> aliveState, () -> deathState, ignored -> false,
-                        initialDeathTime);
+            new ReviveHandler(context, zombiesPlayers, ignored -> aliveState, () -> deathState, ignored -> false,
+                initialDeathTime);
 
         reviveHandler.tick(0L);
 
@@ -107,8 +107,8 @@ public class ReviveHandlerIntegrationTest {
         long reviveTime = 0L;
         when(reviver.getReviveTime()).thenReturn(reviveTime);
         ReviveHandler reviveHandler =
-                new ReviveHandler(context, zombiesPlayers, ignored -> aliveState, () -> deathState,
-                        candidate -> candidate == reviver, 20L);
+            new ReviveHandler(context, zombiesPlayers, ignored -> aliveState, () -> deathState,
+                candidate -> candidate == reviver, 20L);
 
         reviveHandler.tick(0L);
         reviveHandler.tick(0L);

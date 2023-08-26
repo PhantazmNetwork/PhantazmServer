@@ -20,7 +20,7 @@ public class BinaryDataReader implements DataReader {
      * @param binaryReader The delegate {@link BinaryReader}
      */
     public BinaryDataReader(@NotNull BinaryReader binaryReader) {
-        this.binaryReader = Objects.requireNonNull(binaryReader, "binaryReader");
+        this.binaryReader = Objects.requireNonNull(binaryReader);
     }
 
     @Override

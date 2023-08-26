@@ -13,8 +13,8 @@ import org.phantazm.zombies.map.shop.PlayerInteraction;
 import java.util.Objects;
 
 @Description("""
-        Plays a Minecraft sound. Can either be specific to the player activating this shop, or global (instance-wide).
-        """)
+    Plays a Minecraft sound. Can either be specific to the player activating this shop, or global (instance-wide).
+    """)
 @Model("zombies.map.shop.interactor.play_sound")
 @Cache(false)
 public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data> {
@@ -23,15 +23,14 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
     @FactoryMethod
     public PlaySoundInteractor(@NotNull Data data, @NotNull Instance instance) {
         super(data);
-        this.instance = Objects.requireNonNull(instance, "instance");
+        this.instance = Objects.requireNonNull(instance);
     }
 
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         if (data.broadcast) {
             instance.playSound(data.sound);
-        }
-        else {
+        } else {
             interaction.player().module().getPlayerView().getPlayer().ifPresent(player -> player.playSound(data.sound));
         }
 
@@ -39,6 +38,7 @@ public class PlaySoundInteractor extends InteractorBase<PlaySoundInteractor.Data
     }
 
     @DataObject
-    public record Data(@NotNull Sound sound, boolean broadcast) {
+    public record Data(@NotNull Sound sound,
+        boolean broadcast) {
     }
 }

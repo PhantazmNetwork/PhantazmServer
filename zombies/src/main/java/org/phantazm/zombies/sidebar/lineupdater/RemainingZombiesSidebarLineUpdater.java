@@ -25,7 +25,7 @@ public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
 
     @FactoryMethod
     public RemainingZombiesSidebarLineUpdater(@NotNull Data data, @NotNull RoundHandler roundHandler) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
         this.roundSupplier = Objects.requireNonNull(roundHandler::currentRound, "roundSupplier");
     }
 
@@ -41,7 +41,8 @@ public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
             if ((lastRemainingZombies == -1 || lastRemainingZombies != totalMobCount)) {
                 lastRemainingZombies = totalMobCount;
 
-                TagResolver remainingZombiesPlaceholder = Placeholder.component("remaining_zombies", Component.text(lastRemainingZombies));
+                TagResolver remainingZombiesPlaceholder = Placeholder.component("remaining_zombies",
+                    Component.text(lastRemainingZombies));
                 return MiniMessage.miniMessage().deserialize(data.format, remainingZombiesPlaceholder);
             }
 

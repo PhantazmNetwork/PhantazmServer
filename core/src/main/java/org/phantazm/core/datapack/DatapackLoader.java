@@ -55,20 +55,20 @@ public class DatapackLoader {
     private Biome loadBiome(NamespaceID name, Path path) throws IOException {
         JsonObject rootJson = JsonParser.parseReader(Files.newBufferedReader(path)).getAsJsonObject();
         Biome.Builder biomeBuilder = Biome.builder()
-                .name(name)
-                .temperature(rootJson.get("temperature").getAsFloat())
-                .downfall(rootJson.get("downfall").getAsFloat())
-                .hasPrecipitation(rootJson.get("has_precipitation").getAsBoolean());
+            .name(name)
+            .temperature(rootJson.get("temperature").getAsFloat())
+            .downfall(rootJson.get("downfall").getAsFloat())
+            .hasPrecipitation(rootJson.get("has_precipitation").getAsBoolean());
         if (rootJson.has("temperature_modifier")) {
             biomeBuilder.temperatureModifier(Biome.TemperatureModifier.valueOf(rootJson.get("temperature_modifier").getAsString().toUpperCase()));
         }
 
         JsonObject effectsJson = rootJson.getAsJsonObject("effects");
         BiomeEffects.Builder effectsBuilder = BiomeEffects.builder()
-                .fogColor(effectsJson.get("fog_color").getAsInt())
-                .skyColor(effectsJson.get("sky_color").getAsInt())
-                .waterColor(effectsJson.get("water_color").getAsInt())
-                .waterFogColor(effectsJson.get("water_fog_color").getAsInt());
+            .fogColor(effectsJson.get("fog_color").getAsInt())
+            .skyColor(effectsJson.get("sky_color").getAsInt())
+            .waterColor(effectsJson.get("water_color").getAsInt())
+            .waterFogColor(effectsJson.get("water_fog_color").getAsInt());
         if (effectsJson.has("foliage_color")) {
             effectsBuilder.foliageColor(effectsJson.get("foliage_color").getAsInt());
         }
@@ -77,7 +77,7 @@ public class DatapackLoader {
         }
         if (effectsJson.has("grass_color_modifier")) {
             effectsBuilder.grassColorModifier(BiomeEffects.GrassColorModifier.valueOf(effectsJson.get(
-                    "grass_color_modifier").getAsString().toUpperCase()));
+                "grass_color_modifier").getAsString().toUpperCase()));
         }
         if (effectsJson.has("particle")) {
             JsonObject particleJson = effectsJson.getAsJsonObject("particle");

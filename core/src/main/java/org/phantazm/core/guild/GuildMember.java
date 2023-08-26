@@ -10,7 +10,7 @@ public class GuildMember {
     private final PlayerView playerView;
 
     public GuildMember(@NotNull PlayerView playerView) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.playerView = Objects.requireNonNull(playerView);
     }
 
     public @NotNull PlayerView getPlayerView() {

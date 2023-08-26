@@ -31,15 +31,15 @@ public class DistanceTargetLimiter implements TargetLimiter {
      */
     @FactoryMethod
     public DistanceTargetLimiter(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public @NotNull List<Pair<? extends LivingEntity, Vec>> limitTargets(@NotNull Pos start,
-            @NotNull List<Pair<? extends LivingEntity, Vec>> targets) {
+        @NotNull List<Pair<? extends LivingEntity, Vec>> targets) {
         List<Pair<? extends LivingEntity, Vec>> targetsCopy = new ArrayList<>(targets);
         Comparator<Pair<? extends LivingEntity, Vec>> comparator =
-                Comparator.comparingDouble(pair -> start.distanceSquared(pair.value()));
+            Comparator.comparingDouble(pair -> start.distanceSquared(pair.value()));
         if (!data.prioritizeClosest()) {
             comparator = comparator.reversed();
         }
@@ -52,10 +52,12 @@ public class DistanceTargetLimiter implements TargetLimiter {
      * Data for a {@link DistanceTargetLimiter}.
      *
      * @param targetLimit       The maximum number of targets to select
-     * @param prioritizeClosest Whether the closest targets should be prioritized or the farthest targets should be prioritized
+     * @param prioritizeClosest Whether the closest targets should be prioritized or the farthest targets should be
+     *                          prioritized
      */
     @DataObject
-    public record Data(int targetLimit, boolean prioritizeClosest) {
+    public record Data(int targetLimit,
+        boolean prioritizeClosest) {
 
     }
 }

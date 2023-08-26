@@ -22,8 +22,8 @@ public class BasicDoorHandler implements DoorHandler {
     private final BoundedTracker<Room> roomTracker;
 
     public BasicDoorHandler(@NotNull BoundedTracker<Door> doorTracker, @NotNull BoundedTracker<Room> roomTracker) {
-        this.doorTracker = Objects.requireNonNull(doorTracker, "doorTracker");
-        this.roomTracker = Objects.requireNonNull(roomTracker, "roomTracker");
+        this.doorTracker = Objects.requireNonNull(doorTracker);
+        this.roomTracker = Objects.requireNonNull(roomTracker);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class BasicDoorHandler implements DoorHandler {
                 if (!standingInRoom.isOpen()) {
                     return;
                 }
-                
+
                 Key standingIn = standingInRoom.getRoomInfo().id();
 
                 DoorInfo info = door.doorInfo();
@@ -76,13 +76,12 @@ public class BasicDoorHandler implements DoorHandler {
                 PlayerCoins coins = player.module().getCoins();
                 TransactionModifierSource modifiers = player.module().compositeTransactionModifiers();
                 TransactionResult result = coins.runTransaction(
-                        new Transaction(modifiers.modifiers(ModifierSourceGroups.DOOR_COIN_SPEND), -sumCost));
+                    new Transaction(modifiers.modifiers(ModifierSourceGroups.DOOR_COIN_SPEND), -sumCost));
 
                 if (result.isAffordable(coins)) {
                     coins.applyTransaction(result);
                     door.open(player);
-                }
-                else {
+                } else {
                     door.failOpen(player);
                 }
 

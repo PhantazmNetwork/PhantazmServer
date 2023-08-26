@@ -14,8 +14,7 @@ import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
@@ -36,14 +35,11 @@ public class SlowDownShotHandler implements ShotHandler {
 
     private final Data data;
 
-    private MobStore mobStore;
-
     private long selfTick = 0;
 
     @FactoryMethod
-    public SlowDownShotHandler(@NotNull Data data, @NotNull MobStore mobStore) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+    public SlowDownShotHandler(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -73,33 +69,39 @@ public class SlowDownShotHandler implements ShotHandler {
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         for (GunHit target : shot.regularTargets()) {
-            PhantazmMob mob = mobStore.getMob(target.entity().getUuid());
-            if (mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
+            if (!(target.entity() instanceof Mob mob)) {
+                continue;
+            }
+
+            if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
                 continue;
             }
 
             removalQueue.add(ObjectLongPair.of(target.entity().getUuid(), selfTick + data.headshotDuration()));
             latestTimeMap.put(target.entity().getUuid(), selfTick + data.duration());
             AttributeModifier modifier =
-                    new AttributeModifier(SLOW_DOWN_UUID, "slowdown_shot_handler", data.multiplier(),
-                            AttributeOperation.MULTIPLY_TOTAL);
+                new AttributeModifier(SLOW_DOWN_UUID, "slowdown_shot_handler", data.multiplier(),
+                    AttributeOperation.MULTIPLY_TOTAL);
             AttributeInstance attribute = target.entity().getAttribute(Attribute.MOVEMENT_SPEED);
             attribute.removeModifier(SLOW_DOWN_UUID);
             attribute.addModifier(modifier);
         }
         for (GunHit target : shot.headshotTargets()) {
-            PhantazmMob mob = mobStore.getMob(target.entity().getUuid());
-            if (mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
+            if (!(target.entity() instanceof Mob mob)) {
+                continue;
+            }
+
+            if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
                 continue;
             }
 
             removalQueue.add(ObjectLongPair.of(target.entity().getUuid(), selfTick + data.headshotDuration()));
             latestTimeMap.put(target.entity().getUuid(), selfTick + data.headshotDuration());
             AttributeModifier modifier =
-                    new AttributeModifier(SLOW_DOWN_UUID, "slowdown_shot_handler", data.headshotMultiplier(),
-                            AttributeOperation.MULTIPLY_TOTAL);
+                new AttributeModifier(SLOW_DOWN_UUID, "slowdown_shot_handler", data.headshotMultiplier(),
+                    AttributeOperation.MULTIPLY_TOTAL);
             AttributeInstance attribute = target.entity().getAttribute(Attribute.MOVEMENT_SPEED);
             attribute.removeModifier(SLOW_DOWN_UUID);
             attribute.addModifier(modifier);
@@ -107,7 +109,10 @@ public class SlowDownShotHandler implements ShotHandler {
     }
 
     @DataObject
-    public record Data(double multiplier, double headshotMultiplier, long duration, long headshotDuration) {
+    public record Data(double multiplier,
+        double headshotMultiplier,
+        long duration,
+        long headshotDuration) {
 
     }
 

@@ -17,7 +17,7 @@ public class WhitelistCommand extends PermissionLockedCommand {
     private static final ArgumentWord PLAYER_ARGUMENT = ArgumentType.Word("player");
 
     public WhitelistCommand(@NotNull IdentitySource identitySource, @NotNull LoginValidator loginValidator,
-            boolean whitelist) {
+        boolean whitelist) {
         super("whitelist", PERMISSION);
 
         addSubcommand(new Add(identitySource, loginValidator));
@@ -34,8 +34,7 @@ public class WhitelistCommand extends PermissionLockedCommand {
                     uuidOptional.ifPresent(uuid -> {
                         if (loginValidator.isWhitelisted(uuid)) {
                             sender.sendMessage(uuid + " (" + name + ") is already whitelisted");
-                        }
-                        else {
+                        } else {
                             loginValidator.addWhitelist(uuid);
                             sender.sendMessage("Whitelisted " + uuid + " (" + name + ")");
                         }
@@ -47,7 +46,7 @@ public class WhitelistCommand extends PermissionLockedCommand {
 
     private static class Remove extends PermissionLockedCommand {
         private Remove(@NotNull IdentitySource identitySource, @NotNull LoginValidator loginValidator,
-                boolean whitelist) {
+            boolean whitelist) {
             super("remove", PERMISSION_REMOVE);
 
             addSyntax((sender, context) -> {
@@ -64,8 +63,7 @@ public class WhitelistCommand extends PermissionLockedCommand {
                                     player.kick(LoginValidator.NOT_WHITELISTED_MESSAGE);
                                 }
                             }
-                        }
-                        else {
+                        } else {
                             sender.sendMessage(uuid + " (" + name + ") is not whitelisted");
                         }
                     });

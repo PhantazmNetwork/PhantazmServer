@@ -8,7 +8,7 @@ public class BasicInventoryObjectGroup extends InventoryObjectGroupAbstract {
     private final InventoryObject defaultObject;
 
     public BasicInventoryObjectGroup(@NotNull InventoryProfile profile, @NotNull IntSet slots,
-            @Nullable InventoryObject defaultObject) {
+        @Nullable InventoryObject defaultObject) {
         super(profile, slots);
         this.defaultObject = defaultObject;
     }
@@ -33,8 +33,7 @@ public class BasicInventoryObjectGroup extends InventoryObjectGroupAbstract {
                     profile.setInventoryObject(slot, toPush);
                     return slot;
                 }
-            }
-            else if (!profile.hasInventoryObject(slot)) {
+            } else if (!profile.hasInventoryObject(slot)) {
                 profile.setInventoryObject(slot, toPush);
                 return slot;
             }

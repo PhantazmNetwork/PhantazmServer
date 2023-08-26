@@ -19,8 +19,8 @@ public class BasicShopHandler implements ShopHandler {
     private final BoundedTracker<Room> roomTracker;
 
     public BasicShopHandler(@NotNull BoundedTracker<Shop> shopTracker, @NotNull BoundedTracker<Room> roomTracker) {
-        this.shopTracker = Objects.requireNonNull(shopTracker, "shopTracker");
-        this.roomTracker = Objects.requireNonNull(roomTracker, "roomTracker");
+        this.shopTracker = Objects.requireNonNull(shopTracker);
+        this.roomTracker = Objects.requireNonNull(roomTracker);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class BasicShopHandler implements ShopHandler {
     }
 
     public boolean handleInteraction(@NotNull ZombiesPlayer player, @NotNull Point clicked,
-            @NotNull Key interactionType) {
+        @NotNull Key interactionType) {
         if (!player.inStage(StageKeys.IN_GAME)) {
             return false;
         }

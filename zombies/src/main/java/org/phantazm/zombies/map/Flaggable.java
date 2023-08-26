@@ -14,8 +14,7 @@ public interface Flaggable {
         if (hasFlag(flag)) {
             clearFlag(flag);
             return false;
-        }
-        else {
+        } else {
             setFlag(flag);
             return true;
         }

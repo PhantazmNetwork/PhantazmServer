@@ -57,14 +57,13 @@ final class EquipmentFeature {
     }
 
     static void initialize(@NotNull KeyParser keyParser, @NotNull ContextManager contextManager,
-            @NotNull ConfigCodec codec, @NotNull ConfigProcessor<EquipmentData> gunDataProcessor) {
-        EquipmentFeature.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+        @NotNull ConfigCodec codec, @NotNull ConfigProcessor<EquipmentData> gunDataProcessor) {
+        EquipmentFeature.keyParser = Objects.requireNonNull(keyParser);
 
         String ending;
         if (codec.getPreferredExtensions().isEmpty()) {
             ending = "";
-        }
-        else {
+        } else {
             ending = "." + codec.getPreferredExtension();
         }
 
@@ -75,8 +74,7 @@ final class EquipmentFeature {
         try {
             FileUtils.createDirectories(guns);
             FileUtils.createDirectories(perks);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("Failed to create a necessary equipment directory.", e);
             return;
         }
@@ -86,14 +84,14 @@ final class EquipmentFeature {
 
         for (Path equipmentDirectory : equipmentDirectories) {
             try (Stream<Path> gunDirectories = Files.list(equipmentDirectory)) {
-                for (Path gunDirectory : (Iterable<? extends Path>)gunDirectories::iterator) {
+                for (Path gunDirectory : (Iterable<? extends Path>) gunDirectories::iterator) {
                     if (!Files.isDirectory(gunDirectory)) {
                         continue;
                     }
 
                     String infoFileName = codec.getPreferredExtensions().isEmpty()
-                                          ? "settings"
-                                          : "settings." + codec.getPreferredExtension();
+                        ? "settings"
+                        : "settings." + codec.getPreferredExtension();
                     Path infoPath = gunDirectory.resolve(infoFileName);
                     if (!Files.isRegularFile(infoPath)) {
                         LOGGER.warn("No equipment settings file at {}.", infoPath);
@@ -103,8 +101,7 @@ final class EquipmentFeature {
                     EquipmentData equipmentData;
                     try {
                         equipmentData = Configuration.read(infoPath, codec, gunDataProcessor);
-                    }
-                    catch (ConfigProcessException e) {
+                    } catch (ConfigProcessException e) {
                         LOGGER.warn("Failed to read equipment settings file at {}.", infoPath, e);
                         continue;
                     }
@@ -112,7 +109,7 @@ final class EquipmentFeature {
                     List<ElementContext> levelData = new ArrayList<>();
                     Path levelsPath = gunDirectory.resolve("levels");
                     try (Stream<Path> levelDirectories = Files.list(levelsPath)) {
-                        for (Path levelFile : (Iterable<? extends Path>)levelDirectories::iterator) {
+                        for (Path levelFile : (Iterable<? extends Path>) levelDirectories::iterator) {
                             if (!(Files.isRegularFile(levelFile) && matcher.matches(levelFile))) {
                                 continue;
                             }
@@ -120,21 +117,18 @@ final class EquipmentFeature {
                             try {
                                 ConfigNode node = Configuration.read(levelFile, codec, ConfigProcessor.CONFIG_NODE);
                                 levelData.add(contextManager.makeContext(node));
-                            }
-                            catch (IOException e) {
+                            } catch (IOException e) {
                                 LOGGER.warn("Failed to read level file at {}.", levelFile, e);
                             }
                         }
-                    }
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         LOGGER.warn("Failed to list levels directory at {}.", levelsPath, e);
                         continue;
                     }
 
                     equipmentLevelMap.put(equipmentData.name(), Pair.of(equipmentData, levelData));
                 }
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOGGER.warn("Failed to list equipment directory at {}", guns, e);
             }
         }
@@ -144,7 +138,7 @@ final class EquipmentFeature {
     }
 
     public static @NotNull EquipmentCreator createEquipmentCreator(@NotNull ZombiesEquipmentModule equipmentModule) {
-        Objects.requireNonNull(equipmentModule, "equipmentModule");
+        Objects.requireNonNull(equipmentModule);
         FeatureUtils.check(equipmentLevelMap);
         FeatureUtils.check(keyParser);
 
@@ -197,10 +191,9 @@ final class EquipmentFeature {
 
                 Key equipmentType = pair.left().type();
                 if (EquipmentTypes.PERK.equals(equipmentType)) {
-                    return (Optional<TEquipment>)loadPerk(equipmentKey);
-                }
-                else if (EquipmentTypes.GUN.equals(equipmentType)) {
-                    return (Optional<TEquipment>)loadGun(pair, equipmentKey);
+                    return (Optional<TEquipment>) loadPerk(equipmentKey);
+                } else if (EquipmentTypes.GUN.equals(equipmentType)) {
+                    return (Optional<TEquipment>) loadGun(pair, equipmentKey);
                 }
 
                 return Optional.empty();
@@ -246,11 +239,10 @@ final class EquipmentFeature {
 
                     if (!event.shot().headshotTargets().isEmpty()) {
                         equipmentModule.getMapStats()
-                                .setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + 1);
-                    }
-                    else if (!event.shot().regularTargets().isEmpty()) {
+                            .setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + 1);
+                    } else if (!event.shot().regularTargets().isEmpty()) {
                         equipmentModule.getMapStats()
-                                .setRegularHits(equipmentModule.getMapStats().getRegularHits() + 1);
+                            .setRegularHits(equipmentModule.getMapStats().getRegularHits() + 1);
                     }
                 });
 

@@ -55,9 +55,10 @@ public class InteractorDelegatingItem implements GuiItem {
     }
 
     @DataObject
-    public record Data(@NotNull ItemStack itemStack,
-                       boolean closeOnClick,
-                       @NotNull @ChildPath("interactor") String interactor) {
+    public record Data(
+        @NotNull ItemStack itemStack,
+        boolean closeOnClick,
+        @NotNull @ChildPath("interactor") String interactor) {
         @Default("closeOnClick")
         public static @NotNull ConfigElement defaultCloseOnClick() {
             return ConfigPrimitive.of(true);

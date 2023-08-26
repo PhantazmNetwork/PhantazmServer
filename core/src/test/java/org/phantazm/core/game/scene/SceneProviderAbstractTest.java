@@ -34,25 +34,25 @@ public class SceneProviderAbstractTest {
     @Test
     public void testMaximumLobbies() {
         SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider =
-                new SceneProviderAbstract<>(executor,maximumLobbies) {
-                    @Override
-                    protected @NotNull Optional<TransferResult> chooseScene(@NotNull SceneJoinRequest o) {
-                        return Optional.empty();
-                    }
+            new SceneProviderAbstract<>(executor, maximumLobbies) {
+                @Override
+                protected @NotNull Optional<TransferResult> chooseScene(@NotNull SceneJoinRequest o) {
+                    return Optional.empty();
+                }
 
-                    @SuppressWarnings("unchecked")
-                    @Override
-                    protected @NotNull CompletableFuture<Scene<SceneJoinRequest>> createScene(@NotNull SceneJoinRequest o) {
-                        Scene<SceneJoinRequest> scene = mock(Scene.class);
-                        when(scene.join(ArgumentMatchers.any())).thenReturn(TransferResult.failure(Component.empty()));
-                        return CompletableFuture.completedFuture(scene);
-                    }
+                @SuppressWarnings("unchecked")
+                @Override
+                protected @NotNull CompletableFuture<Scene<SceneJoinRequest>> createScene(@NotNull SceneJoinRequest o) {
+                    Scene<SceneJoinRequest> scene = mock(Scene.class);
+                    when(scene.join(ArgumentMatchers.any())).thenReturn(TransferResult.failure(Component.empty()));
+                    return CompletableFuture.completedFuture(scene);
+                }
 
-                    @Override
-                    protected void cleanupScene(@NotNull Scene<SceneJoinRequest> scene) {
+                @Override
+                protected void cleanupScene(@NotNull Scene<SceneJoinRequest> scene) {
 
-                    }
-                };
+                }
+            };
 
         SceneJoinRequest request = Mockito.mock(SceneJoinRequest.class);
         for (int i = 0; i < maximumLobbies; i++) {
@@ -72,26 +72,26 @@ public class SceneProviderAbstractTest {
         }
 
         SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider =
-                new SceneProviderAbstract<>(executor,maximumLobbies) {
+            new SceneProviderAbstract<>(executor, maximumLobbies) {
 
-                    private final Iterator<Scene<SceneJoinRequest>> iterator = scenes.iterator();
+                private final Iterator<Scene<SceneJoinRequest>> iterator = scenes.iterator();
 
-                    @Override
-                    protected @NotNull Optional<TransferResult> chooseScene(@NotNull SceneJoinRequest o) {
-                        return Optional.empty();
-                    }
+                @Override
+                protected @NotNull Optional<TransferResult> chooseScene(@NotNull SceneJoinRequest o) {
+                    return Optional.empty();
+                }
 
-                    @Override
-                    protected @NotNull CompletableFuture<Scene<SceneJoinRequest>> createScene(@NotNull SceneJoinRequest o) {
-                        return CompletableFuture.completedFuture(iterator.next());
-                    }
+                @Override
+                protected @NotNull CompletableFuture<Scene<SceneJoinRequest>> createScene(@NotNull SceneJoinRequest o) {
+                    return CompletableFuture.completedFuture(iterator.next());
+                }
 
-                    @Override
-                    protected void cleanupScene(@NotNull Scene<SceneJoinRequest> scene) {
+                @Override
+                protected void cleanupScene(@NotNull Scene<SceneJoinRequest> scene) {
 
-                    }
+                }
 
-                };
+            };
 
         SceneJoinRequest request = Mockito.mock(SceneJoinRequest.class);
         for (int i = 0; i < maximumLobbies; i++) {
@@ -112,22 +112,22 @@ public class SceneProviderAbstractTest {
         when(scene.isShutdown()).thenReturn(true);
 
         SceneProvider<Scene<SceneJoinRequest>, SceneJoinRequest> sceneProvider =
-                new SceneProviderAbstract<>(executor, maximumLobbies) {
-                    @Override
-                    protected @NotNull Optional<TransferResult> chooseScene(@NotNull SceneJoinRequest o) {
-                        return Optional.empty();
-                    }
+            new SceneProviderAbstract<>(executor, maximumLobbies) {
+                @Override
+                protected @NotNull Optional<TransferResult> chooseScene(@NotNull SceneJoinRequest o) {
+                    return Optional.empty();
+                }
 
-                    @Override
-                    protected @NotNull CompletableFuture<Scene<SceneJoinRequest>> createScene(@NotNull SceneJoinRequest o) {
-                        return CompletableFuture.completedFuture(scene);
-                    }
+                @Override
+                protected @NotNull CompletableFuture<Scene<SceneJoinRequest>> createScene(@NotNull SceneJoinRequest o) {
+                    return CompletableFuture.completedFuture(scene);
+                }
 
-                    @Override
-                    protected void cleanupScene(@NotNull Scene<SceneJoinRequest> scene) {
+                @Override
+                protected void cleanupScene(@NotNull Scene<SceneJoinRequest> scene) {
 
-                    }
-                };
+                }
+            };
 
         SceneJoinRequest request = Mockito.mock(SceneJoinRequest.class);
         sceneProvider.provideScene(request).join();

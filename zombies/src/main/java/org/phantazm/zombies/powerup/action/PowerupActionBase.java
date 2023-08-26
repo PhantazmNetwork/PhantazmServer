@@ -11,7 +11,7 @@ public abstract class PowerupActionBase implements PowerupAction {
     private final DeactivationPredicate deactivationPredicate;
 
     public PowerupActionBase(@NotNull DeactivationPredicate deactivationPredicate) {
-        this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate, "deactivationPredicate");
+        this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate);
     }
 
     @Override

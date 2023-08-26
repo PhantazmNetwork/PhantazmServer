@@ -20,10 +20,10 @@ public class ByteArrayInputDataReader implements DataReader {
      * @param input The delegate {@link ByteArrayDataInput}
      */
     public ByteArrayInputDataReader(@NotNull ByteArrayDataInput input) {
-        this.input = Objects.requireNonNull(input, "input");
+        this.input = Objects.requireNonNull(input);
     }
 
-    public ByteArrayInputDataReader(byte @NotNull[] bytes) {
+    public ByteArrayInputDataReader(byte @NotNull [] bytes) {
         this(ByteStreams.newDataInput(bytes));
     }
 

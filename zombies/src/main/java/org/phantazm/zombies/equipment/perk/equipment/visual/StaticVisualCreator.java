@@ -19,7 +19,7 @@ public class StaticVisualCreator implements PerkVisualCreator {
 
     @FactoryMethod
     public StaticVisualCreator(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class StaticVisualCreator implements PerkVisualCreator {
         private final Data data;
 
         private Visual(Data data) {
-            this.data = Objects.requireNonNull(data, "data");
+            this.data = Objects.requireNonNull(data);
         }
 
         @Override

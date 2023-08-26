@@ -16,10 +16,10 @@ public class ZombiesPlayerDeathEvent implements ZombiesPlayerEvent, CancellableE
     private boolean cancelled;
 
     public ZombiesPlayerDeathEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
-            @NotNull Damage damage) {
-        this.player = Objects.requireNonNull(player, "player");
-        this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
-        this.damage = Objects.requireNonNull(damage, "damageType");
+        @NotNull Damage damage) {
+        this.player = Objects.requireNonNull(player);
+        this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
+        this.damage = Objects.requireNonNull(damage);
     }
 
     @Override
@@ -36,11 +36,11 @@ public class ZombiesPlayerDeathEvent implements ZombiesPlayerEvent, CancellableE
         return damage;
     }
 
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
-    }
-
     public boolean isCancelled() {
         return this.cancelled;
+    }
+
+    public void setCancelled(boolean cancel) {
+        this.cancelled = cancel;
     }
 }

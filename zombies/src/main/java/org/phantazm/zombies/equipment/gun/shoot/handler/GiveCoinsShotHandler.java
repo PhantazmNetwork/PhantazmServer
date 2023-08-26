@@ -29,10 +29,10 @@ public class GiveCoinsShotHandler implements ShotHandler {
 
     @FactoryMethod
     public GiveCoinsShotHandler(@NotNull Data data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull MapObjects mapObjects) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+        @NotNull MapObjects mapObjects) {
+        this.data = Objects.requireNonNull(data);
+        this.playerMap = Objects.requireNonNull(playerMap);
+        this.mapObjects = Objects.requireNonNull(mapObjects);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class GiveCoinsShotHandler implements ShotHandler {
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         UUID attackerId = attacker.getUuid();
         ZombiesPlayer player = playerMap.get(attackerId);
         if (player == null) {
@@ -53,7 +53,7 @@ public class GiveCoinsShotHandler implements ShotHandler {
 
         PlayerCoins coins = player.module().getCoins();
         Collection<Transaction.Modifier> modifiers =
-                player.module().compositeTransactionModifiers().modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
+            player.module().compositeTransactionModifiers().modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
 
         int change = 0;
 
@@ -66,7 +66,8 @@ public class GiveCoinsShotHandler implements ShotHandler {
         }
 
         if (!shot.headshotTargets().isEmpty()) {
-            displays.add(Component.text((isInstaKill ? "Insta Kill " : "Critical Hit ") + shot.headshotTargets().size() + "x"));
+            displays.add(
+                Component.text((isInstaKill ? "Insta Kill " : "Critical Hit ") + shot.headshotTargets().size() + "x"));
             for (GunHit ignored : shot.headshotTargets()) {
                 change += isInstaKill ? data.instaKillCoins : data.headshotCoins;
             }
@@ -76,6 +77,8 @@ public class GiveCoinsShotHandler implements ShotHandler {
     }
 
     @DataObject
-    public record Data(int normalCoins, int headshotCoins, int instaKillCoins) {
+    public record Data(int normalCoins,
+        int headshotCoins,
+        int instaKillCoins) {
     }
 }

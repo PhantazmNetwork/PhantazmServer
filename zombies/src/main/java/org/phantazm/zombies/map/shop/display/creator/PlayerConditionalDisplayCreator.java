@@ -20,8 +20,8 @@ public class PlayerConditionalDisplayCreator implements PlayerDisplayCreator {
 
     @FactoryMethod
     public PlayerConditionalDisplayCreator(@NotNull @Child("predicate") Predicate<? super ZombiesPlayer> predicate,
-            @NotNull @Child("success") List<PlayerDisplayCreator> success,
-            @NotNull @Child("failure") List<PlayerDisplayCreator> failure) {
+        @NotNull @Child("success") List<PlayerDisplayCreator> success,
+        @NotNull @Child("failure") List<PlayerDisplayCreator> failure) {
         this.predicate = predicate;
         this.success = success;
         this.failure = failure;
@@ -44,9 +44,10 @@ public class PlayerConditionalDisplayCreator implements PlayerDisplayCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("predicate") String predicate,
-                       @NotNull @ChildPath("success") List<String> success,
-                       @NotNull @ChildPath("failure") List<String> failure) {
+    public record Data(
+        @NotNull @ChildPath("predicate") String predicate,
+        @NotNull @ChildPath("success") List<String> success,
+        @NotNull @ChildPath("failure") List<String> failure) {
     }
 
     private static class Display implements ShopDisplay {
@@ -60,7 +61,7 @@ public class PlayerConditionalDisplayCreator implements PlayerDisplayCreator {
         private int ticks;
 
         private Display(Predicate<? super ZombiesPlayer> predicate, List<ShopDisplay> success,
-                List<ShopDisplay> failure, ZombiesPlayer zombiesPlayer) {
+            List<ShopDisplay> failure, ZombiesPlayer zombiesPlayer) {
             this.predicate = predicate;
             this.success = success;
             this.failure = failure;

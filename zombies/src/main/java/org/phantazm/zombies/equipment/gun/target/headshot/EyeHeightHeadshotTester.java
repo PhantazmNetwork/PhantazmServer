@@ -23,6 +23,6 @@ public class EyeHeightHeadshotTester implements HeadshotTester {
     public boolean isHeadshot(@NotNull Entity shooter, @NotNull Entity entity, @NotNull Point intersection) {
         double eyeHeight = entity.getPosition().y() + entity.getEyeHeight();
         return intersection.y() >= eyeHeight ||
-                (eyeHeight - intersection.y()) <= (entity.getBoundingBox().height()) - entity.getEyeHeight();
+            (eyeHeight - intersection.y()) <= (entity.getBoundingBox().height()) - entity.getEyeHeight();
     }
 }

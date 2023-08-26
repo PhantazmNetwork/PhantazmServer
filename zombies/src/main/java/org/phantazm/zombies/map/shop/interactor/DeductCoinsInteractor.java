@@ -22,13 +22,14 @@ public class DeductCoinsInteractor extends InteractorBase<DeductCoinsInteractor.
         PlayerCoins coins = interaction.player().module().getCoins();
 
         TransactionResult result = coins.runTransaction(new Transaction(
-                interaction.player().module().compositeTransactionModifiers().modifiers(data.modifierType),
-                -data.cost));
+            interaction.player().module().compositeTransactionModifiers().modifiers(data.modifierType),
+            -data.cost));
         coins.applyTransaction(result);
         return true;
     }
 
     @DataObject
-    public record Data(int cost, @NotNull Key modifierType) {
+    public record Data(int cost,
+        @NotNull Key modifierType) {
     }
 }

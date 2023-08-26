@@ -20,8 +20,8 @@ public class KnockedPlayerState implements ZombiesPlayerState {
     private final Collection<Activable> activables;
 
     public KnockedPlayerState(@NotNull ReviveHandler reviveHandler, @NotNull Collection<Activable> activables) {
-        this.reviveHandler = Objects.requireNonNull(reviveHandler, "reviveHandler");
-        this.activables = Objects.requireNonNull(activables, "activables");
+        this.reviveHandler = Objects.requireNonNull(reviveHandler);
+        this.activables = Objects.requireNonNull(activables);
     }
 
     public @NotNull ReviveHandler getReviveHandler() {

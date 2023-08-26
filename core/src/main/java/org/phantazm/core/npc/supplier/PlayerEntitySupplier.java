@@ -30,14 +30,16 @@ public class PlayerEntitySupplier implements Supplier<Entity> {
     public Entity get() {
         if (data.skinUUID != null) {
             return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), data.playerName,
-                    PlayerSkin.fromUuid(data.skinUUID.replace("-", "")));
+                PlayerSkin.fromUuid(data.skinUUID.replace("-", "")));
         }
 
         return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), data.playerName, data.playerSkin);
     }
 
     @DataObject
-    public record Data(@NotNull String playerName, @Nullable String skinUUID, @Nullable PlayerSkin playerSkin) {
+    public record Data(@NotNull String playerName,
+        @Nullable String skinUUID,
+        @Nullable PlayerSkin playerSkin) {
         @Default("playerName")
         public static ConfigElement defaultPlayerName() {
             return ConfigPrimitive.of("");

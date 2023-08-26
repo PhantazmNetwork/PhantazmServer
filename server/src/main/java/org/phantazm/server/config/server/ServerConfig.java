@@ -10,7 +10,8 @@ import java.util.Objects;
  * @param serverInfoConfig Config for the server's setup
  * @param pingListConfig   Config for the server's ping list
  */
-public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig, @NotNull PingListConfig pingListConfig) {
+public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig,
+    @NotNull PingListConfig pingListConfig) {
     /**
      * The default ServerConfig instance.
      */
@@ -23,8 +24,8 @@ public record ServerConfig(@NotNull ServerInfoConfig serverInfoConfig, @NotNull 
      * @param pingListConfig   Config for the server's ping list
      */
     public ServerConfig {
-        Objects.requireNonNull(serverInfoConfig, "serverInfoConfig");
-        Objects.requireNonNull(pingListConfig, "pingListConfig");
+        Objects.requireNonNull(serverInfoConfig);
+        Objects.requireNonNull(pingListConfig);
     }
 
 }

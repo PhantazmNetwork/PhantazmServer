@@ -4,7 +4,7 @@ import net.kyori.adventure.key.Key;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.phantazm.commons.Namespaces;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
@@ -20,7 +20,7 @@ public class BasicPlayerKillsTest {
     @BeforeEach
     public void setup() {
         ZombiesPlayerMapStats mapStats = BasicZombiesPlayerMapStats.createBasicStats(UUID.randomUUID(),
-                Key.key(Namespaces.PHANTAZM, "test_map"));
+            Key.key(Namespaces.PHANTAZM, "test_map"));
         kills = new BasicPlayerKills(mapStats);
     }
 
@@ -31,7 +31,7 @@ public class BasicPlayerKillsTest {
 
     @Test
     public void testKillsIncreaseAfterKill() {
-        PhantazmMob mob = mock(PhantazmMob.class);
+        Mob mob = mock(Mob.class);
 
         kills.onKill(mob);
 

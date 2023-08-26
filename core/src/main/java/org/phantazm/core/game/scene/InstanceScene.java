@@ -21,24 +21,23 @@ import java.util.concurrent.locks.StampedLock;
  * @param <TRequest>
  */
 public abstract class InstanceScene<TRequest extends SceneJoinRequest> implements Scene<TRequest> {
-    private final UUID uuid;
     protected final Instance instance;
     protected final SceneFallback fallback;
     protected final Point spawnPoint;
     protected final PlayerViewProvider playerViewProvider;
-
+    private final UUID uuid;
     private final Set<Player> ghosts;
     private final StampedLock ghostLock;
 
     protected volatile boolean shutdown = false;
 
     public InstanceScene(@NotNull UUID uuid, @NotNull Instance instance, @NotNull SceneFallback fallback,
-            @NotNull Point spawnPoint, @NotNull PlayerViewProvider playerViewProvider) {
-        this.uuid = Objects.requireNonNull(uuid, "uuid");
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.fallback = Objects.requireNonNull(fallback, "fallback");
-        this.spawnPoint = Objects.requireNonNull(spawnPoint, "spawnPoint");
-        this.playerViewProvider = Objects.requireNonNull(playerViewProvider, "playerViewProvider");
+        @NotNull Point spawnPoint, @NotNull PlayerViewProvider playerViewProvider) {
+        this.uuid = Objects.requireNonNull(uuid);
+        this.instance = Objects.requireNonNull(instance);
+        this.fallback = Objects.requireNonNull(fallback);
+        this.spawnPoint = Objects.requireNonNull(spawnPoint);
+        this.playerViewProvider = Objects.requireNonNull(playerViewProvider);
         this.ghosts = Collections.newSetFromMap(new WeakHashMap<>());
         this.ghostLock = new StampedLock();
     }
@@ -87,8 +86,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
             }
 
             CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
-        }
-        finally {
+        } finally {
             MinecraftServer.getInstanceManager().forceUnregisterInstance(instance);
         }
     }
@@ -115,14 +113,13 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         try {
             ghosts.add(player);
             ghosts.removeIf(this::invalidGhost);
-        }
-        finally {
+        } finally {
             ghostLock.unlockWrite(writeStamp);
         }
 
         player.setInstanceAddCallback(
-                () -> Utils.handleInstanceTransfer(oldInstance, instance, player, newInstancePlayer -> true,
-                        this::hasGhost));
+            () -> Utils.handleInstanceTransfer(oldInstance, instance, player, newInstancePlayer -> true,
+                this::hasGhost));
         player.setGameMode(GameMode.SPECTATOR);
         player.setInstance(instance, spawnPoint);
         player.getInventory().clear();
@@ -149,8 +146,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
             if (!ghosts.contains(player)) {
                 return false;
             }
-        }
-        finally {
+        } finally {
             ghostLock.unlockRead(readStamp);
         }
 
@@ -170,8 +166,7 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
         long writeStamp = ghostLock.writeLock();
         try {
             ghosts.removeIf(this::invalidGhost);
-        }
-        finally {
+        } finally {
             ghostLock.unlockWrite(writeStamp);
         }
     }

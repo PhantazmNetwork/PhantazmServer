@@ -21,7 +21,7 @@ public class LobbyRouterIntegrationTest {
     public void testJoinRejectionWhenNotJoinable(Env env) {
         String lobbyName = "main";
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> sceneProviders =
-                Collections.singletonMap(lobbyName, (SceneProvider<Lobby, LobbyJoinRequest>)mock(SceneProvider.class));
+            Collections.singletonMap(lobbyName, (SceneProvider<Lobby, LobbyJoinRequest>) mock(SceneProvider.class));
         SceneRouter<Lobby, LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
         router.setJoinable(false);
@@ -35,7 +35,7 @@ public class LobbyRouterIntegrationTest {
     public void testJoinRejectionWhenShutdown(Env env) {
         String lobbyName = "main";
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> sceneProviders =
-                Collections.singletonMap(lobbyName, (SceneProvider<Lobby, LobbyJoinRequest>)mock(SceneProvider.class));
+            Collections.singletonMap(lobbyName, (SceneProvider<Lobby, LobbyJoinRequest>) mock(SceneProvider.class));
         SceneRouter<Lobby, LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
         router.shutdown();
@@ -49,7 +49,7 @@ public class LobbyRouterIntegrationTest {
     public void testJoinRequestWithNoMatchingSceneProvider(Env env) {
         String lobbyName = "main";
         Map<String, SceneProvider<Lobby, LobbyJoinRequest>> sceneProviders =
-                Collections.singletonMap(lobbyName, (SceneProvider<Lobby, LobbyJoinRequest>)mock(SceneProvider.class));
+            Collections.singletonMap(lobbyName, (SceneProvider<Lobby, LobbyJoinRequest>) mock(SceneProvider.class));
         SceneRouter<Lobby, LobbyRouteRequest> router = new LobbyRouter(sceneProviders);
 
         LobbyRouteRequest request = new LobbyRouteRequest("notMain", new BasicLobbyJoinRequest(List.of()));

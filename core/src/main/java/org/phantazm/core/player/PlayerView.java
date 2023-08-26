@@ -12,8 +12,8 @@ import java.util.concurrent.CompletableFuture;
  * Represents a view of a player that may be offline. Provides their UUID as well as a means to access the
  * {@link Player} instance associated with said UUID.
  *
- * @implSpec Implementations should anticipate many calls to {@code getPlayer}, and are encouraged to perform caching
- * if necessary to improve performance. However, since PlayerView instances are intended for long-term storage in fields
+ * @implSpec Implementations should anticipate many calls to {@code getPlayer}, and are encouraged to perform caching if
+ * necessary to improve performance. However, since PlayerView instances are intended for long-term storage in fields
  * and other places where they may become out-of-date, it is important to avoid keeping strong references to any cached
  * Player objects within the PlayerView implementation itself.
  * @see BasicPlayerView

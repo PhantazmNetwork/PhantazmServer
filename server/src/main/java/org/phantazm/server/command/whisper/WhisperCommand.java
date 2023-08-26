@@ -16,9 +16,9 @@ import java.util.Objects;
 public class WhisperCommand {
 
     public static @NotNull Command whisperCommand(@NotNull ConnectionManager connectionManager,
-            @NotNull WhisperManager whisperManager) {
-        Objects.requireNonNull(connectionManager, "connectionManager");
-        Objects.requireNonNull(whisperManager, "whisperManager");
+        @NotNull WhisperManager whisperManager) {
+        Objects.requireNonNull(connectionManager);
+        Objects.requireNonNull(whisperManager);
 
         Command command = new Command("whisper", "w", "msg");
         Argument<String> target = ArgumentType.Word("target");
@@ -45,7 +45,7 @@ public class WhisperCommand {
 
             if (!(sender instanceof Player || sender instanceof ConsoleSender)) {
                 sender.sendMessage(Component.text("You have to be a player or the console to use that command!",
-                        NamedTextColor.RED));
+                    NamedTextColor.RED));
                 return false;
             }
 

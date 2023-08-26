@@ -11,8 +11,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
 /**
  * Contains static {@link ConfigProcessor} implementations used to serialize/deserialize certain common objects.
  */
@@ -25,12 +23,10 @@ public final class ConfigProcessors {
                 String string = ConfigProcessor.STRING.dataFromElement(element);
                 if (string.contains(":")) {
                     return Key.key(string);
-                }
-                else {
+                } else {
                     return Key.key(Namespaces.PHANTAZM, string);
                 }
-            }
-            catch (InvalidKeyException keyException) {
+            } catch (InvalidKeyException keyException) {
                 throw new ConfigProcessException(keyException);
             }
         }
@@ -55,34 +51,8 @@ public final class ConfigProcessors {
         }
     };
 
-    private static final ConfigProcessor<UUID> uuid = new ConfigProcessor<>() {
-        @Override
-        public UUID dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-            try {
-                return UUID.fromString(ConfigProcessor.STRING.dataFromElement(element));
-            }
-            catch (IllegalArgumentException e) {
-                throw new ConfigProcessException("invalid UUID string", e);
-            }
-        }
-
-        @Override
-        public @NotNull ConfigElement elementFromData(UUID uuid) {
-            return ConfigPrimitive.of(uuid.toString());
-        }
-    };
-
     private ConfigProcessors() {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns the {@link ConfigProcessor} implementation used to serialize/deserialize {@link UUID} objects.
-     *
-     * @return the ConfigProcessor used to serialize/deserialize UUID instances
-     */
-    public static @NotNull ConfigProcessor<UUID> uuid() {
-        return uuid;
     }
 
     /**

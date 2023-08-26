@@ -44,18 +44,18 @@ public class BasicAliveStateActivable implements Activable {
     private int lastTickHp = -1;
 
     public BasicAliveStateActivable(@NotNull AlivePlayerStateContext context, @NotNull Instance instance,
-            @NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
-            @NotNull ZombiesPlayerMeta meta, @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar,
-            @NotNull TabList tabList, @NotNull BelowNameTag belowNameTag) {
-        this.context = Objects.requireNonNull(context, "context");
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.meta = Objects.requireNonNull(meta, "meta");
-        this.settings = Objects.requireNonNull(settings, "settings");
-        this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
-        this.tabList = Objects.requireNonNull(tabList, "tabList");
-        this.belowNameTag = Objects.requireNonNull(belowNameTag, "belowNameTag");
+        @NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
+        @NotNull ZombiesPlayerMeta meta, @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar,
+        @NotNull TabList tabList, @NotNull BelowNameTag belowNameTag) {
+        this.context = Objects.requireNonNull(context);
+        this.instance = Objects.requireNonNull(instance);
+        this.accessRegistry = Objects.requireNonNull(accessRegistry);
+        this.playerView = Objects.requireNonNull(playerView);
+        this.meta = Objects.requireNonNull(meta);
+        this.settings = Objects.requireNonNull(settings);
+        this.sidebar = Objects.requireNonNull(sidebar);
+        this.tabList = Objects.requireNonNull(tabList);
+        this.belowNameTag = Objects.requireNonNull(belowNameTag);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class BasicAliveStateActivable implements Activable {
 
                 if (meta.isInGame()) {
                     playerView.getPlayer().ifPresent(player -> player.sendMessage(
-                            miniMessage.deserialize(settings.reviveMessageToRevivedFormat(), tagResolvers)));
+                        miniMessage.deserialize(settings.reviveMessageToRevivedFormat(), tagResolvers)));
                 }
 
                 Set<Player> players = new HashSet<>(instance.getPlayers());
@@ -92,14 +92,13 @@ public class BasicAliveStateActivable implements Activable {
                 Audience filteredAudience = PacketGroupingAudience.of(players);
 
                 filteredAudience.sendMessage(
-                        miniMessage.deserialize(settings.reviveMessageToOthersFormat(), tagResolvers));
+                    miniMessage.deserialize(settings.reviveMessageToOthersFormat(), tagResolvers));
             });
 
             Point point = context.reviveLocation();
             if (point != null) {
                 instance.playSound(settings.reviveSound(), point.x(), point.y(), point.z());
-            }
-            else {
+            } else {
                 playerView.getPlayer().ifPresent(player -> {
                     Pos location = player.getPosition();
                     instance.playSound(settings.reviveSound(), location.x(), location.y(), location.z());
@@ -114,7 +113,7 @@ public class BasicAliveStateActivable implements Activable {
     public void tick(long time) {
         ++healTicks;
         playerView.getPlayer().ifPresent(player -> {
-            int playerHealTicks = (int)player.getAttributeValue(Attributes.HEAL_TICKS);
+            int playerHealTicks = (int) player.getAttributeValue(Attributes.HEAL_TICKS);
             if (playerHealTicks >= 0) {
                 if (healTicks >= playerHealTicks) {
                     player.setHealth(player.getHealth() + 1F);
@@ -122,7 +121,7 @@ public class BasicAliveStateActivable implements Activable {
                 }
             }
 
-            int currentHp = (int)Math.floor(player.getHealth());
+            int currentHp = (int) Math.floor(player.getHealth());
             if (currentHp != lastTickHp) {
                 belowNameTag.updateScore(player, currentHp);
                 lastTickHp = currentHp;

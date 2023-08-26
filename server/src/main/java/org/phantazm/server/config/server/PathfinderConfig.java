@@ -5,13 +5,14 @@ import java.util.concurrent.TimeUnit;
 /**
  * Config for pathfinding.
  */
-public record PathfinderConfig(int threads,
-                               boolean asyncMode,
-                               int corePoolSize,
-                               int maximumPoolSize,
-                               int minimumRunnable,
-                               long keepAliveTime,
-                               TimeUnit keepAliveTimeUnit) {
+public record PathfinderConfig(
+    int threads,
+    boolean asyncMode,
+    int corePoolSize,
+    int maximumPoolSize,
+    int minimumRunnable,
+    long keepAliveTime,
+    TimeUnit keepAliveTimeUnit) {
     /**
      * The default PathfinderConfig.
      */

@@ -9,7 +9,7 @@ public class StaticInventoryObject implements InventoryObject {
     private final ItemStack itemStack;
 
     public StaticInventoryObject(@NotNull ItemStack itemStack) {
-        this.itemStack = Objects.requireNonNull(itemStack, "itemStack");
+        this.itemStack = Objects.requireNonNull(itemStack);
     }
 
     @Override
