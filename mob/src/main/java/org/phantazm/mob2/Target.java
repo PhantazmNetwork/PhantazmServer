@@ -18,7 +18,7 @@ import java.util.function.Consumer;
  */
 public sealed interface Target
     permits Target.NoTarget, Target.SinglePointTarget, Target.MultiPointTarget, Target.SingleEntityTarget,
-                Target.MultiEntityTarget {
+    Target.MultiEntityTarget {
     Target NONE = new NoTarget();
 
     static @NotNull Target ofNullable(@Nullable Entity entity) {
@@ -122,8 +122,10 @@ public sealed interface Target
     Optional<? extends Entity> target();
 
     default <T extends Entity> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
-        Collection<? extends Entity> targets = targets();
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(consumer);
 
+        Collection<? extends Entity> targets = targets();
         for (Entity targetEntity : targets) {
             if (type.isAssignableFrom(targetEntity.getClass())) {
                 consumer.accept(type.cast(targetEntity));
@@ -132,6 +134,8 @@ public sealed interface Target
     }
 
     default <T extends Entity> @NotNull Optional<T> forType(@NotNull Class<T> type) {
+        Objects.requireNonNull(type);
+
         Optional<? extends Entity> target = target();
         if (target.isEmpty()) {
             return Optional.empty();
