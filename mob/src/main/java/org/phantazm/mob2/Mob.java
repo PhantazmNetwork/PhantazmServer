@@ -223,7 +223,10 @@ public class Mob extends ProximaEntity {
     public boolean damage(@NotNull Damage damage, boolean bypassArmor) {
         boolean result = super.damage(damage, bypassArmor);
 
-        useIfPresent(Trigger.DAMAGED);
+        if (canUseSkills()) {
+            useIfPresent(Trigger.DAMAGED);
+        }
+
         return result;
     }
 
@@ -234,7 +237,9 @@ public class Mob extends ProximaEntity {
             lastInteractingPlayer = new WeakReference<>(player);
         }
 
-        useIfPresent(Trigger.INTERACT);
+        if (canUseSkills()) {
+            useIfPresent(Trigger.INTERACT);
+        }
     }
 
     @Override
@@ -244,23 +249,30 @@ public class Mob extends ProximaEntity {
             lastHitEntity = new WeakReference<>(target);
         }
 
-        useIfPresent(Trigger.ATTACK);
+        if (canUseSkills()) {
+            useIfPresent(Trigger.ATTACK);
+        }
     }
 
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
         return super.setInstance(instance, spawnPosition).thenRun(() -> {
-            getAcquirable().sync(ignored -> useIfPresent(Trigger.SPAWN));
+            if (canUseSkills()) {
+                getAcquirable().sync(ignored -> useIfPresent(Trigger.SPAWN));
+            }
         });
     }
 
     @Override
     public void kill() {
-        if (isDead || !isActive() || isRemoved()) {
+        if (isDead()) {
             return;
         }
 
-        useIfPresent(Trigger.DEATH);
+        if (canUseSkills()) {
+            useIfPresent(Trigger.DEATH);
+        }
+
         super.kill();
     }
 
@@ -278,6 +290,10 @@ public class Mob extends ProximaEntity {
 
     @Override
     public void update(long time) {
+        if (!canUseSkills()) {
+            return;
+        }
+
         super.update(time);
 
         for (Skill skill : tickableSkills) {
@@ -287,6 +303,16 @@ public class Mob extends ProximaEntity {
         for (Skill skill : useOnTick) {
             skill.use();
         }
+    }
+
+    /**
+     * Determines if this entity can use skills. Equivalent to {@code !isDead() && !isRemoved()}. This is also queried
+     * to determine if the entity's tickable skills should be ticked.
+     *
+     * @return true if this entity can use skills; false otherwise.
+     */
+    public boolean canUseSkills() {
+        return !isDead && !isRemoved();
     }
 
     private TeamsPacket createTeamPacket(TeamSettings newSettings, boolean update) {
