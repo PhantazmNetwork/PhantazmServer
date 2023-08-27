@@ -45,7 +45,7 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
             if (latestInviteTimes.getLong(invitation.invitee().getUUID()) == invitation.expirationTime()) {
                 latestInviteTimes.removeLong(invitation.invitee().getUUID());
             }
-            notification.notifyExpiry(invitation.invitee(), invitation.invitee());
+            notification.notifyExpiry(invitation.inviter(), invitation.invitee());
 
             invitations.remove();
             invitation = invitations.peek();
