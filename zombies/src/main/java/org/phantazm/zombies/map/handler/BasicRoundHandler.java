@@ -52,7 +52,7 @@ public class BasicRoundHandler implements RoundHandler {
 
         if (++roundIndex < rounds.size()) {
             currentRound = rounds.get(roundIndex);
-            currentRound.startRound(time);
+            currentRound.startRound();
 
             this.currentRound = currentRound;
         } else {
@@ -81,7 +81,7 @@ public class BasicRoundHandler implements RoundHandler {
 
         this.roundIndex = roundIndex;
         currentRound = rounds.get(roundIndex);
-        currentRound.startRound(System.currentTimeMillis());
+        currentRound.startRound();
     }
 
     @Override

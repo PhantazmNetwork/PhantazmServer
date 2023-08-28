@@ -307,10 +307,10 @@ public class Mob extends ProximaEntity {
             return;
         }
 
-        super.remove();
         for (Skill skill : allSkills) {
             skill.end();
         }
+        super.remove();
     }
 
     @Override

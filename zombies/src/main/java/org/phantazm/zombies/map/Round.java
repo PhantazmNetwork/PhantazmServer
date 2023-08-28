@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Round implements Tickable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Round.class);
@@ -32,7 +33,7 @@ public class Round implements Tickable {
     private long waveTicks = 0;
     private Wave currentWave;
     private int waveIndex;
-    private int totalMobCount;
+    private final AtomicInteger totalMobCount;
 
     /**
      * Constructs a new instance of this class.
@@ -40,8 +41,8 @@ public class Round implements Tickable {
      * @param roundInfo the backing data object
      */
     public Round(@NotNull RoundInfo roundInfo, @NotNull List<Wave> waves, @NotNull List<Action<Round>> startActions,
-            @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
-            @NotNull List<Spawnpoint> spawnpoints, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
+        @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
+        @NotNull List<Spawnpoint> spawnpoints, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
         List<WaveInfo> waveInfo = roundInfo.waves();
         if (waveInfo.isEmpty()) {
             LOGGER.warn("Round {} has no waves", roundInfo);
@@ -56,6 +57,8 @@ public class Round implements Tickable {
         this.spawnedMobs = new ConcurrentHashMap<>();
         this.spawnpoints = Objects.requireNonNull(spawnpoints);
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
+
+        this.totalMobCount = new AtomicInteger();
     }
 
     public @NotNull RoundInfo getRoundInfo() {
@@ -64,13 +67,13 @@ public class Round implements Tickable {
 
     public void removeMob(@NotNull Mob mob) {
         if (spawnedMobs.remove(mob.getUuid()) != null) {
-            totalMobCount--;
+            totalMobCount.decrementAndGet();
         }
     }
 
     public void addMob(@NotNull Mob mob) {
         if (spawnedMobs.put(mob.getUuid(), mob) == null) {
-            totalMobCount++;
+            totalMobCount.incrementAndGet();
         }
     }
 
@@ -79,7 +82,7 @@ public class Round implements Tickable {
     }
 
     public int getTotalMobCount() {
-        return totalMobCount;
+        return totalMobCount.get();
     }
 
     public @Unmodifiable @NotNull List<Wave> getWaves() {
@@ -90,7 +93,7 @@ public class Round implements Tickable {
         return isActive;
     }
 
-    public void startRound(long time) {
+    public void startRound() {
         if (isActive) {
             return;
         }
@@ -118,12 +121,11 @@ public class Round implements Tickable {
             currentWave = waves.get(waveIndex = 0);
             waveTicks = 0;
 
-            totalMobCount = 0;
+            totalMobCount.set(0);
             for (Wave wave : waves) {
-                totalMobCount += wave.mobCount();
+                totalMobCount.updateAndGet(old -> old + wave.mobCount());
             }
-        }
-        else {
+        } else {
             endRound();
         }
     }
@@ -140,7 +142,7 @@ public class Round implements Tickable {
 
         currentWave = null;
         waveTicks = 0;
-        totalMobCount = 0;
+        totalMobCount.set(0);
 
         Iterator<Mob> spawnedIterator = spawnedMobs.values().iterator();
         while (spawnedIterator.hasNext()) {
@@ -148,7 +150,7 @@ public class Round implements Tickable {
             spawnedIterator.remove();
 
             mob.getAcquirable().sync(self -> {
-                ((LivingEntity)self).kill();
+                ((LivingEntity) self).kill();
             });
         }
     }
@@ -162,7 +164,7 @@ public class Round implements Tickable {
     }
 
     private @NotNull List<Mob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo, @NotNull SpawnDistributor spawnDistributor,
-            boolean isWave) {
+        boolean isWave) {
         if (!isActive) {
             throw new IllegalStateException("Round must be active to spawn mobs");
         }
@@ -175,10 +177,9 @@ public class Round implements Tickable {
         if (isWave) {
             //adjust for mobs that may have failed to spawn
             //only reached when calling internally
-            totalMobCount -= currentWave.mobCount() - spawns.size();
-        }
-        else {
-            totalMobCount += spawns.size();
+            totalMobCount.updateAndGet(old -> old - (currentWave.mobCount() - spawns.size()));
+        } else {
+            totalMobCount.updateAndGet(old -> old + spawns.size());
         }
 
         return spawns;
@@ -186,24 +187,26 @@ public class Round implements Tickable {
 
     @Override
     public void tick(long time) {
-        if (isActive) {
-            if (totalMobCount == 0) {
-                endRound();
+        if (!isActive) {
+            return;
+        }
+
+        if (totalMobCount.get() == 0) {
+            endRound();
+            return;
+        }
+
+        ++waveTicks;
+        if (waveIndex < waves.size() && waveTicks > currentWave.getWaveInfo().delayTicks()) {
+            List<Mob> mobs = spawnMobs(currentWave.getWaveInfo().spawns(), spawnDistributor, true);
+            currentWave.onSpawn(mobs);
+
+            waveTicks = 0;
+            if (++waveIndex >= waves.size()) {
                 return;
             }
 
-            ++waveTicks;
-            if (waveIndex < waves.size() && waveTicks > currentWave.getWaveInfo().delayTicks()) {
-                List<Mob> mobs = spawnMobs(currentWave.getWaveInfo().spawns(), spawnDistributor, true);
-                currentWave.onSpawn(mobs);
-
-                waveTicks = 0;
-                if (++waveIndex >= waves.size()) {
-                    return;
-                }
-
-                currentWave = waves.get(waveIndex);
-            }
+            currentWave = waves.get(waveIndex);
         }
     }
 }
