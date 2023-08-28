@@ -97,6 +97,8 @@ public class DatabaseLoginValidator implements LoginValidator {
 
     @Override
     public @NotNull CompletableFuture<LoginEntry> login(@NotNull UUID uuid) {
+        Objects.requireNonNull(uuid);
+
         LoginEntry entry = banCache.getIfPresent(uuid);
         if (entry != null) {
             if (entry.shouldUnban()) {
@@ -112,6 +114,8 @@ public class DatabaseLoginValidator implements LoginValidator {
 
     @Override
     public @NotNull CompletableFuture<BanHistory> history(@NotNull UUID uuid) {
+        Objects.requireNonNull(uuid);
+
         BanHistory history = banHistoryCache.getIfPresent(uuid);
         if (history != null) {
             return CompletableFuture.completedFuture(history);
@@ -132,6 +136,8 @@ public class DatabaseLoginValidator implements LoginValidator {
 
     @Override
     public void clearHistory(@NotNull UUID uuid) {
+        Objects.requireNonNull(uuid);
+
         executor.execute(() -> {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
@@ -146,6 +152,9 @@ public class DatabaseLoginValidator implements LoginValidator {
 
     @Override
     public void ban(@NotNull UUID uuid, @NotNull Component reason, long unbanDate) {
+        Objects.requireNonNull(uuid);
+        Objects.requireNonNull(reason);
+
         long banDate = System.currentTimeMillis() / 1000L;
         banCache.put(uuid, new LoginEntry(false, reason, banDate, unbanDate));
 
@@ -187,6 +196,8 @@ public class DatabaseLoginValidator implements LoginValidator {
 
     @Override
     public boolean isBanned(@NotNull UUID uuid) {
+        Objects.requireNonNull(uuid);
+
         LoginEntry entry = entryFor(uuid);
         if (entry.shouldUnban()) {
             pardon0(uuid);
@@ -215,6 +226,8 @@ public class DatabaseLoginValidator implements LoginValidator {
 
     @Override
     public void addWhitelist(@NotNull UUID uuid) {
+        Objects.requireNonNull(uuid);
+
         whitelistCache.put(uuid, true);
 
         executor.execute(() -> {
@@ -229,6 +242,8 @@ public class DatabaseLoginValidator implements LoginValidator {
 
     @Override
     public boolean isWhitelisted(@NotNull UUID uuid) {
+        Objects.requireNonNull(uuid);
+
         return whitelistCache.get(uuid, key -> {
             return read(() -> {
                 try (Connection connection = dataSource.getConnection()) {
@@ -241,6 +256,8 @@ public class DatabaseLoginValidator implements LoginValidator {
 
     @Override
     public void removeWhitelist(@NotNull UUID uuid) {
+        Objects.requireNonNull(uuid);
+
         executor.execute(() -> {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
