@@ -36,6 +36,8 @@ public final class ServerCommandFeature {
         CommandManager manager = MinecraftServer.getCommandManager();
         manager.register(new StopCommand());
         manager.register(new BanCommand(IdentitySource.MOJANG, validator));
+        manager.register(new BanHistoryCommand(IdentitySource.MOJANG, validator));
+        manager.register(new BanHistoryClearCommand(IdentitySource.MOJANG, validator));
         manager.register(new PardonCommand(IdentitySource.MOJANG, validator));
         manager.register(new WhitelistCommand(IdentitySource.MOJANG, validator, whitelist));
         manager.register(new PermissionCommand(permissionHandler, IdentitySource.MOJANG));

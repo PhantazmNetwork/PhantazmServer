@@ -4,10 +4,10 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.steanky.toolkit.function.ThrowingRunnable;
 import com.github.steanky.toolkit.function.ThrowingSupplier;
-import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
+import org.jooq.Field;
 import org.jooq.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
@@ -25,16 +26,17 @@ import static org.jooq.impl.DSL.*;
 
 public class DatabaseLoginValidator implements LoginValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseLoginValidator.class);
-    private static final BooleanObjectPair<Component> UNBANNED = BooleanObjectPair.of(true, null);
 
-    private final Cache<UUID, BooleanObjectPair<Component>> banCache;
+    private final Cache<UUID, LoginEntry> banCache;
     private final Cache<UUID, Boolean> whitelistCache;
+    private final Cache<UUID, BanHistory> banHistoryCache;
     private final DataSource dataSource;
     private final Executor executor;
 
     public DatabaseLoginValidator(@NotNull DataSource dataSource, @NotNull Executor executor) {
         this.banCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.whitelistCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
+        this.banHistoryCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.dataSource = Objects.requireNonNull(dataSource);
         this.executor = Objects.requireNonNull(executor);
     }
@@ -58,31 +60,94 @@ public class DatabaseLoginValidator implements LoginValidator {
         return defaultValue;
     }
 
-    private static BooleanObjectPair<Component> fromRecord(Record result) {
+    private static LoginEntry loginEntryFromRecord(Record result) {
         if (result == null) {
             return UNBANNED;
         }
 
         String banReason = result.get("ban_reason", String.class);
-        return BooleanObjectPair.of(false,
-            banReason == null ? Component.empty() : MiniMessage.miniMessage().deserialize(banReason));
+        long banDate = result.get("ban_date", long.class);
+        Long unbanDate = result.get("unban_date", Long.class);
+
+        return new LoginEntry(false, banReason == null ? Component.empty() : MiniMessage.miniMessage()
+            .deserialize(banReason), banDate, unbanDate == null ? -1L : unbanDate);
     }
 
-    @Override
-    public @NotNull BooleanObjectPair<Component> validateLogin(@NotNull UUID uuid) {
+    private static BanHistory banHistoryFromRecord(Record result) {
+        if (result == null) {
+            return NEVER_BANNED;
+        }
+
+        long lastBanDate = result.get("last_ban_date", long.class);
+        int banCount = result.get("ban_count", int.class);
+
+        return new BanHistory(lastBanDate, banCount);
+    }
+
+    private LoginEntry entryFor(UUID uuid) {
         return banCache.get(uuid, key -> {
             return read(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     return using(connection).selectFrom(table("player_bans")).where(field("player_uuid").eq(key))
                         .fetchOne();
                 }
-            }, DatabaseLoginValidator::fromRecord, UNBANNED);
+            }, DatabaseLoginValidator::loginEntryFromRecord, UNBANNED);
         });
     }
 
     @Override
-    public void ban(@NotNull UUID uuid, @NotNull Component reason) {
-        banCache.put(uuid, BooleanObjectPair.of(false, reason));
+    public @NotNull CompletableFuture<LoginEntry> login(@NotNull UUID uuid) {
+        LoginEntry entry = banCache.getIfPresent(uuid);
+        if (entry != null) {
+            if (entry.shouldUnban()) {
+                pardon0(uuid);
+                return CompletableFuture.completedFuture(UNBANNED);
+            }
+
+            return CompletableFuture.completedFuture(entry);
+        }
+
+        return CompletableFuture.supplyAsync(() -> entryFor(uuid), executor);
+    }
+
+    @Override
+    public @NotNull CompletableFuture<BanHistory> history(@NotNull UUID uuid) {
+        BanHistory history = banHistoryCache.getIfPresent(uuid);
+        if (history != null) {
+            return CompletableFuture.completedFuture(history);
+        }
+
+        return CompletableFuture.supplyAsync(() -> {
+            return banHistoryCache.get(uuid, key -> {
+                return read(() -> {
+                    try (Connection connection = dataSource.getConnection()) {
+                        return using(connection).selectFrom(table("player_ban_history"))
+                            .where(field("player_uuid").eq(key))
+                            .fetchOne();
+                    }
+                }, DatabaseLoginValidator::banHistoryFromRecord, NEVER_BANNED);
+            });
+        }, executor);
+    }
+
+    @Override
+    public void clearHistory(@NotNull UUID uuid) {
+        executor.execute(() -> {
+            write(() -> {
+                try (Connection connection = dataSource.getConnection()) {
+                    using(connection).deleteFrom(table("player_ban_history"))
+                        .where(field("player_uuid").eq(uuid)).execute();
+                }
+            });
+
+            banHistoryCache.invalidate(uuid);
+        });
+    }
+
+    @Override
+    public void ban(@NotNull UUID uuid, @NotNull Component reason, long unbanDate) {
+        long banDate = System.currentTimeMillis() / 1000L;
+        banCache.put(uuid, new LoginEntry(false, reason, banDate, unbanDate));
 
         executor.execute(() -> {
             String banReason = MiniMessage.miniMessage().serialize(reason);
@@ -93,9 +158,28 @@ public class DatabaseLoginValidator implements LoginValidator {
             String finalBanReason = banReason;
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
-                    using(connection).insertInto(table("player_bans"), field("player_uuid"), field("ban_reason"))
-                        .values(uuid, finalBanReason).onDuplicateKeyUpdate()
-                        .set(field("ban_reason"), finalBanReason).execute();
+                    using(connection).insertInto(table("player_bans"),
+                            field("player_uuid"),
+                            field("ban_reason"),
+                            field("ban_date"),
+                            field("unban_date"))
+                        .values(uuid, finalBanReason, banDate, unbanDate < 0 ? null : unbanDate).onDuplicateKeyUpdate()
+                        .set(field("ban_reason"), finalBanReason)
+                        .set(field("ban_date"), banDate)
+                        .set(field("unban_date"), unbanDate < 0 ? null : unbanDate)
+                        .execute();
+                }
+
+                try (Connection connection = dataSource.getConnection()) {
+                    using(connection).insertInto(table("player_ban_history"),
+                            field("player_uuid"),
+                            field("last_ban_date"),
+                            field("ban_count"))
+                        .values(uuid, banDate, 1)
+                        .onDuplicateKeyUpdate()
+                        .set(field("last_ban_date"), banDate)
+                        .set(field("ban_count"), (Field<?>) field("ban_count").plus(1))
+                        .execute();
                 }
             });
         });
@@ -103,29 +187,30 @@ public class DatabaseLoginValidator implements LoginValidator {
 
     @Override
     public boolean isBanned(@NotNull UUID uuid) {
-        BooleanObjectPair<Component> banned = banCache.get(uuid, key -> {
-            return read(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    return using(connection).selectFrom(table("player_bans")).where(field("player_uuid").eq(key))
-                        .fetchOne();
-                }
-            }, DatabaseLoginValidator::fromRecord, UNBANNED);
-        });
+        LoginEntry entry = entryFor(uuid);
+        if (entry.shouldUnban()) {
+            pardon0(uuid);
+            return false;
+        }
 
-        return !banned.firstBoolean();
+        return !entry.canJoin();
     }
 
-    @Override
-    public void pardon(@NotNull UUID uuid) {
-        banCache.invalidate(uuid);
-
+    private void pardon0(UUID uuid) {
         executor.execute(() -> {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).deleteFrom(table("player_bans")).where(field("player_uuid").eq(uuid)).execute();
                 }
             });
+
+            banCache.invalidate(uuid);
         });
+    }
+
+    @Override
+    public void pardon(@NotNull UUID uuid) {
+        pardon0(uuid);
     }
 
     @Override
@@ -156,8 +241,6 @@ public class DatabaseLoginValidator implements LoginValidator {
 
     @Override
     public void removeWhitelist(@NotNull UUID uuid) {
-        whitelistCache.invalidate(uuid);
-
         executor.execute(() -> {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
@@ -165,6 +248,8 @@ public class DatabaseLoginValidator implements LoginValidator {
                         .execute();
                 }
             });
+
+            whitelistCache.invalidate(uuid);
         });
     }
 }
