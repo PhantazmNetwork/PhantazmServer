@@ -27,15 +27,15 @@ public class BanCommand extends PermissionLockedCommand {
 
         addSyntax((sender, context) -> {
             String name = context.get(PLAYER_ARGUMENT);
-            String dateFormat = context.get(DURATION);
+            String dateDuration = context.get(DURATION);
 
             long duration;
-            if (dateFormat.isEmpty()) {
+            if (dateDuration.isEmpty() || dateDuration.equalsIgnoreCase("forever")) {
                 duration = -1;
             } else {
-                long parsedDuration = TimeUtils.stringToSimpleDuration(dateFormat);
+                long parsedDuration = TimeUtils.stringToSimpleDuration(dateDuration);
                 if (parsedDuration == -1) {
-                    sender.sendMessage(Component.text("Invalid duration string " + dateFormat, NamedTextColor.RED));
+                    sender.sendMessage(Component.text("Invalid duration string " + dateDuration, NamedTextColor.RED));
                     return;
                 }
 
