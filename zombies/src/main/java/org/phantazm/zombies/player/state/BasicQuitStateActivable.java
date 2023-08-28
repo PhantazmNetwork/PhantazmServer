@@ -14,6 +14,7 @@ import org.phantazm.commons.Activable;
 import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.MapSettingsInfo;
 
 import java.util.Objects;
@@ -56,8 +57,9 @@ public class BasicQuitStateActivable implements Activable {
             player.resetTitle();
             player.sendActionBar(Component.empty());
             player.stopSound(SoundStop.all());
-            player.stateHolder().setStage(null);
+            player.stateHolder().removeStage(Stages.ZOMBIES_GAME);
             player.setLastDamageSource(null);
+            player.tagHandler().clearTags();
         });
         playerView.getDisplayName().thenAccept(displayName -> {
             TagResolver quitterPlaceholder = Placeholder.component("quitter", displayName);

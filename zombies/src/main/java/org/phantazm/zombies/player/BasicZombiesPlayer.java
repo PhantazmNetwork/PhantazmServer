@@ -8,7 +8,6 @@ import org.phantazm.commons.TickTaskScheduler;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.zombies.Attributes;
-import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
@@ -69,10 +68,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
             setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(false));
         }
         module.getStateSwitcher().end();
-        getPlayer().ifPresent(player -> {
-            player.tagHandler().clearTags();
-            player.stateHolder().removeStage(Stages.ZOMBIES_GAME);
-        });
     }
 
     private void inventoryTick(Player player, long time) {
