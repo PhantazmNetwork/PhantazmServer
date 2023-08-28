@@ -86,6 +86,10 @@ public class SpawnMobSkill implements SkillComponent {
 
             outer:
             for (int i = 0; i < data.spawnAmount; i++) {
+                if (!unlimited && spawnCount.get() >= data.maxSpawn) {
+                    return;
+                }
+
                 for (Point point : points) {
                     Mob mob = mobSpawner.spawn(data.identifier, instance, Pos.fromPoint(point), self -> {
                         if (unlimited) {
