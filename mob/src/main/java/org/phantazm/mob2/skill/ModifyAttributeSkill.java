@@ -88,7 +88,7 @@ public class ModifyAttributeSkill implements SkillComponent {
         }
 
         private void applyToEntity(LivingEntity entity) {
-            if (data.stage != null) {
+            if (data.stage != null && !(entity instanceof Mob mob && !mob.useStateHolder())) {
                 CancellableState<Entity> state = CancellableState.state(entity, start -> {
                     ((LivingEntity) start).getAttribute(attribute).addModifier(new AttributeModifier(uuid, uuidString,
                         data.amount, data.attributeOperation));
@@ -97,7 +97,6 @@ public class ModifyAttributeSkill implements SkillComponent {
                 });
 
                 entity.stateHolder().registerState(data.stage, state);
-
                 affectedEntities.add(Pair.of(entity, state));
                 return;
             }

@@ -32,7 +32,9 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
     public void preSetup(@NotNull Mob mob) {
         super.preSetup(mob);
 
-        mob.stateHolder().setStage(Stages.ZOMBIES_GAME);
+        if (mob.useStateHolder()) {
+            mob.stateHolder().setStage(Stages.ZOMBIES_GAME);
+        }
     }
 
     @Override
@@ -41,10 +43,10 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
 
         ZombiesScene scene = this.scene.get();
         boolean mobPlayerCollisions = scene.getMapSettingsInfo().mobPlayerCollisions();
-        if (mobPlayerCollisions) {
-            mob.getAcquirable().sync(self -> {
-                ((Mob) self).setCollisionRule(TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS);
-            });
-        }
+
+        mob.getAcquirable().sync(self -> {
+            ((Mob) self).setCollisionRule(mobPlayerCollisions ? TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS :
+                TeamsPacket.CollisionRule.NEVER);
+        });
     }
 }

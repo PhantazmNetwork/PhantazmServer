@@ -43,6 +43,8 @@ public class Mob extends ProximaEntity {
     private Reference<Entity> lastHitEntity;
     private Reference<Player> lastInteractingPlayer;
 
+    private boolean useStateHolder;
+
     private record TeamSettings(Component displayName,
         byte friendlyFlags,
         TeamsPacket.NameTagVisibility nameTagVisibility,
@@ -127,6 +129,27 @@ public class Mob extends ProximaEntity {
         for (Skill skill : skills) {
             addSkill0(skill);
         }
+    }
+
+    /**
+     * Sets whether this entity should use the state holder or not. May not have any impact if it is changed after the
+     * entity has been added to an instance.
+     *
+     * @param useStateHolder whether this entity should use the state holder
+     */
+    public void setUseStateHolder(boolean useStateHolder) {
+        this.useStateHolder = useStateHolder;
+    }
+
+    /**
+     * Whether it is necessary to use this object's state holder when modifying attributes or other persistent
+     * components of entity state. Defaults to {@code false}, can be changed using
+     * {@link Mob#setUseStateHolder(boolean)}.
+     *
+     * @return true if this entity uses the state holder
+     */
+    public boolean useStateHolder() {
+        return this.useStateHolder;
     }
 
     public void removeSkill(@NotNull Skill skill) {
@@ -257,9 +280,11 @@ public class Mob extends ProximaEntity {
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
         return super.setInstance(instance, spawnPosition).thenRun(() -> {
-            if (canUseSkills()) {
-                getAcquirable().sync(ignored -> useIfPresent(Trigger.SPAWN));
-            }
+            getAcquirable().sync(ignored -> {
+                if (canUseSkills()) {
+                    useIfPresent(Trigger.SPAWN);
+                }
+            });
         });
     }
 
