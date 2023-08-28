@@ -143,7 +143,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
         final long aliveTicks = entity.getAliveTicks();
         if (previousPos.samePoint(currentPos)) {
             Block block = instance.getBlock(previousPos);
-            return block.isSolid() && !block.compare(Block.BARRIER) &&
+            return aliveTicks > 1 && block.isSolid() && !block.compare(Block.BARRIER) &&
                 block.registry().collisionShape().intersectBox(
                     previousPos.sub(previousPos.blockX(), previousPos.blockY(), previousPos.blockZ()),
                     entity.getBoundingBox());
