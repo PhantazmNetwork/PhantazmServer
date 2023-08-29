@@ -85,7 +85,6 @@ public class ProjectileMovementGoal implements ProximaGoal {
             return;
         }
 
-        previousPos = entity.getPosition();
         Pos from = this.shooter.getPosition().add(0D, this.shooter.getEyeHeight(), 0D);
         double dx = to.x() - from.x();
         double dy = to.y() - from.y();
@@ -106,8 +105,9 @@ public class ProjectileMovementGoal implements ProximaGoal {
 
         final double mul = MinecraftServer.TICK_PER_SECOND * power;
         entity.setVelocity(new Vec(dx * mul, dy * mul, dz * mul));
-        entity.setView((float) Math.toDegrees(Math.atan2(dx, dz)),
-            (float) Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz))));
+        entity.lookAt(entity.getPosition().add(entity.getVelocity()));
+
+        previousPos = entity.getPosition();
     }
 
     @Override
