@@ -45,7 +45,7 @@ public class BanCommand extends PermissionLockedCommand {
             identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
                 uuidOptional.ifPresent(uuid -> {
                     Component reason = MiniMessage.miniMessage().deserialize(String.join(" ", context.get(REASON)));
-                    loginValidator.ban(uuid, reason, (System.currentTimeMillis() / 1000L) + duration);
+                    loginValidator.ban(uuid, reason, duration == -1 ? -1 : (System.currentTimeMillis() / 1000L) + duration);
 
                     Player player = MinecraftServer.getConnectionManager().getPlayer(uuid);
                     if (player != null) {
