@@ -305,8 +305,8 @@ public class ProximaEntity extends LivingEntity {
             pathfinding.useSynthetic()) {
             Vec3I synthetic = PositionResolver.FLOORED.resolve(VecUtils.toDouble(pathfinding.target.getPosition()));
 
-            if (!pathfinding.getSettings(getBoundingBox()).successPredicate()
-                .test(synthetic.x(), synthetic.y(), synthetic.z(), current.x, current.y, current.z)) {
+            if (pathfinding.getSettings(getBoundingBox()).successPredicate().test(synthetic.x(), synthetic.y(),
+                synthetic.z(), current.x, current.y, current.z)) {
                 target = new Node(synthetic.x(), synthetic.y(), synthetic.z(), 0, 0,
                     (float) (pathfinding.target.getPosition().y() - pathfinding.target.getPosition().blockY()));
             }
