@@ -17,7 +17,6 @@ import org.phantazm.mob2.selector.SelectorComponent;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Model("mob.skill.spawn_mob")
 @Cache
@@ -59,7 +58,9 @@ public class SpawnMobSkill implements SkillComponent {
         private final MobSpawner mobSpawner;
         private final SpawnCallback callback;
 
-        private final AtomicInteger spawnCount;
+        private int spawnCount;
+
+        private final Object lock;
 
         private Internal(Mob self, Selector selector, Data data, MobSpawner mobSpawner, SpawnCallback callback) {
             super(self, selector);
@@ -67,7 +68,7 @@ public class SpawnMobSkill implements SkillComponent {
             this.mobSpawner = mobSpawner;
             this.callback = callback;
 
-            this.spawnCount = new AtomicInteger();
+            this.lock = new Object();
         }
 
         @Override
@@ -77,36 +78,52 @@ public class SpawnMobSkill implements SkillComponent {
                 return;
             }
 
+            if (data.spawnAmount <= 0 || data.maxSpawn == 0) {
+                return;
+            }
+
             Collection<? extends Point> points = target.locations();
-            if (points.isEmpty() || data.spawnAmount <= 0 || data.maxSpawn == 0) {
+            if (points.isEmpty()) {
                 return;
             }
 
             boolean unlimited = data.maxSpawn < 0;
-
-            outer:
-            for (int i = 0; i < data.spawnAmount; i++) {
-                if (!unlimited && spawnCount.get() >= data.maxSpawn) {
-                    return;
+            if (!unlimited) {
+                synchronized (lock) {
+                    spawn(false, instance, points);
                 }
 
+                return;
+            }
+
+            spawn(true, instance, points);
+        }
+
+        private void spawn(boolean unlimited, Instance instance, Iterable<? extends Point> points) {
+            if (!unlimited && spawnCount >= data.maxSpawn) {
+                return;
+            }
+
+            for (int i = 0; i < data.spawnAmount; i++) {
                 for (Point point : points) {
                     Mob mob = mobSpawner.spawn(data.identifier, instance, Pos.fromPoint(point), self -> {
                         if (unlimited) {
                             return;
                         }
 
-                        self.getAcquirable().sync(e -> ((Mob) e).addSkill(new Skill() {
+                        self.addSkill(new Skill() {
                             @Override
                             public void end() {
-                                spawnCount.decrementAndGet();
+                                synchronized (lock) {
+                                    spawnCount--;
+                                }
                             }
-                        }));
+                        });
                     });
 
                     callback.accept(mob);
-                    if (!unlimited && spawnCount.incrementAndGet() >= data.maxSpawn) {
-                        break outer;
+                    if (!unlimited && ++spawnCount >= data.maxSpawn) {
+                        return;
                     }
                 }
             }
