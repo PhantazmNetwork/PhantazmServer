@@ -96,8 +96,8 @@ public class Mob extends ProximaEntity {
     }
 
     /**
-     * Adds a skill to this mob. This will call its {@link Skill#init()}. Ensure that the skill is not assigned to any
-     * other mob.
+     * Adds a skill to this mob. This will call its {@link Skill#init()} method. Ensure that the skill is not assigned
+     * to any other mob.
      * <p>
      * <b>Thread Behavior</b>: It is not safe to call this method by any thread other than the owning's entity's
      * current tick thread, unless proper synchronization is performed.
