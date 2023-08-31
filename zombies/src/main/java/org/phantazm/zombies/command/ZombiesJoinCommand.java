@@ -45,6 +45,12 @@ public class ZombiesJoinCommand extends Command {
                     new SuggestionEntry(entry.getKey().asString(), entry.getValue().settings().displayName()));
             }
         });
+
+        restrictedArgument.setSuggestionCallback((sender, context, suggestion) -> {
+            suggestion.addEntry(new SuggestionEntry("true", Component.text("true")));
+            suggestion.addEntry(new SuggestionEntry("false", Component.text("false")));
+        });
+
         addConditionalSyntax((sender, commandString) -> {
             if (commandString == null) {
                 return sender instanceof Player;
@@ -70,8 +76,7 @@ public class ZombiesJoinCommand extends Command {
             Player joiner = (Player) sender;
             UUID joinerUUID = joiner.getUuid();
             long currentTime = System.currentTimeMillis();
-            if (lastUsageTimes.containsKey(joinerUUID) && currentTime - lastUsageTimes.getLong(
-                joinerUUID) < ratelimit) {
+            if (lastUsageTimes.containsKey(joinerUUID) && currentTime - lastUsageTimes.getLong(joinerUUID) < ratelimit) {
                 joiner.sendMessage(Component.text("You're using that command too quickly!", NamedTextColor.RED));
                 return;
             } else {
