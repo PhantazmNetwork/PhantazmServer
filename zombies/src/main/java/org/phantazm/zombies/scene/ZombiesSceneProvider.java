@@ -238,6 +238,17 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         rootNode.removeChild(scene.getSceneNode());
     }
 
+    @Override
+    public boolean hasActiveScenes() {
+        for (ZombiesScene scene : getScenes()) {
+            if (scene.isLegit() && scene.getIngamePlayerCount() > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private CorpseCreator createCorpseCreator(DependencyProvider mapDependencyProvider) {
         return corpseCreatorSource.make(mapDependencyProvider);
     }
