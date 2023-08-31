@@ -46,8 +46,6 @@ public class RoundCommand extends PermissionLockedCommand {
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             UUID uuid = ((Player) sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
-                scene.setLegit(false);
-
                 RoundHandler handler = scene.getMap().roundHandler();
                 int roundCount = handler.roundCount();
                 int roundIndex = context.get(roundArgument) - 1;
@@ -57,6 +55,8 @@ public class RoundCommand extends PermissionLockedCommand {
                         Component.text("Round " + (roundIndex + 1) + " is out of bounds!", NamedTextColor.RED));
                     return;
                 }
+
+                scene.setLegit(false);
 
                 StageTransition transition = scene.getStageTransition();
                 Stage current = transition.getCurrentStage();
