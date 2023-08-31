@@ -263,9 +263,19 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
             Data data = clientData.get(index);
 
             if (data != null) {
-                if (data.blocks.containsKey(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ())) {
+                int bx = blockPosition.blockX();
+                int by = blockPosition.blockY();
+                int bz = blockPosition.blockZ();
+
+                if (data.blocks.containsKey(bx, by, bz)) {
                     //allow the server to update the block, but don't tell the client
                     event.setSyncClient(false);
+                }
+
+                //update our cached chunk right away
+                Chunk chunk = data.chunk;
+                if (chunk != null) {
+                    chunk.setBlock(bx, by, bz, event.getBlock());
                 }
             }
         }
