@@ -91,7 +91,7 @@ public class ProjectileFirer implements Firer {
                 }
 
                 Mob mob = spawner.spawn(data.projectileMob, instance, start);
-                mob.addGoalGroup(new CollectionGoalGroup(Collections.singleton(
+                mob.addGoalGroup(new CollectionGoalGroup(Set.of(
                     new ProjectileMovementGoal(mob, shooter, end, data.power(), data.spread(),
                         this::onProjectileCollision, this::onProjectileCollision))));
                 mob.setNoGravity(!data.hasGravity());

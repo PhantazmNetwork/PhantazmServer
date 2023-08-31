@@ -12,10 +12,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class ZombiesJoinHelper {
@@ -47,7 +44,7 @@ public class ZombiesJoinHelper {
     }
 
     public void rejoinGame(@NotNull Player joiner, @NotNull UUID targetGame) {
-        joinInternal(joiner, Collections.singleton(viewProvider.fromPlayer(joiner)),
+        joinInternal(joiner, Set.of(viewProvider.fromPlayer(joiner)),
             joinRequest -> ZombiesRouteRequest.rejoinGame(targetGame, joinRequest), false);
     }
 
@@ -58,6 +55,11 @@ public class ZombiesJoinHelper {
             @Override
             public @NotNull Collection<PlayerView> getPlayers() {
                 return playerViews;
+            }
+
+            @Override
+            public @NotNull Set<Key> modifiers() {
+                return Set.of();
             }
 
             @Override

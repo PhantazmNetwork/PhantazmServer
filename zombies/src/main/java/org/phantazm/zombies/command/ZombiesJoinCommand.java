@@ -94,7 +94,7 @@ public class ZombiesJoinCommand extends Command {
             Party party = partyMap.get(joiner.getUuid());
             Collection<PlayerView> playerViews;
             if (party == null) {
-                playerViews = Collections.singleton(viewProvider.fromPlayer(joiner));
+                playerViews = Set.of(viewProvider.fromPlayer(joiner));
             } else {
                 playerViews = new ArrayList<>(party.getMemberManager().getMembers().size());
                 for (GuildMember guildMember : party.getMemberManager().getMembers().values()) {

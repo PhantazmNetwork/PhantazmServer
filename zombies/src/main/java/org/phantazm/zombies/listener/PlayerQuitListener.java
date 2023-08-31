@@ -7,10 +7,7 @@ import org.phantazm.core.game.scene.TransferResult;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene.LeaveHandler;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerQuitListener extends ZombiesPlayerEventListener<PlayerDisconnectEvent> {
 
@@ -24,8 +21,7 @@ public class PlayerQuitListener extends ZombiesPlayerEventListener<PlayerDisconn
 
     @Override
     protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerDisconnectEvent event) {
-        try (TransferResult result = leaveHandler.leave(
-            Collections.singleton(zombiesPlayer.module().getPlayerView().getUUID()))) {
+        try (TransferResult result = leaveHandler.leave(Set.of(zombiesPlayer.module().getPlayerView().getUUID()))) {
             result.executor().ifPresent(Runnable::run);
         }
     }
