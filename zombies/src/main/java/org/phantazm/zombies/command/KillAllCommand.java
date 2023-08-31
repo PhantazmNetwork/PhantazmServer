@@ -24,7 +24,10 @@ public class KillAllCommand extends PermissionLockedCommand {
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             Player player = (Player) sender;
             UUID uuid = player.getUuid();
-            sceneMapper.apply(uuid).flatMap(scene -> scene.getMap().roundHandler().currentRound()).ifPresent(round -> {
+            sceneMapper.apply(uuid).flatMap(scene -> {
+                scene.setLegit(false);
+                return scene.getMap().roundHandler().currentRound();
+            }).ifPresent(round -> {
                 for (Mob mob : round.getSpawnedMobs()) {
                     mob.getAcquirable().sync(ignored -> {
                         mob.damage(Damage.fromPlayer(player, mob.getHealth()), true);

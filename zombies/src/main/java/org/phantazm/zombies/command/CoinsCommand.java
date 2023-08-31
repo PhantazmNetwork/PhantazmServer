@@ -31,6 +31,8 @@ public class CoinsCommand extends PermissionLockedCommand {
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             UUID uuid = ((Player) sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
+                scene.setLegit(false);
+
                 ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(uuid);
                 if (zombiesPlayer == null) {
                     return;

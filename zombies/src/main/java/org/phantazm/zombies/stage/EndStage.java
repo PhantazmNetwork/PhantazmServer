@@ -26,6 +26,7 @@ import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
+import org.phantazm.zombies.scene.ZombiesScene;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class EndStage implements Stage {
     private static final Logger LOGGER = LoggerFactory.getLogger(EndStage.class);
@@ -57,6 +59,7 @@ public class EndStage implements Stage {
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final RoundHandler roundHandler;
     private final ZombiesDatabase database;
+    private final Supplier<ZombiesScene> sceneSupplier;
 
     private final Map<UUID, SidebarUpdater> sidebarUpdaters;
     private final HttpClient client = HttpClient.newHttpClient();
@@ -67,7 +70,7 @@ public class EndStage implements Stage {
         @NotNull TickFormatter tickFormatter, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
         @NotNull Wrapper<Long> remainingTicks, @NotNull Wrapper<Long> ticksSinceStart,
         @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
-        @NotNull RoundHandler roundHandler, @NotNull ZombiesDatabase database) {
+        @NotNull RoundHandler roundHandler, @NotNull ZombiesDatabase database, @NotNull Supplier<ZombiesScene> sceneSupplier) {
         this.instance = Objects.requireNonNull(instance);
         this.settings = Objects.requireNonNull(settings);
         this.webhook = Objects.requireNonNull(webhook);
@@ -78,6 +81,7 @@ public class EndStage implements Stage {
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator);
         this.roundHandler = Objects.requireNonNull(roundHandler);
         this.database = Objects.requireNonNull(database);
+        this.sceneSupplier = Objects.requireNonNull(sceneSupplier);
 
         this.sidebarUpdaters = new HashMap<>();
     }
@@ -125,6 +129,7 @@ public class EndStage implements Stage {
     public void start() {
         instance.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH, Sound.Source.MASTER, 1.0F, 1.0F));
 
+        boolean isLegit = sceneSupplier.get().isLegit();
         boolean anyAlive = false;
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (zombiesPlayer.isAlive()) {
@@ -155,10 +160,13 @@ public class EndStage implements Stage {
                 MINI_MESSAGE.deserialize(settings.winSubtitleFormat(), roundPlaceholder));
 
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-                ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
-                stats.setWins(stats.getWins() + 1);
-                database.synchronizeBestTime(zombiesPlayer.getUUID(), settings.id(), zombiesPlayers.size(), "",
-                    ticksSinceStart.get());
+                if (isLegit) {
+                    ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
+                    stats.setWins(stats.getWins() + 1);
+
+                    database.synchronizeBestTime(zombiesPlayer.getUUID(), settings.id(), zombiesPlayers.size(), "",
+                        ticksSinceStart.get());
+                }
 
                 zombiesPlayer.getPlayer().ifPresent(player -> {
                     byte[] data = MinestomPacketUtils.serialize(new RoundStartPacket());
@@ -167,7 +175,10 @@ public class EndStage implements Stage {
             }
 
             this.hasWon = true;
-            runWebhook(timeString);
+
+            if (isLegit) {
+                runWebhook(timeString);
+            }
         } else {
             instance.sendTitlePart(TitlePart.TITLE,
                 MINI_MESSAGE.deserialize(settings.lossTitleFormat(), roundPlaceholder));

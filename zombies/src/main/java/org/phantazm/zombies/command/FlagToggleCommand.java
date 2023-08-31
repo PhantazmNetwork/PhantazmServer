@@ -31,6 +31,8 @@ public class FlagToggleCommand extends PermissionLockedCommand {
             UUID uuid = player.getUuid();
 
             sceneMapper.apply(uuid).ifPresent(scene -> {
+                scene.setLegit(false);
+
                 @Subst(Constants.NAMESPACE_OR_KEY)
                 String flag = context.get(FLAG_ARGUMENT);
 

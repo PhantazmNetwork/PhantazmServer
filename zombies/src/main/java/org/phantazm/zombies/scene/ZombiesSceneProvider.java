@@ -192,7 +192,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
                     settings.maxPlayers());
             StageTransition stageTransition =
                 createStageTransition(instance, mapObjects.module().random(), zombiesPlayers.values(), spawnPos,
-                    roundHandler, ticksSinceStart, sidebarModule, shopHandler);
+                    roundHandler, ticksSinceStart, sidebarModule, shopHandler, sceneWrapper.unmodifiableView());
             stageTransition.start();
 
             LeaveHandler leaveHandler = new LeaveHandler(stageTransition, zombiesPlayers);
@@ -323,7 +323,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private @NotNull StageTransition createStageTransition(@NotNull Instance instance, @NotNull Random random,
         @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
         @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
-        @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler) {
+        @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler, @NotNull Supplier<ZombiesScene> sceneSupplier) {
         MapSettingsInfo settings = mapInfo.settings();
 
         Stage idle = new IdleStage(instance, settings, zombiesPlayers,
@@ -343,7 +343,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Stage end = new EndStage(instance, settings, mapInfo.webhook(),
             new AnalogTickFormatter(new AnalogTickFormatter.Data(false)), zombiesPlayers,
             Wrapper.of(settings.endTicks()), ticksSinceStart,
-            newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")), roundHandler, database);
+            newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")), roundHandler, database, sceneSupplier);
         return new StageTransition(idle, countdown, inGame, end);
     }
 

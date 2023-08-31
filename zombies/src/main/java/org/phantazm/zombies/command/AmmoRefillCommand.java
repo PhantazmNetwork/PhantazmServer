@@ -27,6 +27,8 @@ public class AmmoRefillCommand extends PermissionLockedCommand {
 
             UUID uuid = player.getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
+                scene.setLegit(false);
+
                 ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(uuid);
                 Optional<InventoryAccess> acccessOptional =
                     zombiesPlayer.module().getEquipmentHandler().accessRegistry().getCurrentAccess();

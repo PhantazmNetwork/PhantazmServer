@@ -46,6 +46,8 @@ public class RoundCommand extends PermissionLockedCommand {
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             UUID uuid = ((Player) sender).getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
+                scene.setLegit(false);
+
                 RoundHandler handler = scene.getMap().roundHandler();
                 int roundCount = handler.roundCount();
                 int roundIndex = context.get(roundArgument) - 1;

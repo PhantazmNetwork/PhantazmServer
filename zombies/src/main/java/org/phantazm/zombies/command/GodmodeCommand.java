@@ -24,6 +24,8 @@ public class GodmodeCommand extends PermissionLockedCommand {
             Player player = (Player) sender;
             UUID uuid = player.getUuid();
             sceneMapper.apply(uuid).ifPresent(scene -> {
+                scene.setLegit(false);
+
                 ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(uuid);
                 Flaggable flags = zombiesPlayer.module().flags();
 

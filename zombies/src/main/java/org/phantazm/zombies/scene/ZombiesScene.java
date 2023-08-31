@@ -58,6 +58,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private final UUID allowedRequestUUID;
     private final Object joinLock = new Object();
     private boolean joinable = true;
+    private volatile boolean isLegit;
 
     private volatile int pendingPlayers = 0;
 
@@ -79,6 +80,16 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         this.database = Objects.requireNonNull(database);
         this.sceneNode = Objects.requireNonNull(sceneNode);
         this.allowedRequestUUID = allowedRequestUUID;
+
+        this.isLegit = true;
+    }
+
+    public boolean isLegit() {
+        return isLegit;
+    }
+
+    public void setLegit(boolean legit) {
+        this.isLegit = legit;
     }
 
     public @NotNull EventNode<Event> getSceneNode() {
@@ -190,7 +201,7 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
                         teleportOrSetInstance(teleportedPlayers, player, futures, pos);
                         runnables.add(() -> {
                             player.stateHolder().setStage(Stages.ZOMBIES_GAME);
-                            
+
                             zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
                         });
                     });
