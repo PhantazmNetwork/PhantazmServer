@@ -15,6 +15,7 @@ public class BasicRoundHandler implements RoundHandler {
 
     private Round currentRound;
     private int roundIndex;
+    private int lastMobCount = 0;
 
     private boolean hasEnded;
 
@@ -38,6 +39,7 @@ public class BasicRoundHandler implements RoundHandler {
 
         currentRound.tick(time);
         if (currentRound.isActive()) {
+            lastMobCount = currentRound.getTotalMobCount();
             return;
         }
 
@@ -53,6 +55,7 @@ public class BasicRoundHandler implements RoundHandler {
         if (++roundIndex < rounds.size()) {
             currentRound = rounds.get(roundIndex);
             currentRound.startRound();
+            lastMobCount = currentRound.getTotalMobCount();
 
             this.currentRound = currentRound;
         } else {
@@ -82,6 +85,7 @@ public class BasicRoundHandler implements RoundHandler {
         this.roundIndex = roundIndex;
         currentRound = rounds.get(roundIndex);
         currentRound.startRound();
+        lastMobCount = currentRound.getTotalMobCount();
     }
 
     @Override
@@ -92,6 +96,11 @@ public class BasicRoundHandler implements RoundHandler {
     @Override
     public boolean hasEnded() {
         return hasEnded;
+    }
+
+    @Override
+    public int getLastMobCount() {
+        return lastMobCount;
     }
 
     @Override
