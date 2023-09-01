@@ -354,7 +354,9 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         Stage end = new EndStage(instance, settings, mapInfo.webhook(),
             new AnalogTickFormatter(new AnalogTickFormatter.Data(false)), zombiesPlayers,
             Wrapper.of(settings.endTicks()), ticksSinceStart,
-            newSidebarUpdaterCreator(sidebarModule, ElementPath.of("end")), roundHandler, database, sceneSupplier);
+            (player, hasWon) -> {
+                return newSidebarUpdaterCreator(sidebarModule, ElementPath.of(hasWon ? "win" : "lose")).apply(player);
+            }, roundHandler, database, sceneSupplier);
         return new StageTransition(idle, countdown, inGame, end);
     }
 

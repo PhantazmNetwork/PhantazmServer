@@ -39,7 +39,7 @@ import java.text.MessageFormat;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class EndStage implements Stage {
@@ -56,7 +56,7 @@ public class EndStage implements Stage {
     private final Wrapper<Long> remainingTicks;
     private final Wrapper<Long> ticksSinceStart;
 
-    private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
+    private final BiFunction<? super ZombiesPlayer, Boolean, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final RoundHandler roundHandler;
     private final ZombiesDatabase database;
     private final Supplier<ZombiesScene> sceneSupplier;
@@ -69,7 +69,7 @@ public class EndStage implements Stage {
     public EndStage(@NotNull Instance instance, @NotNull MapSettingsInfo settings, @NotNull WebhookInfo webhook,
         @NotNull TickFormatter tickFormatter, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
         @NotNull Wrapper<Long> remainingTicks, @NotNull Wrapper<Long> ticksSinceStart,
-        @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
+        @NotNull BiFunction<? super ZombiesPlayer, Boolean, ? extends SidebarUpdater> sidebarUpdaterCreator,
         @NotNull RoundHandler roundHandler, @NotNull ZombiesDatabase database, @NotNull Supplier<ZombiesScene> sceneSupplier) {
         this.instance = Objects.requireNonNull(instance);
         this.settings = Objects.requireNonNull(settings);
@@ -267,7 +267,7 @@ public class EndStage implements Stage {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (!zombiesPlayer.hasQuit()) {
                 SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(),
-                    unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
+                    unused -> sidebarUpdaterCreator.apply(zombiesPlayer, hasWon));
                 sidebarUpdater.tick(time);
             }
 
