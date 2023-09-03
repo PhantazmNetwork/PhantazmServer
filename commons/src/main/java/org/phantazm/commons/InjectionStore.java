@@ -183,7 +183,7 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
     final class InjectionStoreImpl implements InjectionStore {
         private final Map<Key<?>, Object> mappings;
 
-        private InjectionStoreImpl(@NotNull Map<Key<?>, Object> mappings) {
+        private InjectionStoreImpl(Map<Key<?>, Object> mappings) {
             this.mappings = mappings;
         }
 

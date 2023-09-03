@@ -57,9 +57,9 @@ public class BasicMobSpawner implements MobSpawner {
 
     @Override
     public void init() {
-        builder.clear();
         buildDependencies(builder);
         this.injectionStore = builder.build();
+        builder.clear();
     }
 
     /**

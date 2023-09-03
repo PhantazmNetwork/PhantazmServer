@@ -40,7 +40,7 @@ public class DamageSkill implements SkillComponent {
         float amount,
         float knockback,
         boolean horizontal,
-        boolean armorBypassing) {
+        boolean bypassArmor) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -56,7 +56,7 @@ public class DamageSkill implements SkillComponent {
             return ConfigPrimitive.of(true);
         }
 
-        @Default("armorBypassing")
+        @Default("bypassArmor")
         public static @NotNull ConfigElement defaultArmorBypassing() {
             return ConfigPrimitive.of(false);
         }
@@ -79,7 +79,7 @@ public class DamageSkill implements SkillComponent {
                     entity.takeKnockback(data.knockback, data.horizontal, Math.sin(angle), -Math.cos(angle));
                 }
 
-                entity.damage(Damage.fromEntity(self, data.amount), data.armorBypassing);
+                entity.damage(Damage.fromEntity(self, data.amount), data.bypassArmor);
             }));
         }
 
