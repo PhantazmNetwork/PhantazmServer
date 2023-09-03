@@ -101,12 +101,13 @@ public class ShootProjectileSkill implements SkillComponent {
         }
 
         private void shootAtPoint(Instance instance, Point target) {
-            Mob projectile = spawner.spawn(data.entity, instance, self.getPosition().add(0, self.getEyeHeight(), 0));
-            callback.accept(projectile);
+            spawner.spawn(data.entity, instance, self.getPosition().add(0, self.getEyeHeight(), 0), self -> {
+                callback.accept(self);
 
-            projectile.setNoGravity(!data.gravity);
-            projectile.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(projectile, self, target,
-                data.power(), data.spread(), this::onCollideWithBlock, this::onCollideWithEntity))));
+                self.setNoGravity(!data.gravity);
+                self.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(self, self, target,
+                    data.power(), data.spread(), this::onCollideWithBlock, this::onCollideWithEntity))));
+            });
         }
 
         @Override

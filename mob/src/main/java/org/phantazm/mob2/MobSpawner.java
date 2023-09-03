@@ -50,16 +50,8 @@ public interface MobSpawner {
     boolean canSpawn(@NotNull Key identifier);
 
     /**
-     * Initializes this MobSpawner, preparing any necessary {@link InjectionStore} entries. This method will typically
-     * call {@link MobSpawner#buildDependencies(InjectionStore.Builder)}. It must be called at least <i>once</i> before
-     * the mob spawner is used. Calling it again will re-compute dependencies.
+     * Initializes this MobSpawner. This may involve preparing any necessary {@link InjectionStore} entries. It must be
+     * called at least <i>once</i> before the mob spawner is used.
      */
     void init();
-
-    /**
-     * Called by the MobSpawner to prepare any necessary {@link InjectionStore} entries.
-     *
-     * @param builder the builder to append dependencies to
-     */
-    void buildDependencies(InjectionStore.@NotNull Builder builder);
 }

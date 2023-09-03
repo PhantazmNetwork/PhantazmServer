@@ -25,7 +25,7 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
     @Override
     public void buildDependencies(InjectionStore.@NotNull Builder builder) {
         super.buildDependencies(builder);
-        builder.with(Keys.SCENE, Objects.requireNonNull(scene.get()));
+        builder.with(Keys.SCENE, scene.get());
     }
 
     @Override
@@ -35,18 +35,9 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
         if (mob.useStateHolder()) {
             mob.stateHolder().setStage(Stages.ZOMBIES_GAME);
         }
-    }
 
-    @Override
-    public void postSetup(@NotNull Mob mob) {
-        super.postSetup(mob);
-
-        ZombiesScene scene = this.scene.get();
-        boolean mobPlayerCollisions = scene.getMapSettingsInfo().mobPlayerCollisions();
-
-        mob.getAcquirable().sync(self -> {
-            ((Mob) self).setCollisionRule(mobPlayerCollisions ? TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS :
-                TeamsPacket.CollisionRule.NEVER);
-        });
+        boolean mobPlayerCollisions = this.scene.get().getMapSettingsInfo().mobPlayerCollisions();
+        mob.setCollisionRule(mobPlayerCollisions ? TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS :
+            TeamsPacket.CollisionRule.NEVER);
     }
 }

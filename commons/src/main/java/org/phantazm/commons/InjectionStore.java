@@ -85,6 +85,8 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
 
         @NotNull
         InjectionStore build();
+
+        void clear();
     }
 
     sealed interface Key<T> permits InjectionStore.KeyImpl {
@@ -117,6 +119,11 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
             }
 
             return new InjectionStoreImpl(Map.copyOf(values));
+        }
+
+        @Override
+        public void clear() {
+            values.clear();
         }
     }
 

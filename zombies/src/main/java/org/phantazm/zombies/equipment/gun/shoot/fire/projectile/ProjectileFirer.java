@@ -90,11 +90,11 @@ public class ProjectileFirer implements Firer {
                     return;
                 }
 
-                Mob mob = spawner.spawn(data.projectileMob, instance, start);
-                mob.addGoalGroup(new CollectionGoalGroup(Set.of(
-                    new ProjectileMovementGoal(mob, shooter, end, data.power(), data.spread(),
-                        this::onProjectileCollision, this::onProjectileCollision))));
-                mob.setNoGravity(!data.hasGravity());
+                Mob mob = spawner.spawn(data.projectileMob, instance, start, self -> {
+                    self.addGoalGroup(new CollectionGoalGroup(Set.of(new ProjectileMovementGoal(self, shooter, end,
+                        data.power(), data.spread(), this::onProjectileCollision, this::onProjectileCollision))));
+                    self.setNoGravity(!data.hasGravity());
+                });
 
                 firedShots.put(mob.getUuid(), new FiredShot(gun, state, shooter, start, previousHits));
                 removalQueue.add(new AliveProjectile(new WeakReference<>(mob), ticks));
