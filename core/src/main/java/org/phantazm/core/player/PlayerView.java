@@ -16,9 +16,9 @@ import java.util.concurrent.CompletableFuture;
  * necessary to improve performance. However, since PlayerView instances are intended for long-term storage in fields
  * and other places where they may become out-of-date, it is important to avoid keeping strong references to any cached
  * Player objects within the PlayerView implementation itself.
- * @see BasicPlayerView
+ * @see PlayerViewImpl
  */
-public interface PlayerView {
+public sealed interface PlayerView permits PlayerViewImpl {
 
     /**
      * Gets the {@link UUID} of the player.

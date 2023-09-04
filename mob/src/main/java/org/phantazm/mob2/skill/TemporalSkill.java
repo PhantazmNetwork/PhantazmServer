@@ -79,7 +79,7 @@ public class TemporalSkill implements SkillComponent {
         public void use() {
             boolean endDelegate = false;
 
-            Acquired<Entity> acquired = self.getAcquirable().lock();
+            Acquired<? extends Entity> acquired = self.getAcquirable().lock();
             try {
                 int oldStartTime = this.startTicks;
                 if (oldStartTime >= 0) {
@@ -130,7 +130,7 @@ public class TemporalSkill implements SkillComponent {
         public void end() {
             boolean end = false;
 
-            Acquired<Entity> acquired = self.getAcquirable().lock();
+            Acquired<? extends Entity> acquired = self.getAcquirable().lock();
             try {
                 if (this.startTicks < 0 || this.actualDelay < 0) {
                     end = true;

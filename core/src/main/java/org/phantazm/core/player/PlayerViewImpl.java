@@ -3,7 +3,10 @@ package org.phantazm.core.player;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.scene2.Scene;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -11,6 +14,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Semaphore;
+
+import org.phantazm.core.scene2.SceneManager;
 
 /**
  * <p>Basic implementation of a {@link PlayerView}. Caches the player object, so {@code getPlayer} is safe to call
@@ -26,16 +32,20 @@ import java.util.concurrent.CompletableFuture;
  * @see Player
  * @see BasicPlayerViewProvider
  */
-class BasicPlayerView implements PlayerView {
-    private static final Reference<Player> NULL_REFERENCE = new WeakReference<>(null);
+@ApiStatus.Internal
+public final class PlayerViewImpl implements PlayerView {
+    private static final Reference<Player> NULL_PLAYER_REFERENCE = new WeakReference<>(null);
+    private static final Reference<Scene> NULL_SCENE_REFERENCE = new WeakReference<>(null);
 
     private final IdentitySource identitySource;
     private final ConnectionManager connectionManager;
     private final UUID uuid;
 
+    private final Semaphore sceneJoinLock = new Semaphore(1);
     private final Object usernameLock = new Object();
     private final Object usernameRequestLock = new Object();
 
+    private volatile Reference<Scene> currentSceneReference;
     private volatile Reference<Player> playerReference;
 
     private volatile CompletableFuture<String> usernameRequest;
@@ -48,12 +58,13 @@ class BasicPlayerView implements PlayerView {
      * @param connectionManager The {@link ConnectionManager} used to find {@link Player}s based on their {@link UUID}
      * @param uuid              The {@link UUID} of the {@link Player} to store
      */
-    BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
+    PlayerViewImpl(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
         @NotNull UUID uuid) {
         this.identitySource = Objects.requireNonNull(identitySource);
         this.connectionManager = Objects.requireNonNull(connectionManager);
         this.uuid = Objects.requireNonNull(uuid);
-        this.playerReference = new WeakReference<>(null);
+        this.playerReference = NULL_PLAYER_REFERENCE;
+        this.currentSceneReference = NULL_SCENE_REFERENCE;
     }
 
     /**
@@ -63,13 +74,14 @@ class BasicPlayerView implements PlayerView {
      * @param connectionManager the ConnectionManager used to find {@link Player}s based on their {@link UUID}
      * @param player            the player, whose UUID and username will be cached immediately
      */
-    BasicPlayerView(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
+    PlayerViewImpl(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
         @NotNull Player player) {
         this.identitySource = Objects.requireNonNull(identitySource);
         this.connectionManager = Objects.requireNonNull(connectionManager);
         this.uuid = player.getUuid();
-        this.playerReference = new WeakReference<>(player);
+        this.playerReference = NULL_PLAYER_REFERENCE;
         this.username = player.getUsername();
+        this.currentSceneReference = NULL_SCENE_REFERENCE;
     }
 
     private CompletableFuture<String> getUsernameRequest() {
@@ -154,7 +166,7 @@ class BasicPlayerView implements PlayerView {
         player = connectionManager.getPlayer(uuid);
 
         if (player == null) {
-            playerReference = NULL_REFERENCE;
+            playerReference = NULL_PLAYER_REFERENCE;
             return Optional.empty();
         } else {
             playerReference = new WeakReference<>(player);
@@ -162,4 +174,45 @@ class BasicPlayerView implements PlayerView {
         }
     }
 
+    /**
+     * Returns the semaphore used to synchronize scene join attempts by this player. It initially has exactly 1 permit.
+     * The amount of permits available should never be allowed to exceed 1 under any circumstances.
+     * <p>
+     * This method is marked internal because it is only useful when called by {@link SceneManager}, and it is easy for
+     * users to corrupt internal state (for example by releasing too many permits, which would allow concurrent join
+     * attempts by this player).
+     *
+     * @return the semaphore used to synchronize join attempts
+     */
+    @ApiStatus.Internal
+    public @NotNull Semaphore joinSemaphore() {
+        return sceneJoinLock;
+    }
+
+    /**
+     * Gets the player's current scene.
+     * <p>
+     * This method is marked internal because it should only be called by {@link SceneManager}, as it will perform the
+     * correct synchronization. To retrieve the player's current scene, please use
+     * {@link SceneManager#getCurrentScene(PlayerView)}.
+     *
+     * @return an Optional containing the current scene, or {@code null} if there is none
+     */
+    @ApiStatus.Internal
+    public @NotNull Optional<Scene> currentScene() {
+        return Optional.ofNullable(currentSceneReference.get());
+    }
+
+    /**
+     * Updates the player's current scene. This should only be called by a thread that's able to acquire exactly one
+     * permit from {@link PlayerViewImpl#joinSemaphore()}.
+     * <p>
+     * This method is marked internal because its access must be carefully synchronized by {@link SceneManager}.
+     *
+     * @param scene the scene to update to; {@code null} to set no scene
+     */
+    @ApiStatus.Internal
+    public void updateCurrentScene(@Nullable Scene scene) {
+        this.currentSceneReference = scene == null ? NULL_SCENE_REFERENCE : new WeakReference<>(scene);
+    }
 }
