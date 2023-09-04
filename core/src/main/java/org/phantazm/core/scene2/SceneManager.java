@@ -25,7 +25,9 @@ import java.util.function.BiConsumer;
 
 /**
  * SceneManager is used to fulfill requests by one or more players to join {@link Scene} objects. This class also
- * manages the lifecycle of every Scene object; creation, ticking, and eventually removal.
+ * manages the lifecycle of every Scene object; creation, ticking, and eventually removal. Several different utility
+ * methods, such as {@link SceneManager#getCurrentScene(PlayerView)}, are also provided to make working with scenes
+ * easier.
  * <p>
  * <h2>Thread Safety</h2>
  * Unless otherwise indicated, all methods are completely thread-safe.
@@ -161,7 +163,12 @@ public final class SceneManager implements Tickable {
      */
     @SuppressWarnings("unchecked")
     public <T extends Scene> @Nullable @Unmodifiable Set<T> typed(@NotNull Class<T> sceneType) {
-        return (Set<T>) Set.copyOf(mappedScenes.get(sceneType));
+        Set<?> scenes = mappedScenes.get(sceneType);
+        if (scenes == null) {
+            return null;
+        }
+
+        return (Set<T>) Set.copyOf(scenes);
     }
 
     /**

@@ -77,7 +77,6 @@ public interface Scene extends Tickable, Acquirable.Source<Scene> {
      * <p>
      * This method <i>must</i>:
      * <ul>
-     *     <li>Ignore offline players</li>
      *     <li>Ignore players that have never been added to the scene</li>
      *     <li>Ignore players that are in a different scene</li>
      *     <li>Modify the state of players that <i>are</i> present in this scene such as to remove any and all modifications applied by this scene</li>
@@ -85,9 +84,9 @@ public interface Scene extends Tickable, Acquirable.Source<Scene> {
      * <p>
      * This method must <i>not</i>:
      * <ul>
-     *     <li>Send the player(s) to a new scene</li>
+     *     <li>Send the players to a new scene</li>
      *     <li>Attempt to remove players from other scenes</li>
-     *     <li>Kick the player(s)</li>
+     *     <li>Kick the players</li>
      * </ul>
      * <p>
      * This method is marked as internal because it should generally only be called by {@link SceneManager}; this method

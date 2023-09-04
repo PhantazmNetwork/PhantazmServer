@@ -26,9 +26,6 @@ import org.phantazm.core.scene2.SceneManager;
  * <p>This class is not part of the public API. Instances may be obtained through a suitable {@link PlayerViewProvider}
  * implementation.</p>
  *
- * @apiNote This class does not provide an implementation of equals/hashCode because of the inherently volatile nature
- * of its internal state (the cached player reference may be garbage collected at any time). {@code getUUID} should be
- * used if a map-safe, representative object is desired.
  * @see Player
  * @see BasicPlayerViewProvider
  */
@@ -44,6 +41,8 @@ public final class PlayerViewImpl implements PlayerView {
     private final Semaphore sceneJoinLock = new Semaphore(1);
     private final Object usernameLock = new Object();
     private final Object usernameRequestLock = new Object();
+
+    private final int hashCode;
 
     private volatile Reference<Scene> currentSceneReference;
     private volatile Reference<Player> playerReference;
@@ -65,6 +64,8 @@ public final class PlayerViewImpl implements PlayerView {
         this.uuid = Objects.requireNonNull(uuid);
         this.playerReference = NULL_PLAYER_REFERENCE;
         this.currentSceneReference = NULL_SCENE_REFERENCE;
+
+        this.hashCode = uuid.hashCode();
     }
 
     /**
@@ -79,9 +80,11 @@ public final class PlayerViewImpl implements PlayerView {
         this.identitySource = Objects.requireNonNull(identitySource);
         this.connectionManager = Objects.requireNonNull(connectionManager);
         this.uuid = player.getUuid();
-        this.playerReference = NULL_PLAYER_REFERENCE;
+        this.playerReference = new WeakReference<>(player);
         this.username = player.getUsername();
         this.currentSceneReference = NULL_SCENE_REFERENCE;
+
+        this.hashCode = uuid.hashCode();
     }
 
     private CompletableFuture<String> getUsernameRequest() {
@@ -174,9 +177,34 @@ public final class PlayerViewImpl implements PlayerView {
         }
     }
 
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        if (obj == this) {
+            return true;
+        }
+
+        if (obj instanceof PlayerViewImpl other) {
+            return uuid.equals(other.uuid);
+        }
+
+        return false;
+    }
+
     /**
      * Returns the semaphore used to synchronize scene join attempts by this player. It initially has exactly 1 permit.
      * The amount of permits available should never be allowed to exceed 1 under any circumstances.
+     * <p>
+     * A semaphore is used instead of a lock to permit "unlocking" on a different thread than the one which acquired
+     * it.
      * <p>
      * This method is marked internal because it is only useful when called by {@link SceneManager}, and it is easy for
      * users to corrupt internal state (for example by releasing too many permits, which would allow concurrent join
@@ -190,7 +218,11 @@ public final class PlayerViewImpl implements PlayerView {
     }
 
     /**
-     * Gets the player's current scene.
+     * Gets the player's current scene. The optional may be empty if:
+     * <ul>
+     *     <li>The player is not part of a scene; such as if they are offline</li>
+     *     <li>The player previously had a scene but the scene was garbage collected</li>
+     * </ul>
      * <p>
      * This method is marked internal because it should only be called by {@link SceneManager}, as it will perform the
      * correct synchronization. To retrieve the player's current scene, please use
