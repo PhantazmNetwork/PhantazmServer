@@ -4,11 +4,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.Tickable;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 
 import java.util.*;
 import java.util.function.BooleanSupplier;

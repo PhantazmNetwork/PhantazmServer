@@ -1,8 +1,8 @@
 package org.phantazm.zombies.player.action_bar;
 
 import net.kyori.adventure.text.Component;
+import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.Objects;

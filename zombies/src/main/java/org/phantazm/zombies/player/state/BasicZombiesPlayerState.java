@@ -3,7 +3,7 @@ package org.phantazm.zombies.player.state;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 
 import java.util.Collection;
 import java.util.List;

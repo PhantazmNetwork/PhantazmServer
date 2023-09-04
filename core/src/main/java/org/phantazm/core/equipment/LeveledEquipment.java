@@ -5,7 +5,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 
 import java.util.Map;
 import java.util.Objects;

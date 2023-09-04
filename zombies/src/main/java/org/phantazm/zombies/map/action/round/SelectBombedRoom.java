@@ -26,7 +26,7 @@ import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.TickableTask;
+import org.phantazm.core.tick.TickableTask;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.Flags;

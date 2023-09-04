@@ -1,6 +1,6 @@
 package org.phantazm.proxima.bindings.minestom.goal;
 
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
 
 /**

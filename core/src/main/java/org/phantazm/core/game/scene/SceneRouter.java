@@ -1,8 +1,8 @@
 package org.phantazm.core.game.scene;
 
 import net.kyori.adventure.key.Keyed;
+import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 
 import java.util.Collection;
 import java.util.Optional;

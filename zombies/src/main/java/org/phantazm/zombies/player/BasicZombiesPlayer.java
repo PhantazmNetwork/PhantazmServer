@@ -4,7 +4,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.zombies.Attributes;

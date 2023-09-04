@@ -1,4 +1,4 @@
-package org.phantazm.commons;
+package org.phantazm.core.tick;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -5,7 +5,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.map.*;

@@ -1,9 +1,9 @@
 package org.phantazm.zombies.map;
 
+import net.minestom.server.Tickable;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.Tickable;
 import org.phantazm.core.packet.MinestomPacketUtils;
 import org.phantazm.messaging.packet.server.RoundStartPacket;
 import org.phantazm.mob2.Mob;
@@ -77,7 +77,8 @@ public class Round implements Tickable {
         }
     }
 
-    public @Unmodifiable @NotNull List<Mob> getSpawnedMobs() {
+    public @Unmodifiable
+    @NotNull List<Mob> getSpawnedMobs() {
         return List.copyOf(spawnedMobs.values());
     }
 
@@ -85,7 +86,8 @@ public class Round implements Tickable {
         return totalMobCount.get();
     }
 
-    public @Unmodifiable @NotNull List<Wave> getWaves() {
+    public @Unmodifiable
+    @NotNull List<Wave> getWaves() {
         return waves;
     }
 

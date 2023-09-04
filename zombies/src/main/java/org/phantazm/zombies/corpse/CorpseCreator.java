@@ -21,7 +21,7 @@ import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
@@ -102,11 +102,13 @@ public class CorpseCreator {
     }
 
     public interface Source {
-        @NotNull CorpseCreator make(@NotNull DependencyProvider mapDependencyProvider);
+        @NotNull
+        CorpseCreator make(@NotNull DependencyProvider mapDependencyProvider);
     }
 
     public interface CorpseLine {
-        @NotNull Component update(@NotNull Corpse corpse, long time);
+        @NotNull
+        Component update(@NotNull Corpse corpse, long time);
     }
 
     @DataObject

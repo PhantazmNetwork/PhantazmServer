@@ -1,7 +1,7 @@
 package org.phantazm.zombies.map.shop.interactor;
 
+import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 
@@ -31,5 +31,9 @@ public interface ShopInteractor extends Tickable {
     boolean handleInteraction(@NotNull PlayerInteraction interaction);
 
     default void initialize(@NotNull Shop shop) {
+    }
+
+    default void tick(long time) {
+        
     }
 }

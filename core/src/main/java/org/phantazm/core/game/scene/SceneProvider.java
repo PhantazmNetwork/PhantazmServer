@@ -1,8 +1,8 @@
 package org.phantazm.core.game.scene;
 
+import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
-import org.phantazm.commons.Tickable;
 
 import java.util.Collection;
 import java.util.Optional;

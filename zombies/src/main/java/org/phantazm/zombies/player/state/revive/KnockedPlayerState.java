@@ -4,7 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 

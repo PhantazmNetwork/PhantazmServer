@@ -1,9 +1,9 @@
 package org.phantazm.core.game.scene;
 
+import net.minestom.server.Tickable;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.Tickable;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 

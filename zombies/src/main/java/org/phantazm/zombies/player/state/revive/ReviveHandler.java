@@ -3,7 +3,7 @@ package org.phantazm.zombies.player.state.revive;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;

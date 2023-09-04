@@ -1,5 +1,6 @@
-package org.phantazm.commons;
+package org.phantazm.core.tick;
 
+import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
 
 public interface TickableTask extends Tickable {

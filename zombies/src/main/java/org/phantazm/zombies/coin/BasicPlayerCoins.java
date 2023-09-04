@@ -1,8 +1,8 @@
 package org.phantazm.zombies.coin;
 
 import net.kyori.adventure.text.Component;
+import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.coin.component.TransactionMessager;
 

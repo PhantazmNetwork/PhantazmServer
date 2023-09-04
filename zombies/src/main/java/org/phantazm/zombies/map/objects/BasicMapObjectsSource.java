@@ -19,7 +19,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.ClientBlockHandler;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.ElementUtils;

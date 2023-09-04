@@ -17,7 +17,7 @@ import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.TransferResult;

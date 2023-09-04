@@ -1,9 +1,6 @@
 package org.phantazm.core.scene2;
 
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.Tickable;
-import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.thread.Acquirable;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.thread.ThreadDispatcher;
@@ -14,13 +11,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewImpl;
-import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 
 /**
@@ -29,6 +22,8 @@ import java.util.function.BiConsumer;
  * methods, such as {@link SceneManager#getCurrentScene(PlayerView)}, are also provided to make working with scenes
  * easier.
  * <p>
+ * This class is intended to be used as a singleton; generally, most applications will only want to have a one
+ * {@link SceneManager}.
  * <h2>Thread Safety</h2>
  * Unless otherwise indicated, all methods are completely thread-safe.
  */
@@ -62,22 +57,16 @@ public final class SceneManager implements Tickable {
 
     private final Executor executor;
     private final Map<Class<? extends Scene>, Set<Scene>> mappedScenes;
-    private final PlayerViewProvider viewProvider;
     private final ThreadDispatcher<Scene> threadDispatcher;
 
-    public SceneManager(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes,
-        @NotNull PlayerViewProvider viewProvider, int numThreads) {
+    public SceneManager(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes, int numThreads) {
         this.executor = Objects.requireNonNull(executor);
         this.mappedScenes = buildSceneMap(Set.copyOf(sceneTypes));
-        this.viewProvider = Objects.requireNonNull(viewProvider);
         this.threadDispatcher = ThreadDispatcher.of(ThreadProvider.counter(), numThreads);
-
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, this::onDisconnect);
     }
 
-    public SceneManager(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes,
-        @NotNull PlayerViewProvider viewProvider) {
-        this(executor, sceneTypes, viewProvider, Runtime.getRuntime().availableProcessors());
+    public SceneManager(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes) {
+        this(executor, sceneTypes, Runtime.getRuntime().availableProcessors());
     }
 
     @SuppressWarnings("unchecked")
@@ -85,15 +74,20 @@ public final class SceneManager implements Tickable {
         Map.Entry<Class<? extends Scene>, Set<Scene>>[] entries = new Map.Entry[sceneTypes.size()];
         int i = 0;
         for (Class<? extends Scene> sceneType : sceneTypes) {
-            entries[i++] = Map.entry(sceneType, new CopyOnWriteArraySet<>());
+            entries[i++] = Map.entry(sceneType, Collections.newSetFromMap(new ConcurrentHashMap<>()));
         }
 
         return Map.ofEntries(entries);
     }
 
-    private void onDisconnect(@NotNull PlayerDisconnectEvent disconnectEvent) {
-        Player player = disconnectEvent.getPlayer();
-        PlayerViewImpl view = (PlayerViewImpl) viewProvider.fromPlayer(player);
+    /**
+     * Should be called once with a representative {@link PlayerView} when said player disconnects from the server. This
+     * will update state and remove the player from their old {@link Scene}.
+     *
+     * @param playerView the player to disconnect
+     */
+    public void handleDisconnect(@NotNull PlayerView playerView) {
+        PlayerViewImpl view = (PlayerViewImpl) playerView;
 
         Semaphore semaphore = view.joinSemaphore();
         semaphore.acquireUninterruptibly();
@@ -154,7 +148,7 @@ public final class SceneManager implements Tickable {
 
     /**
      * Retrieves all scenes of a specified type. The resulting set is unmodifiable and will not change even if new
-     * scenes are created after the invocation of this method.
+     * scenes are created after the invocation of this method. None of the scenes are acquired.
      *
      * @param sceneType the scene type to look up
      * @param <T>       the type of scene to search for
@@ -293,6 +287,33 @@ public final class SceneManager implements Tickable {
         } finally {
             semaphore.release();
         }
+    }
+
+    /**
+     * Registers a new {@link Tickable}, that will be ticked in the same context as the provided {@link Scene}. That is,
+     * the same thread that is used to tick the scene will also be used to tick {@code tickable}. The tickable will be
+     * removed when the scene is removed.
+     * <p>
+     * If {@code context} is not a scene currently in the manager, this method will do nothing.
+     *
+     * @param context  the scene context
+     * @param tickable the tickable to be bound to the scene
+     */
+    public void addTickable(@NotNull Scene context, @NotNull Tickable tickable) {
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(tickable);
+        threadDispatcher.updateElement(tickable, context);
+    }
+
+    /**
+     * Manually removes a {@link Tickable}. If this was never added using
+     * {@link SceneManager#addTickable(Scene, Tickable)}, this method will do nothing.
+     *
+     * @param tickable the tickable to remove
+     */
+    public void removeTickable(@NotNull Tickable tickable) {
+        Objects.requireNonNull(tickable);
+        threadDispatcher.removeElement(tickable);
     }
 
     private <T extends Scene> T createAndJoinNewScene(Join<T> join) {

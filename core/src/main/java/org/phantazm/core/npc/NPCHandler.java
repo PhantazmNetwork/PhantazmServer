@@ -1,5 +1,6 @@
 package org.phantazm.core.npc;
 
+import net.minestom.server.Tickable;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
@@ -7,7 +8,6 @@ import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 
 import java.util.List;
 import java.util.Objects;

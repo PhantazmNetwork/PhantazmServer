@@ -16,7 +16,7 @@ import net.minestom.server.scoreboard.BelowNameTag;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 import org.phantazm.commons.MiniMessageUtils;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
