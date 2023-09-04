@@ -91,21 +91,21 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
             instance.getEntityTracker()
                 .nearbyEntities(powerup.spawnLocation(), data.radius, EntityTracker.Target.LIVING_ENTITIES,
                     entity -> {
-                        if (!(entity instanceof Mob mob)) {
+                        if (!(entity instanceof Mob)) {
                             return;
                         }
 
-                        entity.getAcquirable().sync(ignored -> {
+                        entity.getAcquirable().sync(self -> {
+                            Mob mob = (Mob) self;
                             if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
                                 switch (data.bossDamageType) {
-                                    case HEALTH_FACTOR -> entity.damage(
-                                        Damage.fromPlayer(player, entity.getMaxHealth() * data.bossDamage),
-                                        data.bypassArmor);
-                                    case CONSTANT -> entity.damage(Damage.fromPlayer(player, data.bossDamage),
+                                    case HEALTH_FACTOR -> mob.damage(Damage.fromPlayer(player, mob
+                                        .getMaxHealth() * data.bossDamage), data.bypassArmor);
+                                    case CONSTANT -> mob.damage(Damage.fromPlayer(player, data.bossDamage),
                                         data.bypassArmor);
                                 }
 
-                                if (entity.getHealth() <= 0) {
+                                if (mob.getHealth() <= 0) {
                                     giveCoins(zombiesPlayer);
                                 }
 
@@ -113,7 +113,7 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
                             }
 
                             giveCoins(zombiesPlayer);
-                            entity.damage(Damage.fromPlayer(player, entity.getHealth()), true);
+                            mob.damage(Damage.fromPlayer(player, mob.getHealth()), data.bypassArmor);
                         });
                     });
         }
