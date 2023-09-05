@@ -1,16 +1,20 @@
 package org.phantazm.core.scene2;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.Tickable;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.thread.Acquirable;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.thread.ThreadDispatcher;
 import net.minestom.server.thread.ThreadProvider;
+import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewImpl;
+import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -24,12 +28,71 @@ import java.util.function.Function;
  * methods, such as {@link SceneManager#getCurrentScene(PlayerView)}, are also provided to make working with scenes
  * easier.
  * <p>
- * This class is intended to be used as a singleton; generally, most applications will only want to have a one
- * {@link SceneManager}.
+ * This class is intended to be used as a singleton. The SceneManager instance for this application can be obtained
+ * through calling {@link Global#instance()} after ensuring {@link Global#init(Executor, Set, PlayerViewProvider, int)}
+ * has been called exactly <i>once</i>.
  * <h2>Thread Safety</h2>
- * Unless otherwise indicated, all methods are completely thread-safe.
+ * Unless otherwise indicated, all methods declared on this class are completely thread-safe.
  */
 public final class SceneManager implements Tickable {
+    /**
+     * A container class which holds the global SceneManager and provides access to its initialization through
+     * {@link Global#init(Executor, Set, PlayerViewProvider, int)}.
+     */
+    public static final class Global {
+        private static final Object GLOBAL_INITIALIZE_LOCK = new Object();
+
+        private static SceneManager instance;
+
+        /**
+         * Initializes the global {@link SceneManager}. This should be called once at server startup, after
+         * {@link MinecraftServer#init()} but optionally before starting. Calling it more than once will result in an
+         * {@link IllegalStateException}.
+         *
+         * @param executor     the executor to be used for join request fulfillment by the global SceneManager
+         * @param sceneTypes   the types of scene recognized by the global SceneManager
+         * @param viewProvider the {@link PlayerViewProvider} used to resolve PlayerView instances
+         * @param numThreads   the number of threads dedicated to ticking {@link Scene} instances
+         */
+        public static void init(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes,
+            @NotNull PlayerViewProvider viewProvider, int numThreads) {
+            Objects.requireNonNull(viewProvider);
+
+            synchronized (GLOBAL_INITIALIZE_LOCK) {
+                if (instance != null) {
+                    throw new IllegalStateException("The global SceneManager has already been initialized");
+                }
+
+                SceneManager manager = new SceneManager(executor, sceneTypes, numThreads);
+
+                MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, disconnectEvent -> {
+                    manager.handleDisconnect(viewProvider.fromPlayer(disconnectEvent.getPlayer()));
+                });
+
+                MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+                    manager.tick(System.currentTimeMillis());
+                }, TaskSchedule.immediate(), TaskSchedule.nextTick());
+
+                instance = manager;
+            }
+        }
+
+        /**
+         * Gets the global {@link SceneManager} instance. If this has not already been initialized through a call to
+         * {@link Global#init(Executor, Set, PlayerViewProvider, int)}, a {@link IllegalStateException} will be thrown.
+         *
+         * @return the global {@link SceneManager}
+         */
+        public static @NotNull SceneManager instance() {
+            SceneManager instance = Global.instance;
+            if (instance == null) {
+                throw new IllegalStateException("The global SceneManager has not yet been initialized");
+            }
+
+            return instance;
+        }
+    }
+
     /**
      * Represents the result of an attempted join for one or more players.
      */
@@ -65,14 +128,10 @@ public final class SceneManager implements Tickable {
     private final Map<Class<? extends Scene>, SceneEntry> mappedScenes;
     private final ThreadDispatcher<Scene> threadDispatcher;
 
-    public SceneManager(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes, int numThreads) {
+    private SceneManager(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes, int numThreads) {
         this.executor = Objects.requireNonNull(executor);
         this.mappedScenes = buildSceneMap(Set.copyOf(sceneTypes));
         this.threadDispatcher = ThreadDispatcher.of(ThreadProvider.counter(), numThreads);
-    }
-
-    public SceneManager(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes) {
-        this(executor, sceneTypes, Runtime.getRuntime().availableProcessors());
     }
 
     @SuppressWarnings("unchecked")
