@@ -58,7 +58,7 @@ public final class SceneManager implements Tickable {
     }
 
     private record SceneEntry(Set<Scene> scenes,
-        ReentrantLock creationLock) {
+        Object creationLock) {
     }
 
     private final Executor executor;
@@ -211,8 +211,7 @@ public final class SceneManager implements Tickable {
                 return JoinResult.JOINED;
             }
 
-            entry.creationLock.lock();
-            try {
+            synchronized (entry.creationLock) {
                 //another thread may have created a scene we can join before we locked
                 if (tryJoinScenes(entry.scenes, join)) {
                     return JoinResult.JOINED;
@@ -230,8 +229,6 @@ public final class SceneManager implements Tickable {
                 threadDispatcher.updateElement(newScene, newScene);
 
                 return JoinResult.JOINED;
-            } finally {
-                entry.creationLock.unlock();
             }
         }, executor).whenComplete((ignored, ignored1) -> {
             unlockPlayers(join.players());
