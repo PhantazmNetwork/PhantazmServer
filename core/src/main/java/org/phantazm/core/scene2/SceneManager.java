@@ -2,7 +2,9 @@ package org.phantazm.core.scene2;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.Tickable;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.thread.Acquirable;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.thread.ThreadDispatcher;
@@ -31,6 +33,7 @@ import java.util.function.Function;
  * This class is intended to be used as a singleton. The SceneManager instance for this application can be obtained
  * through calling {@link Global#instance()} after ensuring {@link Global#init(Executor, Set, PlayerViewProvider, int)}
  * has been called exactly <i>once</i>.
+ * <p>
  * <h2>Thread Safety</h2>
  * Unless otherwise indicated, all methods declared on this class are completely thread-safe.
  */
@@ -45,7 +48,7 @@ public final class SceneManager implements Tickable {
         private static SceneManager instance;
 
         /**
-         * Initializes the global {@link SceneManager}. This should be called once at server startup, after
+         * Initializes the global {@link SceneManager}. This should be called only once, after
          * {@link MinecraftServer#init()} but optionally before starting. Calling it more than once will result in an
          * {@link IllegalStateException}.
          *
@@ -68,6 +71,8 @@ public final class SceneManager implements Tickable {
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, disconnectEvent -> {
                     manager.handleDisconnect(viewProvider.fromPlayer(disconnectEvent.getPlayer()));
                 });
+
+                MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, manager::handleLogin);
 
                 MinecraftServer.getSchedulerManager().scheduleTask(() -> {
                     manager.tick(System.currentTimeMillis());
@@ -94,13 +99,18 @@ public final class SceneManager implements Tickable {
     }
 
     /**
-     * Represents the result of an attempted join for one or more players.
+     * Represents the status of an attempted join for one or more players.
      */
-    public enum JoinResult {
+    public enum JoinStatus {
         /**
          * The join operation completed successfully. The scene was able to accept all necessary players.
          */
         JOINED,
+
+        /**
+         * No players joined because the Join did not have any.
+         */
+        EMPTY_PLAYERS,
 
         /**
          * No scene with the same type as was requested in the join exists. No players have been moved or had any state
@@ -120,6 +130,99 @@ public final class SceneManager implements Tickable {
         CANNOT_PROVISION
     }
 
+    /**
+     * Encapsulates the result of a successful or failed attempt to join a scene contained in this manager.
+     *
+     * @param status the {@link JoinStatus} containing the status of the operation
+     * @param scene  the scene that was joined; is {@code null} if {@code status != JoinStatus.JOINED}, non-null
+     *               otherwise
+     * @param <T>    the type of scene that was joined
+     */
+    public record JoinResult<T extends Scene>(@NotNull JoinStatus status,
+        T scene) {
+        private static final JoinResult<?> EMPTY_PLAYERS = new JoinResult<>(JoinStatus.EMPTY_PLAYERS, null);
+
+        private static final JoinResult<?> UNRECOGNIZED_TYPE = new JoinResult<>(JoinStatus.UNRECOGNIZED_TYPE, null);
+
+        private static final JoinResult<?> ALREADY_JOINING = new JoinResult<>(JoinStatus.ALREADY_JOINING, null);
+
+        private static final JoinResult<?> CANNOT_PROVISION = new JoinResult<>(JoinStatus.CANNOT_PROVISION, null);
+
+        public JoinResult {
+            Objects.requireNonNull(status);
+            if (status == JoinStatus.JOINED) {
+                Objects.requireNonNull(scene);
+            } else if (scene != null) {
+                throw new IllegalArgumentException("Cannot specify a scene for a JoinStatus other than JOINED");
+            }
+        }
+
+        /**
+         * Returns a JoinResult with status {@link JoinStatus#EMPTY_PLAYERS}.
+         *
+         * @param <T> the type of scene that was joined
+         * @return a JoinResult with status {@link JoinStatus#EMPTY_PLAYERS}
+         */
+        @SuppressWarnings("unchecked")
+        public static <T extends Scene> @NotNull JoinResult<T> emptyPlayers() {
+            return (JoinResult<T>) EMPTY_PLAYERS;
+        }
+
+        /**
+         * Returns a JoinResult with status {@link JoinStatus#UNRECOGNIZED_TYPE}.
+         *
+         * @param <T> the type of scene that was joined
+         * @return a JoinResult with status {@link JoinStatus#UNRECOGNIZED_TYPE}
+         */
+        @SuppressWarnings("unchecked")
+        public static <T extends Scene> @NotNull JoinResult<T> unrecognizedType() {
+            return (JoinResult<T>) UNRECOGNIZED_TYPE;
+        }
+
+        /**
+         * Returns a JoinResult with status {@link JoinStatus#ALREADY_JOINING}.
+         *
+         * @param <T> the type of scene that was joined
+         * @return a JoinResult with status {@link JoinStatus#ALREADY_JOINING}
+         */
+        @SuppressWarnings("unchecked")
+        public static <T extends Scene> @NotNull JoinResult<T> alreadyJoining() {
+            return (JoinResult<T>) ALREADY_JOINING;
+        }
+
+        /**
+         * Returns a JoinResult with status {@link JoinStatus#CANNOT_PROVISION}.
+         *
+         * @param <T> the type of scene that was joined
+         * @return a JoinResult with status {@link JoinStatus#CANNOT_PROVISION}
+         */
+        @SuppressWarnings("unchecked")
+        public static <T extends Scene> @NotNull JoinResult<T> cannotProvision() {
+            return (JoinResult<T>) CANNOT_PROVISION;
+        }
+
+        /**
+         * Creates a successful JoinResult with status {@link JoinStatus#JOINED} and a given {@link Scene}.
+         *
+         * @param scene the scene that was joined
+         * @param <T>   the type of scene that was joined
+         * @return a JoinResult with status {@link JoinStatus#JOINED} and a non-null Scene
+         */
+        public static <T extends Scene> @NotNull JoinResult<T> joined(@NotNull T scene) {
+            return new JoinResult<>(JoinStatus.JOINED, scene);
+        }
+
+        /**
+         * Returns {@code true} if this JoinResult encapsulates a successful join attempt (and therefore, has a non-null
+         * scene). Returns {@code false} otherwise.
+         *
+         * @return {@code true} if this JoinResult encapsulates a successful join attempt; {@code false} otherwise
+         */
+        public boolean successful() {
+            return status == JoinStatus.JOINED;
+        }
+    }
+
     private record SceneEntry(Set<Scene> scenes,
         Object creationLock) {
     }
@@ -127,6 +230,8 @@ public final class SceneManager implements Tickable {
     private final Executor executor;
     private final Map<Class<? extends Scene>, SceneEntry> mappedScenes;
     private final ThreadDispatcher<Scene> threadDispatcher;
+
+    private volatile Function<? super Player, ? extends Join<? extends InstanceScene>> requestMapper;
 
     private SceneManager(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes, int numThreads) {
         this.executor = Objects.requireNonNull(executor);
@@ -146,13 +251,7 @@ public final class SceneManager implements Tickable {
         return Map.ofEntries(entries);
     }
 
-    /**
-     * Should be called once with a representative {@link PlayerView} when said player disconnects from the server. This
-     * will update state and remove the player from their old {@link Scene}.
-     *
-     * @param playerView the player to disconnect
-     */
-    public void handleDisconnect(@NotNull PlayerView playerView) {
+    private void handleDisconnect(@NotNull PlayerView playerView) {
         PlayerViewImpl view = (PlayerViewImpl) playerView;
 
         Semaphore semaphore = view.joinSemaphore();
@@ -167,6 +266,44 @@ public final class SceneManager implements Tickable {
         } finally {
             semaphore.release();
         }
+    }
+
+    private void handleLogin(@NotNull PlayerLoginEvent loginEvent) {
+        if (loginEvent.getSpawningInstance() != null) {
+            return;
+        }
+
+        Player player = loginEvent.getPlayer();
+
+        Function<? super Player, ? extends Join<? extends InstanceScene>> mapper = this.requestMapper;
+        if (mapper == null) {
+            loginEvent.setCancelled(true);
+            return;
+        }
+
+        Join<? extends InstanceScene> join = mapper.apply(player);
+        JoinResult<? extends InstanceScene> result = joinScene(join).join();
+        if (!result.successful()) {
+            loginEvent.setCancelled(true);
+            return;
+        }
+
+        InstanceScene scene = result.scene();
+        loginEvent.setSpawningInstance(scene.instance());
+    }
+
+    /**
+     * Sets the function that will be used to construct {@link Join} instances in response to player login. Such Join
+     * objects must have a scene type assignable to {@link InstanceScene}, because it is necessary to set the player's
+     * spawning instance on login.
+     * <p>
+     * If set to {@code null}, players will be unable to join the server. The login hook is set to null by default, so
+     * to have the server be accessible at all, this needs to be set.
+     *
+     * @param requestMapper the function used to create Join objects for players in response to login events
+     */
+    public void setLoginHook(@Nullable Function<? super @NotNull Player, ? extends @NotNull Join<? extends InstanceScene>> requestMapper) {
+        this.requestMapper = requestMapper;
     }
 
     /**
@@ -248,59 +385,65 @@ public final class SceneManager implements Tickable {
      * will immediately fail (they will return a CompletableFuture containing {@code false}).
      *
      * @param join the Join to fulfill
-     * @return a {@link CompletableFuture} containing a {@link JoinResult} indicating the success or failure of the join
+     * @param <T>  the type of scene
+     * @return a {@link CompletableFuture} containing a {@link JoinResult} indicating the success or failure of the
+     * join, as well as the scene that was joined (if successful)
      */
-    public @NotNull CompletableFuture<JoinResult> joinScene(@NotNull Join<?> join) {
+    public <T extends Scene> @NotNull CompletableFuture<JoinResult<T>> joinScene(@NotNull Join<T> join) {
         SceneEntry entry = mappedScenes.get(join.targetType());
         if (entry == null) {
-            return CompletableFuture.completedFuture(JoinResult.UNRECOGNIZED_TYPE);
+            return CompletableFuture.completedFuture(JoinResult.unrecognizedType());
         }
 
         Set<PlayerView> players = join.players();
         if (players.isEmpty()) {
-            return CompletableFuture.completedFuture(JoinResult.JOINED);
+            return CompletableFuture.completedFuture(JoinResult.emptyPlayers());
         }
 
         if (!lockPlayers(players, false)) {
-            return CompletableFuture.completedFuture(JoinResult.ALREADY_JOINING);
+            return CompletableFuture.completedFuture(JoinResult.alreadyJoining());
         }
 
         return CompletableFuture.supplyAsync(() -> {
-            if (tryJoinScenes(entry.scenes, join)) {
-                return JoinResult.JOINED;
-            }
-
-            synchronized (entry.creationLock) {
-                //another thread may have created a scene we can join before we locked
-                if (tryJoinScenes(entry.scenes, join)) {
-                    return JoinResult.JOINED;
+            try {
+                T joinedScene = tryJoinScenes(entry.scenes, join);
+                if (joinedScene != null) {
+                    return JoinResult.joined(joinedScene);
                 }
 
-                if (!join.canCreateNewScene()) {
-                    return JoinResult.CANNOT_PROVISION;
+                synchronized (entry.creationLock) {
+                    joinedScene = tryJoinScenes(entry.scenes, join);
+                    if (joinedScene != null) {
+                        return JoinResult.joined(joinedScene);
+                    }
+
+                    if (!join.canCreateNewScene()) {
+                        return JoinResult.cannotProvision();
+                    }
+
+                    T newScene = createAndJoinNewScene(join);
+
+                    entry.scenes.add(newScene);
+                    threadDispatcher.createPartition(newScene);
+                    threadDispatcher.updateElement(newScene, newScene);
+
+                    return JoinResult.joined(newScene);
                 }
-
-                Scene newScene = createAndJoinNewScene(join);
-
-                entry.scenes.add(newScene);
-                threadDispatcher.createPartition(newScene);
-                threadDispatcher.updateElement(newScene, newScene);
-
-                return JoinResult.JOINED;
+            } finally {
+                unlockPlayers(players);
             }
-        }, executor).whenComplete((ignored, ignored1) -> {
-            unlockPlayers(join.players());
-        });
+        }, executor);
     }
 
-    private boolean tryJoinScenes(Set<Scene> scenes, Join<?> join) {
+    private <T extends Scene> T tryJoinScenes(Set<Scene> scenes, Join<T> join) {
         for (Scene scene : scenes) {
-            if (tryJoinScene(scene, join)) {
-                return true;
+            T joinedScene = tryJoinScene(scene, join);
+            if (joinedScene != null) {
+                return joinedScene;
             }
         }
 
-        return false;
+        return null;
     }
 
     private boolean lockPlayers(Collection<PlayerView> players, boolean force) {
@@ -413,14 +556,14 @@ public final class SceneManager implements Tickable {
         return scene;
     }
 
-    private <T extends Scene> boolean tryJoinScene(Scene scene, Join<T> join) {
+    private <T extends Scene> T tryJoinScene(Scene scene, Join<T> join) {
         Acquirable<? extends Scene> sceneAcquirable = scene.getAcquirable();
         T castScene = join.targetType().cast(scene);
 
         Acquired<? extends Scene> acquired = sceneAcquirable.lock();
         try {
             if (!castScene.joinable() || !join.matches(castScene)) {
-                return false;
+                return null;
             }
 
             leaveOldScenes(join, castScene);
@@ -429,7 +572,7 @@ public final class SceneManager implements Tickable {
             acquired.unlock();
         }
 
-        return true;
+        return castScene;
     }
 
     private void leaveOldScenes(Join<?> join, Scene newScene) {
