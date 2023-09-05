@@ -15,6 +15,7 @@ import org.phantazm.core.player.PlayerViewImpl;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  * SceneManager is used to fulfill requests by one or more players to join {@link Scene} objects. This class also
@@ -107,34 +108,36 @@ public final class SceneManager implements Tickable {
      * Removes a scene, shutting it down and scheduling it for removal from internal data structures. If the scene is
      * not managed by this manager, or is of an unrecognized type, this method will do nothing.
      * <p>
-     * Note that this method will remove any players in the scene when it has shut down, but these players will not be
-     * sent anywhere.
+     * Note that this method will <i>leave</i> any players from the scene when it has shut down, but these players will
+     * not be sent anywhere. That is the responsibility of {@code playerCallback}, a {@link CompletableFuture}-returning
+     * function. When its future is complete (exceptionally or otherwise), the scene will be fully shut down by calling
+     * {@link Scene#shutdown()}.
      *
-     * @param scene the scene to remove
+     * @param scene          the scene to remove
+     * @param playerCallback the callback to run with the set of all players that were previously in {@code scene}
      */
-    public void removeScene(@NotNull Scene scene) {
+    public void removeScene(@NotNull Scene scene,
+        @NotNull Function<? super @NotNull Set<@NotNull PlayerView>, ? extends @NotNull CompletableFuture<?>> playerCallback) {
         Set<Scene> scenes = mappedScenes.get(scene.getClass());
         if (scenes == null) {
             return;
         }
+
+        if (!scenes.remove(scene)) {
+            return;
+        }
+
+        threadDispatcher.deletePartition(scene);
 
         scene.getAcquirable().async(self -> {
             if (self.isShutdown()) {
                 return;
             }
 
-            if (!scenes.remove(self)) {
-                return;
-            }
-
-            threadDispatcher.removeElement(self);
-            threadDispatcher.deletePartition(self);
-
-            self.shutdown();
-
             Set<PlayerView> players = self.players();
+            lockPlayers(players, true);
+
             try {
-                lockPlayers(players, true);
                 self.leave(players);
 
                 for (PlayerView playerView : players) {
@@ -143,6 +146,10 @@ public final class SceneManager implements Tickable {
             } finally {
                 unlockPlayers(players);
             }
+
+            playerCallback.apply(players).whenComplete((ignored1, ignored2) -> {
+                scene.getAcquirable().sync(Scene::shutdown);
+            });
         });
     }
 

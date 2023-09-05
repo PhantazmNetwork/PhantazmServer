@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Represents something that can be joined by players, such as a game or a lobby. Scenes are ticked by a
@@ -59,15 +60,17 @@ public interface Scene extends Tickable, Acquirable.Source<Scene> {
      *     <li>The scene will no longer accept new players; {@link Scene#joinable()} will return {@code false}.</li>
      *     <li>Subsequent calls to {@link Scene#isShutdown()} will return {@code true}.</li>
      *     <li>The scene will clean up any otherwise persistent resources it may be using, such as instances, event hooks, or scheduled tasks.</li>
-     *     <li>The scene will NOT remove any players present in the scene; it is expected that a {@link SceneManager} will call {@link Scene#leave(Set)} for the remaining players</li>
-     *     <li>As a consequence of the previous requirement, after calling this method, the set returned by {@link Scene#players()} should never change so long as {@link Scene#leave(Set)} is not called.</li>
      * </ul>
      * <p>
      * Shutting down a scene that has already shut down will do nothing.
      * <p>
+     * Players that exist in the scene when it is shut down <i>may</i> be forcefully kicked from the server. The
+     * {@link SceneManager} instance should make a best-effort attempt to find somewhere to send old players before
+     * calling this method.
+     * <p>
      * This method is marked as internal because it should only be called indirectly through
-     * {@link SceneManager#removeScene(Scene)}, in order to prevent shut-down scenes from sticking around in the
-     * manager, ensure players are properly removed, and prevent synchronization issues.
+     * {@link SceneManager#removeScene(Scene, Function)}, in order to prevent shut-down scenes from sticking around in
+     * the manager, ensure players are properly removed, and prevent synchronization issues.
      */
     @ApiStatus.Internal
     void shutdown();
