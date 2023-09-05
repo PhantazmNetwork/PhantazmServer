@@ -17,7 +17,6 @@ import java.util.concurrent.CompletableFuture;
  * Basic implementation of a {@link LobbyJoinRequest}.
  */
 public class BasicLobbyJoinRequest implements LobbyJoinRequest {
-
     private final Collection<PlayerView> players;
 
     /**
