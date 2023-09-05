@@ -12,7 +12,7 @@ import java.util.Objects;
  * {@link InstanceScene#shutdown()} should make sure to call {@code super.shutdown()}.
  */
 public abstract class InstanceScene extends SceneAbstract {
-    protected final Instance instance;
+    private final Instance instance;
 
     public InstanceScene(@NotNull Instance instance) {
         this.instance = Objects.requireNonNull(instance);
@@ -20,6 +20,10 @@ public abstract class InstanceScene extends SceneAbstract {
 
     @Override
     public void shutdown() {
+        if (isShutdown()) {
+            return;
+        }
+
         super.shutdown();
         MinecraftServer.getInstanceManager().forceUnregisterInstance(instance);
     }
@@ -29,7 +33,7 @@ public abstract class InstanceScene extends SceneAbstract {
      *
      * @return the instace for this InstanceScene
      */
-    public @NotNull Instance instance() {
+    public final @NotNull Instance instance() {
         return instance;
     }
 }

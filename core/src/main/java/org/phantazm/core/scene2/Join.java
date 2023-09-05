@@ -9,6 +9,7 @@ import java.util.Set;
 /**
  * Represents a request by some number of players to join a specific scene. Join instances are expected to be passed to
  * a {@link SceneManager} that will fulfill the request.
+ * <p>
  * <h2>Thread Safety</h2>
  * Unless otherwise specified, no methods on Join support concurrent access.
  *

@@ -10,7 +10,6 @@ import net.minestom.server.thread.Acquired;
 import net.minestom.server.thread.ThreadDispatcher;
 import net.minestom.server.thread.ThreadProvider;
 import net.minestom.server.timer.TaskSchedule;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -20,7 +19,6 @@ import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -37,7 +35,7 @@ import java.util.function.Function;
  * <h2>Thread Safety</h2>
  * Unless otherwise indicated, all methods declared on this class are completely thread-safe.
  */
-public final class SceneManager implements Tickable {
+public final class SceneManager {
     /**
      * A container class which holds the global SceneManager and provides access to its initialization through
      * {@link Global#init(Executor, Set, PlayerViewProvider, int)}.
@@ -245,7 +243,7 @@ public final class SceneManager implements Tickable {
         int i = 0;
         for (Class<? extends Scene> sceneType : sceneTypes) {
             entries[i++] = Map.entry(sceneType, new SceneEntry(Collections.newSetFromMap(new ConcurrentHashMap<>()),
-                new ReentrantLock()));
+                new Object()));
         }
 
         return Map.ofEntries(entries);
@@ -628,15 +626,8 @@ public final class SceneManager implements Tickable {
         }
     }
 
-    /**
-     * Ticks this SceneManager. Should only be called by the Minestom tick scheduler at a rate of approximately 20 times
-     * per second.
-     *
-     * @param time the time of the tick in milliseconds
-     */
-    @Override
-    @ApiStatus.Internal
-    public void tick(long time) {
+
+    private void tick(long time) {
         threadDispatcher.updateAndAwait(time);
         threadDispatcher.refreshThreads(System.currentTimeMillis() - time);
     }

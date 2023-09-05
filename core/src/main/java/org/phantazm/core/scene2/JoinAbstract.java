@@ -18,12 +18,12 @@ public abstract class JoinAbstract<T extends Scene> implements Join<T> {
     }
 
     @Override
-    public @NotNull @Unmodifiable Set<@NotNull PlayerView> players() {
+    public final @NotNull @Unmodifiable Set<@NotNull PlayerView> players() {
         return players;
     }
 
     @Override
-    public @NotNull Class<T> targetType() {
+    public final @NotNull Class<T> targetType() {
         return targetType;
     }
 }
