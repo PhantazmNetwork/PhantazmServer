@@ -14,6 +14,7 @@ import org.phantazm.core.player.PlayerViewImpl;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -56,8 +57,12 @@ public final class SceneManager implements Tickable {
         CANNOT_PROVISION
     }
 
+    private record SceneEntry(Set<Scene> scenes,
+        ReentrantLock creationLock) {
+    }
+
     private final Executor executor;
-    private final Map<Class<? extends Scene>, Set<Scene>> mappedScenes;
+    private final Map<Class<? extends Scene>, SceneEntry> mappedScenes;
     private final ThreadDispatcher<Scene> threadDispatcher;
 
     public SceneManager(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes, int numThreads) {
@@ -71,11 +76,12 @@ public final class SceneManager implements Tickable {
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<Class<? extends Scene>, Set<Scene>> buildSceneMap(Collection<Class<? extends Scene>> sceneTypes) {
-        Map.Entry<Class<? extends Scene>, Set<Scene>>[] entries = new Map.Entry[sceneTypes.size()];
+    private static Map<Class<? extends Scene>, SceneEntry> buildSceneMap(Collection<Class<? extends Scene>> sceneTypes) {
+        Map.Entry<Class<? extends Scene>, SceneEntry>[] entries = new Map.Entry[sceneTypes.size()];
         int i = 0;
         for (Class<? extends Scene> sceneType : sceneTypes) {
-            entries[i++] = Map.entry(sceneType, Collections.newSetFromMap(new ConcurrentHashMap<>()));
+            entries[i++] = Map.entry(sceneType, new SceneEntry(Collections.newSetFromMap(new ConcurrentHashMap<>()),
+                new ReentrantLock()));
         }
 
         return Map.ofEntries(entries);
@@ -118,11 +124,12 @@ public final class SceneManager implements Tickable {
      */
     public void removeScene(@NotNull Scene scene,
         @NotNull Function<? super @NotNull Set<@NotNull PlayerView>, ? extends @NotNull CompletableFuture<?>> playerCallback) {
-        Set<Scene> scenes = mappedScenes.get(scene.getClass());
-        if (scenes == null) {
+        SceneEntry entry = mappedScenes.get(scene.getClass());
+        if (entry == null) {
             return;
         }
 
+        Set<Scene> scenes = entry.scenes;
         if (!scenes.remove(scene)) {
             return;
         }
@@ -164,12 +171,12 @@ public final class SceneManager implements Tickable {
      */
     @SuppressWarnings("unchecked")
     public <T extends Scene> @Nullable @Unmodifiable Set<T> typed(@NotNull Class<T> sceneType) {
-        Set<?> scenes = mappedScenes.get(sceneType);
-        if (scenes == null) {
+        SceneEntry entry = mappedScenes.get(sceneType);
+        if (entry == null) {
             return null;
         }
 
-        return (Set<T>) Set.copyOf(scenes);
+        return (Set<T>) Set.copyOf(entry.scenes);
     }
 
     /**
@@ -185,8 +192,8 @@ public final class SceneManager implements Tickable {
      * @return a {@link CompletableFuture} containing a {@link JoinResult} indicating the success or failure of the join
      */
     public @NotNull CompletableFuture<JoinResult> joinScene(@NotNull Join<?> join) {
-        Set<Scene> scenes = mappedScenes.get(join.targetType());
-        if (scenes == null) {
+        SceneEntry entry = mappedScenes.get(join.targetType());
+        if (entry == null) {
             return CompletableFuture.completedFuture(JoinResult.UNRECOGNIZED_TYPE);
         }
 
@@ -200,27 +207,45 @@ public final class SceneManager implements Tickable {
         }
 
         return CompletableFuture.supplyAsync(() -> {
-            for (Scene scene : scenes) {
-                if (tryJoinExisting(scene, join)) {
+            if (tryJoinScenes(entry.scenes, join)) {
+                return JoinResult.JOINED;
+            }
+
+            entry.creationLock.lock();
+            try {
+                //another thread may have created a scene we can join before we locked
+                if (tryJoinScenes(entry.scenes, join)) {
                     return JoinResult.JOINED;
                 }
+
+                boolean canCreateNewScene = join.canCreateNewScene();
+                if (!canCreateNewScene) {
+                    return JoinResult.CANNOT_PROVISION;
+                }
+
+                Scene newScene = createAndJoinNewScene(join);
+
+                entry.scenes.add(newScene);
+                threadDispatcher.createPartition(newScene);
+                threadDispatcher.updateElement(newScene, newScene);
+
+                return JoinResult.JOINED;
+            } finally {
+                entry.creationLock.unlock();
             }
-
-            boolean canCreateNewScene = join.canCreateNewScene();
-            if (!canCreateNewScene) {
-                return JoinResult.CANNOT_PROVISION;
-            }
-
-            Scene newScene = createAndJoinNewScene(join);
-
-            scenes.add(newScene);
-            threadDispatcher.createPartition(newScene);
-            threadDispatcher.updateElement(newScene, newScene);
-
-            return JoinResult.JOINED;
         }, executor).whenComplete((ignored, ignored1) -> {
             unlockPlayers(join.players());
         });
+    }
+
+    private boolean tryJoinScenes(Set<Scene> scenes, Join<?> join) {
+        for (Scene scene : scenes) {
+            if (tryJoinScene(scene, join)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private boolean lockPlayers(Collection<PlayerView> players, boolean force) {
@@ -333,7 +358,7 @@ public final class SceneManager implements Tickable {
         return scene;
     }
 
-    private <T extends Scene> boolean tryJoinExisting(Scene scene, Join<T> join) {
+    private <T extends Scene> boolean tryJoinScene(Scene scene, Join<T> join) {
         Acquirable<? extends Scene> sceneAcquirable = scene.getAcquirable();
         T castScene = join.targetType().cast(scene);
 
