@@ -217,8 +217,7 @@ public final class SceneManager implements Tickable {
                     return JoinResult.JOINED;
                 }
 
-                boolean canCreateNewScene = join.canCreateNewScene();
-                if (!canCreateNewScene) {
+                if (!join.canCreateNewScene()) {
                     return JoinResult.CANNOT_PROVISION;
                 }
 
