@@ -5,7 +5,6 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.config.InstanceConfig;
-import org.phantazm.core.game.scene.Utils;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.ArrayList;
@@ -46,9 +45,6 @@ public class BasicLobbyJoinRequest implements LobbyJoinRequest {
                 if (player.getInstance() == instance) {
                     futures.add(player.teleport(instanceConfig.spawnPoint()));
                 } else {
-                    Instance oldInstance = player.getInstance();
-                    player.setInstanceAddCallback(() -> Utils.handleInstanceTransfer(oldInstance, instance, player,
-                        newInstancePlayer -> !lobby.hasGhost(newInstancePlayer)));
                     futures.add(player.setInstance(instance, instanceConfig.spawnPoint()));
                 }
             });

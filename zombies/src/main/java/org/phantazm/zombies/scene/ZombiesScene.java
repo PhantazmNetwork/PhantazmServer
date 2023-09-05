@@ -21,7 +21,6 @@ import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.TransferResult;
-import org.phantazm.core.game.scene.Utils;
 import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
@@ -263,9 +262,6 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             return;
         }
 
-        Instance oldInstance = player.getInstance();
-        player.setInstanceAddCallback(() -> Utils.handleInstanceTransfer(oldInstance, instance, player,
-            newInstancePlayer -> !super.hasGhost(newInstancePlayer)));
         futures.add(player.setInstance(instance, pos));
     }
 

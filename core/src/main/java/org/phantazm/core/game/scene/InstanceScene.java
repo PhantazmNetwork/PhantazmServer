@@ -117,9 +117,6 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
             ghostLock.unlockWrite(writeStamp);
         }
 
-        player.setInstanceAddCallback(
-            () -> Utils.handleInstanceTransfer(oldInstance, instance, player, newInstancePlayer -> true,
-                this::hasGhost));
         player.setGameMode(GameMode.SPECTATOR);
         player.setInstance(instance, spawnPoint);
         player.getInventory().clear();

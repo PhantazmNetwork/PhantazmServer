@@ -332,7 +332,7 @@ public final class SceneManager implements Tickable {
 
         threadDispatcher.deletePartition(scene);
 
-        scene.getAcquirable().async(self -> {
+        scene.getAcquirable().sync(self -> {
             if (self.isShutdown()) {
                 return;
             }
