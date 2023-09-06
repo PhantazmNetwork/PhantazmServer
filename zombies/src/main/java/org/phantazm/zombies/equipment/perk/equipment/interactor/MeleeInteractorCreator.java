@@ -14,6 +14,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Flags;
@@ -21,8 +22,9 @@ import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.map.Flaggable;
-import org.phantazm.zombies.map.objects.MapObjects;
+import org.phantazm.zombies.mob2.Keys;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene.ZombiesScene;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -36,17 +38,16 @@ import java.util.Optional;
 @Cache(false)
 public class MeleeInteractorCreator implements PerkInteractorCreator {
     private final Data data;
-    private final Flaggable mapFlags;
 
     @FactoryMethod
-    public MeleeInteractorCreator(@NotNull Data data, @NotNull MapObjects mapObjects) {
+    public MeleeInteractorCreator(@NotNull Data data) {
         this.data = Objects.requireNonNull(data);
-        this.mapFlags = mapObjects.module().flags();
     }
 
     @Override
-    public @NotNull PerkInteractor forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
-        return new Interactor(data, zombiesPlayer, mapFlags);
+    public @NotNull PerkInteractor forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
+        ZombiesScene scene = injectionStore.get(Keys.SCENE);
+        return new Interactor(data, zombiesPlayer, scene.getMap().mapObjects().module().flags());
     }
 
     @DataObject

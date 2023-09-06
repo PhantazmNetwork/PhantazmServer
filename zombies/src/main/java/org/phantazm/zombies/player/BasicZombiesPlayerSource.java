@@ -84,7 +84,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
     private final PlayerViewProvider viewProvider;
 
-    private final Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction;
+    private final BiFunction<ZombiesEquipmentModule, ZombiesScene, EquipmentCreator> equipmentCreatorFunction;
 
     private final ContextManager contextManager;
 
@@ -92,7 +92,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
     public BasicZombiesPlayerSource(@NotNull ZombiesDatabase database, @NotNull Executor executor,
         @NotNull PlayerViewProvider viewProvider,
-        @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
+        @NotNull BiFunction<ZombiesEquipmentModule, ZombiesScene, EquipmentCreator> equipmentCreatorFunction,
         @NotNull ContextManager contextManager, @NotNull KeyParser keyParser) {
         this.database = Objects.requireNonNull(database);
         this.executor = Objects.requireNonNull(executor);
@@ -168,7 +168,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         ZombiesEquipmentModule equipmentModule =
             new ZombiesEquipmentModule(zombiesPlayers, playerView, stats, actionBar, mobSpawner,
                 eventNode, random, mapObjects, zombiesPlayerWrapper);
-        EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(equipmentModule);
+        EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(equipmentModule, scene);
 
         Sidebar sidebar = new Sidebar(mapSettingsInfo.scoreboardHeader());
         TabList tabList = new TabList(UUID.randomUUID().toString(), ScoreboardObjectivePacket.Type.INTEGER);

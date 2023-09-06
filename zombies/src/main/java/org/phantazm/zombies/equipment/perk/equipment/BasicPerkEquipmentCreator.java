@@ -6,6 +6,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.zombies.equipment.perk.equipment.interactor.PerkInteractor;
 import org.phantazm.zombies.equipment.perk.equipment.interactor.PerkInteractorCreator;
@@ -36,9 +37,9 @@ public class BasicPerkEquipmentCreator implements PerkEquipmentCreator {
     }
 
     @Override
-    public @NotNull PerkEquipment forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
-        PerkInteractor perkInteractor = interactor.forPlayer(zombiesPlayer);
-        PerkVisual perkVisual = visual.forPlayer(zombiesPlayer);
+    public @NotNull PerkEquipment forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
+        PerkInteractor perkInteractor = interactor.forPlayer(zombiesPlayer, injectionStore);
+        PerkVisual perkVisual = visual.forPlayer(zombiesPlayer, injectionStore);
         return new Equipment(perkInteractor, perkVisual);
     }
 

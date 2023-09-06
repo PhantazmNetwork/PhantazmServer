@@ -6,6 +6,7 @@ import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 @Description("""
@@ -41,7 +42,7 @@ public class NoInteractorCreator implements PerkInteractorCreator {
     }
 
     @Override
-    public @NotNull PerkInteractor forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
+    public @NotNull PerkInteractor forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
         return INTERACTOR;
     }
 }

@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.document.Description;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Arrays;
@@ -47,8 +48,8 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
     }
 
     @Override
-    public @NotNull PerkInteractor forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
-        return new Interactor(data, delegate.forPlayer(zombiesPlayer), flags);
+    public @NotNull PerkInteractor forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
+        return new Interactor(data, delegate.forPlayer(zombiesPlayer, injectionStore), flags);
     }
 
     public enum DelegateType {

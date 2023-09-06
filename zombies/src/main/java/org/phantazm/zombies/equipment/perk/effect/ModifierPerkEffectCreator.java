@@ -9,6 +9,7 @@ import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -57,7 +58,7 @@ public class ModifierPerkEffectCreator implements PerkEffectCreator {
     }
 
     @Override
-    public @NotNull PerkEffect forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
+    public @NotNull PerkEffect forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
         return new Effect(data, zombiesPlayer);
     }
 

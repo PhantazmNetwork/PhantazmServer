@@ -10,6 +10,7 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -24,7 +25,7 @@ public class TransactionModifierPerkEffectCreator implements PerkEffectCreator {
     }
 
     @Override
-    public @NotNull PerkEffect forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
+    public @NotNull PerkEffect forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
         return new Effect(data, zombiesPlayer);
     }
 

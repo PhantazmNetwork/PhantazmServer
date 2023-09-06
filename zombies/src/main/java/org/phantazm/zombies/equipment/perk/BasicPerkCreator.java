@@ -2,6 +2,7 @@ package org.phantazm.zombies.equipment.perk;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.equipment.LeveledEquipment;
 import org.phantazm.zombies.equipment.perk.level.PerkLevel;
 import org.phantazm.zombies.equipment.perk.level.PerkLevelCreator;
@@ -29,12 +30,12 @@ public class BasicPerkCreator implements PerkCreator {
 
     @SuppressWarnings("unchecked")
     @Override
-    public @NotNull Perk forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
+    public @NotNull Perk forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
         Map.Entry<Key, PerkLevel>[] newMapEntries = new Map.Entry[perkLevelCreators.size()];
         Iterator<Map.Entry<Key, PerkLevelCreator>> entryIterator = perkLevelCreators.entrySet().iterator();
         for (int i = 0; i < newMapEntries.length; i++) {
             Map.Entry<Key, PerkLevelCreator> entry = entryIterator.next();
-            newMapEntries[i] = Map.entry(entry.getKey(), entry.getValue().forPlayer(zombiesPlayer));
+            newMapEntries[i] = Map.entry(entry.getKey(), entry.getValue().forPlayer(zombiesPlayer, injectionStore));
         }
 
         return new Basic(equipmentKey, rootLevel, Map.ofEntries(newMapEntries));

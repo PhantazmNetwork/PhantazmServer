@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.element.core.annotation.document.Description;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.equipment.perk.effect.PerkEffect;
 import org.phantazm.zombies.equipment.perk.effect.PerkEffectCreator;
 import org.phantazm.zombies.equipment.perk.equipment.PerkEquipmentCreator;
@@ -36,14 +37,14 @@ public class UpgradeablePerkLevelCreator implements PerkLevelCreator {
     }
 
     @Override
-    public @NotNull PerkLevel forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
+    public @NotNull PerkLevel forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
         PerkEffect[] perkEffects = new PerkEffect[effects.size()];
         Iterator<PerkEffectCreator> iterator = effects.iterator();
         for (int i = 0; i < perkEffects.length; i++) {
-            perkEffects[i] = iterator.next().forPlayer(zombiesPlayer);
+            perkEffects[i] = iterator.next().forPlayer(zombiesPlayer, );
         }
 
-        return new BasicPerkLevel(data.upgrades, equipment.forPlayer(zombiesPlayer), List.of(perkEffects));
+        return new BasicPerkLevel(data.upgrades, equipment.forPlayer(zombiesPlayer, injectionStore), List.of(perkEffects));
     }
 
     @Override

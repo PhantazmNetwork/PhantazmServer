@@ -8,9 +8,11 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
 import org.phantazm.zombies.event.EntityDamageByGunEvent;
+import org.phantazm.zombies.mob2.Keys;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;
@@ -21,18 +23,16 @@ import java.util.UUID;
 @Model("zombies.perk.effect.shot")
 @Cache(false)
 public class ShotEffectCreator implements PerkEffectCreator {
-    private final EventNode<Event> rootNode;
     private final Collection<ShotEffect> actions;
 
     @FactoryMethod
-    public ShotEffectCreator(@NotNull EventNode<Event> rootNode,
-        @NotNull @Child("action") Collection<ShotEffect> actions) {
-        this.rootNode = rootNode;
+    public ShotEffectCreator(@NotNull @Child("action") Collection<ShotEffect> actions) {
         this.actions = List.copyOf(actions);
     }
 
     @Override
-    public @NotNull PerkEffect forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
+    public @NotNull PerkEffect forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
+        EventNode<Event> rootNode = injectionStore.get(Keys.SCENE).getMap().mapObjects().module().eventNode().get();
         return new Effect(rootNode, zombiesPlayer, actions);
     }
 

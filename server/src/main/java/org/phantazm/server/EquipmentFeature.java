@@ -15,6 +15,7 @@ import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FileUtils;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.ElementUtils;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.EquipmentCreator;
@@ -28,7 +29,9 @@ import org.phantazm.zombies.equipment.gun.event.GunShootEvent;
 import org.phantazm.zombies.equipment.perk.BasicPerkCreator;
 import org.phantazm.zombies.equipment.perk.PerkCreator;
 import org.phantazm.zombies.equipment.perk.level.PerkLevelCreator;
+import org.phantazm.zombies.mob2.Keys;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,7 +140,7 @@ final class EquipmentFeature {
         LOGGER.info("Loaded {} equipment.", equipmentLevelMap.size());
     }
 
-    public static @NotNull EquipmentCreator createEquipmentCreator(@NotNull ZombiesEquipmentModule equipmentModule) {
+    public static @NotNull EquipmentCreator createEquipmentCreator(@NotNull ZombiesEquipmentModule equipmentModule, ZombiesScene scene) {
         Objects.requireNonNull(equipmentModule);
         FeatureUtils.check(equipmentLevelMap);
         FeatureUtils.check(keyParser);
@@ -173,6 +176,7 @@ final class EquipmentFeature {
         }
 
         Map<Key, PerkCreator> perkMap = Map.copyOf(perkCreatorMap);
+        InjectionStore injectionStore = InjectionStore.of(Keys.SCENE, scene);
 
         return new EquipmentCreator() {
             @Override
@@ -210,7 +214,7 @@ final class EquipmentFeature {
                     return Optional.empty();
                 }
 
-                return Optional.of(perkCreator.forPlayer(zombiesPlayer));
+                return Optional.of(perkCreator.forPlayer(zombiesPlayer, injectionStore));
             }
 
             private Optional<Equipment> loadGun(Pair<EquipmentData, List<ElementContext>> pair, Key equipmentKey) {

@@ -7,6 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
@@ -23,7 +24,7 @@ public class StaticVisualCreator implements PerkVisualCreator {
     }
 
     @Override
-    public @NotNull PerkVisual forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
+    public @NotNull PerkVisual forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
         return new Visual(data);
     }
 

@@ -7,6 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -24,7 +25,7 @@ public class FlaggingPerkEffectCreator implements PerkEffectCreator {
     }
 
     @Override
-    public @NotNull PerkEffect forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
+    public @NotNull PerkEffect forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
         return new Effect(data, zombiesPlayer.flags());
     }
 
