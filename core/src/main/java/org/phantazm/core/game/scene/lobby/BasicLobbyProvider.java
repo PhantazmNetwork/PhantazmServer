@@ -140,7 +140,7 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
             }
 
             Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, fallback,
-                new NPCHandler(List.copyOf(npcs), instance, instanceNode), defaultItems, miniMessage,
+                new NPCHandler(List.copyOf(npcs), instance), defaultItems, miniMessage,
                 lobbyJoinFormat, quittable, playerViewProvider, displayNameStyler);
             instanceNode.addListener(PlayerDisconnectEvent.class, event -> {
                 try (TransferResult result = lobby.leave(Collections.singleton(event.getPlayer().getUuid()))) {
@@ -156,6 +156,5 @@ public class BasicLobbyProvider extends LobbyProviderAbstract {
     protected void cleanupScene(@NotNull Lobby scene) {
         NPCHandler handler = scene.handler();
         handler.end();
-        rootNode.removeChild(handler.instanceNode());
     }
 }

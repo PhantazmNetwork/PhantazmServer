@@ -7,51 +7,62 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.gui.Gui;
 import org.phantazm.core.gui.GuiItem;
 import org.phantazm.core.npc.interactor.Interactor;
 
 @Model("npc.interactor.gui.item")
-@Cache(false)
-public class InteractorDelegatingItem implements GuiItem {
+@Cache
+public class InteractorDelegatingItem implements BasicComponent<GuiItem> {
     private final Data data;
-    private final Interactor interactor;
+    private final BasicComponent<Interactor> interactor;
 
     @FactoryMethod
-    public InteractorDelegatingItem(@NotNull Data data, @NotNull @Child("interactor") Interactor interactor) {
+    public InteractorDelegatingItem(@NotNull Data data,
+        @NotNull @Child("interactor") BasicComponent<Interactor> interactor) {
         this.data = data;
         this.interactor = interactor;
     }
 
     @Override
-    public void handleClick(@NotNull Gui owner, @NotNull Player player, int slot, @NotNull ClickType clickType) {
-        if (clickType == ClickType.LEFT_CLICK) {
-            interactor.interact(player);
+    public GuiItem apply(@NotNull InjectionStore injectionStore) {
+        return new Internal(data, interactor.apply(injectionStore));
+    }
 
-            if (data.closeOnClick) {
-                player.closeInventory();
+    private record Internal(Data data,
+        Interactor interactor) implements GuiItem {
+        @Override
+        public void handleClick(@NotNull Gui owner, @NotNull Player player, int slot, @NotNull ClickType clickType) {
+            if (clickType == ClickType.LEFT_CLICK) {
+                interactor.interact(player);
+
+                if (data.closeOnClick) {
+                    player.closeInventory();
+                }
             }
         }
-    }
 
-    @Override
-    public void onRemove(@NotNull Gui owner, int slot) {
+        @Override
+        public void onRemove(@NotNull Gui owner, int slot) {
 
-    }
+        }
 
-    @Override
-    public void onReplace(@NotNull Gui owner, @NotNull GuiItem newItem, int slot) {
+        @Override
+        public void onReplace(@NotNull Gui owner, @NotNull GuiItem newItem, int slot) {
 
-    }
+        }
 
-    @Override
-    public @NotNull ItemStack getItemStack() {
-        return data.itemStack;
-    }
+        @Override
+        public @NotNull ItemStack getItemStack() {
+            return data.itemStack;
+        }
 
-    @Override
-    public boolean shouldRedraw() {
-        return false;
+        @Override
+        public boolean shouldRedraw() {
+            return false;
+        }
     }
 
     @DataObject

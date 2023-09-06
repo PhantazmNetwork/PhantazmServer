@@ -12,13 +12,15 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.PlayerSkin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 
 import java.util.function.Supplier;
 
 @Model("npc.entity.supplier.player")
 @Cache
-public class PlayerEntitySupplier implements Supplier<Entity> {
+public class PlayerEntitySupplier implements BasicComponent<Supplier<Entity>> {
     private final Data data;
 
     @FactoryMethod
@@ -27,13 +29,20 @@ public class PlayerEntitySupplier implements Supplier<Entity> {
     }
 
     @Override
-    public Entity get() {
-        if (data.skinUUID != null) {
-            return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), data.playerName,
-                PlayerSkin.fromUuid(data.skinUUID.replace("-", "")));
-        }
+    public Supplier<Entity> apply(@NotNull InjectionStore injectionStore) {
+        return new Internal(data);
+    }
 
-        return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), data.playerName, data.playerSkin);
+    private record Internal(Data data) implements Supplier<Entity> {
+        @Override
+        public Entity get() {
+            if (data.skinUUID != null) {
+                return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), data.playerName,
+                    PlayerSkin.fromUuid(data.skinUUID.replace("-", "")));
+            }
+
+            return new MinimalFakePlayer(MinecraftServer.getSchedulerManager(), data.playerName, data.playerSkin);
+        }
     }
 
     @DataObject

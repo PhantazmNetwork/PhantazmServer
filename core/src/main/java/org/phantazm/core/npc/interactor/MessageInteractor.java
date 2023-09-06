@@ -11,10 +11,12 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.InjectionStore;
 
 @Model("npc.interactor.message")
 @Cache
-public class MessageInteractor implements Interactor {
+public class MessageInteractor implements BasicComponent<Interactor> {
     private final Data data;
 
     @FactoryMethod
@@ -23,16 +25,23 @@ public class MessageInteractor implements Interactor {
     }
 
     @Override
-    public void interact(@NotNull Player player) {
-        if (data.broadcast) {
-            Instance instance = player.getInstance();
-            if (instance != null) {
-                instance.sendMessage(data.message);
+    public Interactor apply(@NotNull InjectionStore injectionStore) {
+        return new Internal(data);
+    }
+
+    private record Internal(Data data) implements Interactor {
+        @Override
+        public void interact(@NotNull Player player) {
+            if (data.broadcast) {
+                Instance instance = player.getInstance();
+                if (instance != null) {
+                    instance.sendMessage(data.message);
+                } else {
+                    player.sendMessage(data.message);
+                }
             } else {
                 player.sendMessage(data.message);
             }
-        } else {
-            player.sendMessage(data.message);
         }
     }
 

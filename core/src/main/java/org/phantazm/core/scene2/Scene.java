@@ -105,6 +105,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene> {
      *     <li>Send the players to a new scene</li>
      *     <li>Attempt to remove players from other scenes</li>
      *     <li>Kick the players</li>
+     *     <li>Modify player state for players not in the scene</li>
      * </ul>
      * <p>
      * This method is marked as internal because it should generally only be called by {@link SceneManager}; this method

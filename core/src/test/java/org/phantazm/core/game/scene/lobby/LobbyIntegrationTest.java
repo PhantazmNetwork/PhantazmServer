@@ -35,7 +35,7 @@ public class LobbyIntegrationTest {
             InstanceConfig.DEFAULT_TIME_RATE, InstanceConfig.DEFAULT_CHUNK_LOAD_RANGE);
         SceneFallback sceneFallback = (ignored) -> CompletableFuture.completedFuture(true);
         Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback,
-            new NPCHandler(List.of(), instance, instance.eventNode()), Collections.emptyList(),
+            new NPCHandler(List.of(), instance), Collections.emptyList(),
             MiniMessage.miniMessage(), "", true, Mockito.mock(PlayerViewProvider.class),
             player -> CompletableFuture.completedFuture(Component.empty()));
         PlayerView playerView = mock(PlayerView.class);
