@@ -14,7 +14,6 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.CoreStages;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.IdentifiableScene;
 import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.JoinToggleable;
@@ -41,8 +40,7 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
         @NotNull String lobbyJoinMessageFormat,
         @NotNull NPCHandler npcHandler,
         @NotNull Collection<ItemStack> defaultItems,
-        @NotNull PlayerViewProvider viewProvider,
-        @NotNull Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler) {
+        @NotNull Function<? super @NotNull Player, ? extends @NotNull CompletableFuture<?>> displayNameStyler) {
         super(instance);
         this.players = new HashSet<>();
         this.playersView = Collections.unmodifiableSet(players);
@@ -98,7 +96,6 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
             }));
 
             holder.setStage(CoreStages.LOBBY);
-
             player.teleport(spawnPoint);
         }
     }

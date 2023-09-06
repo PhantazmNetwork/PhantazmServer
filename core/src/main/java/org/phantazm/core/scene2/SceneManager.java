@@ -361,13 +361,31 @@ public final class SceneManager {
      * may additionally be empty, in which case scenes of that type <i>may</i> exist but none currently do
      */
     @SuppressWarnings("unchecked")
-    public <T extends Scene> @Nullable @Unmodifiable Set<T> typed(@NotNull Class<T> sceneType) {
+    public <T extends Scene> @Unmodifiable Set<T> typed(@NotNull Class<T> sceneType) {
         SceneEntry entry = mappedScenes.get(sceneType);
         if (entry == null) {
             return null;
         }
 
         return (Set<T>) Set.copyOf(entry.scenes);
+    }
+
+    /**
+     * Retrieves the number of scenes that exactly match a specified type. If the type has not been registered,
+     * {@code -1} is returned.
+     *
+     * @param sceneType the type of scene to search for
+     * @param <T>       the type of scene to search for
+     * @return the number of scenes that are currently active (not shut down) of the specified type, or {@code -1} if no
+     * such scene type has been registered
+     */
+    public <T extends Scene> int amount(@NotNull Class<T> sceneType) {
+        SceneEntry entry = mappedScenes.get(sceneType);
+        if (entry == null) {
+            return -1;
+        }
+
+        return entry.scenes.size();
     }
 
     /**
@@ -412,7 +430,7 @@ public final class SceneManager {
                         return JoinResult.joined(joinedScene);
                     }
 
-                    if (!join.canCreateNewScene()) {
+                    if (!join.canCreateNewScene(this)) {
                         return JoinResult.cannotProvision();
                     }
 

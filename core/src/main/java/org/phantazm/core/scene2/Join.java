@@ -36,9 +36,9 @@ public interface Join<T extends Scene> {
     @NotNull Class<T> targetType();
 
     /**
-     * Creates a new Scene which can be used to fulfill this request. If {@link Join#canCreateNewScene()} returns
-     * {@code false}, this method will throw an exception. Otherwise, the scene returned by this method <i>must</i> have
-     * the following characteristics:
+     * Creates a new Scene which can be used to fulfill this request. If {@link Join#canCreateNewScene(SceneManager)}
+     * returns {@code false}, this method will throw an exception. Otherwise, the scene returned by this method
+     * <i>must</i> have the following characteristics:
      *
      * <ul>
      *     <li>The scene must not already be a part of a {@link SceneManager}.</li>
@@ -58,16 +58,17 @@ public interface Join<T extends Scene> {
      * Whether this Join may result in the creation of a new Scene. In general, {@link SceneManager} will prefer to use
      * an existing scene to fulfill this request, even if this method returns true.
      *
+     * @param manager the {@link SceneManager} that is processing this join
      * @return {@code true} if this join may result in a new Scene
      */
-    boolean canCreateNewScene();
+    boolean canCreateNewScene(@NotNull SceneManager manager);
 
     /**
      * Joins the given scene. {@code scene} <i>must</i> be acquired when this method is called, so it is safe to use any
      * method on the object. This method <i>may</i> throw an unchecked exception when called for any scene {@code scene}
-     * such that {@code Join#matches(scene)} returns {@code false}, unless {@link Join#canCreateNewScene()} returns
-     * {@code true} and the scene was freshly created using {@link Join#createNewScene(SceneManager)}, in which case the
-     * join will always succeed.
+     * such that {@code Join#matches(scene)} returns {@code false}, unless {@link Join#canCreateNewScene(SceneManager)}
+     * returns {@code true} and the scene was freshly created using {@link Join#createNewScene(SceneManager)}, in which
+     * case the join will always succeed.
      * <p>
      * This method is expected to (either directly or indirectly) perform actions such as teleporting players to a new
      * instance, sending tablist packets, and other modifying operations, as appropriate. This method should <i>not</i>
