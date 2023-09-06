@@ -81,7 +81,8 @@ public final class SceneManager {
 
         /**
          * Gets the global {@link SceneManager} instance. If this has not already been initialized through a call to
-         * {@link Global#init(Executor, Set, PlayerViewProvider, int)}, a {@link IllegalStateException} will be thrown.
+         * {@link Global#init(Executor, Set, PlayerViewProvider, int)}, an {@link IllegalStateException} will be
+         * thrown.
          *
          * @return the global {@link SceneManager}
          */
@@ -373,6 +374,8 @@ public final class SceneManager {
     /**
      * Retrieves the number of scenes that exactly match a specified type. If the type has not been registered,
      * {@code -1} is returned.
+     * <p>
+     * If called from within {@link Join#canCreateNewScene(SceneManager)}, this SceneManager should ensure
      *
      * @param sceneType the type of scene to search for
      * @param <T>       the type of scene to search for

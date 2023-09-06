@@ -2,7 +2,6 @@ package org.phantazm.core.scene2;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.core.scene2.lobby.Lobby;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -24,25 +23,25 @@ public abstract class CreatingJoin<T extends Scene> extends JoinAbstract<T> {
     @Override
     public boolean canCreateNewScene(@NotNull SceneManager manager) {
         int sceneCap = sceneCreator.sceneCap();
-        if (sceneCap < 0) {
-            return true;
+        if (sceneCap == -1) {
+            return players().size() < sceneCreator.playerCap();
         }
 
-        int currentAmount = manager.amount(Lobby.class);
+        int currentAmount = manager.amount(targetType());
         if (currentAmount == -1) {
             return false;
         }
 
-        return currentAmount + 1 <= sceneCap;
+        return currentAmount + 1 <= sceneCap && players().size() < sceneCreator.playerCap();
     }
 
     @Override
     public boolean matches(@NotNull T scene) {
         int playerCap = sceneCreator.playerCap();
-        if (playerCap < 0) {
+        if (playerCap == -1) {
             return true;
         }
 
-        return scene.players().size() + super.players().size() <= playerCap;
+        return scene.players().size() + players().size() <= playerCap;
     }
 }

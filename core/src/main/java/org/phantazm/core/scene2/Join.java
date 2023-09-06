@@ -8,7 +8,8 @@ import java.util.Set;
 
 /**
  * Represents a request by some number of players to join a specific scene. Join instances are expected to be passed to
- * a {@link SceneManager} that will fulfill the request.
+ * a {@link SceneManager} that will fulfill the request. Consequently, Join instances are most commonly used as if by a
+ * visitor pattern.
  * <p>
  * <h2>Thread Safety</h2>
  * Unless otherwise specified, no methods on Join support concurrent access.
@@ -37,7 +38,7 @@ public interface Join<T extends Scene> {
 
     /**
      * Creates a new Scene which can be used to fulfill this request. If {@link Join#canCreateNewScene(SceneManager)}
-     * returns {@code false}, this method will throw an exception. Otherwise, the scene returned by this method
+     * returns {@code false}, this method <i>may</i> throw an exception. Otherwise, the scene returned by this method
      * <i>must</i> have the following characteristics:
      *
      * <ul>
