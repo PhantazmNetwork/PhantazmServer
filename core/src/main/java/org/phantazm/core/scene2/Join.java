@@ -45,10 +45,14 @@ public interface Join<T extends Scene> {
      *     <li>The scene must match this Join; that is, {@link Join#matches(Scene)} will return {@code true} if passed the new scene instance.</li>
      *     <li>As a consequence of the previous requirement, calling {@link Join#join(Scene)} on the scene must succeed without throwing an exception.</li>
      * </ul>
+     * <p>
+     * It is expected that the returned scene will be added to the SceneManager fulfilling this join by the manager
+     * itself, which will make it eligible to fulfill future joins.
      *
+     * @param manager the SceneManager responsible for fulfilling this Join
      * @return a new Scene
      */
-    @NotNull T createNewScene();
+    @NotNull T createNewScene(@NotNull SceneManager manager);
 
     /**
      * Whether this Join may result in the creation of a new Scene. In general, {@link SceneManager} will prefer to use
@@ -62,8 +66,8 @@ public interface Join<T extends Scene> {
      * Joins the given scene. {@code scene} <i>must</i> be acquired when this method is called, so it is safe to use any
      * method on the object. This method <i>may</i> throw an unchecked exception when called for any scene {@code scene}
      * such that {@code Join#matches(scene)} returns {@code false}, unless {@link Join#canCreateNewScene()} returns
-     * {@code true} and the scene was freshly created using {@link Join#createNewScene()}, in which case the join will
-     * always succeed.
+     * {@code true} and the scene was freshly created using {@link Join#createNewScene(SceneManager)}, in which case the
+     * join will always succeed.
      * <p>
      * This method is expected to (either directly or indirectly) perform actions such as teleporting players to a new
      * instance, sending tablist packets, and other modifying operations, as appropriate. This method should <i>not</i>

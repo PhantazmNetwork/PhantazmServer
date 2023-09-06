@@ -20,11 +20,6 @@ public abstract class InstanceScene extends SceneAbstract {
 
     @Override
     public void shutdown() {
-        if (isShutdown()) {
-            return;
-        }
-
-        super.shutdown();
         MinecraftServer.getInstanceManager().forceUnregisterInstance(instance);
     }
 

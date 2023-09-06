@@ -4,7 +4,6 @@ import net.minestom.server.Tickable;
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.player.PlayerView;
 
@@ -25,7 +24,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene> {
      *
      * @return all players currently in the scene
      */
-    @NotNull @UnmodifiableView Set<PlayerView> players();
+    @NotNull @UnmodifiableView Set<@NotNull PlayerView> players();
 
     /**
      * Returns whether this scene is joinable under any circumstances. When determining where to send player(s), this
@@ -33,7 +32,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene> {
      * <p>
      * This method must also return false if:
      * <ul>
-     *     <li>The scene has been shut down by a previous call to {@link Scene#shutdown()} (i.e. when {@link Scene#isShutdown()} returns {@code true})</li>
+     *     <li>The scene has been shut down by a previous call to {@link Scene#preShutdown()} (i.e. when {@link Scene#isShutdown()} returns {@code true})</li>
      * </ul>
      *
      * @return true if this scene can be joined, false otherwise
@@ -49,21 +48,36 @@ public interface Scene extends Tickable, Acquirable.Source<Scene> {
     boolean preventsServerShutdown();
 
     /**
-     * Checks if the scene has been previously shut down via a call to {@link Scene#shutdown()}.
+     * Checks if the scene has been previously shut down via a call to {@link Scene#preShutdown()}.
      *
      * @return {@code true} if the scene has been shut down prior, {@code false} otherwise
      */
     boolean isShutdown();
 
     /**
-     * Shuts down this scene. Broadly speaking, this will have the following effects:
+     * Initializes the shutdown procedure for this scene. It is expected that, some point after calling this method, the
+     * {@link SceneManager} will call {@link Scene#shutdown()} in order to conclude shutdown.
+     * <p>
+     * Calling this method will generally have the following effects:
      * <ul>
      *     <li>The scene will no longer accept new players; {@link Scene#joinable()} will return {@code false}.</li>
      *     <li>Subsequent calls to {@link Scene#isShutdown()} will return {@code true}.</li>
-     *     <li>The scene will clean up any otherwise persistent resources it may be using, such as instances, event hooks, or scheduled tasks.</li>
      * </ul>
      * <p>
-     * Shutting down a scene that has already shut down will do nothing.
+     * This method should <i>not</i> perform clean up actions; rather, it should update state as necessary to ensure
+     * this scene cannot be joined.
+     * <p>
+     * This method is marked as internal because, along with {@code shutdown}, it should only be called indirectly
+     * through {@link SceneManager#removeScene(Scene, Function)}.
+     */
+    @ApiStatus.Internal
+    void preShutdown();
+
+    /**
+     * Shuts down this scene, cleaning up any resources it might have been using. These include instances, event hooks,
+     * and scheduled tasks. This method should only be called after calling {@link Scene#preShutdown()}.
+     * Implementations
+     * <i>may</i> throw an exception if {@code preShutdown} is not called first.
      * <p>
      * Players that exist in the scene when it is shut down <i>may</i> be forcefully kicked from the server. The
      * {@link SceneManager} instance should make a best-effort attempt to find somewhere to send old players before

@@ -5,7 +5,6 @@ import net.minestom.server.Tickable;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.thread.Acquirable;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.thread.ThreadDispatcher;
 import net.minestom.server.thread.ThreadProvider;
@@ -267,10 +266,6 @@ public final class SceneManager {
     }
 
     private void handleLogin(@NotNull PlayerLoginEvent loginEvent) {
-        if (loginEvent.getSpawningInstance() != null) {
-            return;
-        }
-
         Player player = loginEvent.getPlayer();
 
         Function<? super Player, ? extends Join<? extends InstanceScene>> mapper = this.requestMapper;
@@ -279,8 +274,7 @@ public final class SceneManager {
             return;
         }
 
-        Join<? extends InstanceScene> join = mapper.apply(player);
-        JoinResult<? extends InstanceScene> result = joinScene(join).join();
+        JoinResult<? extends InstanceScene> result = joinScene(Objects.requireNonNull(mapper.apply(player))).join();
         if (!result.successful()) {
             loginEvent.setCancelled(true);
             return;
@@ -330,10 +324,13 @@ public final class SceneManager {
 
         threadDispatcher.deletePartition(scene);
 
-        scene.getAcquirable().sync(self -> {
+        //acquire async - locking on players may be time-consuming if they are joining a scene
+        scene.getAcquirable().async(self -> {
             if (self.isShutdown()) {
                 return;
             }
+
+            self.preShutdown();
 
             Set<PlayerView> players = self.players();
             lockPlayers(players, true);
@@ -545,7 +542,7 @@ public final class SceneManager {
     }
 
     private <T extends Scene> T createAndJoinNewScene(Join<T> join) {
-        T scene = join.createNewScene();
+        T scene = join.createNewScene(this);
         leaveOldScenes(join, scene);
 
         //not necessary to acquire, scene was just created but is not ticking yet
@@ -555,10 +552,9 @@ public final class SceneManager {
     }
 
     private <T extends Scene> T tryJoinScene(Scene scene, Join<T> join) {
-        Acquirable<? extends Scene> sceneAcquirable = scene.getAcquirable();
         T castScene = join.targetType().cast(scene);
 
-        Acquired<? extends Scene> acquired = sceneAcquirable.lock();
+        Acquired<? extends Scene> acquired = castScene.getAcquirable().lock();
         try {
             if (!castScene.joinable() || !join.matches(castScene)) {
                 return null;
