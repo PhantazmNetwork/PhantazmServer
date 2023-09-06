@@ -42,6 +42,6 @@ public abstract class CreatingJoin<T extends Scene> extends JoinAbstract<T> {
             return true;
         }
 
-        return scene.players().size() + players().size() <= playerCap;
+        return scene.playerCount() + players().size() <= playerCap;
     }
 }

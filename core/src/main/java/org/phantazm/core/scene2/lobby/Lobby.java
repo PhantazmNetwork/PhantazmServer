@@ -21,6 +21,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.OpenBookPacket;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.CoreStages;
 import org.phantazm.core.npc.NPCHandler;
@@ -53,7 +54,7 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
         @NotNull Function<? super @NotNull Player, ? extends @NotNull CompletableFuture<?>> displayNameStyler) {
         super(instance);
         this.players = new HashSet<>();
-        this.playersView = Collections.unmodifiableSet(players);
+        this.playersView = Collections.unmodifiableSet(this.players);
         this.identity = UUID.randomUUID();
 
         this.spawnPoint = Objects.requireNonNull(spawnPoint);
@@ -102,8 +103,18 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
     }
 
     @Override
-    public @NotNull @UnmodifiableView Set<PlayerView> players() {
+    public @NotNull @Unmodifiable Set<PlayerView> players() {
+        return Set.copyOf(players);
+    }
+
+    @Override
+    public @NotNull @UnmodifiableView Set<@NotNull PlayerView> playersView() {
         return playersView;
+    }
+
+    @Override
+    public int playerCount() {
+        return players.size();
     }
 
     @Override

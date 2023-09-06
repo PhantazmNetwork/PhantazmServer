@@ -325,30 +325,35 @@ public final class SceneManager {
 
         threadDispatcher.deletePartition(scene);
 
-        //acquire async - locking on players may be time-consuming if they are joining a scene
-        scene.getAcquirable().async(self -> {
-            if (self.isShutdown()) {
-                return;
+        Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
+
+        Set<PlayerView> players = null;
+        boolean playersLocked = false;
+
+        try {
+            try {
+                scene.preShutdown();
+
+                players = scene.players();
+                playersLocked = lockPlayers(players, true);
+
+                scene.leave(players);
+            } finally {
+                acquired.unlock();
             }
 
-            self.preShutdown();
-
-            Set<PlayerView> players = self.players();
-            lockPlayers(players, true);
-
-            try {
-                self.leave(players);
-
-                for (PlayerView playerView : players) {
-                    ((PlayerViewImpl) playerView).updateCurrentScene(null);
-                }
-            } finally {
+            //while the players lock is held, update their current scene
+            for (PlayerView playerView : players) {
+                ((PlayerViewImpl) playerView).updateCurrentScene(null);
+            }
+        } finally {
+            if (playersLocked) {
                 unlockPlayers(players);
             }
+        }
 
-            playerCallback.apply(players).whenComplete((ignored1, ignored2) -> {
-                scene.getAcquirable().sync(Scene::shutdown);
-            });
+        playerCallback.apply(players).whenComplete((ignored1, ignored2) -> {
+            scene.getAcquirable().sync(Scene::shutdown);
         });
     }
 

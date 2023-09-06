@@ -4,6 +4,7 @@ import net.minestom.server.Tickable;
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.player.PlayerView;
 
@@ -24,7 +25,22 @@ public interface Scene extends Tickable, Acquirable.Source<Scene> {
      *
      * @return all players currently in the scene
      */
-    @NotNull @UnmodifiableView Set<@NotNull PlayerView> players();
+    @NotNull @Unmodifiable Set<@NotNull PlayerView> players();
+
+    /**
+     * Gets a view of all players currently in the scene. This collection cannot be modified by callers, but can itself
+     * change as players are added to or removed from the scene
+     *
+     * @return a read-only view of the players currently in this scene
+     */
+    @NotNull @UnmodifiableView Set<@NotNull PlayerView> playersView();
+
+    /**
+     * Gets the number of players currently in the scene.
+     *
+     * @return the number of players in the scene
+     */
+    int playerCount();
 
     /**
      * Returns whether this scene is joinable under any circumstances. When determining where to send player(s), this
