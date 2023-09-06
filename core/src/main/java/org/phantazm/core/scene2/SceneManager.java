@@ -421,11 +421,11 @@ public final class SceneManager {
             return CompletableFuture.completedFuture(JoinResult.emptyPlayers());
         }
 
-        if (!lockPlayers(players, false)) {
-            return CompletableFuture.completedFuture(JoinResult.alreadyJoining());
-        }
-
         return CompletableFuture.supplyAsync(() -> {
+            if (!lockPlayers(players, false)) {
+                return JoinResult.alreadyJoining();
+            }
+
             try {
                 T joinedScene = tryJoinScenes(entry.scenes, join);
                 if (joinedScene != null) {
