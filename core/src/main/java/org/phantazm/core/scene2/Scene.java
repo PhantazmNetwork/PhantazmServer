@@ -1,6 +1,8 @@
 package org.phantazm.core.scene2;
 
 import net.minestom.server.Tickable;
+import net.minestom.server.adventure.audience.PacketGroupingAudience;
+import net.minestom.server.entity.Player;
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -8,6 +10,8 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.player.PlayerView;
 
+import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -19,7 +23,7 @@ import java.util.function.Function;
  * Unless otherwise stated, all methods on Scene are <i>not</i> thread safe; the scene must be acquired using the
  * {@link Acquirable} API before modifications are made.
  */
-public interface Scene extends Tickable, Acquirable.Source<Scene> {
+public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupingAudience {
     /**
      * Gets all players currently in this scene.
      *
@@ -132,4 +136,10 @@ public interface Scene extends Tickable, Acquirable.Source<Scene> {
      */
     @ApiStatus.Internal
     void leave(@NotNull Set<? extends @NotNull PlayerView> players);
+
+    @Override
+    default @NotNull Collection<@NotNull Player> getPlayers() {
+        return playersView().stream().map(PlayerView::getPlayer)
+            .filter(Optional::isPresent).map(Optional::get).toList();
+    }
 }
