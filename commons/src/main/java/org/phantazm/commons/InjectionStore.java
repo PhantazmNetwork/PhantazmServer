@@ -80,6 +80,8 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
     @Unmodifiable
     Collection<@NotNull Object> objects();
 
+    @NotNull InjectionStore.Builder toBuilder();
+
     sealed interface Builder permits BuilderImpl {
         <T> @NotNull Builder with(@NotNull Key<T> key, @NotNull T object);
 
@@ -102,6 +104,10 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
 
         private BuilderImpl() {
             this.values = new HashMap<>();
+        }
+
+        private BuilderImpl(Map<Key<?>, Object> values) {
+            this.values = new HashMap<>(values);
         }
 
         @Override
@@ -223,6 +229,11 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
         public @NotNull
         @Unmodifiable Collection<Object> objects() {
             return mappings.values();
+        }
+
+        @Override
+        public @NotNull InjectionStore.Builder toBuilder() {
+            return new InjectionStore.BuilderImpl(mappings);
         }
     }
 }

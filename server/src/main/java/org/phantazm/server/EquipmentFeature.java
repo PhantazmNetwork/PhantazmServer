@@ -26,6 +26,7 @@ import org.phantazm.zombies.equipment.gun.GunLevel;
 import org.phantazm.zombies.equipment.gun.GunModel;
 import org.phantazm.zombies.equipment.gun.ZombiesEquipmentModule;
 import org.phantazm.zombies.equipment.gun.event.GunShootEvent;
+import org.phantazm.zombies.equipment.gun2.Keys.EventNodeHolder;
 import org.phantazm.zombies.equipment.perk.BasicPerkCreator;
 import org.phantazm.zombies.equipment.perk.PerkCreator;
 import org.phantazm.zombies.equipment.perk.level.PerkLevelCreator;
@@ -176,7 +177,6 @@ final class EquipmentFeature {
         }
 
         Map<Key, PerkCreator> perkMap = Map.copyOf(perkCreatorMap);
-        InjectionStore injectionStore = InjectionStore.of(Keys.SCENE, scene);
 
         return new EquipmentCreator() {
             @Override
@@ -196,6 +196,8 @@ final class EquipmentFeature {
                 Key equipmentType = pair.left().type();
                 if (EquipmentTypes.PERK.equals(equipmentType)) {
                     return (Optional<TEquipment>) loadPerk(equipmentKey);
+                } else if (EquipmentTypes.GUN2.equals(equipmentType)) {
+                    return (Optional<TEquipment>) loadGun2(equipmentKey);
                 } else if (EquipmentTypes.GUN.equals(equipmentType)) {
                     return (Optional<TEquipment>) loadGun(pair, equipmentKey);
                 }
@@ -214,6 +216,22 @@ final class EquipmentFeature {
                     return Optional.empty();
                 }
 
+                InjectionStore injectionStore = InjectionStore.of(Keys.SCENE, scene);
+                return Optional.of(perkCreator.forPlayer(zombiesPlayer, injectionStore));
+            }
+
+            private Optional<Equipment> loadGun2(Key equipmentKey) {
+                PerkCreator perkCreator = perkMap.get(equipmentKey);
+                if (perkCreator == null) {
+                    return Optional.empty();
+                }
+
+                ZombiesPlayer zombiesPlayer = equipmentModule.getZombiesPlayerSupplier().get();
+                if (zombiesPlayer == null) {
+                    return Optional.empty();
+                }
+
+                InjectionStore injectionStore = InjectionStore.of(org.phantazm.zombies.equipment.gun2.Keys.EVENT_NODE_HOLDER, new EventNodeHolder(equipmentModule.getEventNode()));
                 return Optional.of(perkCreator.forPlayer(zombiesPlayer, injectionStore));
             }
 
@@ -235,10 +253,6 @@ final class EquipmentFeature {
                 GunModel model = new GunModel(rootLevel, levels);
                 Gun gun = new Gun(equipmentKey, equipmentModule.getPlayerView()::getPlayer, model);
                 equipmentModule.getEventNode().addListener(GunShootEvent.class, event -> {
-                    if (event.gun() != gun) {
-                        return;
-                    }
-
                     equipmentModule.getMapStats().setShots(equipmentModule.getMapStats().getShots() + 1);
 
                     if (!event.shot().headshotTargets().isEmpty()) {

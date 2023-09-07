@@ -24,27 +24,39 @@ import java.util.*;
 @Cache(false)
 public class NonUpgradeablePerkLevelCreator implements PerkLevelCreator {
     private final Data data;
+    private final PerkLevelInjector injector;
     private final PerkEquipmentCreator equipment;
     private final Collection<PerkEffectCreator> effects;
 
     @FactoryMethod
     public NonUpgradeablePerkLevelCreator(@NotNull Data data,
+        @NotNull @Child("injector") PerkLevelInjector injector,
         @NotNull @Child("equipment") PerkEquipmentCreator equipment,
         @NotNull @Child("perk_effects") Collection<PerkEffectCreator> effects) {
         this.data = Objects.requireNonNull(data);
+        this.injector = Objects.requireNonNull(injector);
         this.equipment = Objects.requireNonNull(equipment);
         this.effects = List.copyOf(effects);
     }
 
     @Override
     public @NotNull PerkLevel forPlayer(@NotNull ZombiesPlayer zombiesPlayer, @NotNull InjectionStore injectionStore) {
-        PerkEffect[] perkEffects = new PerkEffect[effects.size()];
+        InjectionStore.Builder builder = injectionStore.toBuilder();
+        injector.inject(builder, zombiesPlayer, injectionStore);
+        InjectionStore newStore = builder.build();
+
+        List<PerkEffect> additionalEffects = injector.makeDefaultEffects(zombiesPlayer, newStore);
+
+        PerkEffect[] perkEffects = new PerkEffect[effects.size() + additionalEffects.size()];
         Iterator<PerkEffectCreator> iterator = effects.iterator();
-        for (int i = 0; i < perkEffects.length; i++) {
-            perkEffects[i] = iterator.next().forPlayer(zombiesPlayer, );
+        for (int i = 0; i < effects.size(); i++) {
+            perkEffects[i] = iterator.next().forPlayer(zombiesPlayer, newStore);
+        }
+        for (int i = effects.size(); i < additionalEffects.size(); ++i) {
+            perkEffects[i] = additionalEffects.get(i - effects.size());
         }
 
-        return new BasicPerkLevel(Set.of(), equipment.forPlayer(zombiesPlayer, injectionStore), List.of(perkEffects));
+        return new BasicPerkLevel(Set.of(), equipment.forPlayer(zombiesPlayer, newStore), List.of(perkEffects));
     }
 
     @Override
@@ -55,6 +67,7 @@ public class NonUpgradeablePerkLevelCreator implements PerkLevelCreator {
     @DataObject
     public record Data(
         @NotNull @Description("The level key for this level") Key key,
+        @NotNull @ChildPath("injector") String injector,
         @NotNull @Description("The equipment controlling this perk's visuals") @ChildPath(
             "equipment") String equipment,
         @NotNull @Description("The perk effect(s) which are applied for this level") @ChildPath(
