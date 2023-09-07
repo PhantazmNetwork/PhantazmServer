@@ -20,6 +20,10 @@ public class JoinLobby extends CreatingJoin<Lobby> implements TablistSettingJoin
         this.login = login;
     }
 
+    public JoinLobby(@NotNull Collection<@NotNull PlayerView> players, @NotNull SceneCreator<Lobby> sceneCreator) {
+        this(players, sceneCreator, false);
+    }
+
     @Override
     public void join(@NotNull Lobby scene) {
         if (login) {

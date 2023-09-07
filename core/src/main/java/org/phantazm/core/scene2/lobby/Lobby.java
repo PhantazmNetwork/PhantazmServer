@@ -6,6 +6,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.state.CancellableState;
 import net.minestom.server.event.EventFilter;
@@ -67,6 +68,7 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
         this.joinable = true;
 
         MinecraftServer.getGlobalEventHandler().addChild(this.lobbyNode);
+        npcHandler.spawnAll();
     }
 
     private EventNode<InstanceEvent> buildNode(Instance instance) {
@@ -167,8 +169,11 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
             for (ItemStack stack : defaultItems) {
                 ((Player) self).getInventory().addItemStack(stack);
             }
+
+            ((Player) self).setGameMode(GameMode.ADVENTURE);
         }, self -> {
             ((Player) self).getInventory().clear();
+            ((Player) self).setGameMode(GameMode.SURVIVAL);
         }));
 
         holder.setStage(CoreStages.LOBBY);

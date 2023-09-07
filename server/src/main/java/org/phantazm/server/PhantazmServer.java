@@ -10,7 +10,6 @@ import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -213,12 +212,12 @@ public final class PhantazmServer {
             SceneManager manager = SceneManager.Global.instance();
             manager.registerJoinFunction(manager.joinKey(Lobby.class), manager.joinFunction(Lobby.class, players -> {
                 return new JoinLobby(players,
-                    LobbyFeature.lobbies().get(Key.key(Namespaces.PHANTAZM, "main")).sceneCreator(), false);
+                    LobbyFeature.lobbies().get(lobbiesConfig.mainLobby()).sceneCreator());
             }));
 
             manager.setLoginHook(player -> {
                 return new JoinLobby(Set.of(viewProvider.fromPlayer(player)),
-                    LobbyFeature.lobbies().get(Key.key(Namespaces.PHANTAZM, "main")).sceneCreator(), true);
+                    LobbyFeature.lobbies().get(lobbiesConfig.mainLobby()).sceneCreator(), true);
             });
         });
 
@@ -245,7 +244,7 @@ public final class PhantazmServer {
             ChatFeature.initialize(chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
                 RoleFeature.roleStore());
 
-            LobbyFeature.initialize(lobbiesConfig, contextManager, RoleFeature.roleStore(),
+            LobbyFeature.initialize(contextManager, RoleFeature.roleStore(),
                 ExecutorFeature.getExecutor(), mappingProcessorSource, yamlCodec);
 
             ProximaFeature.initialize(pathfinderConfig);

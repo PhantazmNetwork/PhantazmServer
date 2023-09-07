@@ -21,13 +21,13 @@ import org.phantazm.core.npc.NPC;
 import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.scene2.lobby.Lobby;
 import org.phantazm.core.scene2.lobby.LobbyCreator;
-import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.lobby.LobbyConfig;
 import org.phantazm.server.role.RoleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -81,9 +81,8 @@ public final class LobbyFeature {
         }
     }
 
-    static void initialize(@NotNull LobbiesConfig lobbiesConfig,
-        @NotNull ContextManager contextManager, @NotNull RoleStore roleStore, @NotNull Executor executor,
-        @NotNull MappingProcessorSource mappingProcessorSource, @NotNull ConfigCodec codec) {
+    static void initialize(@NotNull ContextManager contextManager, @NotNull RoleStore roleStore,
+        @NotNull Executor executor, @NotNull MappingProcessorSource mappingProcessorSource, @NotNull ConfigCodec codec) {
         try {
             FileUtils.createDirectories(LOBBY_INSTANCES_DIRECTORY);
             FileUtils.createDirectories(LOBBY_CONFIG_DIRECTORY);
@@ -95,7 +94,7 @@ public final class LobbyFeature {
             .processorFor(Token.ofClass(LobbyConfig.class));
 
         InstanceLoader instanceLoader = new AnvilFileSystemInstanceLoader(MinecraftServer.getInstanceManager(),
-            lobbiesConfig.instancesPath(), DynamicChunk::new, executor);
+            LOBBY_INSTANCES_DIRECTORY, DynamicChunk::new, executor);
 
         Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler = (player -> {
             return roleStore.getStylingRole(player.getUuid()).whenComplete((result, error) -> {
@@ -108,10 +107,9 @@ public final class LobbyFeature {
         });
 
         Map<Key, LobbyEntry> map = new HashMap<>();
+        PathMatcher npcFileMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.{yml,yaml}");
 
         List<CompletableFuture<?>> preloadFutures = new ArrayList<>();
-
-        PathMatcher npcFileMatcher = LOBBY_CONFIG_DIRECTORY.getFileSystem().getPathMatcher("glob:**/*.{yml,yaml}");
         try (Stream<Path> lobbyFolderStream = Files.list(LOBBY_CONFIG_DIRECTORY)) {
             for (Path lobbyFolder : (Iterable<? extends Path>) lobbyFolderStream::iterator) {
                 if (!Files.isDirectory(lobbyFolder)) {
