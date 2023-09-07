@@ -12,19 +12,21 @@ import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewImpl;
 import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.Lock;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
  * SceneManager is used to fulfill requests by one or more players to join {@link Scene} objects. This class also
  * manages the lifecycle of every Scene object; creation, ticking, and eventually removal. Several different utility
- * methods, such as {@link SceneManager#getCurrentScene(PlayerView)}, are also provided to make working with scenes
+ * methods, such as {@link SceneManager#currentScene(PlayerView)}, are also provided to make working with scenes
  * easier.
  * <p>
  * This class is intended to be used as a singleton. The SceneManager instance for this application can be obtained
@@ -252,8 +254,8 @@ public final class SceneManager {
     private void handleDisconnect(@NotNull PlayerView playerView) {
         PlayerViewImpl view = (PlayerViewImpl) playerView;
 
-        Semaphore semaphore = view.joinSemaphore();
-        semaphore.acquireUninterruptibly();
+        Lock lock = view.joinLock();
+        lock.lock();
         try {
             view.currentScene().ifPresent(scene -> scene.getAcquirable().sync(self -> {
                     self.leave(Set.of(view));
@@ -262,7 +264,7 @@ public final class SceneManager {
 
             view.updateCurrentScene(null);
         } finally {
-            semaphore.release();
+            lock.unlock();
         }
     }
 
@@ -342,7 +344,7 @@ public final class SceneManager {
                 acquired.unlock();
             }
 
-            //while the players lock is held, update their current scene
+            //while the players lock is held, set their current scene to null
             for (PlayerView playerView : players) {
                 ((PlayerViewImpl) playerView).updateCurrentScene(null);
             }
@@ -358,22 +360,33 @@ public final class SceneManager {
     }
 
     /**
-     * Retrieves all scenes of a specified type. The resulting set is unmodifiable and will not change even if new
-     * scenes are created after the invocation of this method. None of the scenes are acquired.
+     * Returns the set of all valid scene types for this manager.
      *
-     * @param sceneType the scene type to look up
+     * @return the set of all valid scene types for this manager
+     */
+    public @NotNull @Unmodifiable Set<Class<? extends Scene>> types() {
+        return mappedScenes.keySet();
+    }
+
+    /**
+     * Retrieves all scenes of a specified type. The resulting set is an <i>unmodifiable view</i>; it cannot be modified
+     * by calling code, but it may change as new scenes are added or removed by this manager. This method will perform
+     * an exact match; subclasses of {@code sceneType} will not be included.
+     *
+     * @param sceneType the exact scene type to look up
      * @param <T>       the type of scene to search for
      * @return a set of scenes of the specified type; or {@code null} if such a type has not been registered; the set
-     * may additionally be empty, in which case scenes of that type <i>may</i> exist but none currently do
+     * may additionally be empty, in which case scenes of that type <i>may</i> exist in the future but none currently
+     * do
      */
     @SuppressWarnings("unchecked")
-    public <T extends Scene> @Unmodifiable Set<T> typed(@NotNull Class<T> sceneType) {
+    public <T extends Scene> @UnmodifiableView Set<T> typed(@NotNull Class<T> sceneType) {
         SceneEntry entry = mappedScenes.get(sceneType);
         if (entry == null) {
             return null;
         }
 
-        return (Set<T>) Set.copyOf(entry.scenes);
+        return (Set<T>) Collections.unmodifiableSet(entry.scenes);
     }
 
     /**
@@ -446,7 +459,6 @@ public final class SceneManager {
 
                     entry.scenes.add(newScene);
                     threadDispatcher.createPartition(newScene);
-                    threadDispatcher.updateElement(newScene, newScene);
 
                     return JoinResult.joined(newScene);
                 }
@@ -472,31 +484,32 @@ public final class SceneManager {
             return true;
         }
 
-        List<Semaphore> semaphores = force ? null : new ArrayList<>(players.size());
+        List<Lock> acquiredLocks = force ? null : new ArrayList<>(players.size());
         for (PlayerView playerView : players) {
-            Semaphore semaphore = ((PlayerViewImpl) playerView).joinSemaphore();
+            Lock lock = ((PlayerViewImpl) playerView).joinLock();
             if (force) {
-                semaphore.acquireUninterruptibly();
+                lock.lock();
                 continue;
             }
 
-            if (!semaphore.tryAcquire()) {
-                for (Semaphore acquired : semaphores) {
-                    acquired.release();
-                }
-
-                return false;
+            if (lock.tryLock()) {
+                acquiredLocks.add(lock);
+                continue;
             }
 
-            semaphores.add(semaphore);
+            for (Lock acquired : acquiredLocks) {
+                acquired.unlock();
+            }
+
+            return false;
         }
 
         return true;
     }
 
-    private void unlockPlayers(Collection<PlayerView> players) {
+    private void unlockPlayers(Iterable<PlayerView> players) {
         for (PlayerView playerView : players) {
-            ((PlayerViewImpl) playerView).joinSemaphore().release();
+            ((PlayerViewImpl) playerView).joinLock().unlock();
         }
     }
 
@@ -507,9 +520,8 @@ public final class SceneManager {
      * @param playerView the player to check
      * @return an Optional containing the current scene
      */
-    public @NotNull Optional<Scene> getCurrentScene(@NotNull PlayerView playerView) {
-        PlayerViewImpl view = (PlayerViewImpl) playerView;
-        return view.currentScene();
+    public @NotNull Optional<Scene> currentScene(@NotNull PlayerView playerView) {
+        return ((PlayerViewImpl) playerView).currentScene();
     }
 
     /**
@@ -526,8 +538,8 @@ public final class SceneManager {
         @NotNull BiConsumer<? super @NotNull PlayerView, ? super @NotNull Scene> consumer) {
         PlayerViewImpl view = (PlayerViewImpl) playerView;
 
-        Semaphore semaphore = view.joinSemaphore();
-        semaphore.acquireUninterruptibly();
+        Lock lock = view.joinLock();
+        lock.lock();
         try {
             Optional<Scene> scene = view.currentScene();
             if (scene.isEmpty()) {
@@ -536,7 +548,7 @@ public final class SceneManager {
 
             consumer.accept(view, scene.get());
         } finally {
-            semaphore.release();
+            lock.unlock();
         }
     }
 

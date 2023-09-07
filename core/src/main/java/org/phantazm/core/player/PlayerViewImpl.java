@@ -14,7 +14,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.phantazm.core.scene2.SceneManager;
 
@@ -38,7 +39,7 @@ public final class PlayerViewImpl implements PlayerView {
     private final ConnectionManager connectionManager;
     private final UUID uuid;
 
-    private final Semaphore sceneJoinLock = new Semaphore(1);
+    private final Lock sceneJoinLock = new ReentrantLock();
     private final Object usernameLock = new Object();
     private final Object usernameRequestLock = new Object();
 
@@ -200,20 +201,16 @@ public final class PlayerViewImpl implements PlayerView {
     }
 
     /**
-     * Returns the semaphore used to synchronize scene join attempts by this player. It initially has exactly 1 permit.
-     * The amount of permits available should never be allowed to exceed 1 under any circumstances.
-     * <p>
-     * A semaphore is used instead of a lock to permit "unlocking" on a different thread than the one which acquired
-     * it.
+     * Returns the {@link Lock} used to synchronize scene join attempts by this player.
      * <p>
      * This method is marked internal because it is only useful when called by {@link SceneManager}, and it is easy for
-     * users to corrupt internal state (for example by releasing too many permits, which would allow concurrent join
-     * attempts by this player).
+     * users to corrupt internal state (for example by erroneously locking the player, which would prevent them from
+     * ever being able to join a scene).
      *
      * @return the semaphore used to synchronize join attempts
      */
     @ApiStatus.Internal
-    public @NotNull Semaphore joinSemaphore() {
+    public @NotNull Lock joinLock() {
         return sceneJoinLock;
     }
 
@@ -222,11 +219,12 @@ public final class PlayerViewImpl implements PlayerView {
      * <ul>
      *     <li>The player is not part of a scene; such as if they are offline</li>
      *     <li>The player previously had a scene but the scene was garbage collected</li>
+     *     <li>The player is in a transitory period between having left a scene and being added to a new one</li>
      * </ul>
      * <p>
      * This method is marked internal because it should only be called by {@link SceneManager}, as it will perform the
      * correct synchronization. To retrieve the player's current scene, please use
-     * {@link SceneManager#getCurrentScene(PlayerView)}.
+     * {@link SceneManager#currentScene(PlayerView)}.
      *
      * @return an Optional containing the current scene, or {@code null} if there is none
      */
@@ -236,8 +234,8 @@ public final class PlayerViewImpl implements PlayerView {
     }
 
     /**
-     * Updates the player's current scene. This should only be called by a thread that's able to acquire exactly one
-     * permit from {@link PlayerViewImpl#joinSemaphore()}.
+     * Updates the player's current scene. This should only be called by a thread that's able to acquire the monitor
+     * from {@link PlayerViewImpl#joinLock()}.
      * <p>
      * This method is marked internal because its access must be carefully synchronized by {@link SceneManager}.
      *
