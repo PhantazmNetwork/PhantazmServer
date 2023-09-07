@@ -124,7 +124,7 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
         return false;
     }
 
-    public void postLogin(@NotNull Set<@NotNull PlayerView> players) {
+    void postLogin(@NotNull Set<@NotNull PlayerView> players) {
         for (PlayerView playerView : players) {
             if (!this.players.contains(playerView)) {
                 continue;
@@ -134,7 +134,7 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
         }
     }
 
-    public void join(@NotNull Set<@NotNull PlayerView> players, boolean login) {
+    void join(@NotNull Set<@NotNull PlayerView> players, boolean login) {
         for (PlayerView joiningPlayer : players) {
             if (!this.players.add(joiningPlayer)) {
                 continue;

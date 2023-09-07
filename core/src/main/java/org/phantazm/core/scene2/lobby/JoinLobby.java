@@ -1,15 +1,16 @@
 package org.phantazm.core.scene2.lobby;
 
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.scene2.CreatingJoin;
 import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.scene2.SceneManager;
-import org.phantazm.core.scene2.TablistSettingJoin;
 
 import java.util.Collection;
+import java.util.List;
 
-public class JoinLobby extends CreatingJoin<Lobby> implements TablistSettingJoin<Lobby>, SceneManager.LoginJoin<Lobby> {
+public class JoinLobby extends CreatingJoin<Lobby> implements SceneManager.LoginJoin<Lobby> {
     private final boolean login;
 
     private Lobby scene;
@@ -30,12 +31,12 @@ public class JoinLobby extends CreatingJoin<Lobby> implements TablistSettingJoin
             this.scene = scene;
         }
 
-        TablistSettingJoin.super.join(scene);
         scene.join(players(), login);
     }
 
     @Override
     public void postSpawn() {
+        Lobby scene = this.scene;
         if (scene == null || !login) {
             return;
         }
@@ -43,6 +44,24 @@ public class JoinLobby extends CreatingJoin<Lobby> implements TablistSettingJoin
         scene.getAcquirable().sync(self -> {
             ((Lobby) self).postLogin(players());
         });
-        scene = null;
+        this.scene = null;
+    }
+
+    @Override
+    public void updateTablist(@NotNull List<@NotNull Player> tablistRecipients) {
+        Lobby scene = this.scene;
+        if (scene == null || !login) {
+            return;
+        }
+
+        for (PlayerView playerView : players()) {
+            playerView.getPlayer().ifPresent(tablistRecipients::add);
+        }
+
+        scene.getAcquirable().sync(self -> {
+            for (PlayerView playerView : self.playersView()) {
+                playerView.getPlayer().ifPresent(tablistRecipients::add);
+            }
+        });
     }
 }

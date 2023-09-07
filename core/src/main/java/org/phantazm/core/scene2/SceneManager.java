@@ -7,6 +7,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.PlayerTablistEvent;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.thread.ThreadDispatcher;
 import net.minestom.server.thread.ThreadProvider;
@@ -58,7 +59,7 @@ public final class SceneManager {
          * @param viewProvider the {@link PlayerViewProvider} used to resolve PlayerView instances
          * @param numThreads   the number of threads dedicated to ticking {@link Scene} instances
          */
-        public static void init(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes,
+        public static void init(@NotNull Executor executor, @NotNull Set<@NotNull Class<? extends Scene>> sceneTypes,
             @NotNull PlayerViewProvider viewProvider, int numThreads) {
             Objects.requireNonNull(viewProvider);
 
@@ -74,6 +75,7 @@ public final class SceneManager {
                 });
 
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, manager::handleLogin);
+                MinecraftServer.getGlobalEventHandler().addListener(PlayerTablistEvent.class, manager::handleTablist);
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, manager::handleSpawn);
 
                 MinecraftServer.getSchedulerManager().scheduleTask(() -> {
@@ -295,7 +297,7 @@ public final class SceneManager {
 
     private volatile Function<? super Player, ? extends LoginJoin<? extends InstanceScene>> requestMapper;
 
-    private SceneManager(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes, int numThreads) {
+    private SceneManager(Executor executor, Set<Class<? extends Scene>> sceneTypes, int numThreads) {
         this.executor = Objects.requireNonNull(executor);
         this.mappedScenes = buildSceneMap(Set.copyOf(sceneTypes));
         this.threadDispatcher = ThreadDispatcher.of(ThreadProvider.counter(), numThreads);
@@ -351,6 +353,17 @@ public final class SceneManager {
          * @see SceneManager#setLoginHook(Function)
          */
         void postSpawn();
+
+        /**
+         * Called before {@link LoginJoin#postSpawn()}, but before after the initial call to
+         * {@link LoginJoin#join(Scene)}. This is responsible for sending tablist packets, as appropriate, so that the
+         * players in the spawning scene are able to see the joining player. The player's instance has still not been
+         * set yet, so many methods on it will not work.
+         *
+         * @param tablistRecipients a modifiable list, to which players should be added in order for them to receive a
+         *                          tablist packet
+         */
+        void updateTablist(@NotNull List<@NotNull Player> tablistRecipients);
     }
 
     private final Map<UUID, LoginJoin<?>> joinRequestMap = new ConcurrentHashMap<>();
@@ -372,8 +385,18 @@ public final class SceneManager {
         }
 
         joinRequestMap.put(player.getUuid(), loginJoin);
-        InstanceScene scene = result.scene();
-        loginEvent.setSpawningInstance(scene.instance());
+        loginEvent.setSpawningInstance(result.scene().instance());
+    }
+
+    private void handleTablist(@NotNull PlayerTablistEvent tablistEvent) {
+        if (!tablistEvent.isFirstSpawn()) {
+            return;
+        }
+
+        LoginJoin<?> loginJoin = joinRequestMap.get(tablistEvent.getPlayer().getUuid());
+        if (loginJoin != null) {
+            loginJoin.updateTablist(tablistEvent.tablistAddRecipients());
+        }
     }
 
     private void handleSpawn(@NotNull PlayerSpawnEvent spawnEvent) {
@@ -462,20 +485,28 @@ public final class SceneManager {
      * to have the server be accessible at all, this needs to be set.
      * <p>
      * Successfully fulfilling a LoginJoin requires special support from scenes, as many methods on {@link Player} will
-     * not work (such as {@link Player#teleport(Pos)}). Therefore, fulfilling a LoginJoin is split into two parts:
+     * not work (such as {@link Player#teleport(Pos)}). Therefore, fulfilling a LoginJoin is split into three parts:
      * <ol>
      *     <li>The initial login, where a suitable scene is found and joined. The scene must be made aware that the
      *     player is just logging in, so that it will not call any methods that are unusable at this point.</li>
+     *     <li>Tablist update, where the recipients of tablist packets for the joining player are determined.</li>
      *     <li>The post-spawn, which is invoked at a later point once the player has been fully initialized. The full
      *     scope of Player-related methods may now be called.</li>
      * </ol>
      * <p>
      * The first phase is triggered by {@link PlayerLoginEvent} to locate a suitable scene using the LoginJoin provided
-     * by the login hook function. If a scene is successfully found, the LoginJoin instance is <i>saved</i> until some
-     * time later, when {@link PlayerSpawnEvent} is called to initially spawn in the player. At this point, the saved
-     * LoginJoin instance is retrieved and the {@link LoginJoin#postSpawn()} method is called. When logging in,
-     * LoginJoin implementations are expected to save the scene that was passed to {@link LoginJoin#join(Scene)} so that
-     * necessary methods to update player state can be called on the scene later.
+     * by the login hook function. If a scene is successfully found, the LoginJoin instance is <i>saved</i>. LoginJoin
+     * implementations are expected to save the scene that was passed to {@link LoginJoin#join(Scene)} so that necessary
+     * methods to update player state can be called in the next two phases.
+     * <p>
+     * At some point later, a {@link PlayerTablistEvent} is triggered and {@link LoginJoin#updateTablist(List)} is
+     * called to determine which players should see the joining player in the tablist. Generally speaking, this is only
+     * players in the scene that the player is joining, but different LoginJoin implementations will have different
+     * rules.
+     * <p>
+     * Finally, {@link PlayerSpawnEvent} is called to initially spawn in the player. At this point, the saved
+     * LoginJoin instance is removed and the {@link LoginJoin#postSpawn()} method is called, which will fully add the
+     * player to the scene, as they now have their instance properly set.
      *
      * @param requestMapper the function used to create Join objects for players in response to login events
      */
