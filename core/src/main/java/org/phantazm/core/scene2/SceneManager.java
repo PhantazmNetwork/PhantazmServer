@@ -322,11 +322,7 @@ public final class SceneManager {
         Lock lock = view.joinLock();
         lock.lock();
         try {
-            view.currentScene().ifPresent(scene -> scene.getAcquirable().sync(self -> {
-                    self.leave(Set.of(view));
-                })
-            );
-
+            view.currentScene().ifPresent(scene -> scene.getAcquirable().sync(self -> self.leave(Set.of(view))));
             view.updateCurrentScene(null);
         } finally {
             lock.unlock();
@@ -567,9 +563,7 @@ public final class SceneManager {
             }
         }
 
-        playerCallback.apply(players).whenComplete((ignored1, ignored2) -> {
-            scene.getAcquirable().sync(Scene::shutdown);
-        });
+        playerCallback.apply(players).whenComplete((ignored1, ignored2) -> scene.getAcquirable().sync(Scene::shutdown));
     }
 
     /**
@@ -834,9 +828,7 @@ public final class SceneManager {
                     return;
                 }
 
-                scene.getAcquirable().sync(self -> {
-                    self.leave(players);
-                });
+                scene.getAcquirable().sync(self -> self.leave(players));
             });
 
             onlyPlayer.updateCurrentScene(newScene);
@@ -863,9 +855,7 @@ public final class SceneManager {
 
         for (Map.Entry<Scene, Set<PlayerViewImpl>> entry : groupedScenes.entrySet()) {
             Set<PlayerViewImpl> value = entry.getValue();
-            entry.getKey().getAcquirable().sync(self -> {
-                self.leave(value);
-            });
+            entry.getKey().getAcquirable().sync(self -> self.leave(value));
 
             for (PlayerViewImpl view : value) {
                 view.updateCurrentScene(newScene);

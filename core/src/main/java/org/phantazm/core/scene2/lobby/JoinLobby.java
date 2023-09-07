@@ -41,9 +41,7 @@ public class JoinLobby extends CreatingJoin<Lobby> implements SceneManager.Login
             return;
         }
 
-        scene.getAcquirable().sync(self -> {
-            ((Lobby) self).postLogin(players());
-        });
+        scene.getAcquirable().sync(self -> ((Lobby) self).postLogin(players()));
         this.scene = null;
     }
 
