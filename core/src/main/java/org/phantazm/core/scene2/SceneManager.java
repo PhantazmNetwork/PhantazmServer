@@ -434,6 +434,7 @@ public final class SceneManager {
             throw new IllegalArgumentException("type not assignable to Scene");
         }
 
+        validateType(type);
         return new JoinFunction<>() {
             @Override
             public @NotNull Class<T> type() {
