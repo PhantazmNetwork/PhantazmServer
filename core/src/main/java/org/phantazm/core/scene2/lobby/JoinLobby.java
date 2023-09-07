@@ -40,7 +40,9 @@ public class JoinLobby extends CreatingJoin<Lobby> implements TablistSettingJoin
             return;
         }
 
-        scene.postLogin(players());
+        scene.getAcquirable().sync(self -> {
+            ((Lobby) self).postLogin(players());
+        });
         scene = null;
     }
 }

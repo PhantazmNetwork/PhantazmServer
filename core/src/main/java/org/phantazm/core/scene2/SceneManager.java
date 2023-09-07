@@ -344,6 +344,9 @@ public final class SceneManager {
          * time after a player logs into the server. If this method is called, it means that the player was able to
          * successfully join a scene using this LoginJoin. Therefore, this method should update the scene that was
          * previously passed to {@link LoginJoin#join(Scene)}.
+         * <p>
+         * Note: It is necessary to synchronize on the stored scene using the Acquirable API, as unlike
+         * {@link Join#join(Scene)}, no lock on it is guaranteed to be held when this method is called.
          *
          * @see SceneManager#setLoginHook(Function)
          */
