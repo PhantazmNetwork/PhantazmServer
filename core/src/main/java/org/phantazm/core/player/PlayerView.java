@@ -37,13 +37,33 @@ public sealed interface PlayerView permits PlayerViewImpl {
      */
     @NotNull CompletableFuture<String> getUsername();
 
+    /**
+     * Retrieves the player's username immediately if it is cached in this object, or the player is currently online.
+     * May be out-of-date, as it is not defined when (if ever) a previously cached username becomes invalid.
+     *
+     * @return an Optional containing the cached username, or an empty Optional if not present
+     */
     @NotNull Optional<String> getUsernameIfCached();
 
-    @NotNull CompletableFuture<? extends Component> getDisplayName();
+    /**
+     * Asynchronously gets the display name of this player. If they are currently online, this function will immediately
+     * exit with a completed {@link CompletableFuture} containing the result of calling {@link Player#getDisplayName()}.
+     * Otherwise, the player's username will be resolved given their UUID (which may entail a request to Mojang's API
+     * servers) and a plain text component (with no styling applied) containing the player's username will, when the
+     * operation completes, be set as the future's value.
+     *
+     * @return a CompletableFuture containing the player's current display name
+     */
+    @NotNull CompletableFuture<Component> getDisplayName();
 
-    @NotNull Component getDisplayNameIfPresent();
-
-    @NotNull Optional<? extends Component> getDisplayNameIfCached();
+    /**
+     * Immediately gets the display name of this player if it is cached in this object, or if the player is currently
+     * online. May be out-of-date, as it is not defined when (if ever) a previously cached display name becomes
+     * invalid.
+     *
+     * @return an Optional containing the cached username, or an empty Optional if not present
+     */
+    @NotNull Optional<Component> getDisplayNameIfCached();
 
     /**
      * Gets an {@link Optional} which may contain the player, only if they are online. Maintaining strong references to

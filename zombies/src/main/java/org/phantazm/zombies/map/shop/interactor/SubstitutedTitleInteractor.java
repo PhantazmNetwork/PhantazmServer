@@ -30,7 +30,9 @@ public class SubstitutedTitleInteractor extends InteractorBase<SubstitutedTitleI
             return false;
         }
 
-        Component playerName = interaction.player().module().getPlayerView().getDisplayNameIfPresent();
+        Component playerName = interaction.player().module().getPlayerView().getDisplayNameIfCached()
+            .orElse(Component.empty());
+
         TagResolver playerPlaceholder = Placeholder.component("player", playerName);
         Component message = MiniMessage.miniMessage().deserialize(data.format, playerPlaceholder);
 

@@ -56,7 +56,7 @@ public class SendMessageAction implements PowerupActionComponent {
         }
 
         private Component getComponent(ZombiesPlayer player) {
-            Component playerName = player.module().getPlayerView().getDisplayNameIfPresent();
+            Component playerName = player.module().getPlayerView().getDisplayNameIfCached().orElse(Component.empty());
             TagResolver playerPlaceholder = Placeholder.component("player", playerName);
 
             return MiniMessage.miniMessage().deserialize(data.format, playerPlaceholder);

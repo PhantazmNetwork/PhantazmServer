@@ -133,28 +133,14 @@ public final class PlayerViewImpl implements PlayerView {
     }
 
     @Override
-    public @NotNull CompletableFuture<? extends Component> getDisplayName() {
-        Optional<? extends Component> cached = getPlayer().map(Player::getDisplayName);
-        if (cached.isPresent()) {
-            return CompletableFuture.completedFuture(cached.get());
-        }
-
-        return getUsername().thenApply(Component::text);
-    }
-
-    @Override
-    public @NotNull Component getDisplayNameIfPresent() {
-        Optional<? extends Component> cached = getPlayer().map(Player::getDisplayName);
-        if (cached.isPresent()) {
-            return cached.get();
-        }
-
-        return getUsernameIfCached().map(Component::text).orElseGet(() -> Component.text(getUUID().toString()));
+    public @NotNull CompletableFuture<Component> getDisplayName() {
+        return getPlayer().map(Player::getDisplayName).map(CompletableFuture::completedFuture)
+            .orElseGet(() -> getUsername().thenApply(Component::text));
 
     }
 
     @Override
-    public @NotNull Optional<? extends Component> getDisplayNameIfCached() {
+    public @NotNull Optional<Component> getDisplayNameIfCached() {
         return getPlayer().map(Player::getDisplayName).or(() -> getUsernameIfCached().map(Component::text));
     }
 
