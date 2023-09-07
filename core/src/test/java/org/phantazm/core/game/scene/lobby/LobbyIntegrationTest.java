@@ -28,25 +28,6 @@ public class LobbyIntegrationTest {
 
     private static final UUID playerUUID = UUID.fromString("ade229bf-d062-46e8-99d8-97b667d5a127");
 
-    @Test
-    public void testShutdown(Env env) {
-        Instance instance = env.createFlatInstance();
-        InstanceConfig instanceConfig = new InstanceConfig(InstanceConfig.DEFAULT_POS, InstanceConfig.DEFAULT_TIME,
-            InstanceConfig.DEFAULT_TIME_RATE, InstanceConfig.DEFAULT_CHUNK_LOAD_RANGE);
-        SceneFallback sceneFallback = (ignored) -> CompletableFuture.completedFuture(true);
-        Lobby lobby = new Lobby(UUID.randomUUID(), instance, instanceConfig, sceneFallback,
-            new NPCHandler(List.of(), instance), Collections.emptyList(),
-            MiniMessage.miniMessage(), "", true, Mockito.mock(PlayerViewProvider.class),
-            player -> CompletableFuture.completedFuture(Component.empty()));
-        PlayerView playerView = mock(PlayerView.class);
-
-        lobby.shutdown();
-        assertTrue(lobby.isShutdown());
-
-        TransferResult result = lobby.join(new BasicLobbyJoinRequest(Collections.singleton(playerView)));
-        assertFalse(result.executor().isPresent());
-    }
-
     /* TODO: fix
     @Test
     public void testJoin(Env env) {

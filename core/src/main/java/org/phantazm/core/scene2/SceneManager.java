@@ -2,9 +2,11 @@ package org.phantazm.core.scene2;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.Tickable;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.thread.ThreadDispatcher;
 import net.minestom.server.thread.ThreadProvider;
@@ -72,6 +74,7 @@ public final class SceneManager {
                 });
 
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, manager::handleLogin);
+                MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, manager::handleSpawn);
 
                 MinecraftServer.getSchedulerManager().scheduleTask(() -> {
                     manager.tick(System.currentTimeMillis());
@@ -96,6 +99,64 @@ public final class SceneManager {
 
             return instance;
         }
+    }
+
+    /**
+     * A key for a specific type of Join. See {@link SceneManager#joinKey(Class, String)}.
+     *
+     * @param <T> the type of scene this key joins
+     */
+    public static class Key<T extends Scene> {
+        private final Class<T> type;
+        private final String name;
+        private final int hash;
+
+        private Key(Class<T> type, String name) {
+            this.type = type;
+            this.name = name;
+            this.hash = computeHash(type, name);
+        }
+
+        private static int computeHash(Class<?> clazz, String id) {
+            return 31 * (31 + clazz.hashCode()) + id.hashCode();
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+
+            if (obj == this) {
+                return true;
+            }
+
+            if (obj instanceof Key<?> other) {
+                return type.equals(other.type) && name.equals(other.name);
+            }
+
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "Key[" + type.getSimpleName() + (name.isEmpty() ? "]" : (", " + name + "]"));
+        }
+    }
+
+    /**
+     * A function for creating a {@link Join} from a set of players.
+     *
+     * @param <T> the type of scene to join
+     */
+    public interface JoinFunction<T extends Scene> extends
+        Function<@NotNull Set<@NotNull PlayerView>, @NotNull Join<T>> {
+        @NotNull Class<T> type();
     }
 
     /**
@@ -230,13 +291,15 @@ public final class SceneManager {
     private final Executor executor;
     private final Map<Class<? extends Scene>, SceneEntry> mappedScenes;
     private final ThreadDispatcher<Scene> threadDispatcher;
+    private final Map<Key<?>, JoinFunction<?>> functionMap;
 
-    private volatile Function<? super Player, ? extends Join<? extends InstanceScene>> requestMapper;
+    private volatile Function<? super Player, ? extends LoginJoin<? extends InstanceScene>> requestMapper;
 
     private SceneManager(@NotNull Executor executor, @NotNull Set<Class<? extends Scene>> sceneTypes, int numThreads) {
         this.executor = Objects.requireNonNull(executor);
         this.mappedScenes = buildSceneMap(Set.copyOf(sceneTypes));
         this.threadDispatcher = ThreadDispatcher.of(ThreadProvider.counter(), numThreads);
+        this.functionMap = new ConcurrentHashMap<>();
     }
 
     @SuppressWarnings("unchecked")
@@ -268,36 +331,152 @@ public final class SceneManager {
         }
     }
 
+    /**
+     * A specialization of {@link Join} that is required for joining during <i>login</i>; that is, when the player first
+     * signs onto the server. Join instances will need to implement this interface if they are to be used as the return
+     * value of the function passed to {@link SceneManager#setLoginHook(Function)}.
+     *
+     * @param <T> the type of scene to join, which must subclass {@link InstanceScene}
+     */
+    public interface LoginJoin<T extends InstanceScene> extends Join<T> {
+        /**
+         * A function called by the {@link SceneManager} as triggered by the first {@link PlayerSpawnEvent} made some
+         * time after a player logs into the server. If this method is called, it means that the player was able to
+         * successfully join a scene using this LoginJoin. Therefore, this method should update the scene that was
+         * previously passed to {@link LoginJoin#join(Scene)}.
+         *
+         * @see SceneManager#setLoginHook(Function)
+         */
+        void postSpawn();
+    }
+
+    private final Map<UUID, LoginJoin<?>> joinRequestMap = new ConcurrentHashMap<>();
+
     private void handleLogin(@NotNull PlayerLoginEvent loginEvent) {
         Player player = loginEvent.getPlayer();
 
-        Function<? super Player, ? extends Join<? extends InstanceScene>> mapper = this.requestMapper;
+        Function<? super Player, ? extends LoginJoin<? extends InstanceScene>> mapper = this.requestMapper;
         if (mapper == null) {
             loginEvent.setCancelled(true);
             return;
         }
 
-        JoinResult<? extends InstanceScene> result = joinScene(Objects.requireNonNull(mapper.apply(player))).join();
+        LoginJoin<?> loginJoin = Objects.requireNonNull(mapper.apply(player));
+        JoinResult<? extends InstanceScene> result = joinScene(loginJoin).join();
         if (!result.successful()) {
             loginEvent.setCancelled(true);
             return;
         }
 
+        joinRequestMap.put(player.getUuid(), loginJoin);
         InstanceScene scene = result.scene();
         loginEvent.setSpawningInstance(scene.instance());
     }
 
+    private void handleSpawn(@NotNull PlayerSpawnEvent spawnEvent) {
+        if (!spawnEvent.isFirstSpawn()) {
+            return;
+        }
+
+        LoginJoin<?> loginJoin = joinRequestMap.remove(spawnEvent.getPlayer().getUuid());
+        if (loginJoin != null) {
+            loginJoin.postSpawn();
+        }
+    }
+
+    private void validateType(Class<?> type) {
+        Objects.requireNonNull(type);
+
+        if (!mappedScenes.containsKey(type)) {
+            throw new IllegalArgumentException("attempted to create a key for which no scene exists");
+        }
+    }
+
+    public @NotNull <T extends Scene> Key<T> joinKey(@NotNull Class<T> type) {
+        validateType(type);
+        return new Key<>(type, "");
+    }
+
+    public @NotNull <T extends Scene> Key<T> joinKey(@NotNull Class<T> type, @NotNull String name) {
+        validateType(type);
+        Objects.requireNonNull(name);
+        return new Key<>(type, name);
+    }
+
+    public @NotNull <T extends Scene> JoinFunction<T> joinFunction(@NotNull Class<T> type,
+        @NotNull Function<@NotNull Set<@NotNull PlayerView>, @NotNull Join<T>> function) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(function);
+
+        if (!Scene.class.isAssignableFrom(type)) {
+            throw new IllegalArgumentException("type not assignable to Scene");
+        }
+
+        return new JoinFunction<>() {
+            @Override
+            public @NotNull Class<T> type() {
+                return type;
+            }
+
+            @Override
+            public @NotNull Join<T> apply(@NotNull Set<@NotNull PlayerView> playerViews) {
+                return Objects.requireNonNull(function.apply(playerViews));
+            }
+        };
+    }
+
+    public <T extends Scene> void registerJoinFunction(@NotNull Key<T> key, @NotNull JoinFunction<T> function) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(function);
+
+        if (!key.type.equals(function.type())) {
+            throw new IllegalArgumentException("mismatch between Key type and JoinFunction type");
+        }
+
+        functionMap.put(key, function);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Scene> @NotNull CompletableFuture<JoinResult<T>> joinScene(@NotNull Key<T> key,
+        @NotNull Set<@NotNull PlayerView> players) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(players);
+
+        JoinFunction<T> function = (JoinFunction<T>) functionMap.get(key);
+        if (function == null) {
+            throw new IllegalArgumentException("no join function mapped to " + key);
+        }
+
+        return joinScene(function.apply(players));
+    }
+
     /**
-     * Sets the function that will be used to construct {@link Join} instances in response to player login. Such Join
-     * objects must have a scene type assignable to {@link InstanceScene}, because it is necessary to set the player's
-     * spawning instance on login.
+     * Sets the function that will be used to construct {@link LoginJoin} instances in response to player login. Such
+     * Join objects must have a scene type assignable to {@link InstanceScene}, because it is necessary to set the
+     * player's spawning instance on login.
      * <p>
      * If set to {@code null}, players will be unable to join the server. The login hook is set to null by default, so
      * to have the server be accessible at all, this needs to be set.
+     * <p>
+     * Successfully fulfilling a LoginJoin requires special support from scenes, as many methods on {@link Player} will
+     * not work (such as {@link Player#teleport(Pos)}). Therefore, fulfilling a LoginJoin is split into two parts:
+     * <ol>
+     *     <li>The initial login, where a suitable scene is found and joined. The scene must be made aware that the
+     *     player is just logging in, so that it will not call any methods that are unusable at this point.</li>
+     *     <li>The post-spawn, which is invoked at a later point once the player has been fully initialized. The full
+     *     scope of Player-related methods may now be called.</li>
+     * </ol>
+     * <p>
+     * The first phase is triggered by {@link PlayerLoginEvent} to locate a suitable scene using the LoginJoin provided
+     * by the login hook function. If a scene is successfully found, the LoginJoin instance is <i>saved</i> until some
+     * time later, when {@link PlayerSpawnEvent} is called to initially spawn in the player. At this point, the saved
+     * LoginJoin instance is retrieved and the {@link LoginJoin#postSpawn()} method is called. When logging in,
+     * LoginJoin implementations are expected to save the scene that was passed to {@link LoginJoin#join(Scene)} so that
+     * necessary methods to update player state can be called on the scene later.
      *
      * @param requestMapper the function used to create Join objects for players in response to login events
      */
-    public void setLoginHook(@Nullable Function<? super @NotNull Player, ? extends @NotNull Join<? extends InstanceScene>> requestMapper) {
+    public void setLoginHook(@Nullable Function<? super @NotNull Player, ? extends @NotNull LoginJoin<? extends InstanceScene>> requestMapper) {
         this.requestMapper = requestMapper;
     }
 

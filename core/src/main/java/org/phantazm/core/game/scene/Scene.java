@@ -73,8 +73,6 @@ public interface Scene<TRequest extends SceneJoinRequest> extends Tickable {
      */
     void setJoinable(boolean joinable);
 
-    @NotNull SceneFallback getFallback();
-
     boolean isQuittable();
 
     boolean acceptGhost(@NotNull PlayerView playerView);

@@ -76,7 +76,7 @@ public final class ZombiesFeature {
     static void initialize(@NotNull ContextManager contextManager, @NotNull Spawner spawner,
         @NotNull KeyParser keyParser,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
-        @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback sceneFallback,
+        @NotNull PlayerViewProvider viewProvider,
         @NotNull Map<? super UUID, ? extends Party> parties, @NotNull SceneTransferHelper sceneTransferHelper,
         @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
         @NotNull MappingProcessorSource mappingProcessorSource, @NotNull Map<Key, MobCreator> mobCreatorMap) {
@@ -121,7 +121,7 @@ public final class ZombiesFeature {
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                 new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
-                    instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
+                    instanceSpaceFunction, entry.getValue(), instanceLoader, globalEventNode,
                     ZombiesFeature.mobSpawnerSource(), clientBlockHandlerSource,
                     contextManager, keyParser, database, viewProvider, ZombiesFeature.powerupHandlerSource(),
                     new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,
@@ -140,7 +140,7 @@ public final class ZombiesFeature {
 
         MinecraftServer.getCommandManager().register(
             new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider,
-                MinecraftServer.getSchedulerManager(), sceneTransferHelper, sceneFallback,
+                MinecraftServer.getSchedulerManager(), sceneTransferHelper,
                 zombiesConfig.joinRatelimit()));
     }
 

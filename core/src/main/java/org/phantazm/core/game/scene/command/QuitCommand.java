@@ -8,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.Scene;
 import org.phantazm.core.game.scene.TransferResult;
-import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,7 @@ public final class QuitCommand {
     }
 
     public static @NotNull Command quitCommand(@NotNull RouterStore routerStore,
-        @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback defaultFallback) {
+        @NotNull PlayerViewProvider viewProvider) {
         Objects.requireNonNull(routerStore);
         Objects.requireNonNull(viewProvider);
 
@@ -55,21 +54,15 @@ public final class QuitCommand {
                 TransferResult result = scene.leave(Collections.singleton(player.getUuid()));
                 if (result.executor().isPresent()) {
                     result.executor().get().run();
-                    scene.getFallback().fallback(viewProvider.fromPlayer(player))
-                        .whenComplete((fallbackResult, throwable) -> {
-                            if (throwable != null) {
-                                LOGGER.warn("Failed to fallback", throwable);
-                            }
-                        });
+
+                    //TODO implement
+                    throw new UnsupportedOperationException();
                 } else {
                     result.message().ifPresent(sender::sendMessage);
                 }
             } else {
-                defaultFallback.fallback(viewProvider.fromPlayer(player)).whenComplete((fallbackResult, throwable) -> {
-                    if (throwable != null) {
-                        LOGGER.warn("Failed to fallback", throwable);
-                    }
-                });
+                //TODO remove
+                throw new UnsupportedOperationException();
             }
         });
 

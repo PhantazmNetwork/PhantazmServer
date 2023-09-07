@@ -25,7 +25,7 @@ public class LobbyCreator implements SceneCreator<Lobby> {
     private final String lobbyJoinMessageFormat;
     private final List<BasicComponent<NPC>> npcs;
     private final List<ItemStack> defaultItems;
-    private final Function<? super @NotNull Player, ? extends @NotNull CompletableFuture<?>> displayNameStyler;
+    private final Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler;
 
     private final int sceneCap;
     private final int playerCap;

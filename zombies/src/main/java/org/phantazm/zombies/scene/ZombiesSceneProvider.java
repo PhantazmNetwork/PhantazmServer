@@ -66,7 +66,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
     private final Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction;
     private final MapInfo mapInfo;
     private final InstanceLoader instanceLoader;
-    private final SceneFallback sceneFallback;
     private final EventNode<Event> rootNode;
     private final ContextManager contextManager;
     private final KeyParser keyParser;
@@ -84,7 +83,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
     public ZombiesSceneProvider(@NotNull Executor executor, int maximumScenes,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
-        @NotNull MapInfo mapInfo, @NotNull InstanceLoader instanceLoader, @NotNull SceneFallback sceneFallback,
+        @NotNull MapInfo mapInfo, @NotNull InstanceLoader instanceLoader,
         @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
         @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
         @NotNull ContextManager contextManager, @NotNull KeyParser keyParser, @NotNull ZombiesDatabase database,
@@ -95,7 +94,6 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction);
         this.mapInfo = Objects.requireNonNull(mapInfo);
         this.instanceLoader = Objects.requireNonNull(instanceLoader);
-        this.sceneFallback = Objects.requireNonNull(sceneFallback);
         this.rootNode = Objects.requireNonNull(rootNode);
         this.contextManager = Objects.requireNonNull(contextManager);
         this.keyParser = Objects.requireNonNull(keyParser);
@@ -213,7 +211,7 @@ public class ZombiesSceneProvider extends SceneProviderAbstract<ZombiesScene, Zo
 
             UUID allowedRequestUUID = request.isRestricted() ? request.getUUID() : null;
             ZombiesScene scene =
-                new ZombiesScene(UUID.randomUUID(), map, zombiesPlayers, instance, sceneFallback, settings,
+                new ZombiesScene(UUID.randomUUID(), map, zombiesPlayers, instance, settings,
                     stageTransition, leaveHandler, playerCreator, tickTaskScheduler, database, childNode,
                     allowedRequestUUID, playerViewProvider);
             sceneWrapper.set(scene);

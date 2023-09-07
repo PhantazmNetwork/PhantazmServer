@@ -122,9 +122,19 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
         return false;
     }
 
-    public void join(@NotNull Set<@NotNull PlayerView> players) {
+    public void postLogin(@NotNull Set<@NotNull PlayerView> players) {
+        for (PlayerView playerView : players) {
+            if (!this.players.contains(playerView)) {
+                continue;
+            }
+
+            playerView.getPlayer().ifPresent(this::onSpawn);
+        }
+    }
+
+    public void join(@NotNull Set<@NotNull PlayerView> players, boolean login) {
         for (PlayerView joiningPlayer : players) {
-            if (!players.add(joiningPlayer)) {
+            if (!this.players.add(joiningPlayer)) {
                 continue;
             }
 
@@ -143,18 +153,26 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
                 instance().sendMessage(MiniMessage.miniMessage().deserialize(lobbyJoinMessageFormat, joinerTag));
             });
 
-            CancellableState.Holder<Entity> holder = player.stateHolder();
-            holder.registerState(CoreStages.LOBBY, CancellableState.state(player, self -> {
-                for (ItemStack stack : defaultItems) {
-                    ((Player) self).getInventory().addItemStack(stack);
-                }
-            }, self -> {
-                ((Player) self).getInventory().clear();
-            }));
+            if (login) {
+                return;
+            }
 
-            holder.setStage(CoreStages.LOBBY);
-            player.teleport(spawnPoint);
+            onSpawn(player);
         }
+    }
+
+    private void onSpawn(Player player) {
+        CancellableState.Holder<Entity> holder = player.stateHolder();
+        holder.registerState(CoreStages.LOBBY, CancellableState.state(player, self -> {
+            for (ItemStack stack : defaultItems) {
+                ((Player) self).getInventory().addItemStack(stack);
+            }
+        }, self -> {
+            ((Player) self).getInventory().clear();
+        }));
+
+        holder.setStage(CoreStages.LOBBY);
+        player.teleport(spawnPoint);
     }
 
     @Override

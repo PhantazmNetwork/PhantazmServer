@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -54,6 +55,7 @@ public final class EthyleneFeature {
             .withScalarSignature(permission())
             .withScalarSignature(entityType()).withScalarSignature(material())
             .withScalarSignature(potionEffect())
+            .withScalarSignature(path())
             .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
             .withTypeImplementation(Object2FloatOpenHashMap.class, Object2FloatMap.class)
             .withTypeImplementation(IntOpenHashSet.class, IntSet.class)
@@ -154,6 +156,14 @@ public final class EthyleneFeature {
         }, entityType -> entityType == null
             ? ConfigPrimitive.NULL
             : ConfigPrimitive.of(entityType.namespace().asString()));
+    }
+
+    private static ScalarSignature<Path> path() {
+        return ScalarSignature.of(Token.ofClass(Path.class), element -> {
+            return Path.of(element.asString());
+        }, entityType -> entityType == null
+            ? ConfigPrimitive.NULL
+            : ConfigPrimitive.of(entityType.toString()));
     }
 
     private static ScalarSignature<Block> block() {

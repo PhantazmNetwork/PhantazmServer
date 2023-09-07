@@ -1,5 +1,8 @@
 package org.phantazm.core.config;
 
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -9,8 +12,8 @@ import java.util.Objects;
 /**
  * Config for a single {@link Instance}.
  */
-public record InstanceConfig(@NotNull Pos spawnPoint,
-    long time,
+public record InstanceConfig(long time,
+    @NotNull Pos spawnPoint,
     int timeRate,
     int chunkLoadDistance) {
     /**
@@ -24,13 +27,8 @@ public record InstanceConfig(@NotNull Pos spawnPoint,
 
     public static final int DEFAULT_CHUNK_LOAD_RANGE = 10;
 
-    /**
-     * Creates config regarding a single {@link Instance}.
-     *
-     * @param spawnPoint The spawn point for the {@link Instance}
-     */
-    public InstanceConfig {
-        Objects.requireNonNull(spawnPoint);
+    @Default("timeRate")
+    public static @NotNull ConfigElement defaultTimeRate() {
+        return ConfigPrimitive.of(0);
     }
-
 }

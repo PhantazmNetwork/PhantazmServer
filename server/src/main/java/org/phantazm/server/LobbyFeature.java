@@ -1,29 +1,26 @@
 package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import com.github.steanky.ethylene.core.ConfigCodec;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.bridge.Configuration;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.ethylene.mapper.MappingProcessorSource;
+import com.github.steanky.ethylene.mapper.type.Token;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.Event;
-import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.instance.DynamicChunk;
-import net.minestom.server.instance.InstanceManager;
-import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.commons.BasicComponent;
 import org.phantazm.commons.FileUtils;
-import org.phantazm.core.game.scene.RouteResult;
-import org.phantazm.core.game.scene.SceneProvider;
-import org.phantazm.core.game.scene.TransferResult;
-import org.phantazm.core.game.scene.fallback.CompositeFallback;
-import org.phantazm.core.game.scene.fallback.KickFallback;
-import org.phantazm.core.game.scene.fallback.SceneFallback;
-import org.phantazm.core.game.scene.lobby.*;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
-import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.npc.NPC;
+import org.phantazm.core.scene2.SceneCreator;
+import org.phantazm.core.scene2.lobby.Lobby;
+import org.phantazm.core.scene2.lobby.LobbyCreator;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.lobby.LobbyConfig;
 import org.phantazm.server.role.RoleStore;
@@ -31,12 +28,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.PathMatcher;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * Main entrypoint for lobby-related features.
@@ -44,50 +46,56 @@ import java.util.function.Function;
 public final class LobbyFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(LobbyFeature.class);
 
-    private static LobbyRouter lobbyRouter;
+    public static final Path LOBBY_INSTANCES_DIRECTORY = Path.of("./lobbies/instances");
+    public static final Path LOBBY_CONFIG_DIRECTORY = Path.of("./lobbies/config");
+    public static final Path NPC_DIRECTORY = Path.of("./npcs");
 
-    private static SceneFallback fallback;
+    private static Map<Key, LobbyEntry> lobbies;
 
     private LobbyFeature() {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Initializes lobby-related features. Should only be called once from {@link PhantazmServer#main(String[])}.
-     *
-     * @param playerViewProvider the {@link PlayerViewProvider} instance used by the server
-     * @param lobbiesConfig      the {@link LobbiesConfig} used to determine lobby behavior
-     */
-    static void initialize(@NotNull PlayerViewProvider playerViewProvider, @NotNull LobbiesConfig lobbiesConfig,
-        @NotNull ContextManager contextManager, @NotNull RoleStore roleStore) {
-        EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
+    public record LobbyEntry(@NotNull LobbyConfig lobbyConfig,
+        @NotNull SceneCreator<Lobby> sceneCreator) {
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
 
-        InstanceManager instanceManager = MinecraftServer.getInstanceManager();
+            if (obj == this) {
+                return true;
+            }
+
+            if (obj instanceof LobbyEntry other) {
+                return lobbyConfig.name().equals(other.lobbyConfig.name());
+            }
+
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return lobbyConfig.name().hashCode();
+        }
+    }
+
+    static void initialize(@NotNull LobbiesConfig lobbiesConfig,
+        @NotNull ContextManager contextManager, @NotNull RoleStore roleStore, @NotNull Executor executor,
+        @NotNull MappingProcessorSource mappingProcessorSource, @NotNull ConfigCodec codec) {
         try {
-            FileUtils.createDirectories(lobbiesConfig.instancesPath());
+            FileUtils.createDirectories(LOBBY_INSTANCES_DIRECTORY);
+            FileUtils.createDirectories(LOBBY_CONFIG_DIRECTORY);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        InstanceLoader instanceLoader =
-            new AnvilFileSystemInstanceLoader(instanceManager, lobbiesConfig.instancesPath(), DynamicChunk::new,
-                ExecutorFeature.getExecutor());
-        SceneFallback finalFallback = new KickFallback(lobbiesConfig.kickMessage());
+        ConfigProcessor<LobbyConfig> lobbyConfigProcessor = mappingProcessorSource
+            .processorFor(Token.ofClass(LobbyConfig.class));
 
-        Map<String, SceneProvider<Lobby, LobbyJoinRequest>> lobbyProviders =
-            new HashMap<>(lobbiesConfig.lobbies().size());
-        lobbyRouter = new LobbyRouter(lobbyProviders);
-
-        LobbyConfig mainLobbyConfig = lobbiesConfig.lobbies().get(lobbiesConfig.mainLobbyName());
-        if (mainLobbyConfig == null) {
-            throw new IllegalArgumentException("No main lobby config present");
-        }
-
-        LOGGER.info("Preloading {} lobby instances", lobbiesConfig.lobbies().size());
-        for (LobbyConfig lobbyConfig : lobbiesConfig.lobbies().values()) {
-            instanceLoader.preload(lobbyConfig.lobbyPaths(), lobbyConfig.instanceConfig().spawnPoint(),
-                lobbyConfig.instanceConfig().chunkLoadDistance());
-        }
+        InstanceLoader instanceLoader = new AnvilFileSystemInstanceLoader(MinecraftServer.getInstanceManager(),
+            lobbiesConfig.instancesPath(), DynamicChunk::new, executor);
 
         Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler = (player -> {
             return roleStore.getStylingRole(player.getUuid()).whenComplete((result, error) -> {
@@ -99,77 +107,67 @@ public final class LobbyFeature {
             });
         });
 
-        SceneProvider<Lobby, LobbyJoinRequest> mainLobbyProvider =
-            new BasicLobbyProvider(ExecutorFeature.getExecutor(), mainLobbyConfig.maxLobbies(),
-                -mainLobbyConfig.maxPlayers(), instanceLoader, mainLobbyConfig.lobbyPaths(), finalFallback,
-                mainLobbyConfig.instanceConfig(), contextManager, mainLobbyConfig.npcs(),
-                mainLobbyConfig.defaultItems(), MiniMessage.miniMessage(), mainLobbyConfig.lobbyJoinFormat(),
-                false, node, playerViewProvider, displayNameStyler);
-        lobbyProviders.put(lobbiesConfig.mainLobbyName(), mainLobbyProvider);
+        Map<Key, LobbyEntry> map = new HashMap<>();
 
-        fallback = new LobbyRouterFallback(LobbyFeature.getLobbyRouter(), lobbiesConfig.mainLobbyName());
-        SceneFallback regularFallback = new CompositeFallback(List.of(fallback, finalFallback));
+        List<CompletableFuture<?>> preloadFutures = new ArrayList<>();
 
-        for (Map.Entry<String, LobbyConfig> lobby : lobbiesConfig.lobbies().entrySet()) {
-            if (!lobby.getKey().equals(lobbiesConfig.mainLobbyName())) {
-                lobbyProviders.put(lobby.getKey(),
-                    new BasicLobbyProvider(ExecutorFeature.getExecutor(), lobby.getValue().maxLobbies(),
-                        -lobby.getValue().maxPlayers(), instanceLoader, lobby.getValue().lobbyPaths(),
-                        regularFallback, lobby.getValue().instanceConfig(), contextManager,
-                        mainLobbyConfig.npcs(), mainLobbyConfig.defaultItems(), MiniMessage.miniMessage(),
-                        lobby.getValue().lobbyJoinFormat(), true, node, playerViewProvider, displayNameStyler));
-            }
-        }
+        PathMatcher npcFileMatcher = LOBBY_CONFIG_DIRECTORY.getFileSystem().getPathMatcher("glob:**/*.{yml,yaml}");
+        try (Stream<Path> lobbyFolderStream = Files.list(LOBBY_CONFIG_DIRECTORY)) {
+            for (Path lobbyFolder : (Iterable<? extends Path>) lobbyFolderStream::iterator) {
+                if (!Files.isDirectory(lobbyFolder)) {
+                    continue;
+                }
 
-        Map<UUID, LoginLobbyJoinRequest> loginJoinRequests = new HashMap<>();
+                Path settingsPath = lobbyFolder.resolve("settings.yml");
+                if (!Files.exists(settingsPath)) {
+                    LOGGER.warn("Expected settings.yml file in folder " + lobbyFolder);
+                    continue;
+                }
 
-        node.addListener(PlayerLoginEvent.class, event -> {
-            LoginLobbyJoinRequest joinRequest = new LoginLobbyJoinRequest(event, playerViewProvider);
-            LobbyRouteRequest routeRequest = new LobbyRouteRequest(lobbiesConfig.mainLobbyName(), joinRequest);
+                LobbyConfig lobbyConfig = Configuration.read(settingsPath, codec, lobbyConfigProcessor);
 
-            Player player = event.getPlayer();
-            RouteResult routeResult = lobbyRouter.findScene(routeRequest).join();
-            boolean success = false;
-            if (routeResult.result().isPresent()) {
-                try (TransferResult transferResult = routeResult.result().get()) {
-                    if (transferResult.executor().isPresent()) {
-                        transferResult.executor().get().run();
-                        loginJoinRequests.put(player.getUuid(), joinRequest);
-                        success = true;
+                Path npcFolder = lobbyFolder.resolve(NPC_DIRECTORY);
+                try (Stream<Path> npcFileStream = Files.list(npcFolder)) {
+                    List<BasicComponent<NPC>> components = new ArrayList<>();
+                    for (Path npcFile : (Iterable<? extends Path>) npcFileStream::iterator) {
+                        if (!npcFileMatcher.matches(npcFile)) {
+                            continue;
+                        }
+
+                        ConfigElement element = Configuration.read(npcFile, codec);
+                        if (!element.isNode()) {
+                            LOGGER.warn("Expected " + npcFile + " to contain a top-level node");
+                            continue;
+                        }
+
+                        BasicComponent<NPC> npcComponent = contextManager.makeContext(element.asNode()).provide();
+                        components.add(npcComponent);
                     }
+
+                    if (map.putIfAbsent(lobbyConfig.name(),
+                        new LobbyEntry(lobbyConfig, new LobbyCreator(instanceLoader, lobbyConfig.lobbyPaths(),
+                            lobbyConfig.instanceConfig(), lobbyConfig.lobbyJoinFormat(), List.copyOf(components),
+                            lobbyConfig.defaultItems(), displayNameStyler, lobbyConfig.maxLobbies(),
+                            lobbyConfig.maxPlayers()))) != null) {
+                        throw new RuntimeException("Duplicate lobby named " + lobbyConfig.name());
+                    }
+
+                    preloadFutures.add(CompletableFuture.runAsync(() -> {
+                        instanceLoader.preload(lobbyConfig.lobbyPaths(), lobbyConfig.instanceConfig().spawnPoint(),
+                            lobbyConfig.instanceConfig().chunkLoadDistance());
+                    }, executor));
                 }
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-            if (!success) {
-                LOGGER.warn("Kicking player {} because we weren't able to find a lobby for them to join",
-                    player.getUuid());
-                event.setCancelled(true);
-            }
-        });
+        lobbies = Map.copyOf(map);
 
-        node.addListener(PlayerSpawnEvent.class, event -> {
-            if (!event.isFirstSpawn()) {
-                return;
-            }
-
-            Player player = event.getPlayer();
-            LoginLobbyJoinRequest joinRequest = loginJoinRequests.remove(player.getUuid());
-            if (joinRequest == null) {
-                LOGGER.warn("Player {} spawned without a login join request", player.getUuid());
-                player.kick(Component.empty());
-            }
-        });
-
-        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
-            lobbyRouter.tick(System.currentTimeMillis());
-        }, TaskSchedule.immediate(), TaskSchedule.nextTick());
+        CompletableFuture.allOf(preloadFutures.toArray(CompletableFuture[]::new)).join();
     }
 
-    public static @NotNull LobbyRouter getLobbyRouter() {
-        return FeatureUtils.check(lobbyRouter);
-    }
-
-    public static SceneFallback getFallback() {
-        return FeatureUtils.check(fallback);
+    public static @NotNull @Unmodifiable Map<Key, LobbyEntry> lobbies() {
+        return FeatureUtils.check(lobbies);
     }
 }

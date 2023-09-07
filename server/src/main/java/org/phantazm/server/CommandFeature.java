@@ -12,10 +12,9 @@ public final class CommandFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull RouterStore routerStore, @NotNull PlayerViewProvider viewProvider,
-        @NotNull SceneFallback defaultFallback) {
+    static void initialize(@NotNull RouterStore routerStore, @NotNull PlayerViewProvider viewProvider) {
         MinecraftServer.getCommandManager()
-            .register(QuitCommand.quitCommand(routerStore, viewProvider, defaultFallback));
+            .register(QuitCommand.quitCommand(routerStore, viewProvider));
     }
 
 }

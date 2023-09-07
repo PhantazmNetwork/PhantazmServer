@@ -22,7 +22,6 @@ import java.util.concurrent.locks.StampedLock;
  */
 public abstract class InstanceScene<TRequest extends SceneJoinRequest> implements Scene<TRequest> {
     protected final Instance instance;
-    protected final SceneFallback fallback;
     protected final Point spawnPoint;
     protected final PlayerViewProvider playerViewProvider;
     private final UUID uuid;
@@ -31,11 +30,10 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
 
     protected volatile boolean shutdown = false;
 
-    public InstanceScene(@NotNull UUID uuid, @NotNull Instance instance, @NotNull SceneFallback fallback,
+    public InstanceScene(@NotNull UUID uuid, @NotNull Instance instance,
         @NotNull Point spawnPoint, @NotNull PlayerViewProvider playerViewProvider) {
         this.uuid = Objects.requireNonNull(uuid);
         this.instance = Objects.requireNonNull(instance);
-        this.fallback = Objects.requireNonNull(fallback);
         this.spawnPoint = Objects.requireNonNull(spawnPoint);
         this.playerViewProvider = Objects.requireNonNull(playerViewProvider);
         this.ghosts = Collections.newSetFromMap(new WeakHashMap<>());
@@ -81,19 +79,12 @@ public abstract class InstanceScene<TRequest extends SceneJoinRequest> implement
                 if (invalidGhost(ghost)) {
                     continue;
                 }
-
-                futures.add(fallback.fallback(playerViewProvider.fromPlayer(ghost)));
             }
 
             CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
         } finally {
             MinecraftServer.getInstanceManager().forceUnregisterInstance(instance);
         }
-    }
-
-    @Override
-    public @NotNull SceneFallback getFallback() {
-        return fallback;
     }
 
     @Override

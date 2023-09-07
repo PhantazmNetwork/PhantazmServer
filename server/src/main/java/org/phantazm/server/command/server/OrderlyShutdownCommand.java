@@ -15,7 +15,6 @@ import org.phantazm.core.event.PlayerJoinLobbyEvent;
 import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneRouter;
 import org.phantazm.core.game.scene.event.SceneShutdownEvent;
-import org.phantazm.core.game.scene.lobby.Lobby;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.server.RouterKeys;
 import org.phantazm.server.config.server.ShutdownConfig;
@@ -54,13 +53,6 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
             for (SceneRouter<?, ?> router : routerStore.getRouters()) {
                 if (router.isGame()) {
                     router.setJoinable(false);
-                }
-            }
-            for (Lobby lobby : routerStore.getRouter(RouterKeys.LOBBY_SCENE_ROUTER).getScenes()) {
-                for (PlayerView playerView : lobby.getPlayers().values()) {
-                    playerView.getPlayer().ifPresent(player -> {
-                        player.kick(Component.text("Server is shutting down", NamedTextColor.RED));
-                    });
                 }
             }
 

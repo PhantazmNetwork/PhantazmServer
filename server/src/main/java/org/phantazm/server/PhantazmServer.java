@@ -10,8 +10,7 @@ import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -25,12 +24,13 @@ import org.phantazm.core.chat.ChatConfig;
 import org.phantazm.core.game.scene.BasicRouterStore;
 import org.phantazm.core.game.scene.RouterStore;
 import org.phantazm.core.game.scene.SceneTransferHelper;
-import org.phantazm.core.game.scene.fallback.CompositeFallback;
-import org.phantazm.core.game.scene.fallback.KickFallback;
 import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.scene2.SceneManager;
+import org.phantazm.core.scene2.lobby.JoinLobby;
+import org.phantazm.core.scene2.lobby.Lobby;
 import org.phantazm.server.command.whisper.WhisperConfig;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
@@ -46,7 +46,6 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -92,7 +91,7 @@ public final class PhantazmServer {
             handler.writeDefaultsAndGet();
 
             serverConfig = handler.loadDataNow(ConfigFeature.SERVER_CONFIG_KEY);
-            ServerInfoConfig serverInfoConfig = serverConfig.serverInfoConfig();
+            ServerInfoConfig serverInfoConfig = serverConfig.serverInfo();
             if (isUnsafe(args)) {
                 LOGGER.warn("""
                                             
@@ -207,6 +206,20 @@ public final class PhantazmServer {
             BlockHandlerFeature.initialize();
             LocalizationFeature.initialize();
             PlayerFeature.initialize(playerConfig);
+
+            SceneManager.Global.init(ExecutorFeature.getExecutor(), Set.of(Lobby.class), viewProvider,
+                Runtime.getRuntime().availableProcessors());
+
+            SceneManager manager = SceneManager.Global.instance();
+            manager.registerJoinFunction(manager.joinKey(Lobby.class), manager.joinFunction(Lobby.class, players -> {
+                return new JoinLobby(players,
+                    LobbyFeature.lobbies().get(Key.key(Namespaces.PHANTAZM, "main")).sceneCreator(), false);
+            }));
+
+            manager.setLoginHook(player -> {
+                return new JoinLobby(Set.of(viewProvider.fromPlayer(player)),
+                    LobbyFeature.lobbies().get(Key.key(Namespaces.PHANTAZM, "main")).sceneCreator(), true);
+            });
         });
 
         CompletableFuture<?> databaseFeatures = CompletableFuture.runAsync(() -> {
@@ -232,7 +245,8 @@ public final class PhantazmServer {
             ChatFeature.initialize(chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
                 RoleFeature.roleStore());
 
-            LobbyFeature.initialize(viewProvider, lobbiesConfig, contextManager, RoleFeature.roleStore());
+            LobbyFeature.initialize(lobbiesConfig, contextManager, RoleFeature.roleStore(),
+                ExecutorFeature.getExecutor(), mappingProcessorSource, yamlCodec);
 
             ProximaFeature.initialize(pathfinderConfig);
             MobFeature.initialize(yamlCodec, mappingProcessorSource, contextManager, ProximaFeature.getPathfinder(),
@@ -240,29 +254,25 @@ public final class PhantazmServer {
             EquipmentFeature.initialize(keyParser, contextManager, yamlCodec,
                 mappingProcessorSource.processorFor(Token.ofClass(EquipmentData.class)));
 
-
             SongFeature.initialize(keyParser);
 
             ZombiesFeature.initialize(contextManager, ProximaFeature.getSpawner(),
-                keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider, new CompositeFallback(
-                    List.of(LobbyFeature.getFallback(), new KickFallback(
-                        Component.text("Failed to send you to lobby!", NamedTextColor.RED)))),
+                keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider,
                 PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
                 zombiesConfig, mappingProcessorSource, MobFeature.getMobCreators());
 
             LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
             ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),
-                serverConfig.serverInfoConfig().whitelist(), HikariFeature.getDataSource(),
+                serverConfig.serverInfo().whitelist(), HikariFeature.getDataSource(),
                 ExecutorFeature.getExecutor(), routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),
                 viewProvider, transferHelper, RoleFeature.roleStore());
 
             ValidationFeature.initialize(LoginValidatorFeature.loginValidator(),
                 ServerCommandFeature.permissionHandler());
 
-            CommandFeature.initialize(routerStore, viewProvider, LobbyFeature.getFallback());
+            CommandFeature.initialize(routerStore, viewProvider);
 
             routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
-            routerStore.putRouter(RouterKeys.LOBBY_SCENE_ROUTER, LobbyFeature.getLobbyRouter());
         });
 
         CompletableFuture.allOf(independentFeatures, databaseFeatures, databaseDependents, game).join();
@@ -270,7 +280,7 @@ public final class PhantazmServer {
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig,
         StartupConfig startupConfig) {
-        ServerInfoConfig infoConfig = serverConfig.serverInfoConfig();
+        ServerInfoConfig infoConfig = serverConfig.serverInfo();
 
         switch (infoConfig.authType()) {
             case MOJANG -> MojangAuth.init();
@@ -282,7 +292,7 @@ public final class PhantazmServer {
         }
 
         node.addListener(ServerListPingEvent.class,
-            event -> event.getResponseData().setDescription(serverConfig.pingListConfig().description()));
+            event -> event.getResponseData().setDescription(serverConfig.pingList().description()));
 
         server.start(infoConfig.serverIP(), infoConfig.port());
 

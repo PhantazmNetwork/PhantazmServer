@@ -62,13 +62,13 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
     private volatile int pendingPlayers = 0;
 
     public ZombiesScene(@NotNull UUID uuid, @NotNull ZombiesMap map, @NotNull Map<UUID, ZombiesPlayer> zombiesPlayers,
-        @NotNull Instance instance, @NotNull SceneFallback fallback, @NotNull MapSettingsInfo mapSettingsInfo,
+        @NotNull Instance instance, @NotNull MapSettingsInfo mapSettingsInfo,
         @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
         @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
         @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
         @NotNull EventNode<Event> sceneNode, @Nullable UUID allowedRequestUUID,
         @NotNull PlayerViewProvider playerViewProvider) {
-        super(uuid, instance, fallback, VecUtils.toPoint(mapSettingsInfo.spawn()), playerViewProvider);
+        super(uuid, instance, VecUtils.toPoint(mapSettingsInfo.spawn()), playerViewProvider);
         this.map = Objects.requireNonNull(map);
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo);
@@ -371,13 +371,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
             }
 
             if (!zombiesPlayer.hasQuit()) {
-                fallbackFutures.add(fallback.fallback(zombiesPlayer.module().getPlayerView())
-                    .whenComplete((fallbackResult, throwable) -> {
-                        if (throwable != null) {
-                            LOGGER.warn("Failed to fallback {}", zombiesPlayer.getUUID(),
-                                throwable);
-                        }
-                    }));
+                //TODO implement
+                throw new UnsupportedOperationException();
             }
 
             zombiesPlayer.end();

@@ -21,7 +21,7 @@ public class ZombiesCommand extends Command {
     public ZombiesCommand(@NotNull Map<? super UUID, ? extends Party> parties, @NotNull ZombiesSceneRouter router,
         @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
         @NotNull SchedulerManager schedulerManager, @NotNull SceneTransferHelper transferHelper,
-        @NotNull SceneFallback fallback, long joinRatelimit) {
+        long joinRatelimit) {
         super("zombies");
 
         Objects.requireNonNull(parties);
@@ -29,7 +29,6 @@ public class ZombiesCommand extends Command {
         Objects.requireNonNull(keyParser);
         Objects.requireNonNull(maps);
         Objects.requireNonNull(viewProvider);
-        Objects.requireNonNull(fallback);
 
         ZombiesJoinHelper joinHelper = new ZombiesJoinHelper(viewProvider, router, schedulerManager, transferHelper);
         addSubcommand(new ZombiesJoinCommand(parties, viewProvider, keyParser, maps, joinHelper,
