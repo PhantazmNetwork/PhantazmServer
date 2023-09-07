@@ -409,6 +409,10 @@ public final class SceneManager {
     private void validateType(Class<?> type) {
         Objects.requireNonNull(type);
 
+        if (!Scene.class.isAssignableFrom(type)) {
+            throw new IllegalArgumentException("type not assignable to Scene");
+        }
+
         if (!mappedScenes.containsKey(type)) {
             throw new IllegalArgumentException("attempted to create a key for which no scene exists");
         }
@@ -427,14 +431,9 @@ public final class SceneManager {
 
     public @NotNull <T extends Scene> JoinFunction<T> joinFunction(@NotNull Class<T> type,
         @NotNull Function<@NotNull Set<@NotNull PlayerView>, @NotNull Join<T>> function) {
-        Objects.requireNonNull(type);
+        validateType(type);
         Objects.requireNonNull(function);
 
-        if (!Scene.class.isAssignableFrom(type)) {
-            throw new IllegalArgumentException("type not assignable to Scene");
-        }
-
-        validateType(type);
         return new JoinFunction<>() {
             @Override
             public @NotNull Class<T> type() {
