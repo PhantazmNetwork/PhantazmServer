@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
-import org.phantazm.zombies.equipment.gun.shoot.GunShot;
+import org.phantazm.zombies.equipment.gun2.shoot.GunShot;
 
 import java.util.Collection;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package org.phantazm.zombies.equipment.gun.shoot;
+package org.phantazm.zombies.equipment.gun2.shoot;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;

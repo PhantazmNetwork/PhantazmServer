@@ -18,7 +18,7 @@ import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
-import org.phantazm.zombies.equipment.gun.shoot.GunShot;
+import org.phantazm.zombies.equipment.gun2.shoot.GunShot;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;

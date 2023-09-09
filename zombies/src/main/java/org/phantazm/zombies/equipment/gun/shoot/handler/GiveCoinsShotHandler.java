@@ -13,8 +13,8 @@ import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
-import org.phantazm.zombies.equipment.gun.shoot.GunHit;
-import org.phantazm.zombies.equipment.gun.shoot.GunShot;
+import org.phantazm.zombies.equipment.gun2.shoot.GunHit;
+import org.phantazm.zombies.equipment.gun2.shoot.GunShot;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 

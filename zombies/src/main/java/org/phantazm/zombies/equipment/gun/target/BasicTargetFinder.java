@@ -9,7 +9,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.equipment.gun.shoot.GunHit;
+import org.phantazm.zombies.equipment.gun2.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.target.entityfinder.directional.DirectionalEntityFinder;
 import org.phantazm.zombies.equipment.gun.target.headshot.HeadshotTester;
 import org.phantazm.zombies.equipment.gun.target.intersectionfinder.IntersectionFinder;

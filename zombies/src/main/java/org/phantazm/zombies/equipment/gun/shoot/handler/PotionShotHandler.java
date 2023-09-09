@@ -9,8 +9,8 @@ import net.minestom.server.potion.Potion;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
-import org.phantazm.zombies.equipment.gun.shoot.GunHit;
-import org.phantazm.zombies.equipment.gun.shoot.GunShot;
+import org.phantazm.zombies.equipment.gun2.shoot.GunHit;
+import org.phantazm.zombies.equipment.gun2.shoot.GunShot;
 
 import java.util.Collection;
 import java.util.Objects;

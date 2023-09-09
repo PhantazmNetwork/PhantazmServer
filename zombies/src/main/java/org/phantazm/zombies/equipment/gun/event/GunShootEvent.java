@@ -4,7 +4,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
-import org.phantazm.zombies.equipment.gun.shoot.GunShot;
+import org.phantazm.zombies.equipment.gun2.shoot.GunShot;
 
 public record GunShootEvent(
     @NotNull Gun gun,
