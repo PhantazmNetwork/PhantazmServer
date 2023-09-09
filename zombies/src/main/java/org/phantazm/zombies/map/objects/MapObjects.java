@@ -12,6 +12,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.core.sound.SongPlayer;

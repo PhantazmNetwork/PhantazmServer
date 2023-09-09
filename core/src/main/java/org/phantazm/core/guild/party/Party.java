@@ -4,6 +4,7 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.audience.Audience;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Tickable;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.guild.Guild;
 import org.phantazm.core.guild.GuildMemberManager;
 import org.phantazm.core.guild.invite.InvitationManager;
@@ -29,9 +30,13 @@ public class Party extends Guild<PartyMember> implements Tickable {
 
     private final SingleMemberPermission<PartyMember> invitePermission;
 
+    private final SingleMemberPermission<PartyMember> allInvitePermission;
+
     private final SingleMemberPermission<PartyMember> joinPermission;
 
     private final Wrapper<PartyMember> owner;
+
+    private final Flaggable flaggable;
 
     public Party(@NotNull GuildMemberManager<PartyMember> memberManager,
         @NotNull Function<? super PlayerView, ? extends PartyMember> memberCreator, @NotNull Audience audience,
@@ -39,7 +44,8 @@ public class Party extends Guild<PartyMember> implements Tickable {
         @NotNull PartyNotification notification, @NotNull InvitationManager<PartyMember> invitationManager,
         @NotNull MultipleMemberPermission<PartyMember> kickPermission,
         @NotNull SingleMemberPermission<PartyMember> invitePermission,
-        @NotNull SingleMemberPermission<PartyMember> joinPermission, @NotNull Wrapper<PartyMember> owner) {
+        @NotNull SingleMemberPermission<PartyMember> allInvitePermission,
+        @NotNull SingleMemberPermission<PartyMember> joinPermission, @NotNull Wrapper<PartyMember> owner, @NotNull Flaggable flaggable) {
         super(memberManager, memberCreator);
         this.audience = Objects.requireNonNull(audience);
         this.spyAudience = Objects.requireNonNull(spyAudience);
@@ -47,8 +53,10 @@ public class Party extends Guild<PartyMember> implements Tickable {
         this.invitationManager = Objects.requireNonNull(invitationManager);
         this.kickPermission = Objects.requireNonNull(kickPermission);
         this.invitePermission = Objects.requireNonNull(invitePermission);
+        this.allInvitePermission = Objects.requireNonNull(allInvitePermission);
         this.joinPermission = Objects.requireNonNull(joinPermission);
         this.owner = Objects.requireNonNull(owner);
+        this.flaggable = Objects.requireNonNull(flaggable);
     }
 
     public @NotNull Audience getAudience() {
@@ -75,12 +83,20 @@ public class Party extends Guild<PartyMember> implements Tickable {
         return invitePermission;
     }
 
+    public @NotNull SingleMemberPermission<PartyMember> getAllInvitePermission() {
+        return allInvitePermission;
+    }
+
     public @NotNull SingleMemberPermission<PartyMember> getJoinPermission() {
         return joinPermission;
     }
 
     public @NotNull Wrapper<PartyMember> getOwner() {
         return owner;
+    }
+
+    public @NotNull Flaggable getFlaggable() {
+        return flaggable;
     }
 
     @Override

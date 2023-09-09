@@ -1,4 +1,4 @@
-package org.phantazm.zombies.map;
+package org.phantazm.commons.flag;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;

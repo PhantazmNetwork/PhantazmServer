@@ -20,7 +20,7 @@ import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
-import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 

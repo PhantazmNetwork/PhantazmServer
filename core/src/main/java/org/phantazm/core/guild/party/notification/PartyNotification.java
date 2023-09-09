@@ -247,4 +247,18 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
         });
     }
 
+    // TODO: change to adventure boolean choice whenever we update adventure
+    public void notifyAllInvite(@NotNull PartyMember enabler, boolean enabled) {
+        enabler.getPlayerView().getDisplayName().whenComplete((displayName, throwable) -> {
+            if (throwable != null) {
+                LOGGER.warn("Exception while sending party all-invite message", throwable);
+                return;
+            }
+
+            TagResolver enablerPlaceholder = Placeholder.component("enabler", displayName);
+            Component message = miniMessage.deserialize(enabled ? config.allInviteEnabledFormat() : config.allInviteDisabledFormat(), enablerPlaceholder);
+            audience.sendMessage(message);
+        });
+    }
+
 }

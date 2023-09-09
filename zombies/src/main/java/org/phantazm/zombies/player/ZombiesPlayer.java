@@ -10,6 +10,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.BelowNameTag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Activable;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;

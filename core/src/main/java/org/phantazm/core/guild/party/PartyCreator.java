@@ -4,22 +4,18 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.flag.BasicFlaggable;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.guild.GuildMemberManager;
 import org.phantazm.core.guild.invite.InvitationManager;
 import org.phantazm.core.guild.party.notification.PartyNotification;
 import org.phantazm.core.guild.party.notification.PartyNotificationConfig;
-import org.phantazm.core.guild.permission.MultipleMemberPermission;
-import org.phantazm.core.guild.permission.RankMultipleMemberPermission;
-import org.phantazm.core.guild.permission.RankSingleMemberPermission;
-import org.phantazm.core.guild.permission.SingleMemberPermission;
+import org.phantazm.core.guild.permission.*;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.time.AnalogTickFormatter;
 import org.phantazm.core.time.TickFormatter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class PartyCreator {
@@ -40,11 +36,13 @@ public class PartyCreator {
 
     private final int minimumInviteRank;
 
+    private final int minimumAllInviteRank;
+
     private final int minimumJoinRank;
 
     public PartyCreator(@NotNull PartyNotificationConfig notificationConfig, @NotNull TickFormatter tickFormatter,
         @NotNull MiniMessage miniMessage, int creatorRank, int defaultRank, long invitationDuration,
-        int minimumKickRank, int minimumInviteRank, int minimumJoinRank) {
+        int minimumKickRank, int minimumInviteRank, int minimumAllInviteRank, int minimumJoinRank) {
         this.notificationConfig = Objects.requireNonNull(notificationConfig);
         this.tickFormatter = Objects.requireNonNull(tickFormatter);
         this.miniMessage = Objects.requireNonNull(miniMessage);
@@ -53,6 +51,7 @@ public class PartyCreator {
         this.invitationDuration = invitationDuration;
         this.minimumKickRank = minimumKickRank;
         this.minimumInviteRank = minimumInviteRank;
+        this.minimumAllInviteRank = minimumAllInviteRank;
         this.minimumJoinRank = minimumJoinRank;
     }
 
@@ -65,6 +64,7 @@ public class PartyCreator {
         memberManager.addMember(owner);
         Wrapper<PartyMember> ownerWrapper = Wrapper.of(owner);
 
+        Flaggable flaggable = new BasicFlaggable();
         Function<? super PlayerView, ? extends PartyMember> memberCreator = this::createMember;
         Audience audience = new PartyAudience(members.values());
         SpyAudience spyAudience = new SpyAudience();
@@ -73,12 +73,15 @@ public class PartyCreator {
         InvitationManager<PartyMember> invitationManager =
             new InvitationManager<>(memberManager, memberCreator, notification, invitationDuration);
         MultipleMemberPermission<PartyMember> kickPermission = new RankMultipleMemberPermission<>(minimumKickRank);
-        SingleMemberPermission<PartyMember> invitePermission = new RankSingleMemberPermission<>(minimumInviteRank);
+        SingleMemberPermission<PartyMember> rankInvitePermission = new RankSingleMemberPermission<>(minimumInviteRank);
+        SingleMemberPermission<PartyMember> flagInvitePermission = new FlaggableSingleMemberPermission<>(flaggable, Flags.ALL_INVITE);
+        SingleMemberPermission<PartyMember> invitePermission = new OrMultipleMemberPermission<>(List.of(rankInvitePermission, flagInvitePermission));
+        SingleMemberPermission<PartyMember> allInvitePermission = new RankSingleMemberPermission<>(minimumAllInviteRank);
         SingleMemberPermission<PartyMember> joinPermission = new RankSingleMemberPermission<>(minimumJoinRank);
 
         return new Party(memberManager, memberCreator, audience, spyAudience, notification, invitationManager,
             kickPermission,
-            invitePermission, joinPermission, ownerWrapper);
+            invitePermission, joinPermission, allInvitePermission, ownerWrapper, flaggable);
     }
 
     private PartyMember createMember(PlayerView playerView) {
@@ -102,6 +105,8 @@ public class PartyCreator {
         private int minimumKickRank = 1;
 
         private int minimumInviteRank = 1;
+
+        private int minimumAllInviteRank = 1;
 
         private int minimumJoinRank = 1;
 
@@ -177,6 +182,15 @@ public class PartyCreator {
             return this;
         }
 
+        public int getMinimumAllInviteRank() {
+            return minimumAllInviteRank;
+        }
+
+        public @NotNull Builder setMinimumAllInviteRank(int minimumAllInviteRank) {
+            this.minimumAllInviteRank = minimumAllInviteRank;
+            return this;
+        }
+
         public int getMinimumJoinRank() {
             return minimumJoinRank;
         }
@@ -188,7 +202,7 @@ public class PartyCreator {
 
         public @NotNull PartyCreator build() {
             return new PartyCreator(notificationConfig, tickFormatter, miniMessage, creatorRank, defaultRank,
-                invitationDuration, minimumKickRank, minimumInviteRank, minimumJoinRank);
+                invitationDuration, minimumKickRank, minimumInviteRank, minimumAllInviteRank, minimumJoinRank);
         }
 
     }

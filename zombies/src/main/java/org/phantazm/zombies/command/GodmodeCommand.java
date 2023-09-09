@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.zombies.Flags;
-import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene.ZombiesScene;
 

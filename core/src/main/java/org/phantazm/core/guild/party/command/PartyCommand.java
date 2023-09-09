@@ -38,6 +38,7 @@ public class PartyCommand {
         command.addSubcommand(PartyDisbandCommand.disbandCommand(config, partyHolder));
         command.addSubcommand(
             PartySpyCommand.spyCommand(config, miniMessage, connectionManager, partyHolder, viewProvider));
+        command.addSubcommand(PartyAllInviteCommand.allInviteCommand(config, partyHolder));
 
         return command;
     }

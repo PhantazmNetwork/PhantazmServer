@@ -29,6 +29,7 @@ import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.phantazm.commons.Activable;
 import org.phantazm.commons.BasicTickTaskScheduler;
 import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;

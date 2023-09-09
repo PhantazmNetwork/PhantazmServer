@@ -23,6 +23,7 @@ import net.minestom.server.scoreboard.BelowNameTag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.BasicTickTaskScheduler;
 import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.commons.flag.BasicFlaggable;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.SceneProviderAbstract;

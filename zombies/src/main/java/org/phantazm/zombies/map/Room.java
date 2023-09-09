@@ -3,6 +3,8 @@ package org.phantazm.zombies.map;
 import com.github.steanky.vector.Bounds3I;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.flag.BasicFlaggable;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.tracker.BoundedBase;
 import org.phantazm.zombies.map.action.Action;
 

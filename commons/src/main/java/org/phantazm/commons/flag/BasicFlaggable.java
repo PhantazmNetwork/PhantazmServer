@@ -1,4 +1,4 @@
-package org.phantazm.zombies.map;
+package org.phantazm.commons.flag;
 
 import it.unimi.dsi.fastutil.Hash;
 import net.kyori.adventure.key.Key;

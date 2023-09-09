@@ -14,10 +14,11 @@ public record PartyConfig(
     long invitationDuration,
     int minimumKickRank,
     int minimumInviteRank,
-    int minimumJoinRank) {
+    int minimumJoinRank,
+    int minimumAllInviteRank) {
 
     public static final PartyConfig DEFAULT =
         new PartyConfig(PartyNotificationConfig.DEFAULT, PartyCommandConfig.DEFAULT, "", 1, 0,
-            60L * MinecraftServer.TICK_PER_SECOND, 1, 1, 1);
+            60L * MinecraftServer.TICK_PER_SECOND, 1, 1, 1, 1);
 
 }

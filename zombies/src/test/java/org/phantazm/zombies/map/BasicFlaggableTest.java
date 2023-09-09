@@ -4,6 +4,8 @@ import net.kyori.adventure.key.Key;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.phantazm.commons.Namespaces;
+import org.phantazm.commons.flag.BasicFlaggable;
+import org.phantazm.commons.flag.Flaggable;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
