@@ -27,6 +27,7 @@ import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.scene2.CoreJoinKeys;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.scene2.lobby.JoinLobby;
 import org.phantazm.core.scene2.lobby.Lobby;
@@ -210,9 +211,8 @@ public final class PhantazmServer {
                 Runtime.getRuntime().availableProcessors());
 
             SceneManager manager = SceneManager.Global.instance();
-            manager.registerJoinFunction(manager.joinKey(Lobby.class), manager.joinFunction(Lobby.class, players -> {
-                return new JoinLobby(players,
-                    LobbyFeature.lobbies().get(lobbiesConfig.mainLobby()).sceneCreator());
+            manager.registerJoinFunction(CoreJoinKeys.MAIN_LOBBY, SceneManager.joinFunction(Lobby.class, players -> {
+                return new JoinLobby(players, LobbyFeature.lobbies().get(lobbiesConfig.mainLobby()).sceneCreator());
             }));
 
             manager.setLoginHook(player -> {

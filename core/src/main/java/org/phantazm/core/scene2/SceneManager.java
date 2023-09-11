@@ -104,9 +104,15 @@ public final class SceneManager {
     }
 
     /**
-     * A key for a specific type of Join. See {@link SceneManager#joinKey(Class, String)}.
+     * A key for a specific type of {@link Join}. Used by some methods on SceneManager as an alternative to manually
+     * creating Join instances every time they are needed. The constructor for this class is private, but instances can
+     * be obtained by calling {@link SceneManager#joinKey(Class, String)} or an overload.
+     * <p>
+     * Instances should generally be stored in {@code public static} and referenced as-needed by other code.
      *
      * @param <T> the type of scene this key joins
+     * @see SceneManager#joinKey(Class, String)
+     * @see SceneManager#registerJoinFunction(Key, JoinFunction)
      */
     public static class Key<T extends Scene> {
         private final Class<T> type;
@@ -116,6 +122,8 @@ public final class SceneManager {
         private Key(Class<T> type, String name) {
             this.type = type;
             this.name = name;
+
+            //compute hash right
             this.hash = computeHash(type, name);
         }
 
@@ -158,6 +166,11 @@ public final class SceneManager {
      */
     public interface JoinFunction<T extends Scene> extends
         Function<@NotNull Set<@NotNull PlayerView>, @NotNull Join<T>> {
+        /**
+         * The type of scene this function will join.
+         *
+         * @return the type of scene this function will join
+         */
         @NotNull Class<T> type();
     }
 
@@ -406,32 +419,45 @@ public final class SceneManager {
         }
     }
 
-    private void validateType(Class<?> type) {
+    /**
+     * Creates a new {@link Key} of type {@code type} and name {@code name}.
+     *
+     * @param type the type of {@link Scene} this Key will be associated with
+     * @param name the name of the key, used to disambiguate when there are multiple keys with the same underlying type
+     * @param <T>  the type of Scene this key is for
+     * @return a new Key instance
+     */
+    public static @NotNull <T extends Scene> Key<T> joinKey(@NotNull Class<T> type, @NotNull String name) {
         Objects.requireNonNull(type);
-
-        if (!Scene.class.isAssignableFrom(type)) {
-            throw new IllegalArgumentException("type not assignable to Scene");
-        }
-
-        if (!mappedScenes.containsKey(type)) {
-            throw new IllegalArgumentException("attempted to create a key for which no scene exists");
-        }
-    }
-
-    public @NotNull <T extends Scene> Key<T> joinKey(@NotNull Class<T> type) {
-        validateType(type);
-        return new Key<>(type, "");
-    }
-
-    public @NotNull <T extends Scene> Key<T> joinKey(@NotNull Class<T> type, @NotNull String name) {
-        validateType(type);
         Objects.requireNonNull(name);
         return new Key<>(type, name);
     }
 
-    public @NotNull <T extends Scene> JoinFunction<T> joinFunction(@NotNull Class<T> type,
+    /**
+     * Creates a new {@link Key} of type {@code type} and whose name is an empty string. Useful if it is anticipated
+     * that there will only be one Key necessary for a given kind of scene.
+     *
+     * @param type the type of {@link Scene} this Key will be associated with
+     * @param <T>  the type of Scene this key is for
+     * @return a new Key instance
+     */
+    public static @NotNull <T extends Scene> Key<T> joinKey(@NotNull Class<T> type) {
+        Objects.requireNonNull(type);
+        return new Key<>(type, "");
+    }
+
+    /**
+     * Creates a new {@link JoinFunction} implementation.
+     *
+     * @param type     the type of the JoinFunction
+     * @param function a {@link Function} which accepts a set of {@link PlayerView} instances and returns a new
+     *                 {@link Join} instance.
+     * @param <T>      the type of scene the resulting function will join
+     * @return a new JoinFunction
+     */
+    public static @NotNull <T extends Scene> JoinFunction<T> joinFunction(@NotNull Class<T> type,
         @NotNull Function<@NotNull Set<@NotNull PlayerView>, @NotNull Join<T>> function) {
-        validateType(type);
+        Objects.requireNonNull(type);
         Objects.requireNonNull(function);
 
         return new JoinFunction<>() {
@@ -447,6 +473,16 @@ public final class SceneManager {
         };
     }
 
+    /**
+     * Registers a persistent {@link JoinFunction}, associating it with a specific {@link Key}. JoinFunctions can be
+     * used to more conveniently submit join requests to this SceneManager
+     *
+     * @param key      the key associated with the JoinFunction
+     * @param function the JoinFunction associated with the key
+     * @param <T>      the scene type
+     * @throws IllegalArgumentException if the key type is not equal to the function type, or if a function is already
+     *                                  bound to the given key
+     */
     public <T extends Scene> void registerJoinFunction(@NotNull Key<T> key, @NotNull JoinFunction<T> function) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(function);
@@ -455,9 +491,23 @@ public final class SceneManager {
             throw new IllegalArgumentException("mismatch between Key type and JoinFunction type");
         }
 
-        functionMap.put(key, function);
+        if (functionMap.putIfAbsent(key, function) != null) {
+            throw new IllegalArgumentException("Key " + key + " already associated with a JoinFunction");
+        }
     }
 
+    /**
+     * Attempts to fulfill a {@link Join} created by calling the {@link JoinFunction} associated with the given
+     * {@link Key} with the set of {@link PlayerView}s participating in the join.
+     *
+     * @param key     the key used to look up a JoinFunction
+     * @param players the set of joining players
+     * @param <T>     the type of scene to join
+     * @return the result of calling {@link SceneManager#joinScene(Join)} on the Join instanced returned by a registered
+     * JoinFunction
+     * @throws IllegalArgumentException if there is no JoinFunction mapped to the given key
+     * @see SceneManager#joinScene(Join)
+     */
     @SuppressWarnings("unchecked")
     public <T extends Scene> @NotNull CompletableFuture<JoinResult<T>> joinScene(@NotNull Key<T> key,
         @NotNull Set<@NotNull PlayerView> players) {
@@ -599,8 +649,6 @@ public final class SceneManager {
     /**
      * Retrieves the number of scenes that exactly match a specified type. If the type has not been registered,
      * {@code -1} is returned.
-     * <p>
-     * If called from within {@link Join#canCreateNewScene(SceneManager)}, this SceneManager should ensure
      *
      * @param sceneType the type of scene to search for
      * @param <T>       the type of scene to search for
@@ -835,7 +883,7 @@ public final class SceneManager {
             return;
         }
 
-        Map<Scene, Set<PlayerViewImpl>> groupedScenes = new IdentityHashMap<>(4);
+        Map<Scene, Set<PlayerViewImpl>> groupedScenes = new HashMap<>(4);
         for (PlayerView playerView : players) {
             PlayerViewImpl view = (PlayerViewImpl) playerView;
 

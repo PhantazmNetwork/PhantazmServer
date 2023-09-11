@@ -78,7 +78,7 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
             (e, v) -> v.getUniqueId().equals(uuid));
 
         node.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
-        node.addListener(PlayerEntityInteractEvent.class, this::entityInteract);
+        node.addListener(PlayerEntityInteractEvent.class, npcHandler::handleInteract);
         node.addListener(ItemDropEvent.class, event -> event.setCancelled(true));
         node.addListener(InventoryPreClickEvent.class, event -> event.setCancelled(true));
         node.addListener(PlayerPreEatEvent.class, event -> event.setCancelled(true));
@@ -98,10 +98,6 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
         });
 
         return node;
-    }
-
-    private void entityInteract(PlayerEntityInteractEvent event) {
-        npcHandler.handleInteract(event);
     }
 
     @Override

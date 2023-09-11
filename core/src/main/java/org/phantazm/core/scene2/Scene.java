@@ -19,6 +19,10 @@ import java.util.function.Function;
  * Represents something that can be joined by players, such as a game or a lobby. Scenes are ticked by a
  * {@link SceneManager}.
  * <p>
+ * Scene implementations are expected to have an identity-based {@link Object#equals(Object)} method (and, by extension,
+ * {@link Object#hashCode()}). That is, their {@code equals} method should return true iff {@code this == obj} where
+ * {@code this} is this object and {@code obj} is the object to which this one is being compared.
+ * <p>
  * <h2>Thread Safety</h2>
  * Unless otherwise stated, all methods on Scene are <i>not</i> thread safe; the scene must be acquired using the
  * {@link Acquirable} API before modifications are made.

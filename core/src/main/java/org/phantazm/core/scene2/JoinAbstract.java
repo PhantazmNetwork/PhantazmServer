@@ -15,9 +15,16 @@ import java.util.Set;
  * @param <T> the type of scene to join
  */
 public abstract class JoinAbstract<T extends Scene> implements Join<T> {
-    private final Set<@NotNull PlayerView> players;
+    private final Set<PlayerView> players;
     private final Class<T> targetType;
 
+    /**
+     * Creates a new instance of this class. {@code players} will be used to create an immutable set, which will remove
+     * duplicate elements.
+     *
+     * @param players    the players participating in this join
+     * @param targetType the type of scene to join
+     */
     public JoinAbstract(@NotNull Collection<@NotNull PlayerView> players, @NotNull Class<T> targetType) {
         this.players = Set.copyOf(players);
         this.targetType = Objects.requireNonNull(targetType);
