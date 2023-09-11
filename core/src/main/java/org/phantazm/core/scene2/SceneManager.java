@@ -349,14 +349,14 @@ public final class SceneManager {
      */
     public interface LoginJoin<T extends InstanceScene> extends Join<T> {
         /**
-         * A function called by the {@link SceneManager} as triggered by the first {@link PlayerSpawnEvent} made some
-         * time after a player logs into the server. If this method is called, it means that the player was able to
-         * successfully join a scene using this LoginJoin. Therefore, this method should update the scene that was
-         * previously passed to {@link LoginJoin#join(Scene)}.
+         * A function called by the {@link SceneManager} when triggered by the first {@link PlayerSpawnEvent} made some
+         * time after a player logs onto the server. If this method is called, it means that the player was able to
+         * successfully join a scene using this LoginJoin. Therefore, this method should update {@code scene} as
+         * necessary to ensure the player has been fully added.
          * <p>
          * No lock will be held on the provided scene.
          *
-         * @param scene the scene that was previously joined
+         * @param scene the scene that was previously passed to {@link Join#join(Scene)}
          * @see SceneManager#setLoginHook(Function)
          */
         void postSpawn(@NotNull T scene);
@@ -368,7 +368,7 @@ public final class SceneManager {
          * <p>
          * No lock will be held on the provided scene.
          *
-         * @param scene            the scene that was previously joined
+         * @param scene            the scene that was previously passed to {@link Join#join(Scene)}
          * @param tablistShowEvent an event object which can be modified to control which players may see the joining
          *                         player in the tablist
          */
@@ -557,7 +557,8 @@ public final class SceneManager {
      * </ol>
      * <p>
      * The first phase is triggered by {@link PlayerLoginEvent} to locate a suitable scene using the LoginJoin provided
-     * by the login hook function. If a scene is successfully found, the LoginJoin instance is <i>saved</i>.
+     * by the login hook function. If a scene is successfully found, the LoginJoin instance is saved for use in the
+     * following two stages.
      * <p>
      * At some point later, a {@link PlayerTablistShowEvent} is triggered and
      * {@link LoginJoin#updateTablist(InstanceScene, PlayerTablistShowEvent)} is called to determine which players

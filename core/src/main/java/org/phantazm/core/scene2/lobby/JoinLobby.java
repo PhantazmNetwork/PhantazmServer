@@ -43,17 +43,13 @@ public class JoinLobby extends CreatingJoin<Lobby> implements SceneManager.Login
         List<Player> participants;
         try {
             Scene self = acquired.get();
-            participants = new ArrayList<>(players().size() + self.playerCount());
+            participants = new ArrayList<>(self.playerCount());
 
             for (PlayerView playerView : self.playersView()) {
                 playerView.getPlayer().ifPresent(participants::add);
             }
         } finally {
             acquired.unlock();
-        }
-
-        for (PlayerView playerView : players()) {
-            playerView.getPlayer().ifPresent(participants::add);
         }
 
         event.setTablistParticipants(participants);

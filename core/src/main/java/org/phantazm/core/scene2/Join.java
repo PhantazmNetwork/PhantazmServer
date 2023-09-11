@@ -11,10 +11,17 @@ import java.util.Set;
  * a {@link SceneManager} that will fulfill the request. Consequently, Join instances are most commonly used as if by a
  * visitor pattern.
  * <p>
+ * Manually creating Join instances whenever it is necessary to move players around may be inconvenient. Therefore,
+ * users of this API should consider registering {@link SceneManager.JoinFunction} instances to the SceneManager, which
+ * are associated with a {@link SceneManager.Key}; then, sending players between scenes is as simple as calling
+ * {@link SceneManager#joinScene(SceneManager.Key, Set)} passing in the key and the set of players that should join.
+ * <p>
  * <h2>Thread Safety</h2>
  * Unless otherwise specified, no methods on Join support concurrent access.
  *
  * @param <T> the type of scene to join
+ * @see SceneManager.JoinFunction
+ * @see SceneManager#registerJoinFunction(SceneManager.Key, SceneManager.JoinFunction)
  */
 public interface Join<T extends Scene> {
     /**
@@ -69,7 +76,7 @@ public interface Join<T extends Scene> {
      * method on the object. This method <i>may</i> throw an unchecked exception when called for any scene {@code scene}
      * such that {@code Join#matches(scene)} returns {@code false}, unless {@link Join#canCreateNewScene(SceneManager)}
      * returns {@code true} and the scene was freshly created using {@link Join#createNewScene(SceneManager)}, in which
-     * case the join will always succeed.
+     * case the join must always succeed as per the specification of scene creation.
      * <p>
      * This method is expected to (either directly or indirectly) perform actions such as teleporting players to a new
      * instance, sending tablist packets, and other modifying operations, as appropriate. This method should <i>not</i>
