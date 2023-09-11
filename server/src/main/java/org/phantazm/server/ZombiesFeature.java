@@ -21,7 +21,6 @@ import org.phantazm.core.BasicClientBlockHandlerSource;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.SceneTransferHelper;
-import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
@@ -117,7 +116,7 @@ public final class ZombiesFeature {
         database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
 
         EventNode<Event> globalEventNode = MinecraftServer.getGlobalEventHandler();
-        ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource(globalEventNode);
+        ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource();
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             ZombiesSceneProvider provider =
                 new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
