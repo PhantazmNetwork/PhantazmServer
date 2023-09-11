@@ -414,10 +414,6 @@ public final class SceneManager {
     }
 
     private void handleTablist(@NotNull PlayerTablistShowEvent tablistEvent) {
-        if (!tablistEvent.isFirstSpawn()) {
-            return;
-        }
-
         LoginEntry<?> entry = joinRequestMap.get(tablistEvent.getPlayer().getUuid());
         if (entry != null) {
             entry.updateTablist(tablistEvent);
