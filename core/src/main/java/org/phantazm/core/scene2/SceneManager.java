@@ -7,7 +7,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
-import net.minestom.server.event.player.PlayerTablistEvent;
+import net.minestom.server.event.player.PlayerTablistShowEvent;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.thread.ThreadDispatcher;
 import net.minestom.server.thread.ThreadProvider;
@@ -75,7 +75,7 @@ public final class SceneManager {
                 });
 
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, manager::handleLogin);
-                MinecraftServer.getGlobalEventHandler().addListener(PlayerTablistEvent.class, manager::handleTablist);
+                MinecraftServer.getGlobalEventHandler().addListener(PlayerTablistShowEvent.class, manager::handleTablist);
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, manager::handleSpawn);
 
                 MinecraftServer.getSchedulerManager().scheduleTask(() -> {
@@ -122,8 +122,6 @@ public final class SceneManager {
         private Key(Class<T> type, String name) {
             this.type = type;
             this.name = name;
-
-            //compute hash right
             this.hash = computeHash(type, name);
         }
 
@@ -356,26 +354,44 @@ public final class SceneManager {
          * successfully join a scene using this LoginJoin. Therefore, this method should update the scene that was
          * previously passed to {@link LoginJoin#join(Scene)}.
          * <p>
-         * Note: It is necessary to synchronize on the stored scene using the Acquirable API, as unlike
-         * {@link Join#join(Scene)}, no lock on it is guaranteed to be held when this method is called.
+         * No lock will be held on the provided scene.
          *
+         * @param scene the scene that was previously joined
          * @see SceneManager#setLoginHook(Function)
          */
-        void postSpawn();
+        void postSpawn(@NotNull T scene);
 
         /**
-         * Called before {@link LoginJoin#postSpawn()}, but before after the initial call to
-         * {@link LoginJoin#join(Scene)}. This is responsible for sending tablist packets, as appropriate, so that the
-         * players in the spawning scene are able to see the joining player. The player's instance has still not been
-         * set yet, so many methods on it will not work.
+         * Called before {@link LoginJoin#postSpawn(InstanceScene)}, but after the initial call to
+         * {@link LoginJoin#join(Scene)}. This is responsible for determining which players should see the joining
+         * player.
+         * <p>
+         * No lock will be held on the provided scene.
          *
-         * @param tablistRecipients a modifiable list, to which players should be added in order for them to receive a
-         *                          tablist packet
+         * @param scene            the scene that was previously joined
+         * @param tablistShowEvent an event object which can be modified to control which players may see the joining
+         *                         player in the tablist
          */
-        void updateTablist(@NotNull List<@NotNull Player> tablistRecipients);
+        void updateTablist(@NotNull T scene, @NotNull PlayerTablistShowEvent tablistShowEvent);
     }
 
-    private final Map<UUID, LoginJoin<?>> joinRequestMap = new ConcurrentHashMap<>();
+    private record LoginEntry<T extends InstanceScene>(LoginJoin<T> join,
+        T scene) {
+        private void updateTablist(PlayerTablistShowEvent event) {
+            join.updateTablist(scene, event);
+        }
+
+        private void postSpawn() {
+            join.postSpawn(scene);
+        }
+
+        private static <T extends InstanceScene> LoginEntry<T> of(LoginJoin<T> join,
+            JoinResult<? extends InstanceScene> result) {
+            return new LoginEntry<>(join, join.targetType().cast(result.scene));
+        }
+    }
+
+    private final Map<UUID, LoginEntry<?>> joinRequestMap = new ConcurrentHashMap<>();
 
     private void handleLogin(@NotNull PlayerLoginEvent loginEvent) {
         Player player = loginEvent.getPlayer();
@@ -393,18 +409,18 @@ public final class SceneManager {
             return;
         }
 
-        joinRequestMap.put(player.getUuid(), loginJoin);
+        joinRequestMap.put(player.getUuid(), LoginEntry.of(loginJoin, result));
         loginEvent.setSpawningInstance(result.scene().instance());
     }
 
-    private void handleTablist(@NotNull PlayerTablistEvent tablistEvent) {
+    private void handleTablist(@NotNull PlayerTablistShowEvent tablistEvent) {
         if (!tablistEvent.isFirstSpawn()) {
             return;
         }
 
-        LoginJoin<?> loginJoin = joinRequestMap.get(tablistEvent.getPlayer().getUuid());
-        if (loginJoin != null) {
-            loginJoin.updateTablist(tablistEvent.tablistAddRecipients());
+        LoginEntry<?> entry = joinRequestMap.get(tablistEvent.getPlayer().getUuid());
+        if (entry != null) {
+            entry.updateTablist(tablistEvent);
         }
     }
 
@@ -413,9 +429,9 @@ public final class SceneManager {
             return;
         }
 
-        LoginJoin<?> loginJoin = joinRequestMap.remove(spawnEvent.getPlayer().getUuid());
-        if (loginJoin != null) {
-            loginJoin.postSpawn();
+        LoginEntry<?> entry = joinRequestMap.remove(spawnEvent.getPlayer().getUuid());
+        if (entry != null) {
+            entry.postSpawn();
         }
     }
 
@@ -541,18 +557,16 @@ public final class SceneManager {
      * </ol>
      * <p>
      * The first phase is triggered by {@link PlayerLoginEvent} to locate a suitable scene using the LoginJoin provided
-     * by the login hook function. If a scene is successfully found, the LoginJoin instance is <i>saved</i>. LoginJoin
-     * implementations are expected to save the scene that was passed to {@link LoginJoin#join(Scene)} so that necessary
-     * methods to update player state can be called in the next two phases.
+     * by the login hook function. If a scene is successfully found, the LoginJoin instance is <i>saved</i>.
      * <p>
-     * At some point later, a {@link PlayerTablistEvent} is triggered and {@link LoginJoin#updateTablist(List)} is
-     * called to determine which players should see the joining player in the tablist. Generally speaking, this is only
-     * players in the scene that the player is joining, but different LoginJoin implementations will have different
-     * rules.
+     * At some point later, a {@link PlayerTablistShowEvent} is triggered and
+     * {@link LoginJoin#updateTablist(InstanceScene, PlayerTablistShowEvent)} is called to determine which players
+     * should see the joining player in the tablist. Generally speaking, this is only players in the scene that the
+     * player is joining, but different LoginJoin implementations will have different rules.
      * <p>
      * Finally, {@link PlayerSpawnEvent} is called to initially spawn in the player. At this point, the saved
-     * LoginJoin instance is removed and the {@link LoginJoin#postSpawn()} method is called, which will fully add the
-     * player to the scene, as they now have their instance properly set.
+     * LoginJoin instance is removed and the {@link LoginJoin#postSpawn(InstanceScene)} method is called, which will
+     * fully add the player to the scene, as they now have their instance properly set.
      *
      * @param requestMapper the function used to create Join objects for players in response to login events
      */
