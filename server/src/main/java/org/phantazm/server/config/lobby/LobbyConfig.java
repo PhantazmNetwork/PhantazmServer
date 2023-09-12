@@ -21,6 +21,6 @@ public record LobbyConfig(
 
     @Default("timeout")
     public static @NotNull ConfigPrimitive timeoutDefault() {
-        return ConfigPrimitive.of(6000);
+        return ConfigPrimitive.of(20);
     }
 }
