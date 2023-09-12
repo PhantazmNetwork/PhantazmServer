@@ -159,10 +159,10 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      * disconnecting from the server (in which case there is no other scene).
      *
      * @param players the players who are leaving, some of which may not be online, or even present in the scene
-     * @return a modifiable set of players that were actually removed from the scene
+     * @return a set of players that were actually removed from the scene
      */
     @ApiStatus.Internal
-    @NotNull Set<@NotNull PlayerView> leave(@NotNull Set<? extends @NotNull PlayerView> players);
+    @NotNull Set<@NotNull Player> leave(@NotNull Set<? extends @NotNull PlayerView> players);
 
     /**
      * Called by the {@link SceneManager} after players that were previously in this scene join a new scene. Since the
@@ -174,7 +174,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      * {@link Scene#leave(Set)}. That is, the set is guaranteed to contain only players that were successfully removed
      * from the scene with a {@code leave} call. However, some players <i>may</i> be offline. There will always be
      * exactly one call made to this method for every call to {@code leave}, unless the returned set is empty, in which
-     * case the call to this method may be omitted.
+     * case the call to this method may or may not be omitted.
      * <p>
      * As with similar methods on this interface, this is marked as internal because it should only be called by the
      * SceneManager, which does so directly after the players have joined a new scene, or alternatively after they are
@@ -183,7 +183,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      * @param leftPlayers the players that previously left this scene
      */
     @ApiStatus.Internal
-    void postLeave(@NotNull Set<@NotNull PlayerView> leftPlayers);
+    void postLeave(@NotNull Set<@NotNull Player> leftPlayers);
 
     @Override
     default @NotNull Collection<@NotNull Player> getPlayers() {

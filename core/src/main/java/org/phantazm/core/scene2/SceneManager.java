@@ -70,7 +70,8 @@ public final class SceneManager {
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, disconnectEvent -> {
                     manager.handleDisconnect(viewProvider.fromPlayer(disconnectEvent.getPlayer()));
                 });
-                MinecraftServer.getGlobalEventHandler().addListener(PlayerTablistRemoveEvent.class, manager::handlePostDisconnect);
+                MinecraftServer.getGlobalEventHandler().addListener(PlayerTablistRemoveEvent.class,
+                    manager::handlePostDisconnect);
 
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, manager::handleLogin);
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerTablistShowEvent.class, manager::handleTablist);
@@ -325,8 +326,8 @@ public final class SceneManager {
         return Map.ofEntries(entries);
     }
 
-    private record LeaveEntry(Set<PlayerView> leaving,
-        Scene sceneLeft) {
+    private record LeaveEntry(Scene scene,
+        Set<Player> left) {
     }
 
     private final Map<UUID, LeaveEntry> leaveEntryMap = new ConcurrentHashMap<>();
@@ -348,10 +349,10 @@ public final class SceneManager {
                 Set<PlayerView> leaving = Set.of(view);
                 Scene self = acquired.get();
 
-                self.leave(leaving);
+                Set<Player> players = self.leave(leaving);
                 view.updateCurrentScene(null);
 
-                leaveEntryMap.put(view.getUUID(), new LeaveEntry(leaving, scene));
+                leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, players));
             } finally {
                 acquired.unlock();
             }
@@ -362,14 +363,14 @@ public final class SceneManager {
 
     private void handlePostDisconnect(PlayerTablistRemoveEvent event) {
         Player player = event.getPlayer();
-        LeaveEntry leaveEntry = leaveEntryMap.remove(player.getUuid());
-        if (leaveEntry == null) {
+        LeaveEntry left = leaveEntryMap.remove(player.getUuid());
+        if (left == null) {
             return;
         }
 
         event.setBroadcastTablistRemoval(false);
-        leaveEntry.sceneLeft.getAcquirable().sync(self -> {
-            self.postLeave(leaveEntry.leaving);
+        left.scene.getAcquirable().sync(self -> {
+            self.postLeave(left.left);
         });
     }
 
@@ -634,7 +635,7 @@ public final class SceneManager {
         Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
 
         Set<PlayerView> players = null;
-        Set<PlayerView> leftPlayers;
+        Set<Player> leftPlayers;
         boolean playersLocked = false;
 
         try {
@@ -665,7 +666,12 @@ public final class SceneManager {
             }
         }
 
-        Set<PlayerView> finalLeftPlayers = leftPlayers;
+        if (leftPlayers.isEmpty()) {
+            scene.getAcquirable().sync(Scene::shutdown);
+            return;
+        }
+
+        Set<Player> finalLeftPlayers = leftPlayers;
         playerCallback.apply(players).whenComplete((ignored1, ignored2) -> scene.getAcquirable().sync(self -> {
             self.postLeave(finalLeftPlayers);
             self.shutdown();
@@ -904,6 +910,19 @@ public final class SceneManager {
         return scene;
     }
 
+    private static Set<Player> filterOnline(Set<PlayerView> viewSet) {
+        if (viewSet.isEmpty()) {
+            return Set.of();
+        }
+
+        Set<Player> set = new HashSet<>(viewSet.size());
+        for (PlayerView view : viewSet) {
+            view.getPlayer().ifPresent(set::add);
+        }
+
+        return set;
+    }
+
     private <T extends Scene> T tryJoinScene(Scene scene, Join<T> join) {
         T castScene = join.targetType().cast(scene);
 
@@ -942,13 +961,14 @@ public final class SceneManager {
                 }
 
                 scene.getAcquirable().sync(self -> {
-                    Set<PlayerView> left = self.leave(players);
-
-                    if (!left.isEmpty()) {
-                        leaveActions.add(() -> {
-                            self.getAcquirable().sync(self2 -> self2.postLeave(left));
-                        });
+                    Set<Player> left = self.leave(players);
+                    if (left.isEmpty()) {
+                        return;
                     }
+
+                    leaveActions.add(() -> {
+                        self.getAcquirable().sync(self2 -> self2.postLeave(left));
+                    });
                 });
             });
 
@@ -977,13 +997,14 @@ public final class SceneManager {
         for (Map.Entry<Scene, Set<PlayerViewImpl>> entry : groupedScenes.entrySet()) {
             Set<PlayerViewImpl> value = entry.getValue();
             entry.getKey().getAcquirable().sync(self -> {
-                Set<PlayerView> left = self.leave(value);
-
-                if (!left.isEmpty()) {
-                    leaveActions.add(() -> {
-                        self.getAcquirable().sync(self2 -> self2.postLeave(left));
-                    });
+                Set<Player> left = self.leave(value);
+                if (left.isEmpty()) {
+                    return;
                 }
+
+                leaveActions.add(() -> {
+                    self.getAcquirable().sync(self2 -> self2.postLeave(left));
+                });
             });
 
             for (PlayerViewImpl view : value) {
