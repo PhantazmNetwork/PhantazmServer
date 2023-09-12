@@ -642,6 +642,12 @@ public final class SceneManager {
                 scene.preShutdown();
 
                 players = Set.copyOf(scene.playersView());
+                if (players.isEmpty()) {
+                    //we can shut down immediately if we have no players
+                    scene.shutdown();
+                    return;
+                }
+
                 playersLocked = lockPlayers(players, true);
 
                 leftPlayers = scene.leave(players);
