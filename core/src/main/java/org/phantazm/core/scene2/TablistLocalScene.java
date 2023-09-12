@@ -14,7 +14,7 @@ import java.util.Set;
  */
 public interface TablistLocalScene extends Scene {
     default void postLeave(@NotNull Set<@NotNull Player> leftPlayers) {
-        if (leftPlayers.isEmpty()) {
+        if (leftPlayers.isEmpty() || playerCount() == 0) {
             return;
         }
 
