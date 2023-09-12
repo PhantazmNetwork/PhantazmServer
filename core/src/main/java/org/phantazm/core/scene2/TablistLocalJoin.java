@@ -10,11 +10,7 @@ public interface TablistLocalJoin<T extends Scene> extends Join<T> {
     enum Type {
         BOTH_JOINING,
         FIRST_JOINING,
-        SECOND_JOINING,
-
-        BOTH_LEAVING,
-        FIRST_LEAVING,
-        SECOND_LEAVING
+        SECOND_JOINING
     }
 
     enum ViewResult {
@@ -93,5 +89,7 @@ public interface TablistLocalJoin<T extends Scene> extends Join<T> {
         }
     }
 
-    @NotNull ViewResult visibility(@NotNull PlayerView first, @NotNull PlayerView second, @NotNull Type type);
+    default @NotNull ViewResult visibility(@NotNull PlayerView first, @NotNull PlayerView second, @NotNull Type type) {
+        return ViewResult.BOTH_SEE;
+    }
 }

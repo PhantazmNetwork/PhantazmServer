@@ -22,7 +22,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.OpenBookPacket;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.CoreStages;
 import org.phantazm.core.npc.NPCHandler;
@@ -30,12 +29,13 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.scene2.IdentifiableScene;
 import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.JoinToggleable;
+import org.phantazm.core.scene2.TablistLocalScene;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggleable {
+public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggleable, TablistLocalScene {
     private final Set<PlayerView> players;
     private final Set<PlayerView> playersView;
     private final UUID identity;
@@ -98,11 +98,6 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
         });
 
         return node;
-    }
-
-    @Override
-    public @NotNull @Unmodifiable Set<PlayerView> players() {
-        return Set.copyOf(players);
     }
 
     @Override
@@ -177,16 +172,18 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
     }
 
     @Override
-    public void leave(@NotNull Set<? extends @NotNull PlayerView> players) {
+    public @NotNull Set<@NotNull PlayerView> leave(@NotNull Set<? extends @NotNull PlayerView> players) {
+        Set<PlayerView> leftPlayers = new HashSet<>(players.size());
         for (PlayerView leavingPlayer : players) {
             if (!this.players.remove(leavingPlayer)) {
                 continue;
             }
 
-            leavingPlayer.getPlayer().ifPresent(player -> {
-                player.stateHolder().removeStage(CoreStages.LOBBY);
-            });
+            leavingPlayer.getPlayer().ifPresent(player -> player.stateHolder().removeStage(CoreStages.LOBBY));
+            leftPlayers.add(leavingPlayer);
         }
+
+        return leftPlayers;
     }
 
     @Override

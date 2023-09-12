@@ -34,11 +34,6 @@ public class JoinLobby extends CreatingJoin<Lobby> implements SceneManager.Login
     }
 
     @Override
-    public @NotNull ViewResult visibility(@NotNull PlayerView first, @NotNull PlayerView second, @NotNull Type type) {
-        return ViewResult.BOTH_SEE;
-    }
-
-    @Override
     public void postSpawn(@NotNull Lobby scene) {
         scene.getAcquirable().sync(self -> ((Lobby) self).postLogin(playerViews()));
     }

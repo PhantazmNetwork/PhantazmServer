@@ -4,10 +4,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.Tickable;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
-import net.minestom.server.event.player.PlayerTablistShowEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.thread.ThreadDispatcher;
 import net.minestom.server.thread.ThreadProvider;
@@ -73,6 +70,7 @@ public final class SceneManager {
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, disconnectEvent -> {
                     manager.handleDisconnect(viewProvider.fromPlayer(disconnectEvent.getPlayer()));
                 });
+                MinecraftServer.getGlobalEventHandler().addListener(PlayerTablistRemoveEvent.class, manager::handlePostDisconnect);
 
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, manager::handleLogin);
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerTablistShowEvent.class, manager::handleTablist);
@@ -327,18 +325,54 @@ public final class SceneManager {
         return Map.ofEntries(entries);
     }
 
+    private record LeaveEntry(Set<PlayerView> leaving,
+        Scene sceneLeft) {
+    }
+
+    private final Map<UUID, LeaveEntry> leaveEntryMap = new ConcurrentHashMap<>();
+
     private void handleDisconnect(@NotNull PlayerView playerView) {
         PlayerViewImpl view = (PlayerViewImpl) playerView;
 
         Lock lock = view.joinLock();
         lock.lock();
         try {
-            view.currentScene().ifPresent(scene -> scene.getAcquirable().sync(self -> self.leave(Set.of(view))));
-            view.updateCurrentScene(null);
+            Optional<Scene> currentSceneOptional = view.currentScene();
+            if (currentSceneOptional.isEmpty()) {
+                return;
+            }
+
+            Scene scene = currentSceneOptional.get();
+            Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
+            try {
+                Set<PlayerView> leaving = Set.of(view);
+                Scene self = acquired.get();
+
+                self.leave(leaving);
+                view.updateCurrentScene(null);
+
+                leaveEntryMap.put(view.getUUID(), new LeaveEntry(leaving, scene));
+            } finally {
+                acquired.unlock();
+            }
         } finally {
             lock.unlock();
         }
     }
+
+    private void handlePostDisconnect(PlayerTablistRemoveEvent event) {
+        Player player = event.getPlayer();
+        LeaveEntry leaveEntry = leaveEntryMap.remove(player.getUuid());
+        if (leaveEntry == null) {
+            return;
+        }
+
+        event.setBroadcastTablistRemoval(false);
+        leaveEntry.sceneLeft.getAcquirable().sync(self -> {
+            self.postLeave(leaveEntry.leaving);
+        });
+    }
+
 
     /**
      * A specialization of {@link Join} that is required for joining during <i>login</i>; that is, when the player first
@@ -600,16 +634,17 @@ public final class SceneManager {
         Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
 
         Set<PlayerView> players = null;
+        Set<PlayerView> leftPlayers;
         boolean playersLocked = false;
 
         try {
             try {
                 scene.preShutdown();
 
-                players = scene.players();
+                players = Set.copyOf(scene.playersView());
                 playersLocked = lockPlayers(players, true);
 
-                scene.leave(players);
+                leftPlayers = scene.leave(players);
             } finally {
                 acquired.unlock();
             }
@@ -624,7 +659,11 @@ public final class SceneManager {
             }
         }
 
-        playerCallback.apply(players).whenComplete((ignored1, ignored2) -> scene.getAcquirable().sync(Scene::shutdown));
+        Set<PlayerView> finalLeftPlayers = leftPlayers;
+        playerCallback.apply(players).whenComplete((ignored1, ignored2) -> scene.getAcquirable().sync(self -> {
+            self.postLeave(finalLeftPlayers);
+            self.shutdown();
+        }));
     }
 
     /**
@@ -847,10 +886,14 @@ public final class SceneManager {
 
     private <T extends Scene> T createAndJoinNewScene(Join<T> join) {
         T scene = join.createNewScene(this);
-        leaveOldScenes(join, scene);
+        Iterable<Runnable> actions = leaveOldScenes(join, scene);
 
         //not necessary to acquire, scene was just created but is not ticking yet
         join.join(scene);
+
+        for (Runnable runnable : actions) {
+            runnable.run();
+        }
 
         return scene;
     }
@@ -864,8 +907,12 @@ public final class SceneManager {
                 return null;
             }
 
-            leaveOldScenes(join, castScene);
+            Iterable<Runnable> actions = leaveOldScenes(join, castScene);
             join.join(castScene);
+
+            for (Runnable runnable : actions) {
+                runnable.run();
+            }
         } finally {
             acquired.unlock();
         }
@@ -873,12 +920,13 @@ public final class SceneManager {
         return castScene;
     }
 
-    private void leaveOldScenes(Join<?> join, Scene newScene) {
+    private Iterable<Runnable> leaveOldScenes(Join<?> join, Scene newScene) {
         Set<PlayerView> players = join.playerViews();
         if (players.isEmpty()) {
-            return;
+            return List.of();
         }
 
+        List<Runnable> leaveActions = new ArrayList<>(5);
         if (players.size() == 1) {
             PlayerViewImpl onlyPlayer = (PlayerViewImpl) players.iterator().next();
 
@@ -887,11 +935,19 @@ public final class SceneManager {
                     return;
                 }
 
-                scene.getAcquirable().sync(self -> self.leave(players));
+                scene.getAcquirable().sync(self -> {
+                    Set<PlayerView> left = self.leave(players);
+
+                    if (!left.isEmpty()) {
+                        leaveActions.add(() -> {
+                            self.getAcquirable().sync(self2 -> self2.postLeave(left));
+                        });
+                    }
+                });
             });
 
             onlyPlayer.updateCurrentScene(newScene);
-            return;
+            return leaveActions;
         }
 
         Map<Scene, Set<PlayerViewImpl>> groupedScenes = new HashMap<>(4);
@@ -914,12 +970,22 @@ public final class SceneManager {
 
         for (Map.Entry<Scene, Set<PlayerViewImpl>> entry : groupedScenes.entrySet()) {
             Set<PlayerViewImpl> value = entry.getValue();
-            entry.getKey().getAcquirable().sync(self -> self.leave(value));
+            entry.getKey().getAcquirable().sync(self -> {
+                Set<PlayerView> left = self.leave(value);
+
+                if (!left.isEmpty()) {
+                    leaveActions.add(() -> {
+                        self.getAcquirable().sync(self2 -> self2.postLeave(left));
+                    });
+                }
+            });
 
             for (PlayerViewImpl view : value) {
                 view.updateCurrentScene(newScene);
             }
         }
+
+        return leaveActions;
     }
 
 
