@@ -29,12 +29,13 @@ public class LobbyCreator implements SceneCreator<Lobby> {
 
     private final int sceneCap;
     private final int playerCap;
+    private final int timeout;
 
     public LobbyCreator(@NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPath,
         @NotNull InstanceConfig instanceConfig, @NotNull String lobbyJoinMessageFormat,
         @NotNull List<BasicComponent<NPC>> npcs, @NotNull List<ItemStack> defaultItems,
         @NotNull Function<? super @NotNull Player, ? extends @NotNull CompletableFuture<?>> displayNameStyler,
-        int sceneCap, int playerCap) {
+        int sceneCap, int playerCap, int timeout) {
         this.instanceLoader = Objects.requireNonNull(instanceLoader);
         this.lobbyPath = List.copyOf(lobbyPath);
         this.instanceConfig = Objects.requireNonNull(instanceConfig);
@@ -45,6 +46,7 @@ public class LobbyCreator implements SceneCreator<Lobby> {
 
         this.sceneCap = sceneCap;
         this.playerCap = playerCap;
+        this.timeout = timeout;
     }
 
     @Override
@@ -62,7 +64,7 @@ public class LobbyCreator implements SceneCreator<Lobby> {
 
         NPCHandler handler = new NPCHandler(npcs, instance);
         return new Lobby(instance, instanceConfig.spawnPoint(), lobbyJoinMessageFormat, handler, defaultItems,
-            displayNameStyler);
+            displayNameStyler, timeout);
     }
 
     @Override

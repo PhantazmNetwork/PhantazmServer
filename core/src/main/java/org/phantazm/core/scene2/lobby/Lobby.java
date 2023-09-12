@@ -52,8 +52,9 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
 
     public Lobby(@NotNull Instance instance, @NotNull Pos spawnPoint, @NotNull String lobbyJoinMessageFormat,
         @NotNull NPCHandler npcHandler, @NotNull Collection<ItemStack> defaultItems,
-        @NotNull Function<? super @NotNull Player, ? extends @NotNull CompletableFuture<?>> displayNameStyler) {
-        super(instance);
+        @NotNull Function<? super @NotNull Player, ? extends @NotNull CompletableFuture<?>> displayNameStyler,
+        int timeout) {
+        super(instance, timeout);
         this.players = new HashSet<>();
         this.playersView = Collections.unmodifiableSet(this.players);
         this.identity = UUID.randomUUID();
@@ -203,6 +204,7 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
 
     @Override
     public void tick(long time) {
+        super.tick(time);
         this.npcHandler.tick(time);
     }
 

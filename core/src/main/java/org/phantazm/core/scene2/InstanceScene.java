@@ -14,7 +14,8 @@ import java.util.Objects;
 public abstract class InstanceScene extends SceneAbstract {
     private final Instance instance;
 
-    public InstanceScene(@NotNull Instance instance) {
+    public InstanceScene(@NotNull Instance instance, int timeout) {
+        super(timeout);
         this.instance = Objects.requireNonNull(instance);
     }
 

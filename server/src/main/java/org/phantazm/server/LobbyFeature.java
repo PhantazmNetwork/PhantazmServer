@@ -146,7 +146,7 @@ public final class LobbyFeature {
                         new LobbyEntry(lobbyConfig, new LobbyCreator(instanceLoader, lobbyConfig.lobbyPaths(),
                             lobbyConfig.instanceConfig(), lobbyConfig.lobbyJoinFormat(), List.copyOf(components),
                             lobbyConfig.defaultItems(), displayNameStyler, lobbyConfig.maxLobbies(),
-                            lobbyConfig.maxPlayers()))) != null) {
+                            lobbyConfig.maxPlayers(), lobbyConfig.timeout()))) != null) {
                         throw new RuntimeException("Duplicate lobby named " + lobbyConfig.name());
                     }
 
