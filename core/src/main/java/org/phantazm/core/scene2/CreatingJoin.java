@@ -24,7 +24,7 @@ public abstract class CreatingJoin<T extends Scene> extends JoinAbstract<T> {
     public boolean canCreateNewScene(@NotNull SceneManager manager) {
         int sceneCap = sceneCreator.sceneCap();
         if (sceneCap == -1) {
-            return players().size() < sceneCreator.playerCap();
+            return playerViews().size() < sceneCreator.playerCap();
         }
 
         int currentAmount = manager.amount(targetType());
@@ -32,7 +32,7 @@ public abstract class CreatingJoin<T extends Scene> extends JoinAbstract<T> {
             return false;
         }
 
-        return currentAmount + 1 <= sceneCap && players().size() < sceneCreator.playerCap();
+        return currentAmount + 1 <= sceneCap && playerViews().size() < sceneCreator.playerCap();
     }
 
     @Override
@@ -42,6 +42,6 @@ public abstract class CreatingJoin<T extends Scene> extends JoinAbstract<T> {
             return true;
         }
 
-        return scene.playerCount() + players().size() <= playerCap;
+        return scene.playerCount() + playerViews().size() <= playerCap;
     }
 }

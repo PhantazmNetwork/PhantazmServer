@@ -5,16 +5,13 @@ import net.minestom.server.event.player.PlayerTablistShowEvent;
 import net.minestom.server.thread.Acquired;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.core.scene2.CreatingJoin;
-import org.phantazm.core.scene2.Scene;
-import org.phantazm.core.scene2.SceneCreator;
-import org.phantazm.core.scene2.SceneManager;
+import org.phantazm.core.scene2.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class JoinLobby extends CreatingJoin<Lobby> implements SceneManager.LoginJoin<Lobby> {
+public class JoinLobby extends CreatingJoin<Lobby> implements SceneManager.LoginJoin<Lobby>, TablistLocalJoin<Lobby> {
     private final boolean login;
 
     public JoinLobby(@NotNull Collection<@NotNull PlayerView> players, @NotNull SceneCreator<Lobby> sceneCreator,
@@ -29,16 +26,25 @@ public class JoinLobby extends CreatingJoin<Lobby> implements SceneManager.Login
 
     @Override
     public void join(@NotNull Lobby scene) {
-        scene.join(players(), login);
+        if (!login) {
+            TablistLocalJoin.super.join(scene);
+        }
+
+        scene.join(playerViews(), login);
+    }
+
+    @Override
+    public @NotNull ViewResult visibility(@NotNull PlayerView first, @NotNull PlayerView second, @NotNull Type type) {
+        return ViewResult.BOTH_SEE;
     }
 
     @Override
     public void postSpawn(@NotNull Lobby scene) {
-        scene.getAcquirable().sync(self -> ((Lobby) self).postLogin(players()));
+        scene.getAcquirable().sync(self -> ((Lobby) self).postLogin(playerViews()));
     }
 
     @Override
-    public void updateTablist(@NotNull Lobby scene, @NotNull PlayerTablistShowEvent event) {
+    public void updateLoginTablist(@NotNull Lobby scene, @NotNull PlayerTablistShowEvent event) {
         Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
         List<Player> participants;
         try {

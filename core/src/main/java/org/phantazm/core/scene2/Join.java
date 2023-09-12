@@ -30,7 +30,7 @@ public interface Join<T extends Scene> {
      *
      * @return the set of all joining players
      */
-    @NotNull @Unmodifiable Set<@NotNull PlayerView> players();
+    @NotNull @Unmodifiable Set<@NotNull PlayerView> playerViews();
 
     /**
      * The type of {@link Scene} this Join wants. {@link SceneManager} will use this value to determine what types of
@@ -80,7 +80,7 @@ public interface Join<T extends Scene> {
      * <p>
      * This method is expected to (either directly or indirectly) perform actions such as teleporting players to a new
      * instance, sending tablist packets, and other modifying operations, as appropriate. This method should <i>not</i>
-     * modify players that are not present in {@link Join#players()}.
+     * modify players that are not present in {@link Join#playerViews()}.
      *
      * @param scene the scene to join
      */

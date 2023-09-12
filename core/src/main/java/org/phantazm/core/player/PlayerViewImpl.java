@@ -179,8 +179,8 @@ public final class PlayerViewImpl implements PlayerView {
             return true;
         }
 
-        if (obj instanceof PlayerViewImpl other) {
-            return uuid.equals(other.uuid);
+        if (obj instanceof PlayerView other) {
+            return uuid.equals(other.getUUID());
         }
 
         return false;

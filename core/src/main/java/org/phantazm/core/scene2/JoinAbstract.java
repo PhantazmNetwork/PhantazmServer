@@ -31,7 +31,7 @@ public abstract class JoinAbstract<T extends Scene> implements Join<T> {
     }
 
     @Override
-    public final @NotNull @Unmodifiable Set<@NotNull PlayerView> players() {
+    public final @NotNull @Unmodifiable Set<@NotNull PlayerView> playerViews() {
         return players;
     }
 

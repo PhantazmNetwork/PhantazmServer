@@ -10,9 +10,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.player.PlayerView;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -24,7 +22,7 @@ import java.util.function.Function;
  * {@code this} is this object and {@code obj} is the object to which this one is being compared.
  * <p>
  * <h2>Thread Safety</h2>
- * Unless otherwise stated, all methods on Scene are <i>not</i> thread safe; the scene must be acquired using the
+ * Unless otherwise specified, all methods on Scene are <i>not</i> thread safe; the scene must be acquired using the
  * {@link Acquirable} API before modifications are made.
  */
 public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupingAudience {
@@ -37,11 +35,43 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
 
     /**
      * Gets a view of all players currently in the scene. This collection cannot be modified by callers, but can itself
-     * change as players are added to or removed from the scene
+     * change as players are added to or removed from the scene.
      *
      * @return a read-only view of the players currently in this scene
      */
     @NotNull @UnmodifiableView Set<@NotNull PlayerView> playersView();
+
+    /**
+     * Determines if this Scene contains the given player or not.
+     *
+     * @param playerView the {@link PlayerView} to check
+     * @return {@code true} if this scene contains the player; {@code false} otherwise
+     */
+    default boolean hasPlayer(@NotNull PlayerView playerView) {
+        return playersView().contains(playerView);
+    }
+
+    /**
+     * Determines if a player exists in this scene such that {@link PlayerView#getUUID()} equals the given UUID.
+     *
+     * @param uuid the UUID to check for
+     * @return {@code true} if this scene contains a player with the UUID; {@code false} otherwise
+     */
+    default boolean hasPlayer(@NotNull UUID uuid) {
+        Objects.requireNonNull(uuid);
+        return playersView().contains(PlayerView.lookup(uuid));
+    }
+
+    /**
+     * Determines if a player exists in this scene.
+     *
+     * @param player the player to check for
+     * @return {@code true} if this scene contains the player; {@code false} otherwise
+     */
+    default boolean hasPlayer(@NotNull Player player) {
+        Objects.requireNonNull(player);
+        return hasPlayer(player.getUuid());
+    }
 
     /**
      * Gets the number of players currently in the scene.
@@ -143,7 +173,13 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
 
     @Override
     default @NotNull Collection<@NotNull Player> getPlayers() {
-        return playersView().stream().map(PlayerView::getPlayer)
-            .filter(Optional::isPresent).map(Optional::get).toList();
+        Set<PlayerView> playerViews = playersView();
+        List<Player> onlinePlayers = new ArrayList<>(playerViews.size());
+
+        for (PlayerView view : playerViews) {
+            view.getPlayer().ifPresent(onlinePlayers::add);
+        }
+
+        return onlinePlayers;
     }
 }

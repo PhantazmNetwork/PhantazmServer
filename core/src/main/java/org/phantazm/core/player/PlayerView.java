@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -21,7 +22,97 @@ import java.util.concurrent.CompletableFuture;
  * only on equality checking or hashing the {@link UUID} returned by calling {@link PlayerView#getUUID()}.
  * @see PlayerViewImpl
  */
-public sealed interface PlayerView permits PlayerViewImpl {
+public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
+    /**
+     * Creates a new "lookup" PlayerView instance. Useful when, given a UUID, is it necessary to determine if a given
+     * set of PlayerView objects contains a player whose UUID matches a known UUID. The UUID need not correspond to a
+     * valid Minecraft user.
+     * <p>
+     * The returned object will be unbound to any particular {@link IdentitySource}. Therefore, the player's username
+     * (and consequently their display name) will always be their UUID. Likewise, the PlayerView is not bound to an
+     * existing player, online or otherwise, and therefore its {@link PlayerView#getPlayer()} method will always return
+     * an empty optional.
+     * <p>
+     * For obtaining instances of PlayerView that <i>are</i> bound to an IdentitySource and do correspond to an actual
+     * account, see {@link PlayerViewProvider}.
+     * <p>
+     * <b>Unless you know what you're doing, you probably want to get your
+     * PlayerView instances from PlayerViewProvider instead of this method!</b>
+     *
+     * @param uuid the UUID from which to create a new lookup PlayerView
+     * @return a new PlayerView useful for map or set lookups
+     */
+    static @NotNull PlayerView lookup(@NotNull UUID uuid) {
+        Objects.requireNonNull(uuid);
+        return new Lookup(uuid);
+    }
+
+
+    /**
+     * A special {@link PlayerView} implementation that is unbound to a player instance, but can be created using only a
+     * {@link UUID}. Instances can be obtained by calling {@link PlayerView#lookup(UUID)}.
+     */
+    final class Lookup implements PlayerView {
+        private final UUID uuid;
+        private final int hashCode;
+
+        private Lookup(UUID uuid) {
+            this.uuid = uuid;
+            this.hashCode = uuid.hashCode();
+        }
+
+        @Override
+        public @NotNull UUID getUUID() {
+            return uuid;
+        }
+
+        @Override
+        public @NotNull CompletableFuture<String> getUsername() {
+            return CompletableFuture.completedFuture(uuid.toString());
+        }
+
+        @Override
+        public @NotNull Optional<String> getUsernameIfCached() {
+            return Optional.empty();
+        }
+
+        @Override
+        public @NotNull CompletableFuture<Component> getDisplayName() {
+            return CompletableFuture.completedFuture(Component.text(uuid.toString()));
+        }
+
+        @Override
+        public @NotNull Optional<Component> getDisplayNameIfCached() {
+            return Optional.empty();
+        }
+
+        @Override
+        public @NotNull Optional<Player> getPlayer() {
+            return Optional.empty();
+        }
+
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+
+            if (obj == this) {
+                return true;
+            }
+
+            if (obj instanceof PlayerView other) {
+                return uuid.equals(other.getUUID());
+            }
+
+            return false;
+        }
+    }
 
     /**
      * Gets the {@link UUID} of the player.
@@ -35,8 +126,9 @@ public sealed interface PlayerView permits PlayerViewImpl {
      * if necessary, and should cache the results of this operation.
      *
      * @return a {@link CompletableFuture} representing an attempt at retrieving the username of this player. If the
-     * username cannot be found due to network conditions or an invalid UUID, the returned String will be the result of
-     * calling {@link UUID#toString()} on the stored UUID
+     * username cannot be found due to network conditions, an invalid UUID, or this instance is not bound to a specific
+     * {@link IdentitySource}, the returned String will be the result of calling {@link UUID#toString()} on the stored
+     * UUID
      */
     @NotNull CompletableFuture<String> getUsername();
 

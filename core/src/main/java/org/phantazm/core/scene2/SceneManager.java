@@ -372,13 +372,13 @@ public final class SceneManager {
          * @param tablistShowEvent an event object which can be modified to control which players may see the joining
          *                         player in the tablist
          */
-        void updateTablist(@NotNull T scene, @NotNull PlayerTablistShowEvent tablistShowEvent);
+        void updateLoginTablist(@NotNull T scene, @NotNull PlayerTablistShowEvent tablistShowEvent);
     }
 
     private record LoginEntry<T extends InstanceScene>(LoginJoin<T> join,
         T scene) {
         private void updateTablist(PlayerTablistShowEvent event) {
-            join.updateTablist(scene, event);
+            join.updateLoginTablist(scene, event);
         }
 
         private void postSpawn() {
@@ -557,7 +557,7 @@ public final class SceneManager {
      * following two stages.
      * <p>
      * At some point later, a {@link PlayerTablistShowEvent} is triggered and
-     * {@link LoginJoin#updateTablist(InstanceScene, PlayerTablistShowEvent)} is called to determine which players
+     * {@link LoginJoin#updateLoginTablist(InstanceScene, PlayerTablistShowEvent)} is called to determine which players
      * should see the joining player in the tablist. Generally speaking, this is only players in the scene that the
      * player is joining, but different LoginJoin implementations will have different rules.
      * <p>
@@ -695,7 +695,7 @@ public final class SceneManager {
             return CompletableFuture.completedFuture(JoinResult.unrecognizedType());
         }
 
-        Set<PlayerView> players = join.players();
+        Set<PlayerView> players = join.playerViews();
         if (players.isEmpty()) {
             return CompletableFuture.completedFuture(JoinResult.emptyPlayers());
         }
@@ -874,7 +874,7 @@ public final class SceneManager {
     }
 
     private void leaveOldScenes(Join<?> join, Scene newScene) {
-        Set<PlayerView> players = join.players();
+        Set<PlayerView> players = join.playerViews();
         if (players.isEmpty()) {
             return;
         }
