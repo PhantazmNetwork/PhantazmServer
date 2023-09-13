@@ -20,6 +20,9 @@ import java.util.function.Function;
  * {@link Object#hashCode()}). That is, their {@code equals} method should return true iff {@code this == obj} where
  * {@code this} is this object and {@code obj} is the object to which this one is being compared.
  * <p>
+ * Unless specified by the method contract, Scene methods should <i>not</i> throw exceptions to avoid corrupting state.
+ * Exceptions may or may not be handled gracefully by the SceneManager.
+ * <p>
  * Players can <i>join</i> scenes using various methods on {@link SceneManager}. SceneManager also manages scene
  * lifetime: creation, ticking, and removal.
  * <p>

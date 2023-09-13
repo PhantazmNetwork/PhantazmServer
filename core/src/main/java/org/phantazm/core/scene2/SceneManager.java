@@ -68,7 +68,7 @@ public final class SceneManager {
                 SceneManager manager = new SceneManager(executor, sceneTypes, numThreads);
 
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, disconnectEvent -> {
-                    manager.handleDisconnect(viewProvider.fromPlayer(disconnectEvent.getPlayer()), disconnectEvent.getPlayer());
+                    manager.handleDisconnect(viewProvider.fromPlayer(disconnectEvent.getPlayer()));
                 });
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerTablistRemoveEvent.class,
                     manager::handlePostDisconnect);
@@ -332,7 +332,7 @@ public final class SceneManager {
 
     private final Map<UUID, LeaveEntry> leaveEntryMap = new ConcurrentHashMap<>();
 
-    private void handleDisconnect(@NotNull PlayerView playerView, @NotNull Player player) {
+    private void handleDisconnect(@NotNull PlayerView playerView) {
         PlayerViewImpl view = (PlayerViewImpl) playerView;
 
         Lock lock = view.joinLock();

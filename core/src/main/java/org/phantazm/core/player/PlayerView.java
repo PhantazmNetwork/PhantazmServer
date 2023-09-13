@@ -159,6 +159,11 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
 
             return false;
         }
+
+        @Override
+        public String toString() {
+            return "PlayerViewLookup[uuid=" + uuid + "]";
+        }
     }
 
     /**

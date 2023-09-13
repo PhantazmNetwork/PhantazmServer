@@ -208,6 +208,11 @@ public final class PlayerViewImpl implements PlayerView {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return "LinkedPlayerView[uuid=" + uuid + ", username=" + username + ", linkedPlayer=" + playerReference.get() + "]";
+    }
+
     /**
      * Returns the {@link Lock} used to synchronize scene join attempts by this player.
      * <p>
