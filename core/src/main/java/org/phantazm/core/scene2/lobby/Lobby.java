@@ -173,8 +173,8 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
     }
 
     @Override
-    public @NotNull Set<@NotNull Player> leave(@NotNull Set<? extends @NotNull PlayerView> players) {
-        Set<Player> leftPlayers = new HashSet<>(players.size());
+    public @NotNull Set<@NotNull PlayerView> leave(@NotNull Set<? extends @NotNull PlayerView> players) {
+        Set<PlayerView> leftPlayers = new HashSet<>(players.size());
         for (PlayerView leavingPlayer : players) {
             if (!this.players.remove(leavingPlayer)) {
                 continue;
@@ -182,8 +182,9 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
 
             leavingPlayer.getPlayer().ifPresent(player -> {
                 player.stateHolder().removeStage(CoreStages.LOBBY);
-                leftPlayers.add(player);
             });
+
+            leftPlayers.add(leavingPlayer);
         }
 
         return leftPlayers;

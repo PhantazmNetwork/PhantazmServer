@@ -13,16 +13,26 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * Represents something that can be joined by players, such as a game or a lobby. Scenes are ticked by a
- * {@link SceneManager}.
+ * Represents something that can be joined by players, such as a game or a lobby. Players can be sent between scenes,
+ * but they can only be considered a "part of" one scene at a time.
  * <p>
  * Scene implementations are expected to have an identity-based {@link Object#equals(Object)} method (and, by extension,
  * {@link Object#hashCode()}). That is, their {@code equals} method should return true iff {@code this == obj} where
  * {@code this} is this object and {@code obj} is the object to which this one is being compared.
  * <p>
+ * Players can <i>join</i> scenes using various methods on {@link SceneManager}. SceneManager also manages scene
+ * lifetime: creation, ticking, and removal.
+ * <p>
+ * Methods on this interface that are annotated with {@link ApiStatus.Internal} should not be called outside of
+ * SceneManager for any reason.
+ * <p>
  * <h2>Thread Safety</h2>
  * Unless otherwise specified, all methods on Scene are <i>not</i> thread safe; the scene must be acquired using the
- * {@link Acquirable} API before modifications are made.
+ * {@link Acquirable} API before modifications are made. However, all non-internal methods are safe to access without
+ * synchronizing from the current <i>tick thread</i>. In other words, if calling from the {@link Scene#tick(long)}
+ * method, it is not necessary to acquire before modifying scene state.
+ *
+ * @see SceneManager
  */
 public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupingAudience {
     /**
@@ -144,6 +154,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      *     <li>Ignore players that have never been added to the scene</li>
      *     <li>Ignore players that are in a different scene</li>
      *     <li>Modify the state of players that <i>are</i> present in this scene such as to remove any and all modifications applied by this scene</li>
+     *     <li>Correctly handle players for which {@link PlayerView#getPlayer()} returns an empty Optional, but {@link PlayerView#unwrap()} does not</li>
      * </ul>
      * <p>
      * This method must <i>not</i>:
@@ -154,27 +165,35 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      *     <li>Modify player state for players not in the scene</li>
      * </ul>
      * <p>
+     * This method may be called for players that are disconnecting from the server. Therefore, their
+     * {@link PlayerView#getPlayer()} method will return an empty Optional, as they are not connected to the server. If
+     * they were previously present in this scene, this method must correctly update internal state to account for this,
+     * and add the appropriate PlayerView to the set returned by this method.
+     * <p>
      * This method is marked as internal because it should generally only be called by {@link SceneManager}; this method
      * is only used if it can be determined that a player will be accepted by a different scene, or if they are
      * disconnecting from the server (in which case there is no other scene).
      *
      * @param players the players who are leaving, some of which may not be online, or even present in the scene
-     * @return a set of players that were actually removed from the scene
+     * @return a set of players that were actually removed from the scene, some of which may not be online
      */
     @ApiStatus.Internal
-    @NotNull Set<@NotNull Player> leave(@NotNull Set<? extends @NotNull PlayerView> players);
+    @NotNull Set<@NotNull PlayerView> leave(@NotNull Set<? extends @NotNull PlayerView> players);
 
     /**
-     * Called by the {@link SceneManager} after players that were previously in this scene join a new scene. Since the
-     * players are no longer managed by this scene, this method should not touch the state of the players in
-     * {@code leftPlayers}. This is primarily useful for sending tablist removal packets to players that <i>are</i>
-     * currently in the scene.
+     * Called by the {@link SceneManager} after players that were previously in this scene either leave the server or
+     * join a new scene. Since the players are no longer managed by this scene, this method should not touch the state
+     * of the players in {@code leftPlayers}. This is primarily useful for sending tablist removal packets to players
+     * that <i>are</i> currently in the scene.
      * <p>
      * {@code leftPlayers} is guaranteed to consist entirely of players that were previously returned by a call to
      * {@link Scene#leave(Set)}. That is, the set is guaranteed to contain only players that were successfully removed
-     * from the scene with a {@code leave} call. However, some players <i>may</i> be offline. There will always be
-     * exactly one call made to this method for every call to {@code leave}, unless the returned set is empty, in which
-     * case the call to this method may or may not be omitted.
+     * from the scene with a {@code leave} call. There will always be exactly one call made to this method for every
+     * call to {@code leave}, unless the set returned by such a call is empty, in which case the call to this method may
+     * or may not be omitted.
+     * <p>
+     * Some of the players in the {@code leftPlayers} set may be offline, such as if they disconnected from the server
+     * while in this scene.
      * <p>
      * As with similar methods on this interface, this is marked as internal because it should only be called by the
      * SceneManager, which does so directly after the players have joined a new scene, or alternatively after they are
@@ -187,13 +206,6 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
 
     @Override
     default @NotNull Collection<@NotNull Player> getPlayers() {
-        Set<PlayerView> playerViews = playersView();
-        List<Player> onlinePlayers = new ArrayList<>(playerViews.size());
-
-        for (PlayerView view : playerViews) {
-            view.getPlayer().ifPresent(onlinePlayers::add);
-        }
-
-        return onlinePlayers;
+        return PlayerView.getMany(playersView(), ArrayList::new);
     }
 }

@@ -4,10 +4,9 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.IntFunction;
 
 /**
  * Represents a view of a player that may be offline. Provides their UUID as well as a means to access the
@@ -47,6 +46,49 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
         return new Lookup(uuid);
     }
 
+    /**
+     * Given some collection of PlayerView objects, populates a collection returned by {@code creator} containing the
+     * existing {@link Player} objects contained in the optionals returned by calling {@link PlayerView#unwrap()} on
+     * each element of {@code input}.
+     *
+     * @param input   the input collection
+     * @param creator the creator of the output collection, which accepts the size of the input collection as an
+     *                argument
+     * @param <T>     the input type
+     * @param <V>     the output type
+     * @return the collection returned by {@code creator}, populated with Player objects
+     */
+    static <T extends Collection<Player>,
+        V extends Collection<PlayerView>> @NotNull T unwrapMany(@NotNull V input, @NotNull IntFunction<? extends T> creator) {
+        T out = creator.apply(input.size());
+        for (PlayerView view : input) {
+            view.unwrap().ifPresent(out::add);
+        }
+
+        return out;
+    }
+
+    /**
+     * Given some collection of PlayerView objects, populates a collection returned by {@code creator} containing the
+     * existing {@link Player} objects contained in the optionals returned by calling {@link PlayerView#getPlayer()} on
+     * each element of {@code input}.
+     *
+     * @param input   the input collection
+     * @param creator the creator of the output collection, which accepts the size of the input collection as an
+     *                argument
+     * @param <T>     the input type
+     * @param <V>     the output type
+     * @return the collection returned by {@code creator}, populated with Player objects
+     */
+    static <T extends Collection<Player>,
+        V extends Collection<PlayerView>> @NotNull T getMany(@NotNull V input, @NotNull IntFunction<? extends T> creator) {
+        T out = creator.apply(input.size());
+        for (PlayerView view : input) {
+            view.getPlayer().ifPresent(out::add);
+        }
+
+        return out;
+    }
 
     /**
      * A special {@link PlayerView} implementation that is unbound to a player instance, but can be created using only a
@@ -88,6 +130,11 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
 
         @Override
         public @NotNull Optional<Player> getPlayer() {
+            return Optional.empty();
+        }
+
+        @Override
+        public @NotNull Optional<Player> unwrap() {
             return Optional.empty();
         }
 
@@ -167,4 +214,14 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
      * @return An {@link Optional} of the player which is empty when the player is offline
      */
     @NotNull Optional<Player> getPlayer();
+
+    /**
+     * If this player's entity has not yet been removed, returns an optional containing the player, which may or may not
+     * be online (and therefore accessible through a ConnectionManager). This has limited usage compared to
+     * {@link PlayerView#getPlayer()}, which should generally be preferred unless it is necessary to handle
+     * {@link Player} instances during their disconnect, but before they are fully removed from the server.
+     *
+     * @return an {@link Optional} containing the player
+     */
+    @NotNull Optional<Player> unwrap();
 }

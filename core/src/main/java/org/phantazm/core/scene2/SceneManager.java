@@ -348,10 +348,10 @@ public final class SceneManager {
             try {
                 Scene self = acquired.get();
 
-                self.leave(Set.of(view));
+                Set<Player> left = PlayerView.unwrapMany(self.leave(Set.of(view)), HashSet::new);
                 view.updateCurrentScene(null);
 
-                leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, Set.of(player)));
+                leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, left));
             } finally {
                 acquired.unlock();
             }
@@ -368,9 +368,7 @@ public final class SceneManager {
         }
 
         event.setBroadcastTablistRemoval(false);
-        left.scene.getAcquirable().sync(self -> {
-            self.postLeave(left.left);
-        });
+        left.scene.getAcquirable().sync(self -> self.postLeave(left.left));
     }
 
 
@@ -650,7 +648,7 @@ public final class SceneManager {
 
                 playersLocked = lockPlayers(players, true);
 
-                leftPlayers = scene.leave(players);
+                leftPlayers = PlayerView.unwrapMany(scene.leave(players), HashSet::new);
             } finally {
                 acquired.unlock();
             }
@@ -909,19 +907,6 @@ public final class SceneManager {
         return scene;
     }
 
-    private static Set<Player> filterOnline(Set<PlayerView> viewSet) {
-        if (viewSet.isEmpty()) {
-            return Set.of();
-        }
-
-        Set<Player> set = new HashSet<>(viewSet.size());
-        for (PlayerView view : viewSet) {
-            view.getPlayer().ifPresent(set::add);
-        }
-
-        return set;
-    }
-
     private <T extends Scene> T tryJoinScene(Scene scene, Join<T> join) {
         T castScene = join.targetType().cast(scene);
 
@@ -959,16 +944,7 @@ public final class SceneManager {
                     return;
                 }
 
-                scene.getAcquirable().sync(self -> {
-                    Set<Player> left = self.leave(players);
-                    if (left.isEmpty()) {
-                        return;
-                    }
-
-                    leaveActions.add(() -> {
-                        self.getAcquirable().sync(self2 -> self2.postLeave(left));
-                    });
-                });
+                processLeavingPlayer(scene, players, leaveActions);
             });
 
             onlyPlayer.updateCurrentScene(newScene);
@@ -995,16 +971,7 @@ public final class SceneManager {
 
         for (Map.Entry<Scene, Set<PlayerViewImpl>> entry : groupedScenes.entrySet()) {
             Set<PlayerViewImpl> value = entry.getValue();
-            entry.getKey().getAcquirable().sync(self -> {
-                Set<Player> left = self.leave(value);
-                if (left.isEmpty()) {
-                    return;
-                }
-
-                leaveActions.add(() -> {
-                    self.getAcquirable().sync(self2 -> self2.postLeave(left));
-                });
-            });
+            processLeavingPlayer(entry.getKey(), entry.getValue(), leaveActions);
 
             for (PlayerViewImpl view : value) {
                 view.updateCurrentScene(newScene);
@@ -1014,6 +981,16 @@ public final class SceneManager {
         return leaveActions;
     }
 
+    private static void processLeavingPlayer(Scene scene, Set<? extends PlayerView> views, List<Runnable> leaveActions) {
+        scene.getAcquirable().sync(self -> {
+            Set<Player> left = PlayerView.getMany(self.leave(views), HashSet::new);
+            if (left.isEmpty()) {
+                return;
+            }
+
+            leaveActions.add(() -> self.getAcquirable().sync(self2 -> self2.postLeave(left)));
+        });
+    }
 
     private void tick(long time) {
         threadDispatcher.updateAndAwait(time);

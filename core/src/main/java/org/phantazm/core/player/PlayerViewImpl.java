@@ -1,6 +1,7 @@
 package org.phantazm.core.player;
 
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.ApiStatus;
@@ -162,6 +163,27 @@ public final class PlayerViewImpl implements PlayerView {
             playerReference = new WeakReference<>(player);
             return Optional.of(player);
         }
+    }
+
+    @Override
+    public @NotNull Optional<Player> unwrap() {
+        Player player = playerReference.get();
+        if (player != null) {
+            Entity entity = Entity.getEntity(uuid);
+            if (!(entity instanceof Player resolvedPlayer) || player != resolvedPlayer) {
+                playerReference = NULL_PLAYER_REFERENCE;
+                return Optional.empty();
+            }
+
+            return Optional.of(player);
+        }
+
+        if (Entity.getEntity(uuid) instanceof Player resolvedPlayer) {
+            playerReference = new WeakReference<>(resolvedPlayer);
+            return Optional.of(resolvedPlayer);
+        }
+
+        return Optional.empty();
     }
 
     @Override
