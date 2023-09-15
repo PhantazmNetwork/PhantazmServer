@@ -17,6 +17,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewImpl;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.scene2.event.SceneCreationEvent;
 import org.phantazm.core.scene2.event.SceneShutdownEvent;
 
 import java.util.*;
@@ -797,14 +798,20 @@ public final class SceneManager {
      * join, as well as the scene that was joined (if successful)
      */
     public <T extends Scene> @NotNull CompletableFuture<JoinResult<T>> joinScene(@NotNull Join<T> join) {
-        SceneEntry entry = mappedScenes.get(join.targetType());
-        if (entry == null) {
-            return CompletableFuture.completedFuture(JoinResult.unrecognizedType());
-        }
-
         Set<PlayerView> players = join.playerViews();
         if (players.isEmpty()) {
             return CompletableFuture.completedFuture(JoinResult.emptyPlayers());
+        }
+
+        List<SceneEntry> targetEntries = new ArrayList<>();
+        for (Map.Entry<Class<? extends Scene>, SceneEntry> entry : mappedScenes.entrySet()) {
+            if (join.targetType().isAssignableFrom(entry.getKey())) {
+                targetEntries.add(entry.getValue());
+            }
+        }
+
+        if (targetEntries.isEmpty()) {
+            return CompletableFuture.completedFuture(JoinResult.unrecognizedType());
         }
 
         return CompletableFuture.supplyAsync(() -> {
@@ -813,28 +820,39 @@ public final class SceneManager {
             }
 
             try {
-                T joinedScene = tryJoinScenes(entry.scenes, join);
-                if (joinedScene != null) {
-                    return JoinResult.joined(joinedScene);
-                }
-
-                synchronized (entry.creationLock) {
-                    joinedScene = tryJoinScenes(entry.scenes, join);
+                for (SceneEntry entry : targetEntries) {
+                    T joinedScene = tryJoinScenes(entry.scenes, join);
                     if (joinedScene != null) {
                         return JoinResult.joined(joinedScene);
                     }
 
-                    if (!join.canCreateNewScene(this)) {
-                        return JoinResult.cannotProvision();
+                    synchronized (entry.creationLock) {
+                        joinedScene = tryJoinScenes(entry.scenes, join);
+                        if (joinedScene != null) {
+                            return JoinResult.joined(joinedScene);
+                        }
+
+                        if (!join.canCreateNewScene(this)) {
+                            continue;
+                        }
+
+                        T newScene = createAndJoinNewScene(join);
+                        SceneEntry actualEntry = mappedScenes.get(newScene.getClass());
+                        if (actualEntry == null) {
+                            throw new IllegalStateException("Join attempted to create a scene for which there is no " +
+                                "corresponding type registered");
+                        }
+
+                        EventDispatcher.call(new SceneCreationEvent(newScene));
+
+                        actualEntry.scenes.add(newScene);
+                        threadDispatcher.createPartition(newScene);
+
+                        return JoinResult.joined(newScene);
                     }
-
-                    T newScene = createAndJoinNewScene(join);
-
-                    entry.scenes.add(newScene);
-                    threadDispatcher.createPartition(newScene);
-
-                    return JoinResult.joined(newScene);
                 }
+
+                return JoinResult.cannotProvision();
             } finally {
                 unlockPlayers(players);
             }
@@ -968,6 +986,7 @@ public final class SceneManager {
 
     private <T extends Scene> T createAndJoinNewScene(Join<T> join) {
         T scene = join.createNewScene(this);
+
         Iterable<Runnable> actions = leaveOldScenes(join.playerViews(), scene);
 
         //not necessary to acquire, scene was just created but is not ticking yet

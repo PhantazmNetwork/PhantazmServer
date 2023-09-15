@@ -38,8 +38,7 @@ public interface Join<T extends Scene> {
 
     /**
      * The type of {@link Scene} this Join wants. {@link SceneManager} will use this value to determine what types of
-     * scene may be used. This is an <i>exact match</i>; subclasses of {@code T} will not be considered for joining,
-     * even if such a cast would be technically safe.
+     * scene may be used. Subclasses of {@code T} will be considered for joining, as well.
      * <p>
      * The value returned by this method should not change over the lifetime of this object. Consequently, it should be
      * threadsafe.
@@ -57,6 +56,7 @@ public interface Join<T extends Scene> {
      *     <li>The scene must not already be a part of a {@link SceneManager}.</li>
      *     <li>The scene must match this Join; that is, {@link Join#matches(Scene)} will return {@code true} if passed the new scene instance.</li>
      *     <li>As a consequence of the previous requirement, calling {@link Join#join(Scene)} on the scene must succeed without throwing an exception.</li>
+     *     <li>The scene's class must be present in the set returned by {@link SceneManager#types()}.</li>
      * </ul>
      * <p>
      * It is expected that the returned scene will be added to the SceneManager fulfilling this join by the manager
