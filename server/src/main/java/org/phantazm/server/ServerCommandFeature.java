@@ -4,8 +4,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.game.scene.RouterStore;
-import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.command.server.*;
