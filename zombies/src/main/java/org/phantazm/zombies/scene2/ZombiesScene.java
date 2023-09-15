@@ -24,6 +24,7 @@ import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.stage.Stage;
+import org.phantazm.zombies.stage.StageKeys;
 import org.phantazm.zombies.stage.StageTransition;
 
 import java.util.*;
@@ -45,6 +46,7 @@ public class ZombiesScene extends InstanceScene {
     private final Pos spawnPos;
 
     private boolean isLegit;
+    private boolean restricted;
 
     public ZombiesScene(@NotNull Instance instance,
         @NotNull ZombiesMap map,
@@ -103,6 +105,11 @@ public class ZombiesScene extends InstanceScene {
         }
 
         CompletableFuture.allOf(futures).join();
+
+        if (restricted) {
+            setJoinable(false);
+            stageTransition.setCurrentStage(StageKeys.IN_GAME);
+        }
     }
 
     @Override
@@ -227,6 +234,14 @@ public class ZombiesScene extends InstanceScene {
     protected boolean canTimeout() {
         //timeout is handled by StageTransition
         return false;
+    }
+
+    public void setRestricted(boolean restricted) {
+        this.restricted = restricted;
+    }
+
+    public boolean isRestricted() {
+        return this.restricted;
     }
 
     public @NotNull @UnmodifiableView Map<PlayerView, ZombiesPlayer> managedPlayers() {

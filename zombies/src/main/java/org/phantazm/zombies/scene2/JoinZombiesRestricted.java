@@ -17,7 +17,7 @@ public class JoinZombiesRestricted extends JoinZombiesMap {
     @Override
     public @NotNull ZombiesScene createNewScene(@NotNull SceneManager manager) {
         ZombiesScene newScene = super.createNewScene(manager);
-        newScene.setJoinable(false);
+        newScene.setRestricted(true);
 
         return newScene;
     }
