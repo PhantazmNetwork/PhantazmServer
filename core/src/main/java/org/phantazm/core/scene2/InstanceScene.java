@@ -57,10 +57,10 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
 
             if (this.spectators.add(player)) {
                 player.getPlayer().ifPresent(actualPlayer -> {
-                    joinSpectator(actualPlayer, ghost);
-
                     actualPlayer.updateViewableRule(this::hasSpectator);
                     actualPlayer.setGameMode(GameMode.SPECTATOR);
+
+                    joinSpectator(actualPlayer, ghost);
                 });
             }
         }
@@ -77,7 +77,7 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
 
     @Override
     public boolean sendRemovalPacketToExistingPlayer(@NotNull Player leavingPlayer, @NotNull Player scenePlayer) {
-        return hasSpectator(scenePlayer);
+        return !hasSpectator(leavingPlayer) || hasSpectator(scenePlayer);
     }
 
     @Override
