@@ -1,5 +1,6 @@
 package org.phantazm.server.command.server;
 
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -10,12 +11,12 @@ import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
-import org.phantazm.core.game.scene.RouterStore;
-import org.phantazm.core.game.scene.Scene;
-import org.phantazm.core.game.scene.SceneRouter;
-import org.phantazm.core.game.scene.SceneTransferHelper;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.scene2.*;
+import org.phantazm.core.scene2.join.JoinSpectator;
 
+import java.util.Set;
 import java.util.UUID;
 
 public class GhostCommand extends PermissionLockedCommand {
@@ -26,34 +27,35 @@ public class GhostCommand extends PermissionLockedCommand {
 
         ArgumentUUID sceneArgument = ArgumentType.UUID("scene");
         sceneArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            for (SceneRouter<?, ?> router : routerStore.getRouters()) {
-                if (!router.isGame()) {
-                    continue;
+            SceneManager.Global.instance().forEachScene(scene -> {
+                if (scene.isGame() && scene instanceof IdentifiableScene identifiableScene &&
+                    scene instanceof WatchableScene) {
+                    suggestion.addEntry(new SuggestionEntry(identifiableScene.identity().toString(), null));
                 }
-
-                for (Scene<?> scene : router.getScenes()) {
-                    suggestion.addEntry(new SuggestionEntry(scene.getUUID().toString(), null));
-                }
-            }
+            });
         });
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), ((sender, context) -> {
             Player player = (Player) sender;
-            UUID argument = context.get(sceneArgument);
-            for (SceneRouter<?, ?> router : routerStore.getRouters()) {
-                if (!router.isGame()) {
-                    continue;
-                }
+            PlayerView playerView = viewProvider.fromPlayer(player);
 
-                for (Scene<?> scene : router.getScenes()) {
-                    if (scene.getUUID().equals(argument)) {
-                        transferHelper.ghost(scene, viewProvider.fromPlayer(player));
-                        return;
-                    }
+            UUID argument = context.get(sceneArgument);
+
+            Wrapper<InstanceScene> sceneWrapper = Wrapper.ofNull();
+            SceneManager.Global.instance().forEachScene(scene -> {
+                if (scene.isGame() && scene instanceof InstanceScene instanceScene) {
+                    sceneWrapper.set(instanceScene);
                 }
+            });
+
+            Scene target = sceneWrapper.get();
+            if (target == null) {
+                sender.sendMessage(Component.text("No scene found with that UUID").color(NamedTextColor.RED));
+                return;
             }
 
-            sender.sendMessage(Component.text("No scene found with that UUID").color(NamedTextColor.RED));
+            SceneManager.Global.instance().joinScene(new JoinSpectator<>(Set.of(playerView), InstanceScene.class,
+                true, argument));
         }), sceneArgument);
     }
 }

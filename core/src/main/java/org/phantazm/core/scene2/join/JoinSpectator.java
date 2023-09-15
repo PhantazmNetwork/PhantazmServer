@@ -10,8 +10,6 @@ import java.util.UUID;
 
 public class JoinSpectator<T extends WatchableScene & IdentifiableScene> extends JoinAbstract<T> implements Join<T>,
     TablistLocalJoin<T> {
-
-
     private final boolean ghost;
     private final UUID targetUuid;
 
@@ -44,7 +42,7 @@ public class JoinSpectator<T extends WatchableScene & IdentifiableScene> extends
 
     @Override
     public boolean matches(@NotNull T scene) {
-        return scene.identity().equals(targetUuid);
+        return scene.isGame() && scene.identity().equals(targetUuid);
     }
 
     @Override

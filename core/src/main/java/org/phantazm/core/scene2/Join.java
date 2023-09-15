@@ -103,7 +103,7 @@ public interface Join<T extends Scene> {
      * <p>
      * It is necessary to use this method to:
      * <ul>
-     *     <li>Update the player's Viewable rules, as they are cleared by the SceneManager directly after joining</li>
+     *     <li>Update the player's Viewable rules, as they are cleared by the SceneManager directly after {@link Join#join(Scene)} is called</li>
      * </ul>
      *
      * @param scene the scene to join

@@ -10,7 +10,8 @@ import java.util.UUID;
  */
 public interface IdentifiableScene extends Scene {
     /**
-     * The unique identifier of this scene.
+     * The unique identifier of this scene. This must not change for the usable lifetime of the scene; therefore, it
+     * should be threadsafe.
      *
      * @return this scene's identifier
      */
