@@ -36,6 +36,24 @@ public abstract class CreatingJoin<T extends Scene> extends JoinAbstract<T> {
     @Override
     public boolean matches(@NotNull T scene) {
         int playerCap = sceneCreator.playerCap();
-        return playerCap == -1 || scene.playerCount() + playerViews().size() <= playerCap;
+        return playerCap == -1 || scene.playerCount() + newPlayerCount(scene) <= playerCap;
+    }
+
+    /**
+     * Determines the number of new players that will be joining this scene by only counting join participants which are
+     * not already in the scene.
+     *
+     * @param scene the scene to join
+     * @return the number of players that aren't already in the scene
+     */
+    public int newPlayerCount(@NotNull T scene) {
+        int newPlayers = 0;
+        for (PlayerView joining : playerViews()) {
+            if (!scene.hasPlayer(joining)) {
+                newPlayers++;
+            }
+        }
+
+        return newPlayers;
     }
 }

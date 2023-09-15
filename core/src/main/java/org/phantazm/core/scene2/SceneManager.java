@@ -306,6 +306,7 @@ public final class SceneManager {
     private final Map<Key<?>, JoinFunction<?>> functionMap;
 
     private volatile Function<? super Player, ? extends LoginJoin<? extends InstanceScene>> requestMapper;
+    private volatile Function<? super Set<PlayerView>, ? extends CompletableFuture<?>> globalFallback;
 
     private SceneManager(Executor executor, Set<Class<? extends Scene>> sceneTypes, int numThreads) {
         this.executor = Objects.requireNonNull(executor);
@@ -604,19 +605,38 @@ public final class SceneManager {
     }
 
     /**
+     * Sets the default fallback for players. This is a function that, given a set of players, will perform some
+     * (synchronous or asynchronous) computation that may move them to a new scene, kick them from the server, or do
+     * nothing. In most cases, this function is expected to attempt to fulfill a specific <i>join</i> for the players.
+     * <p>
+     * The default value of this function is {@code null}. When null, nothing will be done to move players out of scenes
+     * that are shutting down. In this case, players may be entirely kicked from the server by the scene when
+     * {@link Scene#shutdown()} is called, but this behavior is not required.
+     * <p>
+     * The default fallback is only used when {@link SceneManager#removeScene(Scene)} is called. If
+     * {@link SceneManager#removeScene(Scene, Function)} is used instead, the function passed to that method will be
+     * used in favor of the default fallback.
+     *
+     * @param fallback the default fallback, or {@code null} to use no fallback (default value)
+     */
+    public void setDefaultFallback(@Nullable Function<? super @NotNull Set<@NotNull PlayerView>, ? extends @NotNull CompletableFuture<?>> fallback) {
+        this.globalFallback = fallback;
+    }
+
+    /**
      * Removes a scene, shutting it down and scheduling it for removal from internal data structures. If the scene is
      * not managed by this manager, or is of an unrecognized type, this method will do nothing.
      * <p>
      * Note that this method will <i>leave</i> any players from the scene when it has shut down, but these players will
-     * not be sent anywhere. That is the responsibility of {@code playerCallback}, a {@link CompletableFuture}-returning
-     * function. When its future is complete (exceptionally or otherwise), the scene will be fully shut down by calling
-     * {@link Scene#shutdown()}.
+     * not be sent anywhere. That is the responsibility of {@code shutdownCallback}, a
+     * {@link CompletableFuture}-returning function. When its future is complete (exceptionally or otherwise), the scene
+     * will be fully shut down by calling {@link Scene#shutdown()}.
      *
-     * @param scene          the scene to remove
-     * @param playerCallback the callback to run with the set of all players that were previously in {@code scene}
+     * @param scene            the scene to remove
+     * @param shutdownCallback the callback to run with the set of all players that were previously in {@code scene}
      */
     public void removeScene(@NotNull Scene scene,
-        @NotNull Function<? super @NotNull Set<@NotNull PlayerView>, ? extends @NotNull CompletableFuture<?>> playerCallback) {
+        @Nullable Function<? super @NotNull Set<@NotNull PlayerView>, ? extends @NotNull CompletableFuture<?>> shutdownCallback) {
         SceneEntry entry = mappedScenes.get(scene.getClass());
         if (entry == null) {
             return;
@@ -663,16 +683,36 @@ public final class SceneManager {
             }
         }
 
-        if (leftPlayers.isEmpty()) {
-            scene.getAcquirable().sync(Scene::shutdown);
+        boolean hasLeftPlayers = !leftPlayers.isEmpty();
+
+        Set<Player> finalLeftPlayers = leftPlayers;
+        if (!hasLeftPlayers || shutdownCallback == null) {
+            scene.getAcquirable().sync(self -> {
+                if (hasLeftPlayers) {
+                    self.postLeave(finalLeftPlayers);
+                }
+
+                self.shutdown();
+            });
+
             return;
         }
 
-        Set<Player> finalLeftPlayers = leftPlayers;
-        playerCallback.apply(players).whenComplete((ignored1, ignored2) -> scene.getAcquirable().sync(self -> {
+        shutdownCallback.apply(players).whenComplete((ignored1, ignored2) -> scene.getAcquirable().sync(self -> {
             self.postLeave(finalLeftPlayers);
             self.shutdown();
         }));
+    }
+
+    /**
+     * Removes a scene, using the <i>default fallback</i> to move existing players out of the scene (see
+     * {@link SceneManager#setDefaultFallback(Function)} for more details). Otherwise, behaves exactly as
+     * {@link SceneManager#removeScene(Scene, Function)}.
+     *
+     * @param scene the scene to remove
+     */
+    public void removeScene(@NotNull Scene scene) {
+        removeScene(scene, globalFallback);
     }
 
     /**

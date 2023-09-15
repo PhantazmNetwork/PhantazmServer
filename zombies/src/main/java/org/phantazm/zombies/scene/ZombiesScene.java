@@ -21,7 +21,6 @@ import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.game.scene.InstanceScene;
 import org.phantazm.core.game.scene.TransferResult;
-import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.stats.zombies.ZombiesDatabase;
@@ -65,7 +64,8 @@ public class ZombiesScene extends InstanceScene<ZombiesJoinRequest> {
         @NotNull Instance instance, @NotNull MapSettingsInfo mapSettingsInfo,
         @NotNull StageTransition stageTransition, @NotNull LeaveHandler leaveHandler,
         @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
-        @NotNull TickTaskScheduler taskScheduler, @NotNull ZombiesDatabase database,
+        @NotNull TickTaskScheduler taskScheduler,
+        @NotNull ZombiesDatabase database,
         @NotNull EventNode<Event> sceneNode, @Nullable UUID allowedRequestUUID,
         @NotNull PlayerViewProvider playerViewProvider) {
         super(uuid, instance, VecUtils.toPoint(mapSettingsInfo.spawn()), playerViewProvider);

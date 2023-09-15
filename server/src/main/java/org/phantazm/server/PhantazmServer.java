@@ -219,6 +219,10 @@ public final class PhantazmServer {
                 return new JoinLobby(Set.of(viewProvider.fromPlayer(player)),
                     LobbyFeature.lobbies().get(lobbiesConfig.mainLobby()).sceneCreator(), true);
             });
+
+            manager.setDefaultFallback(playerViews -> {
+                return SceneManager.Global.instance().joinScene(CoreJoinKeys.MAIN_LOBBY, playerViews);
+            });
         });
 
         CompletableFuture<?> databaseFeatures = CompletableFuture.runAsync(() -> {

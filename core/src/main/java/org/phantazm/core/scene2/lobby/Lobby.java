@@ -26,19 +26,16 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.CoreStages;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.core.scene2.IdentifiableScene;
 import org.phantazm.core.scene2.InstanceScene;
-import org.phantazm.core.scene2.JoinToggleable;
 import org.phantazm.core.scene2.TablistLocalScene;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggleable, TablistLocalScene {
+public class Lobby extends InstanceScene implements TablistLocalScene {
     private final Set<PlayerView> players;
     private final Set<PlayerView> playersView;
-    private final UUID identity;
 
     private final Pos spawnPoint;
     private final String lobbyJoinMessageFormat;
@@ -48,8 +45,6 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
 
     private final EventNode<InstanceEvent> lobbyNode;
 
-    private boolean joinable;
-
     public Lobby(@NotNull Instance instance, @NotNull Pos spawnPoint, @NotNull String lobbyJoinMessageFormat,
         @NotNull NPCHandler npcHandler, @NotNull Collection<ItemStack> defaultItems,
         @NotNull Function<? super @NotNull Player, ? extends @NotNull CompletableFuture<?>> displayNameStyler,
@@ -57,7 +52,6 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
         super(instance, timeout);
         this.players = new HashSet<>();
         this.playersView = Collections.unmodifiableSet(this.players);
-        this.identity = UUID.randomUUID();
 
         this.spawnPoint = Objects.requireNonNull(spawnPoint);
         this.lobbyJoinMessageFormat = Objects.requireNonNull(lobbyJoinMessageFormat);
@@ -65,8 +59,6 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
         this.defaultItems = List.copyOf(defaultItems);
         this.displayNameStyler = Objects.requireNonNull(displayNameStyler);
         this.lobbyNode = buildNode(instance);
-
-        this.joinable = true;
 
         MinecraftServer.getGlobalEventHandler().addChild(this.lobbyNode);
         npcHandler.spawnAll();
@@ -169,7 +161,7 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
         }));
 
         holder.setStage(CoreStages.LOBBY);
-        player.teleport(spawnPoint);
+        teleportOrSetInstance(player, spawnPoint);
     }
 
     @Override
@@ -191,21 +183,6 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
     }
 
     @Override
-    public @NotNull UUID identity() {
-        return identity;
-    }
-
-    @Override
-    public boolean joinable() {
-        return super.joinable() && joinable;
-    }
-
-    @Override
-    public void setJoinable(boolean joinable) {
-        this.joinable = joinable;
-    }
-
-    @Override
     public void tick(long time) {
         super.tick(time);
         this.npcHandler.tick(time);
@@ -213,7 +190,10 @@ public class Lobby extends InstanceScene implements IdentifiableScene, JoinToggl
 
     @Override
     public void shutdown() {
-        MinecraftServer.getGlobalEventHandler().removeChild(lobbyNode);
+        EventNode<? super InstanceEvent> parent = lobbyNode.getParent();
+        if (parent != null) {
+            parent.removeChild(lobbyNode);
+        }
 
         super.shutdown();
         this.npcHandler.end();

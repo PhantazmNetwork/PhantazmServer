@@ -53,6 +53,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      * @return {@code true} if this scene contains the player; {@code false} otherwise
      */
     default boolean hasPlayer(@NotNull PlayerView playerView) {
+        Objects.requireNonNull(playerView);
         return playersView().contains(playerView);
     }
 
@@ -123,8 +124,9 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      *     <li>Subsequent calls to {@link Scene#isShutdown()} will return {@code true}.</li>
      * </ul>
      * <p>
-     * This method should <i>not</i> perform clean up actions; rather, it should update state as necessary to ensure
-     * this scene cannot be joined.
+     * In other words, this method should update state as necessary to ensure this scene cannot be joined. Additionally,
+     * implementations may find it useful to perform certain cleanup actions here, as players will <i>not</i> be
+     * removed yet.
      * <p>
      * This method is marked as internal because, along with {@code shutdown}, it should only be called indirectly
      * through {@link SceneManager#removeScene(Scene, Function)}.

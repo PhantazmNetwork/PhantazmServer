@@ -1,10 +1,13 @@
 package org.phantazm.core.scene2;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Further specialization of {@link SceneAbstract} that assumes a single instance devoted to this {@link Scene}. The
@@ -31,5 +34,13 @@ public abstract class InstanceScene extends SceneAbstract {
      */
     public final @NotNull Instance instance() {
         return instance;
+    }
+
+    protected @NotNull CompletableFuture<?> teleportOrSetInstance(@NotNull Player player, @NotNull Pos pos) {
+        if (player.getInstance() == instance()) {
+            return player.teleport(pos);
+        }
+
+        return player.setInstance(instance(), pos);
     }
 }

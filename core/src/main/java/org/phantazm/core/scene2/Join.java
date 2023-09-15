@@ -26,7 +26,11 @@ import java.util.Set;
 public interface Join<T extends Scene> {
     /**
      * Retrieves the set of all players that are participating in this Join. The contents of this set, as well as the
-     * set instance itself, should never change over the lifetime of this object.
+     * set instance itself, should never change over the lifetime of this object. If empty, the {@link SceneManager}
+     * will ignore this Join.
+     * <p>
+     * Otherwise, there are almost no restrictions on the players that can be present in this set. They may be offline,
+     * spread across various scenes, or have no current scene.
      *
      * @return the set of all joining players
      */
@@ -37,7 +41,8 @@ public interface Join<T extends Scene> {
      * scene may be used. This is an <i>exact match</i>; subclasses of {@code T} will not be considered for joining,
      * even if such a cast would be technically safe.
      * <p>
-     * The value returned by this method should not change over the lifetime of this object.
+     * The value returned by this method should not change over the lifetime of this object. Consequently, it should be
+     * threadsafe.
      *
      * @return the kind of scene we must join
      */
@@ -45,8 +50,8 @@ public interface Join<T extends Scene> {
 
     /**
      * Creates a new Scene which can be used to fulfill this request. If {@link Join#canCreateNewScene(SceneManager)}
-     * returns {@code false}, this method <i>may</i> throw an exception. Otherwise, the scene returned by this method
-     * <i>must</i> have the following characteristics:
+     * returns {@code false}, this method <i>may</i> throw an exception. Otherwise, so long as {@code canCreateNewScene}
+     * returns {@code true}, the scene returned by this method <i>must</i> have the following characteristics:
      *
      * <ul>
      *     <li>The scene must not already be a part of a {@link SceneManager}.</li>
@@ -81,14 +86,19 @@ public interface Join<T extends Scene> {
      * This method is expected to (either directly or indirectly) perform actions such as teleporting players to a new
      * instance, sending tablist packets, and other modifying operations, as appropriate. This method should <i>not</i>
      * modify players that are not present in {@link Join#playerViews()}.
+     * <p>
+     * When sending players to scenes, it is important to note that (by default) there is no mechanism preventing a
+     * player from participating in a join for a scene which they are already a part of. Join implementations must be
+     * aware of this fact, and may wish to take such players into account when determining if a scene is eligible.
      *
      * @param scene the scene to join
      */
     void join(@NotNull T scene);
 
     /**
-     * Determines if the existing scene {@code scene} can be used to fulfill this Join. If this method returns true,
-     * {@link Join#join(Scene)} will succeed. {@link SceneManager} always queries this method before attempting to
+     * Determines if the existing scene {@code scene} can be used to fulfill this Join. If this method returns true
+     * while {@code scene} is acquired, {@link Join#join(Scene)} must succeed so long as the scene is still acquired
+     * since the previous call to {@code matches}. {@link SceneManager} always queries this method before attempting to
      * fulfill a join.
      *
      * @param scene the scene to join
