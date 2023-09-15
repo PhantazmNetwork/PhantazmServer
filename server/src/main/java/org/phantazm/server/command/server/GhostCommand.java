@@ -28,9 +28,8 @@ public class GhostCommand extends PermissionLockedCommand {
         ArgumentUUID sceneArgument = ArgumentType.UUID("scene");
         sceneArgument.setSuggestionCallback((sender, context, suggestion) -> {
             SceneManager.Global.instance().forEachScene(scene -> {
-                if (scene.isGame() && scene instanceof IdentifiableScene identifiableScene &&
-                    scene instanceof WatchableScene) {
-                    suggestion.addEntry(new SuggestionEntry(identifiableScene.identity().toString(), null));
+                if (scene.isGame() && scene instanceof InstanceScene instanceScene) {
+                    suggestion.addEntry(new SuggestionEntry(instanceScene.identity().toString(), null));
                 }
             });
         });
@@ -50,7 +49,7 @@ public class GhostCommand extends PermissionLockedCommand {
 
             Scene target = sceneWrapper.get();
             if (target == null) {
-                sender.sendMessage(Component.text("No scene found with that UUID").color(NamedTextColor.RED));
+                sender.sendMessage(Component.text("No scene found with that UUID!").color(NamedTextColor.RED));
                 return;
             }
 
