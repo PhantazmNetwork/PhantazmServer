@@ -6,7 +6,7 @@ import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
 
-public interface TablistLocalJoin<T extends Scene> extends Join<T> {
+public interface TablistLocalJoin<T extends WatchableScene> extends Join<T> {
     enum Type {
         BOTH_JOINING,
         FIRST_JOINING,
@@ -90,6 +90,23 @@ public interface TablistLocalJoin<T extends Scene> extends Join<T> {
     }
 
     default @NotNull ViewResult visibility(@NotNull T scene, @NotNull PlayerView first, @NotNull PlayerView second, @NotNull Type type) {
-        return ViewResult.BOTH_SEE;
+        return switch (type) {
+            case BOTH_JOINING -> ViewResult.BOTH_SEE;
+            case FIRST_JOINING -> {
+                if (scene.hasSpectator(second)) {
+                    //spectators can see this player
+                    yield ViewResult.SECOND_SEES_FIRST;
+                }
+
+                yield ViewResult.BOTH_SEE;
+            }
+            case SECOND_JOINING -> {
+                if (scene.hasSpectator(first)) {
+                    yield ViewResult.FIRST_SEES_SECOND;
+                }
+
+                yield ViewResult.BOTH_SEE;
+            }
+        };
     }
 }

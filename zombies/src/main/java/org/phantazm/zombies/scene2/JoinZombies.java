@@ -24,6 +24,6 @@ public class JoinZombies extends CreatingJoin<ZombiesScene> implements TablistLo
     @Override
     public boolean matches(@NotNull ZombiesScene scene) {
         Stage stage = scene.currentStage();
-        return super.matches(scene) && (stage != null && stage.canRejoin());
+        return super.matches(scene) && (stage != null && stage.canJoin());
     }
 }

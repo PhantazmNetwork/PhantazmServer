@@ -5,12 +5,13 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.scene2.JoinAbstract;
 import org.phantazm.core.scene2.SceneManager;
+import org.phantazm.core.scene2.TablistLocalJoin;
 import org.phantazm.zombies.stage.Stage;
 
 import java.util.Collection;
 import java.util.UUID;
 
-public class RejoinZombies extends JoinAbstract<ZombiesScene> {
+public class RejoinZombies extends JoinAbstract<ZombiesScene> implements TablistLocalJoin<ZombiesScene> {
     private final UUID uuid;
 
     public RejoinZombies(@NotNull Collection<@NotNull PlayerView> players, @Nullable UUID uuid) {
