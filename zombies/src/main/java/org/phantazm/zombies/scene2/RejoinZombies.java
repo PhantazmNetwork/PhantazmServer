@@ -31,6 +31,7 @@ public class RejoinZombies extends JoinAbstract<ZombiesScene> implements Tablist
 
     @Override
     public void join(@NotNull ZombiesScene scene) {
+        TablistLocalJoin.super.join(scene);
         scene.join(playerViews());
     }
 
