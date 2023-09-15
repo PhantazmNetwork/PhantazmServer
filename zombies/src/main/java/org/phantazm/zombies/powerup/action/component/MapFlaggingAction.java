@@ -10,7 +10,7 @@ import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.action.PowerupActionBase;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.action.map_flagging")
 @Cache(false)
@@ -27,7 +27,7 @@ public class MapFlaggingAction implements PowerupActionComponent {
 
     @Override
     public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
-        return new Action(data, deactivationPredicate.apply(scene), scene.getMap().mapObjects().module().flags());
+        return new Action(data, deactivationPredicate.apply(scene), scene.map().mapObjects().module().flags());
     }
 
     @DataObject

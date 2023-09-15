@@ -4,6 +4,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerUseItemOnBlockEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Map;
@@ -14,7 +15,7 @@ public class PlayerUseItemOnBlockListener extends ZombiesPlayerEventListener<Pla
     private final PlayerRightClickListener rightClickListener;
 
     public PlayerUseItemOnBlockListener(@NotNull Instance instance,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers,
         @NotNull PlayerRightClickListener rightClickListener) {
         super(instance, zombiesPlayers);
         this.rightClickListener = Objects.requireNonNull(rightClickListener);

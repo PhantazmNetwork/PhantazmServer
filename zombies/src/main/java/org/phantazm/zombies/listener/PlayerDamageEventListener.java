@@ -13,6 +13,7 @@ import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.PhysicsUtils;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Tags;
@@ -34,7 +35,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
     private final MapSettingsInfo mapSettingsInfo;
 
     public PlayerDamageEventListener(@NotNull Instance instance,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
         @NotNull MapSettingsInfo mapSettingsInfo) {
         super(instance, zombiesPlayers);
         this.mapObjects = Objects.requireNonNull(mapObjects);

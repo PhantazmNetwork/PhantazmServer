@@ -21,6 +21,7 @@ import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
@@ -38,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDeathEvent> {
@@ -54,7 +54,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
     private final BoundedTracker<Room> roomTracker;
     private final BoundedTracker<Window> windowTracker;
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
 
     private final MapSettingsInfo settingsInfo;
 
@@ -62,7 +62,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         @NotNull Supplier<Optional<Round>> roundSupplier,
         @NotNull PowerupHandler powerupHandler, @NotNull BoundedTracker<Room> roomTracker,
         @NotNull BoundedTracker<Window> windowTracker,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap, @NotNull MapSettingsInfo settingsInfo) {
+        @NotNull Map<PlayerView, ZombiesPlayer> playerMap, @NotNull MapSettingsInfo settingsInfo) {
         super(instance);
         this.keyParser = Objects.requireNonNull(keyParser);
         this.roundSupplier = Objects.requireNonNull(roundSupplier);
@@ -94,7 +94,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
             return;
         }
 
-        ZombiesPlayer player = playerMap.get(attacker.getUuid());
+        ZombiesPlayer player = playerMap.get(PlayerView.lookup(attacker.getUuid()));
         if (player == null) {
             return;
         }

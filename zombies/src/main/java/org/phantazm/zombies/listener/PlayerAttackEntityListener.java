@@ -12,6 +12,7 @@ import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -28,7 +29,7 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
     private final Tag<Integer> lastPunchTicksTag;
 
     public PlayerAttackEntityListener(@NotNull Instance instance,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, float punchDamage, int punchCooldown,
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, float punchDamage, int punchCooldown,
         float punchKnockback) {
         super(instance, zombiesPlayers);
         this.punchDamage = punchDamage;

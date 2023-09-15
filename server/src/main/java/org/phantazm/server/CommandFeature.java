@@ -2,9 +2,7 @@ package org.phantazm.server;
 
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.game.scene.RouterStore;
-import org.phantazm.core.game.scene.command.QuitCommand;
-import org.phantazm.core.game.scene.fallback.SceneFallback;
+import org.phantazm.core.scene2.QuitCommand;
 import org.phantazm.core.player.PlayerViewProvider;
 
 public final class CommandFeature {
@@ -12,9 +10,8 @@ public final class CommandFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull RouterStore routerStore, @NotNull PlayerViewProvider viewProvider) {
-        MinecraftServer.getCommandManager()
-            .register(QuitCommand.quitCommand(routerStore, viewProvider));
+    static void initialize(@NotNull PlayerViewProvider viewProvider) {
+        MinecraftServer.getCommandManager().register(QuitCommand.quitCommand(viewProvider));
     }
 
 }

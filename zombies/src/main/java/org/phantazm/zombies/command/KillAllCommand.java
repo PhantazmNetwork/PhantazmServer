@@ -1,13 +1,17 @@
 package org.phantazm.zombies.command;
 
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
+import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.mob2.Mob;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -17,22 +21,21 @@ import java.util.function.Function;
 public class KillAllCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.killall");
 
-    public KillAllCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
+    public KillAllCommand(@NotNull PlayerViewProvider viewProvider) {
         super("killall", PERMISSION);
-        Objects.requireNonNull(sceneMapper);
-
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
-            Player player = (Player) sender;
-            UUID uuid = player.getUuid();
-            sceneMapper.apply(uuid).flatMap(scene -> {
+            Player playerSender = (Player) sender;
+            PlayerView playerView = viewProvider.fromPlayer(playerSender);
+            SceneManager.Global.instance().currentScene(playerView, ZombiesScene.class).ifPresent(scene -> {
                 scene.setLegit(false);
-                return scene.getMap().roundHandler().currentRound();
-            }).ifPresent(round -> {
-                for (Mob mob : round.getSpawnedMobs()) {
-                    mob.getAcquirable().sync(ignored -> {
-                        mob.damage(Damage.fromPlayer(player, mob.getHealth()), true);
-                    });
-                }
+
+                scene.map().roundHandler().currentRound().ifPresent(round -> {
+                    for (Mob mob : round.getSpawnedMobs()) {
+                        mob.getAcquirable().sync(self -> {
+                            ((LivingEntity) self).damage(Damage.fromPlayer(playerSender, mob.getHealth()), true);
+                        });
+                    }
+                });
             });
         });
     }

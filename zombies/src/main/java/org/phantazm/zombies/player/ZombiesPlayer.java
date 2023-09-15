@@ -23,7 +23,7 @@ import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.powerup.Powerup;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.stage.Stage;
 
 import java.util.Map;
@@ -157,7 +157,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     }
 
     default boolean inStage(@NotNull Key stageKey) {
-        Stage currentStage = getScene().getCurrentStage();
+        Stage currentStage = getScene().currentStage();
         if (currentStage == null) {
             return false;
         }
@@ -178,7 +178,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
         @NotNull
         ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+            @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers,
             @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
             @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,

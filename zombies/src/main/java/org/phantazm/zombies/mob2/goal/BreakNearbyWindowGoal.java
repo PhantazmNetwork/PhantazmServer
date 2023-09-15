@@ -18,7 +18,7 @@ import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.map.ZombiesMap;
 import org.phantazm.zombies.mob2.Keys;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -36,7 +36,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
     @Override
     public @NotNull ProximaGoal create(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         ZombiesScene scene = injectionStore.get(Keys.SCENE);
-        ZombiesMap map = scene.getMap();
+        ZombiesMap map = scene.map();
         return new Goal(data, map.windowHandler().tracker(), map.mapObjects().roomTracker(), mob);
     }
 

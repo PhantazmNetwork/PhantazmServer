@@ -5,6 +5,7 @@ import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.handler.DoorHandler;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.map.shop.InteractionTypes;
@@ -23,7 +24,7 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
     private final PlayerRightClickListener rightClickListener;
 
     public PlayerInteractBlockListener(@NotNull Instance instance,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
         @NotNull DoorHandler doorHandler, @NotNull PlayerRightClickListener rightClickListener) {
         super(instance, zombiesPlayers);
         this.shopHandler = Objects.requireNonNull(shopHandler);

@@ -3,6 +3,7 @@ package org.phantazm.zombies.map.shop.display;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.element.core.annotation.document.Description;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.display.creator.PlayerDisplayCreator;
@@ -21,13 +22,13 @@ import java.util.UUID;
 @Cache(false)
 public class PlayerDisplay implements ShopDisplay {
     private final PlayerDisplayCreator playerDisplayCreator;
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
 
     private final Map<? super UUID, ShopDisplay> playerDisplays;
 
     @FactoryMethod
     public PlayerDisplay(@NotNull @Child("display_creator") PlayerDisplayCreator playerDisplayCreator,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+        @NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
         this.playerDisplayCreator = Objects.requireNonNull(playerDisplayCreator);
         this.playerMap = Objects.requireNonNull(playerMap);
         this.playerDisplays = new LinkedHashMap<>();

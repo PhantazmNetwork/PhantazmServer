@@ -21,8 +21,7 @@ import java.util.UUID;
 public class GhostCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.ghost");
 
-    public GhostCommand(@NotNull PlayerViewProvider viewProvider, @NotNull SceneTransferHelper transferHelper,
-        @NotNull RouterStore routerStore) {
+    public GhostCommand(@NotNull PlayerViewProvider viewProvider) {
         super("ghost", PERMISSION);
 
         ArgumentUUID sceneArgument = ArgumentType.UUID("scene");

@@ -194,8 +194,6 @@ public final class PhantazmServer {
             () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
         ConfigCodec tomlCodec = new TomlCodec();
 
-        RouterStore routerStore = new BasicRouterStore();
-        SceneTransferHelper transferHelper = new SceneTransferHelper(routerStore);
         PlayerViewProvider viewProvider =
             new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
@@ -259,23 +257,20 @@ public final class PhantazmServer {
 
             SongFeature.initialize(keyParser);
 
-            ZombiesFeature.initialize(contextManager, ProximaFeature.getSpawner(),
-                keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider,
-                PartyFeature.getPartyHolder().uuidToGuild(), transferHelper, SongFeature.songLoader(),
+            ZombiesFeature.initialize(contextManager, keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider,
+                PartyFeature.getPartyHolder().uuidToGuild(), SongFeature.songLoader(),
                 zombiesConfig, mappingProcessorSource, MobFeature.getMobCreators());
 
             LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
             ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),
                 serverConfig.serverInfo().whitelist(), HikariFeature.getDataSource(),
-                ExecutorFeature.getExecutor(), routerStore, shutdownConfig, zombiesConfig.gamereportConfig(),
-                viewProvider, transferHelper, RoleFeature.roleStore());
+                ExecutorFeature.getExecutor(), shutdownConfig, zombiesConfig.gamereportConfig(),
+                viewProvider, RoleFeature.roleStore());
 
             ValidationFeature.initialize(LoginValidatorFeature.loginValidator(),
                 ServerCommandFeature.permissionHandler());
 
-            CommandFeature.initialize(routerStore, viewProvider);
-
-            routerStore.putRouter(RouterKeys.ZOMBIES_SCENE_ROUTER, ZombiesFeature.zombiesSceneRouter());
+            CommandFeature.initialize(viewProvider);
         });
 
         CompletableFuture.allOf(independentFeatures, databaseFeatures, databaseDependents, game).join();

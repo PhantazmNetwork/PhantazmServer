@@ -15,7 +15,7 @@ import org.phantazm.mob2.validator.ValidatorComponent;
 import org.phantazm.zombies.mob2.Keys;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
 import java.util.Set;
@@ -49,7 +49,7 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
                 return false;
             }
 
-            ZombiesPlayer player = scene.getMap().mapObjects().module().playerMap().get(entity.getUuid());
+            ZombiesPlayer player = scene.map().mapObjects().module().playerMap().get(entity.getUuid());
             if (player == null) {
                 return false;
             }

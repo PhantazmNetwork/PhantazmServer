@@ -19,6 +19,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.ClientBlockHandler;
 import org.phantazm.core.ClientBlockHandlerSource;
@@ -47,7 +48,7 @@ import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 import org.phantazm.zombies.mob2.MobSpawnerSource;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.spawn.BasicSpawnDistributor;
 import org.phantazm.zombies.spawn.SpawnDistributor;
 import org.slf4j.Logger;
@@ -79,7 +80,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
     @Override
     public @NotNull MapObjects make(@NotNull Supplier<ZombiesScene> scene, @NotNull Instance instance,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+        @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
         @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier,
         @NotNull Wrapper<PowerupHandler> powerupHandler,
         @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
@@ -241,7 +242,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
 
     private List<Round> buildRounds(List<RoundInfo> roundInfoList, List<Spawnpoint> spawnpoints,
         DependencyProvider dependencyProvider, SpawnDistributor spawnDistributor,
-        Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
+        Map<PlayerView, ZombiesPlayer> playerMap) {
         List<Round> rounds = new ArrayList<>(roundInfoList.size());
         for (RoundInfo roundInfo : roundInfoList) {
             List<Action<Round>> startActions = contextManager.makeContext(roundInfo.startActions())
@@ -261,7 +262,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             }
 
             rounds.add(new Round(roundInfo, waves, startActions, endActions, spawnDistributor, spawnpoints,
-                zombiesPlayers.values()));
+                playerMap.values()));
         }
 
         return rounds;
@@ -277,7 +278,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final Flaggable flaggable;
         private final TransactionModifierSource transactionModifierSource;
         private final SlotDistributor slotDistributor;
-        private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+        private final Map<PlayerView, ZombiesPlayer> playerMap;
         private final Pos respawnPos;
         private final Supplier<? extends MapObjects> mapObjectsSupplier;
         private final Wrapper<PowerupHandler> powerupHandler;
@@ -291,7 +292,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private Module(KeyParser keyParser, Instance instance, Random random,
             Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
             TransactionModifierSource transactionModifierSource, SlotDistributor slotDistributor,
-            Map<? super UUID, ? extends ZombiesPlayer> playerMap, Pos respawnPos,
+            Map<PlayerView, ZombiesPlayer> playerMap, Pos respawnPos,
             Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
             Wrapper<WindowHandler> windowHandler, Wrapper<EventNode<Event>> eventNode,
             SongPlayer songPlayer, SongLoader songLoader, InteractorGroupHandler interactorGroupHandler,
@@ -351,7 +352,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         }
 
         @Override
-        public @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap() {
+        public @NotNull Map<PlayerView, ZombiesPlayer> playerMap() {
             return playerMap;
         }
 

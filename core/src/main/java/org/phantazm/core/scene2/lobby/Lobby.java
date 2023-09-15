@@ -99,12 +99,12 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
     }
 
     @Override
-    public int playerCount() {
-        return players.size();
+    public boolean preventsServerShutdown() {
+        return false;
     }
 
     @Override
-    public boolean preventsServerShutdown() {
+    public boolean isGame() {
         return false;
     }
 
@@ -172,10 +172,7 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
                 continue;
             }
 
-            leavingPlayer.getPlayer().ifPresent(player -> {
-                player.stateHolder().removeStage(CoreStages.LOBBY);
-            });
-
+            leavingPlayer.getPlayer().ifPresent(player -> player.stateHolder().removeStage(CoreStages.LOBBY));
             leftPlayers.add(leavingPlayer);
         }
 

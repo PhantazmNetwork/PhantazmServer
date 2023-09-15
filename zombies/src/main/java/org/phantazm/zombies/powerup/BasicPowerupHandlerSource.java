@@ -14,7 +14,7 @@ import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.powerup.predicate.ImmediateDeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.PickupPredicateComponent;
 import org.phantazm.zombies.powerup.visual.PowerupVisualComponent;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

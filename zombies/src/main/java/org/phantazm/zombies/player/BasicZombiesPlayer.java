@@ -11,7 +11,7 @@ import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.map.Flaggable;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
 

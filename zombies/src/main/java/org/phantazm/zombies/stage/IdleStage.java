@@ -122,6 +122,11 @@ public class IdleStage implements Stage {
     }
 
     @Override
+    public boolean canJoin() {
+        return true;
+    }
+
+    @Override
     public @NotNull Key key() {
         return StageKeys.IDLE_STAGE;
     }

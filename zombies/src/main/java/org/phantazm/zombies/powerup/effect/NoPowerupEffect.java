@@ -4,7 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.entity_effect.none")
 @Cache(false)

@@ -4,7 +4,7 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.mob2.MobSpawner;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Map;
 import java.util.function.Supplier;

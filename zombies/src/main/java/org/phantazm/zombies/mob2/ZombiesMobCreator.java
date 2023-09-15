@@ -24,7 +24,7 @@ import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.map.Window;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.List;
 import java.util.Map;
@@ -51,7 +51,7 @@ public class ZombiesMobCreator extends MobCreatorBase {
 
     protected void setPathfinding(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         ZombiesScene scene = injectionStore.get(Keys.SCENE);
-        BoundedTracker<Window> windowTracker = scene.getMap().mapObjects().windowTracker();
+        BoundedTracker<Window> windowTracker = scene.map().mapObjects().windowTracker();
 
         mob.pathfinding().setPenalty((x, y, z, h) -> {
             Optional<Window> windowOptional = windowTracker.atPoint(x, y + 1, z);

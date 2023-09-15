@@ -4,6 +4,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.Tickable;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.*;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.thread.ThreadDispatcher;
@@ -16,11 +17,13 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewImpl;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.scene2.event.SceneShutdownEvent;
 
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -663,6 +666,7 @@ public final class SceneManager {
                 if (players.isEmpty()) {
                     //we can shut down immediately if we have no players
                     scene.shutdown();
+                    EventDispatcher.call(new SceneShutdownEvent(scene));
                     return;
                 }
 
@@ -693,6 +697,7 @@ public final class SceneManager {
                 }
 
                 self.shutdown();
+                EventDispatcher.call(new SceneShutdownEvent(self));
             });
 
             return;
@@ -701,6 +706,7 @@ public final class SceneManager {
         shutdownCallback.apply(players).whenComplete((ignored1, ignored2) -> scene.getAcquirable().sync(self -> {
             self.postLeave(finalLeftPlayers);
             self.shutdown();
+            EventDispatcher.call(new SceneShutdownEvent(self));
         }));
     }
 
@@ -731,18 +737,31 @@ public final class SceneManager {
      *
      * @param sceneType the exact scene type to look up
      * @param <T>       the type of scene to search for
-     * @return a set of scenes of the specified type; or {@code null} if such a type has not been registered; the set
-     * may additionally be empty, in which case scenes of that type <i>may</i> exist in the future but none currently
-     * do
+     * @return a set of scenes of the specified type; empty if such a type has not been registered or if there are not
+     * any scenes of that type
      */
     @SuppressWarnings("unchecked")
-    public <T extends Scene> @UnmodifiableView Set<T> typed(@NotNull Class<T> sceneType) {
+    public <T extends Scene> @UnmodifiableView @NotNull Set<T> typed(@NotNull Class<T> sceneType) {
         SceneEntry entry = mappedScenes.get(sceneType);
         if (entry == null) {
-            return null;
+            return Set.of();
         }
 
         return (Set<T>) Collections.unmodifiableSet(entry.scenes);
+    }
+
+    /**
+     * Iterates every scene managed by this manager, calling {@link Consumer#accept(Object)} with every instance. None
+     * of the scenes will be acquired by the calling thread.
+     *
+     * @param consumer the consumer which accepts scene objects
+     */
+    public void forEachScene(@NotNull Consumer<? super @NotNull Scene> consumer) {
+        for (Class<? extends Scene> type : mappedScenes.keySet()) {
+            for (Scene scene : mappedScenes.get(type).scenes) {
+                consumer.accept(scene);
+            }
+        }
     }
 
     /**
@@ -833,7 +852,7 @@ public final class SceneManager {
         return null;
     }
 
-    private boolean lockPlayers(Collection<PlayerView> players, boolean force) {
+    private boolean lockPlayers(Collection<? extends PlayerView> players, boolean force) {
         if (players.isEmpty()) {
             return true;
         }
@@ -861,21 +880,35 @@ public final class SceneManager {
         return true;
     }
 
-    private void unlockPlayers(Iterable<PlayerView> players) {
+    private void unlockPlayers(Iterable<? extends PlayerView> players) {
         for (PlayerView playerView : players) {
             ((PlayerViewImpl) playerView).joinLock().unlock();
         }
     }
 
     /**
-     * Gets an Optional that may contain the current scene the player is in, or {@code null} if the player does not
-     * belong to an existing scene.
+     * Gets an Optional that may contain the current scene the player is in, which will be empty if the player does not
+     * belong to a scene.
      *
      * @param playerView the player to check
      * @return an Optional containing the current scene
      */
     public @NotNull Optional<Scene> currentScene(@NotNull PlayerView playerView) {
         return ((PlayerViewImpl) playerView).currentScene();
+    }
+
+    /**
+     * Works the same as {@link SceneManager#currentScene(PlayerView)}, but will additionally be empty if the player's
+     * current scene is not the same as the provided type. Otherwise, the returned optional will contain a scene that
+     * has been cast to the type.
+     *
+     * @param playerView the player to check
+     * @param type       the type of scene
+     * @param <T>        the type of scene to check for
+     * @return an Optional containing the current scene, cast to the target type
+     */
+    public @NotNull <T extends Scene> Optional<T> currentScene(@NotNull PlayerView playerView, @NotNull Class<T> type) {
+        return ((PlayerViewImpl) playerView).currentScene().filter(scene -> scene.getClass().equals(type)).map(type::cast);
     }
 
     /**
@@ -935,7 +968,7 @@ public final class SceneManager {
 
     private <T extends Scene> T createAndJoinNewScene(Join<T> join) {
         T scene = join.createNewScene(this);
-        Iterable<Runnable> actions = leaveOldScenes(join, scene);
+        Iterable<Runnable> actions = leaveOldScenes(join.playerViews(), scene);
 
         //not necessary to acquire, scene was just created but is not ticking yet
         join.join(scene);
@@ -956,7 +989,7 @@ public final class SceneManager {
                 return null;
             }
 
-            Iterable<Runnable> actions = leaveOldScenes(join, castScene);
+            Iterable<Runnable> actions = leaveOldScenes(join.playerViews(), castScene);
             join.join(castScene);
 
             for (Runnable runnable : actions) {
@@ -969,8 +1002,7 @@ public final class SceneManager {
         return castScene;
     }
 
-    private Iterable<Runnable> leaveOldScenes(Join<?> join, Scene newScene) {
-        Set<PlayerView> players = join.playerViews();
+    private Iterable<Runnable> leaveOldScenes(Set<? extends PlayerView> players, Scene newScene) {
         if (players.isEmpty()) {
             return List.of();
         }

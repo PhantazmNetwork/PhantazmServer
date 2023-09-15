@@ -8,7 +8,7 @@ import org.phantazm.mob2.BasicMobSpawner;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.zombies.Stages;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Map;
 import java.util.Objects;
@@ -36,7 +36,7 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
             mob.stateHolder().setStage(Stages.ZOMBIES_GAME);
         }
 
-        boolean mobPlayerCollisions = this.scene.get().getMapSettingsInfo().mobPlayerCollisions();
+        boolean mobPlayerCollisions = this.scene.get().mapSettingsInfo().mobPlayerCollisions();
         mob.setCollisionRule(mobPlayerCollisions ? TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS :
             TeamsPacket.CollisionRule.NEVER);
     }

@@ -1,5 +1,6 @@
 package org.phantazm.server.command.server;
 
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -12,26 +13,19 @@ import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.event.PlayerJoinLobbyEvent;
-import org.phantazm.core.game.scene.RouterStore;
-import org.phantazm.core.game.scene.SceneRouter;
-import org.phantazm.core.game.scene.event.SceneShutdownEvent;
-import org.phantazm.core.player.PlayerView;
-import org.phantazm.server.RouterKeys;
+import org.phantazm.core.scene2.event.SceneShutdownEvent;
+import org.phantazm.core.scene2.JoinToggleableScene;
+import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.server.config.server.ShutdownConfig;
-
-import java.util.Objects;
 
 public class OrderlyShutdownCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.orderly_shutdown");
 
-    private final RouterStore routerStore;
     private boolean initialized;
     private long shutdownStart;
 
-    public OrderlyShutdownCommand(@NotNull RouterStore routerStore, @NotNull ShutdownConfig shutdownConfig,
-        @NotNull EventNode<Event> globalNode) {
+    public OrderlyShutdownCommand(@NotNull ShutdownConfig shutdownConfig) {
         super("orderly_shutdown", PERMISSION);
-        this.routerStore = Objects.requireNonNull(routerStore);
 
         addSyntax((sender, context) -> {
             if (initialized) {
@@ -39,6 +33,7 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
                 return;
             }
 
+            EventNode<Event> globalNode = MinecraftServer.getGlobalEventHandler();
             globalNode.addListener(SceneShutdownEvent.class, this::onSceneShutdown);
             globalNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
                 event.getPlayer().kick(Component.text("Server is not joinable", NamedTextColor.RED));
@@ -50,11 +45,11 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
             initialized = true;
             shutdownStart = System.currentTimeMillis();
 
-            for (SceneRouter<?, ?> router : routerStore.getRouters()) {
-                if (router.isGame()) {
-                    router.setJoinable(false);
+            SceneManager.Global.instance().forEachScene(scene -> {
+                if (scene.isGame() && scene instanceof JoinToggleableScene joinToggleable) {
+                    joinToggleable.getAcquirable().sync(self -> ((JoinToggleableScene) self).setJoinable(false));
                 }
-            }
+            });
 
             MinecraftServer.getSchedulerManager().scheduleTask(() -> {
                 long elapsedMs = System.currentTimeMillis() - shutdownStart;
@@ -84,17 +79,17 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
     }
 
     private boolean noGamesActive() {
-        for (SceneRouter<?, ?> router : routerStore.getRouters()) {
-            if (!router.isGame()) {
-                continue;
-            }
+        Wrapper<Boolean> result = Wrapper.of(true);
 
-            if (router.hasActiveScenes()) {
-                return false;
-            }
-        }
+        SceneManager.Global.instance().forEachScene(scene -> {
+            scene.getAcquirable().sync(self -> {
+                if (self.preventsServerShutdown()) {
+                    result.set(false);
+                }
+            });
+        });
 
-        return true;
+        return result.get();
     }
 
     private void onSceneShutdown(@NotNull SceneShutdownEvent event) {

@@ -12,7 +12,7 @@ import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.action.PowerupActionBase;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.UUID;
 
@@ -29,7 +29,7 @@ public class PreventAmmoDrainAction implements PowerupActionComponent {
 
     @Override
     public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
-        return new Action(deactivationPredicate.apply(scene), scene.getSceneNode(), scene.instance().getUniqueId());
+        return new Action(deactivationPredicate.apply(scene), scene.sceneNode(), scene.instance().getUniqueId());
     }
 
     private static class Action extends PowerupActionBase {

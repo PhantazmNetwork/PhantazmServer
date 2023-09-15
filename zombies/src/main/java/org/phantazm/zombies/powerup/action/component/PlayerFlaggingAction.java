@@ -9,7 +9,7 @@ import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.action.PowerupActionBase;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.action.player_flagging")
 @Cache(false)

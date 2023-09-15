@@ -2,6 +2,7 @@ package org.phantazm.zombies.listener;
 
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Flags;
@@ -15,10 +16,10 @@ import java.util.UUID;
 
 public class EntityDamageByGunEventListener extends PhantazmMobEventListener<EntityDamageByGunEvent> {
     private final MapObjects mapObjects;
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
 
     public EntityDamageByGunEventListener(@NotNull Instance instance,
-        @NotNull MapObjects mapObjects, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+        @NotNull MapObjects mapObjects, @NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
         super(instance);
         this.mapObjects = Objects.requireNonNull(mapObjects);
         this.playerMap = Objects.requireNonNull(playerMap);
@@ -37,7 +38,7 @@ public class EntityDamageByGunEventListener extends PhantazmMobEventListener<Ent
     }
 
     private boolean playerHasInstakill(UUID uuid) {
-        ZombiesPlayer player = playerMap.get(uuid);
+        ZombiesPlayer player = playerMap.get(PlayerView.lookup(uuid));
         return player != null && player.module().flags().hasFlag(Flags.INSTA_KILL);
     }
 

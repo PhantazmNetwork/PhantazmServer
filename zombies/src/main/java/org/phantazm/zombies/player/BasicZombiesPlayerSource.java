@@ -64,7 +64,7 @@ import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 import org.phantazm.zombies.player.state.revive.NearbyReviverPredicate;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,7 +105,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
     @SuppressWarnings("unchecked")
     @Override
     public @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers,
         @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
         @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
         @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,

@@ -11,7 +11,10 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.scene2.SceneManager;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -22,28 +25,28 @@ public class FlagToggleCommand extends PermissionLockedCommand {
 
     private static final ArgumentString FLAG_ARGUMENT = ArgumentType.String("flag");
 
-    public FlagToggleCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper,
+    public FlagToggleCommand(@NotNull PlayerViewProvider viewProvider,
         @NotNull KeyParser keyParser) {
         super("toggle_flag", PERMISSION);
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
-            Player player = (Player) sender;
-            UUID uuid = player.getUuid();
+            PlayerView playerView = viewProvider.fromPlayer((Player) sender);
+            SceneManager.Global.instance().currentScene(playerView, ZombiesScene.class).ifPresent(scene -> {
+                scene.getAcquirable().sync(self -> {
+                    self.setLegit(false);
 
-            sceneMapper.apply(uuid).ifPresent(scene -> {
-                scene.setLegit(false);
+                    @Subst(Constants.NAMESPACE_OR_KEY)
+                    String flag = context.get(FLAG_ARGUMENT);
 
-                @Subst(Constants.NAMESPACE_OR_KEY)
-                String flag = context.get(FLAG_ARGUMENT);
+                    if (keyParser.isValidKey(flag)) {
+                        Key key = keyParser.parseKey(flag);
 
-                if (keyParser.isValidKey(flag)) {
-                    Key key = keyParser.parseKey(flag);
-
-                    boolean res = scene.getMap().mapObjects().module().flags().toggleFlag(key);
-                    sender.sendMessage("Toggled flag " + key + " to " + res);
-                } else {
-                    sender.sendMessage("Invalid key " + flag);
-                }
+                        boolean res = self.map().mapObjects().module().flags().toggleFlag(key);
+                        sender.sendMessage("Toggled flag " + key + " to " + res);
+                    } else {
+                        sender.sendMessage("Invalid key " + flag);
+                    }
+                });
             });
         }, FLAG_ARGUMENT);
 

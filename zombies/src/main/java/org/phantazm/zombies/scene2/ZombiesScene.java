@@ -6,12 +6,14 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.scene2.TablistLocalScene;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.MapSettingsInfo;
@@ -22,7 +24,6 @@ import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.stage.Stage;
-import org.phantazm.zombies.stage.StageKeys;
 import org.phantazm.zombies.stage.StageTransition;
 
 import java.util.*;
@@ -30,10 +31,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class ZombiesScene extends InstanceScene implements TablistLocalScene {
-    private final Map<PlayerView, ZombiesPlayer> playerMap;
-    private final Map<PlayerView, ZombiesPlayer> activePlayers;
+    private final Map<PlayerView, ZombiesPlayer> managedPlayers;
+    private final Map<PlayerView, ZombiesPlayer> managedPlayersView;
 
-    private final Set<PlayerView> viewSet;
+    private final Map<PlayerView, ZombiesPlayer> activePlayers;
+    private final Map<PlayerView, ZombiesPlayer> activePlayersView;
 
     private final ZombiesMap map;
     private final MapSettingsInfo mapSettingsInfo;
@@ -44,18 +46,20 @@ public class ZombiesScene extends InstanceScene implements TablistLocalScene {
 
     private boolean isLegit;
 
-    public ZombiesScene(@NotNull Instance instance, int timeout,
+    public ZombiesScene(@NotNull Instance instance,
         @NotNull ZombiesMap map,
         @NotNull MapSettingsInfo mapSettingsInfo,
+        @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
         @NotNull StageTransition stageTransition,
         @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
         @NotNull ZombiesDatabase database,
         @NotNull EventNode<Event> sceneNode) {
-        super(instance, timeout);
-        this.playerMap = new HashMap<>();
-        this.activePlayers = new HashMap<>();
+        super(instance, -1);
+        this.managedPlayers = Objects.requireNonNull(playerMap);
+        this.managedPlayersView = Collections.unmodifiableMap(playerMap);
 
-        this.viewSet = Collections.unmodifiableSet(activePlayers.keySet());
+        this.activePlayers = new HashMap<>();
+        this.activePlayersView = Collections.unmodifiableMap(this.activePlayers);
 
         this.map = Objects.requireNonNull(map);
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo);
@@ -69,12 +73,7 @@ public class ZombiesScene extends InstanceScene implements TablistLocalScene {
 
     @Override
     public @NotNull @UnmodifiableView Set<@NotNull PlayerView> playersView() {
-        return viewSet;
-    }
-
-    @Override
-    public int playerCount() {
-        return playerMap.size();
+        return activePlayersView.keySet();
     }
 
     @Override
@@ -91,14 +90,14 @@ public class ZombiesScene extends InstanceScene implements TablistLocalScene {
 
         int i = 0;
         for (PlayerView playerView : joiningPlayers) {
-            ZombiesPlayer zombiesPlayer = playerMap.get(playerView);
+            ZombiesPlayer zombiesPlayer = managedPlayers.get(playerView);
             if (zombiesPlayer == null) {
                 futures[i++] = handleNewPlayer(playerView, spawnPos);
                 continue;
             }
 
             if (!zombiesPlayer.hasQuit()) {
-                //player exists and hasn't quit, so do nothing
+                //player exists and hasn't quit, so don't do anything
                 futures[i++] = CompletableFuture.completedFuture(null);
                 continue;
             }
@@ -123,8 +122,13 @@ public class ZombiesScene extends InstanceScene implements TablistLocalScene {
         zombiesPlayer.start();
         zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, AlivePlayerStateContext.regular());
 
-        playerMap.put(newPlayer, zombiesPlayer);
+        managedPlayers.put(newPlayer, zombiesPlayer);
         activePlayers.put(newPlayer, zombiesPlayer);
+
+        Stage stage = currentStage();
+        if (stage != null) {
+            stage.onJoin(zombiesPlayer);
+        }
 
         return teleportOrSetInstance(player, spawnPos);
     }
@@ -142,6 +146,11 @@ public class ZombiesScene extends InstanceScene implements TablistLocalScene {
 
         activePlayers.put(zombiesPlayer.module().getPlayerView(), zombiesPlayer);
 
+        Stage stage = currentStage();
+        if (stage != null) {
+            stage.onJoin(zombiesPlayer);
+        }
+
         return teleportOrSetInstance(player, spawnPos);
     }
 
@@ -152,7 +161,7 @@ public class ZombiesScene extends InstanceScene implements TablistLocalScene {
         Set<PlayerView> leftPlayers = new HashSet<>();
         for (PlayerView player : players) {
             ZombiesPlayer leavingZombiesPlayer = (stage == null || !stage.hasPermanentPlayers()) ?
-                playerMap.remove(player) : playerMap.get(player);
+                managedPlayers.remove(player) : managedPlayers.get(player);
             activePlayers.remove(player);
 
             if (leavingZombiesPlayer == null) {
@@ -183,11 +192,7 @@ public class ZombiesScene extends InstanceScene implements TablistLocalScene {
         stageTransition.tick(time);
         map.tick(time);
 
-        for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-            if (zombiesPlayer.hasQuit()) {
-                continue;
-            }
-
+        for (ZombiesPlayer zombiesPlayer : activePlayers.values()) {
             zombiesPlayer.tick(time);
         }
     }
@@ -199,7 +204,7 @@ public class ZombiesScene extends InstanceScene implements TablistLocalScene {
             return;
         }
 
-        for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+        for (ZombiesPlayer zombiesPlayer : managedPlayers.values()) {
             database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
         }
     }
@@ -219,8 +224,12 @@ public class ZombiesScene extends InstanceScene implements TablistLocalScene {
 
     @Override
     protected boolean canTimeout() {
-        Stage stage = stageTransition.getCurrentStage();
-        return (stage == null || stage.key().equals(StageKeys.IDLE_STAGE)) && super.canTimeout();
+        //timeout is handled by StageTransition
+        return false;
+    }
+
+    public @NotNull @UnmodifiableView Map<PlayerView, ZombiesPlayer> managedPlayers() {
+        return managedPlayersView;
     }
 
     public @NotNull ZombiesMap map() {
@@ -247,11 +256,13 @@ public class ZombiesScene extends InstanceScene implements TablistLocalScene {
         return sceneNode;
     }
 
-    public Stage getCurrentStage() {
+    public @Nullable Stage currentStage() {
         return stageTransition.getCurrentStage();
     }
 
-    public boolean isComplete() {
-        return stageTransition.isComplete();
+    @SuppressWarnings("unchecked")
+    @Override
+    public @NotNull Acquirable<? extends ZombiesScene> getAcquirable() {
+        return (Acquirable<? extends ZombiesScene>) super.getAcquirable();
     }
 }

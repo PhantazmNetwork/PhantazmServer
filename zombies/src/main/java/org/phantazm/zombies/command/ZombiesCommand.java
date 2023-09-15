@@ -6,39 +6,34 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.timer.SchedulerManager;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.game.scene.SceneTransferHelper;
-import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.map.MapInfo;
-import org.phantazm.zombies.scene.ZombiesJoinHelper;
-import org.phantazm.zombies.scene.ZombiesSceneRouter;
+import org.phantazm.zombies.scene2.ZombiesJoiner;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
 public class ZombiesCommand extends Command {
-    public ZombiesCommand(@NotNull Map<? super UUID, ? extends Party> parties, @NotNull ZombiesSceneRouter router,
+    public ZombiesCommand(@NotNull ZombiesJoiner joiner, @NotNull Map<? super UUID, ? extends Party> parties,
         @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, @NotNull PlayerViewProvider viewProvider,
-        @NotNull SchedulerManager schedulerManager, @NotNull SceneTransferHelper transferHelper,
         long joinRatelimit) {
         super("zombies");
 
+        Objects.requireNonNull(joiner);
         Objects.requireNonNull(parties);
-        Objects.requireNonNull(router);
         Objects.requireNonNull(keyParser);
         Objects.requireNonNull(maps);
         Objects.requireNonNull(viewProvider);
 
-        ZombiesJoinHelper joinHelper = new ZombiesJoinHelper(viewProvider, router, schedulerManager, transferHelper);
-        addSubcommand(new ZombiesJoinCommand(parties, viewProvider, keyParser, maps, joinHelper,
-            joinRatelimit));
-        addSubcommand(new CoinsCommand(router::getCurrentScene));
-        addSubcommand(new RoundCommand(router::getCurrentScene, schedulerManager));
-        addSubcommand(new KillAllCommand(router::getCurrentScene));
-        addSubcommand(new GodmodeCommand(router::getCurrentScene));
-        addSubcommand(new AmmoRefillCommand(router::getCurrentScene));
-        addSubcommand(new FlagToggleCommand(router::getCurrentScene, keyParser));
-        addSubcommand(new ZombiesRejoinCommand(router, viewProvider, joinHelper));
+        addSubcommand(new ZombiesJoinCommand(joiner, parties, viewProvider, keyParser, maps, joinRatelimit));
+        addSubcommand(new CoinsCommand(viewProvider));
+        addSubcommand(new RoundCommand(viewProvider));
+        addSubcommand(new KillAllCommand(viewProvider));
+        addSubcommand(new GodmodeCommand(viewProvider));
+        addSubcommand(new AmmoRefillCommand(viewProvider));
+        addSubcommand(new FlagToggleCommand(viewProvider, keyParser));
+        addSubcommand(new ZombiesRejoinCommand(viewProvider, joiner));
     }
 }

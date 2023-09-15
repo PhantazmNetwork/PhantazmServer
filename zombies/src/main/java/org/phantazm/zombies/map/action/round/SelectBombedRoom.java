@@ -26,6 +26,7 @@ import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.tick.TickableTask;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.Attributes;
@@ -52,14 +53,14 @@ public class SelectBombedRoom implements Action<Round> {
     private final Random random;
     private final Instance instance;
     private final ParticleWrapper particle;
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
 
     private final List<TargetedAttribute> modifiers;
 
     @FactoryMethod
     public SelectBombedRoom(@NotNull Data data, @NotNull Supplier<? extends MapObjects> supplier,
         @NotNull Random random, @NotNull Instance instance, @NotNull @Child("particle") ParticleWrapper particle,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+        @NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
         this.data = data;
         this.supplier = supplier;
         this.random = random;

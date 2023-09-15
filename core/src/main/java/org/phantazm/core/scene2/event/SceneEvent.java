@@ -1,9 +1,9 @@
-package org.phantazm.core.game.scene.event;
+package org.phantazm.core.scene2.event;
 
 import net.minestom.server.event.Event;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.game.scene.Scene;
+import org.phantazm.core.scene2.Scene;
 
 public interface SceneEvent extends Event {
-    @NotNull Scene<?> getScene();
+    @NotNull Scene getScene();
 }

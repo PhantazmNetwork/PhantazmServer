@@ -9,7 +9,7 @@ import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.skill.SpawnCallback;
 import org.phantazm.mob2.skill.SpawnCallbackComponent;
 import org.phantazm.zombies.map.Round;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Optional;
 
@@ -29,7 +29,7 @@ public class AddToRoundCallback implements SpawnCallbackComponent {
     private record Internal(ZombiesScene scene) implements SpawnCallback {
         @Override
         public void accept(@NotNull Mob mob) {
-            Optional<Round> roundOptional = scene.getMap().roundHandler().currentRound();
+            Optional<Round> roundOptional = scene.map().roundHandler().currentRound();
             if (roundOptional.isEmpty()) {
                 return;
             }

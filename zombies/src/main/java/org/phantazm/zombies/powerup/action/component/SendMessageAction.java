@@ -14,7 +14,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.action.InstantAction;
 import org.phantazm.zombies.powerup.action.PowerupAction;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.action.send_message")
 @Cache(false)

@@ -7,6 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
@@ -24,11 +25,11 @@ import java.util.*;
 @Cache(false)
 public class GiveCoinsShotHandler implements ShotHandler {
     private final Data data;
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
     private final MapObjects mapObjects;
 
     @FactoryMethod
-    public GiveCoinsShotHandler(@NotNull Data data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+    public GiveCoinsShotHandler(@NotNull Data data, @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
         @NotNull MapObjects mapObjects) {
         this.data = Objects.requireNonNull(data);
         this.playerMap = Objects.requireNonNull(playerMap);
@@ -44,7 +45,7 @@ public class GiveCoinsShotHandler implements ShotHandler {
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
         @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         UUID attackerId = attacker.getUuid();
-        ZombiesPlayer player = playerMap.get(attackerId);
+        ZombiesPlayer player = playerMap.get(PlayerView.lookup(attackerId));
         if (player == null) {
             return;
         }

@@ -18,15 +18,18 @@ import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.scene2.Join;
+import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.zombies.map.MapInfo;
-import org.phantazm.zombies.scene.ZombiesJoinHelper;
+import org.phantazm.zombies.scene2.ZombiesJoiner;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
 
 public class ZombiesJoinCommand extends Command {
-    public ZombiesJoinCommand(@NotNull Map<? super UUID, ? extends Party> partyMap,
+    public ZombiesJoinCommand(@NotNull ZombiesJoiner zombiesJoiner, @NotNull Map<? super UUID, ? extends Party> partyMap,
         @NotNull PlayerViewProvider viewProvider, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
-        @NotNull ZombiesJoinHelper joinHelper, long ratelimit) {
+        long ratelimit) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.String("map-key");
@@ -36,7 +39,6 @@ public class ZombiesJoinCommand extends Command {
         Objects.requireNonNull(viewProvider);
         Objects.requireNonNull(keyParser);
         Objects.requireNonNull(maps);
-        Objects.requireNonNull(joinHelper);
 
         Object2LongMap<UUID> lastUsageTimes = new Object2LongOpenHashMap<>();
         mapKeyArgument.setSuggestionCallback((sender, context, suggestion) -> {
@@ -97,17 +99,22 @@ public class ZombiesJoinCommand extends Command {
             }
 
             Party party = partyMap.get(joiner.getUuid());
-            Collection<PlayerView> playerViews;
+            Set<PlayerView> playerViews;
             if (party == null) {
                 playerViews = Set.of(viewProvider.fromPlayer(joiner));
             } else {
-                playerViews = new ArrayList<>(party.getMemberManager().getMembers().size());
+                playerViews = new HashSet<>(party.getMemberManager().getMembers().size());
                 for (GuildMember guildMember : party.getMemberManager().getMembers().values()) {
                     playerViews.add(guildMember.getPlayerView());
                 }
             }
 
-            joinHelper.joinGame(joiner, playerViews, targetMap, context.get(restrictedArgument));
+            boolean restricted = context.get(restrictedArgument);
+            if (restricted) {
+                SceneManager.Global.instance().joinScene(zombiesJoiner.joinRestricted(playerViews, targetMap));
+            } else {
+                SceneManager.Global.instance().joinScene(zombiesJoiner.joinMap(playerViews, targetMap));
+            }
         }, mapKeyArgument, restrictedArgument);
     }
 

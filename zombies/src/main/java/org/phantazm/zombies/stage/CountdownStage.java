@@ -133,6 +133,11 @@ public class CountdownStage implements Stage {
     }
 
     @Override
+    public boolean canJoin() {
+        return true;
+    }
+
+    @Override
     public void start() {
         ticksRemaining.set(initialTicks);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {

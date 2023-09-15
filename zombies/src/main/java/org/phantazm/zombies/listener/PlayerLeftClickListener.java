@@ -8,6 +8,7 @@ import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.UUID;
 
 public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHandAnimationEvent> {
     public PlayerLeftClickListener(@NotNull Instance instance,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers) {
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers) {
         super(instance, zombiesPlayers);
     }
 

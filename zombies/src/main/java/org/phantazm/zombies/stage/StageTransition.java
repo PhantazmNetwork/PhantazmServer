@@ -2,6 +2,7 @@ package org.phantazm.zombies.stage;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.tick.Activable;
 
 public class StageTransition implements Activable {
@@ -64,7 +65,7 @@ public class StageTransition implements Activable {
         }
     }
 
-    public Stage getCurrentStage() {
+    public @Nullable Stage getCurrentStage() {
         return currentStage;
     }
 

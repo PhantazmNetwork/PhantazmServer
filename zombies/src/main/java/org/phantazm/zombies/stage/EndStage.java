@@ -26,7 +26,7 @@ import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,6 +122,11 @@ public class EndStage implements Stage {
 
     @Override
     public boolean canRejoin() {
+        return false;
+    }
+
+    @Override
+    public boolean canJoin() {
         return false;
     }
 

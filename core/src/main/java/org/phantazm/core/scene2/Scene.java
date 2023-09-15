@@ -84,7 +84,9 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      *
      * @return the number of players in the scene
      */
-    int playerCount();
+    default int playerCount() {
+        return playersView().size();
+    }
 
     /**
      * Returns whether this scene is joinable under any circumstances. When determining where to send player(s), this
@@ -98,6 +100,23 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      * @return true if this scene can be joined, false otherwise
      */
     boolean joinable();
+
+    /**
+     * If this scene represents a "game" of some kind. Generally speaking, scenes that are games:
+     *
+     * <ul>
+     *     <li>Will prevent the server from shutting down during an orderly shutdown</li>
+     *     <li>Can be "quit" using a command like {@code /quit} or similar</li>
+     * </ul>
+     * <p>
+     * Defaults to {@code true}. Must remain constant for the scene's usable lifetime, and by extension it is safe to
+     * call this method without acquiring the scene first.
+     *
+     * @return {@code true} if quittable, {@code false} otherwise
+     */
+    default boolean isGame() {
+        return true;
+    }
 
     /**
      * Whether this scene should prevent an orderly server shutdown. This should be {@code true} for ongoing games with

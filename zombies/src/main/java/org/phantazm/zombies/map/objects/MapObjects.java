@@ -11,6 +11,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.sound.SongLoader;
@@ -25,7 +26,7 @@ import org.phantazm.zombies.map.shop.InteractorGroupHandler;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -73,7 +74,7 @@ public interface MapObjects {
     interface Source {
         @NotNull
         MapObjects make(@NotNull Supplier<ZombiesScene> scene, @NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+            @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier,
             @NotNull Wrapper<PowerupHandler> powerupHandler,
             @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
@@ -104,7 +105,7 @@ public interface MapObjects {
         SlotDistributor slotDistributor();
 
         @NotNull
-        Map<? super UUID, ? extends ZombiesPlayer> playerMap();
+        Map<PlayerView, ZombiesPlayer> playerMap();
 
         @NotNull
         Collection<? extends ZombiesPlayer> playerCollection();
