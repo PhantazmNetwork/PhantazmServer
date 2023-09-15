@@ -45,7 +45,7 @@ public interface Join<T extends Scene> {
      *
      * @return the kind of scene we must join
      */
-    @NotNull Class<T> targetType();
+    @NotNull Class<? extends T> targetType();
 
     /**
      * Creates a new Scene which can be used to fulfill this request. If {@link Join#canCreateNewScene(SceneManager)}
@@ -85,7 +85,9 @@ public interface Join<T extends Scene> {
      * <p>
      * This method is expected to (either directly or indirectly) perform actions such as teleporting players to a new
      * instance, sending tablist packets, and other modifying operations, as appropriate. This method should <i>not</i>
-     * modify players that are not present in {@link Join#playerViews()}.
+     * modify players that are not present in {@link Join#playerViews()}. Also, this method should take care not to
+     * modify the viewability rules of the players, as they will be cleared by the SceneManager directly after this
+     * method returns. For scenes that need custom viewable rules, use {@link Join#postJoin(Scene)} to update them.
      * <p>
      * When sending players to scenes, it is important to note that (by default) there is no mechanism preventing a
      * player from participating in a join for a scene which they are already a part of. Join implementations must be
@@ -94,6 +96,21 @@ public interface Join<T extends Scene> {
      * @param scene the scene to join
      */
     void join(@NotNull T scene);
+
+    /**
+     * Called by the {@link SceneManager} after {@link Join#join(Scene)} is invoked. At this point, the player has
+     * "fully" joined the scene.
+     * <p>
+     * It is necessary to use this method to:
+     * <ul>
+     *     <li>Update the player's Viewable rules, as they are cleared by the SceneManager directly after joining</li>
+     * </ul>
+     *
+     * @param scene the scene to join
+     */
+    default void postJoin(@NotNull T scene) {
+
+    }
 
     /**
      * Determines if the existing scene {@code scene} can be used to fulfill this Join. If this method returns true

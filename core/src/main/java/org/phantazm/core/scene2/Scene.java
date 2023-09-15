@@ -199,7 +199,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      * disconnecting from the server (in which case there is no other scene).
      *
      * @param players the players who are leaving, some of which may not be online, or even present in the scene
-     * @return a set of players that were actually removed from the scene, some of which may not be online
+     * @return a modifiable set of players that were actually removed from the scene, some of which may not be online
      */
     @ApiStatus.Internal
     @NotNull Set<@NotNull PlayerView> leave(@NotNull Set<? extends @NotNull PlayerView> players);

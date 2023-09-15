@@ -66,11 +66,11 @@ public interface TablistLocalJoin<T extends Scene> extends Join<T> {
 
                 //both players are joining the scene
                 if (!firstInScene && !secondInScene) {
-                    visibility(first, second, Type.BOTH_JOINING).sendAdd(first, second);
+                    visibility(scene, first, second, Type.BOTH_JOINING).sendAdd(first, second);
                     continue;
                 }
 
-                visibility(first, second, !firstInScene ? Type.FIRST_JOINING : Type.SECOND_JOINING)
+                visibility(scene, first, second, !firstInScene ? Type.FIRST_JOINING : Type.SECOND_JOINING)
                     .sendAdd(first, second);
             }
 
@@ -84,12 +84,12 @@ public interface TablistLocalJoin<T extends Scene> extends Join<T> {
                     continue;
                 }
 
-                visibility(first, scenePlayer, Type.FIRST_JOINING).sendAdd(first, scenePlayer);
+                visibility(scene, first, scenePlayer, Type.FIRST_JOINING).sendAdd(first, scenePlayer);
             }
         }
     }
 
-    default @NotNull ViewResult visibility(@NotNull PlayerView first, @NotNull PlayerView second, @NotNull Type type) {
+    default @NotNull ViewResult visibility(@NotNull T scene, @NotNull PlayerView first, @NotNull PlayerView second, @NotNull Type type) {
         return ViewResult.BOTH_SEE;
     }
 }

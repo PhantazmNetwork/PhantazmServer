@@ -991,12 +991,23 @@ public final class SceneManager {
 
         //not necessary to acquire, scene was just created but is not ticking yet
         join.join(scene);
+        resetViewableRules(join.playerViews());
+        join.postJoin(scene);
 
         for (Runnable runnable : actions) {
             runnable.run();
         }
 
         return scene;
+    }
+
+    private void resetViewableRules(Iterable<PlayerView> playerViews) {
+        for (PlayerView playerView : playerViews) {
+            playerView.getPlayer().ifPresent(player -> {
+                player.updateViewableRule(null);
+                player.updateViewerRule(null);
+            });
+        }
     }
 
     private <T extends Scene> T tryJoinScene(Scene scene, Join<T> join) {
@@ -1010,6 +1021,8 @@ public final class SceneManager {
 
             Iterable<Runnable> actions = leaveOldScenes(join.playerViews(), castScene);
             join.join(castScene);
+            resetViewableRules(join.playerViews());
+            join.postJoin(castScene);
 
             for (Runnable runnable : actions) {
                 runnable.run();

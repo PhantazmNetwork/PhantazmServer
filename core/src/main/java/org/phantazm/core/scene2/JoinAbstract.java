@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public abstract class JoinAbstract<T extends Scene> implements Join<T> {
     private final Set<PlayerView> players;
-    private final Class<T> targetType;
+    private final Class<? extends T> targetType;
 
     /**
      * Creates a new instance of this class. {@code players} will be used to create an immutable set, which will remove
@@ -25,7 +25,7 @@ public abstract class JoinAbstract<T extends Scene> implements Join<T> {
      * @param players    the players participating in this join
      * @param targetType the type of scene to join
      */
-    public JoinAbstract(@NotNull Collection<@NotNull PlayerView> players, @NotNull Class<T> targetType) {
+    public JoinAbstract(@NotNull Collection<@NotNull PlayerView> players, @NotNull Class<? extends T> targetType) {
         this.players = Set.copyOf(players);
         this.targetType = Objects.requireNonNull(targetType);
     }
@@ -36,7 +36,7 @@ public abstract class JoinAbstract<T extends Scene> implements Join<T> {
     }
 
     @Override
-    public final @NotNull Class<T> targetType() {
+    public final @NotNull Class<? extends T> targetType() {
         return targetType;
     }
 }

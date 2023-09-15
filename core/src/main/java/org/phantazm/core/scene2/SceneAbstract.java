@@ -2,7 +2,12 @@ package org.phantazm.core.scene2;
 
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
+import org.phantazm.core.player.PlayerView;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -20,8 +25,12 @@ import java.util.UUID;
  */
 public abstract class SceneAbstract implements Scene, IdentifiableScene, JoinToggleableScene {
     private final Acquirable<Scene> acquirable = Acquirable.of(this);
+
     private final int timeout;
     private final UUID identity;
+
+    protected final Set<PlayerView> scenePlayers;
+    private final Set<PlayerView> scenePlayersView;
 
     private int timeoutTicks;
     private boolean shutdown;
@@ -37,6 +46,14 @@ public abstract class SceneAbstract implements Scene, IdentifiableScene, JoinTog
         this.timeout = timeout;
         this.identity = UUID.randomUUID();
         this.joinable = true;
+
+        this.scenePlayers = new HashSet<>();
+        this.scenePlayersView = Collections.unmodifiableSet(this.scenePlayers);
+    }
+
+    @Override
+    public @NotNull @UnmodifiableView Set<@NotNull PlayerView> playersView() {
+        return scenePlayersView;
     }
 
     @Override

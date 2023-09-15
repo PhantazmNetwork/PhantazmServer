@@ -30,11 +30,11 @@ public interface TablistLocalScene extends Scene {
                 }
 
                 Player existing = existingOptional.get();
-                if (!existing.isViewer(leftPlayer)) {
+                if (!existing.isViewer(leftPlayer) && sendRemovalPacketToExistingPlayer(leftPlayer, existing)) {
                     existing.sendPacket(removalPacket);
                 }
 
-                if (leftPlayer.isOnline() && !leftPlayer.isViewer(existing)) {
+                if (leftPlayer.isOnline() && !leftPlayer.isViewer(existing) && sendRemovalPacketToLeavingPlayer(leftPlayer, existing)) {
                     leftPlayer.sendPacket(existing.getRemovePlayerToList());
                 }
             }
@@ -69,5 +69,13 @@ public interface TablistLocalScene extends Scene {
                 otherLeftPlayer.sendPacket(removalPacket);
             }
         }
+    }
+
+    default boolean sendRemovalPacketToExistingPlayer(@NotNull Player leavingPlayer, @NotNull Player scenePlayer) {
+        return true;
+    }
+
+    default boolean sendRemovalPacketToLeavingPlayer(@NotNull Player leavingPlayer, @NotNull Player scenePlayer) {
+        return true;
     }
 }

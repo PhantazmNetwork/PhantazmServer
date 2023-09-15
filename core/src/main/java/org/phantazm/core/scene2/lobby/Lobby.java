@@ -21,8 +21,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.OpenBookPacket;
+import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.CoreStages;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
@@ -34,9 +34,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 public class Lobby extends InstanceScene implements TablistLocalScene {
-    private final Set<PlayerView> players;
-    private final Set<PlayerView> playersView;
-
     private final Pos spawnPoint;
     private final String lobbyJoinMessageFormat;
     private final NPCHandler npcHandler;
@@ -50,8 +47,6 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
         @NotNull Function<? super @NotNull Player, ? extends @NotNull CompletableFuture<?>> displayNameStyler,
         int timeout) {
         super(instance, timeout);
-        this.players = new HashSet<>();
-        this.playersView = Collections.unmodifiableSet(this.players);
 
         this.spawnPoint = Objects.requireNonNull(spawnPoint);
         this.lobbyJoinMessageFormat = Objects.requireNonNull(lobbyJoinMessageFormat);
@@ -94,11 +89,6 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
     }
 
     @Override
-    public @NotNull @UnmodifiableView Set<@NotNull PlayerView> playersView() {
-        return playersView;
-    }
-
-    @Override
     public boolean preventsServerShutdown() {
         return false;
     }
@@ -110,7 +100,7 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
 
     void postLogin(@NotNull Set<@NotNull PlayerView> players) {
         for (PlayerView playerView : players) {
-            if (!this.players.contains(playerView)) {
+            if (!this.scenePlayers.contains(playerView)) {
                 continue;
             }
 
@@ -120,7 +110,7 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
 
     void join(@NotNull Set<@NotNull PlayerView> players, boolean login) {
         for (PlayerView joiningPlayer : players) {
-            if (!this.players.add(joiningPlayer)) {
+            if (!this.scenePlayers.add(joiningPlayer)) {
                 continue;
             }
 
@@ -166,14 +156,9 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
 
     @Override
     public @NotNull Set<@NotNull PlayerView> leave(@NotNull Set<? extends @NotNull PlayerView> players) {
-        Set<PlayerView> leftPlayers = new HashSet<>(players.size());
-        for (PlayerView leavingPlayer : players) {
-            if (!this.players.remove(leavingPlayer)) {
-                continue;
-            }
-
-            leavingPlayer.getPlayer().ifPresent(player -> player.stateHolder().removeStage(CoreStages.LOBBY));
-            leftPlayers.add(leavingPlayer);
+        Set<PlayerView> leftPlayers = super.leave(players);
+        for (PlayerView left : leftPlayers) {
+            left.getPlayer().ifPresent(player -> player.stateHolder().removeStage(CoreStages.LOBBY));
         }
 
         return leftPlayers;
@@ -194,5 +179,11 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
 
         super.shutdown();
         this.npcHandler.end();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public @NotNull Acquirable<? extends Lobby> getAcquirable() {
+        return (Acquirable<? extends Lobby>) super.getAcquirable();
     }
 }
