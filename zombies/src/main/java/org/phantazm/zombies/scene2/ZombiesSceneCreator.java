@@ -178,7 +178,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         };
 
         ZombiesScene scene = new ZombiesScene(instance, map, settings, zombiesPlayers, stageTransition, playerCreator,
-            database, childNode);
+            database, childNode, tickTaskScheduler);
         sceneWrapper.set(scene);
         rootNode.addChild(childNode);
 

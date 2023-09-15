@@ -13,6 +13,7 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.MapSettingsInfo;
@@ -39,6 +40,7 @@ public class ZombiesScene extends InstanceScene {
     private final Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator;
     private final ZombiesDatabase database;
     private final EventNode<Event> sceneNode;
+    private final TickTaskScheduler tickTaskScheduler;
 
     private final Pos spawnPos;
 
@@ -51,7 +53,8 @@ public class ZombiesScene extends InstanceScene {
         @NotNull StageTransition stageTransition,
         @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
         @NotNull ZombiesDatabase database,
-        @NotNull EventNode<Event> sceneNode) {
+        @NotNull EventNode<Event> sceneNode,
+        @NotNull TickTaskScheduler tickTaskScheduler) {
         super(instance, -1);
         this.managedPlayers = Objects.requireNonNull(playerMap);
         this.managedPlayersView = Collections.unmodifiableMap(playerMap);
@@ -62,6 +65,7 @@ public class ZombiesScene extends InstanceScene {
         this.playerCreator = Objects.requireNonNull(playerCreator);
         this.database = Objects.requireNonNull(database);
         this.sceneNode = Objects.requireNonNull(sceneNode);
+        this.tickTaskScheduler = Objects.requireNonNull(tickTaskScheduler);
 
         Vec3I spawnBlock = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         this.spawnPos = new Pos(spawnBlock.x() + 0.5, spawnBlock.y(), spawnBlock.z() + 0.5, mapSettingsInfo.yaw(),
@@ -182,6 +186,7 @@ public class ZombiesScene extends InstanceScene {
 
         stageTransition.tick(time);
         map.tick(time);
+        tickTaskScheduler.tick(time);
 
         for (ZombiesPlayer zombiesPlayer : managedPlayers.values()) {
             if (zombiesPlayer.hasQuit()) {
@@ -214,6 +219,7 @@ public class ZombiesScene extends InstanceScene {
         super.shutdown();
 
         stageTransition.end();
+        tickTaskScheduler.end();
         map.mapObjects().module().powerupHandler().get().end();
     }
 

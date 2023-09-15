@@ -9,6 +9,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.validator.Validator;
 import org.phantazm.mob2.validator.ValidatorComponent;
@@ -49,7 +50,7 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
                 return false;
             }
 
-            ZombiesPlayer player = scene.map().mapObjects().module().playerMap().get(entity.getUuid());
+            ZombiesPlayer player = scene.map().mapObjects().module().playerMap().get(PlayerView.lookup(entity.getUuid()));
             if (player == null) {
                 return false;
             }

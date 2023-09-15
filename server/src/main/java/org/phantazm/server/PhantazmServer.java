@@ -34,6 +34,7 @@ import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.zombies.equipment.EquipmentData;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.snakeyaml.engine.v2.api.Dump;
@@ -202,8 +203,8 @@ public final class PhantazmServer {
             LocalizationFeature.initialize();
             PlayerFeature.initialize(playerConfig);
 
-            SceneManager.Global.init(ExecutorFeature.getExecutor(), Set.of(Lobby.class), viewProvider,
-                Runtime.getRuntime().availableProcessors());
+            SceneManager.Global.init(ExecutorFeature.getExecutor(), Set.of(Lobby.class, ZombiesScene.class),
+                viewProvider, Runtime.getRuntime().availableProcessors());
 
             SceneManager manager = SceneManager.Global.instance();
             manager.registerJoinFunction(CoreJoinKeys.MAIN_LOBBY, SceneManager.joinFunction(Lobby.class, players -> {
