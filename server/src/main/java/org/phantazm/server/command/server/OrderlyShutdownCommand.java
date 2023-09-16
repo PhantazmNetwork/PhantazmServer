@@ -67,17 +67,17 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
             MinecraftServer.getSchedulerManager().scheduleTask(() -> {
                 long elapsedMs = System.currentTimeMillis() - shutdownStart;
                 if (elapsedMs > shutdownConfig.forceShutdownTime()) {
-                    System.exit(0); //exit even if we've got games
+                    exit(); //exit even if we've got games
                     return;
                 }
 
                 if (noGamesActive()) {
-                    System.exit(0);
+                    exit();
                 }
             }, TaskSchedule.immediate(), TaskSchedule.tick(20));
 
             if (noGamesActive()) {
-                System.exit(0);
+                exit();
             }
         });
     }
@@ -98,7 +98,16 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
 
     private void onSceneShutdown(@NotNull SceneShutdownEvent event) {
         if (noGamesActive()) {
-            System.exit(0);
+            exit();
         }
+    }
+
+    private void exit() {
+        Thread thread = new Thread(() -> {
+            System.exit(0);
+        });
+
+        thread.setName("Shutdown-Trigger");
+        thread.start();
     }
 }
