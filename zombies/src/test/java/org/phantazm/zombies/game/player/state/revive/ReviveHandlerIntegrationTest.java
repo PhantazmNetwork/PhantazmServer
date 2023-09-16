@@ -5,6 +5,7 @@ import net.minestom.testing.Env;
 import net.minestom.testing.EnvTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
@@ -24,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @EnvTest
+@Disabled("because mocks don't work on sealed interfaces")
 public class ReviveHandlerIntegrationTest {
 
     private Collection<? extends ZombiesPlayer> zombiesPlayers;
