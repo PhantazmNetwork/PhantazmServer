@@ -13,6 +13,7 @@ import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.ReferenceUtils;
 import org.phantazm.mob2.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.phantazm.proxima.bindings.minestom.ProximaEntity;
@@ -78,8 +79,8 @@ public class Mob extends ProximaEntity {
         this.triggeredSkills = new EnumMap<>(Trigger.class);
         this.data = Objects.requireNonNull(data);
 
-        this.lastHitEntity = new WeakReference<>(null);
-        this.lastInteractingPlayer = new WeakReference<>(null);
+        this.lastHitEntity = ReferenceUtils.nullReference();
+        this.lastInteractingPlayer = ReferenceUtils.nullReference();
 
         String name = TEAM_PREFIX + Long.toString(MOB_COUNTER.getAndIncrement(), 16);
         if (name.length() > 16) {

@@ -7,6 +7,7 @@ import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.ReferenceUtils;
 import org.phantazm.core.scene2.Scene;
 
 import java.lang.ref.Reference;
@@ -33,9 +34,6 @@ import org.phantazm.core.scene2.SceneManager;
  */
 @ApiStatus.Internal
 public final class PlayerViewImpl implements PlayerView {
-    private static final Reference<Player> NULL_PLAYER_REFERENCE = new WeakReference<>(null);
-    private static final Reference<Scene> NULL_SCENE_REFERENCE = new WeakReference<>(null);
-
     private final IdentitySource identitySource;
     private final ConnectionManager connectionManager;
     private final UUID uuid;
@@ -64,8 +62,8 @@ public final class PlayerViewImpl implements PlayerView {
         this.identitySource = Objects.requireNonNull(identitySource);
         this.connectionManager = Objects.requireNonNull(connectionManager);
         this.uuid = Objects.requireNonNull(uuid);
-        this.playerReference = NULL_PLAYER_REFERENCE;
-        this.currentSceneReference = NULL_SCENE_REFERENCE;
+        this.playerReference = ReferenceUtils.nullReference();
+        this.currentSceneReference = ReferenceUtils.nullReference();
 
         this.hashCode = uuid.hashCode();
     }
@@ -84,7 +82,7 @@ public final class PlayerViewImpl implements PlayerView {
         this.uuid = player.getUuid();
         this.playerReference = new WeakReference<>(player);
         this.username = player.getUsername();
-        this.currentSceneReference = NULL_SCENE_REFERENCE;
+        this.currentSceneReference = ReferenceUtils.nullReference();
 
         this.hashCode = uuid.hashCode();
     }
@@ -157,7 +155,7 @@ public final class PlayerViewImpl implements PlayerView {
         player = connectionManager.getPlayer(uuid);
 
         if (player == null) {
-            playerReference = NULL_PLAYER_REFERENCE;
+            playerReference = ReferenceUtils.nullReference();
             return Optional.empty();
         } else {
             playerReference = new WeakReference<>(player);
@@ -171,7 +169,7 @@ public final class PlayerViewImpl implements PlayerView {
         if (player != null) {
             Entity entity = Entity.getEntity(uuid);
             if (!(entity instanceof Player resolvedPlayer) || player != resolvedPlayer) {
-                playerReference = NULL_PLAYER_REFERENCE;
+                playerReference = ReferenceUtils.nullReference();
                 return Optional.empty();
             }
 
@@ -256,6 +254,6 @@ public final class PlayerViewImpl implements PlayerView {
      */
     @ApiStatus.Internal
     public void updateCurrentScene(@Nullable Scene scene) {
-        this.currentSceneReference = scene == null ? NULL_SCENE_REFERENCE : new WeakReference<>(scene);
+        this.currentSceneReference = scene == null ? ReferenceUtils.nullReference() : new WeakReference<>(scene);
     }
 }
