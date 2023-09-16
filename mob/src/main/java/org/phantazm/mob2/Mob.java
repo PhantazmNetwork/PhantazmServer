@@ -82,7 +82,7 @@ public class Mob extends ProximaEntity {
         this.lastHitEntity = ReferenceUtils.nullReference();
         this.lastInteractingPlayer = ReferenceUtils.nullReference();
 
-        String name = TEAM_PREFIX + Long.toString(MOB_COUNTER.getAndIncrement(), 16);
+        String name = TEAM_PREFIX + Long.toString(MOB_COUNTER.getAndIncrement(), Character.MAX_RADIX);
         if (name.length() > 16) {
             name = name.substring(0, 16);
         }

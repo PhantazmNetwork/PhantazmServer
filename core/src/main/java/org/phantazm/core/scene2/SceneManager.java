@@ -377,7 +377,6 @@ public final class SceneManager {
         left.scene.getAcquirable().sync(self -> self.postLeave(left.left));
     }
 
-
     /**
      * A specialization of {@link Join} that is required for joining during <i>login</i>; that is, when the player first
      * signs onto the server. Join instances will need to implement this interface if they are to be used as the return
