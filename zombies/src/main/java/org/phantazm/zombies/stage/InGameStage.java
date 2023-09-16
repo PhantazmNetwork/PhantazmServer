@@ -92,6 +92,16 @@ public class InGameStage implements Stage {
     }
 
     @Override
+    public boolean canJoin() {
+        return false;
+    }
+
+    @Override
+    public boolean preventsShutdown() {
+        return true;
+    }
+
+    @Override
     public void start() {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             zombiesPlayer.module().getMeta().setInGame(true);

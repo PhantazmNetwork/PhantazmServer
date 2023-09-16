@@ -3,6 +3,7 @@ package org.phantazm.zombies.listener;
 import net.minestom.server.event.player.PlayerStartSneakingEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.handler.WindowHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -14,7 +15,7 @@ public class PlayerStartSneakingListener extends ZombiesPlayerEventListener<Play
     private final WindowHandler windowHandler;
 
     public PlayerStartSneakingListener(@NotNull Instance instance,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull WindowHandler windowHandler) {
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull WindowHandler windowHandler) {
         super(instance, zombiesPlayers);
         this.windowHandler = Objects.requireNonNull(windowHandler);
     }

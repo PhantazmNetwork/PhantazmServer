@@ -13,7 +13,7 @@ import java.util.*;
 @Model("zombies.sidebar.section.zombies_player")
 @Cache(false)
 public class ZombiesPlayerSection implements SidebarSection {
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
     private final PlayerView playerView;
     private final PlayerUpdaterCreator creator;
 
@@ -21,7 +21,7 @@ public class ZombiesPlayerSection implements SidebarSection {
     private SidebarLineUpdater lineUpdater;
 
     @FactoryMethod
-    public ZombiesPlayerSection(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+    public ZombiesPlayerSection(@NotNull Map<PlayerView, ZombiesPlayer> playerMap,
         @NotNull PlayerView playerView, @NotNull @Child("line_updater") PlayerUpdaterCreator creator) {
         this.playerMap = Objects.requireNonNull(playerMap);
         this.playerView = Objects.requireNonNull(playerView);
@@ -41,7 +41,7 @@ public class ZombiesPlayerSection implements SidebarSection {
     @Override
     public @NotNull List<Optional<Component>> update(long time) {
         if (player == null) {
-            player = playerMap.get(playerView.getUUID());
+            player = playerMap.get(playerView);
             if (player == null) {
                 return List.of();
             }

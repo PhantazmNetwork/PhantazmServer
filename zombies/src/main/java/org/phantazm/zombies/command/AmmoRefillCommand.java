@@ -8,9 +8,13 @@ import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.inventory.InventoryAccess;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
+import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.player.PlayerViewImpl;
+import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -19,32 +23,35 @@ import java.util.function.Function;
 public class AmmoRefillCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.ammo_refill");
 
-    public AmmoRefillCommand(@NotNull Function<? super UUID, Optional<ZombiesScene>> sceneMapper) {
+    public AmmoRefillCommand(@NotNull PlayerViewProvider viewProvider) {
         super("ammo_refill", PERMISSION);
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
-            Player player = (Player) sender;
+            PlayerView playerView = viewProvider.fromPlayer((Player) sender);
+            SceneManager.Global.instance().currentScene(playerView, ZombiesScene.class).ifPresent(scene -> {
+                scene.getAcquirable().sync(self -> {
+                    self.setLegit(false);
 
-            UUID uuid = player.getUuid();
-            sceneMapper.apply(uuid).ifPresent(scene -> {
-                scene.setLegit(false);
+                    ZombiesPlayer zombiesPlayer = scene.managedPlayers().get(playerView);
+                    Optional<InventoryAccess> acccessOptional =
+                        zombiesPlayer.module().getEquipmentHandler().accessRegistry().getCurrentAccess();
+                    if (acccessOptional.isEmpty()) {
+                        return;
+                    }
 
-                ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(uuid);
-                Optional<InventoryAccess> acccessOptional =
-                    zombiesPlayer.module().getEquipmentHandler().accessRegistry().getCurrentAccess();
-
-                if (acccessOptional.isPresent()) {
                     InventoryProfile profile = acccessOptional.get().profile();
 
                     for (int i = 0; i < profile.getSlotCount(); i++) {
-                        if (profile.hasInventoryObject(i)) {
-                            InventoryObject object = profile.getInventoryObject(i);
-                            if (object instanceof Gun gun) {
-                                gun.refill();
-                            }
+                        if (!profile.hasInventoryObject(i)) {
+                            continue;
+                        }
+
+                        InventoryObject object = profile.getInventoryObject(i);
+                        if (object instanceof Gun gun) {
+                            gun.refill();
                         }
                     }
-                }
+                });
             });
         });
     }

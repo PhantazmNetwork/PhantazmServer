@@ -2,7 +2,7 @@ package org.phantazm.zombies.stage;
 
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 public interface Stage extends Activable, Keyed {
@@ -21,4 +21,7 @@ public interface Stage extends Activable, Keyed {
 
     boolean canRejoin();
 
+    boolean canJoin();
+
+    boolean preventsShutdown();
 }

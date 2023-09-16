@@ -2,8 +2,8 @@ package org.phantazm.core.guild.invite;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.GuildMemberManager;
 import org.phantazm.core.player.PlayerView;
@@ -28,8 +28,8 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
     private long ticks = 0;
 
     public InvitationManager(@NotNull GuildMemberManager<TMember> memberManager,
-            @NotNull Function<? super PlayerView, ? extends TMember> playerCreator,
-            @NotNull InvitationNotification<TMember> notification, long invitationDuration) {
+        @NotNull Function<? super PlayerView, ? extends TMember> playerCreator,
+        @NotNull InvitationNotification<TMember> notification, long invitationDuration) {
         this.memberManager = Objects.requireNonNull(memberManager, "memberManager");
         this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
         this.notification = Objects.requireNonNull(notification, "notification");
@@ -94,7 +94,9 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
         notification.notifyJoin(newMember);
     }
 
-    private record Invitation(@NotNull PlayerView inviter, @NotNull PlayerView invitee, long expirationTime) {
+    private record Invitation(@NotNull PlayerView inviter,
+        @NotNull PlayerView invitee,
+        long expirationTime) {
 
     }
 

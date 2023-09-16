@@ -3,7 +3,7 @@ package org.phantazm.core.inventory;
 import net.minestom.server.inventory.AbstractInventory;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 
 /**
  * Represents an item in an {@link AbstractInventory}.
@@ -14,7 +14,8 @@ public interface InventoryObject extends Activable {
      *
      * @return The currently associated {@link ItemStack}
      */
-    @NotNull ItemStack getItemStack();
+    @NotNull
+    ItemStack getItemStack();
 
     /**
      * Checks whether this inventory object should be redrawn.

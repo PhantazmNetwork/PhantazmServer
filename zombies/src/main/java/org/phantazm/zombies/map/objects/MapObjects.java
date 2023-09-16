@@ -11,7 +11,8 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.sound.SongLoader;
@@ -26,39 +27,55 @@ import org.phantazm.zombies.map.shop.InteractorGroupHandler;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
 import java.util.function.Supplier;
 
 public interface MapObjects {
-    @Unmodifiable @NotNull List<Spawnpoint> spawnpoints();
+    @Unmodifiable
+    @NotNull
+    List<Spawnpoint> spawnpoints();
 
-    @Unmodifiable @NotNull List<Round> rounds();
+    @Unmodifiable
+    @NotNull
+    List<Round> rounds();
 
-    @NotNull DependencyProvider mapDependencyProvider();
+    @NotNull
+    DependencyProvider mapDependencyProvider();
 
-    @NotNull Module module();
+    @NotNull
+    Module module();
 
-    @NotNull BoundedTracker<Room> roomTracker();
+    @NotNull
+    BoundedTracker<Room> roomTracker();
 
-    @NotNull BoundedTracker<Window> windowTracker();
+    @NotNull
+    BoundedTracker<Window> windowTracker();
 
-    @NotNull BoundedTracker<Shop> shopTracker();
+    @NotNull
+    BoundedTracker<Shop> shopTracker();
 
-    @NotNull BoundedTracker<Door> doorTracker();
+    @NotNull
+    BoundedTracker<Door> doorTracker();
 
-    @NotNull Map<? super Key, ? extends Room> roomMap();
+    @NotNull
+    Map<? super Key, ? extends Room> roomMap();
 
-    @NotNull MobSpawner mobSpawner();
+    @NotNull
+    MobSpawner mobSpawner();
 
-    @NotNull Point mapOrigin();
+    @NotNull
+    Point mapOrigin();
 
-    @NotNull TickTaskScheduler taskScheduler();
+    @NotNull
+    TickTaskScheduler taskScheduler();
 
-    @NotNull interface Source {
-        @NotNull MapObjects make(@NotNull Supplier<ZombiesScene> scene, @NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+    @NotNull
+    interface Source {
+        @NotNull
+        MapObjects make(@NotNull Supplier<ZombiesScene> scene, @NotNull Instance instance,
+            @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
             @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier,
             @NotNull Wrapper<PowerupHandler> powerupHandler,
             @NotNull Wrapper<WindowHandler> windowHandler, @NotNull Wrapper<EventNode<Event>> eventNode,
@@ -67,40 +84,58 @@ public interface MapObjects {
     }
 
     interface Module {
-        @NotNull KeyParser keyParser();
+        @NotNull
+        KeyParser keyParser();
 
-        @NotNull Instance instance();
+        @NotNull
+        Instance instance();
 
-        @NotNull Random random();
+        @NotNull
+        Random random();
 
-        @NotNull Supplier<? extends RoundHandler> roundHandlerSupplier();
+        @NotNull
+        Supplier<? extends RoundHandler> roundHandlerSupplier();
 
-        @NotNull Flaggable flags();
+        @NotNull
+        Flaggable flags();
 
-        @NotNull TransactionModifierSource modifierSource();
+        @NotNull
+        TransactionModifierSource modifierSource();
 
-        @NotNull SlotDistributor slotDistributor();
+        @NotNull
+        SlotDistributor slotDistributor();
 
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap();
+        @NotNull
+        Map<PlayerView, ZombiesPlayer> playerMap();
 
-        @NotNull Collection<? extends ZombiesPlayer> playerCollection();
+        @NotNull
+        Collection<? extends ZombiesPlayer> playerCollection();
 
-        @NotNull Pos respawnPos();
+        @NotNull
+        Pos respawnPos();
 
-        @NotNull Supplier<? extends MapObjects> mapObjectsSupplier();
+        @NotNull
+        Supplier<? extends MapObjects> mapObjectsSupplier();
 
-        @NotNull Supplier<? extends PowerupHandler> powerupHandler();
+        @NotNull
+        Supplier<? extends PowerupHandler> powerupHandler();
 
-        @NotNull Supplier<? extends WindowHandler> windowHandler();
+        @NotNull
+        Supplier<? extends WindowHandler> windowHandler();
 
-        @NotNull Supplier<? extends EventNode<Event>> eventNode();
+        @NotNull
+        Supplier<? extends EventNode<Event>> eventNode();
 
-        @NotNull SongLoader songLoader();
+        @NotNull
+        SongLoader songLoader();
 
-        @NotNull SongPlayer songPlayer();
+        @NotNull
+        SongPlayer songPlayer();
 
-        @NotNull InteractorGroupHandler interactorGroupHandler();
+        @NotNull
+        InteractorGroupHandler interactorGroupHandler();
 
-        @NotNull Wrapper<Long> ticksSinceStart();
+        @NotNull
+        Wrapper<Long> ticksSinceStart();
     }
 }

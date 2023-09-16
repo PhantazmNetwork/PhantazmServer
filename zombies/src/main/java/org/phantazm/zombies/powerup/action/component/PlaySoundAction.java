@@ -11,7 +11,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.action.InstantAction;
 import org.phantazm.zombies.powerup.action.PowerupAction;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Random;
 
@@ -27,7 +27,7 @@ public class PlaySoundAction implements PowerupActionComponent {
 
     @Override
     public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
-        return new Action(data, scene.instance(), scene.getMap().mapObjects().module().random());
+        return new Action(data, scene.instance(), scene.map().mapObjects().module().random());
     }
 
     @DataObject

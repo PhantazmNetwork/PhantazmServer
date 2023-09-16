@@ -1,13 +1,13 @@
 package org.phantazm.zombies.map.shop;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.Tickable;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.Tickable;
 import org.phantazm.core.tracker.BoundedBase;
 import org.phantazm.commons.flag.BasicFlaggable;
 import org.phantazm.commons.flag.Flaggable;

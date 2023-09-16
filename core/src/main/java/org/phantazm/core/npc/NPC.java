@@ -1,10 +1,10 @@
 package org.phantazm.core.npc;
 
+import net.minestom.server.Tickable;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.Tickable;
 
 import java.util.UUID;
 

@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -18,11 +19,11 @@ import java.util.UUID;
 @Model("zombies.map.round.action.revive_players")
 @Cache(false)
 public class RevivePlayersAction implements Action<Round> {
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
     private final Pos respawnPos;
 
     @FactoryMethod
-    public RevivePlayersAction(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap, @NotNull Pos respawnPos) {
+    public RevivePlayersAction(@NotNull Map<PlayerView, ZombiesPlayer> playerMap, @NotNull Pos respawnPos) {
         this.playerMap = Objects.requireNonNull(playerMap);
         this.respawnPos = Objects.requireNonNull(respawnPos);
     }

@@ -9,7 +9,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.BelowNameTag;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryObject;
@@ -24,7 +24,7 @@ import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.powerup.Powerup;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.stage.Stage;
 
 import java.util.Map;
@@ -36,11 +36,13 @@ import java.util.function.Function;
 
 public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
-    @NotNull ZombiesPlayerModule module();
+    @NotNull
+    ZombiesPlayerModule module();
 
     long getReviveTime();
 
-    @NotNull ZombiesScene getScene();
+    @NotNull
+    ZombiesScene getScene();
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
         Optional<Player> playerOptional = module().getPlayerView().getPlayer();
@@ -156,7 +158,7 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     }
 
     default boolean inStage(@NotNull Key stageKey) {
-        Stage currentStage = getScene().getCurrentStage();
+        Stage currentStage = getScene().currentStage();
         if (currentStage == null) {
             return false;
         }
@@ -175,8 +177,9 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     interface Source {
 
-        @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
+        @NotNull
+        ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
+            @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers,
             @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
             @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
             @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,

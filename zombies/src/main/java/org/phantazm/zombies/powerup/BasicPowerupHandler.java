@@ -9,6 +9,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.EntityTracker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.action.PowerupAction;
@@ -17,7 +18,7 @@ import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.powerup.predicate.PickupPredicateComponent;
 import org.phantazm.zombies.powerup.visual.PowerupVisual;
 import org.phantazm.zombies.powerup.visual.PowerupVisualComponent;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -74,7 +75,7 @@ public class BasicPowerupHandler implements PowerupHandler {
     private void maybePickup(Powerup powerup, long time) {
         ZombiesScene scene = this.scene.get();
 
-        double powerupPickupRadius = scene.getMapSettingsInfo().powerupPickupRadius();
+        double powerupPickupRadius = scene.mapSettingsInfo().powerupPickupRadius();
         scene.instance().getEntityTracker()
             .nearbyEntitiesUntil(powerup.spawnLocation(), powerupPickupRadius + 2, EntityTracker.Target.PLAYERS,
                 player -> {
@@ -87,7 +88,7 @@ public class BasicPowerupHandler implements PowerupHandler {
                         return false;
                     }
 
-                    ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(player.getUuid());
+                    ZombiesPlayer zombiesPlayer = scene.managedPlayers().get(PlayerView.lookup(player.getUuid()));
                     if (zombiesPlayer != null && zombiesPlayer.canPickupPowerup(powerup)) {
                         powerup.activate(zombiesPlayer, time);
                         return true;

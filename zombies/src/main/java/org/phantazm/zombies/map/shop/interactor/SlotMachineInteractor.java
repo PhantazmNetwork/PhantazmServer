@@ -281,7 +281,7 @@ public class SlotMachineInteractor implements ShopInteractor {
 
     private TagResolver[] getTagsForFrame(@Nullable SlotMachineFrame frame, TagResolver... additionalTags) {
         TagResolver rollingPlayerTag = Placeholder.component("rolling_player",
-            rollInteraction.player().module().getPlayerView().getDisplayNameIfPresent());
+            rollInteraction.player().module().getPlayerView().getDisplayNameIfCached().orElse(Component.empty()));
 
         Component displayName = frame != null ? getItemName(frame.getVisual()) : Component.empty();
         TagResolver itemName = Placeholder.component("item_name", displayName);

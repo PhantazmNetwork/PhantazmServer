@@ -19,12 +19,12 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
+import org.phantazm.core.player.PlayerView;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @Model("zombies.powerup.action.boss_bar_timer")
 @Cache(false)
@@ -40,14 +40,14 @@ public class BossBarTimerAction implements PowerupActionComponent {
 
     @Override
     public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
-        return new Action(data, scene.instance(), scene.getZombiesPlayers(), tickFormatter);
+        return new Action(data, scene.instance(), scene.managedPlayers(), tickFormatter);
     }
 
     private static class Action implements PowerupAction {
         private final Data data;
         private final Instance instance;
         private final DeactivationPredicate predicate;
-        private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+        private final Map<PlayerView, ZombiesPlayer> playerMap;
         private final TickFormatter tickFormatter;
 
         private final List<CancellableState<Entity>> states;
@@ -55,7 +55,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
         private long startTicks = -1;
         private BossBar bossBar;
 
-        private Action(Data data, Instance instance, Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+        private Action(Data data, Instance instance, Map<PlayerView, ZombiesPlayer> playerMap,
             TickFormatter tickFormatter) {
             this.data = data;
             this.instance = instance;

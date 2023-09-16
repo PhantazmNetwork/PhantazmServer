@@ -2,9 +2,8 @@ package org.phantazm.core.guild.party;
 
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.audience.Audience;
+import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
-import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.guild.Guild;
 import org.phantazm.core.guild.GuildMemberManager;
 import org.phantazm.core.guild.invite.InvitationManager;

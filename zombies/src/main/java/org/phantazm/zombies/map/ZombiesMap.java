@@ -1,7 +1,7 @@
 package org.phantazm.zombies.map;
 
+import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 import org.phantazm.core.sound.SongPlayer;
 import org.phantazm.zombies.map.handler.DoorHandler;
 import org.phantazm.zombies.map.handler.RoundHandler;

@@ -1,13 +1,11 @@
 package org.phantazm.core.npc;
 
+import net.minestom.server.Tickable;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
-import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,18 +13,13 @@ import java.util.Objects;
 public class NPCHandler implements Tickable {
     private final List<NPC> npcs;
     private final Instance instance;
-    private final EventNode<InstanceEvent> instanceNode;
 
-    public NPCHandler(@NotNull List<NPC> npcs, @NotNull Instance instance,
-        @NotNull EventNode<InstanceEvent> instanceNode) {
+    public NPCHandler(@NotNull List<NPC> npcs, @NotNull Instance instance) {
         this.npcs = List.copyOf(npcs);
         this.instance = Objects.requireNonNull(instance);
-        this.instanceNode = Objects.requireNonNull(instanceNode);
-
-        instanceNode.addListener(PlayerEntityInteractEvent.class, this::entityInteractEvent);
     }
 
-    private void entityInteractEvent(PlayerEntityInteractEvent event) {
+    public void handleInteract(@NotNull PlayerEntityInteractEvent event) {
         if (event.getHand() != Player.Hand.MAIN) {
             return;
         }
@@ -60,9 +53,5 @@ public class NPCHandler implements Tickable {
         for (NPC npc : npcs) {
             npc.tick(time);
         }
-    }
-
-    public @NotNull EventNode<InstanceEvent> instanceNode() {
-        return instanceNode;
     }
 }

@@ -4,8 +4,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.game.scene.RouterStore;
-import org.phantazm.core.game.scene.SceneTransferHelper;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.command.server.*;
@@ -28,9 +26,9 @@ public final class ServerCommandFeature {
     }
 
     static void initialize(@NotNull LoginValidator validator, boolean whitelist, @NotNull DataSource dataSource,
-        @NotNull Executor executor, @NotNull RouterStore store, @NotNull ShutdownConfig shutdownConfig,
+        @NotNull Executor executor, @NotNull ShutdownConfig shutdownConfig,
         @NotNull ZombiesGamereportConfig zombiesGamereportConfig, @NotNull PlayerViewProvider playerViewProvider,
-        @NotNull SceneTransferHelper sceneTransferHelper, @NotNull RoleStore roleStore) {
+        @NotNull RoleStore roleStore) {
         ServerCommandFeature.permissionHandler = new DatabasePermissionHandler(dataSource, executor, roleStore);
 
         CommandManager manager = MinecraftServer.getCommandManager();
@@ -41,10 +39,10 @@ public final class ServerCommandFeature {
         manager.register(new PardonCommand(IdentitySource.MOJANG, validator));
         manager.register(new WhitelistCommand(IdentitySource.MOJANG, validator, whitelist));
         manager.register(new PermissionCommand(permissionHandler, IdentitySource.MOJANG));
-        manager.register(new OrderlyShutdownCommand(store, shutdownConfig, MinecraftServer.getGlobalEventHandler()));
+        manager.register(new OrderlyShutdownCommand(shutdownConfig));
         manager.register(new DebugCommand());
-        manager.register(new GamereportCommand(store, zombiesGamereportConfig));
-        manager.register(new GhostCommand(playerViewProvider, sceneTransferHelper, store));
+        manager.register(new GamereportCommand(zombiesGamereportConfig));
+        manager.register(new GhostCommand(playerViewProvider));
         manager.register(new FlyCommand());
         manager.register(new GamemodeCommand());
         manager.register(new AddRoleCommand(IdentitySource.MOJANG, roleStore, permissionHandler));

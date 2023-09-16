@@ -6,6 +6,7 @@ import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.inventory.InventoryAccess;
 import org.phantazm.core.inventory.InventoryObject;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -17,10 +18,10 @@ import java.util.UUID;
 @Model("zombies.map.shop.interactor.refill_all_ammo")
 @Cache(false)
 public class RefillAllAmmoInteractor implements ShopInteractor {
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
 
     @FactoryMethod
-    public RefillAllAmmoInteractor(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+    public RefillAllAmmoInteractor(@NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
         this.playerMap = playerMap;
     }
 

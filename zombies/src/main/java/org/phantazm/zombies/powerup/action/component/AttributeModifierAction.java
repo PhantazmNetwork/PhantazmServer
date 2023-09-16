@@ -16,7 +16,8 @@ import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.action.PowerupActionBase;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
+import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
 
@@ -35,7 +36,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
 
     @Override
     public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
-        return new Action(data, deactivationPredicate.apply(scene), scene.getZombiesPlayers());
+        return new Action(data, deactivationPredicate.apply(scene), scene.managedPlayers());
     }
 
     @DataObject
@@ -53,12 +54,12 @@ public class AttributeModifierAction implements PowerupActionComponent {
         private final Attribute attribute;
         private final UUID attributeUID;
         private final String attributeName;
-        private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+        private final Map<PlayerView, ZombiesPlayer> playerMap;
 
         private final List<CancellableState<Entity>> states;
 
         private Action(Data data, DeactivationPredicate deactivationPredicate,
-            Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+            Map<PlayerView, ZombiesPlayer> playerMap) {
             super(deactivationPredicate);
             this.data = data;
             this.attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);

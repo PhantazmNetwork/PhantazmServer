@@ -14,41 +14,38 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.BasicClientBlockHandlerSource;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
-import org.phantazm.core.game.scene.SceneTransferHelper;
-import org.phantazm.core.game.scene.fallback.SceneFallback;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
-import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.stats.zombies.SQLZombiesDatabase;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
+import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.mob2.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob2.MobSpawnerSource;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
-import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.BasicPowerupHandlerSource;
 import org.phantazm.zombies.powerup.FileSystemPowerupDataLoader;
 import org.phantazm.zombies.powerup.PowerupData;
 import org.phantazm.zombies.powerup.PowerupHandler;
-import org.phantazm.zombies.scene.ZombiesScene;
-import org.phantazm.zombies.scene.ZombiesSceneProvider;
-import org.phantazm.zombies.scene.ZombiesSceneRouter;
+import org.phantazm.zombies.scene2.ZombiesJoiner;
+import org.phantazm.zombies.scene2.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesSceneCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,14 +67,13 @@ public final class ZombiesFeature {
     private static PowerupHandler.Source powerupHandlerSource;
 
     private static MobSpawnerSource mobSpawnerSource;
-    private static ZombiesSceneRouter sceneRouter;
     private static ZombiesDatabase database;
 
-    static void initialize(@NotNull ContextManager contextManager, @NotNull Spawner spawner,
+    static void initialize(@NotNull ContextManager contextManager,
         @NotNull KeyParser keyParser,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
-        @NotNull PlayerViewProvider viewProvider, @NotNull SceneFallback sceneFallback,
-        @NotNull Map<? super UUID, ? extends Party> parties, @NotNull SceneTransferHelper sceneTransferHelper,
+        @NotNull PlayerViewProvider viewProvider,
+        @NotNull Map<? super UUID, ? extends Party> parties,
         @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
         @NotNull MappingProcessorSource mappingProcessorSource, @NotNull Map<Key, MobCreator> mobCreatorMap) {
         Attributes.registerAll();
@@ -112,36 +108,32 @@ public final class ZombiesFeature {
 
         CompletableFuture.allOf(loadFutures.toArray(CompletableFuture[]::new)).join();
 
-        Map<Key, ZombiesSceneProvider> providers = new HashMap<>(maps.size());
+        Map<Key, SceneCreator<ZombiesScene>> providers = new HashMap<>(maps.size());
 
         database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
 
         EventNode<Event> globalEventNode = MinecraftServer.getGlobalEventHandler();
-        ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource(globalEventNode);
+        ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource();
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
-            ZombiesSceneProvider provider =
-                new ZombiesSceneProvider(ExecutorFeature.getExecutor(), zombiesConfig.maximumScenes(),
-                    instanceSpaceFunction, entry.getValue(), instanceLoader, sceneFallback, globalEventNode,
+            CorpseCreator.Source corpseCreatorSource = mapDependencyProvider -> contextManager
+                .makeContext(entry.getValue().corpse()).provide(mapDependencyProvider);
+
+            ZombiesSceneCreator provider =
+                new ZombiesSceneCreator(zombiesConfig.maximumScenes(),
+                    entry.getValue(), instanceLoader, keyParser, contextManager, songLoader, database, instanceSpaceFunction, globalEventNode,
                     ZombiesFeature.mobSpawnerSource(), clientBlockHandlerSource,
-                    contextManager, keyParser, database, viewProvider, ZombiesFeature.powerupHandlerSource(),
+                    ZombiesFeature.powerupHandlerSource(),
                     new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,
                         EquipmentFeature::createEquipmentCreator, contextManager,
                         keyParser),
-                    mapDependencyProvider -> contextManager.makeContext(entry.getValue().corpse())
-                        .provide(mapDependencyProvider), songLoader);
+                    corpseCreatorSource);
             providers.put(entry.getKey(), provider);
         }
 
-        ZombiesFeature.sceneRouter = new ZombiesSceneRouter(providers);
+        ZombiesJoiner joiner = new ZombiesJoiner(providers);
 
-        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
-            sceneRouter.tick(System.currentTimeMillis());
-        }, TaskSchedule.immediate(), TaskSchedule.nextTick());
-
-        MinecraftServer.getCommandManager().register(
-            new ZombiesCommand(parties, sceneRouter, keyParser, maps, viewProvider,
-                MinecraftServer.getSchedulerManager(), sceneTransferHelper, sceneFallback,
-                zombiesConfig.joinRatelimit()));
+        MinecraftServer.getCommandManager().register(new ZombiesCommand(joiner, parties, keyParser, maps, viewProvider,
+            zombiesConfig.joinRatelimit()));
     }
 
     private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) {
@@ -183,19 +175,6 @@ public final class ZombiesFeature {
 
     public static @NotNull MobSpawnerSource mobSpawnerSource() {
         return FeatureUtils.check(mobSpawnerSource);
-    }
-
-    public static @NotNull Optional<ZombiesScene> getPlayerScene(@NotNull UUID playerUUID) {
-        return FeatureUtils.check(sceneRouter).getCurrentScene(playerUUID);
-    }
-
-    public static @NotNull Optional<ZombiesPlayer> getZombiesPlayer(@NotNull UUID playerUUID) {
-        return FeatureUtils.check(sceneRouter).getCurrentScene(playerUUID)
-            .map(scene -> scene.getZombiesPlayers().get(playerUUID));
-    }
-
-    public static @NotNull ZombiesSceneRouter zombiesSceneRouter() {
-        return FeatureUtils.check(sceneRouter);
     }
 
     public static @NotNull ZombiesDatabase getDatabase() {

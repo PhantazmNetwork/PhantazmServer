@@ -14,7 +14,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.action.InstantAction;
 import org.phantazm.zombies.powerup.action.PowerupAction;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.action.send_message")
 @Cache(false)
@@ -56,7 +56,7 @@ public class SendMessageAction implements PowerupActionComponent {
         }
 
         private Component getComponent(ZombiesPlayer player) {
-            Component playerName = player.module().getPlayerView().getDisplayNameIfPresent();
+            Component playerName = player.module().getPlayerView().getDisplayNameIfCached().orElse(Component.empty());
             TagResolver playerPlaceholder = Placeholder.component("player", playerName);
 
             return MiniMessage.miniMessage().deserialize(data.format, playerPlaceholder);

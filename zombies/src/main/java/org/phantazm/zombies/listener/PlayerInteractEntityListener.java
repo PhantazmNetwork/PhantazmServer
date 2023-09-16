@@ -4,6 +4,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.map.shop.InteractionTypes;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -19,7 +20,7 @@ public class PlayerInteractEntityListener extends ZombiesPlayerEventListener<Pla
     private final PlayerRightClickListener rightClickListener;
 
     public PlayerInteractEntityListener(@NotNull Instance instance,
-        @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
         @NotNull PlayerRightClickListener rightClickListener) {
         super(instance, zombiesPlayers);
         this.shopHandler = Objects.requireNonNull(shopHandler);

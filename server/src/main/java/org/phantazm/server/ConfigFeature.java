@@ -12,10 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.chat.ChatConfig;
 import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.server.command.whisper.WhisperConfig;
-import org.phantazm.server.config.loader.LobbiesConfigProcessor;
-import org.phantazm.server.config.loader.PathfinderConfigProcessor;
-import org.phantazm.server.config.loader.ServerConfigProcessor;
-import org.phantazm.server.config.loader.ShutdownConfigProcessor;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.PathfinderConfig;
@@ -122,20 +118,20 @@ public final class ConfigFeature {
                 PlayerConfig.DEFAULT, PLAYER_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(SERVER_CONFIG_KEY,
-            new SyncFileConfigLoader<>(new ServerConfigProcessor(), ServerConfig.DEFAULT, SERVER_CONFIG_PATH,
-                tomlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ServerConfig.class)),
+                ServerConfig.DEFAULT, SERVER_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(LOBBIES_CONFIG_KEY,
-            new SyncFileConfigLoader<>(new LobbiesConfigProcessor(), LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH,
-                yamlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(LobbiesConfig.class)),
+                LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH, yamlCodec));
 
         handler.registerLoader(PATHFINDER_CONFIG_KEY,
-            new SyncFileConfigLoader<>(new PathfinderConfigProcessor(), PathfinderConfig.DEFAULT,
-                PATHFINDER_CONFIG_PATH, tomlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(PathfinderConfig.class)),
+                PathfinderConfig.DEFAULT, PATHFINDER_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(SHUTDOWN_CONFIG_KEY,
-            new SyncFileConfigLoader<>(new ShutdownConfigProcessor(), ShutdownConfig.DEFAULT, SHUTDOWN_CONFIG_PATH,
-                tomlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ShutdownConfig.class)),
+                ShutdownConfig.DEFAULT, SHUTDOWN_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(STARTUP_CONFIG_KEY,
             new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(StartupConfig.class)),

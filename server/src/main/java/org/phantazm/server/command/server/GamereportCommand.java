@@ -17,55 +17,45 @@ import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.core.command.PermissionLockedCommand;
-import org.phantazm.core.game.scene.RouterStore;
-import org.phantazm.core.game.scene.Scene;
-import org.phantazm.core.game.scene.SceneRouter;
+import org.phantazm.core.scene2.Scene;
+import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.time.AnalogTickFormatter;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.server.config.server.ZombiesGamereportConfig;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.scene.ZombiesScene;
-import org.phantazm.zombies.scene.ZombiesSceneRouter;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.stage.EndStage;
 import org.phantazm.zombies.stage.InGameStage;
 import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageKeys;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GamereportCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.gamereport");
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     private final Map<Key, PageFormatter> pageFormatters;
 
-    public GamereportCommand(@NotNull RouterStore routerStore, @NotNull ZombiesGamereportConfig config) {
+    public GamereportCommand(@NotNull ZombiesGamereportConfig config) {
         super("gamereport", PERMISSION);
 
-        Map<Key, PageFormatter> temp = new HashMap<>();
-        temp.put(ZombiesSceneRouter.KEY, new ZombiesPageFormatter(config));
-        pageFormatters = Map.copyOf(temp);
+        pageFormatters = Map.of(Key.key(Namespaces.PHANTAZM, "zombies"), new ZombiesPageFormatter(config));
 
-        Argument<String> routerArgument = ArgumentType.String("router-key");
-        routerArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            for (SceneRouter<?, ?> router : routerStore.getRouters()) {
-                if (!router.isGame()) {
-                    continue;
-                }
-
+        Argument<String> typeArgument = ArgumentType.String("type-key");
+        typeArgument.setSuggestionCallback((sender, context, suggestion) -> {
+            for (Key key : pageFormatters.keySet()) {
                 suggestion.addEntry(
-                    new SuggestionEntry(router.key().asString(), Component.text(router.key().asString())));
+                    new SuggestionEntry(key.asString(), Component.text(key.asString())));
             }
         });
 
         Argument<Integer> pageArgument = ArgumentType.Integer("page").setDefaultValue(1);
         addSyntax((sender, context) -> {
             @Subst(Constants.NAMESPACE_OR_KEY)
-            String key = context.get(routerArgument);
+            String key = context.get(typeArgument);
 
             if (!Key.parseable(key)) {
                 sender.sendMessage(Component.text("Invalid key!").color(NamedTextColor.RED));
@@ -73,51 +63,36 @@ public class GamereportCommand extends PermissionLockedCommand {
             }
 
             Key routerKey = Key.key(key);
-            SceneRouter<?, ?> targetRouter = null;
-            for (SceneRouter<?, ?> router : routerStore.getRouters()) {
-                if (!router.isGame()) {
-                    continue;
-                }
-
-                if (router.key().equals(routerKey)) {
-                    targetRouter = router;
-                    break;
-                }
-            }
-
-            if (targetRouter == null) {
-                sender.sendMessage(Component.text("Target router does not exist!").color(NamedTextColor.RED));
+            PageFormatter pageFormatter = pageFormatters.get(routerKey);
+            if (pageFormatter == null) {
+                sender.sendMessage(Component.text("Target type does not exist!").color(NamedTextColor.RED));
                 return;
             }
 
-            PageFormatter formatter = pageFormatters.get(targetRouter.key());
-            if (formatter == null) {
-                sender.sendMessage(Component.text("No formatter for this scene!").color(NamedTextColor.RED));
-                return;
-            }
-
-            List<? extends Scene<?>> scenes = List.copyOf(targetRouter.getScenes());
+            Set<? extends Scene> scenes = pageFormatter.scenes();
 
             if (scenes.isEmpty()) {
-                sender.sendMessage(Component.text("There are no scenes in this router!").color(NamedTextColor.RED));
+                sender.sendMessage(Component.text("There are no scenes of this type!").color(NamedTextColor.RED));
                 return;
             }
 
-            int pageCount = (int) Math.ceil(scenes.size() / (double) formatter.itemsPerPage());
+            int pageCount = (int) Math.ceil(scenes.size() / (double) pageFormatter.itemsPerPage());
             int page = context.get(pageArgument);
             if (page < 1 || page > pageCount) {
                 sender.sendMessage(Component.text("Target page does not exist!").color(NamedTextColor.RED));
                 return;
             }
 
-            sender.sendMessage(formatter.page(page, scenes));
-        }, routerArgument, pageArgument);
+            sender.sendMessage(pageFormatter.page(page, List.copyOf(scenes)));
+        }, typeArgument, pageArgument);
     }
 
     private interface PageFormatter {
-        @NotNull Component page(int pageIndex, @NotNull List<? extends Scene<?>> scenes);
+        @NotNull Component page(int pageIndex, @NotNull List<? extends Scene> scenes);
 
         int itemsPerPage();
+
+        @NotNull Set<? extends Scene> scenes();
     }
 
     private record ZombiesPageFormatter(ZombiesGamereportConfig config) implements PageFormatter {
@@ -125,7 +100,7 @@ public class GamereportCommand extends PermissionLockedCommand {
         private static final TickFormatter TIME_FORMATTER = new AnalogTickFormatter(new AnalogTickFormatter.Data(true));
 
         @Override
-        public @NotNull Component page(int page, @NotNull List<? extends Scene<?>> scenes) {
+        public @NotNull Component page(int page, @NotNull List<? extends Scene> scenes) {
             int maxPages = (int) Math.ceil(scenes.size() / (double) ITEMS_PER_PAGE);
 
             List<Component> gameEntries = new ArrayList<>(scenes.size());
@@ -136,10 +111,10 @@ public class GamereportCommand extends PermissionLockedCommand {
                 ZombiesScene zombiesScene = (ZombiesScene) scenes.get(i);
 
                 TagResolver currentGameTag = Placeholder.unparsed("current_game", Integer.toString(i + 1));
-                TagResolver gameUUIDTag = Placeholder.unparsed("game_uuid", zombiesScene.getUUID().toString());
+                TagResolver gameUUIDTag = Placeholder.unparsed("game_uuid", zombiesScene.identity().toString());
 
-                List<Component> playerNames = new ArrayList<>(zombiesScene.getMapSettingsInfo().maxPlayers());
-                for (ZombiesPlayer player : zombiesScene.getZombiesPlayers().values()) {
+                List<Component> playerNames = new ArrayList<>(zombiesScene.mapSettingsInfo().maxPlayers());
+                for (ZombiesPlayer player : zombiesScene.managedPlayers().values()) {
                     player.getPlayer().ifPresent(actualPlayer -> {
                         Component displayName = actualPlayer.getDisplayName();
                         playerNames.add(displayName == null ? Component.text(actualPlayer.getUsername()) : displayName);
@@ -149,13 +124,13 @@ public class GamereportCommand extends PermissionLockedCommand {
                 Component playerList = Component.join(JoinConfiguration.commas(true), playerNames);
                 TagResolver playerListTag = Placeholder.component("player_list", playerList);
                 TagResolver mapNameTag =
-                    Placeholder.component("map_name", zombiesScene.getMapSettingsInfo().displayName());
+                    Placeholder.component("map_name", zombiesScene.mapSettingsInfo().displayName());
 
                 Component gameState;
-                Stage currentStage = zombiesScene.getCurrentStage();
+                Stage currentStage = zombiesScene.currentStage();
 
                 TagResolver currentRoundTag = Placeholder.parsed("current_round",
-                    Integer.toString(zombiesScene.getMap().roundHandler().currentRoundIndex() + 1));
+                    Integer.toString(zombiesScene.map().roundHandler().currentRoundIndex() + 1));
 
                 if (currentStage == null || currentStage.key().equals(StageKeys.IDLE_STAGE)) {
                     gameState = MINI_MESSAGE.deserialize(config.idleStageFormat());
@@ -182,7 +157,7 @@ public class GamereportCommand extends PermissionLockedCommand {
                 TagResolver gameStateTag = Placeholder.component("game_state", gameState);
 
                 TagResolver warpTag = TagResolver.resolver("warp",
-                    Tag.styling(ClickEvent.runCommand("/ghost " + zombiesScene.getUUID())));
+                    Tag.styling(ClickEvent.runCommand("/ghost " + zombiesScene.identity())));
 
                 gameEntries.add(
                     MINI_MESSAGE.deserialize(config.gameEntryFormat(), totalGamesTag, currentGameTag, gameUUIDTag,
@@ -228,6 +203,11 @@ public class GamereportCommand extends PermissionLockedCommand {
         @Override
         public int itemsPerPage() {
             return ITEMS_PER_PAGE;
+        }
+
+        @Override
+        public @NotNull Set<ZombiesScene> scenes() {
+            return SceneManager.Global.instance().typed(ZombiesScene.class);
         }
     }
 }

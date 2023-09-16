@@ -5,7 +5,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.deactivation_predicate.timed")
 public class TimedDeactivationPredicate implements DeactivationPredicateComponent {

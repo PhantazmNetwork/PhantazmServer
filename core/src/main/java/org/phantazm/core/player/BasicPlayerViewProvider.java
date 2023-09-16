@@ -7,10 +7,12 @@ import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A {@link PlayerViewProvider} based off of a {@link ConnectionManager}, which will be the ConnectionManager instance
@@ -24,7 +26,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     private final IdentitySource identitySource;
     private final ConnectionManager connectionManager;
-    private final Cache<UUID, BasicPlayerView> uuidToView;
+    private final Map<UUID, PlayerViewImpl> uuidToView;
     private final Cache<String, UUID> nameToUuid;
 
     /**
@@ -38,7 +40,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
         @NotNull Duration duration) {
         this.identitySource = Objects.requireNonNull(identitySource);
         this.connectionManager = Objects.requireNonNull(connectionManager);
-        this.uuidToView = Caffeine.newBuilder().weakValues().build();
+        this.uuidToView = new ConcurrentHashMap<>();
         this.nameToUuid = Caffeine.newBuilder().expireAfterWrite(Objects.requireNonNull(duration)).build();
     }
 
@@ -57,7 +59,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     @Override
     public @NotNull PlayerView fromUUID(@NotNull UUID uuid) {
         Objects.requireNonNull(uuid);
-        return uuidToView.get(uuid, key -> new BasicPlayerView(identitySource, connectionManager, key));
+        return uuidToView.computeIfAbsent(uuid, key -> new PlayerViewImpl(identitySource, connectionManager, key));
     }
 
     @Override
@@ -98,7 +100,8 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     @Override
     public @NotNull PlayerView fromPlayer(@NotNull Player player) {
         Objects.requireNonNull(player);
-        return uuidToView.get(player.getUuid(), key -> new BasicPlayerView(identitySource, connectionManager, player));
+        return uuidToView.computeIfAbsent(player.getUuid(), key ->
+            new PlayerViewImpl(identitySource, connectionManager, player));
     }
 
 }

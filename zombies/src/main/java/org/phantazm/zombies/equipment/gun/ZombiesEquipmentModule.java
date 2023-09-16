@@ -20,7 +20,7 @@ import java.util.function.Supplier;
 @Memoize
 @Depend
 public class ZombiesEquipmentModule implements DependencyModule {
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
     private final PlayerView playerView;
     private final ZombiesPlayerMapStats mapStats;
     private final ZombiesPlayerActionBar actionBar;
@@ -30,7 +30,7 @@ public class ZombiesEquipmentModule implements DependencyModule {
     private final MapObjects mapObjects;
     private final Supplier<? extends ZombiesPlayer> zombiesPlayerSupplier;
 
-    public ZombiesEquipmentModule(@NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
+    public ZombiesEquipmentModule(@NotNull Map<PlayerView, ZombiesPlayer> playerMap,
         @NotNull PlayerView playerView, @NotNull ZombiesPlayerMapStats mapStats,
         @NotNull ZombiesPlayerActionBar actionBar, @NotNull MobSpawner mobSpawner,
         @NotNull EventNode<Event> eventNode, @NotNull Random random,
@@ -46,7 +46,7 @@ public class ZombiesEquipmentModule implements DependencyModule {
         this.zombiesPlayerSupplier = Objects.requireNonNull(zombiesPlayerSupplier);
     }
 
-    public @NotNull Map<? super UUID, ? extends ZombiesPlayer> getPlayerMap() {
+    public @NotNull Map<PlayerView, ZombiesPlayer> getPlayerMap() {
         return playerMap;
     }
 
