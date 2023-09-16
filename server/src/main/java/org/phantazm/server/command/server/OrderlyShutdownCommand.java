@@ -12,7 +12,8 @@ import net.minestom.server.permission.Permission;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.PermissionLockedCommand;
-import org.phantazm.core.event.PlayerJoinLobbyEvent;
+import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.scene2.event.SceneJoinEvent;
 import org.phantazm.core.scene2.event.SceneShutdownEvent;
 import org.phantazm.core.scene2.JoinToggleableScene;
 import org.phantazm.core.scene2.SceneManager;
@@ -38,8 +39,11 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
             globalNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
                 event.getPlayer().kick(Component.text("Server is not joinable", NamedTextColor.RED));
             });
-            globalNode.addListener(PlayerJoinLobbyEvent.class, event -> {
-                event.getPlayer().kick(Component.text("Routing to fresh instance...", NamedTextColor.RED));
+            globalNode.addListener(SceneJoinEvent.class, event -> {
+                for (PlayerView view : event.players()) {
+                    view.getPlayer().ifPresent(player -> player.kick(
+                        Component.text("Routing to fresh instance...", NamedTextColor.RED)));
+                }
             });
 
             initialized = true;

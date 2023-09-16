@@ -78,7 +78,20 @@ public class ZombiesScene extends InstanceScene {
 
     @Override
     public boolean preventsServerShutdown() {
-        return isLegit;
+        if (!isLegit) {
+            return false;
+        }
+
+        if (playerCount() == 0) {
+            return false;
+        }
+
+        Stage stage = stageTransition.getCurrentStage();
+        if (stage == null) {
+            return false;
+        }
+
+        return stage.preventsShutdown();
     }
 
     void join(@NotNull Set<@NotNull PlayerView> joiningPlayers) {

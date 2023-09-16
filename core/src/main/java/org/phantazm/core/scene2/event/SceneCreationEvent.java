@@ -3,16 +3,16 @@ package org.phantazm.core.scene2.event;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.scene2.Scene;
 
-public class SceneCreationEvent implements SceneEvent {
-    private final Scene scene;
+import java.util.Objects;
 
+public record SceneCreationEvent(Scene scene) implements SceneEvent {
     public SceneCreationEvent(@NotNull Scene scene) {
-        this.scene = scene;
+        this.scene = Objects.requireNonNull(scene);
     }
 
 
     @Override
-    public @NotNull Scene getScene() {
+    public @NotNull Scene scene() {
         return scene;
     }
 }

@@ -18,6 +18,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewImpl;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.event.SceneCreationEvent;
+import org.phantazm.core.scene2.event.SceneJoinEvent;
 import org.phantazm.core.scene2.event.SceneShutdownEvent;
 
 import java.util.*;
@@ -814,7 +815,7 @@ public final class SceneManager {
             return CompletableFuture.completedFuture(JoinResult.unrecognizedType());
         }
 
-        return CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<JoinResult<T>> result = CompletableFuture.supplyAsync(() -> {
             if (!lockPlayers(players, false)) {
                 return JoinResult.alreadyJoining();
             }
@@ -857,6 +858,14 @@ public final class SceneManager {
                 unlockPlayers(players);
             }
         }, executor);
+
+        return result.whenComplete((joinResult, error) -> {
+            if (error != null || !joinResult.successful()) {
+                return;
+            }
+
+            EventDispatcher.call(new SceneJoinEvent(joinResult.scene, players));
+        });
     }
 
     private <T extends Scene> T tryJoinScenes(Set<Scene> scenes, Join<T> join) {

@@ -5,5 +5,5 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.scene2.Scene;
 
 public interface SceneEvent extends Event {
-    @NotNull Scene getScene();
+    @NotNull Scene scene();
 }

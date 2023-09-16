@@ -131,6 +131,11 @@ public class EndStage implements Stage {
     }
 
     @Override
+    public boolean preventsShutdown() {
+        return true;
+    }
+
+    @Override
     public void start() {
         instance.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH, Sound.Source.MASTER, 1.0F, 1.0F));
 

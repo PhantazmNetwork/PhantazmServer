@@ -22,4 +22,6 @@ public interface Stage extends Activable, Keyed {
     boolean canRejoin();
 
     boolean canJoin();
+
+    boolean preventsShutdown();
 }
