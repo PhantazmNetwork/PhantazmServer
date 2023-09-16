@@ -105,7 +105,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      * If this scene represents a "game" of some kind. Generally speaking, scenes that are games:
      *
      * <ul>
-     *     <li>Will prevent the server from shutting down during an orderly shutdown</li>
+     *     <li>Will prevent the server from shutting down during an orderly shutdown, if the game is in-progress</li>
      *     <li>Can be "quit" using a command like {@code /quit} or similar</li>
      * </ul>
      * <p>
@@ -226,7 +226,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      * @param leftPlayers the players that previously left this scene
      */
     @ApiStatus.Internal
-    void postLeave(@NotNull Set<@NotNull Player> leftPlayers);
+    void postLeave(@NotNull Set<? extends @NotNull Player> leftPlayers);
 
     @Override
     default @NotNull Collection<@NotNull Player> getPlayers() {

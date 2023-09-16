@@ -13,7 +13,7 @@ import java.util.Set;
  * A {@link Scene} that sends tablist removal packets to remaining players after others are removed from this scene.
  */
 public interface TablistLocalScene extends Scene {
-    default void postLeave(@NotNull Set<@NotNull Player> leftPlayers) {
+    default void postLeave(@NotNull Set<? extends @NotNull Player> leftPlayers) {
         if (leftPlayers.isEmpty() || playerCount() == 0) {
             return;
         }

@@ -105,7 +105,7 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
     }
 
     @Override
-    public void postLeave(@NotNull Set<@NotNull Player> leftPlayers) {
+    public void postLeave(@NotNull Set<? extends @NotNull Player> leftPlayers) {
         TablistLocalScene.super.postLeave(leftPlayers);
 
         for (Player player : leftPlayers) {
