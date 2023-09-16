@@ -35,7 +35,7 @@ public class JoinLobby extends CreatingJoin<Lobby> implements SceneManager.Login
 
     @Override
     public void postSpawn(@NotNull Lobby scene) {
-        scene.getAcquirable().sync(self -> ((Lobby) self).postLogin(playerViews()));
+        scene.getAcquirable().sync(self -> self.postLogin(playerViews()));
     }
 
     @Override
