@@ -79,7 +79,8 @@ public final class EthyleneFeature {
                     if (meta != null) {
                         try {
                             builder.meta((NBTCompound) new SNBTParser(new StringReader(meta)).parse());
-                        } catch (NBTException ignored1) {
+                        } catch (NBTException exception) {
+                            LOGGER.warn("NBTException when deserializing to ItemStack", exception);
                         }
                     }
 

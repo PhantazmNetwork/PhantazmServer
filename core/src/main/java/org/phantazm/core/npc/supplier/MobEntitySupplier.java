@@ -6,6 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.BasicComponent;
 import org.phantazm.commons.InjectionStore;
@@ -30,7 +31,7 @@ public class MobEntitySupplier implements BasicComponent<Supplier<Entity>> {
     private record Internal(Data data) implements Supplier<Entity> {
         @Override
         public Entity get() {
-            return new Entity(data.entityType);
+            return new LivingEntity(data.entityType);
         }
     }
 
