@@ -13,7 +13,7 @@ import java.util.UUID;
  * in {@link Scene#playersView()} etc.) but are generally not visible to non-spectators.
  */
 public interface WatchableScene extends Scene {
-    void joinSpectators(@NotNull Set<@NotNull PlayerView> players, boolean ghost);
+    void joinSpectators(@NotNull Set<? extends @NotNull PlayerView> players, boolean ghost);
 
     @NotNull @UnmodifiableView Set<@NotNull PlayerView> spectatorsView();
 

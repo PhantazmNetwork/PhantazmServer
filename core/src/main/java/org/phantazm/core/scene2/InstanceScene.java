@@ -49,7 +49,7 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
     }
 
     @Override
-    public void joinSpectators(@NotNull Set<@NotNull PlayerView> players, boolean ghost) {
+    public void joinSpectators(@NotNull Set<? extends @NotNull PlayerView> players, boolean ghost) {
         for (PlayerView player : players) {
             if (!super.scenePlayers.add(player)) {
                 continue;
@@ -92,7 +92,7 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
 
     @Override
     public @NotNull Set<@NotNull PlayerView> leave(@NotNull Set<? extends @NotNull PlayerView> players) {
-        Set<PlayerView> leftPlayers = new HashSet<>(players);
+        Set<PlayerView> leftPlayers = new HashSet<>(players.size());
         for (PlayerView leavingPlayer : players) {
             if (!super.scenePlayers.remove(leavingPlayer)) {
                 continue;
