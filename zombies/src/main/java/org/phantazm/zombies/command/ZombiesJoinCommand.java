@@ -11,6 +11,7 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
+import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.GuildMember;
@@ -27,6 +28,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class ZombiesJoinCommand extends Command {
+    public static final Permission BYPASS_SANDBOX_RESTRICTION = new Permission("zombies.playtest.bypass_sandbox");
+
     @SuppressWarnings("unchecked")
     public ZombiesJoinCommand(@NotNull ZombiesJoiner zombiesJoiner, @NotNull Map<? super UUID, ? extends Party> partyMap,
         @NotNull PlayerViewProvider viewProvider, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
@@ -118,6 +121,24 @@ public class ZombiesJoinCommand extends Command {
 
             boolean sandbox = context.get(sandboxArgument);
             if (sandbox) {
+                boolean bypassRestriction = true;
+                for (PlayerView playerView : playerViews) {
+                    Optional<Player> optional = playerView.getPlayer();
+                    if (optional.isEmpty()) {
+                        continue;
+                    }
+
+                    if (!optional.get().hasPermission(BYPASS_SANDBOX_RESTRICTION)) {
+                        bypassRestriction = false;
+                        break;
+                    }
+                }
+
+                if (bypassRestriction) {
+                    SceneManager.Global.instance().joinScene(zombiesJoiner.joinSandbox(playerViews, targetMap));
+                    return;
+                }
+
                 CompletableFuture<Boolean>[] futures = new CompletableFuture[playerViews.size()];
                 int i = 0;
                 for (PlayerView playerView : playerViews) {
