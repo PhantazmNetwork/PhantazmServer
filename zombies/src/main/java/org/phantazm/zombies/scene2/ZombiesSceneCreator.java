@@ -10,6 +10,7 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
@@ -204,6 +205,20 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
     @Override
     public int playerCap() {
         return mapInfo.settings().maxPlayers();
+    }
+
+    @Override
+    public boolean hasPermission(@NotNull Set<? extends @NotNull PlayerView> players) {
+        List<Player> onlinePlayers = PlayerView.getMany(players, ArrayList::new);
+        for (String permission : mapInfo.settings().requiredPermissions()) {
+            for (Player player : onlinePlayers) {
+                if (!player.hasPermission(permission)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     private CorpseCreator createCorpseCreator(DependencyProvider mapDependencyProvider) {

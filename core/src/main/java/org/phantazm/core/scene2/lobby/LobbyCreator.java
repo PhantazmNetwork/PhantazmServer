@@ -10,11 +10,13 @@ import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.npc.NPC;
 import org.phantazm.core.npc.NPCHandler;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.scene2.SceneCreator;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -75,5 +77,10 @@ public class LobbyCreator implements SceneCreator<Lobby> {
     @Override
     public int playerCap() {
         return playerCap;
+    }
+
+    @Override
+    public boolean hasPermission(@NotNull Set<? extends @NotNull PlayerView> players) {
+        return true;
     }
 }

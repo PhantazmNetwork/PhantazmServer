@@ -81,7 +81,7 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
      * @return the collection returned by {@code creator}, populated with Player objects
      */
     static <T extends Collection<Player>,
-        V extends Collection<PlayerView>> @NotNull T getMany(@NotNull V input, @NotNull IntFunction<? extends T> creator) {
+        V extends Collection<? extends PlayerView>> @NotNull T getMany(@NotNull V input, @NotNull IntFunction<? extends T> creator) {
         T out = creator.apply(input.size());
         for (PlayerView view : input) {
             view.getPlayer().ifPresent(out::add);

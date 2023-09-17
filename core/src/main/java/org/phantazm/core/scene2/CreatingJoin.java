@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 public abstract class CreatingJoin<T extends Scene> extends JoinAbstract<T> {
-    private final SceneCreator<T> sceneCreator;
+    protected final SceneCreator<T> sceneCreator;
 
     public CreatingJoin(@NotNull Collection<@NotNull PlayerView> players, @NotNull Class<T> targetType,
         @NotNull SceneCreator<T> sceneCreator) {
@@ -30,13 +30,15 @@ public abstract class CreatingJoin<T extends Scene> extends JoinAbstract<T> {
             return false;
         }
 
-        return (sceneCap < 0 || currentAmount + 1 <= sceneCap) && (playerCap < 0 || playerViews().size() <= playerCap);
+        return (sceneCap < 0 || currentAmount + 1 <= sceneCap) && (playerCap < 0 || playerViews().size() <= playerCap)
+            && sceneCreator.hasPermission(playerViews());
     }
 
     @Override
     public boolean matches(@NotNull T scene) {
         int playerCap = sceneCreator.playerCap();
-        return playerCap < 0 || scene.playerCount() + newPlayerCount(scene) <= playerCap;
+        return playerCap < 0 || scene.playerCount() + newPlayerCount(scene) <= playerCap &&
+            sceneCreator.hasPermission(playerViews());
     }
 
     /**
