@@ -142,7 +142,7 @@ public class ZombiesJoinCommand extends Command {
             } else {
                 SceneManager.Global.instance().joinScene(zombiesJoiner.joinMap(playerViews, targetMap));
             }
-        }, mapKeyArgument, restrictedArgument);
+        }, mapKeyArgument, restrictedArgument, sandboxArgument);
     }
 
 }

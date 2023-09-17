@@ -17,6 +17,7 @@ import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.MiniMessageUtils;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.scene2.Scene;
@@ -112,6 +113,7 @@ public class GamereportCommand extends PermissionLockedCommand {
 
                 TagResolver currentGameTag = Placeholder.unparsed("current_game", Integer.toString(i + 1));
                 TagResolver gameUUIDTag = Placeholder.unparsed("game_uuid", zombiesScene.identity().toString());
+                TagResolver notLegitTag = MiniMessageUtils.optional("not_legit", !zombiesScene.isLegit());
 
                 List<Component> playerNames = new ArrayList<>(zombiesScene.mapSettingsInfo().maxPlayers());
                 for (ZombiesPlayer player : zombiesScene.managedPlayers().values()) {
@@ -161,7 +163,7 @@ public class GamereportCommand extends PermissionLockedCommand {
 
                 gameEntries.add(
                     MINI_MESSAGE.deserialize(config.gameEntryFormat(), totalGamesTag, currentGameTag, gameUUIDTag,
-                        playerListTag, mapNameTag, gameStateTag, warpTag));
+                        notLegitTag, playerListTag, mapNameTag, gameStateTag, warpTag));
             }
 
             Component gameList = Component.join(JoinConfiguration.newlines(), gameEntries);

@@ -14,7 +14,7 @@ public class JoinZombiesRestricted extends JoinZombiesMap {
     public JoinZombiesRestricted(@NotNull Collection<@NotNull PlayerView> players,
         @NotNull SceneCreator<ZombiesScene> sceneCreator, @NotNull Key mapKey, boolean sandbox) {
         super(players, sceneCreator, mapKey);
-        this.sandbox = true;
+        this.sandbox = sandbox;
     }
 
     public JoinZombiesRestricted(@NotNull Collection<@NotNull PlayerView> players,
