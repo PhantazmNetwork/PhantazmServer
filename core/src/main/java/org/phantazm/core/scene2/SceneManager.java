@@ -205,7 +205,13 @@ public final class SceneManager {
          * No existing scenes were found, and no new scenes could be created in order to fulfill this request. No
          * players have been moved or had any state changed.
          */
-        CANNOT_PROVISION
+        CANNOT_PROVISION,
+
+        /**
+         * Join status used in {@link SceneJoinEvent} to indicate an internal error occurred. Players may have been
+         * moved, some state may have changed.
+         */
+        INTERNAL_ERROR
     }
 
     /**
@@ -219,12 +225,10 @@ public final class SceneManager {
     public record JoinResult<T extends Scene>(@NotNull JoinStatus status,
         T scene) {
         private static final JoinResult<?> EMPTY_PLAYERS = new JoinResult<>(JoinStatus.EMPTY_PLAYERS, null);
-
         private static final JoinResult<?> UNRECOGNIZED_TYPE = new JoinResult<>(JoinStatus.UNRECOGNIZED_TYPE, null);
-
         private static final JoinResult<?> ALREADY_JOINING = new JoinResult<>(JoinStatus.ALREADY_JOINING, null);
-
         private static final JoinResult<?> CANNOT_PROVISION = new JoinResult<>(JoinStatus.CANNOT_PROVISION, null);
+        private static final JoinResult<?> INTERNAL_ERROR = new JoinResult<>(JoinStatus.INTERNAL_ERROR, null);
 
         public JoinResult {
             Objects.requireNonNull(status);
@@ -800,17 +804,19 @@ public final class SceneManager {
     public <T extends Scene> @NotNull CompletableFuture<JoinResult<T>> joinScene(@NotNull Join<T> join) {
         Set<PlayerView> players = join.playerViews();
         if (players.isEmpty()) {
+            EventDispatcher.call(new SceneJoinEvent(JoinResult.emptyPlayers(), players));
             return CompletableFuture.completedFuture(JoinResult.emptyPlayers());
         }
 
-        List<SceneEntry> targetEntries = new ArrayList<>();
+        List<Map.Entry<Class<? extends Scene>, SceneEntry>> targetEntries = new ArrayList<>();
         for (Map.Entry<Class<? extends Scene>, SceneEntry> entry : mappedScenes.entrySet()) {
             if (join.targetType().isAssignableFrom(entry.getKey())) {
-                targetEntries.add(entry.getValue());
+                targetEntries.add(entry);
             }
         }
 
         if (targetEntries.isEmpty()) {
+            EventDispatcher.call(new SceneJoinEvent(JoinResult.unrecognizedType(), players));
             return CompletableFuture.completedFuture(JoinResult.unrecognizedType());
         }
 
@@ -820,14 +826,16 @@ public final class SceneManager {
             }
 
             try {
-                for (SceneEntry entry : targetEntries) {
-                    T joinedScene = tryJoinScenes(entry.scenes, join);
+                for (Map.Entry<Class<? extends Scene>, SceneEntry> entry : targetEntries) {
+                    SceneEntry sceneEntry = entry.getValue();
+
+                    T joinedScene = tryJoinScenes(sceneEntry.scenes, join);
                     if (joinedScene != null) {
                         return JoinResult.joined(joinedScene);
                     }
 
-                    synchronized (entry.creationLock) {
-                        joinedScene = tryJoinScenes(entry.scenes, join);
+                    synchronized (sceneEntry.creationLock) {
+                        joinedScene = tryJoinScenes(sceneEntry.scenes, join);
                         if (joinedScene != null) {
                             return JoinResult.joined(joinedScene);
                         }
@@ -837,17 +845,14 @@ public final class SceneManager {
                         }
 
                         T newScene = createAndJoinNewScene(join);
-                        SceneEntry actualEntry = mappedScenes.get(newScene.getClass());
-                        if (actualEntry == null) {
-                            throw new IllegalStateException("Join attempted to create a scene for which there is no " +
-                                "corresponding type registered");
+                        if (!newScene.getClass().equals(entry.getKey())) {
+                            throw new IllegalStateException("Created scene type is not the same as the entry type");
                         }
 
-                        EventDispatcher.call(new SceneCreationEvent(newScene));
-
-                        actualEntry.scenes.add(newScene);
+                        sceneEntry.scenes.add(newScene);
                         threadDispatcher.createPartition(newScene);
 
+                        EventDispatcher.call(new SceneCreationEvent(newScene));
                         return JoinResult.joined(newScene);
                     }
                 }
@@ -859,11 +864,8 @@ public final class SceneManager {
         }, executor);
 
         return result.whenComplete((joinResult, error) -> {
-            if (error != null || !joinResult.successful()) {
-                return;
-            }
-
-            EventDispatcher.call(new SceneJoinEvent(joinResult.scene, players));
+            EventDispatcher.call(new SceneJoinEvent((joinResult == null || error != null) ?
+                JoinResult.INTERNAL_ERROR : joinResult, players));
         });
     }
 

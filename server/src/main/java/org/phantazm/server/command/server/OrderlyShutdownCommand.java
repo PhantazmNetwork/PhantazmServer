@@ -40,6 +40,10 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
                 event.getPlayer().kick(Component.text("Server is not joinable", NamedTextColor.RED));
             });
             globalNode.addListener(SceneJoinEvent.class, event -> {
+                if (!event.result().successful()) {
+                    return;
+                }
+
                 for (PlayerView view : event.players()) {
                     view.getPlayer().ifPresent(player -> player.kick(
                         Component.text("Routing to fresh instance...", NamedTextColor.RED)));

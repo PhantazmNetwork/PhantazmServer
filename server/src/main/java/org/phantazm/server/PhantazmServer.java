@@ -11,6 +11,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.server.ServerListPingEvent;
@@ -23,9 +24,11 @@ import org.phantazm.core.chat.ChatConfig;
 import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.IdentitySource;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.CoreJoinKeys;
 import org.phantazm.core.scene2.SceneManager;
+import org.phantazm.core.scene2.event.SceneJoinEvent;
 import org.phantazm.core.scene2.lobby.JoinLobby;
 import org.phantazm.core.scene2.lobby.Lobby;
 import org.phantazm.server.command.whisper.WhisperConfig;
@@ -44,6 +47,7 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -77,6 +81,7 @@ public final class PhantazmServer {
         PartyConfig partyConfig;
         WhisperConfig whisperConfig;
         ChatConfig chatConfig;
+        JoinReportConfig joinReportConfig;
         ZombiesConfig zombiesConfig;
 
         KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
@@ -133,6 +138,7 @@ public final class PhantazmServer {
             partyConfig = handler.loadDataNow(ConfigFeature.PARTY_CONFIG_KEY);
             whisperConfig = handler.loadDataNow(ConfigFeature.WHISPER_CONFIG_KEY);
             chatConfig = handler.loadDataNow(ConfigFeature.CHAT_CONFIG_KEY);
+            joinReportConfig = handler.loadDataNow(ConfigFeature.JOIN_REPORT_CONFIG_KEY);
             zombiesConfig = handler.loadDataNow(ConfigFeature.ZOMBIES_CONFIG_KEY);
             LOGGER.info("Server configuration loaded successfully.");
         } catch (ConfigProcessException e) {
@@ -145,7 +151,7 @@ public final class PhantazmServer {
         try {
             LOGGER.info("Initializing features.");
             initializeFeatures(keyParser, playerConfig, serverConfig, shutdownConfig, pathfinderConfig, lobbiesConfig,
-                partyConfig, whisperConfig, chatConfig, zombiesConfig);
+                partyConfig, whisperConfig, chatConfig, joinReportConfig, zombiesConfig);
             LOGGER.info("Features initialized successfully.");
         } catch (Exception exception) {
             LOGGER.error("Fatal error during initialization", exception);
@@ -187,7 +193,8 @@ public final class PhantazmServer {
 
     private static void initializeFeatures(KeyParser keyParser, PlayerConfig playerConfig, ServerConfig serverConfig,
         ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
-        PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, ZombiesConfig zombiesConfig) {
+        PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, JoinReportConfig joinReportConfig,
+        ZombiesConfig zombiesConfig) {
         ConfigCodec yamlCodec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
             () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
         ConfigCodec tomlCodec = new TomlCodec();
@@ -218,6 +225,23 @@ public final class PhantazmServer {
 
             manager.setDefaultFallback(playerViews -> {
                 return SceneManager.Global.instance().joinScene(CoreJoinKeys.MAIN_LOBBY, playerViews);
+            });
+
+            MinecraftServer.getGlobalEventHandler().addListener(SceneJoinEvent.class, event -> {
+                SceneManager.JoinResult<?> result = event.result();
+                if (result.successful()) {
+                    return;
+                }
+
+                PacketGroupingAudience audience = PacketGroupingAudience.of(PlayerView.getMany(event.players(),
+                    ArrayList::new));
+                switch (result.status()) {
+                    case EMPTY_PLAYERS -> audience.sendMessage(joinReportConfig.emptyPlayers());
+                    case UNRECOGNIZED_TYPE -> audience.sendMessage(joinReportConfig.unrecognizedType());
+                    case ALREADY_JOINING -> audience.sendMessage(joinReportConfig.alreadyJoining());
+                    case CANNOT_PROVISION -> audience.sendMessage(joinReportConfig.cannotProvision());
+                    case INTERNAL_ERROR -> audience.sendMessage(joinReportConfig.internalError());
+                }
             });
         });
 

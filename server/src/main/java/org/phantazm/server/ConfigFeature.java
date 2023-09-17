@@ -14,10 +14,7 @@ import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.server.command.whisper.WhisperConfig;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
-import org.phantazm.server.config.server.PathfinderConfig;
-import org.phantazm.server.config.server.ServerConfig;
-import org.phantazm.server.config.server.ShutdownConfig;
-import org.phantazm.server.config.server.StartupConfig;
+import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 
 import java.nio.file.Path;
@@ -54,6 +51,8 @@ public final class ConfigFeature {
     public static final Path WHISPER_CONFIG_PATH = Path.of("./whisper-config.toml");
 
     public static final Path CHAT_CONFIG_PATH = Path.of("./chat-config.yml");
+
+    public static final Path JOIN_REPORT_CONFIG_PATH = Path.of("./join-report-config.toml");
 
     public static final Path ZOMBIES_CONFIG_PATH = Path.of("./zombies-config.toml");
 
@@ -94,6 +93,9 @@ public final class ConfigFeature {
 
     public static final ConfigHandler.ConfigKey<ChatConfig> CHAT_CONFIG_KEY =
         new ConfigHandler.ConfigKey<>(ChatConfig.class, "chat_config");
+
+    public static final ConfigHandler.ConfigKey<JoinReportConfig> JOIN_REPORT_CONFIG_KEY =
+        new ConfigHandler.ConfigKey<>(JoinReportConfig.class, "join_report_config");
 
     public static final ConfigHandler.ConfigKey<ZombiesConfig> ZOMBIES_CONFIG_KEY =
         new ConfigHandler.ConfigKey<>(ZombiesConfig.class, "zombies_config");
@@ -148,6 +150,10 @@ public final class ConfigFeature {
         handler.registerLoader(CHAT_CONFIG_KEY,
             new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ChatConfig.class)),
                 ChatConfig.DEFAULT, CHAT_CONFIG_PATH, yamlCodec));
+
+        handler.registerLoader(JOIN_REPORT_CONFIG_KEY,
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(JoinReportConfig.class)),
+                JoinReportConfig.DEFAULT, JOIN_REPORT_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(ZOMBIES_CONFIG_KEY,
             new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ZombiesConfig.class)),
