@@ -9,19 +9,20 @@ import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Map;
-import java.util.UUID;
+import java.util.function.Supplier;
 
 public class PlayerItemSelectListener extends ZombiesPlayerEventListener<PlayerChangeHeldSlotEvent> {
 
     public PlayerItemSelectListener(@NotNull Instance instance,
-        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers) {
-        super(instance, zombiesPlayers);
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull Supplier<ZombiesScene> scene) {
+        super(instance, zombiesPlayers, scene);
     }
 
     @Override
-    protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerChangeHeldSlotEvent event) {
+    protected void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerChangeHeldSlotEvent event) {
         if (!zombiesPlayer.canUseEquipment()) {
             event.setCancelled(true);
             return;

@@ -33,6 +33,7 @@ import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,8 +63,9 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         @NotNull Supplier<Optional<Round>> roundSupplier,
         @NotNull PowerupHandler powerupHandler, @NotNull BoundedTracker<Room> roomTracker,
         @NotNull BoundedTracker<Window> windowTracker,
-        @NotNull Map<PlayerView, ZombiesPlayer> playerMap, @NotNull MapSettingsInfo settingsInfo) {
-        super(instance);
+        @NotNull Map<PlayerView, ZombiesPlayer> playerMap, @NotNull MapSettingsInfo settingsInfo,
+        @NotNull Supplier<ZombiesScene> scene) {
+        super(instance, scene);
         this.keyParser = Objects.requireNonNull(keyParser);
         this.roundSupplier = Objects.requireNonNull(roundSupplier);
         this.powerupHandler = Objects.requireNonNull(powerupHandler);
@@ -75,7 +77,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
     }
 
     @Override
-    public void accept(@NotNull Mob mob, @NotNull EntityDeathEvent event) {
+    public void accept(@NotNull ZombiesScene scene, @NotNull Mob mob, @NotNull EntityDeathEvent event) {
         EventDispatcher.call(new PhantazmMobDeathEvent(mob));
 
         roundSupplier.get().ifPresent(round -> {

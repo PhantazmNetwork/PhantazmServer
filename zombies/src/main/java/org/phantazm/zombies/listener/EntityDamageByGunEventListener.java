@@ -9,24 +9,26 @@ import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.event.EntityDamageByGunEvent;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public class EntityDamageByGunEventListener extends PhantazmMobEventListener<EntityDamageByGunEvent> {
     private final MapObjects mapObjects;
     private final Map<PlayerView, ZombiesPlayer> playerMap;
 
     public EntityDamageByGunEventListener(@NotNull Instance instance,
-        @NotNull MapObjects mapObjects, @NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
-        super(instance);
+        @NotNull MapObjects mapObjects, @NotNull Map<PlayerView, ZombiesPlayer> playerMap, @NotNull Supplier<ZombiesScene> scene) {
+        super(instance, scene);
         this.mapObjects = Objects.requireNonNull(mapObjects);
         this.playerMap = Objects.requireNonNull(playerMap);
     }
 
     @Override
-    protected void accept(@NotNull Mob mob, @NotNull EntityDamageByGunEvent event) {
+    protected void accept(@NotNull ZombiesScene scene, @NotNull Mob mob, @NotNull EntityDamageByGunEvent event) {
         if (event.isInstakill()) {
             if (mobResistsInstakill(mob)) {
                 event.setInstakill(false);

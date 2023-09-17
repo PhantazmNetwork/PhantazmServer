@@ -8,10 +8,11 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.map.shop.InteractionTypes;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.function.Supplier;
 
 public class PlayerInteractEntityListener extends ZombiesPlayerEventListener<PlayerEntityInteractEvent> {
 
@@ -21,14 +22,14 @@ public class PlayerInteractEntityListener extends ZombiesPlayerEventListener<Pla
 
     public PlayerInteractEntityListener(@NotNull Instance instance,
         @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
-        @NotNull PlayerRightClickListener rightClickListener) {
-        super(instance, zombiesPlayers);
+        @NotNull PlayerRightClickListener rightClickListener, @NotNull Supplier<ZombiesScene> scene) {
+        super(instance, zombiesPlayers, scene);
         this.shopHandler = Objects.requireNonNull(shopHandler);
         this.rightClickListener = Objects.requireNonNull(rightClickListener);
     }
 
     @Override
-    public void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerEntityInteractEvent event) {
+    public void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerEntityInteractEvent event) {
         if (event.getHand() != Player.Hand.MAIN) {
             return;
         }

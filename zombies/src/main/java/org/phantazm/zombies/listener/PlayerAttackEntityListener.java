@@ -16,10 +16,11 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.function.Supplier;
 
 public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<EntityAttackEvent> {
     private final float punchDamage;
@@ -30,8 +31,8 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
 
     public PlayerAttackEntityListener(@NotNull Instance instance,
         @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, float punchDamage, int punchCooldown,
-        float punchKnockback) {
-        super(instance, zombiesPlayers);
+        float punchKnockback, @NotNull Supplier<ZombiesScene> scene) {
+        super(instance, zombiesPlayers, scene);
         this.punchDamage = punchDamage;
         this.lastPunchTicksTag = Tag.Integer("last_punch").defaultValue(0);
         this.punchCooldown = punchCooldown;
@@ -39,7 +40,7 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
     }
 
     @Override
-    protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull EntityAttackEvent event) {
+    protected void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull EntityAttackEvent event) {
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
         if (playerOptional.isEmpty()) {
             return;

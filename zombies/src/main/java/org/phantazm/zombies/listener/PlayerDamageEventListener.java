@@ -23,11 +23,12 @@ import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.function.Supplier;
 
 public class PlayerDamageEventListener extends ZombiesPlayerEventListener<EntityDamageEvent> {
 
@@ -36,14 +37,14 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
     public PlayerDamageEventListener(@NotNull Instance instance,
         @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
-        @NotNull MapSettingsInfo mapSettingsInfo) {
-        super(instance, zombiesPlayers);
+        @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Supplier<ZombiesScene> scene) {
+        super(instance, zombiesPlayers, scene);
         this.mapObjects = Objects.requireNonNull(mapObjects);
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo);
     }
 
     @Override
-    protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull EntityDamageEvent event) {
+    protected void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull EntityDamageEvent event) {
         if (!zombiesPlayer.canTakeDamage()) {
             event.setCancelled(true);
             return;

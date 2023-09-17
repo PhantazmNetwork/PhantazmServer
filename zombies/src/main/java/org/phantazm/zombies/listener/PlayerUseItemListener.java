@@ -6,10 +6,11 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.function.Supplier;
 
 public class PlayerUseItemListener extends ZombiesPlayerEventListener<PlayerUseItemEvent> {
 
@@ -17,13 +18,13 @@ public class PlayerUseItemListener extends ZombiesPlayerEventListener<PlayerUseI
 
     public PlayerUseItemListener(@NotNull Instance instance,
         @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers,
-        @NotNull PlayerRightClickListener rightClickListener) {
-        super(instance, zombiesPlayers);
+        @NotNull PlayerRightClickListener rightClickListener, @NotNull Supplier<ZombiesScene> scene) {
+        super(instance, zombiesPlayers, scene);
         this.rightClickListener = Objects.requireNonNull(rightClickListener);
     }
 
     @Override
-    public void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerUseItemEvent event) {
+    public void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerUseItemEvent event) {
         if (event.getHand() == Player.Hand.MAIN) {
             rightClickListener.onRightClick(zombiesPlayer, event.getPlayer().getHeldSlot());
         }

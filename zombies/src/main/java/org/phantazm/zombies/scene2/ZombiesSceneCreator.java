@@ -165,8 +165,9 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         stageTransition.start();
 
         EventNode<Event> childNode =
-            createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
-                doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, spawnPos);
+            createEventNode(sceneWrapper.unmodifiableView(), instance, zombiesPlayers, mapObjects, roundHandler,
+                shopHandler, windowHandler, doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(),
+                powerupHandler, spawnPos);
         eventNodeWrapper.set(childNode);
 
         CorpseCreator corpseCreator = createCorpseCreator(mapObjects.mapDependencyProvider());
@@ -249,7 +250,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         return doorHandlerSource.make(doorTracker, roomTracker);
     }
 
-    private @NotNull EventNode<Event> createEventNode(@NotNull Instance instance,
+    private @NotNull EventNode<Event> createEventNode(@NotNull Supplier<ZombiesScene> sceneSupplier, @NotNull Instance instance,
         @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
         @NotNull RoundHandler roundHandler, @NotNull ShopHandler shopHandler, @NotNull WindowHandler windowHandler,
         @NotNull DoorHandler doorHandler, @NotNull BoundedTracker<Room> roomTracker,
@@ -260,46 +261,46 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         //entity events
         node.addListener(EntityDeathEvent.class,
             new PhantazmMobDeathListener(keyParser, instance, roundHandler::currentRound, powerupHandler,
-                roomTracker, windowTracker, zombiesPlayers, settings));
+                roomTracker, windowTracker, zombiesPlayers, settings, sceneSupplier));
         node.addListener(EntityDamageByGunEvent.class,
-            new EntityDamageByGunEventListener(instance, mapObjects, zombiesPlayers));
+            new EntityDamageByGunEventListener(instance, mapObjects, zombiesPlayers, sceneSupplier));
 
         //player events
         node.addListener(EntityDamageEvent.class,
-            new PlayerDamageEventListener(instance, zombiesPlayers, mapObjects, settings));
-        node.addListener(PlayerHandAnimationEvent.class, new PlayerLeftClickListener(instance, zombiesPlayers));
+            new PlayerDamageEventListener(instance, zombiesPlayers, mapObjects, settings, sceneSupplier));
+        node.addListener(PlayerHandAnimationEvent.class, new PlayerLeftClickListener(instance, zombiesPlayers, sceneSupplier));
         PlayerAttackEntityListener attackEntityListener =
             new PlayerAttackEntityListener(instance, zombiesPlayers, settings.punchDamage(),
-                settings.punchCooldown(), settings.punchKnockback());
+                settings.punchCooldown(), settings.punchKnockback(), sceneSupplier);
 
         node.addListener(EntityAttackEvent.class, attackEntityListener);
-        node.addListener(PlayerChangeHeldSlotEvent.class, new PlayerItemSelectListener(instance, zombiesPlayers));
-        node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers));
+        node.addListener(PlayerChangeHeldSlotEvent.class, new PlayerItemSelectListener(instance, zombiesPlayers, sceneSupplier));
+        node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers, sceneSupplier));
 
         //various forms of clicking
         PlayerRightClickListener rightClickListener = new PlayerRightClickListener();
         node.addListener(PlayerBlockInteractEvent.class,
             new PlayerInteractBlockListener(instance, zombiesPlayers, shopHandler, doorHandler,
-                rightClickListener));
+                rightClickListener, sceneSupplier));
         node.addListener(PlayerEntityInteractEvent.class,
-            new PlayerInteractEntityListener(instance, zombiesPlayers, shopHandler, rightClickListener));
+            new PlayerInteractEntityListener(instance, zombiesPlayers, shopHandler, rightClickListener, sceneSupplier));
         node.addListener(PlayerUseItemEvent.class,
-            new PlayerUseItemListener(instance, zombiesPlayers, rightClickListener));
+            new PlayerUseItemListener(instance, zombiesPlayers, rightClickListener, sceneSupplier));
         node.addListener(PlayerUseItemOnBlockEvent.class,
-            new PlayerUseItemOnBlockListener(instance, zombiesPlayers, rightClickListener));
-        node.addListener(PlayerSwapItemEvent.class, new PlayerSwapItemListener(instance, zombiesPlayers));
+            new PlayerUseItemOnBlockListener(instance, zombiesPlayers, rightClickListener, sceneSupplier));
+        node.addListener(PlayerSwapItemEvent.class, new PlayerSwapItemListener(instance, zombiesPlayers, sceneSupplier));
 
         //sneaking/not sneaking
         node.addListener(PlayerStartSneakingEvent.class,
-            new PlayerStartSneakingListener(instance, zombiesPlayers, windowHandler));
+            new PlayerStartSneakingListener(instance, zombiesPlayers, windowHandler, sceneSupplier));
         node.addListener(PlayerStopSneakingEvent.class,
-            new PlayerStopSneakingListener(instance, zombiesPlayers, windowHandler));
+            new PlayerStopSneakingListener(instance, zombiesPlayers, windowHandler, sceneSupplier));
 
         //inventory
-        node.addListener(InventoryPreClickEvent.class, new PlayerInventoryPreClickListener(instance, zombiesPlayers));
-        node.addListener(PlayerPreEatEvent.class, new PlayerEatItemEventListener(instance, zombiesPlayers));
+        node.addListener(InventoryPreClickEvent.class, new PlayerInventoryPreClickListener(instance, zombiesPlayers, sceneSupplier));
+        node.addListener(PlayerPreEatEvent.class, new PlayerEatItemEventListener(instance, zombiesPlayers, sceneSupplier));
 
-        node.addListener(PlayerRespawnEvent.class, new PlayerRespawnListener(instance, zombiesPlayers, spawnPos));
+        node.addListener(PlayerRespawnEvent.class, new PlayerRespawnListener(instance, zombiesPlayers, spawnPos, sceneSupplier));
 
         return node;
     }

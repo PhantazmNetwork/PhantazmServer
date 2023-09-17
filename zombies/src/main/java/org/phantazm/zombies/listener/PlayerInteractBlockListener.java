@@ -10,10 +10,11 @@ import org.phantazm.zombies.map.handler.DoorHandler;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.map.shop.InteractionTypes;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.function.Supplier;
 
 public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<PlayerBlockInteractEvent> {
 
@@ -25,15 +26,16 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
 
     public PlayerInteractBlockListener(@NotNull Instance instance,
         @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
-        @NotNull DoorHandler doorHandler, @NotNull PlayerRightClickListener rightClickListener) {
-        super(instance, zombiesPlayers);
+        @NotNull DoorHandler doorHandler, @NotNull PlayerRightClickListener rightClickListener,
+        @NotNull Supplier<ZombiesScene> scene) {
+        super(instance, zombiesPlayers, scene);
         this.shopHandler = Objects.requireNonNull(shopHandler);
         this.doorHandler = Objects.requireNonNull(doorHandler);
         this.rightClickListener = Objects.requireNonNull(rightClickListener);
     }
 
     @Override
-    public void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerBlockInteractEvent event) {
+    public void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerBlockInteractEvent event) {
         event.setCancelled(true);
 
         if (event.getBlock().registry().material() != Material.CHEST) {
