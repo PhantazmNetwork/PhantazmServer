@@ -1,8 +1,10 @@
 package org.phantazm.core.player;
 
 import net.minestom.server.entity.Player;
+import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -15,6 +17,31 @@ import java.util.concurrent.CompletableFuture;
  * @implSpec Implementations should guarantee thread safety for all methods.
  */
 public interface PlayerViewProvider {
+    class Global {
+        private static final Object INITIALIZATION_LOCK = new Object();
+        private static PlayerViewProvider instance;
+
+        public static void init(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
+            @NotNull Duration duration) {
+            synchronized (INITIALIZATION_LOCK) {
+                if (instance != null) {
+                    throw new IllegalArgumentException("PlayerViewProvider has already been initialized");
+                }
+
+                Global.instance = new BasicPlayerViewProvider(identitySource, connectionManager, duration);
+            }
+        }
+
+        public static @NotNull PlayerViewProvider instance() {
+            PlayerViewProvider instance = Global.instance;
+            if (instance == null) {
+                throw new IllegalArgumentException("PlayerViewProvider has not yet been initialized");
+            }
+
+            return instance;
+        }
+    }
+
     /**
      * Returns a {@link PlayerView} instance for the specified UUID.
      *

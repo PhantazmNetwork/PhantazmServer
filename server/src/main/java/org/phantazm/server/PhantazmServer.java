@@ -22,7 +22,6 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.core.chat.ChatConfig;
 import org.phantazm.core.guild.party.PartyConfig;
-import org.phantazm.core.player.BasicPlayerViewProvider;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
@@ -47,6 +46,7 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -199,8 +199,10 @@ public final class PhantazmServer {
             () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
         ConfigCodec tomlCodec = new TomlCodec();
 
-        PlayerViewProvider viewProvider =
-            new BasicPlayerViewProvider(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
+        PlayerViewProvider.Global.init(IdentitySource.MOJANG, MinecraftServer.getConnectionManager(),
+            Duration.ofMinutes(2));
+
+        PlayerViewProvider viewProvider = PlayerViewProvider.Global.instance();
 
         CompletableFuture<?> independentFeatures = CompletableFuture.runAsync(() -> {
             DatapackFeature.initialize();

@@ -1,7 +1,5 @@
 package org.phantazm.zombies.command;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -17,17 +15,15 @@ import org.phantazm.zombies.scene2.ZombiesJoiner;
 import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.stage.Stage;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 public class ZombiesRejoinCommand extends Command {
-    public ZombiesRejoinCommand(@NotNull PlayerViewProvider viewProvider, @NotNull ZombiesJoiner zombiesJoiner) {
+    public ZombiesRejoinCommand(@NotNull ZombiesJoiner zombiesJoiner) {
         super("rejoin");
 
-        Objects.requireNonNull(viewProvider);
-
+        PlayerViewProvider viewProvider = PlayerViewProvider.Global.instance();
         Argument<UUID> targetGameArgument = ArgumentType.UUID("target-game").setDefaultValue(() -> null);
 
         targetGameArgument.setSuggestionCallback((sender, context, suggestion) -> {

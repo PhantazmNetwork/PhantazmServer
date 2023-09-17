@@ -32,8 +32,8 @@ public class ZombiesJoinCommand extends Command {
 
     @SuppressWarnings("unchecked")
     public ZombiesJoinCommand(@NotNull ZombiesJoiner zombiesJoiner, @NotNull Map<? super UUID, ? extends Party> partyMap,
-        @NotNull PlayerViewProvider viewProvider, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
-        long ratelimit, @NotNull ZombiesDatabase zombiesDatabase) {
+        @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, long ratelimit,
+        @NotNull ZombiesDatabase zombiesDatabase) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.Word("map-key");
@@ -41,7 +41,6 @@ public class ZombiesJoinCommand extends Command {
         Argument<Boolean> sandboxArgument = ArgumentType.Boolean("sandbox").setDefaultValue(false);
 
         Objects.requireNonNull(partyMap);
-        Objects.requireNonNull(viewProvider);
         Objects.requireNonNull(keyParser);
         Objects.requireNonNull(maps);
 
@@ -111,7 +110,7 @@ public class ZombiesJoinCommand extends Command {
             Party party = partyMap.get(joiner.getUuid());
             Set<PlayerView> playerViews;
             if (party == null) {
-                playerViews = Set.of(viewProvider.fromPlayer(joiner));
+                playerViews = Set.of(PlayerViewProvider.Global.instance().fromPlayer(joiner));
             } else {
                 playerViews = new HashSet<>(party.getMemberManager().getMembers().size());
                 for (GuildMember guildMember : party.getMemberManager().getMembers().values()) {
@@ -170,5 +169,4 @@ public class ZombiesJoinCommand extends Command {
             }
         }, mapKeyArgument, restrictedArgument, sandboxArgument);
     }
-
 }

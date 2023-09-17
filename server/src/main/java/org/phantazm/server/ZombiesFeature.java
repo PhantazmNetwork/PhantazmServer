@@ -132,7 +132,7 @@ public final class ZombiesFeature {
 
         ZombiesJoiner joiner = new ZombiesJoiner(providers);
 
-        MinecraftServer.getCommandManager().register(new ZombiesCommand(joiner, parties, keyParser, maps, viewProvider,
+        MinecraftServer.getCommandManager().register(new ZombiesCommand(joiner, parties, keyParser, maps,
             zombiesConfig.joinRatelimit(), database));
     }
 

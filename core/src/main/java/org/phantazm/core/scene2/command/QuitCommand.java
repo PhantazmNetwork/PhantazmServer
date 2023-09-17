@@ -1,4 +1,4 @@
-package org.phantazm.core.scene2;
+package org.phantazm.core.scene2.command;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
