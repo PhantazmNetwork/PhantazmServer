@@ -121,7 +121,6 @@ public class ZombiesScene extends InstanceScene {
         CompletableFuture.allOf(futures).join();
 
         if (restricted) {
-            setJoinable(false);
             stageTransition.setCurrentStage(StageKeys.IN_GAME);
         }
     }
