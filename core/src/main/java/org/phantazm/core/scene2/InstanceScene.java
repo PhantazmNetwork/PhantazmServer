@@ -82,12 +82,7 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
 
     @Override
     public boolean sendRemovalPacketToLeavingPlayer(@NotNull Player leavingPlayer, @NotNull Player scenePlayer) {
-        if (hasSpectator(leavingPlayer)) {
-            //leaving player is a spectator, always remove from their tablist
-            return true;
-        }
-
-        return !hasSpectator(scenePlayer);
+        return hasSpectator(leavingPlayer) || !hasSpectator(scenePlayer);
     }
 
     @Override
