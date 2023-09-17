@@ -84,6 +84,9 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
                 event.getPlayer().sendPacket(new OpenBookPacket(Player.Hand.MAIN));
             }
         });
+        node.addListener(PlayerRespawnEvent.class, event -> {
+            event.setRespawnPosition(spawnPoint);
+        });
 
         return node;
     }

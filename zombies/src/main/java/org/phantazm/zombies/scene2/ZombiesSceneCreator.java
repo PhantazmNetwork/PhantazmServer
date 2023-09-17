@@ -166,7 +166,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
 
         EventNode<Event> childNode =
             createEventNode(instance, zombiesPlayers, mapObjects, roundHandler, shopHandler, windowHandler,
-                doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler);
+                doorHandler, mapObjects.roomTracker(), mapObjects.windowTracker(), powerupHandler, spawnPos);
         eventNodeWrapper.set(childNode);
 
         CorpseCreator corpseCreator = createCorpseCreator(mapObjects.mapDependencyProvider());
@@ -253,7 +253,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
         @NotNull RoundHandler roundHandler, @NotNull ShopHandler shopHandler, @NotNull WindowHandler windowHandler,
         @NotNull DoorHandler doorHandler, @NotNull BoundedTracker<Room> roomTracker,
-        @NotNull BoundedTracker<Window> windowTracker, @NotNull PowerupHandler powerupHandler) {
+        @NotNull BoundedTracker<Window> windowTracker, @NotNull PowerupHandler powerupHandler, @NotNull Pos spawnPos) {
         EventNode<Event> node = EventNode.all("phantazm_zombies_instance_" + instance.getUniqueId());
         MapSettingsInfo settings = mapInfo.settings();
 
@@ -298,6 +298,8 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         //inventory
         node.addListener(InventoryPreClickEvent.class, new PlayerInventoryPreClickListener(instance, zombiesPlayers));
         node.addListener(PlayerPreEatEvent.class, new PlayerEatItemEventListener(instance, zombiesPlayers));
+
+        node.addListener(PlayerRespawnEvent.class, new PlayerRespawnListener(instance, zombiesPlayers, spawnPos));
 
         return node;
     }
