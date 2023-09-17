@@ -19,7 +19,7 @@ import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageKeys;
 import org.phantazm.zombies.stage.StageTransition;
 
-public class RoundCommand extends SandboxCommand {
+public class RoundCommand extends SandboxLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.round");
 
     public RoundCommand(@NotNull PlayerViewProvider viewProvider) {

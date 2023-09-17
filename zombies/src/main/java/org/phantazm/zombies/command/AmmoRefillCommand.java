@@ -16,7 +16,7 @@ import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Optional;
 
-public class AmmoRefillCommand extends SandboxCommand {
+public class AmmoRefillCommand extends SandboxLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.ammo_refill");
 
     public AmmoRefillCommand(@NotNull PlayerViewProvider viewProvider) {

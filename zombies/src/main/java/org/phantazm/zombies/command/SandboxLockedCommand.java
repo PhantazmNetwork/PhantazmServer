@@ -8,10 +8,10 @@ import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
 
-public class SandboxCommand extends Command {
+public class SandboxLockedCommand extends Command {
     private final Permission permission;
 
-    public SandboxCommand(@NotNull String name, @NotNull Permission permission) {
+    public SandboxLockedCommand(@NotNull String name, @NotNull Permission permission) {
         super(name);
         this.permission = Objects.requireNonNull(permission);
     }

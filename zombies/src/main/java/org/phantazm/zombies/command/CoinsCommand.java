@@ -15,7 +15,7 @@ import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-public class CoinsCommand extends SandboxCommand {
+public class CoinsCommand extends SandboxLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.coins");
     private static final Argument<CoinAction> COIN_ACTION_ARGUMENT =
         ArgumentType.Enum("action", CoinAction.class).setFormat(ArgumentEnum.Format.LOWER_CASED);

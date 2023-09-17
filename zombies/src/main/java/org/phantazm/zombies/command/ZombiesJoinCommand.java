@@ -55,6 +55,11 @@ public class ZombiesJoinCommand extends Command {
             suggestion.addEntry(new SuggestionEntry("false", Component.text("false")));
         });
 
+        sandboxArgument.setSuggestionCallback((sender, context, suggestion) -> {
+            suggestion.addEntry(new SuggestionEntry("true", Component.text("true")));
+            suggestion.addEntry(new SuggestionEntry("false", Component.text("false")));
+        });
+
         addConditionalSyntax((sender, commandString) -> {
             if (commandString == null) {
                 return sender instanceof Player;

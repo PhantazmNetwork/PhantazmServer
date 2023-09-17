@@ -12,7 +12,7 @@ import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-public class KillAllCommand extends SandboxCommand {
+public class KillAllCommand extends SandboxLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.killall");
 
     public KillAllCommand(@NotNull PlayerViewProvider viewProvider) {

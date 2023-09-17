@@ -12,7 +12,7 @@ import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-public class GodmodeCommand extends SandboxCommand {
+public class GodmodeCommand extends SandboxLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.godmode");
 
     public GodmodeCommand(@NotNull PlayerViewProvider viewProvider) {

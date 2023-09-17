@@ -15,7 +15,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-public class FlagToggleCommand extends SandboxCommand {
+public class FlagToggleCommand extends SandboxLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.flag_toggle");
 
     private static final ArgumentString FLAG_ARGUMENT = ArgumentType.String("flag");
