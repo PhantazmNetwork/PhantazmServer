@@ -18,6 +18,7 @@ import org.phantazm.zombies.equipment.gun2.shoot.GunShoot;
 import org.phantazm.zombies.equipment.gun2.shoot.ShootTester;
 import org.phantazm.zombies.equipment.perk.effect.PerkEffect;
 import org.phantazm.zombies.equipment.perk.level.PerkLevelInjector;
+import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.List;
@@ -58,7 +59,8 @@ public class GunLevelInjector implements PerkLevelInjector {
         GunReload reload = new BasicGunReload(reloadTester, state);
         GunShoot shoot = new GunShootCreator(gunUUID, shootTester, reload, stats, state);
         EventNode<Event> eventNode = oldStore.get(Keys.EVENT_NODE_HOLDER).eventNode();
-        GunModule module = new GunModule(gunUUID, stats, state, shootTester, reloadTester, shoot, reload, zombiesPlayer::getPlayer, eventNode);
+        MapObjects mapObjects = oldStore.get(Keys.MAP_OBJECTS);
+        GunModule module = new GunModule(gunUUID, stats, state, shootTester, reloadTester, shoot, reload, zombiesPlayer::getPlayer, eventNode, mapObjects);
         builder.with(Keys.GUN_MODULE, module);
     }
 

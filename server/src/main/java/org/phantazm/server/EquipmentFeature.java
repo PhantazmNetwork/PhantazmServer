@@ -231,7 +231,10 @@ final class EquipmentFeature {
                     return Optional.empty();
                 }
 
-                InjectionStore injectionStore = InjectionStore.of(org.phantazm.zombies.equipment.gun2.Keys.EVENT_NODE_HOLDER, new EventNodeHolder(equipmentModule.getEventNode()));
+                InjectionStore injectionStore = InjectionStore.of(
+                    org.phantazm.zombies.equipment.gun2.Keys.EVENT_NODE_HOLDER, new EventNodeHolder(equipmentModule.getEventNode()),
+                    org.phantazm.zombies.equipment.gun2.Keys.MAP_OBJECTS, equipmentModule.getMapObjects()
+                );
                 return Optional.of(perkCreator.forPlayer(zombiesPlayer, injectionStore));
             }
 

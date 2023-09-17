@@ -8,6 +8,7 @@ import org.phantazm.zombies.equipment.gun2.reload.GunReload;
 import org.phantazm.zombies.equipment.gun2.reload.ReloadTester;
 import org.phantazm.zombies.equipment.gun2.shoot.GunShoot;
 import org.phantazm.zombies.equipment.gun2.shoot.ShootTester;
+import org.phantazm.zombies.map.objects.MapObjects;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -21,6 +22,7 @@ public record GunModule(@NotNull UUID gunUUID,
     @NotNull GunShoot shoot,
     @NotNull GunReload reload,
     @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-    @NotNull EventNode<Event> eventNode) {
+    @NotNull EventNode<Event> eventNode,
+    @NotNull MapObjects mapObjects) {
 
 }

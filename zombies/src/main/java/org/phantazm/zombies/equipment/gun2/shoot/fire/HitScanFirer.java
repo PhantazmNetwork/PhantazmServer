@@ -11,29 +11,47 @@ import org.phantazm.zombies.equipment.gun2.Keys;
 import org.phantazm.zombies.equipment.gun2.event.GunHitShotEvent;
 import org.phantazm.zombies.equipment.gun2.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun2.shoot.GunShot;
+import org.phantazm.zombies.equipment.gun2.shoot.endpoint.ShotEndpointSelector;
 import org.phantazm.zombies.equipment.gun2.target.TargetFinder;
 import org.phantazm.zombies.player.PlayerComponent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 public class HitScanFirer implements PlayerComponent<Firer> {
 
+    private final PlayerComponent<TargetFinder> targetFinder;
+
+    private final PlayerComponent<ShotEndpointSelector> endSelector;
+
+    public HitScanFirer(@NotNull PlayerComponent<TargetFinder> targetFinder, @NotNull PlayerComponent<ShotEndpointSelector> endSelector) {
+        this.targetFinder = Objects.requireNonNull(targetFinder);
+        this.endSelector = Objects.requireNonNull(endSelector);
+    }
+
     @Override
     public @NotNull Firer forPlayer(@NotNull ZombiesPlayer player, @NotNull InjectionStore injectionStore) {
         GunModule module = injectionStore.get(Keys.GUN_MODULE);
-        return new Impl(module.entitySupplier());
+        TargetFinder finder = targetFinder.forPlayer(player, injectionStore);
+        return new Impl(module.entitySupplier(), finder, endSelector.forPlayer(player, injectionStore));
     }
 
     private static class Impl implements Firer {
 
         private final Supplier<Optional<? extends Entity>> entitySupplier;
 
-        public Impl(Supplier<Optional<? extends Entity>> entitySupplier) {
+        private final TargetFinder targetFinder;
+
+        private final ShotEndpointSelector endSelector;
+
+        public Impl(Supplier<Optional<? extends Entity>> entitySupplier, TargetFinder targetFinder, ShotEndpointSelector endSelector) {
             this.entitySupplier = entitySupplier;
+            this.targetFinder = targetFinder;
+            this.endSelector = endSelector;
         }
 
         @Override

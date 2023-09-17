@@ -3,10 +3,13 @@ package org.phantazm.zombies.equipment.gun2;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.zombies.map.objects.MapObjects;
 
 public class Keys {
 
     public static final InjectionStore.Key<EventNodeHolder> EVENT_NODE_HOLDER = InjectionStore.key(EventNodeHolder.class);
+
+    public static final InjectionStore.Key<MapObjects> MAP_OBJECTS = InjectionStore.key(MapObjects.class);
 
     public static final InjectionStore.Key<GunModule> GUN_MODULE = InjectionStore.key(GunModule.class);
 
