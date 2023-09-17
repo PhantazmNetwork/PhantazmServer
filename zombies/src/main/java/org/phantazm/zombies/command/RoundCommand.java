@@ -49,6 +49,8 @@ public class RoundCommand extends SandboxLockedCommand {
                     return;
                 }
 
+                boolean isRestricted = !sender.hasPermission(PERMISSION);
+
                 scene.getAcquirable().sync(self -> {
                     RoundHandler handler = self.map().roundHandler();
                     int roundCount = handler.roundCount();
@@ -57,6 +59,12 @@ public class RoundCommand extends SandboxLockedCommand {
                     if (roundIndex < 0 || roundIndex >= roundCount) {
                         sender.sendMessage(
                             Component.text("Round " + (roundIndex + 1) + " is out of bounds!", NamedTextColor.RED));
+                        return;
+                    }
+
+                    if (isRestricted && roundIndex <= handler.currentRoundIndex()) {
+                        sender.sendMessage(Component.text("You cannot restart the current round or go to " +
+                            "previous rounds!", NamedTextColor.RED));
                         return;
                     }
 
