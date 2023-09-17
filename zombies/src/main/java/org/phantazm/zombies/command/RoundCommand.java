@@ -46,37 +46,35 @@ public class RoundCommand extends SandboxLockedCommand {
     protected void runCommand(@NotNull CommandContext context, @NotNull ZombiesScene scene, @NotNull Player sender) {
         boolean isRestricted = !sender.hasPermission(PERMISSION);
 
-        scene.getAcquirable().sync(self -> {
-            RoundHandler handler = self.map().roundHandler();
-            int roundCount = handler.roundCount();
-            int roundIndex = context.get(ROUND_NUMBER) - 1;
+        RoundHandler handler = scene.map().roundHandler();
+        int roundCount = handler.roundCount();
+        int roundIndex = context.get(ROUND_NUMBER) - 1;
 
-            if (roundIndex < 0 || roundIndex >= roundCount) {
-                sender.sendMessage(
-                    Component.text("Round " + (roundIndex + 1) + " is out of bounds!", NamedTextColor.RED));
-                return;
-            }
+        if (roundIndex < 0 || roundIndex >= roundCount) {
+            sender.sendMessage(
+                Component.text("Round " + (roundIndex + 1) + " is out of bounds!", NamedTextColor.RED));
+            return;
+        }
 
-            if (isRestricted && roundIndex <= handler.currentRoundIndex()) {
-                sender.sendMessage(Component.text("You cannot restart the current round or go to " +
-                    "previous rounds!", NamedTextColor.RED));
-                return;
-            }
+        if (isRestricted && roundIndex <= handler.currentRoundIndex()) {
+            sender.sendMessage(Component.text("You cannot restart the current round or go to " +
+                "previous rounds!", NamedTextColor.RED));
+            return;
+        }
 
-            self.setLegit(false);
+        scene.setLegit(false);
 
-            StageTransition transition = self.stageTransition();
-            Stage current = transition.getCurrentStage();
-            MinecraftServer.getSchedulerManager().scheduleNextProcess(() -> {
-                if (current == null || !current.key().equals(StageKeys.IN_GAME)) {
-                    transition.setCurrentStage(StageKeys.IN_GAME);
-                    if (roundIndex != 0) {
-                        handler.setCurrentRound(roundIndex);
-                    }
-                } else {
+        StageTransition transition = scene.stageTransition();
+        Stage current = transition.getCurrentStage();
+        MinecraftServer.getSchedulerManager().scheduleNextProcess(() -> {
+            if (current == null || !current.key().equals(StageKeys.IN_GAME)) {
+                transition.setCurrentStage(StageKeys.IN_GAME);
+                if (roundIndex != 0) {
                     handler.setCurrentRound(roundIndex);
                 }
-            });
+            } else {
+                handler.setCurrentRound(roundIndex);
+            }
         });
     }
 }
