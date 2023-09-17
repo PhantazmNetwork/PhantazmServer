@@ -44,4 +44,8 @@ public final class ZombiesJoiner {
     public @NotNull Join<ZombiesScene> joinRestricted(@NotNull Set<@NotNull PlayerView> players, @NotNull Key mapKey) {
         return new JoinZombiesRestricted(players, validateKey(mapKey), mapKey);
     }
+
+    public @NotNull Join<ZombiesScene> joinSandbox(@NotNull Set<@NotNull PlayerView> players, @NotNull Key mapKey) {
+        return new JoinZombiesRestricted(players, validateKey(mapKey), mapKey, true);
+    }
 }

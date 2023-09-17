@@ -8,10 +8,8 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
-import net.minestom.server.timer.SchedulerManager;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
-import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneManager;
@@ -21,12 +19,7 @@ import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageKeys;
 import org.phantazm.zombies.stage.StageTransition;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
-
-public class RoundCommand extends PermissionLockedCommand {
+public class RoundCommand extends SandboxCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.round");
 
     public RoundCommand(@NotNull PlayerViewProvider viewProvider) {
@@ -52,6 +45,10 @@ public class RoundCommand extends PermissionLockedCommand {
             Player playerSender = (Player) sender;
             PlayerView playerView = viewProvider.fromPlayer(playerSender);
             SceneManager.Global.instance().currentScene(playerView, ZombiesScene.class).ifPresent(scene -> {
+                if (super.cannotExecute(sender, scene)) {
+                    return;
+                }
+
                 scene.getAcquirable().sync(self -> {
                     RoundHandler handler = self.map().roundHandler();
                     int roundCount = handler.roundCount();

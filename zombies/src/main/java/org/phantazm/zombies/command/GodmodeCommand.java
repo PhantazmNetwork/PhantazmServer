@@ -4,7 +4,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
-import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneManager;
@@ -13,7 +12,7 @@ import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-public class GodmodeCommand extends PermissionLockedCommand {
+public class GodmodeCommand extends SandboxCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.godmode");
 
     public GodmodeCommand(@NotNull PlayerViewProvider viewProvider) {
@@ -24,6 +23,10 @@ public class GodmodeCommand extends PermissionLockedCommand {
 
             PlayerView playerView = viewProvider.fromPlayer(senderPlayer);
             SceneManager.Global.instance().currentScene(playerView, ZombiesScene.class).ifPresent(scene -> {
+                if (super.cannotExecute(sender, scene)) {
+                    return;
+                }
+
                 scene.getAcquirable().sync(self -> {
                     self.setLegit(false);
 

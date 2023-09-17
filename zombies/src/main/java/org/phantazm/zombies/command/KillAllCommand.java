@@ -6,19 +6,13 @@ import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
-import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
-
-public class KillAllCommand extends PermissionLockedCommand {
+public class KillAllCommand extends SandboxCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.killall");
 
     public KillAllCommand(@NotNull PlayerViewProvider viewProvider) {
@@ -27,14 +21,20 @@ public class KillAllCommand extends PermissionLockedCommand {
             Player playerSender = (Player) sender;
             PlayerView playerView = viewProvider.fromPlayer(playerSender);
             SceneManager.Global.instance().currentScene(playerView, ZombiesScene.class).ifPresent(scene -> {
-                scene.setLegit(false);
+                if (super.cannotExecute(sender, scene)) {
+                    return;
+                }
 
-                scene.map().roundHandler().currentRound().ifPresent(round -> {
-                    for (Mob mob : round.getSpawnedMobs()) {
-                        mob.getAcquirable().sync(self -> {
-                            ((LivingEntity) self).damage(Damage.fromPlayer(playerSender, mob.getHealth()), true);
-                        });
-                    }
+                scene.getAcquirable().sync(self -> {
+                    self.setLegit(false);
+
+                    self.map().roundHandler().currentRound().ifPresent(round -> {
+                        for (Mob mob : round.getSpawnedMobs()) {
+                            mob.getAcquirable().sync(self1 -> {
+                                ((LivingEntity) self1).damage(Damage.fromPlayer(playerSender, mob.getHealth()), true);
+                            });
+                        }
+                    });
                 });
             });
         });

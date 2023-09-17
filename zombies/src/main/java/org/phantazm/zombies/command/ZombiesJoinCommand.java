@@ -20,20 +20,24 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.Join;
 import org.phantazm.core.scene2.SceneManager;
+import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.scene2.ZombiesJoiner;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class ZombiesJoinCommand extends Command {
+    @SuppressWarnings("unchecked")
     public ZombiesJoinCommand(@NotNull ZombiesJoiner zombiesJoiner, @NotNull Map<? super UUID, ? extends Party> partyMap,
         @NotNull PlayerViewProvider viewProvider, @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
-        long ratelimit) {
+        long ratelimit, @NotNull ZombiesDatabase zombiesDatabase) {
         super("join");
 
-        Argument<String> mapKeyArgument = ArgumentType.String("map-key");
+        Argument<String> mapKeyArgument = ArgumentType.Word("map-key");
         Argument<Boolean> restrictedArgument = ArgumentType.Boolean("restricted").setDefaultValue(false);
+        Argument<Boolean> sandboxArgument = ArgumentType.Boolean("sandbox").setDefaultValue(false);
 
         Objects.requireNonNull(partyMap);
         Objects.requireNonNull(viewProvider);
@@ -107,6 +111,31 @@ public class ZombiesJoinCommand extends Command {
                 for (GuildMember guildMember : party.getMemberManager().getMembers().values()) {
                     playerViews.add(guildMember.getPlayerView());
                 }
+            }
+
+            boolean sandbox = context.get(sandboxArgument);
+            if (sandbox) {
+                CompletableFuture<Boolean>[] futures = new CompletableFuture[playerViews.size()];
+                int i = 0;
+                for (PlayerView playerView : playerViews) {
+                    futures[i++] = zombiesDatabase.getMapStats(playerView.getUUID(), targetMap).thenApply(stats -> {
+                        return stats.getWins() > 0;
+                    });
+                }
+
+                CompletableFuture.allOf(futures).thenRun(() -> {
+                    for (CompletableFuture<Boolean> future : futures) {
+                        if (future.isCompletedExceptionally() || !future.join()) {
+                            sender.sendMessage("All joining members must have beaten at least 1 game before they can " +
+                                "play sandbox mode!");
+                            return;
+                        }
+                    }
+
+                    SceneManager.Global.instance().joinScene(zombiesJoiner.joinSandbox(playerViews, targetMap));
+                });
+
+                return;
             }
 
             boolean restricted = context.get(restrictedArgument);

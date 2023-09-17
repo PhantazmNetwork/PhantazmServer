@@ -10,17 +10,12 @@ import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
-import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
-
-public class FlagToggleCommand extends PermissionLockedCommand {
+public class FlagToggleCommand extends SandboxCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.flag_toggle");
 
     private static final ArgumentString FLAG_ARGUMENT = ArgumentType.String("flag");
@@ -32,6 +27,10 @@ public class FlagToggleCommand extends PermissionLockedCommand {
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             PlayerView playerView = viewProvider.fromPlayer((Player) sender);
             SceneManager.Global.instance().currentScene(playerView, ZombiesScene.class).ifPresent(scene -> {
+                if (super.cannotExecute(sender, scene)) {
+                    return;
+                }
+
                 scene.getAcquirable().sync(self -> {
                     self.setLegit(false);
 

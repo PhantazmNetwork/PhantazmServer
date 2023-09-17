@@ -23,7 +23,7 @@ public class PermissionLockedCommand extends Command {
         this(name, permission, EMPTY_STRING_ARRAY);
     }
 
-    private boolean checkPermission(CommandSender sender, String command) {
+    protected boolean checkPermission(CommandSender sender, String command) {
         return sender.hasPermission(permission);
     }
 }

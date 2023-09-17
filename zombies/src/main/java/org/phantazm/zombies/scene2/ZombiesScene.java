@@ -46,6 +46,7 @@ public class ZombiesScene extends InstanceScene {
     private final Pos spawnPos;
 
     private boolean isLegit;
+    private boolean sandbox;
     private boolean restricted;
 
     public ZombiesScene(@NotNull Instance instance,
@@ -279,6 +280,18 @@ public class ZombiesScene extends InstanceScene {
 
     public void setLegit(boolean legit) {
         this.isLegit = legit;
+    }
+
+    public boolean isSandbox() {
+        return sandbox;
+    }
+
+    public void setSandbox(boolean sandbox) {
+        this.sandbox = sandbox;
+
+        if (sandbox) {
+            this.isLegit = false;
+        }
     }
 
     public @NotNull EventNode<Event> sceneNode() {
