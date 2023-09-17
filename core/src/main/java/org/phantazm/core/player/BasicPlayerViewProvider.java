@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @apiNote It is expected that clients will create only one instance of this class, following a singleton pattern.
  * There should only be a single active PlayerView instance corresponding to any given UUID at any time.
  */
-class BasicPlayerViewProvider implements PlayerViewProvider {
+public class BasicPlayerViewProvider implements PlayerViewProvider {
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(2);
 
     private final IdentitySource identitySource;
@@ -36,7 +36,7 @@ class BasicPlayerViewProvider implements PlayerViewProvider {
      * @param connectionManager the {@link ConnectionManager} used by this server
      * @param duration          the duration for which name-to-UUID mappings will be cached
      */
-    BasicPlayerViewProvider(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
+    public BasicPlayerViewProvider(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
         @NotNull Duration duration) {
         this.identitySource = Objects.requireNonNull(identitySource);
         this.connectionManager = Objects.requireNonNull(connectionManager);
@@ -51,7 +51,7 @@ class BasicPlayerViewProvider implements PlayerViewProvider {
      * @param identitySource    the {@link IdentitySource} used to resolve names, if necessary
      * @param connectionManager the {@link ConnectionManager} used by this server
      */
-    BasicPlayerViewProvider(@NotNull IdentitySource identitySource,
+    public BasicPlayerViewProvider(@NotNull IdentitySource identitySource,
         @NotNull ConnectionManager connectionManager) {
         this(identitySource, connectionManager, DEFAULT_TIMEOUT);
     }
