@@ -13,7 +13,7 @@ import org.phantazm.zombies.equipment.gun2.effect.GunTickEffect;
 import org.phantazm.zombies.equipment.gun2.reload.BasicGunReload;
 import org.phantazm.zombies.equipment.gun2.reload.GunReload;
 import org.phantazm.zombies.equipment.gun2.reload.ReloadTester;
-import org.phantazm.zombies.equipment.gun2.shoot.GunShootCreator;
+import org.phantazm.zombies.equipment.gun2.shoot.BasicGunShoot;
 import org.phantazm.zombies.equipment.gun2.shoot.GunShoot;
 import org.phantazm.zombies.equipment.gun2.shoot.ShootTester;
 import org.phantazm.zombies.equipment.perk.effect.PerkEffect;
@@ -29,15 +29,12 @@ public class GunLevelInjector implements PerkLevelInjector {
 
     private final GunStats stats;
 
-    private final GunShootCreator shootCreator;
-
     private final GunFireEffect fireEffect;
 
     private final GunTickEffect tickEffect = new GunTickEffect();
 
-    public GunLevelInjector(@NotNull GunStats stats, @NotNull GunShootCreator shootCreator, @NotNull GunFireEffect fireEffect) {
+    public GunLevelInjector(@NotNull GunStats stats, @NotNull GunFireEffect fireEffect) {
         this.stats = Objects.requireNonNull(stats);
-        this.shootCreator = Objects.requireNonNull(shootCreator);
         this.fireEffect = Objects.requireNonNull(fireEffect);
     }
 
@@ -57,7 +54,7 @@ public class GunLevelInjector implements PerkLevelInjector {
         ReloadTester reloadTester = new ReloadTester(stats, state);
         ShootTester shootTester = new ShootTester(reloadTester, stats, state, () -> 1);
         GunReload reload = new BasicGunReload(reloadTester, state);
-        GunShoot shoot = new GunShootCreator(gunUUID, shootTester, reload, stats, state);
+        GunShoot shoot = new BasicGunShoot(gunUUID, shootTester, reload, stats, state);
         EventNode<Event> eventNode = oldStore.get(Keys.EVENT_NODE_HOLDER).eventNode();
         MapObjects mapObjects = oldStore.get(Keys.MAP_OBJECTS);
         GunModule module = new GunModule(gunUUID, stats, state, shootTester, reloadTester, shoot, reload, zombiesPlayer::getPlayer, eventNode, mapObjects);

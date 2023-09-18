@@ -12,7 +12,7 @@ import org.phantazm.zombies.equipment.gun2.reload.GunReload;
 import java.util.Objects;
 import java.util.UUID;
 
-public class GunShootCreator implements GunShoot {
+public class BasicGunShoot implements GunShoot {
 
     private final UUID gunUUID;
 
@@ -24,7 +24,7 @@ public class GunShootCreator implements GunShoot {
 
     private final GunState state;
 
-    public GunShootCreator(@NotNull UUID gunUUID, @NotNull ShootTester shootTester, @NotNull GunReload reload, @NotNull GunStats stats, @NotNull GunState state) {
+    public BasicGunShoot(@NotNull UUID gunUUID, @NotNull ShootTester shootTester, @NotNull GunReload reload, @NotNull GunStats stats, @NotNull GunState state) {
         this.gunUUID = Objects.requireNonNull(gunUUID);
         this.shootTester = Objects.requireNonNull(shootTester);
         this.reload = Objects.requireNonNull(reload);

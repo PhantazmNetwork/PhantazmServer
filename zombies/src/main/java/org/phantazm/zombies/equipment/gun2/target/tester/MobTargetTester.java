@@ -11,7 +11,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import java.util.Collection;
 import java.util.UUID;
 
-public class PhantazmMobTargetTester implements PlayerComponent<TargetTester> {
+public class MobTargetTester implements PlayerComponent<TargetTester> {
     @Override
     public @NotNull TargetTester forPlayer(@NotNull ZombiesPlayer player, @NotNull InjectionStore injectionStore) {
         return new Tester(injectionStore.get(Keys.GUN_MODULE).mapObjects());
