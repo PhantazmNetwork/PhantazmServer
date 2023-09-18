@@ -8,4 +8,5 @@ dependencies {
     api(libs.hikariCP)
     api(libs.fastutil)
     implementation(libs.toolkit.function)
+    implementation(libs.caffeine)
 }

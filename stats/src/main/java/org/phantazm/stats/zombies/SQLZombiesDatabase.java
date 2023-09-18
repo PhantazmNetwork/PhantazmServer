@@ -1,6 +1,9 @@
 package org.phantazm.stats.zombies;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.steanky.toolkit.function.ThrowingFunction;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.key.Key;
@@ -17,6 +20,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -30,6 +34,18 @@ import static org.jooq.impl.DSL.*;
 public class SQLZombiesDatabase implements ZombiesDatabase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SQLZombiesDatabase.class);
+
+    private final Cache<Pair<UUID, Key>, ZombiesPlayerMapStats> mapStatsCache = Caffeine.newBuilder()
+        .expireAfterWrite(Duration.ofMinutes(10))
+        .build();
+
+    private final Cache<MapBestTimesKey, Int2ObjectMap<List<BestTime>>> mapBestTimesCache = Caffeine.newBuilder()
+        .expireAfterWrite(Duration.ofMinutes(10))
+        .build();
+
+    private final Cache<MapPlayerBestTimesKey, Int2ObjectMap<BestTime>> mapPlayerBestTimesCache = Caffeine.newBuilder()
+        .expireAfterWrite(Duration.ofMinutes(10))
+        .build();
 
     private final Executor executor;
 
@@ -89,6 +105,11 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
     @Override
     public @NotNull CompletableFuture<ZombiesPlayerMapStats> getMapStats(@NotNull UUID playerUUID,
         @NotNull Key mapKey) {
+        ZombiesPlayerMapStats stats = mapStatsCache.getIfPresent(Pair.of(playerUUID, mapKey));
+        if (stats != null) {
+            return CompletableFuture.completedFuture(stats);
+        }
+
         return executeSQL(connection -> {
             Record result = using(connection).select().from(table("zombies_player_map_stats"))
                 .where(field("player_uuid").eq(playerUUID.toString()))
@@ -98,19 +119,35 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
                 return BasicZombiesPlayerMapStats.createBasicStats(playerUUID, mapKey);
             }
 
-            return new BasicZombiesPlayerMapStats(playerUUID, mapKey, result.get("games_played", int.class),
+            ZombiesPlayerMapStats newStats = new BasicZombiesPlayerMapStats(playerUUID, mapKey, result.get("games_played", int.class),
                 result.get("wins", int.class), result.get("best_round", int.class),
                 result.get("rounds_survived", int.class), result.get("kills", int.class),
                 result.get("knocks", int.class), result.get("coins_gained", int.class),
                 result.get("coins_spent", int.class), result.get("deaths", int.class),
                 result.get("revives", int.class), result.get("shots", int.class),
                 result.get("regular_hits", int.class), result.get("headshot_hits", int.class));
+            mapStatsCache.put(Pair.of(playerUUID, mapKey), newStats);
+            return newStats;
         });
+    }
+
+    private record MapBestTimesKey(Key mapKey,
+        int minPlayerCount,
+        int maxPlayerCount,
+        String category,
+        int maxLength) {
+
     }
 
     @Override
     public @NotNull CompletableFuture<Int2ObjectMap<List<BestTime>>> getMapBestTimes(@NotNull Key mapKey,
         int minPlayerCount, int maxPlayerCount, @NotNull String category, int maxLength) {
+        MapBestTimesKey cacheKey = new MapBestTimesKey(mapKey, minPlayerCount, maxPlayerCount, category, maxLength);
+        Int2ObjectMap<List<BestTime>> times = mapBestTimesCache.getIfPresent(cacheKey);
+        if (times != null) {
+            return CompletableFuture.completedFuture(times);
+        }
+
         return executeSQL(connection -> {
             Int2ObjectMap<List<BestTime>> bestTimes = new Int2ObjectOpenHashMap<>(maxPlayerCount - minPlayerCount + 1);
             try (ResultSet resultSet = using(connection).select(field("player_uuid"), field("best_time"),
@@ -138,13 +175,28 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
                 }
             }
 
+            mapBestTimesCache.put(cacheKey, bestTimes);
             return bestTimes;
         });
+    }
+
+    private record MapPlayerBestTimesKey(UUID playerUUID,
+        Key mapKey,
+        int minPlayerCount,
+        int maxPlayerCount,
+        String category) {
+
     }
 
     @Override
     public @NotNull CompletableFuture<Int2ObjectMap<BestTime>> getMapPlayerBestTimes(@NotNull UUID playerUUID,
         @NotNull Key mapKey, int minPlayerCount, int maxPlayerCount, @NotNull String category) {
+        MapPlayerBestTimesKey cacheKey = new MapPlayerBestTimesKey(playerUUID, mapKey, minPlayerCount, maxPlayerCount, category);
+        Int2ObjectMap<BestTime> times = mapPlayerBestTimesCache.getIfPresent(cacheKey);
+        if (times != null) {
+            return CompletableFuture.completedFuture(times);
+        }
+
         return executeSQL(connection -> {
             Result<Record3<Long, Integer, Integer>> result =
                 using(connection).select(field("best_time", SQLDataType.BIGINT),
@@ -157,12 +209,13 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
                         .and(field("category").eq(category)))
                     .where(field("player_uuid").eq(playerUUID.toString())).fetch();
 
-            Int2ObjectMap<BestTime> times = new Int2ObjectOpenHashMap<>(result.size());
+            Int2ObjectMap<BestTime> newTimes = new Int2ObjectOpenHashMap<>(result.size());
             for (Record3<Long, Integer, Integer> record : result) {
-                times.put(record.value2().intValue(), new BestTime(record.value3(), playerUUID, record.value1()));
+                newTimes.put(record.value2().intValue(), new BestTime(record.value3(), playerUUID, record.value1()));
             }
 
-            return times;
+            mapPlayerBestTimesCache.put(cacheKey, newTimes);
+            return newTimes;
         });
     }
 
