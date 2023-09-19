@@ -44,6 +44,7 @@ public final class ServerCommandFeature {
         manager.register(new GamereportCommand(zombiesGamereportConfig));
         manager.register(new GhostCommand(playerViewProvider));
         manager.register(new FlyCommand());
+        manager.register(new VelocityCommand());
         manager.register(new GamemodeCommand());
         manager.register(new AddRoleCommand(IdentitySource.MOJANG, roleStore, permissionHandler));
         manager.register(new RemoveRoleCommand(IdentitySource.MOJANG, roleStore, permissionHandler));

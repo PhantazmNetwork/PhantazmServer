@@ -138,11 +138,10 @@ public final class LobbyFeature {
                             continue;
                         }
 
-                        BasicComponent<NPC> npcComponent = contextManager.makeContext(element.asNode()).provide(elementException -> {
+                        components.add(contextManager.makeContext(element.asNode()).provide(elementException -> {
                             LOGGER.warn("Exception when loading NPC file " + npcFile, elementException);
                             throw elementException;
-                        }, () -> null);
-                        components.add(npcComponent);
+                        }, () -> null));
                     }
 
                     if (map.putIfAbsent(lobbyConfig.name(),

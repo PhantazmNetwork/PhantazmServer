@@ -106,9 +106,7 @@ public class InGameStage implements Stage {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             zombiesPlayer.module().getMeta().setInGame(true);
             zombiesPlayer.module().getStats().setGamesPlayed(zombiesPlayer.module().getStats().getGamesPlayed() + 1);
-            zombiesPlayer.getPlayer().ifPresent(player -> {
-                player.teleport(spawnPos);
-            });
+            zombiesPlayer.getPlayer().ifPresent(player -> player.teleport(spawnPos));
 
             ZombiesPlayerModule module = zombiesPlayer.module();
             EquipmentHandler equipmentHandler = module.getEquipmentHandler();

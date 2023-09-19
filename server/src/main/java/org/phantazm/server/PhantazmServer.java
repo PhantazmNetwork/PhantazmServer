@@ -267,8 +267,7 @@ public final class PhantazmServer {
 
             RoleFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor(), yamlCodec,
                 contextManager);
-            ChatFeature.initialize(chatConfig, PartyFeature.getPartyHolder().uuidToGuild(),
-                RoleFeature.roleStore());
+            ChatFeature.initialize(chatConfig, PartyFeature.getPartyHolder().uuidToGuild(), RoleFeature.roleStore());
 
             LobbyFeature.initialize(contextManager, RoleFeature.roleStore(),
                 ExecutorFeature.getExecutor(), mappingProcessorSource, yamlCodec);

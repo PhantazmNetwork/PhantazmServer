@@ -26,8 +26,8 @@ public class AmmoRefillCommand extends SandboxLockedCommand {
         scene.setLegit(false);
 
         ZombiesPlayer zombiesPlayer = scene.managedPlayers().get(PlayerView.lookup(sender.getUuid()));
-        Optional<InventoryAccess> acccessOptional =
-            zombiesPlayer.module().getEquipmentHandler().accessRegistry().getCurrentAccess();
+        Optional<InventoryAccess> acccessOptional = zombiesPlayer.module().getEquipmentHandler().accessRegistry()
+            .getCurrentAccess();
         if (acccessOptional.isEmpty()) {
             return;
         }

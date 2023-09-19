@@ -45,7 +45,7 @@ public class ZombiesScene extends InstanceScene {
 
     private final Pos spawnPos;
 
-    private boolean isLegit;
+    private boolean legit;
     private boolean sandbox;
     private boolean restricted;
 
@@ -74,12 +74,12 @@ public class ZombiesScene extends InstanceScene {
         this.spawnPos = new Pos(spawnBlock.x() + 0.5, spawnBlock.y(), spawnBlock.z() + 0.5, mapSettingsInfo.yaw(),
             mapSettingsInfo.pitch());
 
-        this.isLegit = true;
+        this.legit = true;
     }
 
     @Override
     public boolean preventsServerShutdown() {
-        if (!isLegit) {
+        if (!legit) {
             return false;
         }
 
@@ -220,7 +220,7 @@ public class ZombiesScene extends InstanceScene {
     @Override
     public void preShutdown() {
         super.preShutdown();
-        if (!isLegit) {
+        if (!legit) {
             return;
         }
 
@@ -274,11 +274,11 @@ public class ZombiesScene extends InstanceScene {
     }
 
     public boolean isLegit() {
-        return isLegit;
+        return legit;
     }
 
     public void setLegit(boolean legit) {
-        this.isLegit = legit;
+        this.legit = legit;
     }
 
     public boolean isSandbox() {
@@ -289,7 +289,7 @@ public class ZombiesScene extends InstanceScene {
         this.sandbox = sandbox;
 
         if (sandbox) {
-            this.isLegit = false;
+            this.legit = false;
         }
     }
 
