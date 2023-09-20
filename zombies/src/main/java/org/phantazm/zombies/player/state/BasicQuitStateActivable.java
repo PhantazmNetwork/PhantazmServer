@@ -28,6 +28,7 @@ public class BasicQuitStateActivable implements Activable {
     private final BelowNameTag belowNameTag;
     private final InventoryAccessRegistry accessRegistry;
     private final TickTaskScheduler scheduler;
+    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     public BasicQuitStateActivable(@NotNull Instance instance, @NotNull PlayerView playerView,
         @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar, @NotNull TabList tabList,
@@ -62,7 +63,7 @@ public class BasicQuitStateActivable implements Activable {
         });
         playerView.getDisplayName().thenAccept(displayName -> {
             TagResolver quitterPlaceholder = Placeholder.component("quitter", displayName);
-            instance.sendMessage(MiniMessage.miniMessage().deserialize(settings.quitMessageFormat(), quitterPlaceholder));
+            instance.sendMessage(miniMessage.deserialize(settings.quitMessageFormat(), quitterPlaceholder));
         });
 
         accessRegistry.switchAccess(null);

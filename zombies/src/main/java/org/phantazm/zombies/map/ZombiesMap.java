@@ -12,16 +12,18 @@ import org.phantazm.zombies.powerup.PowerupHandler;
 
 import java.util.Objects;
 
-public record ZombiesMap(@NotNull MapObjects mapObjects,
-    @NotNull SongPlayer songPlayer,
-    @NotNull PowerupHandler powerupHandler,
-    @NotNull RoundHandler roundHandler,
-    @NotNull ShopHandler shopHandler,
-    @NotNull WindowHandler windowHandler,
-    @NotNull DoorHandler doorHandler) implements Tickable {
+public class ZombiesMap implements Tickable {
+    private final MapObjects mapObjects;
+    private final SongPlayer songPlayer;
+    private final PowerupHandler powerupHandler;
+    private final RoundHandler roundHandler;
+    private final ShopHandler shopHandler;
+    private final WindowHandler windowHandler;
+    private final DoorHandler doorHandler;
+
     public ZombiesMap(@NotNull MapObjects mapObjects, @NotNull SongPlayer songPlayer,
-        @NotNull PowerupHandler powerupHandler, @NotNull RoundHandler roundHandler, @NotNull ShopHandler shopHandler,
-        @NotNull WindowHandler windowHandler, @NotNull DoorHandler doorHandler) {
+        @NotNull PowerupHandler powerupHandler, @NotNull RoundHandler roundHandler,
+        @NotNull ShopHandler shopHandler, @NotNull WindowHandler windowHandler, @NotNull DoorHandler doorHandler) {
         this.mapObjects = Objects.requireNonNull(mapObjects);
         this.songPlayer = Objects.requireNonNull(songPlayer);
         this.powerupHandler = Objects.requireNonNull(powerupHandler);
@@ -29,6 +31,34 @@ public record ZombiesMap(@NotNull MapObjects mapObjects,
         this.shopHandler = Objects.requireNonNull(shopHandler);
         this.windowHandler = Objects.requireNonNull(windowHandler);
         this.doorHandler = Objects.requireNonNull(doorHandler);
+    }
+
+    public @NotNull MapObjects mapObjects() {
+        return mapObjects;
+    }
+
+    public @NotNull SongPlayer songPlayer() {
+        return songPlayer;
+    }
+
+    public @NotNull PowerupHandler powerupHandler() {
+        return powerupHandler;
+    }
+
+    public @NotNull RoundHandler roundHandler() {
+        return roundHandler;
+    }
+
+    public @NotNull ShopHandler shopHandler() {
+        return shopHandler;
+    }
+
+    public @NotNull WindowHandler windowHandler() {
+        return windowHandler;
+    }
+
+    public @NotNull DoorHandler doorHandler() {
+        return doorHandler;
     }
 
     @Override
