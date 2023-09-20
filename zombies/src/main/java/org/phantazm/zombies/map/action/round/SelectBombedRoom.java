@@ -78,17 +78,73 @@ public class SelectBombedRoom implements Action<Round> {
         this.modifiers = List.copyOf(modifiers);
     }
 
+    private Optional<Room> selectRoom() {
+        MapObjects objects = supplier.get();
+
+        List<Room> candidateRooms = new ArrayList<>();
+        for (Room room : objects.roomTracker().items()) {
+            if (room.isOpen() && !room.flags().hasFlag(Flags.BOMBED_ROOM) &&
+                !data.exemptRooms.contains(room.getRoomInfo().id())) {
+                candidateRooms.add(room);
+            }
+        }
+
+        if (candidateRooms.isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (!data.canManipulate) {
+            return Optional.of(candidateRooms.get(random.nextInt(candidateRooms.size())));
+        }
+
+        List<Room> manipulatedCandidates = getRoomsContainingPlayers(candidateRooms, objects);
+
+        if (manipulatedCandidates.isEmpty()) {
+            return Optional.of(candidateRooms.get(random.nextInt(candidateRooms.size())));
+        }
+
+        return Optional.of(manipulatedCandidates.get(random.nextInt(manipulatedCandidates.size())));
+    }
+
+    private List<Room> getRoomsContainingPlayers(List<Room> candidateRooms, MapObjects objects) {
+        List<Room> copy = new ArrayList<>(candidateRooms);
+        copy.removeIf(room -> {
+            for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                if (!zombiesPlayer.canDoGenericActions()) {
+                    continue;
+                }
+
+                Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+                if (playerOptional.isEmpty()) {
+                    continue;
+                }
+
+                Player player = playerOptional.get();
+                Optional<Room> roomOptional = objects.roomTracker().atPoint(player.getPosition());
+                if (roomOptional.isEmpty()) {
+                    continue;
+                }
+
+                if (roomOptional.get() == room) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+        return copy;
+    }
+
     @Override
     public void perform(@NotNull Round round) {
         MapObjects objects = supplier.get();
-        List<Room> candidateRooms = objects.roomTracker().items().stream()
-            .filter(room -> room.isOpen() && !room.flags().hasFlag(Flags.BOMBED_ROOM) &&
-                !data.exemptRooms.contains(room.getRoomInfo().id())).toList();
-        if (candidateRooms.isEmpty()) {
+
+        Optional<Room> targetRoomOptional = selectRoom();
+        if (targetRoomOptional.isEmpty()) {
             return;
         }
 
-        Room room = candidateRooms.get(random.nextInt(candidateRooms.size()));
+        Room room = targetRoomOptional.get();
         TagResolver roomPlaceholder = Placeholder.component("room", room.getRoomInfo().displayName());
         Component warningMessage = MiniMessage.miniMessage().deserialize(data.warningFormatMessage, roomPlaceholder);
 
@@ -298,6 +354,7 @@ public class SelectBombedRoom implements Action<Round> {
         long damageDelay,
         long effectDelay,
         int duration,
+        boolean canManipulate,
         @NotNull List<Key> exemptRooms,
         @NotNull List<Modifier> modifiers,
         @NotNull @ChildPath("particle") String particle) {
@@ -314,6 +371,11 @@ public class SelectBombedRoom implements Action<Round> {
         @Default("effectDelay")
         public static @NotNull ConfigElement defaultEffectDelay() {
             return ConfigPrimitive.of(50L);
+        }
+
+        @Default("canManipulate")
+        public static @NotNull ConfigElement defaultCanManipulate() {
+            return ConfigPrimitive.of(true);
         }
     }
 }
