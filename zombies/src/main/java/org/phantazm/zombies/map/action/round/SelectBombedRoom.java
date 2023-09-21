@@ -45,6 +45,7 @@ import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 @Model("zombies.map.round.action.select_bombed")
@@ -212,7 +213,8 @@ public class SelectBombedRoom implements Action<Round> {
                 particle.sendTo(instance, randomPoint.x(), randomPoint.y(), randomPoint.z());
 
                 if (data.sound != null && (data.soundInterval == 0 || ticks % data.soundInterval == 0)) {
-                    instance.playSound(data.sound, VecUtils.toPoint(randomPoint));
+                    long seed = ThreadLocalRandom.current().nextLong();
+                    instance.playSound(Sound.sound(data.sound).seed(seed).build(), VecUtils.toPoint(randomPoint));
                 }
 
                 ++ticks;
