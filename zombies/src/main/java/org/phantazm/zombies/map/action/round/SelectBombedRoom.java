@@ -3,6 +3,7 @@ package org.phantazm.zombies.map.action.round;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3D;
@@ -379,6 +380,11 @@ public class SelectBombedRoom implements Action<Round> {
         @Default("effectDelay")
         public static @NotNull ConfigElement defaultEffectDelay() {
             return ConfigPrimitive.of(50L);
+        }
+
+        @Default("exemptRooms")
+        public static @NotNull ConfigElement defaultExemptRooms() {
+            return ConfigList.of();
         }
     }
 }
