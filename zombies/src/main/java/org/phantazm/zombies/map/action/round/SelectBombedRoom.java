@@ -211,11 +211,12 @@ public class SelectBombedRoom implements Action<Round> {
                 Vec3D randomPoint = randomPoint(objects.mapOrigin(), room);
                 particle.sendTo(instance, randomPoint.x(), randomPoint.y(), randomPoint.z());
 
-                if (data.sound != null && ticks % data.soundInterval == 0) {
+                if (data.sound != null && (data.soundInterval == 0 || ticks % data.soundInterval == 0)) {
                     instance.playSound(data.sound, VecUtils.toPoint(randomPoint));
                 }
 
-                if (++ticks % data.damageInterval != 0) {
+                ++ticks;
+                if (data.damageInterval != 0 && ticks % data.damageInterval != 0) {
                     return;
                 }
 
@@ -239,7 +240,8 @@ public class SelectBombedRoom implements Action<Round> {
 
                     Room currentRoom = roomOptional.get();
                     if (currentRoom == room) {
-                        if (ticks % (data.damageInterval * data.warningMessageHits) == 0) {
+                        if (data.damageInterval == 0 || data.warningMessageHits == 0 ||
+                            ticks % (data.damageInterval * data.warningMessageHits) == 0) {
                             player.sendMessage(data.inAreaMessage);
                         }
 
