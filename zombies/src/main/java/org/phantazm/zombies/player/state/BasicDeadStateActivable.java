@@ -95,22 +95,19 @@ public class BasicDeadStateActivable implements Activable {
             instance.playSound(settings.deathSound(), deathLocation.x(), deathLocation.y(), deathLocation.z());
         }
 
-        if (!context.isRejoin()) {
-            InventoryAccess aliveAccess = accessRegistry.getAccess(InventoryKeys.ALIVE_ACCESS);
+        InventoryAccess aliveAccess = accessRegistry.getAccess(InventoryKeys.ALIVE_ACCESS);
+        for (Key key : settings.lostOnDeath()) {
+            InventoryObjectGroup group = aliveAccess.groups().get(key);
+            if (group == null) {
+                continue;
+            }
 
-            for (Key key : settings.lostOnDeath()) {
-                InventoryObjectGroup group = aliveAccess.groups().get(key);
-                if (group == null) {
-                    continue;
-                }
-
-                InventoryObject defaultObject = group.defaultObject();
-                for (int slot : group.getSlots()) {
-                    if (defaultObject == null) {
-                        accessRegistry.removeObject(aliveAccess, slot);
-                    } else {
-                        accessRegistry.replaceObject(aliveAccess, slot, defaultObject);
-                    }
+            InventoryObject defaultObject = group.defaultObject();
+            for (int slot : group.getSlots()) {
+                if (defaultObject == null) {
+                    accessRegistry.removeObject(aliveAccess, slot);
+                } else {
+                    accessRegistry.replaceObject(aliveAccess, slot, defaultObject);
                 }
             }
         }
