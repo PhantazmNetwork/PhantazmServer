@@ -233,7 +233,7 @@ public class SelectBombedRoom implements Action<Round> {
 
                     Room currentRoom = roomOptional.get();
                     if (currentRoom == room) {
-                        if (ticks % (data.damageInterval * 10) == 0) {
+                        if (ticks % (data.damageInterval * data.warningMessageHits) == 0) {
                             player.sendMessage(data.inAreaMessage);
                         }
 
@@ -339,6 +339,7 @@ public class SelectBombedRoom implements Action<Round> {
         @NotNull Component bombingDamageName,
         float damage,
         int gracePeriod,
+        int warningMessageHits,
         long damageInterval,
         long damageDelay,
         long effectDelay,
@@ -350,6 +351,11 @@ public class SelectBombedRoom implements Action<Round> {
         @Default("warningFormatMessage")
         public static @NotNull ConfigElement defaultWarningFormatMessage() {
             return ConfigPrimitive.NULL;
+        }
+
+        @Default("warningMessageHits")
+        public static @NotNull ConfigElement defaultWarningMessageHits() {
+            return ConfigPrimitive.of(10);
         }
 
         @Default("bombingCompleteFormat")
