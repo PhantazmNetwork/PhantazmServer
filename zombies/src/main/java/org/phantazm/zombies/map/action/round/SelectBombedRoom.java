@@ -110,9 +110,9 @@ public class SelectBombedRoom implements Action<Round> {
         }
 
         TagResolver roomPlaceholder = Placeholder.component("room", room.getRoomInfo().displayName());
-        Component warningMessage = MiniMessage.miniMessage().deserialize(data.warningFormatMessage, roomPlaceholder);
-
-        instance.sendMessage(warningMessage);
+        if (data.warningFormatMessage != null) {
+            instance.sendMessage(MiniMessage.miniMessage().deserialize(data.warningFormatMessage, roomPlaceholder));
+        }
 
         int startRoundIndex = objects.module().roundHandlerSupplier().get().currentRoundIndex();
 
@@ -127,17 +127,24 @@ public class SelectBombedRoom implements Action<Round> {
             private boolean finished;
 
             private void removeStateFor(ZombiesPlayer zombiesPlayer, boolean clearBombTag) {
-                zombiesPlayer.getPlayer().ifPresent(player -> {
-                    for (CancellableState<Entity> state : states) {
-                        if (state.self() == player) {
-                            player.stateHolder().removeState(Stages.ZOMBIES_GAME, state);
-                        }
-                    }
+                Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+                if (playerOptional.isEmpty()) {
+                    return;
+                }
 
-                    if (clearBombTag) {
-                        player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
+                Player player = playerOptional.get();
+                Iterator<CancellableState<Entity>> iterator = states.iterator();
+                while (iterator.hasNext()) {
+                    CancellableState<Entity> state = iterator.next();
+                    if (state.self() == player) {
+                        player.stateHolder().removeState(Stages.ZOMBIES_GAME, state);
+                        iterator.remove();
                     }
-                });
+                }
+
+                if (clearBombTag) {
+                    player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
+                }
             }
 
             @Override
@@ -164,30 +171,35 @@ public class SelectBombedRoom implements Action<Round> {
                 RoundHandler roundHandler = objects.module().roundHandlerSupplier().get();
                 int roundsElapsed = roundHandler.currentRoundIndex() - startRoundIndex;
                 if (roundsElapsed >= data.duration) {
-                    Component completionMessage =
-                        MiniMessage.miniMessage().deserialize(data.bombingCompleteFormat, roomPlaceholder);
-                    instance.sendMessage(completionMessage);
+                    if (data.bombingCompleteFormat != null) {
+                        instance.sendMessage(MiniMessage.miniMessage().deserialize(data.bombingCompleteFormat,
+                            roomPlaceholder));
+                    }
 
                     room.flags().clearFlag(Flags.BOMBED_ROOM);
                     flagSet = false;
                     finished = true;
 
                     for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                        zombiesPlayer.getPlayer().ifPresent(player -> {
-                            if (!zombiesPlayer.canDoGenericActions()) {
-                                removeStateFor(zombiesPlayer, true);
-                            } else {
-                                Optional<Room> roomOptional = objects.roomTracker().atPoint(player.getPosition());
-                                if (roomOptional.isPresent()) {
-                                    Room currentRoom = roomOptional.get();
-                                    if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
-                                        removeStateFor(zombiesPlayer, true);
-                                    }
-                                } else {
+                        Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+                        if (playerOptional.isEmpty()) {
+                            continue;
+                        }
+
+                        Player player = playerOptional.get();
+                        if (!zombiesPlayer.canDoGenericActions()) {
+                            removeStateFor(zombiesPlayer, true);
+                        } else {
+                            Optional<Room> roomOptional = objects.roomTracker().atPoint(player.getPosition());
+                            if (roomOptional.isPresent()) {
+                                Room currentRoom = roomOptional.get();
+                                if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
                                     removeStateFor(zombiesPlayer, true);
                                 }
+                            } else {
+                                removeStateFor(zombiesPlayer, true);
                             }
-                        });
+                        }
                     }
 
                     return;
@@ -196,77 +208,88 @@ public class SelectBombedRoom implements Action<Round> {
                 Vec3D randomPoint = randomPoint(objects.mapOrigin(), room);
                 particle.sendTo(instance, randomPoint.x(), randomPoint.y(), randomPoint.z());
 
-                if (++ticks % 4 == 0) {
-                    for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                        if (!zombiesPlayer.canDoGenericActions() || zombiesPlayer.flags().hasFlag(Flags.GODMODE)) {
-                            removeStateFor(zombiesPlayer, false);
-                            continue;
+                if (++ticks % data.damageInterval != 0) {
+                    return;
+                }
+
+                for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
+                    if (!zombiesPlayer.canDoGenericActions() || zombiesPlayer.flags().hasFlag(Flags.GODMODE)) {
+                        removeStateFor(zombiesPlayer, false);
+                        continue;
+                    }
+
+                    Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+                    if (playerOptional.isEmpty()) {
+                        continue;
+                    }
+
+                    Player player = playerOptional.get();
+                    Optional<Room> roomOptional = objects.roomTracker().atPoint(player.getPosition());
+                    if (roomOptional.isEmpty()) {
+                        removeStateFor(zombiesPlayer, true);
+                        continue;
+                    }
+
+                    Room currentRoom = roomOptional.get();
+                    if (currentRoom == room) {
+                        if (ticks % (data.damageInterval * 10) == 0) {
+                            player.sendMessage(data.inAreaMessage);
                         }
 
-                        zombiesPlayer.getPlayer().ifPresent(player -> {
-                            Optional<Room> roomOptional = objects.roomTracker().atPoint(player.getPosition());
-                            if (roomOptional.isPresent()) {
-                                Room currentRoom = roomOptional.get();
-                                if (currentRoom == room) {
-                                    if (ticks % 40 == 0) {
-                                        player.sendMessage(data.inAreaMessage);
-                                    }
+                        long lastEnterBombedRoom = player.getTag(Tags.LAST_ENTER_BOMBED_ROOM);
+                        if (lastEnterBombedRoom == -1) {
+                            player.setTag(Tags.LAST_ENTER_BOMBED_ROOM, lastEnterBombedRoom =
+                                MinecraftServer.currentTick());
+                        }
 
-                                    long lastEnterBombedRoom = player.getTag(Tags.LAST_ENTER_BOMBED_ROOM);
-                                    if (lastEnterBombedRoom == -1) {
-                                        player.setTag(Tags.LAST_ENTER_BOMBED_ROOM, lastEnterBombedRoom =
-                                            MinecraftServer.currentTick());
-                                    }
-                                    long ticksSinceEnter = MinecraftServer.currentTick() - lastEnterBombedRoom;
+                        long ticksSinceEnter = MinecraftServer.currentTick() - lastEnterBombedRoom;
+                        if (ticksSinceEnter >= data.damageDelay) {
+                            player.damage(bombDamage, true);
+                        }
 
-                                    if (ticksSinceEnter >= data.damageDelay) {
-                                        player.damage(bombDamage, true);
-                                    }
-
-                                    if (ticksSinceEnter >= data.effectDelay) {
-                                        applyModifiers(zombiesPlayer);
-                                    }
-                                } else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
-                                    removeStateFor(zombiesPlayer, true);
-                                }
-                            } else {
-                                removeStateFor(zombiesPlayer, true);
-                            }
-                        });
+                        if (ticksSinceEnter >= data.effectDelay) {
+                            applyModifiers(zombiesPlayer);
+                        }
+                    } else if (!currentRoom.flags().hasFlag(Flags.BOMBED_ROOM)) {
+                        removeStateFor(zombiesPlayer, true);
                     }
                 }
             }
 
             private void applyModifiers(ZombiesPlayer zombiesPlayer) {
-                zombiesPlayer.getPlayer().ifPresent(actualPlayer -> {
-                    CancellableState<Entity> state = CancellableState.state(actualPlayer,
-                        entity -> {
-                            for (TargetedAttribute modifier : modifiers) {
-                                ((Player) entity).getAttribute(Objects.requireNonNullElse(Attribute.fromKey(modifier.attribute),
-                                    Attributes.NIL)).addModifier(modifier.modifier);
+                Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+                if (playerOptional.isEmpty()) {
+                    return;
+                }
+
+                Player actualPlayer = playerOptional.get();
+                CancellableState<Entity> state = CancellableState.state(actualPlayer,
+                    entity -> {
+                        for (TargetedAttribute modifier : modifiers) {
+                            ((Player) entity).getAttribute(Objects.requireNonNullElse(Attribute.fromKey(modifier.attribute),
+                                Attributes.NIL)).addModifier(modifier.modifier);
+                        }
+
+                        for (TimedPotion potion : entity.getActiveEffects()) {
+                            if (potion.getPotion() == NAUSEA) {
+                                return;
                             }
+                        }
 
-                            for (TimedPotion potion : entity.getActiveEffects()) {
-                                if (potion.getPotion() == NAUSEA) {
-                                    return;
-                                }
-                            }
+                        entity.addEffect(NAUSEA);
+                    }, entity -> {
+                        Player player = (Player) entity;
+                        for (TargetedAttribute modifier : modifiers) {
+                            player.getAttribute(
+                                    Objects.requireNonNullElse(Attribute.fromKey(modifier.attribute), Attributes.NIL))
+                                .removeModifier(modifier.modifier.getId());
+                        }
 
-                            entity.addEffect(NAUSEA);
-                        }, entity -> {
-                            Player player = (Player) entity;
-                            for (TargetedAttribute modifier : modifiers) {
-                                player.getAttribute(
-                                        Objects.requireNonNullElse(Attribute.fromKey(modifier.attribute), Attributes.NIL))
-                                    .removeModifier(modifier.modifier.getId());
-                            }
+                        player.removeEffect(PotionEffect.NAUSEA);
+                    });
 
-                            player.removeEffect(PotionEffect.NAUSEA);
-                        });
-
-                    states.add(state);
-                    actualPlayer.stateHolder().registerState(Stages.ZOMBIES_GAME, state);
-                });
+                states.add(state);
+                actualPlayer.stateHolder().registerState(Stages.ZOMBIES_GAME, state);
             }
         }, data.gracePeriod);
     }
@@ -309,12 +332,13 @@ public class SelectBombedRoom implements Action<Round> {
 
     @DataObject
     public record Data(
-        @NotNull String warningFormatMessage,
-        @NotNull String bombingCompleteFormat,
+        @Nullable String warningFormatMessage,
+        @Nullable String bombingCompleteFormat,
         @NotNull Component inAreaMessage,
         @NotNull Component bombingDamageName,
         float damage,
         int gracePeriod,
+        long damageInterval,
         long damageDelay,
         long effectDelay,
         int duration,
@@ -322,6 +346,21 @@ public class SelectBombedRoom implements Action<Round> {
         @NotNull List<Key> exemptRooms,
         @NotNull List<Modifier> modifiers,
         @NotNull @ChildPath("particle") String particle) {
+        @Default("warningFormatMessage")
+        public static @NotNull ConfigElement defaultWarningFormatMessage() {
+            return ConfigPrimitive.NULL;
+        }
+
+        @Default("bombingCompleteFormat")
+        public static @NotNull ConfigElement defaultBombingCompleteFormat() {
+            return ConfigPrimitive.NULL;
+        }
+
+        @Default("damageInterval")
+        public static @NotNull ConfigElement defaultDamageInterval() {
+            return ConfigPrimitive.of(4L);
+        }
+
         @Default("bombingDamageName")
         public static @NotNull ConfigElement defaultBombingDamageName() {
             return ConfigPrimitive.of("<red>Bombing");
