@@ -8,6 +8,7 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -28,6 +29,7 @@ import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.VecUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.tick.TickableTask;
 import org.phantazm.core.particle.ParticleWrapper;
@@ -209,6 +211,10 @@ public class SelectBombedRoom implements Action<Round> {
                 Vec3D randomPoint = randomPoint(objects.mapOrigin(), room);
                 particle.sendTo(instance, randomPoint.x(), randomPoint.y(), randomPoint.z());
 
+                if (data.sound != null && ticks % data.soundInterval == 0) {
+                    instance.playSound(data.sound, VecUtils.toPoint(randomPoint));
+                }
+
                 if (++ticks % data.damageInterval != 0) {
                     return;
                 }
@@ -337,6 +343,8 @@ public class SelectBombedRoom implements Action<Round> {
         @Nullable String bombingCompleteFormat,
         @NotNull Component inAreaMessage,
         @NotNull Component bombingDamageName,
+        @Nullable Sound sound,
+        int soundInterval,
         float damage,
         int gracePeriod,
         int warningMessageHits,
@@ -371,6 +379,16 @@ public class SelectBombedRoom implements Action<Round> {
         @Default("bombingDamageName")
         public static @NotNull ConfigElement defaultBombingDamageName() {
             return ConfigPrimitive.of("<red>Bombing");
+        }
+
+        @Default("sound")
+        public static @NotNull ConfigElement defaultSound() {
+            return ConfigPrimitive.NULL;
+        }
+
+        @Default("soundInterval")
+        public static @NotNull ConfigElement defaultSoundInterval() {
+            return ConfigPrimitive.of(3);
         }
 
         @Default("specificRoom")
