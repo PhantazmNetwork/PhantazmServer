@@ -26,6 +26,7 @@ import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.tick.TickableTask;
 import org.phantazm.core.particle.ParticleWrapper;
@@ -78,17 +79,36 @@ public class SelectBombedRoom implements Action<Round> {
         this.modifiers = List.copyOf(modifiers);
     }
 
-    @Override
-    public void perform(@NotNull Round round) {
-        MapObjects objects = supplier.get();
-        List<Room> candidateRooms = objects.roomTracker().items().stream()
+    private @Nullable Room targetRoom(MapObjects mapObjects) {
+        if (data.specificRoom != null) {
+            for (Room room : mapObjects.roomTracker().items()) {
+                if (room.getRoomInfo().id().equals(data.specificRoom)) {
+                    return room;
+                }
+            }
+
+            return null;
+        }
+
+        List<Room> candidateRooms = mapObjects.roomTracker().items().stream()
             .filter(room -> room.isOpen() && !room.flags().hasFlag(Flags.BOMBED_ROOM) &&
                 !data.exemptRooms.contains(room.getRoomInfo().id())).toList();
         if (candidateRooms.isEmpty()) {
+            return null;
+        }
+
+        return candidateRooms.get(random.nextInt(candidateRooms.size()));
+    }
+
+    @Override
+    public void perform(@NotNull Round round) {
+        MapObjects objects = supplier.get();
+        Room room = targetRoom(objects);
+
+        if (room == null) {
             return;
         }
 
-        Room room = candidateRooms.get(random.nextInt(candidateRooms.size()));
         TagResolver roomPlaceholder = Placeholder.component("room", room.getRoomInfo().displayName());
         Component warningMessage = MiniMessage.miniMessage().deserialize(data.warningFormatMessage, roomPlaceholder);
 
@@ -298,12 +318,18 @@ public class SelectBombedRoom implements Action<Round> {
         long damageDelay,
         long effectDelay,
         int duration,
+        @Nullable Key specificRoom,
         @NotNull List<Key> exemptRooms,
         @NotNull List<Modifier> modifiers,
         @NotNull @ChildPath("particle") String particle) {
         @Default("bombingDamageName")
         public static @NotNull ConfigElement defaultBombingDamageName() {
             return ConfigPrimitive.of("<red>Bombing");
+        }
+
+        @Default("specificRoom")
+        public static @NotNull ConfigElement defaultSpecificRoom() {
+            return ConfigPrimitive.NULL;
         }
 
         @Default("damageDelay")
