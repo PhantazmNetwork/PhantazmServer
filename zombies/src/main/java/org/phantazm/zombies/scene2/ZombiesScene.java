@@ -220,7 +220,7 @@ public class ZombiesScene extends InstanceScene {
     @Override
     public void preShutdown() {
         super.preShutdown();
-        if (!legit) {
+        if (!legit || !mapSettingsInfo.trackStats()) {
             return;
         }
 

@@ -170,7 +170,7 @@ public class EndStage implements Stage {
                 MINI_MESSAGE.deserialize(settings.winSubtitleFormat(), roundPlaceholder));
 
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-                if (isLegit) {
+                if (isLegit && settings.trackStats()) {
                     ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
                     stats.setWins(stats.getWins() + 1);
 
