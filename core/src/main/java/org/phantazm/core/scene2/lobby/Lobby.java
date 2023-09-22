@@ -112,13 +112,18 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
     }
 
     void join(@NotNull Set<@NotNull PlayerView> players, boolean login) {
+        CompletableFuture<?>[] futures = new CompletableFuture[players.size()];
+
+        int i = 0;
         for (PlayerView joiningPlayer : players) {
             if (!this.scenePlayers.add(joiningPlayer)) {
+                futures[i++] = CompletableFuture.completedFuture(null);
                 continue;
             }
 
             Optional<Player> playerOptional = joiningPlayer.getPlayer();
             if (playerOptional.isEmpty()) {
+                futures[i++] = CompletableFuture.completedFuture(null);
                 continue;
             }
 
@@ -136,11 +141,13 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
                 return;
             }
 
-            onSpawn(player);
+            futures[i++] = onSpawn(player);
         }
+
+        CompletableFuture.allOf(futures).join();
     }
 
-    private void onSpawn(Player player) {
+    private CompletableFuture<?> onSpawn(Player player) {
         CancellableState.Holder<Entity> holder = player.stateHolder();
         holder.registerState(CoreStages.LOBBY, CancellableState.state(player, self -> {
             for (ItemStack stack : defaultItems) {
@@ -154,7 +161,7 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
         }));
 
         holder.setStage(CoreStages.LOBBY);
-        teleportOrSetInstance(player, spawnPoint);
+        return teleportOrSetInstance(player, spawnPoint);
     }
 
     @Override
