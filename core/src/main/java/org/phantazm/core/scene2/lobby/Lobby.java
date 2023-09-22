@@ -102,13 +102,25 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
     }
 
     void postLogin(@NotNull Set<@NotNull PlayerView> players) {
+        CompletableFuture<?>[] futures = new CompletableFuture[players.size()];
+
+        int i = 0;
         for (PlayerView playerView : players) {
             if (!this.scenePlayers.contains(playerView)) {
+                futures[i++] = CompletableFuture.completedFuture(null);
                 continue;
             }
 
-            playerView.getPlayer().ifPresent(this::onSpawn);
+            Optional<Player> playerOptional = playerView.getPlayer();
+            if (playerOptional.isEmpty()) {
+                futures[i++] = CompletableFuture.completedFuture(null);
+                continue;
+            }
+
+            futures[i++] = onSpawn(playerOptional.get());
         }
+
+        CompletableFuture.allOf(futures).join();
     }
 
     void join(@NotNull Set<@NotNull PlayerView> players, boolean login) {

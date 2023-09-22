@@ -9,10 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.player.PlayerView;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -50,20 +47,34 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
 
     @Override
     public void joinSpectators(@NotNull Set<? extends @NotNull PlayerView> players, boolean ghost) {
+        CompletableFuture<?>[] futures = new CompletableFuture[players.size()];
+
+        int i = 0;
         for (PlayerView player : players) {
             if (!super.scenePlayers.add(player)) {
+                futures[i++] = CompletableFuture.completedFuture(null);
                 continue;
             }
 
-            if (this.spectators.add(player)) {
-                player.getPlayer().ifPresent(actualPlayer -> {
-                    actualPlayer.updateViewableRule(this::hasSpectator);
-                    actualPlayer.setGameMode(GameMode.SPECTATOR);
-
-                    joinSpectator(actualPlayer, ghost);
-                });
+            if (!this.spectators.add(player)) {
+                futures[i++] = CompletableFuture.completedFuture(null);
+                continue;
             }
+
+            Optional<Player> playerOptional = player.getPlayer();
+            if (playerOptional.isEmpty()) {
+                futures[i++] = CompletableFuture.completedFuture(null);
+                continue;
+            }
+
+            Player actualPlayer = playerOptional.get();
+            actualPlayer.updateViewableRule(this::hasSpectator);
+            actualPlayer.setGameMode(GameMode.SPECTATOR);
+
+            futures[i++] = joinSpectator(actualPlayer, ghost);
         }
+
+        CompletableFuture.allOf(futures).join();
     }
 
     @Override
@@ -71,8 +82,8 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
         return spectatorsView;
     }
 
-    protected void joinSpectator(@NotNull Player spectator, boolean ghost) {
-
+    protected @NotNull CompletableFuture<?> joinSpectator(@NotNull Player spectator, boolean ghost) {
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override

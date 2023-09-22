@@ -126,8 +126,8 @@ public class ZombiesScene extends InstanceScene {
     }
 
     @Override
-    protected void joinSpectator(@NotNull Player spectator, boolean ghost) {
-        teleportOrSetInstance(spectator, spawnPos);
+    protected @NotNull CompletableFuture<?> joinSpectator(@NotNull Player spectator, boolean ghost) {
+        return teleportOrSetInstance(spectator, spawnPos);
     }
 
     private CompletableFuture<?> handleNewPlayer(PlayerView newPlayer, Pos spawnPos) {
