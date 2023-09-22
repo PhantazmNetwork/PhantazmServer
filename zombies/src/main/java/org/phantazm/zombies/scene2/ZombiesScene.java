@@ -220,6 +220,11 @@ public class ZombiesScene extends InstanceScene {
     @Override
     public void preShutdown() {
         super.preShutdown();
+
+        stageTransition.end();
+        tickTaskScheduler.end();
+        map.mapObjects().module().powerupHandler().get().end();
+
         if (!legit || !mapSettingsInfo.trackStats()) {
             return;
         }
@@ -231,16 +236,12 @@ public class ZombiesScene extends InstanceScene {
 
     @Override
     public void shutdown() {
-        EventNode<? super Event> node = sceneNode.getParent();
-        if (node != null) {
-            node.removeChild(sceneNode);
+        EventNode<? super Event> parent = sceneNode.getParent();
+        if (parent != null) {
+            parent.removeChild(sceneNode);
         }
 
         super.shutdown();
-
-        stageTransition.end();
-        tickTaskScheduler.end();
-        map.mapObjects().module().powerupHandler().get().end();
     }
 
     @Override
