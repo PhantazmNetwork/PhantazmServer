@@ -117,9 +117,9 @@ public class BestTimeLeaderboard {
                 tabIndex = playerCountToTabIndex(4);
 
                 ++stamp;
+                active = true;
                 loadMapTimes(stamp);
                 loadViewerTimes(stamp);
-                active = true;
             }
         });
     }
