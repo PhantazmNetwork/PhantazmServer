@@ -24,6 +24,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
 import org.phantazm.zombies.scene2.ZombiesScene;
+import org.phantazm.zombies.stage.StageKeys;
 
 import java.util.Map;
 import java.util.Objects;
@@ -31,7 +32,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class PlayerDamageEventListener extends ZombiesPlayerEventListener<EntityDamageEvent> {
-
     private final MapObjects mapObjects;
     private final MapSettingsInfo mapSettingsInfo;
 
@@ -88,6 +88,18 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
         zombiesPlayer.setState(ZombiesPlayerStateKeys.KNOCKED,
             new KnockedPlayerStateContext(event.getInstance(), deathPosition, roomName, killer));
+
+        boolean anyAlive = false;
+        for (ZombiesPlayer player : super.zombiesPlayers.values()) {
+            if (player.isAlive()) {
+                anyAlive = true;
+                break;
+            }
+        }
+
+        if (!anyAlive) {
+            scene.stageTransition().setCurrentStage(StageKeys.END);
+        }
     }
 
     private Component getEntityName(@NotNull Entity entity) {
@@ -120,5 +132,4 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         return mapObjects.roomTracker().atPoint(deathPosition).map(room -> room.getRoomInfo().displayName())
             .orElse(Component.text("an unknown room"));
     }
-
 }

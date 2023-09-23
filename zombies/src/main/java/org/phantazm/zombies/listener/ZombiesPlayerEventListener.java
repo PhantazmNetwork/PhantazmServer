@@ -13,8 +13,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public abstract class ZombiesPlayerEventListener<TEvent extends EntityInstanceEvent> implements Consumer<TEvent> {
-    private final Instance instance;
-    private final Map<PlayerView, ZombiesPlayer> zombiesPlayers;
+    protected final Instance instance;
+    protected final Map<PlayerView, ZombiesPlayer> zombiesPlayers;
+
     private final Supplier<ZombiesScene> scene;
 
     public ZombiesPlayerEventListener(@NotNull Instance instance,
