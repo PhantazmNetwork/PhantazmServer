@@ -3,7 +3,6 @@ package org.phantazm.mob2.selector;
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
@@ -24,11 +23,6 @@ public class LastHitSelector implements SelectorComponent {
     private record Internal(Mob self) implements Selector {
         @Override
         public @NotNull Target select() {
-            Instance instance = self.getInstance();
-            if (instance == null) {
-                return Target.NONE;
-            }
-
             return self.lastHitEntity().map(Target::entities).orElse(Target.NONE);
         }
     }

@@ -75,8 +75,6 @@ public class ProximaEntity extends LivingEntity {
         current = null;
         target = null;
 
-        recalculationDelay = 0;
-        lastPathfind = 0;
         lastMoved = 0;
 
         lastX = 0;
@@ -88,6 +86,9 @@ public class ProximaEntity extends LivingEntity {
         resetPath();
         this.destination = null;
         pathfinding.target = null;
+
+        recalculationDelay = 0;
+        lastPathfind = 0;
     }
 
     public void setDestination(@Nullable PathTarget destination) {
@@ -100,7 +101,7 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
-        resetPath();
+        destroyPath();
         pathfinding.target = null;
         this.destination = destination;
     }
@@ -115,7 +116,7 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
-        resetPath();
+        destroyPath();
         pathfinding.target = targetEntity;
         this.destination = PathTarget.resolving(() -> {
             if (!pathfinding.isValidTarget(targetEntity)) {
@@ -207,8 +208,7 @@ public class ProximaEntity extends LivingEntity {
             if (!initPath(currentPath)) {
                 currentPath = null;
             }
-        } else if (destination != null && pathfinding.canPathfind(this) && (time - lastPathfind > recalculationDelay &&
-            (destination.hasChanged() || (currentPath == null || !currentPath.isSuccessful())))) {
+        } else if (canNavigate(time)) {
             navigator.navigate(position.x(), position.y(), position.z(), destination);
             this.lastPathfind = time;
         }
@@ -218,6 +218,12 @@ public class ProximaEntity extends LivingEntity {
                 resetPath();
             }
         }
+    }
+
+    protected boolean canNavigate(long time) {
+        return destination != null && pathfinding.canPathfind(this) &&
+            (time - lastPathfind > recalculationDelay &&
+                (destination.hasChanged() || (currentPath == null || !currentPath.isSuccessful())));
     }
 
     protected void aiTick(long time) {
