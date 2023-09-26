@@ -160,6 +160,8 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
     }
 
     private CompletableFuture<?> onSpawn(Player player) {
+        player.heal();
+
         CancellableState.Holder<Entity> holder = player.stateHolder();
         holder.registerState(CoreStages.LOBBY, CancellableState.state(player, self -> {
             for (ItemStack stack : defaultItems) {

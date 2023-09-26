@@ -6,8 +6,11 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.mob2.Mob;
+import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
@@ -61,20 +64,28 @@ public class GiveCoinsShotHandler implements ShotHandler {
         Collection<Component> displays = new ArrayList<>(2);
         if (!shot.regularTargets().isEmpty()) {
             displays.add(Component.text((isInstaKill ? "Insta Kill " : "") + shot.regularTargets().size() + "x"));
-            for (GunHit ignored : shot.regularTargets()) {
-                change += isInstaKill ? data.instaKillCoins : data.normalCoins;
+            for (GunHit hit : shot.regularTargets()) {
+                change += isInstaKill && vulnerableToInstakill(hit.entity()) ? data.instaKillCoins : data.normalCoins;
             }
         }
 
         if (!shot.headshotTargets().isEmpty()) {
             displays.add(
                 Component.text((isInstaKill ? "Insta Kill " : "Critical Hit ") + shot.headshotTargets().size() + "x"));
-            for (GunHit ignored : shot.headshotTargets()) {
-                change += isInstaKill ? data.instaKillCoins : data.headshotCoins;
+            for (GunHit hit : shot.headshotTargets()) {
+                change += isInstaKill && vulnerableToInstakill(hit.entity()) ? data.instaKillCoins : data.headshotCoins;
             }
         }
 
         coins.runTransaction(new Transaction(modifiers, displays, change)).applyIfAffordable(coins);
+    }
+
+    private boolean vulnerableToInstakill(LivingEntity livingEntity) {
+        if (!(livingEntity instanceof Mob mob)) {
+            return true;
+        }
+
+        return !mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL);
     }
 
     @DataObject

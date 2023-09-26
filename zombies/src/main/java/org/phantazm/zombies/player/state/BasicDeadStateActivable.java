@@ -62,14 +62,14 @@ public class BasicDeadStateActivable implements Activable {
     @Override
     public void start() {
         playerView.getPlayer().ifPresent(player -> {
+            player.heal();
             player.setInvisible(true);
             player.setGameMode(GameMode.SPECTATOR);
             sidebar.addViewer(player);
             tabList.addViewer(player);
             belowNameTag.addViewer(player);
         });
-
-
+        
         playerView.getDisplayName().thenAccept(displayName -> {
             if (context.isRejoin()) {
                 TagResolver rejoinerPlaceholder = Placeholder.component("rejoiner", displayName);

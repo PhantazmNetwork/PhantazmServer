@@ -137,6 +137,8 @@ public class ZombiesScene extends InstanceScene {
         }
 
         Player player = playerOptional.get();
+
+        player.heal();
         player.stateHolder().setStage(Stages.ZOMBIES_GAME);
 
         ZombiesPlayer zombiesPlayer = playerCreator.apply(newPlayer);

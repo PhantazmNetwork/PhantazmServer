@@ -17,7 +17,7 @@ public class ZombiesCommand extends Command {
     public ZombiesCommand(@NotNull ZombiesJoiner joiner, @NotNull Map<? super UUID, ? extends Party> parties,
         @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps,
         long joinRatelimit, @NotNull ZombiesDatabase zombiesDatabase) {
-        super("zombies");
+        super("zombies", "z");
 
         Objects.requireNonNull(joiner);
         Objects.requireNonNull(parties);
