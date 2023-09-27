@@ -34,7 +34,8 @@ public class PlayerBlockInteractListener extends ZombiesPlayerEventListener<Play
         }
 
         String name = material.name();
-        if (name.endsWith("_button") || name.endsWith("_fence_gate") || name.endsWith("_door") ||
+        if (name.endsWith("_button") || name.endsWith("_fence_gate") ||
+            (name.endsWith("_door") && !material.equals(Material.IRON_DOOR)) ||
             (name.endsWith("_trapdoor") && !material.equals(Material.IRON_TRAPDOOR)) || name.endsWith("_bed") ||
             name.endsWith("_table") || name.endsWith("chest")) {
             return true;
