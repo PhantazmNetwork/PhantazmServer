@@ -2,6 +2,8 @@ package org.phantazm.zombies.map;
 
 import net.minestom.server.Tickable;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.network.packet.server.CachedPacket;
+import net.minestom.server.network.packet.server.play.PluginMessagePacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.packet.MinestomPacketUtils;
@@ -19,6 +21,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Round implements Tickable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Round.class);
+
+    private static final CachedPacket ROUND_START_PACKET = new CachedPacket(() ->
+        new PluginMessagePacket(RoundStartPacket.ID.asString(), MinestomPacketUtils.serialize(new RoundStartPacket())));
 
     private final RoundInfo roundInfo;
     private final List<Wave> waves;
@@ -109,10 +114,7 @@ public class Round implements Tickable {
 
             int prevBestRound = zombiesPlayer.module().getStats().getBestRound();
             zombiesPlayer.module().getStats().setBestRound(Math.max(prevBestRound, roundInfo.round()));
-            zombiesPlayer.getPlayer().ifPresent(player -> {
-                byte[] data = MinestomPacketUtils.serialize(new RoundStartPacket());
-                player.sendPluginMessage(RoundStartPacket.ID.asString(), data);
-            });
+            zombiesPlayer.getPlayer().ifPresent(player -> player.sendPacket(ROUND_START_PACKET));
         }
 
         for (Action<Round> action : startActions) {
