@@ -14,17 +14,21 @@ import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final ZombiesScene scene;
     private final ZombiesPlayerModule module;
     private final TickTaskScheduler taskScheduler;
 
+    private final AtomicBoolean blockHandAnimation;
+
     public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module,
         @NotNull TickTaskScheduler taskScheduler) {
         this.scene = Objects.requireNonNull(scene);
         this.module = Objects.requireNonNull(module);
         this.taskScheduler = Objects.requireNonNull(taskScheduler);
+        this.blockHandAnimation = new AtomicBoolean();
     }
 
     @Override
@@ -41,6 +45,16 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     @Override
     public @NotNull ZombiesScene getScene() {
         return scene;
+    }
+
+    @Override
+    public void setBlockHandAnimation() {
+        blockHandAnimation.set(true);
+    }
+
+    @Override
+    public boolean blockHandAnimation() {
+        return blockHandAnimation.getAndSet(false);
     }
 
     @Override

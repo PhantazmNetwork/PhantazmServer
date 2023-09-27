@@ -24,7 +24,7 @@ public class PlayerLeftClickListener extends ZombiesPlayerEventListener<PlayerHa
 
     @Override
     protected void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerHandAnimationEvent event) {
-        if (event.getHand() != Player.Hand.MAIN) {
+        if (event.getHand() != Player.Hand.MAIN || zombiesPlayer.blockHandAnimation()) {
             return;
         }
 

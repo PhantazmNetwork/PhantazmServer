@@ -269,11 +269,10 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         node.addListener(EntityDamageEvent.class,
             new PlayerDamageEventListener(instance, zombiesPlayers, mapObjects, settings, sceneSupplier));
         node.addListener(PlayerHandAnimationEvent.class, new PlayerLeftClickListener(instance, zombiesPlayers, sceneSupplier));
-        PlayerAttackEntityListener attackEntityListener =
-            new PlayerAttackEntityListener(instance, zombiesPlayers, settings.punchDamage(),
-                settings.punchCooldown(), settings.punchKnockback(), sceneSupplier);
+        node.addListener(PlayerBlockInteractEvent.class, new PlayerBlockInteractListener(instance, zombiesPlayers, sceneSupplier));
 
-        node.addListener(EntityAttackEvent.class, attackEntityListener);
+        node.addListener(EntityAttackEvent.class, new PlayerAttackEntityListener(instance, zombiesPlayers,
+            settings.punchDamage(), settings.punchCooldown(), settings.punchKnockback(), sceneSupplier));
         node.addListener(PlayerChangeHeldSlotEvent.class, new PlayerItemSelectListener(instance, zombiesPlayers, sceneSupplier));
         node.addListener(ItemDropEvent.class, new PlayerDropItemListener(instance, zombiesPlayers, sceneSupplier));
 

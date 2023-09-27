@@ -44,6 +44,10 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     @NotNull
     ZombiesScene getScene();
 
+    void setBlockHandAnimation();
+
+    boolean blockHandAnimation();
+
     default @NotNull Optional<Equipment> getHeldEquipment() {
         Optional<Player> playerOptional = module().getPlayerView().getPlayer();
         if (playerOptional.isEmpty()) {
