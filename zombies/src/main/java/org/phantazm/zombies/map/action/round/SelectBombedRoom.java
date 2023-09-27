@@ -173,8 +173,8 @@ public class SelectBombedRoom implements Action<Round> {
                 }
 
                 RoundHandler roundHandler = objects.module().roundHandlerSupplier().get();
-                int roundsElapsed = roundHandler.currentRoundIndex() - startRoundIndex;
-                if (roundsElapsed >= data.duration) {
+                int currentRound = roundHandler.currentRoundIndex();
+                if (currentRound < startRoundIndex || currentRound - startRoundIndex >= data.duration) {
                     if (data.bombingCompleteFormat != null) {
                         instance.sendMessage(MiniMessage.miniMessage().deserialize(data.bombingCompleteFormat,
                             roomPlaceholder));
