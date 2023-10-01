@@ -201,8 +201,8 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
             parent.removeChild(lobbyNode);
         }
 
-        super.shutdown();
         this.npcHandler.end();
+        super.shutdown();
     }
 
     @SuppressWarnings("unchecked")

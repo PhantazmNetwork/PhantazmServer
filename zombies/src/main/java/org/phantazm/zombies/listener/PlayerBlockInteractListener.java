@@ -37,12 +37,14 @@ public class PlayerBlockInteractListener extends ZombiesPlayerEventListener<Play
         if (name.endsWith("_button") || name.endsWith("_fence_gate") ||
             (name.endsWith("_door") && !material.equals(Material.IRON_DOOR)) ||
             (name.endsWith("_trapdoor") && !material.equals(Material.IRON_TRAPDOOR)) || name.endsWith("_bed") ||
-            name.endsWith("_table") || name.endsWith("chest")) {
+            name.endsWith("_table") || name.endsWith("chest") || name.endsWith("_anvil")) {
             return true;
         }
 
         return material.equals(Material.LEVER) || material.equals(Material.FURNACE) ||
-            material.equals(Material.BLAST_FURNACE) || material.equals(Material.ANVIL) ||
-            material.equals(Material.BEACON);
+            material.equals(Material.BLAST_FURNACE) || material.equals(Material.BEACON) ||
+            material.equals(Material.LOOM) || material.equals(Material.NOTE_BLOCK) ||
+            material.equals(Material.SHULKER_BOX) || material.equals(Material.BARREL) ||
+            material.equals(Material.HOPPER) || material.equals(Material.COMPOSTER);
     }
 }
