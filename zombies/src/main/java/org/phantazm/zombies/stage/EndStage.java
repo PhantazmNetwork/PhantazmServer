@@ -139,7 +139,7 @@ public class EndStage implements Stage {
     public void start() {
         instance.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH, Sound.Source.MASTER, 1.0F, 1.0F));
 
-        boolean isLegit = sceneSupplier.get().isLegit();
+        boolean isLegit = sceneSupplier.get().isLegit() && ticksSinceStart.get() > 20;
         boolean anyAlive = false;
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (zombiesPlayer.isAlive()) {
