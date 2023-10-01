@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.Audiences;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
@@ -22,6 +23,9 @@ import org.phantazm.server.config.server.ShutdownConfig;
 public class OrderlyShutdownCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.orderly_shutdown");
 
+    private static final Component FRESH_ROUTE_MESSAGE = Component.text("Routing to fresh instance...", NamedTextColor.RED);
+    private static final Component NOT_JOINABLE_MESSAGE = Component.text("Server is not joinable!", NamedTextColor.RED);
+
     private boolean initialized;
     private long shutdownStart;
 
@@ -37,7 +41,7 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
             EventNode<Event> globalNode = MinecraftServer.getGlobalEventHandler();
             globalNode.addListener(SceneShutdownEvent.class, this::onSceneShutdown);
             globalNode.addListener(AsyncPlayerPreLoginEvent.class, event -> {
-                event.getPlayer().kick(Component.text("Server is not joinable", NamedTextColor.RED));
+                event.getPlayer().kick(NOT_JOINABLE_MESSAGE);
             });
             globalNode.addListener(SceneJoinEvent.class, event -> {
                 if (!event.result().successful()) {
@@ -45,8 +49,7 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
                 }
 
                 for (PlayerView view : event.players()) {
-                    view.getPlayer().ifPresent(player -> player.kick(
-                        Component.text("Routing to fresh instance...", NamedTextColor.RED)));
+                    view.getPlayer().ifPresent(player -> player.kick(FRESH_ROUTE_MESSAGE));
                 }
             });
 
@@ -56,7 +59,14 @@ public class OrderlyShutdownCommand extends PermissionLockedCommand {
             SceneManager.Global.instance().forEachScene(scene -> {
                 if (scene.isGame() && scene instanceof JoinToggleableScene joinToggleable) {
                     joinToggleable.getAcquirable().sync(self -> ((JoinToggleableScene) self).setJoinable(false));
+                    return;
                 }
+
+                scene.getAcquirable().sync(self -> {
+                    for (Player player : self.getPlayers()) {
+                        player.kick(FRESH_ROUTE_MESSAGE);
+                    }
+                });
             });
 
             MinecraftServer.getSchedulerManager().scheduleTask(() -> {
