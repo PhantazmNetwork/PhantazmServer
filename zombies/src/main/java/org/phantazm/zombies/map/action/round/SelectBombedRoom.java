@@ -86,7 +86,7 @@ public class SelectBombedRoom implements Action<Round> {
     private @Nullable Room targetRoom(MapObjects mapObjects) {
         if (data.specificRoom != null) {
             for (Room room : mapObjects.roomTracker().items()) {
-                if (room.getRoomInfo().id().equals(data.specificRoom)) {
+                if (room.getRoomInfo().id().equals(data.specificRoom) && !room.flags().hasFlag(Flags.BOMBED_ROOM)) {
                     return room;
                 }
             }
