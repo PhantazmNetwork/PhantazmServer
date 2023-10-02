@@ -52,11 +52,18 @@ public class ProximaEntity extends LivingEntity {
 
     private int removalAnimationDelay = 1000;
 
-    public ProximaEntity(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding) {
-        super(entityType, uuid);
+    protected ProximaEntity(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
+        boolean register) {
+        super(entityType, uuid, false);
         this.pathfinding = Objects.requireNonNull(pathfinding);
         this.goalGroups = new ArrayList<>(5);
         pathfinding.setSelf(this);
+
+        if (register) super.register();
+    }
+
+    public ProximaEntity(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding) {
+        this(entityType, uuid, pathfinding, true);
     }
 
     public @NotNull Pathfinding pathfinding() {

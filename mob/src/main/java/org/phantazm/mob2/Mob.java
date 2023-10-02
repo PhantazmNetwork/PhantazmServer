@@ -70,9 +70,9 @@ public class Mob extends ProximaEntity {
         }
     }
 
-    public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
-        @NotNull MobData data) {
-        super(entityType, uuid, pathfinding);
+    protected Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
+        @NotNull MobData data, boolean register) {
+        super(entityType, uuid, pathfinding, false);
         this.allSkills = new ArrayList<>();
         this.tickableSkills = new ArrayList<>();
         this.useOnTick = new ArrayList<>();
@@ -94,6 +94,13 @@ public class Mob extends ProximaEntity {
         this.cachedUpdateTeamPacket = new CachedPacket(() -> createTeamPacket(this.teamSettings, true));
         this.cachedRemoveTeamPacket = new CachedPacket(() -> new TeamsPacket(this.uniqueTeamName,
             new TeamsPacket.RemoveTeamAction()));
+
+        if (register) super.register();
+    }
+
+    public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
+        @NotNull MobData data) {
+        this(entityType, uuid, pathfinding, data, true);
     }
 
     /**

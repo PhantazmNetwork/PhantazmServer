@@ -23,9 +23,9 @@ public class MinimalFakePlayer extends LivingEntity {
 
     private final PlayerSkin skin;
 
-    public MinimalFakePlayer(@NotNull SchedulerManager schedulerManager, @NotNull String username,
-        @Nullable PlayerSkin skin) {
-        super(EntityType.PLAYER, UUID.randomUUID());
+    protected MinimalFakePlayer(@NotNull SchedulerManager schedulerManager, @NotNull String username,
+        @Nullable PlayerSkin skin, boolean register) {
+        super(EntityType.PLAYER, UUID.randomUUID(), false);
 
         this.schedulerManager = Objects.requireNonNull(schedulerManager);
         this.username = Objects.requireNonNull(username);
@@ -41,6 +41,13 @@ public class MinimalFakePlayer extends LivingEntity {
         meta.setRightLegEnabled(true);
         meta.setHatEnabled(true);
         meta.setNotifyAboutChanges(true);
+
+        if (register) super.register();
+    }
+
+    public MinimalFakePlayer(@NotNull SchedulerManager schedulerManager, @NotNull String username,
+        @Nullable PlayerSkin skin) {
+        this(schedulerManager, username, skin, true);
     }
 
     public void init() {
