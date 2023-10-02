@@ -28,8 +28,8 @@ public class PlayerBlockInteractListener extends ZombiesPlayerEventListener<Play
     }
 
     private static boolean blockNextHandAnimation(Block block) {
-        String namespace = block.registry().namespace().toString();
-        if (namespace.startsWith("potted_")) {
+        String value = block.registry().namespace().path();
+        if (value.startsWith("potted_")) {
             return true;
         }
 
