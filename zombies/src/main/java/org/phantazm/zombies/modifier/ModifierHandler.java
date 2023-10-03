@@ -37,7 +37,9 @@ public final class ModifierHandler {
             Modifier modifier = component.apply(injectionStore, scene);
             modifier.apply();
 
-            SceneManager.Global.instance().addTickable(scene, modifier);
+            if (modifier.needsTicking()) {
+                SceneManager.Global.instance().addTickable(scene, modifier);
+            }
         }
     }
 }

@@ -19,6 +19,7 @@ import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
+import org.phantazm.zombies.modifier.Modifier;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
@@ -51,6 +52,8 @@ public class ZombiesScene extends InstanceScene {
     private boolean sandbox;
     private boolean restricted;
 
+    private final List<Modifier> modifiers;
+
     public ZombiesScene(@NotNull Instance instance,
         @NotNull ZombiesMap map,
         @NotNull MapSettingsInfo mapSettingsInfo,
@@ -77,6 +80,8 @@ public class ZombiesScene extends InstanceScene {
             mapSettingsInfo.pitch());
 
         this.legit = true;
+
+        this.modifiers = new ArrayList<>();
     }
 
     @Override

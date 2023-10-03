@@ -1,9 +1,14 @@
 package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
+import com.github.steanky.element.core.context.ElementContext;
+import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.bridge.Configuration;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
 import net.kyori.adventure.key.Key;
@@ -17,6 +22,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.FileUtils;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.BasicClientBlockHandlerSource;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
@@ -39,6 +45,8 @@ import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.mob2.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob2.MobSpawnerSource;
+import org.phantazm.zombies.modifier.ModifierComponent;
+import org.phantazm.zombies.modifier.ModifierHandler;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
 import org.phantazm.zombies.powerup.BasicPowerupHandlerSource;
 import org.phantazm.zombies.powerup.FileSystemPowerupDataLoader;
@@ -51,10 +59,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public final class ZombiesFeature {
     public static final Path MAPS_FOLDER = Path.of("./zombies/maps");
@@ -85,7 +95,7 @@ public final class ZombiesFeature {
             FileUtils.createDirectories(MODIFIERS_FOLDER);
         } catch (IOException e) {
             LOGGER.error("Error creating some directories", e);
-            throw new RuntimeException(e);
+            throw new RuntimeException();
         }
 
         Attributes.registerAll();
@@ -142,7 +152,33 @@ public final class ZombiesFeature {
             providers.put(entry.getKey(), provider);
         }
 
-        ZombiesJoiner joiner = new ZombiesJoiner(providers);
+        Map<Key, ModifierComponent> modifierComponents = new HashMap<>();
+        try (Stream<Path> files = Files.list(MODIFIERS_FOLDER)) {
+            for (Path path : (Iterable<Path>) files::iterator) {
+                ConfigElement config = Configuration.read(path, codec);
+                if (!config.isNode()) {
+                    LOGGER.error("Expected top-level node in {}", path);
+                    continue;
+                }
+
+                ConfigNode node = config.asNode();
+                ElementContext context = contextManager.makeContext(node);
+                ModifierComponent modifierComponent = context.provide(DependencyProvider.EMPTY, exception -> {
+                    LOGGER.warn("Error loading modifier in {}: {}", path, exception);
+                }, () -> null);
+                if (modifierComponent == null) {
+                    continue;
+                }
+
+                modifierComponents.put(modifierComponent.key(), modifierComponent);
+            }
+        } catch (IOException e) {
+            LOGGER.error("Error enumerating modifiers folder", e);
+            throw new RuntimeException();
+        }
+
+        ModifierHandler modifierHandler = new ModifierHandler(modifierComponents, InjectionStore.EMPTY);
+        ZombiesJoiner joiner = new ZombiesJoiner(providers, modifierHandler);
 
         MinecraftServer.getCommandManager().register(new ZombiesCommand(joiner, parties, keyParser, maps,
             zombiesConfig.joinRatelimit(), database));

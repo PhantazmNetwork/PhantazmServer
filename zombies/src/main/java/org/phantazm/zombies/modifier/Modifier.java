@@ -7,4 +7,8 @@ public interface Modifier extends Tickable {
 
     default void tick(long time) {
     }
+
+    default boolean needsTicking() {
+        return false;
+    }
 }
