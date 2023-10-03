@@ -42,7 +42,7 @@ public class ZombiesRejoinCommand extends Command {
                 }
 
                 Stage stage = zombiesScene.currentStage();
-                if (stage != null && !stage.canRejoin()) {
+                if (stage == null || !stage.canRejoin()) {
                     continue;
                 }
 
