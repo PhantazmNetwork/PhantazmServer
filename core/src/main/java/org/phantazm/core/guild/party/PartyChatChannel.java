@@ -9,6 +9,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FutureUtils;
 import org.phantazm.core.chat.ChatChannel;
 
 import java.util.Map;
@@ -48,7 +49,7 @@ public class PartyChatChannel implements ChatChannel {
         Pair<Party, ObjectBooleanPair<Component>> partyPair = getParty(from);
         if (partyPair.left() == null) {
             onFailure.accept(partyPair.right());
-            return CompletableFuture.completedFuture(null);
+            return FutureUtils.nullCompletedFuture();
         }
 
         return nameFormatter.apply(from).thenAccept(component -> {

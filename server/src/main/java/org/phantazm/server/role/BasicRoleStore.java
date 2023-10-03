@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.phantazm.commons.FutureUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,12 +71,12 @@ public class BasicRoleStore implements RoleStore {
     @Override
     public @NotNull CompletableFuture<Boolean> giveRole(@NotNull UUID uuid, @NotNull String identifier) {
         if (identifier.equals(RoleStore.DEFAULT) || identifier.equals(Role.NONE.identifier())) {
-            return CompletableFuture.completedFuture(false);
+            return FutureUtils.nullCompletedFuture();
         }
 
         Role role = roleMap.get(identifier);
         if (role == null) {
-            return CompletableFuture.completedFuture(false);
+            return FutureUtils.nullCompletedFuture();
         }
 
         return CompletableFuture.supplyAsync(() -> {

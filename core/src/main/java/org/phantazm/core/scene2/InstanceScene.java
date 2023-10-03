@@ -7,6 +7,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.phantazm.commons.FutureUtils;
 import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
@@ -52,18 +53,18 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
         int i = 0;
         for (PlayerView player : players) {
             if (!super.scenePlayers.add(player)) {
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
             if (!this.spectators.add(player)) {
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
             Optional<Player> playerOptional = player.getPlayer();
             if (playerOptional.isEmpty()) {
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
@@ -83,7 +84,7 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
     }
 
     protected @NotNull CompletableFuture<?> joinSpectator(@NotNull Player spectator, boolean ghost) {
-        return CompletableFuture.completedFuture(null);
+        return FutureUtils.nullCompletedFuture();
     }
 
     @Override

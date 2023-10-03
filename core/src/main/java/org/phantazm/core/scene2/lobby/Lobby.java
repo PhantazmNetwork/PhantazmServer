@@ -23,6 +23,7 @@ import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.OpenBookPacket;
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FutureUtils;
 import org.phantazm.core.CoreStages;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
@@ -107,13 +108,13 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
         int i = 0;
         for (PlayerView playerView : players) {
             if (!this.scenePlayers.contains(playerView)) {
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
             Optional<Player> playerOptional = playerView.getPlayer();
             if (playerOptional.isEmpty()) {
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
@@ -129,13 +130,13 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
         int i = 0;
         for (PlayerView joiningPlayer : players) {
             if (!this.scenePlayers.add(joiningPlayer)) {
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
             Optional<Player> playerOptional = joiningPlayer.getPlayer();
             if (playerOptional.isEmpty()) {
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
@@ -150,7 +151,8 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
             });
 
             if (login) {
-                return;
+                futures[i++] = FutureUtils.nullCompletedFuture();
+                continue;
             }
 
             futures[i++] = onSpawn(player);

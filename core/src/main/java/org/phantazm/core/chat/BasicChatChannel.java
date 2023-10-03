@@ -12,6 +12,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FutureUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +46,7 @@ public class BasicChatChannel implements ChatChannel {
         Pair<Audience, ObjectBooleanPair<Component>> audiencePair = getAudience(from);
         if (audiencePair.left() == null) {
             onFailure.accept(audiencePair.right());
-            return CompletableFuture.completedFuture(null);
+            return FutureUtils.nullCompletedFuture();
         }
 
         return formatMessage(from, message).thenAccept(component -> {

@@ -2,13 +2,13 @@ package org.phantazm.zombies.modifier;
 
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.DualComponent;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.event.ZombiesMobSetupEvent;
@@ -19,10 +19,12 @@ import java.util.UUID;
 
 @Model("zombies.modifier.mob_attribute")
 @Cache
-public class MobAttributeModifier implements DualComponent<ZombiesScene, Modifier> {
+public class MobAttributeModifier extends ModifierComponentBase {
     private final Data data;
 
+    @FactoryMethod
     public MobAttributeModifier(@NotNull Data data) {
+        super(data.key);
         this.data = Objects.requireNonNull(data);
     }
 
@@ -36,15 +38,9 @@ public class MobAttributeModifier implements DualComponent<ZombiesScene, Modifie
         @Override
         public void apply() {
             UUID uuid = UUID.randomUUID();
-            scene.addListener(ZombiesMobSetupEvent.class, event -> {
-                event.getEntity().getAttribute(Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
-                    .addModifier(new AttributeModifier(uuid, uuid.toString(), data.amount, data.attributeOperation));
-            });
-        }
-
-        @Override
-        public @NotNull Key key() {
-            return data.key;
+            scene.addListener(ZombiesMobSetupEvent.class, event -> event.getEntity()
+                .getAttribute(Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
+                .addModifier(new AttributeModifier(uuid, uuid.toString(), data.amount, data.attributeOperation)));
         }
     }
 

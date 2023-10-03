@@ -16,6 +16,7 @@ import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.commons.FileUtils;
 import org.phantazm.core.BasicClientBlockHandlerSource;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
@@ -59,6 +60,7 @@ public final class ZombiesFeature {
     public static final Path MAPS_FOLDER = Path.of("./zombies/maps");
     public static final Path POWERUPS_FOLDER = Path.of("./zombies/powerups");
     public static final Path INSTANCES_FOLDER = Path.of("./zombies/instances");
+    public static final Path MODIFIERS_FOLDER = Path.of("./zombies/modifiers");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesFeature.class);
 
@@ -76,6 +78,16 @@ public final class ZombiesFeature {
         @NotNull Map<? super UUID, ? extends Party> parties,
         @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
         @NotNull MappingProcessorSource mappingProcessorSource, @NotNull Map<Key, MobCreator> mobCreatorMap) {
+        try {
+            FileUtils.createDirectories(MAPS_FOLDER);
+            FileUtils.createDirectories(POWERUPS_FOLDER);
+            FileUtils.createDirectories(INSTANCES_FOLDER);
+            FileUtils.createDirectories(MODIFIERS_FOLDER);
+        } catch (IOException e) {
+            LOGGER.error("Error creating some directories", e);
+            throw new RuntimeException(e);
+        }
+
         Attributes.registerAll();
 
         ConfigCodec codec = new YamlCodec();

@@ -10,6 +10,7 @@ import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.phantazm.commons.FutureUtils;
 import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.player.PlayerView;
@@ -111,7 +112,7 @@ public class ZombiesScene extends InstanceScene {
 
             if (!zombiesPlayer.hasQuit()) {
                 //player exists and hasn't quit, so don't do anything
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
@@ -136,7 +137,7 @@ public class ZombiesScene extends InstanceScene {
     private CompletableFuture<?> handleNewPlayer(PlayerView newPlayer, Pos spawnPos) {
         Optional<Player> playerOptional = newPlayer.getPlayer();
         if (playerOptional.isEmpty()) {
-            return CompletableFuture.completedFuture(null);
+            return FutureUtils.nullCompletedFuture();
         }
 
         Player player = playerOptional.get();
@@ -161,7 +162,7 @@ public class ZombiesScene extends InstanceScene {
     private CompletableFuture<?> handleRejoiningPlayer(ZombiesPlayer zombiesPlayer, Pos spawnPos) {
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
         if (playerOptional.isEmpty()) {
-            return CompletableFuture.completedFuture(null);
+            return FutureUtils.nullCompletedFuture();
         }
 
         Player player = playerOptional.get();
