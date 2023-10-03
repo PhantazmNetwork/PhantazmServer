@@ -4,7 +4,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.config.InstanceConfig;
 import org.phantazm.core.instance.InstanceLoader;
@@ -25,7 +25,7 @@ public class LobbyCreator implements SceneCreator<Lobby> {
     private final List<String> lobbyPath;
     private final InstanceConfig instanceConfig;
     private final String lobbyJoinMessageFormat;
-    private final List<BasicComponent<NPC>> npcs;
+    private final List<MonoComponent<NPC>> npcs;
     private final List<ItemStack> defaultItems;
     private final Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler;
 
@@ -35,7 +35,7 @@ public class LobbyCreator implements SceneCreator<Lobby> {
 
     public LobbyCreator(@NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPath,
         @NotNull InstanceConfig instanceConfig, @NotNull String lobbyJoinMessageFormat,
-        @NotNull List<BasicComponent<NPC>> npcs, @NotNull List<ItemStack> defaultItems,
+        @NotNull List<MonoComponent<NPC>> npcs, @NotNull List<ItemStack> defaultItems,
         @NotNull Function<? super @NotNull Player, ? extends @NotNull CompletableFuture<?>> displayNameStyler,
         int sceneCap, int playerCap, int timeout) {
         this.instanceLoader = Objects.requireNonNull(instanceLoader);
@@ -60,7 +60,7 @@ public class LobbyCreator implements SceneCreator<Lobby> {
         InjectionStore store = InjectionStore.of();
 
         List<NPC> npcs = new ArrayList<>(this.npcs.size());
-        for (BasicComponent<NPC> component : this.npcs) {
+        for (MonoComponent<NPC> component : this.npcs) {
             npcs.add(component.apply(store));
         }
 

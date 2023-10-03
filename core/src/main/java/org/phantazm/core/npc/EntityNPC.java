@@ -7,7 +7,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.npc.interactor.Interactor;
 
@@ -17,18 +17,18 @@ import java.util.function.Supplier;
 
 @Model("npc.entity")
 @Cache
-public class EntityNPC implements BasicComponent<NPC> {
+public class EntityNPC implements MonoComponent<NPC> {
     private final Data data;
-    private final BasicComponent<Supplier<Entity>> entity;
-    private final BasicComponent<Consumer<Entity>> settings;
-    private final BasicComponent<EntityTicker> ticker;
-    private final BasicComponent<Interactor> interactor;
+    private final MonoComponent<Supplier<Entity>> entity;
+    private final MonoComponent<Consumer<Entity>> settings;
+    private final MonoComponent<EntityTicker> ticker;
+    private final MonoComponent<Interactor> interactor;
 
     @FactoryMethod
-    public EntityNPC(@NotNull Data data, @NotNull @Child("entity") BasicComponent<Supplier<Entity>> entity,
-        @NotNull @Child("settings") BasicComponent<Consumer<Entity>> settings,
-        @NotNull @Child("ticker") BasicComponent<EntityTicker> ticker,
-        @NotNull @Child("interactor") BasicComponent<Interactor> interactor) {
+    public EntityNPC(@NotNull Data data, @NotNull @Child("entity") MonoComponent<Supplier<Entity>> entity,
+        @NotNull @Child("settings") MonoComponent<Consumer<Entity>> settings,
+        @NotNull @Child("ticker") MonoComponent<EntityTicker> ticker,
+        @NotNull @Child("interactor") MonoComponent<Interactor> interactor) {
         this.data = data;
         this.entity = entity;
         this.settings = settings;

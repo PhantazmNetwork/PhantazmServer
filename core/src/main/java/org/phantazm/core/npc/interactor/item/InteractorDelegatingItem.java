@@ -7,7 +7,7 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.gui.Gui;
 import org.phantazm.core.gui.GuiItem;
@@ -15,13 +15,13 @@ import org.phantazm.core.npc.interactor.Interactor;
 
 @Model("npc.interactor.gui.item")
 @Cache
-public class InteractorDelegatingItem implements BasicComponent<GuiItem> {
+public class InteractorDelegatingItem implements MonoComponent<GuiItem> {
     private final Data data;
-    private final BasicComponent<Interactor> interactor;
+    private final MonoComponent<Interactor> interactor;
 
     @FactoryMethod
     public InteractorDelegatingItem(@NotNull Data data,
-        @NotNull @Child("interactor") BasicComponent<Interactor> interactor) {
+        @NotNull @Child("interactor") MonoComponent<Interactor> interactor) {
         this.data = data;
         this.interactor = interactor;
     }

@@ -29,6 +29,7 @@ import org.phantazm.zombies.stage.StageTransition;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ZombiesScene extends InstanceScene {
@@ -300,6 +301,14 @@ public class ZombiesScene extends InstanceScene {
 
     public @NotNull EventNode<Event> sceneNode() {
         return sceneNode;
+    }
+
+    public void broadcastEvent(@NotNull Event event) {
+        sceneNode.call(event);
+    }
+
+    public <E extends Event> void addListener(@NotNull Class<E> eventClass, @NotNull Consumer<E> listener) {
+        sceneNode.addListener(eventClass, listener);
     }
 
     public @Nullable Stage currentStage() {

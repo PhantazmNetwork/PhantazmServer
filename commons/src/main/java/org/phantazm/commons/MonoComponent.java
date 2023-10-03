@@ -4,5 +4,5 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
-public interface BasicComponent<T> extends Function<@NotNull InjectionStore, T> {
+public interface MonoComponent<T> extends Function<@NotNull InjectionStore, T> {
 }

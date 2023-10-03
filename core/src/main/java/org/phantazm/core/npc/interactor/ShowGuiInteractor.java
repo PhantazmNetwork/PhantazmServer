@@ -7,7 +7,7 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.InventoryType;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.gui.BasicSlotDistributor;
 import org.phantazm.core.gui.Gui;
@@ -18,12 +18,12 @@ import java.util.List;
 
 @Model("npc.interactor.show_gui")
 @Cache
-public class ShowGuiInteractor implements BasicComponent<Interactor> {
+public class ShowGuiInteractor implements MonoComponent<Interactor> {
     private final Data data;
-    private final List<BasicComponent<GuiItem>> guiItems;
+    private final List<MonoComponent<GuiItem>> guiItems;
 
     @FactoryMethod
-    public ShowGuiInteractor(@NotNull Data data, @NotNull @Child("gui_items") List<BasicComponent<GuiItem>> guiItems) {
+    public ShowGuiInteractor(@NotNull Data data, @NotNull @Child("gui_items") List<MonoComponent<GuiItem>> guiItems) {
         this.data = data;
         this.guiItems = guiItems;
     }
@@ -31,7 +31,7 @@ public class ShowGuiInteractor implements BasicComponent<Interactor> {
     @Override
     public Interactor apply(@NotNull InjectionStore injectionStore) {
         List<GuiItem> items = new ArrayList<>(guiItems.size());
-        for (BasicComponent<GuiItem> component : guiItems) {
+        for (MonoComponent<GuiItem> component : guiItems) {
             items.add(component.apply(injectionStore));
         }
 

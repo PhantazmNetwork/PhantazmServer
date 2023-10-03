@@ -7,12 +7,12 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
 
 @Model("npc.interactor.command")
 @Cache
-public class CommandInteractor implements BasicComponent<Interactor> {
+public class CommandInteractor implements MonoComponent<Interactor> {
     private final Data data;
 
     @FactoryMethod

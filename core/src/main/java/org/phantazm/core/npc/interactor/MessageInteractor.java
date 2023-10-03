@@ -11,12 +11,12 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
 
 @Model("npc.interactor.message")
 @Cache
-public class MessageInteractor implements BasicComponent<Interactor> {
+public class MessageInteractor implements MonoComponent<Interactor> {
     private final Data data;
 
     @FactoryMethod

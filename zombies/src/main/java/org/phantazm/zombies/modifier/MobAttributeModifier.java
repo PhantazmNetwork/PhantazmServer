@@ -1,0 +1,58 @@
+package org.phantazm.zombies.modifier;
+
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.Model;
+import net.kyori.adventure.key.Key;
+import net.minestom.server.attribute.Attribute;
+import net.minestom.server.attribute.AttributeModifier;
+import net.minestom.server.attribute.AttributeOperation;
+import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.DualComponent;
+import org.phantazm.commons.InjectionStore;
+import org.phantazm.zombies.Attributes;
+import org.phantazm.zombies.event.ZombiesMobSetupEvent;
+import org.phantazm.zombies.scene2.ZombiesScene;
+
+import java.util.Objects;
+import java.util.UUID;
+
+@Model("zombies.modifier.mob_attribute")
+@Cache
+public class MobAttributeModifier implements DualComponent<ZombiesScene, Modifier> {
+    private final Data data;
+
+    public MobAttributeModifier(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data);
+    }
+
+    @Override
+    public @NotNull Modifier apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesScene scene) {
+        return new Impl(data, scene);
+    }
+
+    private record Impl(Data data,
+        ZombiesScene scene) implements Modifier {
+        @Override
+        public void apply() {
+            UUID uuid = UUID.randomUUID();
+            scene.addListener(ZombiesMobSetupEvent.class, event -> {
+                event.getEntity().getAttribute(Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
+                    .addModifier(new AttributeModifier(uuid, uuid.toString(), data.amount, data.attributeOperation));
+            });
+        }
+
+        @Override
+        public @NotNull Key key() {
+            return data.key;
+        }
+    }
+
+    @DataObject
+    public record Data(@NotNull Key key,
+        @NotNull String attribute,
+        double amount,
+        @NotNull AttributeOperation attributeOperation) {
+
+    }
+}
