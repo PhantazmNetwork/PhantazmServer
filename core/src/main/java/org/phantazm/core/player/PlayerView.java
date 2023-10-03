@@ -2,6 +2,7 @@ package org.phantazm.core.player;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -139,6 +140,11 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
         }
 
         @Override
+        public @NotNull Optional<TagHandler> persistentTags() {
+            return Optional.empty();
+        }
+
+        @Override
         public int hashCode() {
             return hashCode;
         }
@@ -229,4 +235,13 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
      * @return an {@link Optional} containing the player
      */
     @NotNull Optional<Player> unwrap();
+
+    /**
+     * If the player is online, returns a non-empty Optional containing a {@link TagHandler} which holds persistent
+     * tags. These should not be cleared when the player leaves a scene. If the player is offline, returns an empty
+     * Optional.
+     *
+     * @return an Optional containing persistent tags, which will be empty if the player is offline
+     */
+    @NotNull Optional<TagHandler> persistentTags();
 }

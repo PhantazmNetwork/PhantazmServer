@@ -181,7 +181,7 @@ public final class ZombiesFeature {
         ZombiesJoiner joiner = new ZombiesJoiner(providers, modifierHandler);
 
         MinecraftServer.getCommandManager().register(new ZombiesCommand(joiner, parties, keyParser, maps,
-            zombiesConfig.joinRatelimit(), database));
+            zombiesConfig.joinRatelimit(), database, modifierHandler));
     }
 
     private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) {

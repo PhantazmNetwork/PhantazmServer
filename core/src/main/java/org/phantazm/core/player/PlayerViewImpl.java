@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,9 +13,7 @@ import org.phantazm.core.scene2.Scene;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -42,6 +41,8 @@ public final class PlayerViewImpl implements PlayerView {
     private final Object usernameLock = new Object();
     private final Object usernameRequestLock = new Object();
 
+    private final Map<Player, TagHandler> tags;
+
     private final int hashCode;
 
     private volatile Reference<Scene> currentSceneReference;
@@ -66,6 +67,7 @@ public final class PlayerViewImpl implements PlayerView {
         this.currentSceneReference = ReferenceUtils.nullReference();
 
         this.hashCode = uuid.hashCode();
+        this.tags = new WeakHashMap<>(1, 1F);
     }
 
     /**
@@ -85,6 +87,8 @@ public final class PlayerViewImpl implements PlayerView {
         this.currentSceneReference = ReferenceUtils.nullReference();
 
         this.hashCode = uuid.hashCode();
+        this.tags = new WeakHashMap<>(1, 1F);
+        this.tags.put(player, TagHandler.newHandler());
     }
 
     private CompletableFuture<String> getUsernameRequest() {
@@ -182,6 +186,25 @@ public final class PlayerViewImpl implements PlayerView {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public @NotNull Optional<TagHandler> persistentTags() {
+        Optional<Player> player = getPlayer();
+        if (player.isEmpty()) {
+            synchronized (tags) {
+                tags.clear();
+            }
+            
+            return Optional.empty();
+        }
+
+        TagHandler tagHandler;
+        synchronized (tags) {
+            tagHandler = tags.computeIfAbsent(player.get(), (ignored) -> TagHandler.newHandler());
+        }
+
+        return Optional.of(tagHandler);
     }
 
     @Override
