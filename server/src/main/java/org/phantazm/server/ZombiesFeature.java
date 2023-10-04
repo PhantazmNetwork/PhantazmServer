@@ -177,6 +177,8 @@ public final class ZombiesFeature {
             throw new RuntimeException();
         }
 
+        LOGGER.info("Loaded {} modifiers", modifierComponents.size());
+
         ModifierHandler modifierHandler = new ModifierHandler(modifierComponents, InjectionStore.EMPTY);
         ZombiesJoiner joiner = new ZombiesJoiner(providers, modifierHandler);
 

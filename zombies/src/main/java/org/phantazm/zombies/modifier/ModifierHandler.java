@@ -1,7 +1,9 @@
 package org.phantazm.zombies.modifier;
 
+import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.InjectionStore;
@@ -46,25 +48,34 @@ public final class ModifierHandler {
         return components;
     }
 
-    public void toggleModifier(@NotNull PlayerView player, @NotNull Key key) {
+    public boolean toggleModifier(@NotNull PlayerView player, @NotNull Key key) {
         if (!components.containsKey(key)) {
-            return;
+            return false;
         }
 
-        player.persistentTags().ifPresent(tagHandler -> {
-            tagHandler.updateTag(MODIFIERS_TAG, list -> {
-                String keyString = key.asString();
+        Optional<TagHandler> persistentTagsOptional = player.persistentTags();
+        if (persistentTagsOptional.isEmpty()) {
+            return false;
+        }
 
-                List<String> mutableCopy = new ArrayList<>(list);
-                if (!mutableCopy.contains(keyString)) {
-                    mutableCopy.add(keyString);
-                    return List.copyOf(mutableCopy);
-                }
+        TagHandler tagHandler = persistentTagsOptional.get();
 
-                mutableCopy.remove(keyString);
+        Wrapper<Boolean> result = Wrapper.of(false);
+        tagHandler.updateTag(MODIFIERS_TAG, list -> {
+            String keyString = key.asString();
+
+            List<String> mutableCopy = list == null ? new ArrayList<>(1) : new ArrayList<>(list);
+            if (!mutableCopy.contains(keyString)) {
+                mutableCopy.add(keyString);
+                result.set(true);
                 return List.copyOf(mutableCopy);
-            });
+            }
+
+            mutableCopy.remove(keyString);
+            return List.copyOf(mutableCopy);
         });
+
+        return result.get();
     }
 
     public void setModifiers(@NotNull PlayerView player, @NotNull Set<@NotNull Key> keys) {

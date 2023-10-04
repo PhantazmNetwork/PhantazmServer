@@ -8,6 +8,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
+import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.Attributes;
@@ -38,9 +39,17 @@ public class MobAttributeModifier extends ModifierComponentBase {
         @Override
         public void apply() {
             UUID uuid = UUID.randomUUID();
-            scene.addListener(ZombiesMobSetupEvent.class, event -> event.getEntity()
-                .getAttribute(Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
-                .addModifier(new AttributeModifier(uuid, uuid.toString(), data.amount, data.attributeOperation)));
+            scene.addListener(ZombiesMobSetupEvent.class, event -> {
+                LivingEntity entity = event.getEntity();
+
+                Attribute attribute;
+                entity.getAttribute(attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
+                    .addModifier(new AttributeModifier(uuid, uuid.toString(), data.amount, data.attributeOperation));
+
+                if (attribute.equals(Attribute.MAX_HEALTH)) {
+                    entity.heal();
+                }
+            });
         }
     }
 

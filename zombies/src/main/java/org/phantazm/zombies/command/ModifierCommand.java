@@ -33,14 +33,13 @@ public class ModifierCommand extends Command {
         Argument<Actions> modifierAction = ArgumentType.Enum("action", Actions.class)
             .setFormat(ArgumentEnum.Format.LOWER_CASED);
 
-        Argument<String> modifierArgument = ArgumentType.Word("modifier")
+        Argument<String> modifierArgument = ArgumentType.Word("target")
             .setSuggestionCallback((sender, context, suggestion) -> {
                 for (Key key : modifierHandler.componentMap().keySet()) {
                     String name = key.asString();
                     suggestion.addEntry(new SuggestionEntry(name, Component.text(name)));
                 }
-            })
-            .setDefaultValue("");
+            });
 
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
@@ -49,12 +48,13 @@ public class ModifierCommand extends Command {
             Actions actions = context.get(modifierAction);
             if (actions == Actions.CLEAR) {
                 modifierHandler.clearModifiers(playerView);
+                sender.sendMessage(Component.text("Cleared modifiers!", NamedTextColor.GREEN));
                 return;
             }
 
             @Subst(Constants.NAMESPACE_OR_KEY)
             String modifier = context.get(modifierArgument);
-            if (modifier.isEmpty()) {
+            if (modifier.equals("none")) {
                 sender.sendMessage(Component.text("You must specify a modifier!", NamedTextColor.RED));
                 return;
             }
@@ -72,8 +72,11 @@ public class ModifierCommand extends Command {
 
             if (actions == Actions.SET) {
                 modifierHandler.setModifiers(playerView, Set.of(key));
+                sender.sendMessage(Component.text("Set modifier!", NamedTextColor.GREEN));
             } else {
-                modifierHandler.toggleModifier(playerView, key);
+                boolean active = modifierHandler.toggleModifier(playerView, key);
+                sender.sendMessage(Component.text("Toggled modifier " + (active ? "on" : "off") + "!",
+                    NamedTextColor.GREEN));
             }
         }, modifierAction, modifierArgument);
     }
