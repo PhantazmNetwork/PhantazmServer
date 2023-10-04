@@ -339,7 +339,7 @@ public class ZombiesScene extends InstanceScene {
             bits.set(modifierComponent.ordinal());
         }
 
-        char[] hexChars = new char[(Math.max(bits.length() - 1, 1) / 4) + 1];
+        char[] hexChars = new char[((bits.length() - 1) / 4) + 1];
 
         for (int i = 0; i < hexChars.length; i++) {
             int mag = 0;
