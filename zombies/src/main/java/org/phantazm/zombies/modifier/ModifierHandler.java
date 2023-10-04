@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class ModifierHandler {
-    public static final Tag<List<String>> MODIFIERS_TAG = Tag.String("zombies_modifiers").list();
+    private static final Tag<List<String>> MODIFIERS_TAG = Tag.String("zombies_modifiers").list();
 
     private final Map<Key, ModifierComponent> components;
     private final InjectionStore injectionStore;
