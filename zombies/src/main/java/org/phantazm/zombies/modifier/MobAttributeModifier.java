@@ -4,12 +4,18 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.event.ZombiesMobSetupEvent;
@@ -25,7 +31,7 @@ public class MobAttributeModifier extends ModifierComponentBase {
 
     @FactoryMethod
     public MobAttributeModifier(@NotNull Data data) {
-        super(data.key);
+        super(data.key, data.displayName, data.displayItem, data.ordinal);
         this.data = Objects.requireNonNull(data);
     }
 
@@ -54,10 +60,16 @@ public class MobAttributeModifier extends ModifierComponentBase {
     }
 
     @DataObject
-    public record Data(@NotNull Key key,
+    public record Data(int ordinal,
+        @NotNull Key key,
+        @Nullable Component displayName,
+        @NotNull ItemStack displayItem,
         @NotNull String attribute,
         double amount,
         @NotNull AttributeOperation attributeOperation) {
-
+        @Default("displayName")
+        public static @NotNull ConfigElement defaultDisplayName() {
+            return ConfigPrimitive.NULL;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package org.phantazm.zombies.scene2;
 
 import com.github.steanky.vector.Vec3I;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -19,7 +20,7 @@ import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
-import org.phantazm.zombies.modifier.Modifier;
+import org.phantazm.zombies.modifier.ModifierComponent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
@@ -52,7 +53,8 @@ public class ZombiesScene extends InstanceScene {
     private boolean sandbox;
     private boolean restricted;
 
-    private final List<Modifier> modifiers;
+    private final Set<ModifierComponent> activeModifiers;
+    private final Set<ModifierComponent> activeModifiersView;
 
     public ZombiesScene(@NotNull Instance instance,
         @NotNull ZombiesMap map,
@@ -81,7 +83,8 @@ public class ZombiesScene extends InstanceScene {
 
         this.legit = true;
 
-        this.modifiers = new ArrayList<>();
+        this.activeModifiers = new HashSet<>();
+        this.activeModifiersView = Collections.unmodifiableSet(this.activeModifiers);
     }
 
     @Override
@@ -307,6 +310,48 @@ public class ZombiesScene extends InstanceScene {
 
     public @NotNull EventNode<Event> sceneNode() {
         return sceneNode;
+    }
+
+    public void addModifier(@NotNull ModifierComponent modifier) {
+        Objects.requireNonNull(modifier);
+        this.activeModifiers.add(modifier);
+    }
+
+    public @NotNull @UnmodifiableView Set<ModifierComponent> activeModifiers() {
+        return this.activeModifiersView;
+    }
+
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
+    /**
+     * Using the set of active modifiers, creates a string representing the particular combination. This string must be
+     * <i>consistent</i>; that is, given the same set of modifiers, it should produce the same string. Otherwise, the
+     * implementation is free to make the string as reasonably compact as possible.
+     *
+     * @return a consistent string representing the particular modifier combination
+     */
+    public @NotNull String modifierDescriptor() {
+        if (activeModifiers.isEmpty()) {
+            return "0";
+        }
+
+        BitSet bits = new BitSet();
+        for (ModifierComponent modifierComponent : activeModifiers) {
+            bits.set(modifierComponent.ordinal());
+        }
+
+        char[] hexChars = new char[(bits.length() / 16) + 1];
+
+        for (int i = 0; i < hexChars.length; i++) {
+            int mag = 0;
+            for (int j = i * 4, k = 0; j < bits.length() && k < 4; j++, k++) {
+                if (bits.get(j)) mag |= 1 << k;
+            }
+
+            hexChars[i] = HEX_ARRAY[mag];
+        }
+
+        return String.valueOf(hexChars);
     }
 
     public void broadcastEvent(@NotNull Event event) {
