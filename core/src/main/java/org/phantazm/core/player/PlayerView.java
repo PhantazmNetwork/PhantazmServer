@@ -36,8 +36,8 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
      * For obtaining instances of PlayerView that <i>are</i> bound to an IdentitySource and do correspond to an actual
      * account, see {@link PlayerViewProvider}.
      * <p>
-     * <b>Unless you know what you're doing, you probably want to get your
-     * PlayerView instances from PlayerViewProvider instead of this method!</b>
+     * <b>Unless you know what you're doing, you probably want to get your PlayerView instances from PlayerViewProvider
+     * instead of this method!</b>
      *
      * @param uuid the UUID from which to create a new lookup PlayerView
      * @return a new PlayerView useful for map or set lookups

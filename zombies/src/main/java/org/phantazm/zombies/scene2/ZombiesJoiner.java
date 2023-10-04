@@ -38,7 +38,7 @@ public final class ZombiesJoiner {
     }
 
     public @NotNull Join<ZombiesScene> joinMap(@NotNull Set<@NotNull PlayerView> players, @NotNull Key mapKey,
-        @NotNull Set<Key> modifiers) {
+        @NotNull Set<@NotNull Key> modifiers) {
         return new JoinZombiesMap(players, validateKey(mapKey), mapKey, modifierHandler, modifiers);
     }
 
@@ -55,7 +55,7 @@ public final class ZombiesJoiner {
     }
 
     public @NotNull Join<ZombiesScene> joinRestricted(@NotNull Set<@NotNull PlayerView> players, @NotNull Key mapKey,
-        Set<@NotNull Key> modifiers) {
+        @NotNull Set<@NotNull Key> modifiers) {
         return new JoinZombiesRestricted(players, validateKey(mapKey), mapKey, modifierHandler, modifiers);
     }
 
@@ -64,7 +64,7 @@ public final class ZombiesJoiner {
     }
 
     public @NotNull Join<ZombiesScene> joinSandbox(@NotNull Set<@NotNull PlayerView> players, @NotNull Key mapKey,
-        Set<@NotNull Key> modifiers) {
+        @NotNull Set<@NotNull Key> modifiers) {
         return new JoinZombiesRestricted(players, validateKey(mapKey), mapKey, modifierHandler, modifiers, true);
     }
 }

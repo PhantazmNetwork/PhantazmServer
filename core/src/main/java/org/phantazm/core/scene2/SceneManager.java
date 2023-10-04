@@ -112,7 +112,7 @@ public final class SceneManager {
      * creating Join instances every time they are needed. The constructor for this class is private, but instances can
      * be obtained by calling {@link SceneManager#joinKey(Class, String)} or an overload.
      * <p>
-     * Instances should generally be stored in {@code public static} and referenced as-needed by other code.
+     * Instances should generally be stored in {@code public static} fields and referenced as-needed by other code.
      *
      * @param <T> the type of scene this key joins
      * @see SceneManager#joinKey(Class, String)
@@ -844,10 +844,7 @@ public final class SceneManager {
                             continue;
                         }
 
-                        T newScene = createAndJoinNewScene(join);
-                        if (!newScene.getClass().equals(entry.getKey())) {
-                            throw new IllegalStateException("Created scene type is not the same as the entry type");
-                        }
+                        T newScene = createAndJoinNewScene(join, entry.getKey());
 
                         sceneEntry.scenes.add(newScene);
                         threadDispatcher.createPartition(newScene);
@@ -994,8 +991,26 @@ public final class SceneManager {
         threadDispatcher.removeElement(tickable);
     }
 
-    private <T extends Scene> T createAndJoinNewScene(Join<T> join) {
+    /*
+    Using the provided Join, creates a new scene and joins it. The created Scene's type must equal 'type'; if not, an
+    IllegalStateException will be thrown after immediately shutting down the newly-created scene.
+
+    The general sequence of events when running this function is as follows:
+
+    * New scene is created
+    * The players participating in the Join leave their old scenes
+    * The new scene is joined
+    * The viewable rules of the participating players are reset
+    * The new scene is post-joined
+    * The old scenes are post-left
+     */
+    private <T extends Scene> T createAndJoinNewScene(Join<T> join, Class<? extends Scene> type) {
         T scene = join.createNewScene(this);
+        if (!scene.getClass().equals(type)) {
+            scene.preShutdown();
+            scene.shutdown();
+            throw new IllegalStateException("Created scene type is not the same as the entry type");
+        }
 
         Iterable<Runnable> actions = leaveOldScenes(join.playerViews(), scene);
 
@@ -1011,15 +1026,10 @@ public final class SceneManager {
         return scene;
     }
 
-    private void resetViewableRules(Iterable<PlayerView> playerViews) {
-        for (PlayerView playerView : playerViews) {
-            playerView.getPlayer().ifPresent(player -> {
-                player.updateViewableRule(null);
-                player.updateViewerRule(null);
-            });
-        }
-    }
-
+    /*
+    Works similarly to createAndJoinNewScene, but attempts to join 'scene' instead of creating a new scene. 'scene' must
+    be assignable to the target type of 'join'.
+     */
     private <T extends Scene> T tryJoinScene(Scene scene, Join<T> join) {
         T castScene = join.targetType().cast(scene);
 
@@ -1044,27 +1054,41 @@ public final class SceneManager {
         return castScene;
     }
 
+    private void resetViewableRules(Iterable<PlayerView> playerViews) {
+        for (PlayerView playerView : playerViews) {
+            playerView.getPlayer().ifPresent(player -> {
+                player.updateViewableRule(null);
+                player.updateViewerRule(null);
+            });
+        }
+    }
+
     private Iterable<Runnable> leaveOldScenes(Set<? extends PlayerView> players, Scene newScene) {
         if (players.isEmpty()) {
             return List.of();
         }
 
-        List<Runnable> leaveActions = new ArrayList<>(5);
         if (players.size() == 1) {
             PlayerViewImpl onlyPlayer = (PlayerViewImpl) players.iterator().next();
 
-            onlyPlayer.currentScene().ifPresent(scene -> {
-                if (scene == newScene) {
-                    return;
-                }
+            Optional<Scene> oldSceneOptional = onlyPlayer.currentScene();
+            if (oldSceneOptional.isEmpty()) {
+                onlyPlayer.updateCurrentScene(newScene);
+                return List.of();
+            }
 
-                processLeavingPlayer(scene, players, leaveActions);
-            });
+            Scene oldScene = oldSceneOptional.get();
+            if (oldScene == newScene) {
+                return List.of();
+            }
 
+            List<Runnable> leaveActions = new ArrayList<>(1);
+            processLeavingPlayer(oldScene, players, leaveActions);
             onlyPlayer.updateCurrentScene(newScene);
             return leaveActions;
         }
 
+        List<Runnable> leaveActions = new ArrayList<>(players.size());
         Map<Scene, Set<PlayerViewImpl>> groupedScenes = new HashMap<>(4);
         for (PlayerView playerView : players) {
             PlayerViewImpl view = (PlayerViewImpl) playerView;

@@ -10,6 +10,7 @@ import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class ModifierHandler {
     public static final Tag<List<String>> MODIFIERS_TAG = Tag.String("zombies_modifiers").list();
@@ -41,7 +42,7 @@ public final class ModifierHandler {
         }
     }
 
-    public @NotNull @Unmodifiable Map<Key, ModifierComponent> modifiers() {
+    public @NotNull @Unmodifiable Map<Key, ModifierComponent> componentMap() {
         return components;
     }
 
@@ -60,7 +61,7 @@ public final class ModifierHandler {
                     return List.copyOf(mutableCopy);
                 }
 
-                mutableCopy.removeIf(value -> value.equals(keyString));
+                mutableCopy.remove(keyString);
                 return List.copyOf(mutableCopy);
             });
         });
@@ -79,6 +80,11 @@ public final class ModifierHandler {
 
             tagHandler.setTag(MODIFIERS_TAG, List.copyOf(stringList));
         });
+    }
+
+    public @NotNull @Unmodifiable Set<Key> getModifiers(@NotNull PlayerView player) {
+        return player.persistentTags().map(tagHandler -> tagHandler.getTag(MODIFIERS_TAG))
+            .orElse(List.of()).stream().filter(Key::parseable).map(Key::key).collect(Collectors.toUnmodifiableSet());
     }
 
     public void clearModifiers(@NotNull PlayerView player) {

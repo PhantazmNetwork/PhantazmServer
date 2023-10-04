@@ -22,6 +22,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.map.MapInfo;
+import org.phantazm.zombies.modifier.ModifierHandler;
 import org.phantazm.zombies.scene2.ZombiesJoiner;
 
 import java.util.*;
@@ -33,7 +34,7 @@ public class ZombiesJoinCommand extends Command {
     @SuppressWarnings("unchecked")
     public ZombiesJoinCommand(@NotNull ZombiesJoiner zombiesJoiner, @NotNull Map<? super UUID, ? extends Party> partyMap,
         @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, long ratelimit,
-        @NotNull ZombiesDatabase zombiesDatabase) {
+        @NotNull ZombiesDatabase zombiesDatabase, @NotNull ModifierHandler modifierHandler) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.Word("map-key");
@@ -108,15 +109,19 @@ public class ZombiesJoinCommand extends Command {
             }
 
             Party party = partyMap.get(joiner.getUuid());
+            PlayerView joinerView = PlayerViewProvider.Global.instance().fromPlayer(joiner);
+
             Set<PlayerView> playerViews;
             if (party == null) {
-                playerViews = Set.of(PlayerViewProvider.Global.instance().fromPlayer(joiner));
+                playerViews = Set.of(joinerView);
             } else {
                 playerViews = new HashSet<>(party.getMemberManager().getMembers().size());
                 for (GuildMember guildMember : party.getMemberManager().getMembers().values()) {
                     playerViews.add(guildMember.getPlayerView());
                 }
             }
+
+            Set<Key> modifiers = modifierHandler.getModifiers(joinerView);
 
             boolean sandbox = context.get(sandboxArgument);
             if (sandbox) {
@@ -134,7 +139,7 @@ public class ZombiesJoinCommand extends Command {
                 }
 
                 if (bypassRestriction) {
-                    SceneManager.Global.instance().joinScene(zombiesJoiner.joinSandbox(playerViews, targetMap));
+                    SceneManager.Global.instance().joinScene(zombiesJoiner.joinSandbox(playerViews, targetMap, modifiers));
                     return;
                 }
 
@@ -155,7 +160,7 @@ public class ZombiesJoinCommand extends Command {
                         }
                     }
 
-                    SceneManager.Global.instance().joinScene(zombiesJoiner.joinSandbox(playerViews, targetMap));
+                    SceneManager.Global.instance().joinScene(zombiesJoiner.joinSandbox(playerViews, targetMap, modifiers));
                 });
 
                 return;
@@ -163,9 +168,9 @@ public class ZombiesJoinCommand extends Command {
 
             boolean restricted = context.get(restrictedArgument);
             if (restricted) {
-                SceneManager.Global.instance().joinScene(zombiesJoiner.joinRestricted(playerViews, targetMap));
+                SceneManager.Global.instance().joinScene(zombiesJoiner.joinRestricted(playerViews, targetMap, modifiers));
             } else {
-                SceneManager.Global.instance().joinScene(zombiesJoiner.joinMap(playerViews, targetMap));
+                SceneManager.Global.instance().joinScene(zombiesJoiner.joinMap(playerViews, targetMap, modifiers));
             }
         }, mapKeyArgument, restrictedArgument, sandboxArgument);
     }

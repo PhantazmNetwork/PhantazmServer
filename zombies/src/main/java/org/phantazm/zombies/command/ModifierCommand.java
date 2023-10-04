@@ -35,7 +35,7 @@ public class ModifierCommand extends Command {
 
         Argument<String> modifierArgument = ArgumentType.Word("modifier")
             .setSuggestionCallback((sender, context, suggestion) -> {
-                for (Key key : modifierHandler.modifiers().keySet()) {
+                for (Key key : modifierHandler.componentMap().keySet()) {
                     String name = key.asString();
                     suggestion.addEntry(new SuggestionEntry(name, Component.text(name)));
                 }
@@ -65,7 +65,7 @@ public class ModifierCommand extends Command {
             }
 
             Key key = keyParser.parseKey(modifier);
-            if (!modifierHandler.modifiers().containsKey(key)) {
+            if (!modifierHandler.componentMap().containsKey(key)) {
                 sender.sendMessage(Component.text("Modifier " + key + " does not exist!", NamedTextColor.RED));
                 return;
             }
