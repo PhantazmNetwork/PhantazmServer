@@ -26,7 +26,7 @@ public class ZombiesCommand extends Command {
         Objects.requireNonNull(maps);
 
         addSubcommand(new ZombiesJoinCommand(joiner, parties, keyParser, maps, joinRatelimit,
-            zombiesDatabase));
+            zombiesDatabase, modifierHandler));
         addSubcommand(new CoinsCommand());
         addSubcommand(new RoundCommand());
         addSubcommand(new KillAllCommand());
