@@ -1,7 +1,6 @@
 package org.phantazm.zombies.scene2;
 
 import com.github.steanky.vector.Vec3I;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -340,7 +339,7 @@ public class ZombiesScene extends InstanceScene {
             bits.set(modifierComponent.ordinal());
         }
 
-        char[] hexChars = new char[(bits.length() / 16) + 1];
+        char[] hexChars = new char[(Math.max(bits.length() - 1, 1) / 4) + 1];
 
         for (int i = 0; i < hexChars.length; i++) {
             int mag = 0;
