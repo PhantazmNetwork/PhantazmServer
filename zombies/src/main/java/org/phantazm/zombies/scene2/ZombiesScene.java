@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.FutureUtils;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.player.PlayerView;
@@ -19,6 +20,7 @@ import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
+import org.phantazm.zombies.modifier.Modifier;
 import org.phantazm.zombies.modifier.ModifierComponent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
@@ -55,6 +57,8 @@ public class ZombiesScene extends InstanceScene {
     private final Set<ModifierComponent> activeModifiers;
     private final Set<ModifierComponent> activeModifiersView;
 
+    private final List<Modifier> tickingModifiers;
+
     public ZombiesScene(@NotNull Instance instance,
         @NotNull ZombiesMap map,
         @NotNull MapSettingsInfo mapSettingsInfo,
@@ -84,6 +88,8 @@ public class ZombiesScene extends InstanceScene {
 
         this.activeModifiers = new HashSet<>();
         this.activeModifiersView = Collections.unmodifiableSet(this.activeModifiers);
+
+        this.tickingModifiers = new ArrayList<>();
     }
 
     @Override
@@ -228,6 +234,10 @@ public class ZombiesScene extends InstanceScene {
 
             zombiesPlayer.tick(time);
         }
+
+        for (Modifier modifier : tickingModifiers) {
+            modifier.tick(time);
+        }
     }
 
     @Override
@@ -311,9 +321,16 @@ public class ZombiesScene extends InstanceScene {
         return sceneNode;
     }
 
-    public void addModifier(@NotNull ModifierComponent modifier) {
+    public void addModifier(@NotNull ModifierComponent modifier, @NotNull InjectionStore injectionStore) {
         Objects.requireNonNull(modifier);
+        Objects.requireNonNull(injectionStore);
+
         this.activeModifiers.add(modifier);
+
+        Modifier actualModifier = modifier.apply(injectionStore, this);
+        if (actualModifier.needsTicking()) {
+            this.tickingModifiers.add(actualModifier);
+        }
     }
 
     public @NotNull @UnmodifiableView Set<ModifierComponent> activeModifiers() {

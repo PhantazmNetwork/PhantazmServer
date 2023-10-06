@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
@@ -54,14 +53,7 @@ public final class ModifierHandler {
                 continue;
             }
 
-            Modifier modifier = component.apply(injectionStore, scene);
-            modifier.apply();
-
-            scene.addModifier(component);
-
-            if (modifier.needsTicking()) {
-                SceneManager.Global.instance().addTickable(scene, modifier);
-            }
+            scene.addModifier(component, injectionStore);
         }
     }
 
