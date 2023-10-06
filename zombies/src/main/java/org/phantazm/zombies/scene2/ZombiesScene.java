@@ -320,39 +320,6 @@ public class ZombiesScene extends InstanceScene {
         return this.activeModifiersView;
     }
 
-    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
-
-    /**
-     * Using the set of active modifiers, creates a string representing the particular combination. This string must be
-     * <i>consistent</i>; that is, given the same set of modifiers, it should produce the same string. Otherwise, the
-     * implementation is free to make the string as reasonably compact as possible.
-     *
-     * @return a consistent string representing the particular modifier combination
-     */
-    public @NotNull String modifierDescriptor() {
-        if (activeModifiers.isEmpty()) {
-            return "0";
-        }
-
-        BitSet bits = new BitSet();
-        for (ModifierComponent modifierComponent : activeModifiers) {
-            bits.set(modifierComponent.ordinal());
-        }
-
-        char[] hexChars = new char[((bits.length() - 1) / 4) + 1];
-
-        for (int i = 0; i < hexChars.length; i++) {
-            int mag = 0;
-            for (int j = i * 4, k = 0; j < bits.length() && k < 4; j++, k++) {
-                if (bits.get(j)) mag |= 1 << k;
-            }
-
-            hexChars[hexChars.length - i - 1] = HEX_ARRAY[mag];
-        }
-
-        return String.valueOf(hexChars);
-    }
-
     public void broadcastEvent(@NotNull Event event) {
         sceneNode.call(event);
     }
