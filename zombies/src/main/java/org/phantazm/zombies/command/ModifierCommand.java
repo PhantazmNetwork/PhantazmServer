@@ -20,6 +20,10 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.zombies.modifier.ModifierComponent;
 import org.phantazm.zombies.modifier.ModifierHandler;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 public class ModifierCommand extends Command {
     private enum Actions {
         SET,
@@ -83,12 +87,35 @@ public class ModifierCommand extends Command {
                         result.conflictingModifiers().stream().map(ModifierComponent::displayName).toList());
 
                     sender.sendMessage(
-                        Component.text("That modifier would conflict with the already-enabled modifier(s) ",
+                        Component.text("That modifier would conflict with some already enabled modifier(s): ",
                             NamedTextColor.RED).append(conflicts));
                 }
                 case INVALID_MODIFIER -> sender.sendMessage(Component.text("An internal error occurred when " +
                     "attempting to enable that modifier; please report this incident to server staff!", NamedTextColor.RED));
             }
         }, modifierAction, modifierArgument);
+        addSubcommand(new ListModifiers(modifierHandler));
+    }
+
+    private static class ListModifiers extends Command {
+
+        private ListModifiers(ModifierHandler modifierHandler) {
+            super("list");
+
+            addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+                PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer((Player) sender);
+                Set<Key> modifiers = modifierHandler.getModifiers(playerView);
+                Map<Key, ModifierComponent> map = modifierHandler.componentMap();
+
+                Set<ModifierComponent> activeModifiers = modifiers.stream().map(map::get).collect(Collectors.toUnmodifiableSet());
+                if (activeModifiers.isEmpty()) {
+                    sender.sendMessage(Component.text("You do not have any modifiers enabled!", NamedTextColor.RED));
+                    return;
+                }
+
+                sender.sendMessage(Component.join(JoinConfiguration.commas(true),
+                    activeModifiers.stream().map(ModifierComponent::displayName).toList()));
+            });
+        }
     }
 }
