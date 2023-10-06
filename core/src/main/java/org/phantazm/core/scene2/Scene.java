@@ -178,7 +178,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      *     <li>Ignore players that have never been added to the scene</li>
      *     <li>Ignore players that are in a different scene</li>
      *     <li>Modify the state of players that <i>are</i> present in this scene such as to remove any and all modifications applied by this scene</li>
-     *     <li>Correctly handle players for which {@link PlayerView#getPlayer()} returns an empty Optional, but {@link PlayerView#unwrap()} does not</li>
+     *     <li>Correctly remove players who are offline but considered part of the scene still</li>
      * </ul>
      * <p>
      * This method must <i>not</i>:

@@ -3,6 +3,7 @@ package org.phantazm.core.scene2;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.Tickable;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.*;
@@ -27,6 +28,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 /**
  * SceneManager is used to fulfill requests by one or more players to join {@link Scene} objects. This class also
@@ -358,7 +360,7 @@ public final class SceneManager {
             try {
                 Scene self = acquired.get();
 
-                Set<Player> left = PlayerView.unwrapMany(self.leave(Set.of(view)), HashSet::new);
+                Set<Player> left = unwrapMany(self.leave(Set.of(view)), HashSet::new);
                 view.updateCurrentScene(null);
 
                 leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, left));
@@ -379,6 +381,24 @@ public final class SceneManager {
 
         event.setBroadcastTablistRemoval(false);
         left.scene.getAcquirable().sync(self -> self.postLeave(left.left));
+    }
+
+    private static <T extends Collection<Player>> T unwrapMany(@NotNull Set<? extends PlayerView> playerViews,
+        @NotNull IntFunction<? extends @NotNull T> function) {
+        T collection = function.apply(playerViews.size());
+        for (PlayerView playerView : playerViews) {
+            Player playerReference = ((PlayerViewImpl) playerView).reference();
+            if (playerReference != null) {
+                collection.add(playerReference);
+                continue;
+            }
+
+            if (Entity.getEntity(playerView.getUUID()) instanceof Player player) {
+                collection.add(player);
+            }
+        }
+
+        return collection;
     }
 
     /**
@@ -677,7 +697,7 @@ public final class SceneManager {
 
                 playersLocked = lockPlayers(players, true);
 
-                leftPlayers = PlayerView.unwrapMany(scene.leave(players), HashSet::new);
+                leftPlayers = unwrapMany(scene.leave(players), HashSet::new);
             } finally {
                 acquired.unlock();
             }

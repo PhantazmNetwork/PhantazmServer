@@ -41,7 +41,7 @@ public final class PlayerViewImpl implements PlayerView {
     private final Object usernameLock = new Object();
     private final Object usernameRequestLock = new Object();
 
-    private final Map<Player, TagHandler> tags;
+    private final TagHandler tags;
 
     private final int hashCode;
 
@@ -67,7 +67,7 @@ public final class PlayerViewImpl implements PlayerView {
         this.currentSceneReference = ReferenceUtils.nullReference();
 
         this.hashCode = uuid.hashCode();
-        this.tags = new WeakHashMap<>(1, 1F);
+        this.tags = TagHandler.newHandler();
     }
 
     /**
@@ -87,8 +87,7 @@ public final class PlayerViewImpl implements PlayerView {
         this.currentSceneReference = ReferenceUtils.nullReference();
 
         this.hashCode = uuid.hashCode();
-        this.tags = new WeakHashMap<>(1, 1F);
-        this.tags.put(player, TagHandler.newHandler());
+        this.tags = TagHandler.newHandler();
     }
 
     private CompletableFuture<String> getUsernameRequest() {
@@ -168,43 +167,8 @@ public final class PlayerViewImpl implements PlayerView {
     }
 
     @Override
-    public @NotNull Optional<Player> unwrap() {
-        Player player = playerReference.get();
-        if (player != null) {
-            Entity entity = Entity.getEntity(uuid);
-            if (!(entity instanceof Player resolvedPlayer) || player != resolvedPlayer) {
-                playerReference = ReferenceUtils.nullReference();
-                return Optional.empty();
-            }
-
-            return Optional.of(player);
-        }
-
-        if (Entity.getEntity(uuid) instanceof Player resolvedPlayer) {
-            playerReference = new WeakReference<>(resolvedPlayer);
-            return Optional.of(resolvedPlayer);
-        }
-
-        return Optional.empty();
-    }
-
-    @Override
-    public @NotNull Optional<TagHandler> persistentTags() {
-        Optional<Player> player = getPlayer();
-        if (player.isEmpty()) {
-            synchronized (tags) {
-                tags.clear();
-            }
-            
-            return Optional.empty();
-        }
-
-        TagHandler tagHandler;
-        synchronized (tags) {
-            tagHandler = tags.computeIfAbsent(player.get(), (ignored) -> TagHandler.newHandler());
-        }
-
-        return Optional.of(tagHandler);
+    public @NotNull TagHandler tagHandler() {
+        return tags;
     }
 
     @Override
@@ -232,6 +196,21 @@ public final class PlayerViewImpl implements PlayerView {
     @Override
     public String toString() {
         return "LinkedPlayerView[uuid=" + uuid + ", username=" + username + ", linkedPlayer=" + playerReference.get() + "]";
+    }
+
+    /**
+     * Gets the player reference, if it is set. Marked as internal because it is only useful in niche circumstances for
+     * performance. For example, it may prevent an unnecessary lookup to {@link Entity#getEntity(UUID)}. It is only
+     * meant to be used within {@link SceneManager}.
+     * <p>
+     * Note that a null reference does not <i>necessarily</i> mean that the player is offline. Likewise, a non-null
+     * reference does not mean the player isn't offline.
+     *
+     * @return the player reference, which will be null if unset
+     */
+    @ApiStatus.Internal
+    public @Nullable Player reference() {
+        return playerReference.get();
     }
 
     /**

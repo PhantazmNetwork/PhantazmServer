@@ -6,7 +6,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.tag.TagHandler;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -75,16 +74,8 @@ public final class ModifierHandler {
             return INVALID;
         }
 
-        Optional<TagHandler> persistentTagsOptional = player.persistentTags();
-        if (persistentTagsOptional.isEmpty()) {
-            return INVALID;
-        }
-
-        TagHandler tagHandler = persistentTagsOptional.get();
-
         Wrapper<ModifierResult> result = Wrapper.of(DISABLED);
-
-        tagHandler.updateTag(MODIFIERS_TAG, list -> {
+        player.tagHandler().updateTag(MODIFIERS_TAG, list -> {
             String keyString = key.asString();
 
             List<String> mutableCopy = list == null ? new ArrayList<>(1) : new ArrayList<>(list);
@@ -134,11 +125,6 @@ public final class ModifierHandler {
 
     public ModifierHandler.@NotNull ModifierResult setFromDescriptor(@NotNull PlayerView playerView,
         @NotNull String descriptor) {
-        Optional<TagHandler> tagHandlerOptional = playerView.persistentTags();
-        if (tagHandlerOptional.isEmpty()) {
-            return INVALID;
-        }
-
         List<ModifierComponent> components = ModifierUtils.fromDescriptor(ordinalMap, descriptor);
         List<ModifierComponent> conflictingModifiers = searchConflicts(components);
 
@@ -146,7 +132,7 @@ public final class ModifierHandler {
             return new ModifierResult(ModifierStatus.CONFLICTING_MODIFIERS, List.copyOf(conflictingModifiers));
         }
 
-        tagHandlerOptional.get().setTag(MODIFIERS_TAG, components.stream().map(modifierComponent ->
+        playerView.setTag(MODIFIERS_TAG, components.stream().map(modifierComponent ->
             modifierComponent.key().asString()).toList());
         return ENABLED;
     }
@@ -181,11 +167,11 @@ public final class ModifierHandler {
     }
 
     public @NotNull @Unmodifiable Set<Key> getModifiers(@NotNull PlayerView player) {
-        return player.persistentTags().map(tagHandler -> tagHandler.getTag(MODIFIERS_TAG))
-            .orElse(List.of()).stream().filter(Key::parseable).map(Key::key).collect(Collectors.toUnmodifiableSet());
+        return Optional.ofNullable(player.getTag(MODIFIERS_TAG)).orElse(List.of()).stream().filter(Key::parseable)
+            .map(Key::key).collect(Collectors.toUnmodifiableSet());
     }
 
     public void clearModifiers(@NotNull PlayerView player) {
-        player.persistentTags().ifPresent(tagHandler -> tagHandler.setTag(MODIFIERS_TAG, List.of()));
+        player.setTag(MODIFIERS_TAG, List.of());
     }
 }
