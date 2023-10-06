@@ -2,6 +2,8 @@ package org.phantazm.zombies.modifier;
 
 import com.github.steanky.element.core.key.Constants;
 import com.github.steanky.toolkit.collection.Wrapper;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
@@ -36,10 +38,16 @@ public final class ModifierHandler {
     private static final Tag<List<String>> MODIFIERS_TAG = Tag.String("zombies_modifiers").list();
 
     private final Map<Key, ModifierComponent> components;
+    private final Int2ObjectMap<ModifierComponent> ordinalMap;
     private final InjectionStore injectionStore;
 
     public ModifierHandler(@NotNull Map<Key, ModifierComponent> components, @NotNull InjectionStore injectionStore) {
         this.components = Map.copyOf(components);
+        this.ordinalMap = new Int2ObjectOpenHashMap<>(components.size());
+        for (ModifierComponent component : components.values()) {
+            ordinalMap.put(component.ordinal(), component);
+        }
+
         this.injectionStore = Objects.requireNonNull(injectionStore);
     }
 
@@ -84,7 +92,7 @@ public final class ModifierHandler {
                 return List.copyOf(mutableCopy);
             }
 
-            List<ModifierComponent> conflictingModifiers = null;
+            Set<ModifierComponent> conflictingModifiers = null;
             for (@Subst(Constants.NAMESPACE_OR_KEY) String activeModifier : mutableCopy) {
                 if (!Key.parseable(activeModifier)) {
                     continue;
@@ -104,7 +112,7 @@ public final class ModifierHandler {
                 if (activeComponent.exclusiveModifiers().contains(key) || toggledComponent.exclusiveModifiers()
                     .contains(activeModifierKey)) {
                     if (conflictingModifiers == null) {
-                        conflictingModifiers = new ArrayList<>(5);
+                        conflictingModifiers = new HashSet<>();
                     }
 
                     conflictingModifiers.add(activeComponent);
@@ -122,6 +130,46 @@ public final class ModifierHandler {
         });
 
         return result.get();
+    }
+
+    public ModifierHandler.@NotNull ModifierResult setFromDescriptor(@NotNull PlayerView playerView,
+        @NotNull String descriptor) {
+        Optional<TagHandler> tagHandlerOptional = playerView.persistentTags();
+        if (tagHandlerOptional.isEmpty()) {
+            return INVALID;
+        }
+
+        List<ModifierComponent> components = ModifierUtils.fromDescriptor(ordinalMap, descriptor);
+        List<ModifierComponent> conflictingModifiers = searchConflicts(components);
+
+        if (conflictingModifiers != null) {
+            return new ModifierResult(ModifierStatus.CONFLICTING_MODIFIERS, List.copyOf(conflictingModifiers));
+        }
+
+        tagHandlerOptional.get().setTag(MODIFIERS_TAG, components.stream().map(modifierComponent ->
+            modifierComponent.key().asString()).toList());
+        return ENABLED;
+    }
+
+    private static List<ModifierComponent> searchConflicts(List<ModifierComponent> components) {
+        ArrayList<ModifierComponent> conflictingModifiers = null;
+        for (int i = 0; i < components.size(); i++) {
+            ModifierComponent component = components.get(i);
+            for (int j = i + 1; j < components.size(); j++) {
+                ModifierComponent otherComponent = components.get(j);
+                if (component.exclusiveModifiers().contains(otherComponent.key()) ||
+                    otherComponent.exclusiveModifiers().contains(component.key())) {
+                    if (conflictingModifiers == null) {
+                        conflictingModifiers = new ArrayList<>();
+                    }
+
+                    conflictingModifiers.add(component);
+                    conflictingModifiers.add(otherComponent);
+                }
+            }
+        }
+
+        return conflictingModifiers;
     }
 
     public @NotNull ModifierHandler.ModifierResult toggleModifier(@NotNull PlayerView playerView, @NotNull Key key) {

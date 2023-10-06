@@ -1,15 +1,33 @@
 package org.phantazm.zombies.modifier;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.BitSet;
-import java.util.Collection;
+import java.util.*;
 
 public final class ModifierUtils {
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
     private ModifierUtils() {
         throw new UnsupportedOperationException();
+    }
+
+    private static boolean isDescriptorCharacter(char c) {
+        return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F');
+    }
+
+    private static int fromHex(char hex) {
+        if (hex >= '0' && hex <= '9') {
+            return hex - 48;
+        } else if (hex >= 'A' && hex <= 'F') {
+            return (hex - 65) + 10;
+        }
+
+        throw new IllegalStateException("Unexpected value: " + hex);
+    }
+
+    private static char toUpperAscii(char hex) {
+        return (hex >= 'a' && hex <= 'z') ? ((char) (hex - 32)) : hex;
     }
 
     /**
@@ -44,5 +62,37 @@ public final class ModifierUtils {
         }
 
         return String.valueOf(hexChars);
+    }
+
+    public static @NotNull List<@NotNull ModifierComponent> fromDescriptor(
+        @NotNull Int2ObjectMap<? extends ModifierComponent> ordinalMap, @NotNull String descriptor) {
+        if (ordinalMap.isEmpty()) {
+            return List.of();
+        }
+
+        char[] descriptorChars = descriptor.toCharArray();
+
+        List<ModifierComponent> modifierComponents = new ArrayList<>();
+        for (int i = 0; i < descriptorChars.length; i++) {
+            char c = toUpperAscii(descriptorChars[descriptorChars.length - i - 1]);
+            if (!isDescriptorCharacter(c)) {
+                return List.of();
+            }
+
+            int mag = fromHex(c);
+            int offset = i * 4;
+            for (int j = 0; j < 4; j++) {
+                if ((mag & (1 << j)) == 0) {
+                    continue;
+                }
+
+                ModifierComponent component = ordinalMap.get(offset + j);
+                if (component != null) {
+                    modifierComponents.add(component);
+                }
+            }
+        }
+
+        return modifierComponents;
     }
 }
