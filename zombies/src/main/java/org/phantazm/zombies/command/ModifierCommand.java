@@ -31,9 +31,6 @@ public class ModifierCommand extends Command {
     private static final Component INTERNAL_ERROR_MESSAGE = Component.text("An internal error occurred when " +
         "attempting to enable that modifier; please report this incident to server staff!", NamedTextColor.RED);
 
-    private static final Component CLEARED_MODIFIERS_MESSAGE = Component.text("Cleared modifiers!",
-        NamedTextColor.GREEN);
-
     private static final Component INVALID_MODIFIER_MESSAGE = Component.text("Invalid modifier name!",
         NamedTextColor.RED);
 
@@ -53,7 +50,6 @@ public class ModifierCommand extends Command {
 
     private enum Actions {
         SET,
-        CLEAR,
         TOGGLE
     }
 
@@ -75,12 +71,6 @@ public class ModifierCommand extends Command {
             PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer((Player) sender);
 
             Actions actions = context.get(modifierAction);
-            if (actions == Actions.CLEAR) {
-                modifierHandler.clearModifiers(playerView);
-                sender.sendMessage(CLEARED_MODIFIERS_MESSAGE);
-                return;
-            }
-
             @Subst(Constants.NAMESPACE_OR_KEY)
             String modifier = context.get(modifierArgument);
 
@@ -114,6 +104,7 @@ public class ModifierCommand extends Command {
         }, modifierAction, modifierArgument);
 
         addSubcommand(new ListModifiers(modifierHandler));
+        addSubcommand(new ClearModifiers(modifierHandler));
         addSubcommand(new LoadModifiers(modifierHandler));
     }
 
@@ -144,6 +135,26 @@ public class ModifierCommand extends Command {
         }
     }
 
+    private static class ClearModifiers extends Command {
+        private ClearModifiers(ModifierHandler modifierHandler) {
+            super("clear");
+
+            addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+                PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer((Player) sender);
+
+                Set<Key> modifiers;
+                if ((modifiers = modifierHandler.getModifiers(playerView)).isEmpty()) {
+                    sender.sendMessage(NO_ENABLED_MODIFIERS);
+                    return;
+                }
+
+                modifierHandler.clearModifiers(playerView);
+                sender.sendMessage(Component.text("Removed " + modifiers.size() + " modifier(s)",
+                    NamedTextColor.GREEN));
+            });
+        }
+    }
+
     private static class LoadModifiers extends Command {
         private LoadModifiers(ModifierHandler modifierHandler) {
             super("load");
@@ -162,7 +173,6 @@ public class ModifierCommand extends Command {
                                 result.conflictingModifiers().stream().map(ModifierComponent::displayName).toList())));
                     case INVALID_MODIFIER -> sender.sendMessage(INTERNAL_ERROR_MESSAGE);
                 }
-
             }, descriptorArgument);
         }
     }
