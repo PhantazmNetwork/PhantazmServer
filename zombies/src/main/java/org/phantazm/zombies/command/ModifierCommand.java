@@ -46,7 +46,11 @@ public class ModifierCommand extends Command {
     private static final Component NO_ENABLED_MODIFIERS = Component.text("You do not have any modifiers enabled!",
         NamedTextColor.RED);
 
-    private static final Component ENABLED_MODIFIERS_MESSAGE = Component.text("Enabled modifiers!", NamedTextColor.GREEN);
+    private static final Component ENABLED_MODIFIERS_MESSAGE = Component.text("Enabled modifiers!",
+        NamedTextColor.GREEN);
+
+    private static final Component DESCRIPTOR_TOO_LONG = Component.text("That modifier key is too long!",
+        NamedTextColor.RED);
 
     private enum Actions {
         SET,
@@ -162,9 +166,13 @@ public class ModifierCommand extends Command {
             Argument<String> descriptorArgument = ArgumentType.Word("descriptor");
             addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
                 PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer((Player) sender);
+                String descriptor = context.get(descriptorArgument);
+                if (descriptor.length() > 64) {
+                    sender.sendMessage(DESCRIPTOR_TOO_LONG);
+                    return;
+                }
 
-                ModifierHandler.ModifierResult result = modifierHandler.setFromDescriptor(playerView,
-                    context.get(descriptorArgument));
+                ModifierHandler.ModifierResult result = modifierHandler.setFromDescriptor(playerView, descriptor);
                 switch (result.status()) {
                     case MODIFIER_ENABLED -> sender.sendMessage(ENABLED_MODIFIERS_MESSAGE);
                     case CONFLICTING_MODIFIERS -> sender.sendMessage(
