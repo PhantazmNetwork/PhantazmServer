@@ -26,7 +26,12 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     private final IdentitySource identitySource;
     private final ConnectionManager connectionManager;
-    private final Map<UUID, PlayerViewImpl> uuidToView;
+
+    //used only for the purposes of maintaining strong references to players who are online
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    private final Map<Player, PlayerViewImpl> onlinePlayers;
+
+    private final Cache<UUID, PlayerViewImpl> uuidToView;
     private final Cache<String, UUID> nameToUuid;
 
     /**
@@ -40,7 +45,9 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
         @NotNull Duration duration) {
         this.identitySource = Objects.requireNonNull(identitySource);
         this.connectionManager = Objects.requireNonNull(connectionManager);
-        this.uuidToView = new ConcurrentHashMap<>();
+        this.onlinePlayers = new ConcurrentHashMap<>();
+
+        this.uuidToView = Caffeine.newBuilder().weakValues().build();
         this.nameToUuid = Caffeine.newBuilder().expireAfterWrite(Objects.requireNonNull(duration)).build();
     }
 
@@ -59,7 +66,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     @Override
     public @NotNull PlayerView fromUUID(@NotNull UUID uuid) {
         Objects.requireNonNull(uuid);
-        return uuidToView.computeIfAbsent(uuid, key -> new PlayerViewImpl(identitySource, connectionManager, key));
+        return uuidToView.get(uuid, key -> new PlayerViewImpl(identitySource, connectionManager, key));
     }
 
     @Override
@@ -100,8 +107,27 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     @Override
     public @NotNull PlayerView fromPlayer(@NotNull Player player) {
         Objects.requireNonNull(player);
-        return uuidToView.computeIfAbsent(player.getUuid(), key ->
-            new PlayerViewImpl(identitySource, connectionManager, player));
+        return uuidToView.get(player.getUuid(), key -> new PlayerViewImpl(identitySource, connectionManager, player));
     }
 
+    /**
+     * Adds a strong reference to a {@link PlayerViewImpl} associated with the given {@link Player}. If there is already
+     * a weakly or strongly referenced PlayerViewImpl associated with this player's UUID, that instance is used.
+     * Otherwise, a new instance is created and cached.
+     *
+     * @param player the player to add
+     */
+    void addPlayer(@NotNull Player player) {
+        onlinePlayers.put(player, uuidToView.get(player.getUuid(), key ->
+            new PlayerViewImpl(identitySource, connectionManager, player)));
+    }
+
+    /**
+     * Removes a strong reference to an associated {@link PlayerViewImpl}.
+     *
+     * @param player the player to remove an association with
+     */
+    void removePlayer(@NotNull Player player) {
+        onlinePlayers.remove(player);
+    }
 }
