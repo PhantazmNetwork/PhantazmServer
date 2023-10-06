@@ -4,6 +4,7 @@ import com.github.steanky.element.core.key.Constants;
 import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
@@ -16,9 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.zombies.modifier.ModifierComponent;
 import org.phantazm.zombies.modifier.ModifierHandler;
-
-import java.util.Set;
 
 public class ModifierCommand extends Command {
     private enum Actions {
@@ -70,13 +70,24 @@ public class ModifierCommand extends Command {
                 return;
             }
 
-            if (actions == Actions.SET) {
-                modifierHandler.setModifiers(playerView, Set.of(key));
-                sender.sendMessage(Component.text("Set modifier!", NamedTextColor.GREEN));
-            } else {
-                boolean active = modifierHandler.toggleModifier(playerView, key);
-                sender.sendMessage(Component.text("Toggled modifier " + (active ? "on" : "off") + "!",
-                    NamedTextColor.GREEN));
+            ModifierHandler.ModifierResult result = actions == Actions.SET ?
+                modifierHandler.setModifier(playerView, key) : modifierHandler.toggleModifier(playerView, key);
+            switch (result.status()) {
+                case MODIFIER_ENABLED -> sender.sendMessage(Component.text("Enabled modifier!", NamedTextColor.GREEN));
+                case MODIFIER_DISABLED ->
+                    sender.sendMessage(Component.text("Disabled modifier!", NamedTextColor.GREEN));
+                case MODIFIER_ALREADY_ENABLED ->
+                    sender.sendMessage(Component.text("Modifier already enabled!", NamedTextColor.RED));
+                case CONFLICTING_MODIFIERS -> {
+                    Component conflicts = Component.join(JoinConfiguration.commas(true),
+                        result.conflictingModifiers().stream().map(ModifierComponent::displayName).toList());
+
+                    sender.sendMessage(
+                        Component.text("That modifier would conflict with the already-enabled modifier(s) ",
+                            NamedTextColor.RED).append(conflicts));
+                }
+                case INVALID_MODIFIER -> sender.sendMessage(Component.text("An internal error occurred when " +
+                    "attempting to enable that modifier; please report this incident to server staff!", NamedTextColor.RED));
             }
         }, modifierAction, modifierArgument);
     }

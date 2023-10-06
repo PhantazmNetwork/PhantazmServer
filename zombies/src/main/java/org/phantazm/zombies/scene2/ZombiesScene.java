@@ -347,7 +347,7 @@ public class ZombiesScene extends InstanceScene {
                 if (bits.get(j)) mag |= 1 << k;
             }
 
-            hexChars[i] = HEX_ARRAY[mag];
+            hexChars[hexChars.length - i - 1] = HEX_ARRAY[mag];
         }
 
         return String.valueOf(hexChars);

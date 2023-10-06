@@ -6,6 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -22,6 +23,7 @@ import org.phantazm.zombies.event.ZombiesMobSetupEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Model("zombies.modifier.mob_attribute")
@@ -31,7 +33,7 @@ public class MobAttributeModifier extends ModifierComponentBase {
 
     @FactoryMethod
     public MobAttributeModifier(@NotNull Data data) {
-        super(data.key, data.displayName, data.displayItem, data.ordinal);
+        super(data.key, data.displayName, data.displayItem, data.ordinal, data.exclusiveModifiers);
         this.data = Objects.requireNonNull(data);
     }
 
@@ -64,12 +66,18 @@ public class MobAttributeModifier extends ModifierComponentBase {
         @NotNull Key key,
         @Nullable Component displayName,
         @NotNull ItemStack displayItem,
+        @NotNull Set<Key> exclusiveModifiers,
         @NotNull String attribute,
         double amount,
         @NotNull AttributeOperation attributeOperation) {
         @Default("displayName")
         public static @NotNull ConfigElement defaultDisplayName() {
             return ConfigPrimitive.NULL;
+        }
+
+        @Default("exclusiveModifiers")
+        public static @NotNull ConfigElement defaultExclusiveModifiers() {
+            return ConfigList.of();
         }
     }
 }

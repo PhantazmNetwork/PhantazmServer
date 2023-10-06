@@ -17,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
  * @implSpec Implementations should guarantee thread safety for all methods.
  */
 public interface PlayerViewProvider {
-    class Global {
+    final class Global {
         private static final Object INITIALIZATION_LOCK = new Object();
         private static PlayerViewProvider instance;
 
