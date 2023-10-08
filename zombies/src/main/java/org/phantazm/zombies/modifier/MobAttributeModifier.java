@@ -20,6 +20,8 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.DualComponent;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.Attributes;
+import org.phantazm.zombies.coin.ModifierSourceGroups;
+import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.event.mob.ZombiesMobSetupEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -47,11 +49,18 @@ public class MobAttributeModifier implements DualComponent<ZombiesScene, Modifie
         @Override
         public void apply() {
             UUID uuid = UUID.randomUUID();
+            Attribute attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
+            if (attribute.equals(Attribute.MAX_HEALTH)) {
+                scene.map().mapObjects().module().modifierSource().addModifier(ModifierSourceGroups.MOB_COIN_GAIN,
+                    Transaction.modifier(Component.text("Health Modifier"),
+                        convert(data.attributeOperation), -data.amount));
+            }
+
             scene.addListener(ZombiesMobSetupEvent.class, event -> {
                 LivingEntity entity = event.getEntity();
 
-                Attribute attribute;
-                entity.getAttribute(attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
+
+                entity.getAttribute(attribute)
                     .addModifier(new AttributeModifier(uuid, uuid.toString(), data.amount, data.attributeOperation));
 
                 if (attribute.equals(Attribute.MAX_HEALTH)) {
@@ -59,6 +68,13 @@ public class MobAttributeModifier implements DualComponent<ZombiesScene, Modifie
                 }
             });
         }
+    }
+
+    private static Transaction.Modifier.Action convert(AttributeOperation operation) {
+        return switch (operation) {
+            case ADDITION -> Transaction.Modifier.Action.ADD;
+            case MULTIPLY_BASE, MULTIPLY_TOTAL -> Transaction.Modifier.Action.MULTIPLY;
+        };
     }
 
     @DataObject
