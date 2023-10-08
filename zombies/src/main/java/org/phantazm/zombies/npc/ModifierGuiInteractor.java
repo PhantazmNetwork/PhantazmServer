@@ -22,6 +22,8 @@ import net.minestom.server.event.inventory.InventoryClickEvent;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.click.ClickType;
+import net.minestom.server.inventory.condition.InventoryCondition;
+import net.minestom.server.inventory.condition.InventoryConditionResult;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
 import org.intellij.lang.annotations.Subst;
@@ -58,6 +60,7 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
 
     @DataObject
     public record Data(int modifierTogglePadding,
+        @NotNull String titleFormat,
         @NotNull ItemStack inactiveItem,
         @NotNull ItemStack activeItem,
         @NotNull ItemStack aboutItem,
@@ -120,15 +123,22 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
             int[] slots = slotDistributor.distribute(MODIFIERS_PER_PAGE, 1,
                 Math.min(modifiers.size() - (page * MODIFIERS_PER_PAGE), MODIFIERS_PER_PAGE));
 
-            LocalInventory inventory = new LocalInventory(InventoryType.CHEST_6_ROW, Component.empty());
+            PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer(player);
+            ModifierHandler modifierHandler = ModifierHandler.Global.instance();
+
+            LocalInventory inventory = new LocalInventory(InventoryType.CHEST_6_ROW, computeTitle(playerView), playerView, 0);
+            inventory.addInventoryCondition((player1, slot, clickType, inventoryConditionResult) -> {
+                if (clickType != ClickType.LEFT_CLICK) {
+                    inventoryConditionResult.setCancel(true);
+                }
+            });
+
             inventory.setItemStack(45, data.aboutItem);
             inventory.setItemStack(53, data.clearItem.withTag(ACTION_TAG, CLEAR_ACTION));
 
             if (page != 0) inventory.setItemStack(48, data.previousItem.withTag(ACTION_TAG, PREVIOUS_ACTION));
             if (page < pages - 1) inventory.setItemStack(50, data.nextItem.withTag(ACTION_TAG, NEXT_ACTION));
 
-            PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer(player);
-            ModifierHandler modifierHandler = ModifierHandler.Global.instance();
 
             Set<Key> enabledModifiers = modifierHandler.getModifiers(playerView);
             for (int i = 0; i < slots.length; i++) {
@@ -143,21 +153,51 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
                     data.inactiveItem);
             }
 
-            inventory.node.addListener(InventoryClickEvent.class, event -> {
-                ItemStack stack = event.getClickedItem();
+            player.openInventory(inventory);
+        }
 
+        private Component computeTitle(PlayerView playerView) {
+            ModifierHandler modifierHandler = ModifierHandler.Global.instance();
+            int modifierCount = modifierHandler.enabledModifierCount(playerView);
+            return MiniMessage.miniMessage().deserialize(data.titleFormat,
+                Placeholder.unparsed("modifier_count", Integer.toString(modifierCount)));
+        }
+
+        private class LocalInventory extends Inventory {
+            private final EventNode<InventoryClickEvent> node;
+            private final PlayerView view;
+            private final int page;
+
+            private LocalInventory(@NotNull InventoryType inventoryType, @NotNull Component title, @NotNull PlayerView view, int page) {
+                super(inventoryType, title);
+                this.node = EventNode.type("local", EventFilter.from(InventoryClickEvent.class, null,
+                    null));
+                this.view = view;
+                this.page = page;
+            }
+
+            @Override
+            public void callClickEvent(@NotNull Player player, Inventory inventory, int slot, @NotNull ClickType clickType, @NotNull ItemStack clicked, @NotNull ItemStack cursor) {
+                node.call(new InventoryClickEvent(inventory, player, slot, clickType, clicked, cursor));
+            }
+
+            @Override
+            public boolean leftClick(@NotNull Player player, int slot) {
+                ItemStack stack = getItemStack(slot);
+
+                ModifierHandler modifierHandler = ModifierHandler.Global.instance();
                 @Subst(Constants.NAMESPACE_OR_KEY) String modifier = stack.getTag(MODIFIER_TAG);
                 if (modifier != null) {
                     Key key = Key.key(modifier);
-                    ModifierHandler.ModifierResult result = modifierHandler.toggleModifier(playerView, key);
-                    handleResult(player, result, inventory, event.getSlot());
+                    ModifierHandler.ModifierResult result = modifierHandler.toggleModifier(view, key);
+                    handleResult(player, result, slot);
 
-                    return;
+                    return false;
                 }
 
                 String action = stack.getTag(ACTION_TAG);
                 if (action == null) {
-                    return;
+                    return false;
                 }
 
                 int nextPage;
@@ -166,22 +206,22 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
                         nextPage = action.equals(PREVIOUS_ACTION) ? page - 1 : page + 1;
                         if (nextPage < 0 || nextPage >= pages) {
                             player.playSound(data.failureSound);
-                            return;
+                            return false;
                         }
                     }
                     case CLEAR_ACTION -> {
                         nextPage = page;
-                        if (!modifierHandler.hasAnyModifiers(playerView)) {
+                        if (!modifierHandler.hasAnyModifiers(view)) {
                             player.playSound(data.failureSound);
-                            return;
+                            return false;
                         }
 
                         player.playSound(data.successSound);
                         player.sendMessage(data.disabledAllMessage);
-                        modifierHandler.clearModifiers(playerView);
+                        modifierHandler.clearModifiers(view);
                     }
                     default -> {
-                        return;
+                        return false;
                     }
                 }
 
@@ -189,52 +229,39 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
                     Player selfPlayer = (Player) self;
                     showPage(selfPlayer, nextPage);
                 });
-            });
 
-            player.openInventory(inventory);
-        }
-
-        private void handleResult(Player player, ModifierHandler.ModifierResult result, LocalInventory inventory,
-            int slot) {
-            switch (result.status()) {
-                case MODIFIER_ENABLED -> {
-                    player.playSound(data.successSound);
-                    player.sendMessage(data.enabledMessage);
-                    inventory.setItemStack(slot + CHEST_WIDTH, data.activeItem);
-                }
-                case MODIFIER_DISABLED -> {
-                    player.playSound(data.successSound);
-                    player.sendMessage(data.disabledMessage);
-                    inventory.setItemStack(slot + CHEST_WIDTH, data.inactiveItem);
-                }
-                case CONFLICTING_MODIFIERS -> {
-                    player.playSound(data.failureSound);
-
-                    TagResolver resolver = Placeholder.component("conflicts", Component.join(
-                        JoinConfiguration.commas(true), result.conflictingModifiers().stream()
-                            .map(ModifierComponent::displayName).toList()));
-
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(data.conflictingModifiersFormat, resolver));
-                }
-                case INVALID_MODIFIER -> {
-                    player.playSound(data.failureSound);
-                    player.sendMessage(data.invalidModifierMessage);
-                }
-            }
-        }
-
-        private static class LocalInventory extends Inventory {
-            private final EventNode<InventoryClickEvent> node;
-
-            public LocalInventory(@NotNull InventoryType inventoryType, @NotNull Component title) {
-                super(inventoryType, title);
-                this.node = EventNode.type("local", EventFilter.from(InventoryClickEvent.class, null,
-                    null));
+                return false;
             }
 
-            @Override
-            public void callClickEvent(@NotNull Player player, Inventory inventory, int slot, @NotNull ClickType clickType, @NotNull ItemStack clicked, @NotNull ItemStack cursor) {
-                node.call(new InventoryClickEvent(inventory, player, slot, clickType, clicked, cursor));
+            private void handleResult(Player player, ModifierHandler.ModifierResult result,
+                int slot) {
+                switch (result.status()) {
+                    case MODIFIER_ENABLED -> {
+                        player.playSound(data.successSound);
+                        player.sendMessage(data.enabledMessage);
+                        setItemStack(slot + CHEST_WIDTH, data.activeItem);
+                        setTitle(computeTitle(view));
+                    }
+                    case MODIFIER_DISABLED -> {
+                        player.playSound(data.successSound);
+                        player.sendMessage(data.disabledMessage);
+                        setItemStack(slot + CHEST_WIDTH, data.inactiveItem);
+                        setTitle(computeTitle(view));
+                    }
+                    case CONFLICTING_MODIFIERS -> {
+                        player.playSound(data.failureSound);
+
+                        TagResolver resolver = Placeholder.component("conflicts", Component.join(
+                            JoinConfiguration.commas(true), result.conflictingModifiers().stream()
+                                .map(ModifierComponent::displayName).toList()));
+
+                        player.sendMessage(MiniMessage.miniMessage().deserialize(data.conflictingModifiersFormat, resolver));
+                    }
+                    case INVALID_MODIFIER -> {
+                        player.playSound(data.failureSound);
+                        player.sendMessage(data.invalidModifierMessage);
+                    }
+                }
             }
         }
     }

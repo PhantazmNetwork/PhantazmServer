@@ -200,6 +200,11 @@ public final class ModifierHandler {
         return modifiers != null && !modifiers.isEmpty();
     }
 
+    public int enabledModifierCount(@NotNull PlayerView player) {
+        List<String> modifiers = player.getTag(MODIFIERS_TAG);
+        return modifiers == null ? 0 : modifiers.size();
+    }
+
     public void clearModifiers(@NotNull PlayerView player) {
         player.setTag(MODIFIERS_TAG, List.of());
     }
