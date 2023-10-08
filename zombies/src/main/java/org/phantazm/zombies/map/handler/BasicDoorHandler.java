@@ -63,7 +63,7 @@ public class BasicDoorHandler implements DoorHandler {
                 }
 
                 OpenDoorEvent event = new OpenDoorEvent(actualPlayer, player, door);
-                zombiesScene.get().sceneNode().call(event);
+                zombiesScene.get().broadcastEvent(event);
                 if (event.isCancelled()) {
                     return;
                 }

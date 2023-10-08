@@ -13,6 +13,7 @@ import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -20,6 +21,7 @@ import java.util.function.Supplier;
 @Memoize
 @Depend
 public class ZombiesEquipmentModule implements DependencyModule {
+    private final ZombiesScene zombiesScene;
     private final Map<PlayerView, ZombiesPlayer> playerMap;
     private final PlayerView playerView;
     private final ZombiesPlayerMapStats mapStats;
@@ -30,11 +32,12 @@ public class ZombiesEquipmentModule implements DependencyModule {
     private final MapObjects mapObjects;
     private final Supplier<? extends ZombiesPlayer> zombiesPlayerSupplier;
 
-    public ZombiesEquipmentModule(@NotNull Map<PlayerView, ZombiesPlayer> playerMap,
+    public ZombiesEquipmentModule(@NotNull ZombiesScene zombiesScene, @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
         @NotNull PlayerView playerView, @NotNull ZombiesPlayerMapStats mapStats,
         @NotNull ZombiesPlayerActionBar actionBar, @NotNull MobSpawner mobSpawner,
         @NotNull EventNode<Event> eventNode, @NotNull Random random,
         @NotNull MapObjects mapObjects, @NotNull Supplier<? extends ZombiesPlayer> zombiesPlayerSupplier) {
+        this.zombiesScene = Objects.requireNonNull(zombiesScene);
         this.playerMap = Objects.requireNonNull(playerMap);
         this.playerView = Objects.requireNonNull(playerView);
         this.mapStats = Objects.requireNonNull(mapStats);
@@ -44,6 +47,10 @@ public class ZombiesEquipmentModule implements DependencyModule {
         this.random = Objects.requireNonNull(random);
         this.mapObjects = Objects.requireNonNull(mapObjects);
         this.zombiesPlayerSupplier = Objects.requireNonNull(zombiesPlayerSupplier);
+    }
+
+    public @NotNull ZombiesScene getScene() {
+        return zombiesScene;
     }
 
     public @NotNull Map<PlayerView, ZombiesPlayer> getPlayerMap() {

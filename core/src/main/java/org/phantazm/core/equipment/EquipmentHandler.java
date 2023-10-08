@@ -201,7 +201,7 @@ public class EquipmentHandler {
 
     private boolean callEvent(Equipment equipment, Player player) {
         EquipmentAddEvent addEvent = new EquipmentAddEvent(player, equipment);
-        eventScene.sceneNode().call(addEvent);
+        eventScene.broadcastEvent(addEvent);
         return addEvent.isCancelled();
     }
 

@@ -9,6 +9,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.target.entityfinder.directional.DirectionalEntityFinder;
 import org.phantazm.zombies.equipment.gun.target.headshot.HeadshotTester;
@@ -53,7 +54,7 @@ public class BasicTargetFinder implements TargetFinder {
     }
 
     @Override
-    public @NotNull Result findTarget(@NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
+    public @NotNull Result findTarget(@NotNull Gun gun, @NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
         @NotNull Collection<UUID> previousHits) {
         Instance instance = shooter.getInstance();
         if (instance == null) {
@@ -65,7 +66,7 @@ public class BasicTargetFinder implements TargetFinder {
 
         double distanceLimitSquared = start.distanceSquared(end);
         for (LivingEntity entity : nearbyEntities) {
-            if (targetTester.useTarget(entity, previousHits)) {
+            if (targetTester.useTarget(gun, entity, previousHits)) {
                 intersectionFinder.getHitLocation(entity, start, end, distanceLimitSquared).ifPresent(intersection -> {
                     locations.add(Pair.of(entity, intersection));
                 });

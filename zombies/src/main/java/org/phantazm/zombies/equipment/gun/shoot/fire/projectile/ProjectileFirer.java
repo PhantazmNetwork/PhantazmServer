@@ -162,8 +162,8 @@ public class ProjectileFirer implements Firer {
     private void onProjectileCollision(@NotNull FiredShot firedShot, @NotNull Entity projectile,
         @NotNull Point collision) {
         if (firedShot.shooter().getUuid().equals(shooterUUID)) {
-            TargetFinder.Result target = targetFinder.findTarget(firedShot.shooter(), firedShot.start(), collision,
-                firedShot.previousHits());
+            TargetFinder.Result target = targetFinder.findTarget(firedShot.gun, firedShot.shooter(), firedShot.start(),
+                collision, firedShot.previousHits());
 
             target.regular().removeIf(hit -> hit.entity().getUuid().equals(projectile.getUuid()));
             target.headshot().removeIf(hit -> hit.entity().getUuid().equals(projectile.getUuid()));

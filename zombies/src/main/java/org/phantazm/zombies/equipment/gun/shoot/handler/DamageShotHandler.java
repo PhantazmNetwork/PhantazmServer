@@ -15,6 +15,7 @@ import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -27,6 +28,7 @@ import java.util.UUID;
 @Cache(false)
 public class DamageShotHandler implements ShotHandler {
     private final Data data;
+    private final ZombiesScene zombiesScene;
 
     /**
      * Creates a new {@link DamageShotHandler} with the given {@link Data}.
@@ -34,8 +36,9 @@ public class DamageShotHandler implements ShotHandler {
      * @param data The {@link Data} to use
      */
     @FactoryMethod
-    public DamageShotHandler(@NotNull Data data) {
+    public DamageShotHandler(@NotNull Data data, @NotNull ZombiesScene zombiesScene) {
         this.data = Objects.requireNonNull(data);
+        this.zombiesScene = Objects.requireNonNull(zombiesScene);
     }
 
     @Override
@@ -52,19 +55,18 @@ public class DamageShotHandler implements ShotHandler {
 
             EntityDamageByGunEvent event =
                 new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damage);
-            EventDispatcher.call(event);
+            zombiesScene.broadcastEvent(event);
 
             if (event.isCancelled()) {
                 continue;
             }
 
             targetEntity.getAcquirable().sync(ignored -> {
-                float actualDamage = damage;
+                float actualDamage = event.getDamage();
                 if (event.isInstakill()) {
                     targetEntity.damage(Damage.fromEntity(attacker, targetEntity.getHealth()), true);
                     return;
                 }
-
 
                 if (attacker instanceof LivingEntity livingEntity) {
                     actualDamage *= livingEntity.getAttributeValue(Attributes.DAMAGE_MULTIPLIER);

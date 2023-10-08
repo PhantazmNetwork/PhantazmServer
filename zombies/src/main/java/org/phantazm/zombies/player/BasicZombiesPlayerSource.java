@@ -167,7 +167,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         Wrapper<ZombiesPlayer> zombiesPlayerWrapper = Wrapper.ofNull();
         ZombiesEquipmentModule equipmentModule =
-            new ZombiesEquipmentModule(zombiesPlayers, playerView, stats, actionBar, mobSpawner,
+            new ZombiesEquipmentModule(scene, zombiesPlayers, playerView, stats, actionBar, mobSpawner,
                 eventNode, random, mapObjects, zombiesPlayerWrapper);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(equipmentModule);
 

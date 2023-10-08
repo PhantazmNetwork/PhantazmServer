@@ -338,14 +338,6 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         return this.activeModifiersView;
     }
 
-    public void broadcastEvent(@NotNull Event event) {
-        sceneNode.call(event);
-    }
-
-    public <E extends Event> void addListener(@NotNull Class<E> eventClass, @NotNull Consumer<E> listener) {
-        sceneNode.addListener(eventClass, listener);
-    }
-
     public @Nullable Stage currentStage() {
         return stageTransition.getCurrentStage();
     }
