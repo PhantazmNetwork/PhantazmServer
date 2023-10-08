@@ -57,12 +57,13 @@ public class ModifierCommand extends Command {
         TOGGLE
     }
 
-    public ModifierCommand(@NotNull ModifierHandler modifierHandler, @NotNull KeyParser keyParser) {
+    public ModifierCommand(@NotNull KeyParser keyParser) {
         super("modifier");
 
         Argument<Actions> modifierAction = ArgumentType.Enum("action", Actions.class)
             .setFormat(ArgumentEnum.Format.LOWER_CASED);
 
+        ModifierHandler modifierHandler = ModifierHandler.Global.instance();
         Argument<String> modifierArgument = ArgumentType.Word("target")
             .setSuggestionCallback((sender, context, suggestion) -> {
                 for (Key key : modifierHandler.componentMap().keySet()) {

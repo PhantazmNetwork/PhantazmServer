@@ -13,22 +13,20 @@ import java.util.Set;
 
 public class JoinZombiesMap extends JoinZombies {
     private final Key mapKey;
-    private final ModifierHandler modifierHandler;
     private final Set<Key> modifiers;
 
     public JoinZombiesMap(@NotNull Collection<@NotNull PlayerView> players,
         @NotNull SceneCreator<ZombiesScene> sceneCreator, @NotNull Key mapKey,
-        @NotNull ModifierHandler modifierHandler, @NotNull Set<Key> modifiers) {
+        @NotNull Set<Key> modifiers) {
         super(players, sceneCreator);
         this.mapKey = Objects.requireNonNull(mapKey);
-        this.modifierHandler = Objects.requireNonNull(modifierHandler);
         this.modifiers = Objects.requireNonNull(modifiers);
     }
 
     @Override
     public @NotNull ZombiesScene createNewScene(@NotNull SceneManager manager) {
         ZombiesScene scene = super.createNewScene(manager);
-        modifierHandler.applyModifiers(modifiers, scene);
+        ModifierHandler.Global.instance().applyModifiers(modifiers, scene);
 
         return scene;
     }

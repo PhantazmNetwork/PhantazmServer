@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.scene2.SceneManager;
-import org.phantazm.zombies.modifier.ModifierHandler;
 
 import java.util.Collection;
 import java.util.Set;
@@ -14,16 +13,16 @@ public class JoinZombiesRestricted extends JoinZombiesMap {
     private final boolean sandbox;
 
     public JoinZombiesRestricted(@NotNull Collection<@NotNull PlayerView> players,
-        @NotNull SceneCreator<ZombiesScene> sceneCreator, @NotNull Key mapKey, @NotNull ModifierHandler modifierHandler,
+        @NotNull SceneCreator<ZombiesScene> sceneCreator, @NotNull Key mapKey,
         @NotNull Set<Key> modifiers, boolean sandbox) {
-        super(players, sceneCreator, mapKey, modifierHandler, modifiers);
+        super(players, sceneCreator, mapKey, modifiers);
         this.sandbox = sandbox;
     }
 
     public JoinZombiesRestricted(@NotNull Collection<@NotNull PlayerView> players,
-        @NotNull SceneCreator<ZombiesScene> sceneCreator, @NotNull Key mapKey, @NotNull ModifierHandler modifierHandler,
+        @NotNull SceneCreator<ZombiesScene> sceneCreator, @NotNull Key mapKey,
         @NotNull Set<Key> modifiers) {
-        this(players, sceneCreator, mapKey, modifierHandler, modifiers, false);
+        this(players, sceneCreator, mapKey, modifiers, false);
     }
 
     @Override

@@ -34,7 +34,7 @@ public class ZombiesJoinCommand extends Command {
     @SuppressWarnings("unchecked")
     public ZombiesJoinCommand(@NotNull ZombiesJoiner zombiesJoiner, @NotNull Map<? super UUID, ? extends Party> partyMap,
         @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, long ratelimit,
-        @NotNull ZombiesDatabase zombiesDatabase, @NotNull ModifierHandler modifierHandler) {
+        @NotNull ZombiesDatabase zombiesDatabase) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.Word("map-key");
@@ -121,7 +121,7 @@ public class ZombiesJoinCommand extends Command {
                 }
             }
 
-            Set<Key> modifiers = modifierHandler.getModifiers(joinerView);
+            Set<Key> modifiers = ModifierHandler.Global.instance().getModifiers(joinerView);
 
             boolean sandbox = context.get(sandboxArgument);
             if (sandbox) {

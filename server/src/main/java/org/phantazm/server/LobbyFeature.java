@@ -13,6 +13,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.DynamicChunk;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.commons.InjectionStore;
 import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.FileUtils;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
@@ -148,7 +149,7 @@ public final class LobbyFeature {
                         new LobbyEntry(lobbyConfig, new LobbyCreator(instanceLoader, lobbyConfig.lobbyPaths(),
                             lobbyConfig.instanceConfig(), lobbyConfig.lobbyJoinFormat(), List.copyOf(components),
                             lobbyConfig.defaultItems(), displayNameStyler, lobbyConfig.maxLobbies(),
-                            lobbyConfig.maxPlayers(), lobbyConfig.timeout()))) != null) {
+                            lobbyConfig.maxPlayers(), lobbyConfig.timeout(), InjectionStore.of()))) != null) {
                         throw new RuntimeException("Duplicate lobby named " + lobbyConfig.name());
                     }
 

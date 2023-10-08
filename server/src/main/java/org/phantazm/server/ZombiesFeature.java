@@ -178,12 +178,12 @@ public final class ZombiesFeature {
         }
 
         LOGGER.info("Loaded {} modifiers", modifierComponents.size());
+        ModifierHandler.Global.init(modifierComponents, InjectionStore.of());
 
-        ModifierHandler modifierHandler = new ModifierHandler(modifierComponents, InjectionStore.EMPTY);
-        ZombiesJoiner joiner = new ZombiesJoiner(providers, modifierHandler);
+        ZombiesJoiner joiner = new ZombiesJoiner(providers);
 
         MinecraftServer.getCommandManager().register(new ZombiesCommand(joiner, parties, keyParser, maps,
-            zombiesConfig.joinRatelimit(), database, modifierHandler));
+            zombiesConfig.joinRatelimit(), database));
     }
 
     private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) {

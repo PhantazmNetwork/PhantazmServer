@@ -18,7 +18,7 @@ import java.util.List;
 
 @Model("npc.interactor.show_gui")
 @Cache
-public class ShowGuiInteractor implements MonoComponent<Interactor> {
+public class ShowGuiInteractor implements MonoComponent<@NotNull NPCInteractor> {
     private final Data data;
     private final List<MonoComponent<GuiItem>> guiItems;
 
@@ -29,7 +29,7 @@ public class ShowGuiInteractor implements MonoComponent<Interactor> {
     }
 
     @Override
-    public Interactor apply(@NotNull InjectionStore injectionStore) {
+    public @NotNull NPCInteractor apply(@NotNull InjectionStore injectionStore) {
         List<GuiItem> items = new ArrayList<>(guiItems.size());
         for (MonoComponent<GuiItem> component : guiItems) {
             items.add(component.apply(injectionStore));
@@ -39,7 +39,7 @@ public class ShowGuiInteractor implements MonoComponent<Interactor> {
     }
 
     private record Internal(Data data,
-        List<GuiItem> guiItems) implements Interactor {
+        List<GuiItem> guiItems) implements NPCInteractor {
         @Override
         public void interact(@NotNull Player player) {
             player.openInventory(

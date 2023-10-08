@@ -40,7 +40,31 @@ public final class ModifierHandler {
     private final Int2ObjectMap<ModifierComponent> ordinalMap;
     private final InjectionStore injectionStore;
 
-    public ModifierHandler(@NotNull Map<Key, ModifierComponent> components, @NotNull InjectionStore injectionStore) {
+    public static class Global {
+        private static ModifierHandler instance;
+        private static final Object GLOBAL_INITIALIZATION_LOCK = new Object();
+
+        public static void init(@NotNull Map<Key, ModifierComponent> components, @NotNull InjectionStore injectionStore) {
+            synchronized (GLOBAL_INITIALIZATION_LOCK) {
+                if (instance != null) {
+                    throw new IllegalStateException("The ModifierHandler has already been initialized");
+                }
+
+                instance = new ModifierHandler(components, injectionStore);
+            }
+        }
+
+        public static @NotNull ModifierHandler instance() {
+            ModifierHandler instance = Global.instance;
+            if (instance == null) {
+                throw new IllegalStateException("The ModifierHandler has not yet been initialized");
+            }
+
+            return instance;
+        }
+    }
+
+    private ModifierHandler(@NotNull Map<Key, ModifierComponent> components, @NotNull InjectionStore injectionStore) {
         this.components = Map.copyOf(components);
         this.ordinalMap = new Int2ObjectOpenHashMap<>(components.size());
         for (ModifierComponent component : components.values()) {

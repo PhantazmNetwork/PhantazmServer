@@ -383,8 +383,8 @@ public final class SceneManager {
         left.scene.getAcquirable().sync(self -> self.postLeave(left.left));
     }
 
-    private static <T extends Collection<Player>> T unwrapMany(@NotNull Set<? extends PlayerView> playerViews,
-        @NotNull IntFunction<? extends @NotNull T> function) {
+    private static <T extends Collection<Player>> T unwrapMany(Set<? extends PlayerView> playerViews,
+        IntFunction<? extends T> function) {
         T collection = function.apply(playerViews.size());
         for (PlayerView playerView : playerViews) {
             Player playerReference = ((PlayerViewImpl) playerView).reference();
@@ -1142,11 +1142,9 @@ public final class SceneManager {
     private static void processLeavingPlayer(Scene scene, Set<? extends PlayerView> views, List<Runnable> leaveActions) {
         scene.getAcquirable().sync(self -> {
             Set<Player> left = PlayerView.getMany(self.leave(views), HashSet::new);
-            if (left.isEmpty()) {
-                return;
+            if (!left.isEmpty()) {
+                leaveActions.add(() -> self.getAcquirable().sync(self2 -> self2.postLeave(left)));
             }
-
-            leaveActions.add(() -> self.getAcquirable().sync(self2 -> self2.postLeave(left)));
         });
     }
 

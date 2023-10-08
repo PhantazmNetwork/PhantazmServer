@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.npc.interactor.Interactor;
+import org.phantazm.core.npc.interactor.NPCInteractor;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -22,13 +22,13 @@ public class EntityNPC implements MonoComponent<NPC> {
     private final MonoComponent<Supplier<Entity>> entity;
     private final MonoComponent<Consumer<Entity>> settings;
     private final MonoComponent<EntityTicker> ticker;
-    private final MonoComponent<Interactor> interactor;
+    private final MonoComponent<NPCInteractor> interactor;
 
     @FactoryMethod
     public EntityNPC(@NotNull Data data, @NotNull @Child("entity") MonoComponent<Supplier<Entity>> entity,
         @NotNull @Child("settings") MonoComponent<Consumer<Entity>> settings,
         @NotNull @Child("ticker") MonoComponent<EntityTicker> ticker,
-        @NotNull @Child("interactor") MonoComponent<Interactor> interactor) {
+        @NotNull @Child("interactor") MonoComponent<NPCInteractor> interactor) {
         this.data = data;
         this.entity = entity;
         this.settings = settings;
@@ -47,12 +47,12 @@ public class EntityNPC implements MonoComponent<NPC> {
         private final Supplier<? extends Entity> entity;
         private final Consumer<? super Entity> settings;
         private final EntityTicker ticker;
-        private final Interactor interactor;
+        private final NPCInteractor interactor;
 
         private Entity npc;
 
         private Internal(Data data, Supplier<Entity> entity, Consumer<Entity> settings, EntityTicker ticker,
-            Interactor interactor) {
+            NPCInteractor interactor) {
             this.data = data;
             this.entity = entity;
             this.settings = settings;

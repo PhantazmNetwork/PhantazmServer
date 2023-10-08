@@ -9,8 +9,8 @@ import org.phantazm.commons.InjectionStore;
 
 @Model("npc.interactor.none")
 @Cache
-public class NoInteractor implements MonoComponent<Interactor> {
-    private static final Interactor INSTANCE = player -> {
+public class NoInteractor implements MonoComponent<@NotNull NPCInteractor> {
+    private static final NPCInteractor INSTANCE = player -> {
     };
 
     @FactoryMethod
@@ -18,7 +18,7 @@ public class NoInteractor implements MonoComponent<Interactor> {
     }
 
     @Override
-    public Interactor apply(@NotNull InjectionStore injectionStore) {
+    public @NotNull NPCInteractor apply(@NotNull InjectionStore injectionStore) {
         return INSTANCE;
     }
 }

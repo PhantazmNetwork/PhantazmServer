@@ -33,11 +33,13 @@ public class LobbyCreator implements SceneCreator<Lobby> {
     private final int playerCap;
     private final int timeout;
 
+    private final InjectionStore injectionStore;
+
     public LobbyCreator(@NotNull InstanceLoader instanceLoader, @NotNull List<String> lobbyPath,
         @NotNull InstanceConfig instanceConfig, @NotNull String lobbyJoinMessageFormat,
         @NotNull List<MonoComponent<NPC>> npcs, @NotNull List<ItemStack> defaultItems,
         @NotNull Function<? super @NotNull Player, ? extends @NotNull CompletableFuture<?>> displayNameStyler,
-        int sceneCap, int playerCap, int timeout) {
+        int sceneCap, int playerCap, int timeout, @NotNull InjectionStore injectionStore) {
         this.instanceLoader = Objects.requireNonNull(instanceLoader);
         this.lobbyPath = List.copyOf(lobbyPath);
         this.instanceConfig = Objects.requireNonNull(instanceConfig);
@@ -49,6 +51,8 @@ public class LobbyCreator implements SceneCreator<Lobby> {
         this.sceneCap = sceneCap;
         this.playerCap = playerCap;
         this.timeout = timeout;
+
+        this.injectionStore = Objects.requireNonNull(injectionStore);
     }
 
     @Override
@@ -57,11 +61,9 @@ public class LobbyCreator implements SceneCreator<Lobby> {
         instance.setTime(instanceConfig.time());
         instance.setTimeRate(instanceConfig.timeRate());
 
-        InjectionStore store = InjectionStore.of();
-
         List<NPC> npcs = new ArrayList<>(this.npcs.size());
         for (MonoComponent<NPC> component : this.npcs) {
-            npcs.add(component.apply(store));
+            npcs.add(component.apply(injectionStore));
         }
 
         NPCHandler handler = new NPCHandler(npcs, instance);
