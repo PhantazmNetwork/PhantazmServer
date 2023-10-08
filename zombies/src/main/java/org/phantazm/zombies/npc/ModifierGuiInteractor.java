@@ -22,8 +22,6 @@ import net.minestom.server.event.inventory.InventoryClickEvent;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.click.ClickType;
-import net.minestom.server.inventory.condition.InventoryCondition;
-import net.minestom.server.inventory.condition.InventoryConditionResult;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
 import org.intellij.lang.annotations.Subst;
@@ -126,7 +124,7 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
             PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer(player);
             ModifierHandler modifierHandler = ModifierHandler.Global.instance();
 
-            LocalInventory inventory = new LocalInventory(InventoryType.CHEST_6_ROW, computeTitle(playerView), playerView, 0);
+            LocalInventory inventory = new LocalInventory(InventoryType.CHEST_6_ROW, computeTitle(playerView), playerView, page);
             inventory.addInventoryCondition((player1, slot, clickType, inventoryConditionResult) -> {
                 if (clickType != ClickType.LEFT_CLICK) {
                     inventoryConditionResult.setCancel(true);
