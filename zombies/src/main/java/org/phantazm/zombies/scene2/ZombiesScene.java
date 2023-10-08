@@ -34,7 +34,6 @@ import org.phantazm.zombies.stage.StageTransition;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ZombiesScene extends InstanceScene implements EventScene {
@@ -334,6 +333,9 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         if (actualModifier.needsTicking()) {
             this.tickingModifiers.add(actualModifier);
         }
+
+        //TODO: this is temporary, modifiers will eventually have dedicated leaderboards
+        this.legit = false;
     }
 
     public @NotNull @UnmodifiableView Set<ModifierComponent> activeModifiers() {
