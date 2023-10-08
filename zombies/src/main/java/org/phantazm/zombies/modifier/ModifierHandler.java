@@ -29,10 +29,10 @@ public final class ModifierHandler {
         List<ModifierComponent> conflictingModifiers) {
     }
 
-    public static ModifierResult ENABLED = new ModifierResult(ModifierStatus.MODIFIER_ENABLED, null);
-    public static ModifierResult ALREADY_ENABLED = new ModifierResult(ModifierStatus.MODIFIER_ALREADY_ENABLED, null);
-    public static ModifierResult DISABLED = new ModifierResult(ModifierStatus.MODIFIER_DISABLED, null);
-    public static ModifierResult INVALID = new ModifierResult(ModifierStatus.INVALID_MODIFIER, null);
+    private static final ModifierResult ENABLED = new ModifierResult(ModifierStatus.MODIFIER_ENABLED, null);
+    private static final ModifierResult ALREADY_ENABLED = new ModifierResult(ModifierStatus.MODIFIER_ALREADY_ENABLED, null);
+    private static final ModifierResult DISABLED = new ModifierResult(ModifierStatus.MODIFIER_DISABLED, null);
+    private static final ModifierResult INVALID = new ModifierResult(ModifierStatus.INVALID_MODIFIER, null);
 
     private static final Tag<List<String>> MODIFIERS_TAG = Tag.String("zombies_modifiers").list();
 
@@ -193,6 +193,11 @@ public final class ModifierHandler {
     public @NotNull @Unmodifiable Set<Key> getModifiers(@NotNull PlayerView player) {
         return Optional.ofNullable(player.getTag(MODIFIERS_TAG)).orElse(List.of()).stream().filter(Key::parseable)
             .map(Key::key).collect(Collectors.toUnmodifiableSet());
+    }
+
+    public boolean hasAnyModifiers(@NotNull PlayerView player) {
+        List<String> modifiers = player.getTag(MODIFIERS_TAG);
+        return modifiers != null && !modifiers.isEmpty();
     }
 
     public void clearModifiers(@NotNull PlayerView player) {
