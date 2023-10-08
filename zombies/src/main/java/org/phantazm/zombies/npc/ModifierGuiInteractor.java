@@ -190,7 +190,7 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
                 if (modifier != null) {
                     Key key = Key.key(modifier);
                     ModifierHandler.ModifierResult result = modifierHandler.toggleModifier(view, key);
-                    handleResult(player, result, slot);
+                    handleResult(player, result, key, slot);
 
                     return false;
                 }
@@ -234,18 +234,18 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
             }
 
             private void handleResult(Player player, ModifierHandler.ModifierResult result,
-                int slot) {
+                Key modifierKey, int slot) {
                 switch (result.status()) {
                     case MODIFIER_ENABLED -> {
                         player.playSound(data.successSound);
                         player.sendMessage(data.enabledMessage);
-                        setItemStack(slot + CHEST_WIDTH, data.activeItem);
+                        setItemStack(slot > 17 ? slot : slot + CHEST_WIDTH, data.activeItem.withTag(MODIFIER_TAG, modifierKey.asString()));
                         setTitle(computeTitle(view));
                     }
                     case MODIFIER_DISABLED -> {
                         player.playSound(data.successSound);
                         player.sendMessage(data.disabledMessage);
-                        setItemStack(slot + CHEST_WIDTH, data.inactiveItem);
+                        setItemStack(slot > 17 ? slot : slot + CHEST_WIDTH, data.inactiveItem.withTag(MODIFIER_TAG, modifierKey.asString()));
                         setTitle(computeTitle(view));
                     }
                     case CONFLICTING_MODIFIERS -> {
