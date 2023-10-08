@@ -144,11 +144,13 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
                 ModifierComponent component = modifiers.get((page * MODIFIERS_PER_PAGE) + i);
                 int modifierSlot = slot + CHEST_WIDTH;
                 int displaySlot = slot + (CHEST_WIDTH * 2);
-                inventory.setItemStack(modifierSlot, component.displayItem().withTag(MODIFIER_TAG,
-                    component.key().asString()));
 
-                inventory.setItemStack(displaySlot, enabledModifiers.contains(component.key()) ? data.activeItem :
-                    data.inactiveItem);
+                String modifierString = component.key().asString();
+                inventory.setItemStack(modifierSlot, component.displayItem().withTag(MODIFIER_TAG,
+                    modifierString));
+
+                inventory.setItemStack(displaySlot, (enabledModifiers.contains(component.key()) ? data.activeItem :
+                    data.inactiveItem).withTag(MODIFIER_TAG, modifierString));
             }
 
             player.openInventory(inventory);
