@@ -5,7 +5,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.event.GunLoseAmmoEvent;
+import org.phantazm.zombies.event.equipment.GunLoseAmmoEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.action.PowerupAction;

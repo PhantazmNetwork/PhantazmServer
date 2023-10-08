@@ -7,23 +7,29 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.zombies.coin.*;
+import org.phantazm.zombies.event.player.OpenDoorEvent;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.DoorInfo;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.stage.StageKeys;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class BasicDoorHandler implements DoorHandler {
     private final BoundedTracker<Door> doorTracker;
     private final BoundedTracker<Room> roomTracker;
+    private final Supplier<ZombiesScene> zombiesScene;
 
-    public BasicDoorHandler(@NotNull BoundedTracker<Door> doorTracker, @NotNull BoundedTracker<Room> roomTracker) {
+    public BasicDoorHandler(@NotNull BoundedTracker<Door> doorTracker, @NotNull BoundedTracker<Room> roomTracker,
+        @NotNull Supplier<ZombiesScene> zombiesScene) {
         this.doorTracker = Objects.requireNonNull(doorTracker);
         this.roomTracker = Objects.requireNonNull(roomTracker);
+        this.zombiesScene = Objects.requireNonNull(zombiesScene);
     }
 
     @Override
@@ -53,6 +59,12 @@ public class BasicDoorHandler implements DoorHandler {
 
                 Room standingInRoom = standingInRoomOptional.get();
                 if (!standingInRoom.isOpen()) {
+                    return;
+                }
+
+                OpenDoorEvent event = new OpenDoorEvent(actualPlayer, player, door);
+                zombiesScene.get().sceneNode().call(event);
+                if (event.isCancelled()) {
                     return;
                 }
 

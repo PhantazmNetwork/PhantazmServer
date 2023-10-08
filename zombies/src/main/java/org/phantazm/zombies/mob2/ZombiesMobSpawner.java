@@ -8,7 +8,7 @@ import org.phantazm.mob2.BasicMobSpawner;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.zombies.Stages;
-import org.phantazm.zombies.event.ZombiesMobSetupEvent;
+import org.phantazm.zombies.event.mob.ZombiesMobSetupEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Map;

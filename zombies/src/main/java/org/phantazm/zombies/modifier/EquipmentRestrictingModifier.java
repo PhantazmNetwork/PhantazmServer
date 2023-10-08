@@ -14,7 +14,6 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.event.equipment.EquipmentAddEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -42,7 +41,9 @@ public class EquipmentRestrictingModifier extends ModifierComponentBase {
         @Override
         public void apply() {
             scene.addListener(EquipmentAddEvent.class, event -> {
-                if (!data.allowedEquipment.contains(event.equipment().key())) {
+                //if blacklist == true (default), and equipment is in the list, it will be cancelled, otherwise not
+                //if whitelist (blacklist == false), and equipment is NOT in the list, it will be cancelled
+                if (data.blacklist == data.equipment.contains(event.equipment().key())) {
                     event.setCancelled(true);
                 }
             });
@@ -55,7 +56,8 @@ public class EquipmentRestrictingModifier extends ModifierComponentBase {
         @Nullable Component displayName,
         @NotNull ItemStack displayItem,
         @NotNull Set<Key> exclusiveModifiers,
-        @NotNull Set<Key> allowedEquipment) {
+        boolean blacklist,
+        @NotNull Set<Key> equipment) {
         @Default("displayName")
         public static @NotNull ConfigElement defaultDisplayName() {
             return ConfigPrimitive.NULL;
@@ -66,7 +68,12 @@ public class EquipmentRestrictingModifier extends ModifierComponentBase {
             return ConfigList.of();
         }
 
-        @Default("allowedEquipment")
+        @Default("blacklist")
+        public static @NotNull ConfigElement defaultBlacklist() {
+            return ConfigPrimitive.of(true);
+        }
+
+        @Default("equipment")
         public static @NotNull ConfigElement defaultAllowEquipment() {
             return ConfigList.of();
         }

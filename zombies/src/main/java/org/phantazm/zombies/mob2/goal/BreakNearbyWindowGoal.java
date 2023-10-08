@@ -12,7 +12,7 @@ import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.goal.GoalCreator;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
-import org.phantazm.zombies.event.MobBreakWindowEvent;
+import org.phantazm.zombies.event.mob.MobBreakWindowEvent;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.map.ZombiesMap;

@@ -1,4 +1,4 @@
-package org.phantazm.zombies.event;
+package org.phantazm.zombies.event.player;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;

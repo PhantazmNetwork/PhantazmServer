@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.Attributes;
-import org.phantazm.zombies.event.ZombiesMobSetupEvent;
+import org.phantazm.zombies.event.mob.ZombiesMobSetupEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;

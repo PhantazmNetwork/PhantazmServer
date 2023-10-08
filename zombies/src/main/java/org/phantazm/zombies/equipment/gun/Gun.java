@@ -12,7 +12,7 @@ import org.phantazm.core.inventory.CachedInventoryObject;
 import org.phantazm.zombies.equipment.gun.effect.GunEffect;
 import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.visual.GunStackMapper;
-import org.phantazm.zombies.event.GunLoseAmmoEvent;
+import org.phantazm.zombies.event.equipment.GunLoseAmmoEvent;
 
 import java.util.*;
 import java.util.function.Consumer;

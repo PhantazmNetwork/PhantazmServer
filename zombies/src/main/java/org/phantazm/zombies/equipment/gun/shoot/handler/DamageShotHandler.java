@@ -14,7 +14,7 @@ import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
-import org.phantazm.zombies.event.EntityDamageByGunEvent;
+import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
 
 import java.util.Collection;
 import java.util.Objects;
