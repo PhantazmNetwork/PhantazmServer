@@ -122,56 +122,81 @@ public class ZombiesJoinCommand extends Command {
             }
 
             Set<Key> modifiers = ModifierHandler.Global.instance().getModifiers(joinerView);
-
             boolean sandbox = context.get(sandboxArgument);
-            if (sandbox) {
-                boolean bypassRestriction = true;
-                for (PlayerView playerView : playerViews) {
-                    Optional<Player> optional = playerView.getPlayer();
-                    if (optional.isEmpty()) {
-                        continue;
+            boolean restricted = context.get(restrictedArgument);
+
+            if (sandbox || !modifiers.isEmpty()) {
+                hasAtLeastOneWin(zombiesDatabase, targetMap, playerViews).whenComplete((result, error) -> {
+                    if (result == null || error != null) {
+                        return;
                     }
 
-                    if (!optional.get().hasPermission(BYPASS_SANDBOX_RESTRICTION)) {
-                        bypassRestriction = false;
-                        break;
-                    }
-                }
-
-                if (bypassRestriction) {
-                    SceneManager.Global.instance().joinScene(zombiesJoiner.joinSandbox(playerViews, targetMap, modifiers));
-                    return;
-                }
-
-                CompletableFuture<Boolean>[] futures = new CompletableFuture[playerViews.size()];
-                int i = 0;
-                for (PlayerView playerView : playerViews) {
-                    futures[i++] = zombiesDatabase.getMapStats(playerView.getUUID(), targetMap).thenApply(stats -> {
-                        return stats.getWins() > 0;
-                    });
-                }
-
-                CompletableFuture.allOf(futures).thenRun(() -> {
-                    for (CompletableFuture<Boolean> future : futures) {
-                        if (future.isCompletedExceptionally() || !future.join()) {
-                            sender.sendMessage(Component.text("All joining members must have beaten at least " +
-                                "one game before they can play sandbox mode!", NamedTextColor.RED));
-                            return;
-                        }
+                    if (!result) {
+                        sender.sendMessage(Component.text("All joining members must have beaten at least one" +
+                            " game before they can play sandbox mode or use modifiers!", NamedTextColor.RED));
+                        return;
                     }
 
-                    SceneManager.Global.instance().joinScene(zombiesJoiner.joinSandbox(playerViews, targetMap, modifiers));
+                    if (sandbox) {
+                        SceneManager.Global.instance().joinScene(zombiesJoiner.joinSandbox(playerViews, targetMap, modifiers));
+                        return;
+                    }
+
+                    maybeJoinRestricted(zombiesJoiner, playerViews, targetMap, modifiers, restricted);
                 });
 
                 return;
             }
 
-            boolean restricted = context.get(restrictedArgument);
-            if (restricted) {
-                SceneManager.Global.instance().joinScene(zombiesJoiner.joinRestricted(playerViews, targetMap, modifiers));
-            } else {
-                SceneManager.Global.instance().joinScene(zombiesJoiner.joinMap(playerViews, targetMap, modifiers));
-            }
+            maybeJoinRestricted(zombiesJoiner, playerViews, targetMap, modifiers, restricted);
         }, mapKeyArgument, restrictedArgument, sandboxArgument);
+    }
+
+    private void maybeJoinRestricted(ZombiesJoiner zombiesJoiner, Set<PlayerView> playerViews, Key targetMap,
+        Set<Key> modifiers, boolean restricted) {
+        if (restricted) {
+            SceneManager.Global.instance().joinScene(zombiesJoiner.joinRestricted(playerViews, targetMap, modifiers));
+        } else {
+            SceneManager.Global.instance().joinScene(zombiesJoiner.joinMap(playerViews, targetMap, modifiers));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private CompletableFuture<Boolean> hasAtLeastOneWin(ZombiesDatabase zombiesDatabase, Key targetMap,
+        Collection<PlayerView> playerViews) {
+        boolean bypassRestriction = true;
+        for (PlayerView playerView : playerViews) {
+            Optional<Player> optional = playerView.getPlayer();
+            if (optional.isEmpty()) {
+                continue;
+            }
+
+            if (!optional.get().hasPermission(BYPASS_SANDBOX_RESTRICTION)) {
+                bypassRestriction = false;
+                break;
+            }
+        }
+
+        if (bypassRestriction) {
+            return CompletableFuture.completedFuture(true);
+        }
+
+        CompletableFuture<Boolean>[] futures = new CompletableFuture[playerViews.size()];
+        int i = 0;
+        for (PlayerView playerView : playerViews) {
+            futures[i++] = zombiesDatabase.getMapStats(playerView.getUUID(), targetMap).thenApply(stats -> {
+                return stats.getWins() > 0;
+            });
+        }
+
+        return CompletableFuture.allOf(futures).thenApply(ignored -> {
+            for (CompletableFuture<Boolean> future : futures) {
+                if (future.isCompletedExceptionally() || !future.join()) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
     }
 }
