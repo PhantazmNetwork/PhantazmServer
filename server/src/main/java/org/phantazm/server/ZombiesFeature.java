@@ -4,7 +4,6 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
-import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
@@ -89,7 +88,8 @@ public final class ZombiesFeature {
         @NotNull PlayerViewProvider viewProvider,
         @NotNull Map<? super UUID, ? extends Party> parties,
         @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
-        @NotNull MappingProcessorSource mappingProcessorSource, @NotNull Map<Key, MobCreator> mobCreatorMap) {
+        @NotNull MappingProcessorSource mappingProcessorSource, @NotNull Map<Key, MobCreator> mobCreatorMap,
+        @NotNull ModifierCommandConfig commandConfig) {
         try {
             FileUtils.createDirectories(MAPS_FOLDER);
             FileUtils.createDirectories(POWERUPS_FOLDER);
@@ -190,7 +190,7 @@ public final class ZombiesFeature {
         ZombiesJoiner joiner = new ZombiesJoiner(providers);
 
         MinecraftServer.getCommandManager().register(new ZombiesCommand(joiner, parties, keyParser, maps,
-            zombiesConfig.joinRatelimit(), database));
+            zombiesConfig.joinRatelimit(), database, commandConfig));
     }
 
     private static <T extends Keyed> Map<Key, T> loadFeature(String featureName, Loader<T> loader) {

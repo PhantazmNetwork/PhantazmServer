@@ -36,6 +36,7 @@ import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.zombies.equipment.EquipmentData;
+import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.scene2.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +84,7 @@ public final class PhantazmServer {
         ChatConfig chatConfig;
         JoinReportConfig joinReportConfig;
         ZombiesConfig zombiesConfig;
+        ModifierCommandConfig modifierCommandConfig;
 
         KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
         EthyleneFeature.initialize(keyParser);
@@ -140,6 +142,7 @@ public final class PhantazmServer {
             chatConfig = handler.loadDataNow(ConfigFeature.CHAT_CONFIG_KEY);
             joinReportConfig = handler.loadDataNow(ConfigFeature.JOIN_REPORT_CONFIG_KEY);
             zombiesConfig = handler.loadDataNow(ConfigFeature.ZOMBIES_CONFIG_KEY);
+            modifierCommandConfig = handler.loadDataNow(ConfigFeature.MODIFIER_COMMAND_CONFIG_KEY);
             LOGGER.info("Server configuration loaded successfully.");
         } catch (ConfigProcessException e) {
             LOGGER.error("Fatal error when loading configuration data", e);
@@ -151,7 +154,7 @@ public final class PhantazmServer {
         try {
             LOGGER.info("Initializing features.");
             initializeFeatures(keyParser, playerConfig, serverConfig, shutdownConfig, pathfinderConfig, lobbiesConfig,
-                partyConfig, whisperConfig, chatConfig, joinReportConfig, zombiesConfig);
+                partyConfig, whisperConfig, chatConfig, joinReportConfig, zombiesConfig, modifierCommandConfig);
             LOGGER.info("Features initialized successfully.");
         } catch (Exception exception) {
             LOGGER.error("Fatal error during initialization", exception);
@@ -194,7 +197,7 @@ public final class PhantazmServer {
     private static void initializeFeatures(KeyParser keyParser, PlayerConfig playerConfig, ServerConfig serverConfig,
         ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
         PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, JoinReportConfig joinReportConfig,
-        ZombiesConfig zombiesConfig) {
+        ZombiesConfig zombiesConfig, ModifierCommandConfig modifierCommandConfig) {
         ConfigCodec yamlCodec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
             () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
         ConfigCodec tomlCodec = new TomlCodec();
@@ -282,7 +285,7 @@ public final class PhantazmServer {
 
             ZombiesFeature.initialize(contextManager, keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider,
                 PartyFeature.getPartyHolder().uuidToGuild(), SongFeature.songLoader(),
-                zombiesConfig, mappingProcessorSource, MobFeature.getMobCreators());
+                zombiesConfig, mappingProcessorSource, MobFeature.getMobCreators(), modifierCommandConfig);
 
             LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
             ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),

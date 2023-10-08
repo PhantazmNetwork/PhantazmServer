@@ -16,6 +16,7 @@ import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
+import org.phantazm.zombies.modifier.ModifierCommandConfig;
 
 import java.nio.file.Path;
 
@@ -55,6 +56,8 @@ public final class ConfigFeature {
     public static final Path JOIN_REPORT_CONFIG_PATH = Path.of("./join-report-config.toml");
 
     public static final Path ZOMBIES_CONFIG_PATH = Path.of("./zombies-config.toml");
+
+    public static final Path MODIFIER_COMMAND_CONFIG_PATH = Path.of("./modifier-config.toml");
 
     public static final ConfigHandler.ConfigKey<PlayerConfig> PLAYER_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
         PlayerConfig.class, "player_config");
@@ -99,6 +102,9 @@ public final class ConfigFeature {
 
     public static final ConfigHandler.ConfigKey<ZombiesConfig> ZOMBIES_CONFIG_KEY =
         new ConfigHandler.ConfigKey<>(ZombiesConfig.class, "zombies_config");
+
+    public static final ConfigHandler.ConfigKey<ModifierCommandConfig> MODIFIER_COMMAND_CONFIG_KEY =
+        new ConfigHandler.ConfigKey<>(ModifierCommandConfig.class, "modifier_command_config");
 
     private static ConfigHandler handler;
 
@@ -158,6 +164,10 @@ public final class ConfigFeature {
         handler.registerLoader(ZOMBIES_CONFIG_KEY,
             new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ZombiesConfig.class)),
                 ZombiesConfig.DEFAULT, ZOMBIES_CONFIG_PATH, tomlCodec));
+
+        handler.registerLoader(MODIFIER_COMMAND_CONFIG_KEY,
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ModifierCommandConfig.class)),
+                ModifierCommandConfig.DEFAULT, MODIFIER_COMMAND_CONFIG_PATH, tomlCodec));
     }
 
     /**
