@@ -1,6 +1,11 @@
 package org.phantazm.zombies.scene2;
 
 import com.github.steanky.vector.Vec3I;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -23,6 +28,7 @@ import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
 import org.phantazm.zombies.modifier.Modifier;
 import org.phantazm.zombies.modifier.ModifierComponent;
+import org.phantazm.zombies.modifier.ModifierUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
@@ -167,6 +173,17 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         Stage stage = currentStage();
         if (stage != null) {
             stage.onJoin(zombiesPlayer);
+        }
+
+        if (!activeModifiers.isEmpty()) {
+            String descriptor = ModifierUtils.modifierDescriptor(activeModifiers);
+            TagResolver modifiersTag = Placeholder.component("modifiers",
+                Component.join(JoinConfiguration.commas(true),
+                    activeModifiers.stream().map(ModifierComponent::displayName).toList()));
+            TagResolver modifierKeyTag = Placeholder.unparsed("modifier_key", descriptor);
+
+            player.sendMessage(MiniMessage.miniMessage().deserialize(mapSettingsInfo.modifierReportFormat(),
+                modifiersTag, modifierKeyTag));
         }
 
         return teleportOrSetInstance(player, spawnPos);
