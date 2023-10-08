@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.FutureUtils;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.scene2.EventScene;
 import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.player.PlayerView;
@@ -36,7 +37,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ZombiesScene extends InstanceScene {
+public class ZombiesScene extends InstanceScene implements EventScene {
     private final Map<PlayerView, ZombiesPlayer> managedPlayers;
     private final Map<PlayerView, ZombiesPlayer> managedPlayersView;
 

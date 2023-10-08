@@ -18,9 +18,9 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewImpl;
 import org.phantazm.core.player.PlayerViewProvider;
-import org.phantazm.core.scene2.event.SceneCreationEvent;
-import org.phantazm.core.scene2.event.SceneJoinEvent;
-import org.phantazm.core.scene2.event.SceneShutdownEvent;
+import org.phantazm.core.event.scene.SceneCreationEvent;
+import org.phantazm.core.event.scene.SceneJoinEvent;
+import org.phantazm.core.event.scene.SceneShutdownEvent;
 
 import java.util.*;
 import java.util.concurrent.*;

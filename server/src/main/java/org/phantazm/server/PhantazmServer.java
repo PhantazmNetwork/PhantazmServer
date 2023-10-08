@@ -27,7 +27,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.CoreJoinKeys;
 import org.phantazm.core.scene2.SceneManager;
-import org.phantazm.core.scene2.event.SceneJoinEvent;
+import org.phantazm.core.event.scene.SceneJoinEvent;
 import org.phantazm.core.scene2.lobby.JoinLobby;
 import org.phantazm.core.scene2.lobby.Lobby;
 import org.phantazm.server.command.whisper.WhisperConfig;

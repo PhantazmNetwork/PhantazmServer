@@ -163,7 +163,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         accessRegistry.registerAccess(InventoryKeys.ALIVE_ACCESS, livingInventoryAccess);
         accessRegistry.registerAccess(InventoryKeys.DEAD_ACCESS, deadInventoryAccess);
 
-        EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry);
+        EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry, scene);
 
         Wrapper<ZombiesPlayer> zombiesPlayerWrapper = Wrapper.ofNull();
         ZombiesEquipmentModule equipmentModule =
