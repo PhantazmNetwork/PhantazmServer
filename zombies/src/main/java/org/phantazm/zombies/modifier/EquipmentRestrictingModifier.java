@@ -41,8 +41,8 @@ public class EquipmentRestrictingModifier extends ModifierComponentBase {
         @Override
         public void apply() {
             scene.addListener(EquipmentAddEvent.class, event -> {
-                //if blacklist == true (default), and equipment is in the list, it will be cancelled, otherwise not
-                //if whitelist (blacklist == false), and equipment is NOT in the list, it will be cancelled
+                //if blacklist == true, and equipment is in the list, it will be cancelled, otherwise not
+                //if whitelist (blacklist == false, default), and equipment is NOT in the list, it will be cancelled
                 if (data.blacklist == data.equipment.contains(event.equipment().key())) {
                     event.setCancelled(true);
                 }
@@ -70,11 +70,11 @@ public class EquipmentRestrictingModifier extends ModifierComponentBase {
 
         @Default("blacklist")
         public static @NotNull ConfigElement defaultBlacklist() {
-            return ConfigPrimitive.of(true);
+            return ConfigPrimitive.of(false);
         }
 
         @Default("equipment")
-        public static @NotNull ConfigElement defaultAllowEquipment() {
+        public static @NotNull ConfigElement defaultEquipment() {
             return ConfigList.of();
         }
     }

@@ -10,7 +10,7 @@ public class ZombiesPlayerDamageEvent implements ZombiesPlayerEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
 
-    private boolean shouldDie;
+    private boolean shouldKnock;
 
     public ZombiesPlayerDamageEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer) {
         this.player = Objects.requireNonNull(player);
@@ -27,11 +27,11 @@ public class ZombiesPlayerDamageEvent implements ZombiesPlayerEvent {
         return zombiesPlayer;
     }
 
-    public void setShouldDie(boolean shouldDie) {
-        this.shouldDie = shouldDie;
+    public void setShouldKnock(boolean shouldKnock) {
+        this.shouldKnock = shouldKnock;
     }
 
-    public boolean shouldDie() {
-        return shouldDie;
+    public boolean shouldKnock() {
+        return shouldKnock;
     }
 }

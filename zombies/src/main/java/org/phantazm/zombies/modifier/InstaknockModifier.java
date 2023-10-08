@@ -14,20 +14,19 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.zombies.event.player.OpenDoorEvent;
 import org.phantazm.zombies.event.player.ZombiesPlayerDamageEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
 import java.util.Set;
 
-@Model("zombies.modifier.insta_death")
+@Model("zombies.modifier.insta_knock")
 @Cache
-public class InstadeathModifier extends ModifierComponentBase {
+public class InstaknockModifier extends ModifierComponentBase {
     private final Data data;
 
     @FactoryMethod
-    public InstadeathModifier(@NotNull Data data) {
+    public InstaknockModifier(@NotNull Data data) {
         super(data.key, data.displayName, data.displayItem, data.ordinal, data.exclusiveModifiers);
         this.data = Objects.requireNonNull(data);
     }
@@ -41,7 +40,7 @@ public class InstadeathModifier extends ModifierComponentBase {
         ZombiesScene scene) implements Modifier {
         @Override
         public void apply() {
-            scene.addListener(ZombiesPlayerDamageEvent.class, event -> event.setShouldDie(true));
+            scene.addListener(ZombiesPlayerDamageEvent.class, event -> event.setShouldKnock(true));
         }
     }
 
