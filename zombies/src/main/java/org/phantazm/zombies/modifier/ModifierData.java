@@ -18,6 +18,7 @@ public record ModifierData(int ordinal,
     @Nullable Component displayName,
     @NotNull ItemStack displayItem,
     @NotNull Set<Key> exclusiveModifiers,
+    @NotNull String webhookEmoji,
     @NotNull ConfigNode modifier) {
     @Default("displayName")
     public static @NotNull ConfigElement defaultDisplayName() {
@@ -27,6 +28,11 @@ public record ModifierData(int ordinal,
     @Default("exclusiveModifiers")
     public static @NotNull ConfigElement defaultExclusiveModifiers() {
         return ConfigList.of();
+    }
+
+    @Default("webhookEmoji")
+    public static @NotNull ConfigElement defaultWebhookEmoji() {
+        return ConfigPrimitive.of("game_die");
     }
 
     @Default("modifier")
