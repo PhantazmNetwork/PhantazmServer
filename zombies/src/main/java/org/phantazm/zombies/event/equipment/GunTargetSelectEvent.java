@@ -28,7 +28,7 @@ public class GunTargetSelectEvent implements EntityInstanceEvent {
     }
 
     public void setForceSelect(boolean forceSelect) {
-        this.forceSelect = true;
+        this.forceSelect = forceSelect;
     }
 
     public boolean isForceSelected() {

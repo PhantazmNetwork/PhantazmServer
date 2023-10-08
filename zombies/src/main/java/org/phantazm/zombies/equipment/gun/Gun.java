@@ -65,6 +65,10 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         }
     }
 
+    public @NotNull Optional<? extends Entity> owner() {
+        return entitySupplier.get();
+    }
+
     /**
      * Makes the gun fire an individual shot. Use {@link #shoot()} to shoot a volley of shots, which should call this
      * internally.

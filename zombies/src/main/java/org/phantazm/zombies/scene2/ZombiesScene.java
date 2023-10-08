@@ -329,6 +329,8 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         this.activeModifiers.add(modifier);
 
         Modifier actualModifier = modifier.apply(injectionStore, this);
+        actualModifier.apply();
+
         if (actualModifier.needsTicking()) {
             this.tickingModifiers.add(actualModifier);
         }

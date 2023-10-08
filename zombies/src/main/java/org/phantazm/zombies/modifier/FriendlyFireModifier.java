@@ -24,6 +24,7 @@ import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 @Model("zombies.modifier.friendly_fire")
@@ -49,6 +50,12 @@ public class FriendlyFireModifier extends ModifierComponentBase {
             scene.addListener(GunTargetSelectEvent.class, event -> {
                 Entity entity = event.getEntity();
                 if (!(entity instanceof Player player)) {
+                    return;
+                }
+
+                Optional<? extends Entity> owner = event.gun().owner();
+                if (owner.isPresent() && owner.get() == player) {
+                    //you aren't allowed to shoot yourself
                     return;
                 }
 
