@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.DualComponent;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.event.player.ZombiesPlayerDamageEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -22,42 +23,20 @@ import java.util.Set;
 
 @Model("zombies.modifier.insta_knock")
 @Cache
-public class InstaknockModifier extends ModifierComponentBase {
-    private final Data data;
-
+public class InstaknockModifier implements DualComponent<ZombiesScene, Modifier> {
     @FactoryMethod
-    public InstaknockModifier(@NotNull Data data) {
-        super(data.key, data.displayName, data.displayItem, data.ordinal, data.exclusiveModifiers);
-        this.data = Objects.requireNonNull(data);
+    public InstaknockModifier() {
     }
 
     @Override
     public @NotNull Modifier apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesScene scene) {
-        return new Impl(data, scene);
+        return new Impl(scene);
     }
 
-    private record Impl(Data data,
-        ZombiesScene scene) implements Modifier {
+    private record Impl(ZombiesScene scene) implements Modifier {
         @Override
         public void apply() {
             scene.addListener(ZombiesPlayerDamageEvent.class, event -> event.setShouldKnock(true));
-        }
-    }
-
-    @DataObject
-    public record Data(int ordinal,
-        @NotNull Key key,
-        @Nullable Component displayName,
-        @NotNull ItemStack displayItem,
-        @NotNull Set<Key> exclusiveModifiers) {
-        @Default("displayName")
-        public static @NotNull ConfigElement defaultDisplayName() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("exclusiveModifiers")
-        public static @NotNull ConfigElement defaultExclusiveModifiers() {
-            return ConfigList.of();
         }
     }
 }

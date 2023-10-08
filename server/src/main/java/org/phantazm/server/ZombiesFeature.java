@@ -4,11 +4,13 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.Configuration;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
 import net.kyori.adventure.key.Key;
@@ -21,6 +23,7 @@ import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.commons.DualComponent;
 import org.phantazm.commons.FileUtils;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.BasicClientBlockHandlerSource;
@@ -45,8 +48,7 @@ import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.mob2.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob2.MobSpawnerSource;
-import org.phantazm.zombies.modifier.ModifierComponent;
-import org.phantazm.zombies.modifier.ModifierHandler;
+import org.phantazm.zombies.modifier.*;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
 import org.phantazm.zombies.powerup.BasicPowerupHandlerSource;
 import org.phantazm.zombies.powerup.FileSystemPowerupDataLoader;
@@ -152,6 +154,9 @@ public final class ZombiesFeature {
             providers.put(entry.getKey(), provider);
         }
 
+        ConfigProcessor<ModifierData> dataConfigProcessor = mappingProcessorSource
+            .processorFor(Token.ofClass(ModifierData.class));
+
         Map<Key, ModifierComponent> modifierComponents = new HashMap<>();
         try (Stream<Path> files = Files.list(MODIFIERS_FOLDER)) {
             for (Path path : (Iterable<Path>) files::iterator) {
@@ -162,15 +167,17 @@ public final class ZombiesFeature {
                 }
 
                 ConfigNode node = config.asNode();
-                ElementContext context = contextManager.makeContext(node);
-                ModifierComponent modifierComponent = context.provide(DependencyProvider.EMPTY, exception -> {
+                ModifierData modifierData = dataConfigProcessor.dataFromElement(node);
+
+                ElementContext context = contextManager.makeContext(modifierData.modifier());
+                DualComponent<ZombiesScene, Modifier> modifierComponent = context.provide(DependencyProvider.EMPTY, exception -> {
                     LOGGER.warn("Error loading modifier in {}: {}", path, exception);
                 }, () -> null);
                 if (modifierComponent == null) {
                     continue;
                 }
 
-                modifierComponents.put(modifierComponent.key(), modifierComponent);
+                modifierComponents.put(modifierData.key(), new ModifierSource(modifierData, modifierComponent));
             }
         } catch (IOException e) {
             LOGGER.error("Error enumerating modifiers folder", e);

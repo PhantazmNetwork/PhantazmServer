@@ -17,6 +17,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.DualComponent;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.event.mob.ZombiesMobSetupEvent;
@@ -28,12 +29,11 @@ import java.util.UUID;
 
 @Model("zombies.modifier.mob_attribute")
 @Cache
-public class MobAttributeModifier extends ModifierComponentBase {
+public class MobAttributeModifier implements DualComponent<ZombiesScene, Modifier> {
     private final Data data;
 
     @FactoryMethod
     public MobAttributeModifier(@NotNull Data data) {
-        super(data.key, data.displayName, data.displayItem, data.ordinal, data.exclusiveModifiers);
         this.data = Objects.requireNonNull(data);
     }
 
@@ -62,22 +62,8 @@ public class MobAttributeModifier extends ModifierComponentBase {
     }
 
     @DataObject
-    public record Data(int ordinal,
-        @NotNull Key key,
-        @Nullable Component displayName,
-        @NotNull ItemStack displayItem,
-        @NotNull Set<Key> exclusiveModifiers,
-        @NotNull String attribute,
+    public record Data(@NotNull String attribute,
         double amount,
         @NotNull AttributeOperation attributeOperation) {
-        @Default("displayName")
-        public static @NotNull ConfigElement defaultDisplayName() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("exclusiveModifiers")
-        public static @NotNull ConfigElement defaultExclusiveModifiers() {
-            return ConfigList.of();
-        }
     }
 }

@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.DualComponent;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.event.equipment.EquipmentAddEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -22,12 +23,11 @@ import java.util.Set;
 
 @Model("zombies.modifier.equipment_restricting")
 @Cache
-public class EquipmentRestrictingModifier extends ModifierComponentBase {
+public class EquipmentRestrictingModifier implements DualComponent<ZombiesScene, Modifier> {
     private final Data data;
 
     @FactoryMethod
     public EquipmentRestrictingModifier(@NotNull Data data) {
-        super(data.key, data.displayName, data.displayItem, data.ordinal, data.exclusiveModifiers);
         this.data = Objects.requireNonNull(data);
     }
 
@@ -51,23 +51,9 @@ public class EquipmentRestrictingModifier extends ModifierComponentBase {
     }
 
     @DataObject
-    public record Data(int ordinal,
-        @NotNull Key key,
-        @Nullable Component displayName,
-        @NotNull ItemStack displayItem,
-        @NotNull Set<Key> exclusiveModifiers,
+    public record Data(
         boolean blacklist,
         @NotNull Set<Key> equipment) {
-        @Default("displayName")
-        public static @NotNull ConfigElement defaultDisplayName() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("exclusiveModifiers")
-        public static @NotNull ConfigElement defaultExclusiveModifiers() {
-            return ConfigList.of();
-        }
-
         @Default("blacklist")
         public static @NotNull ConfigElement defaultBlacklist() {
             return ConfigPrimitive.of(false);

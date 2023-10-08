@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -117,6 +118,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
      *
      * @param player the player to add
      */
+    @ApiStatus.Internal
     void addPlayer(@NotNull Player player) {
         onlinePlayers.put(player, uuidToView.get(player.getUuid(), key ->
             new PlayerViewImpl(identitySource, connectionManager, player)));
@@ -127,6 +129,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
      *
      * @param player the player to remove an association with
      */
+    @ApiStatus.Internal
     void removePlayer(@NotNull Player player) {
         onlinePlayers.remove(player);
     }
