@@ -16,9 +16,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.EventFilter;
-import net.minestom.server.event.EventNode;
-import net.minestom.server.event.inventory.InventoryClickEvent;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.click.ClickType;
@@ -164,21 +161,13 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
         }
 
         private class LocalInventory extends Inventory {
-            private final EventNode<InventoryClickEvent> node;
             private final PlayerView view;
             private final int page;
 
             private LocalInventory(@NotNull InventoryType inventoryType, @NotNull Component title, @NotNull PlayerView view, int page) {
                 super(inventoryType, title);
-                this.node = EventNode.type("local", EventFilter.from(InventoryClickEvent.class, null,
-                    null));
                 this.view = view;
                 this.page = page;
-            }
-
-            @Override
-            public void callClickEvent(@NotNull Player player, Inventory inventory, int slot, @NotNull ClickType clickType, @NotNull ItemStack clicked, @NotNull ItemStack cursor) {
-                node.call(new InventoryClickEvent(inventory, player, slot, clickType, clicked, cursor));
             }
 
             @Override

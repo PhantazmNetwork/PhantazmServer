@@ -42,7 +42,9 @@ import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.map.objects.MapObjects;
+import org.phantazm.zombies.modifier.ModifierComponent;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -55,6 +57,7 @@ public class SelectBombedRoom implements Action<Round> {
 
     private final Data data;
     private final Supplier<? extends MapObjects> supplier;
+    private final Supplier<? extends ZombiesScene> sceneSupplier;
     private final Random random;
     private final Instance instance;
     private final ParticleWrapper particle;
@@ -65,9 +68,10 @@ public class SelectBombedRoom implements Action<Round> {
     @FactoryMethod
     public SelectBombedRoom(@NotNull Data data, @NotNull Supplier<? extends MapObjects> supplier,
         @NotNull Random random, @NotNull Instance instance, @NotNull @Child("particle") ParticleWrapper particle,
-        @NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
+        @NotNull Map<PlayerView, ZombiesPlayer> playerMap, @NotNull Supplier<? extends ZombiesScene> sceneSupplier) {
         this.data = data;
         this.supplier = supplier;
+        this.sceneSupplier = sceneSupplier;
         this.random = random;
         this.instance = instance;
         this.particle = particle;
@@ -92,6 +96,14 @@ public class SelectBombedRoom implements Action<Round> {
             }
 
             return null;
+        }
+
+        if (!data.disablingModifiers.isEmpty()) {
+            for (ModifierComponent component : sceneSupplier.get().activeModifiers()) {
+                if (data.disablingModifiers.contains(component.key())) {
+                    return null;
+                }
+            }
         }
 
         List<Room> candidateRooms = mapObjects.roomTracker().items().stream()
@@ -359,6 +371,7 @@ public class SelectBombedRoom implements Action<Round> {
         @Nullable Key specificRoom,
         @NotNull List<Key> exemptRooms,
         @NotNull List<Modifier> modifiers,
+        @NotNull List<Key> disablingModifiers,
         @NotNull @ChildPath("particle") String particle) {
         @Default("warningFormatMessage")
         public static @NotNull ConfigElement defaultWarningFormatMessage() {
@@ -412,6 +425,11 @@ public class SelectBombedRoom implements Action<Round> {
 
         @Default("exemptRooms")
         public static @NotNull ConfigElement defaultExemptRooms() {
+            return ConfigList.of();
+        }
+
+        @Default("disablingModifiers")
+        public static @NotNull ConfigElement defaultDisablingModifiers() {
             return ConfigList.of();
         }
     }

@@ -50,4 +50,8 @@ public class ModifierSource implements ModifierComponent {
     public @NotNull @Unmodifiable Set<Key> exclusiveModifiers() {
         return data.exclusiveModifiers();
     }
+
+    public @NotNull DualComponent<ZombiesScene, Modifier> component() {
+        return component;
+    }
 }

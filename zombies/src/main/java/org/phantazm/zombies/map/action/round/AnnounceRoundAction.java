@@ -26,7 +26,6 @@ public class AnnounceRoundAction implements Action<Round> {
     private final Instance instance;
     private final TickFormatter tickFormatter;
     private final Wrapper<Long> ticksSinceStart;
-    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     /**
      * Creates a new instance of this class from the provided contextual data.
@@ -49,7 +48,7 @@ public class AnnounceRoundAction implements Action<Round> {
         String timeString = tickFormatter.format(ticksSinceStart.get());
         TagResolver timePlaceholder = Placeholder.unparsed("time", timeString);
 
-        Component message = miniMessage.deserialize(data.format(), roundPlaceholder, timePlaceholder);
+        Component message = MiniMessage.miniMessage().deserialize(data.format(), roundPlaceholder, timePlaceholder);
         switch (data.destination()) {
             case TITLE -> instance.sendTitlePart(TitlePart.TITLE, message);
             case SUBTITLE -> instance.sendTitlePart(TitlePart.SUBTITLE, message);
