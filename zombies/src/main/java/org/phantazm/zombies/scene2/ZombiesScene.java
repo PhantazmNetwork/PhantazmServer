@@ -1,6 +1,11 @@
 package org.phantazm.zombies.scene2;
 
 import com.github.steanky.vector.Vec3I;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -10,6 +15,9 @@ import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.phantazm.commons.FutureUtils;
+import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.scene2.EventScene;
 import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.player.PlayerView;
@@ -18,6 +26,9 @@ import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
+import org.phantazm.zombies.modifier.Modifier;
+import org.phantazm.zombies.modifier.ModifierComponent;
+import org.phantazm.zombies.modifier.ModifierUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
@@ -31,7 +42,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
-public class ZombiesScene extends InstanceScene {
+public class ZombiesScene extends InstanceScene implements EventScene {
     private final Map<PlayerView, ZombiesPlayer> managedPlayers;
     private final Map<PlayerView, ZombiesPlayer> managedPlayersView;
 
@@ -48,6 +59,11 @@ public class ZombiesScene extends InstanceScene {
     private boolean legit;
     private boolean sandbox;
     private boolean restricted;
+
+    private final Set<ModifierComponent> activeModifiers;
+    private final Set<ModifierComponent> activeModifiersView;
+
+    private final List<Modifier> tickingModifiers;
 
     public ZombiesScene(@NotNull Instance instance,
         @NotNull ZombiesMap map,
@@ -75,6 +91,11 @@ public class ZombiesScene extends InstanceScene {
             mapSettingsInfo.pitch());
 
         this.legit = true;
+
+        this.activeModifiers = new HashSet<>();
+        this.activeModifiersView = Collections.unmodifiableSet(this.activeModifiers);
+
+        this.tickingModifiers = new ArrayList<>();
     }
 
     @Override
@@ -110,7 +131,7 @@ public class ZombiesScene extends InstanceScene {
 
             if (!zombiesPlayer.hasQuit()) {
                 //player exists and hasn't quit, so don't do anything
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
@@ -135,7 +156,7 @@ public class ZombiesScene extends InstanceScene {
     private CompletableFuture<?> handleNewPlayer(PlayerView newPlayer, Pos spawnPos) {
         Optional<Player> playerOptional = newPlayer.getPlayer();
         if (playerOptional.isEmpty()) {
-            return CompletableFuture.completedFuture(null);
+            return FutureUtils.nullCompletedFuture();
         }
 
         Player player = playerOptional.get();
@@ -154,13 +175,24 @@ public class ZombiesScene extends InstanceScene {
             stage.onJoin(zombiesPlayer);
         }
 
+        if (!activeModifiers.isEmpty()) {
+            String descriptor = ModifierUtils.modifierDescriptor(activeModifiers);
+            TagResolver modifiersTag = Placeholder.component("modifiers",
+                Component.join(JoinConfiguration.commas(true),
+                    activeModifiers.stream().map(ModifierComponent::displayName).toList()));
+            TagResolver modifierKeyTag = Placeholder.unparsed("modifier_key", descriptor);
+
+            player.sendMessage(MiniMessage.miniMessage().deserialize(mapSettingsInfo.modifierReportFormat(),
+                modifiersTag, modifierKeyTag));
+        }
+
         return teleportOrSetInstance(player, spawnPos);
     }
 
     private CompletableFuture<?> handleRejoiningPlayer(ZombiesPlayer zombiesPlayer, Pos spawnPos) {
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
         if (playerOptional.isEmpty()) {
-            return CompletableFuture.completedFuture(null);
+            return FutureUtils.nullCompletedFuture();
         }
 
         Player player = playerOptional.get();
@@ -218,6 +250,10 @@ public class ZombiesScene extends InstanceScene {
             }
 
             zombiesPlayer.tick(time);
+        }
+
+        for (Modifier modifier : tickingModifiers) {
+            modifier.tick(time);
         }
     }
 
@@ -300,6 +336,27 @@ public class ZombiesScene extends InstanceScene {
 
     public @NotNull EventNode<Event> sceneNode() {
         return sceneNode;
+    }
+
+    public void addModifier(@NotNull ModifierComponent modifier, @NotNull InjectionStore injectionStore) {
+        Objects.requireNonNull(modifier);
+        Objects.requireNonNull(injectionStore);
+
+        this.activeModifiers.add(modifier);
+
+        Modifier actualModifier = modifier.apply(injectionStore, this);
+        actualModifier.apply();
+
+        if (actualModifier.needsTicking()) {
+            this.tickingModifiers.add(actualModifier);
+        }
+
+        //TODO: this is temporary, modifiers will eventually have dedicated leaderboards
+        this.legit = false;
+    }
+
+    public @NotNull @UnmodifiableView Set<ModifierComponent> activeModifiers() {
+        return this.activeModifiersView;
     }
 
     public @Nullable Stage currentStage() {

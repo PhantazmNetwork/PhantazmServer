@@ -1,4 +1,4 @@
-package org.phantazm.core.scene2.event;
+package org.phantazm.core.event.scene;
 
 import net.minestom.server.event.Event;
 import org.jetbrains.annotations.NotNull;

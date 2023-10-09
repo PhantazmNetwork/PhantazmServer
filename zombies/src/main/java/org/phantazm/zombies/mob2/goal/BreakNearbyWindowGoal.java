@@ -6,14 +6,13 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.LivingEntity;
-import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.goal.GoalCreator;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
-import org.phantazm.zombies.event.MobBreakWindowEvent;
+import org.phantazm.zombies.event.mob.MobBreakWindowEvent;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.map.ZombiesMap;
@@ -37,7 +36,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
     public @NotNull ProximaGoal create(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         ZombiesScene scene = injectionStore.get(Keys.SCENE);
         ZombiesMap map = scene.map();
-        return new Goal(data, map.windowHandler().tracker(), map.mapObjects().roomTracker(), mob);
+        return new Goal(data, map.windowHandler().tracker(), map.mapObjects().roomTracker(), mob, scene);
     }
 
     @DataObject
@@ -51,15 +50,17 @@ public class BreakNearbyWindowGoal implements GoalCreator {
         private final BoundedTracker<Window> windowTracker;
         private final BoundedTracker<Room> roomTracker;
         private final Mob self;
+        private final ZombiesScene scene;
 
         private long breakTicks = -1;
 
         private Goal(Data data, BoundedTracker<Window> windowTracker, BoundedTracker<Room> roomTracker,
-            Mob self) {
+            Mob self, ZombiesScene scene) {
             this.data = data;
             this.windowTracker = windowTracker;
             this.roomTracker = roomTracker;
             this.self = self;
+            this.scene = scene;
         }
 
         @Override
@@ -82,7 +83,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
 
                     int amount = window.updateIndex(targetIndex);
                     if (amount != 0) {
-                        EventDispatcher.call(new MobBreakWindowEvent(self, window, -amount));
+                        scene.broadcastEvent(new MobBreakWindowEvent(self, window, -amount));
                         entity.swingMainHand();
                     }
                 });

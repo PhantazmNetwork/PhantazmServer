@@ -16,7 +16,7 @@ import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
 
 import java.util.Map;
@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 @Model("npc.entity.settings")
 @Cache
-public class BasicEntitySettings implements BasicComponent<Consumer<Entity>> {
+public class BasicEntitySettings implements MonoComponent<Consumer<Entity>> {
     private final Data data;
 
     @FactoryMethod

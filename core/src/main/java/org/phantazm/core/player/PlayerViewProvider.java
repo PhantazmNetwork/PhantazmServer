@@ -1,6 +1,9 @@
 package org.phantazm.core.player;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
  * @implSpec Implementations should guarantee thread safety for all methods.
  */
 public interface PlayerViewProvider {
-    class Global {
+    final class Global {
         private static final Object INITIALIZATION_LOCK = new Object();
         private static PlayerViewProvider instance;
 
@@ -28,7 +31,13 @@ public interface PlayerViewProvider {
                     throw new IllegalArgumentException("PlayerViewProvider has already been initialized");
                 }
 
-                Global.instance = new BasicPlayerViewProvider(identitySource, connectionManager, duration);
+                BasicPlayerViewProvider provider = new BasicPlayerViewProvider(identitySource, connectionManager, duration);
+                MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event ->
+                    provider.addPlayer(event.getPlayer()));
+                MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, event ->
+                    provider.removePlayer(event.getPlayer()));
+
+                Global.instance = provider;
             }
         }
 

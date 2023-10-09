@@ -7,12 +7,12 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
 
 @Model("npc.interactor.command")
 @Cache
-public class CommandInteractor implements BasicComponent<Interactor> {
+public class CommandInteractor implements MonoComponent<@NotNull NPCInteractor> {
     private final Data data;
 
     @FactoryMethod
@@ -21,11 +21,11 @@ public class CommandInteractor implements BasicComponent<Interactor> {
     }
 
     @Override
-    public Interactor apply(@NotNull InjectionStore injectionStore) {
+    public @NotNull NPCInteractor apply(@NotNull InjectionStore injectionStore) {
         return new Internal(data);
     }
 
-    private record Internal(Data data) implements Interactor {
+    private record Internal(Data data) implements NPCInteractor {
         @Override
         public void interact(@NotNull Player player) {
             MinecraftServer.getCommandManager().execute(player, data.command);

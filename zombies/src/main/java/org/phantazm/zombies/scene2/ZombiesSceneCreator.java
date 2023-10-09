@@ -39,7 +39,7 @@ import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.corpse.CorpseCreator;
-import org.phantazm.zombies.event.EntityDamageByGunEvent;
+import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
 import org.phantazm.zombies.listener.*;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.handler.*;
@@ -150,7 +150,8 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
             createWindowHandler(mapObjects.windowTracker(), mapObjects.roomTracker(), zombiesPlayers.values());
         windowHandlerWrapper.set(windowHandler);
 
-        DoorHandler doorHandler = createDoorHandler(mapObjects.doorTracker(), mapObjects.roomTracker());
+        DoorHandler doorHandler = createDoorHandler(mapObjects.doorTracker(), mapObjects.roomTracker(),
+            sceneWrapper.unmodifiableView());
 
         ZombiesMap map =
             new ZombiesMap(mapObjects, songPlayer, powerupHandler, roundHandler, shopHandler, windowHandler,
@@ -246,8 +247,9 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         return windowHandlerSource.make(windowTracker, roomTracker, players);
     }
 
-    private DoorHandler createDoorHandler(BoundedTracker<Door> doorTracker, BoundedTracker<Room> roomTracker) {
-        return doorHandlerSource.make(doorTracker, roomTracker);
+    private DoorHandler createDoorHandler(BoundedTracker<Door> doorTracker, BoundedTracker<Room> roomTracker,
+        Supplier<ZombiesScene> zombiesScene) {
+        return doorHandlerSource.make(doorTracker, roomTracker, zombiesScene);
     }
 
     private @NotNull EventNode<Event> createEventNode(@NotNull Supplier<ZombiesScene> sceneSupplier, @NotNull Instance instance,

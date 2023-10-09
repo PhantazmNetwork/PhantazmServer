@@ -10,7 +10,7 @@ import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
-import org.phantazm.zombies.event.EntityDamageByGunEvent;
+import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;

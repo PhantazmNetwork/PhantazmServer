@@ -9,6 +9,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.state.CancellableState;
+import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
@@ -23,24 +24,28 @@ import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.OpenBookPacket;
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.FutureUtils;
 import org.phantazm.core.CoreStages;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.scene2.EventScene;
 import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.TablistLocalScene;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-public class Lobby extends InstanceScene implements TablistLocalScene {
+public class Lobby extends InstanceScene implements EventScene {
     private final Pos spawnPoint;
     private final String lobbyJoinMessageFormat;
     private final NPCHandler npcHandler;
     private final Collection<ItemStack> defaultItems;
     private final Function<? super Player, ? extends CompletableFuture<?>> displayNameStyler;
 
-    private final EventNode<InstanceEvent> lobbyNode;
+    private final EventNode<Event> lobbyNode;
 
     public Lobby(@NotNull Instance instance, @NotNull Pos spawnPoint, @NotNull String lobbyJoinMessageFormat,
         @NotNull NPCHandler npcHandler, @NotNull Collection<ItemStack> defaultItems,
@@ -59,11 +64,11 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
         npcHandler.spawnAll();
     }
 
-    private EventNode<InstanceEvent> buildNode(Instance instance) {
+    private EventNode<Event> buildNode(Instance instance) {
         UUID uuid = instance.getUniqueId();
 
-        EventNode<InstanceEvent> node = EventNode.type("lobby_node_" + uuid, EventFilter.INSTANCE,
-            (e, v) -> v.getUniqueId().equals(uuid));
+        EventNode<Event> node = EventNode.event("lobby_node_" + uuid, EventFilter.ALL, event ->
+            event instanceof InstanceEvent instanceEvent && instanceEvent.getInstance().getUniqueId().equals(uuid));
 
         node.addListener(PlayerSwapItemEvent.class, event -> event.setCancelled(true));
         node.addListener(PlayerEntityInteractEvent.class, npcHandler::handleInteract);
@@ -84,9 +89,7 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
                 event.getPlayer().sendPacket(new OpenBookPacket(Player.Hand.MAIN));
             }
         });
-        node.addListener(PlayerRespawnEvent.class, event -> {
-            event.setRespawnPosition(spawnPoint);
-        });
+        node.addListener(PlayerRespawnEvent.class, event -> event.setRespawnPosition(spawnPoint));
 
         return node;
     }
@@ -107,13 +110,13 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
         int i = 0;
         for (PlayerView playerView : players) {
             if (!this.scenePlayers.contains(playerView)) {
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
             Optional<Player> playerOptional = playerView.getPlayer();
             if (playerOptional.isEmpty()) {
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
@@ -129,13 +132,13 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
         int i = 0;
         for (PlayerView joiningPlayer : players) {
             if (!this.scenePlayers.add(joiningPlayer)) {
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
             Optional<Player> playerOptional = joiningPlayer.getPlayer();
             if (playerOptional.isEmpty()) {
-                futures[i++] = CompletableFuture.completedFuture(null);
+                futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
             }
 
@@ -150,7 +153,8 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
             });
 
             if (login) {
-                return;
+                futures[i++] = FutureUtils.nullCompletedFuture();
+                continue;
             }
 
             futures[i++] = onSpawn(player);
@@ -196,7 +200,7 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
 
     @Override
     public void shutdown() {
-        EventNode<? super InstanceEvent> parent = lobbyNode.getParent();
+        EventNode<? super Event> parent = lobbyNode.getParent();
         if (parent != null) {
             parent.removeChild(lobbyNode);
         }
@@ -209,5 +213,10 @@ public class Lobby extends InstanceScene implements TablistLocalScene {
     @Override
     public @NotNull Acquirable<? extends Lobby> getAcquirable() {
         return (Acquirable<? extends Lobby>) super.getAcquirable();
+    }
+
+    @Override
+    public @NotNull EventNode<? super Event> sceneNode() {
+        return lobbyNode;
     }
 }

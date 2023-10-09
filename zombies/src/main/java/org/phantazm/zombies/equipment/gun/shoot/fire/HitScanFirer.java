@@ -58,7 +58,7 @@ public class HitScanFirer implements Firer {
             }
             Point end = endOptional.get();
 
-            TargetFinder.Result target = targetFinder.findTarget(entity, start, end, previousHits);
+            TargetFinder.Result target = targetFinder.findTarget(gun, entity, start, end, previousHits);
             for (GunHit hit : target.regular()) {
                 previousHits.add(hit.entity().getUuid());
             }

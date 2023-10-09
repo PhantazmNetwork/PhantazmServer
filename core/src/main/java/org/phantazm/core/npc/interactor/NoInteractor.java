@@ -4,13 +4,13 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
 
 @Model("npc.interactor.none")
 @Cache
-public class NoInteractor implements BasicComponent<Interactor> {
-    private static final Interactor INSTANCE = player -> {
+public class NoInteractor implements MonoComponent<@NotNull NPCInteractor> {
+    private static final NPCInteractor INSTANCE = player -> {
     };
 
     @FactoryMethod
@@ -18,7 +18,7 @@ public class NoInteractor implements BasicComponent<Interactor> {
     }
 
     @Override
-    public Interactor apply(@NotNull InjectionStore injectionStore) {
+    public @NotNull NPCInteractor apply(@NotNull InjectionStore injectionStore) {
         return INSTANCE;
     }
 }

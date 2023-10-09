@@ -78,6 +78,7 @@ public class EquipmentStationInteractor implements ShopInteractor {
                 ShopInteractor.handle(failureInteractors, interaction);
                 yield false;
             }
+            case CANCELLED -> false;
         };
     }
 

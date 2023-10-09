@@ -13,7 +13,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.DynamicChunk;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.FileUtils;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
@@ -126,7 +127,7 @@ public final class LobbyFeature {
 
                 Path npcFolder = lobbyFolder.resolve(NPC_DIRECTORY);
                 try (Stream<Path> npcFileStream = Files.list(npcFolder)) {
-                    List<BasicComponent<NPC>> components = new ArrayList<>();
+                    List<MonoComponent<NPC>> components = new ArrayList<>();
                     for (Path npcFile : (Iterable<? extends Path>) npcFileStream::iterator) {
                         if (!npcFileMatcher.matches(npcFile)) {
                             continue;
@@ -148,7 +149,7 @@ public final class LobbyFeature {
                         new LobbyEntry(lobbyConfig, new LobbyCreator(instanceLoader, lobbyConfig.lobbyPaths(),
                             lobbyConfig.instanceConfig(), lobbyConfig.lobbyJoinFormat(), List.copyOf(components),
                             lobbyConfig.defaultItems(), displayNameStyler, lobbyConfig.maxLobbies(),
-                            lobbyConfig.maxPlayers(), lobbyConfig.timeout()))) != null) {
+                            lobbyConfig.maxPlayers(), lobbyConfig.timeout(), InjectionStore.of()))) != null) {
                         throw new RuntimeException("Duplicate lobby named " + lobbyConfig.name());
                     }
 

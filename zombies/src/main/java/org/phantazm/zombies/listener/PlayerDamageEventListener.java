@@ -17,7 +17,8 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Tags;
-import org.phantazm.zombies.event.ZombiesPlayerDeathEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerDamageEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerDeathEvent;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -55,7 +56,10 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
             return;
         }
 
-        if (event.getActualAmount() < event.getEntity().getHealth()) {
+        ZombiesPlayerDamageEvent damageEvent = new ZombiesPlayerDamageEvent((Player) event.getEntity(), zombiesPlayer);
+        scene.broadcastEvent(damageEvent);
+
+        if (!damageEvent.shouldKnock() && event.getActualAmount() < event.getEntity().getHealth()) {
             return;
         }
 

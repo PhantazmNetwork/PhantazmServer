@@ -1,4 +1,4 @@
-package org.phantazm.zombies.event;
+package org.phantazm.zombies.event.mob;
 
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;

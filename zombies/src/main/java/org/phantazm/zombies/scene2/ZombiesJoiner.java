@@ -30,7 +30,12 @@ public final class ZombiesJoiner {
     }
 
     public @NotNull Join<ZombiesScene> joinMap(@NotNull Set<@NotNull PlayerView> players, @NotNull Key mapKey) {
-        return new JoinZombiesMap(players, validateKey(mapKey), mapKey);
+        return joinMap(players, mapKey, Set.of());
+    }
+
+    public @NotNull Join<ZombiesScene> joinMap(@NotNull Set<@NotNull PlayerView> players, @NotNull Key mapKey,
+        @NotNull Set<@NotNull Key> modifiers) {
+        return new JoinZombiesMap(players, validateKey(mapKey), mapKey, modifiers);
     }
 
     public @NotNull Join<ZombiesScene> rejoin(@NotNull Set<@NotNull PlayerView> players, @Nullable UUID sceneId) {
@@ -42,10 +47,20 @@ public final class ZombiesJoiner {
     }
 
     public @NotNull Join<ZombiesScene> joinRestricted(@NotNull Set<@NotNull PlayerView> players, @NotNull Key mapKey) {
-        return new JoinZombiesRestricted(players, validateKey(mapKey), mapKey);
+        return joinRestricted(players, mapKey, Set.of());
+    }
+
+    public @NotNull Join<ZombiesScene> joinRestricted(@NotNull Set<@NotNull PlayerView> players, @NotNull Key mapKey,
+        @NotNull Set<@NotNull Key> modifiers) {
+        return new JoinZombiesRestricted(players, validateKey(mapKey), mapKey, modifiers);
     }
 
     public @NotNull Join<ZombiesScene> joinSandbox(@NotNull Set<@NotNull PlayerView> players, @NotNull Key mapKey) {
-        return new JoinZombiesRestricted(players, validateKey(mapKey), mapKey, true);
+        return joinSandbox(players, mapKey, Set.of());
+    }
+
+    public @NotNull Join<ZombiesScene> joinSandbox(@NotNull Set<@NotNull PlayerView> players, @NotNull Key mapKey,
+        @NotNull Set<@NotNull Key> modifiers) {
+        return new JoinZombiesRestricted(players, validateKey(mapKey), mapKey, modifiers, true);
     }
 }

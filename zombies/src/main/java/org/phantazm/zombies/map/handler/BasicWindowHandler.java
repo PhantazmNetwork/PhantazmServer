@@ -12,7 +12,7 @@ import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
-import org.phantazm.zombies.event.ZombiesPlayerRepairWindowEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerRepairWindowEvent;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.player.ZombiesPlayer;

@@ -8,14 +8,14 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.BasicComponent;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
 
 import java.util.function.Supplier;
 
 @Model("npc.entity.supplier.mob")
 @Cache
-public class MobEntitySupplier implements BasicComponent<Supplier<Entity>> {
+public class MobEntitySupplier implements MonoComponent<Supplier<Entity>> {
     private final Data data;
 
     @FactoryMethod

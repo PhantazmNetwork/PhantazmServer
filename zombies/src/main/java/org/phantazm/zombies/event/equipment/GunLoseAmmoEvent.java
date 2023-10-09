@@ -1,4 +1,4 @@
-package org.phantazm.zombies.event;
+package org.phantazm.zombies.event.equipment;
 
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.trait.EntityInstanceEvent;

@@ -94,7 +94,8 @@ public record MapSettingsInfo(
     @NotNull Component healthDisplay,
     @NotNull String gameJoinFormat,
     @NotNull String coinLossFormat,
-    @NotNull String killMobFormat) {
+    @NotNull String killMobFormat,
+    @NotNull String modifierReportFormat) {
 
     public static final int MAP_DATA_VERSION = 1;
 
@@ -162,7 +163,8 @@ public record MapSettingsInfo(
             Component.text("Stopped repairing.", NamedTextColor.RED),
             Component.text("Fully repaired!", NamedTextColor.GREEN),
             Component.text("You cannot repair that window while enemies are nearby!", NamedTextColor.RED),
-            Component.text("❤", NamedTextColor.RED), "", "", "<player> killed <mob>!");
+            Component.text("❤", NamedTextColor.RED), "", "",
+            "<player> killed <mob>!", "Enabled modifiers: <modifiers>");
     }
 
     @Default("trackStats")
@@ -203,5 +205,10 @@ public record MapSettingsInfo(
     @Default("killMobFormat")
     public static @NotNull ConfigElement defaultKillMobFormat() {
         return ConfigPrimitive.of("<player> killed <mob>!");
+    }
+
+    @Default("modifierReportFormat")
+    public static @NotNull ConfigElement defaultModifierReportFormat() {
+        return ConfigPrimitive.of("Enabled modifiers: <modifiers>");
     }
 }

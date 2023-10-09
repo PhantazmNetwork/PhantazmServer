@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 
 import java.util.Collection;
@@ -21,6 +22,7 @@ public interface TargetFinder {
     /**
      * Finds the target of a shot.
      *
+     * @param gun
      * @param shooter      The {@link Entity} that shot
      * @param start        The start position of the shot
      * @param end          The endpoint of the shot
@@ -28,7 +30,7 @@ public interface TargetFinder {
      * @return The {@link Result} of the target finding
      */
     @NotNull
-    Result findTarget(@NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
+    Result findTarget(@NotNull Gun gun, @NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
         @NotNull Collection<UUID> previousHits);
 
     /**

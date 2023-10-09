@@ -3,6 +3,7 @@ package org.phantazm.core.scene2;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.Tickable;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.*;
@@ -17,9 +18,9 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewImpl;
 import org.phantazm.core.player.PlayerViewProvider;
-import org.phantazm.core.scene2.event.SceneCreationEvent;
-import org.phantazm.core.scene2.event.SceneJoinEvent;
-import org.phantazm.core.scene2.event.SceneShutdownEvent;
+import org.phantazm.core.event.scene.SceneCreationEvent;
+import org.phantazm.core.event.scene.SceneJoinEvent;
+import org.phantazm.core.event.scene.SceneShutdownEvent;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -27,6 +28,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 /**
  * SceneManager is used to fulfill requests by one or more players to join {@link Scene} objects. This class also
@@ -112,7 +114,7 @@ public final class SceneManager {
      * creating Join instances every time they are needed. The constructor for this class is private, but instances can
      * be obtained by calling {@link SceneManager#joinKey(Class, String)} or an overload.
      * <p>
-     * Instances should generally be stored in {@code public static} and referenced as-needed by other code.
+     * Instances should generally be stored in {@code public static} fields and referenced as-needed by other code.
      *
      * @param <T> the type of scene this key joins
      * @see SceneManager#joinKey(Class, String)
@@ -358,7 +360,7 @@ public final class SceneManager {
             try {
                 Scene self = acquired.get();
 
-                Set<Player> left = PlayerView.unwrapMany(self.leave(Set.of(view)), HashSet::new);
+                Set<Player> left = unwrapMany(self.leave(Set.of(view)), HashSet::new);
                 view.updateCurrentScene(null);
 
                 leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, left));
@@ -379,6 +381,24 @@ public final class SceneManager {
 
         event.setBroadcastTablistRemoval(false);
         left.scene.getAcquirable().sync(self -> self.postLeave(left.left));
+    }
+
+    private static <T extends Collection<Player>> T unwrapMany(Set<? extends PlayerView> playerViews,
+        IntFunction<? extends T> function) {
+        T collection = function.apply(playerViews.size());
+        for (PlayerView playerView : playerViews) {
+            Player playerReference = ((PlayerViewImpl) playerView).reference();
+            if (playerReference != null) {
+                collection.add(playerReference);
+                continue;
+            }
+
+            if (Entity.getEntity(playerView.getUUID()) instanceof Player player) {
+                collection.add(player);
+            }
+        }
+
+        return collection;
     }
 
     /**
@@ -677,7 +697,7 @@ public final class SceneManager {
 
                 playersLocked = lockPlayers(players, true);
 
-                leftPlayers = PlayerView.unwrapMany(scene.leave(players), HashSet::new);
+                leftPlayers = unwrapMany(scene.leave(players), HashSet::new);
             } finally {
                 acquired.unlock();
             }
@@ -844,10 +864,7 @@ public final class SceneManager {
                             continue;
                         }
 
-                        T newScene = createAndJoinNewScene(join);
-                        if (!newScene.getClass().equals(entry.getKey())) {
-                            throw new IllegalStateException("Created scene type is not the same as the entry type");
-                        }
+                        T newScene = createAndJoinNewScene(join, entry.getKey());
 
                         sceneEntry.scenes.add(newScene);
                         threadDispatcher.createPartition(newScene);
@@ -994,8 +1011,26 @@ public final class SceneManager {
         threadDispatcher.removeElement(tickable);
     }
 
-    private <T extends Scene> T createAndJoinNewScene(Join<T> join) {
+    /*
+    Using the provided Join, creates a new scene and joins it. The created Scene's type must equal 'type'; if not, an
+    IllegalStateException will be thrown after immediately shutting down the newly-created scene.
+
+    The general sequence of events when running this function is as follows:
+
+    * New scene is created
+    * The players participating in the Join leave their old scenes
+    * The new scene is joined
+    * The viewable rules of the participating players are reset
+    * The new scene is post-joined
+    * The old scenes are post-left
+     */
+    private <T extends Scene> T createAndJoinNewScene(Join<T> join, Class<? extends Scene> type) {
         T scene = join.createNewScene(this);
+        if (!scene.getClass().equals(type)) {
+            scene.preShutdown();
+            scene.shutdown();
+            throw new IllegalStateException("Created scene type is not the same as the entry type");
+        }
 
         Iterable<Runnable> actions = leaveOldScenes(join.playerViews(), scene);
 
@@ -1011,15 +1046,10 @@ public final class SceneManager {
         return scene;
     }
 
-    private void resetViewableRules(Iterable<PlayerView> playerViews) {
-        for (PlayerView playerView : playerViews) {
-            playerView.getPlayer().ifPresent(player -> {
-                player.updateViewableRule(null);
-                player.updateViewerRule(null);
-            });
-        }
-    }
-
+    /*
+    Works similarly to createAndJoinNewScene, but attempts to join 'scene' instead of creating a new scene. 'scene' must
+    be assignable to the target type of 'join'.
+     */
     private <T extends Scene> T tryJoinScene(Scene scene, Join<T> join) {
         T castScene = join.targetType().cast(scene);
 
@@ -1044,27 +1074,41 @@ public final class SceneManager {
         return castScene;
     }
 
+    private void resetViewableRules(Iterable<PlayerView> playerViews) {
+        for (PlayerView playerView : playerViews) {
+            playerView.getPlayer().ifPresent(player -> {
+                player.updateViewableRule(null);
+                player.updateViewerRule(null);
+            });
+        }
+    }
+
     private Iterable<Runnable> leaveOldScenes(Set<? extends PlayerView> players, Scene newScene) {
         if (players.isEmpty()) {
             return List.of();
         }
 
-        List<Runnable> leaveActions = new ArrayList<>(5);
         if (players.size() == 1) {
             PlayerViewImpl onlyPlayer = (PlayerViewImpl) players.iterator().next();
 
-            onlyPlayer.currentScene().ifPresent(scene -> {
-                if (scene == newScene) {
-                    return;
-                }
+            Optional<Scene> oldSceneOptional = onlyPlayer.currentScene();
+            if (oldSceneOptional.isEmpty()) {
+                onlyPlayer.updateCurrentScene(newScene);
+                return List.of();
+            }
 
-                processLeavingPlayer(scene, players, leaveActions);
-            });
+            Scene oldScene = oldSceneOptional.get();
+            if (oldScene == newScene) {
+                return List.of();
+            }
 
+            List<Runnable> leaveActions = new ArrayList<>(1);
+            processLeavingPlayer(oldScene, players, leaveActions);
             onlyPlayer.updateCurrentScene(newScene);
             return leaveActions;
         }
 
+        List<Runnable> leaveActions = new ArrayList<>(players.size());
         Map<Scene, Set<PlayerViewImpl>> groupedScenes = new HashMap<>(4);
         for (PlayerView playerView : players) {
             PlayerViewImpl view = (PlayerViewImpl) playerView;
@@ -1098,11 +1142,9 @@ public final class SceneManager {
     private static void processLeavingPlayer(Scene scene, Set<? extends PlayerView> views, List<Runnable> leaveActions) {
         scene.getAcquirable().sync(self -> {
             Set<Player> left = PlayerView.getMany(self.leave(views), HashSet::new);
-            if (left.isEmpty()) {
-                return;
+            if (!left.isEmpty()) {
+                leaveActions.add(() -> self.getAcquirable().sync(self2 -> self2.postLeave(left)));
             }
-
-            leaveActions.add(() -> self.getAcquirable().sync(self2 -> self2.postLeave(left)));
         });
     }
 

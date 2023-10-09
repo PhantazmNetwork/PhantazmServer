@@ -38,6 +38,11 @@ public class VelocityCommand extends PermissionLockedCommand {
             }
 
             int amount = context.get(AMOUNT);
+            if (Math.abs(amount) > 100) {
+                sender.sendMessage(Component.text("That value is too large!", NamedTextColor.RED));
+                return;
+            }
+
             switch (context.get(TYPE)) {
                 case VERTICAL -> player.setVelocity(player.getVelocity().add(0, amount, 0));
                 case HORIZONTAL -> {

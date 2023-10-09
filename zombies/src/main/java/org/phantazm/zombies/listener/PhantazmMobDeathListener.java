@@ -26,7 +26,7 @@ import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Tags;
-import org.phantazm.zombies.event.PhantazmMobDeathEvent;
+import org.phantazm.zombies.event.mob.PhantazmMobDeathEvent;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Round;

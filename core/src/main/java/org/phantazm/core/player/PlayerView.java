@@ -2,6 +2,7 @@ package org.phantazm.core.player;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
+import net.minestom.server.tag.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -11,6 +12,11 @@ import java.util.function.IntFunction;
 /**
  * Represents a view of a player that may be offline. Provides their UUID as well as a means to access the
  * {@link Player} instance associated with said UUID.
+ * <p>
+ * This interface extends {@link Taggable}, through which arbitrary data may be associated with this PlayerView. Note
+ * that this data is <i>persistent</i> so long as the player is online, or a reference to this PlayerView is maintained.
+ * As a matter of convention, the tags should be persistent and not cleared even when the player transfers between
+ * scenes or disconnects.
  *
  * @implSpec Implementations should anticipate many calls to {@code getPlayer}, and are encouraged to perform caching if
  * necessary to improve performance. However, since PlayerView instances are intended for long-term storage in fields
@@ -21,7 +27,7 @@ import java.util.function.IntFunction;
  * only on equality checking or hashing the {@link UUID} returned by calling {@link PlayerView#getUUID()}.
  * @see PlayerViewImpl
  */
-public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
+public sealed interface PlayerView extends Taggable permits PlayerViewImpl, PlayerView.Lookup {
     /**
      * Creates a new "lookup" PlayerView instance. Useful when, given a UUID, is it necessary to determine if a given
      * set of PlayerView objects contains a player whose UUID matches a known UUID. The UUID need not correspond to a
@@ -35,8 +41,8 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
      * For obtaining instances of PlayerView that <i>are</i> bound to an IdentitySource and do correspond to an actual
      * account, see {@link PlayerViewProvider}.
      * <p>
-     * <b>Unless you know what you're doing, you probably want to get your
-     * PlayerView instances from PlayerViewProvider instead of this method!</b>
+     * <b>Unless you know what you're doing, you probably want to get your PlayerView instances from PlayerViewProvider
+     * instead of this method!</b>
      *
      * @param uuid the UUID from which to create a new lookup PlayerView
      * @return a new PlayerView useful for map or set lookups
@@ -44,28 +50,6 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
     static @NotNull PlayerView lookup(@NotNull UUID uuid) {
         Objects.requireNonNull(uuid);
         return new Lookup(uuid);
-    }
-
-    /**
-     * Given some collection of PlayerView objects, populates a collection returned by {@code creator} containing the
-     * existing {@link Player} objects contained in the optionals returned by calling {@link PlayerView#unwrap()} on
-     * each element of {@code input}.
-     *
-     * @param input   the input collection
-     * @param creator the creator of the output collection, which accepts the size of the input collection as an
-     *                argument
-     * @param <T>     the input type
-     * @param <V>     the output type
-     * @return the collection returned by {@code creator}, populated with Player objects
-     */
-    static <T extends Collection<Player>,
-        V extends Collection<PlayerView>> @NotNull T unwrapMany(@NotNull V input, @NotNull IntFunction<? extends T> creator) {
-        T out = creator.apply(input.size());
-        for (PlayerView view : input) {
-            view.unwrap().ifPresent(out::add);
-        }
-
-        return out;
     }
 
     /**
@@ -98,9 +82,12 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
         private final UUID uuid;
         private final int hashCode;
 
+        private final TagHandler tagHandler;
+
         private Lookup(UUID uuid) {
             this.uuid = uuid;
             this.hashCode = uuid.hashCode();
+            this.tagHandler = TagHandler.newHandler();
         }
 
         @Override
@@ -134,8 +121,8 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
         }
 
         @Override
-        public @NotNull Optional<Player> unwrap() {
-            return Optional.empty();
+        public @NotNull TagHandler tagHandler() {
+            return tagHandler;
         }
 
         @Override
@@ -219,14 +206,4 @@ public sealed interface PlayerView permits PlayerViewImpl, PlayerView.Lookup {
      * @return An {@link Optional} of the player which is empty when the player is offline
      */
     @NotNull Optional<Player> getPlayer();
-
-    /**
-     * If this player's entity has not yet been removed, returns an optional containing the player, which may or may not
-     * be online (and therefore accessible through a ConnectionManager). This has limited usage compared to
-     * {@link PlayerView#getPlayer()}, which should generally be preferred unless it is necessary to handle
-     * {@link Player} instances during their disconnect, but before they are fully removed from the server.
-     *
-     * @return an {@link Optional} containing the player
-     */
-    @NotNull Optional<Player> unwrap();
 }
