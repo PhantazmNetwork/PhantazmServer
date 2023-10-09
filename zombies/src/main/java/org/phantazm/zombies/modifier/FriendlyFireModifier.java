@@ -55,8 +55,7 @@ public class FriendlyFireModifier implements DualComponent<ZombiesScene, Modifie
 
                 scene.getAcquirable().sync(self -> {
                     ZombiesPlayer zombiesPlayer = self.managedPlayers().get(PlayerView.lookup(player.getUuid()));
-
-                    if (zombiesPlayer.isState(ZombiesPlayerStateKeys.ALIVE)) {
+                    if (zombiesPlayer != null && zombiesPlayer.isState(ZombiesPlayerStateKeys.ALIVE)) {
                         event.setForceSelect(true);
                     }
                 });
