@@ -57,7 +57,7 @@ public class SelectBombedRoom implements Action<Round> {
 
     private final Data data;
     private final Supplier<? extends MapObjects> supplier;
-    private final Supplier<? extends ZombiesScene> sceneSupplier;
+    private final Supplier<ZombiesScene> sceneSupplier;
     private final Random random;
     private final Instance instance;
     private final ParticleWrapper particle;
@@ -68,7 +68,7 @@ public class SelectBombedRoom implements Action<Round> {
     @FactoryMethod
     public SelectBombedRoom(@NotNull Data data, @NotNull Supplier<? extends MapObjects> supplier,
         @NotNull Random random, @NotNull Instance instance, @NotNull @Child("particle") ParticleWrapper particle,
-        @NotNull Map<PlayerView, ZombiesPlayer> playerMap, @NotNull Supplier<? extends ZombiesScene> sceneSupplier) {
+        @NotNull Map<PlayerView, ZombiesPlayer> playerMap, @NotNull Supplier<ZombiesScene> sceneSupplier) {
         this.data = data;
         this.supplier = supplier;
         this.sceneSupplier = sceneSupplier;

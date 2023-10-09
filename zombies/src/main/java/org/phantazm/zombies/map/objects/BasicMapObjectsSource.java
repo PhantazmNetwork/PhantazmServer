@@ -111,7 +111,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         Module module =
             new Module(keyParser, instance, random, roundHandlerSupplier, flaggable, transactionModifierSource,
                 slotDistributor, playerMap, respawnPos, mapObjectsWrapper, powerupHandler, windowHandler, eventNode,
-                songPlayer, songLoader, new BasicInteractorGroupHandler(), ticksSinceStart);
+                songPlayer, songLoader, new BasicInteractorGroupHandler(), ticksSinceStart, scene);
 
         DependencyProvider provider = new ModuleDependencyProvider(keyParser, module);
 
@@ -290,6 +290,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         private final SongLoader songLoader;
         private final InteractorGroupHandler interactorGroupHandler;
         private final Wrapper<Long> ticksSinceStart;
+        private final Supplier<ZombiesScene> sceneSupplier;
 
         private Module(KeyParser keyParser, Instance instance, Random random,
             Supplier<? extends RoundHandler> roundHandlerSupplier, Flaggable flaggable,
@@ -298,7 +299,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             Supplier<? extends MapObjects> mapObjectsSupplier, Wrapper<PowerupHandler> powerupHandler,
             Wrapper<WindowHandler> windowHandler, Wrapper<EventNode<Event>> eventNode,
             SongPlayer songPlayer, SongLoader songLoader, InteractorGroupHandler interactorGroupHandler,
-            Wrapper<Long> ticksSinceStart) {
+            Wrapper<Long> ticksSinceStart, Supplier<ZombiesScene> sceneSupplier) {
             this.keyParser = Objects.requireNonNull(keyParser);
             this.instance = Objects.requireNonNull(instance);
             this.random = Objects.requireNonNull(random);
@@ -316,6 +317,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             this.songLoader = Objects.requireNonNull(songLoader);
             this.interactorGroupHandler = Objects.requireNonNull(interactorGroupHandler);
             this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart);
+            this.sceneSupplier = Objects.requireNonNull(sceneSupplier);
         }
 
         @Override
@@ -406,6 +408,10 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         @Override
         public @NotNull Wrapper<Long> ticksSinceStart() {
             return ticksSinceStart;
+        }
+
+        public @NotNull Supplier<ZombiesScene> sceneSupplier() {
+            return sceneSupplier;
         }
     }
 }
