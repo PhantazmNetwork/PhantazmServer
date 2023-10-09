@@ -189,7 +189,12 @@ public class ZombiesJoinCommand extends Command {
             });
         }
 
-        return CompletableFuture.allOf(futures).thenApply(ignored -> {
+        return CompletableFuture.allOf(futures).handle((ignored, error) -> {
+            if (error != null) {
+                LOGGER.warn("Error checking statistics: ", error);
+                return false;
+            }
+
             for (CompletableFuture<Boolean> future : futures) {
                 if (future.isCompletedExceptionally() || !future.join()) {
                     return false;
