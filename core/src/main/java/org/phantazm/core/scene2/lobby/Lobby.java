@@ -24,19 +24,16 @@ import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.OpenBookPacket;
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.FutureUtils;
 import org.phantazm.core.CoreStages;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.scene2.EventScene;
 import org.phantazm.core.scene2.InstanceScene;
-import org.phantazm.core.scene2.TablistLocalScene;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class Lobby extends InstanceScene implements EventScene {
     private final Pos spawnPoint;
@@ -60,13 +57,21 @@ public class Lobby extends InstanceScene implements EventScene {
         this.displayNameStyler = Objects.requireNonNull(displayNameStyler);
         this.lobbyNode = buildNode(instance);
 
+        //adds this lobby's event node to the Minestom's global node, so that it will actually receive events
         MinecraftServer.getGlobalEventHandler().addChild(this.lobbyNode);
+
+        //spawns NPCs in this lobby
         npcHandler.spawnAll();
     }
 
+    /*
+    Creates an EventNode for this lobby. This cancels most events so that, for example, players can't open trapdoors,
+    eat food, dig blocks, or move items out of inventories.
+     */
     private EventNode<Event> buildNode(Instance instance) {
         UUID uuid = instance.getUniqueId();
 
+        //only handle events that are
         EventNode<Event> node = EventNode.event("lobby_node_" + uuid, EventFilter.ALL, event ->
             event instanceof InstanceEvent instanceEvent && instanceEvent.getInstance().getUniqueId().equals(uuid));
 
@@ -143,6 +148,8 @@ public class Lobby extends InstanceScene implements EventScene {
             }
 
             Player player = playerOptional.get();
+
+            //this block just sends the "player joined" message in chat
             displayNameStyler.apply(player).whenComplete((result, error) -> {
                 if (error != null) {
                     return;
@@ -152,6 +159,7 @@ public class Lobby extends InstanceScene implements EventScene {
                 instance().sendMessage(MiniMessage.miniMessage().deserialize(lobbyJoinMessageFormat, joinerTag));
             });
 
+            //if logging in, do NOT call onSpawn (it would try to teleport the player)
             if (login) {
                 futures[i++] = FutureUtils.nullCompletedFuture();
                 continue;
@@ -160,9 +168,21 @@ public class Lobby extends InstanceScene implements EventScene {
             futures[i++] = onSpawn(player);
         }
 
+        //waits for everyone to finish teleporting
         CompletableFuture.allOf(futures).join();
     }
 
+    /*
+    this method returns a CompletableFuture, which represents some task that may be running concurrently on a different
+    thread. the task CAN return a single value; in this case there is none, because all we're doing is teleporting a
+    player; this operation does not return a value other than `null`. the task can be awaited by calling
+    CompletableFuture#get() or CompletableFuture#join(). the only difference between the two is that join() will throw
+    an unchecked exception if there was an error thrown on the other thread; get() will throw a 'checked' exception and
+    you will have to surround the call in a try-catch block.
+
+    this is an oversimplification; not all CompletableFutures represent a computation occurring on another thread. you
+    can obtain already-completed instances using the method CompletableFuture#completedFuture(T)
+     */
     private CompletableFuture<?> onSpawn(Player player) {
         player.heal();
 
@@ -179,11 +199,14 @@ public class Lobby extends InstanceScene implements EventScene {
         }));
 
         holder.setStage(CoreStages.LOBBY);
+
+        //teleports the player if they are in the same world; otherwise, sets their instance
         return teleportOrSetInstance(player, spawnPoint);
     }
 
     @Override
     public @NotNull Set<@NotNull PlayerView> leave(@NotNull Set<? extends @NotNull PlayerView> players) {
+        //removes players or spectators from the scene
         Set<PlayerView> leftPlayers = super.leave(players);
         for (PlayerView left : leftPlayers) {
             left.getPlayer().ifPresent(player -> player.stateHolder().removeStage(CoreStages.LOBBY));
@@ -202,6 +225,8 @@ public class Lobby extends InstanceScene implements EventScene {
     public void shutdown() {
         EventNode<? super Event> parent = lobbyNode.getParent();
         if (parent != null) {
+            //removes this lobby's event node from the global node to prevent a memory leak
+            //otherwise, we would continue receiving events even after the lobby is shut down
             parent.removeChild(lobbyNode);
         }
 
