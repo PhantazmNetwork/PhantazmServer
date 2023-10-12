@@ -44,7 +44,7 @@ public class AnnounceRoundAction implements Action<Round> {
 
     @Override
     public void perform(@NotNull Round round) {
-        TagResolver roundPlaceholder = Placeholder.component("round", Component.text(round.getRoundInfo().round()));
+        TagResolver roundPlaceholder = Placeholder.component("round", Component.text(round.round()));
         String timeString = tickFormatter.format(ticksSinceStart.get());
         TagResolver timePlaceholder = Placeholder.unparsed("time", timeString);
 
