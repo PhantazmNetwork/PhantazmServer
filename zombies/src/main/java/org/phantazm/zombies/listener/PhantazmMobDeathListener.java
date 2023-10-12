@@ -15,7 +15,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityDeathEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
@@ -78,7 +77,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
     @Override
     public void accept(@NotNull ZombiesScene scene, @NotNull Mob mob, @NotNull EntityDeathEvent event) {
-        EventDispatcher.call(new PhantazmMobDeathEvent(mob));
+        scene.broadcastEvent(new PhantazmMobDeathEvent(mob));
 
         roundSupplier.get().ifPresent(round -> {
             round.removeMob(mob);

@@ -25,7 +25,7 @@ public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
     @FactoryMethod
     public RemainingZombiesSidebarLineUpdater(@NotNull Data data, @NotNull RoundHandler roundHandler) {
         this.data = Objects.requireNonNull(data);
-        this.lastMobCountSupplier = Objects.requireNonNull(roundHandler::getLastMobCount, "roundSupplier");
+        this.lastMobCountSupplier = Objects.requireNonNull(roundHandler::lastMobCount, "roundSupplier");
     }
 
     @Override

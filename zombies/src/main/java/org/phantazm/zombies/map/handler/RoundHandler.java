@@ -18,7 +18,7 @@ public interface RoundHandler extends Tickable {
 
     boolean hasEnded();
 
-    int getLastMobCount();
+    int lastMobCount();
 
     void end();
 }

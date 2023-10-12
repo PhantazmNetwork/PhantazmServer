@@ -18,7 +18,7 @@ import java.util.List;
 
 @Model("npc.interactor.show_gui")
 @Cache
-public class ShowGuiInteractor implements MonoComponent<@NotNull NPCInteractor> {
+public class ShowGuiInteractor implements MonoComponent<NPCInteractor> {
     private final Data data;
     private final List<MonoComponent<GuiItem>> guiItems;
 

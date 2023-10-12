@@ -172,6 +172,10 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
 
             @Override
             public boolean leftClick(@NotNull Player player, int slot) {
+                if (slot > getInventoryType().getSize()) {
+                    return false;
+                }
+
                 ItemStack stack = getItemStack(slot);
 
                 ModifierHandler modifierHandler = ModifierHandler.Global.instance();

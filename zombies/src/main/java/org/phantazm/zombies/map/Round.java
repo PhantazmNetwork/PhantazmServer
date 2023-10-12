@@ -12,20 +12,15 @@ import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.spawn.SpawnDistributor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Round implements Tickable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Round.class);
-
     private static final CachedPacket ROUND_START_PACKET = new CachedPacket(() ->
         new PluginMessagePacket(RoundStartPacket.ID.asString(), MinestomPacketUtils.serialize(new RoundStartPacket())));
 
-    private final RoundInfo roundInfo;
+    private final int round;
     private final List<Wave> waves;
     private final List<Action<Round>> startActions;
     private final List<Action<Round>> endActions;
@@ -38,22 +33,15 @@ public class Round implements Tickable {
     private long waveTicks = 0;
     private Wave currentWave;
     private int waveIndex;
-    private final AtomicInteger totalMobCount;
+    private int totalMobCount;
 
     /**
      * Constructs a new instance of this class.
-     *
-     * @param roundInfo the backing data object
      */
-    public Round(@NotNull RoundInfo roundInfo, @NotNull List<Wave> waves, @NotNull List<Action<Round>> startActions,
+    public Round(int round, @NotNull List<Wave> waves, @NotNull List<Action<Round>> startActions,
         @NotNull List<Action<Round>> endActions, @NotNull SpawnDistributor spawnDistributor,
         @NotNull List<Spawnpoint> spawnpoints, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
-        List<WaveInfo> waveInfo = roundInfo.waves();
-        if (waveInfo.isEmpty()) {
-            LOGGER.warn("Round {} has no waves", roundInfo);
-        }
-
-        this.roundInfo = Objects.requireNonNull(roundInfo);
+        this.round = round;
         this.waves = List.copyOf(waves);
         this.startActions = List.copyOf(startActions);
         this.endActions = List.copyOf(endActions);
@@ -63,22 +51,22 @@ public class Round implements Tickable {
         this.spawnpoints = Objects.requireNonNull(spawnpoints);
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
 
-        this.totalMobCount = new AtomicInteger();
+        this.totalMobCount = 0;
     }
 
-    public @NotNull RoundInfo getRoundInfo() {
-        return roundInfo;
+    public int round() {
+        return round;
     }
 
     public void removeMob(@NotNull Mob mob) {
         if (spawnedMobs.remove(mob.getUuid()) != null) {
-            totalMobCount.decrementAndGet();
+            totalMobCount--;
         }
     }
 
     public void addMob(@NotNull Mob mob) {
         if (spawnedMobs.put(mob.getUuid(), mob) == null) {
-            totalMobCount.incrementAndGet();
+            totalMobCount++;
         }
     }
 
@@ -87,8 +75,8 @@ public class Round implements Tickable {
         return List.copyOf(spawnedMobs.values());
     }
 
-    public int getTotalMobCount() {
-        return totalMobCount.get();
+    public int totalMobCount() {
+        return totalMobCount;
     }
 
     public @Unmodifiable
@@ -113,7 +101,7 @@ public class Round implements Tickable {
             }
 
             int prevBestRound = zombiesPlayer.module().getStats().getBestRound();
-            zombiesPlayer.module().getStats().setBestRound(Math.max(prevBestRound, roundInfo.round()));
+            zombiesPlayer.module().getStats().setBestRound(Math.max(prevBestRound, round));
             zombiesPlayer.getPlayer().ifPresent(player -> player.sendPacket(ROUND_START_PACKET));
         }
 
@@ -121,16 +109,17 @@ public class Round implements Tickable {
             action.perform(this);
         }
 
-        if (!waves.isEmpty()) {
-            currentWave = waves.get(waveIndex = 0);
-            waveTicks = 0;
-
-            totalMobCount.set(0);
-            for (Wave wave : waves) {
-                totalMobCount.updateAndGet(old -> old + wave.mobCount());
-            }
-        } else {
+        if (waves.isEmpty()) {
             endRound();
+            return;
+        }
+
+        currentWave = waves.get(waveIndex = 0);
+        waveTicks = 0;
+
+        totalMobCount = 0;
+        for (Wave wave : waves) {
+            totalMobCount += wave.mobCount();
         }
     }
 
@@ -146,7 +135,7 @@ public class Round implements Tickable {
 
         currentWave = null;
         waveTicks = 0;
-        totalMobCount.set(0);
+        totalMobCount = 0;
 
         Iterator<Mob> spawnedIterator = spawnedMobs.values().iterator();
         do {
@@ -185,9 +174,9 @@ public class Round implements Tickable {
         if (isWave) {
             //adjust for mobs that may have failed to spawn
             //only reached when calling internally
-            totalMobCount.updateAndGet(old -> old - (currentWave.mobCount() - spawns.size()));
+            totalMobCount -= currentWave.mobCount() - spawns.size();
         } else {
-            totalMobCount.updateAndGet(old -> old + spawns.size());
+            totalMobCount += spawns.size();
         }
 
         return spawns;
@@ -199,14 +188,14 @@ public class Round implements Tickable {
             return;
         }
 
-        if (totalMobCount.get() == 0) {
+        if (totalMobCount == 0) {
             endRound();
             return;
         }
 
         ++waveTicks;
-        if (waveIndex < waves.size() && waveTicks > currentWave.getWaveInfo().delayTicks()) {
-            List<Mob> mobs = spawnMobs(currentWave.getWaveInfo().spawns(), spawnDistributor, true);
+        if (waveIndex < waves.size() && waveTicks > currentWave.delayTicks()) {
+            List<Mob> mobs = spawnMobs(currentWave.spawns(), spawnDistributor, true);
             currentWave.onSpawn(mobs);
 
             waveTicks = 0;

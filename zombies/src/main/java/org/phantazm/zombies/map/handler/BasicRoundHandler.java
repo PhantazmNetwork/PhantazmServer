@@ -18,6 +18,7 @@ public class BasicRoundHandler implements RoundHandler {
     private int lastMobCount = 0;
 
     private boolean hasEnded;
+    private boolean isEndless;
 
     public BasicRoundHandler(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull List<Round> rounds) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
@@ -39,7 +40,7 @@ public class BasicRoundHandler implements RoundHandler {
 
         currentRound.tick(time);
         if (currentRound.isActive()) {
-            lastMobCount = currentRound.getTotalMobCount();
+            lastMobCount = currentRound.totalMobCount();
             return;
         }
 
@@ -55,7 +56,7 @@ public class BasicRoundHandler implements RoundHandler {
         if (++roundIndex < rounds.size()) {
             currentRound = rounds.get(roundIndex);
             currentRound.startRound();
-            lastMobCount = currentRound.getTotalMobCount();
+            lastMobCount = currentRound.totalMobCount();
 
             this.currentRound = currentRound;
         } else {
@@ -85,7 +86,7 @@ public class BasicRoundHandler implements RoundHandler {
         this.roundIndex = roundIndex;
         currentRound = rounds.get(roundIndex);
         currentRound.startRound();
-        lastMobCount = currentRound.getTotalMobCount();
+        lastMobCount = currentRound.totalMobCount();
     }
 
     @Override
@@ -99,7 +100,7 @@ public class BasicRoundHandler implements RoundHandler {
     }
 
     @Override
-    public int getLastMobCount() {
+    public int lastMobCount() {
         return lastMobCount;
     }
 
@@ -107,5 +108,9 @@ public class BasicRoundHandler implements RoundHandler {
     public void end() {
         hasEnded = true;
         currentRound = null;
+    }
+
+    public void setEndless(boolean endless) {
+        this.isEndless = endless;
     }
 }

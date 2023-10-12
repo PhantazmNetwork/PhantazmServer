@@ -22,7 +22,7 @@ public final class QuitCommand {
     public static @NotNull Command quitCommand(@NotNull PlayerViewProvider viewProvider) {
         Objects.requireNonNull(viewProvider);
 
-        Command command = new Command("quit", "leave", "l");
+        Command command = new Command("quit", "leave", "l", "hub");
         command.addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             Player player = (Player) sender;
             PlayerView playerView = viewProvider.fromPlayer(player);

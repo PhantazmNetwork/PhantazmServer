@@ -5,27 +5,19 @@ import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.map.action.Action;
 
 import java.util.List;
-import java.util.Objects;
 
 public class Wave {
-    private final WaveInfo waveInfo;
+    private final long delayTicks;
     private final int mobCount;
     private final List<Action<List<Mob>>> spawnActions;
+    private final List<SpawnInfo> spawns;
 
-    /**
-     * Constructs a new instance of this class.
-     *
-     * @param waveInfo the backing data object
-     */
-    public Wave(@NotNull WaveInfo waveInfo, @NotNull List<Action<List<Mob>>> spawnActions) {
-        this.waveInfo = Objects.requireNonNull(waveInfo);
-
-        int count = 0;
-        for (SpawnInfo spawnInfo : waveInfo.spawns()) {
-            count += spawnInfo.amount();
-        }
-        this.mobCount = count;
+    public Wave(long delayTicks, int mobCount, @NotNull List<Action<List<Mob>>> spawnActions,
+        @NotNull List<SpawnInfo> spawns) {
+        this.delayTicks = delayTicks;
+        this.mobCount = mobCount;
         this.spawnActions = List.copyOf(spawnActions);
+        this.spawns = List.copyOf(spawns);
     }
 
     /**
@@ -37,8 +29,12 @@ public class Wave {
         return mobCount;
     }
 
-    public @NotNull WaveInfo getWaveInfo() {
-        return waveInfo;
+    public long delayTicks() {
+        return delayTicks;
+    }
+
+    public @NotNull List<SpawnInfo> spawns() {
+        return spawns;
     }
 
     public void onSpawn(@NotNull List<Mob> mobs) {

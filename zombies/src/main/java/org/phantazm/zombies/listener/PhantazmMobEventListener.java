@@ -29,8 +29,7 @@ public abstract class PhantazmMobEventListener<TEvent extends EntityInstanceEven
             return;
         }
 
-        ZombiesScene zombiesScene = scene.get();
-        zombiesScene.getAcquirable().sync(self -> accept(self, mob, event));
+        scene.get().getAcquirable().sync(self -> accept(self, mob, event));
     }
 
     protected abstract void accept(@NotNull ZombiesScene scene, @NotNull Mob mob, @NotNull TEvent event);

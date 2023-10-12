@@ -260,10 +260,15 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                     .provideCollection(ElementPath.EMPTY,
                         dependencyProvider, HANDLER);
 
-                waves.add(new Wave(wave, spawnActions));
+                int count = 0;
+                for (SpawnInfo spawnInfo : wave.spawns()) {
+                    count += spawnInfo.amount();
+                }
+
+                waves.add(new Wave(wave.delayTicks(), count, spawnActions, wave.spawns()));
             }
 
-            rounds.add(new Round(roundInfo, waves, startActions, endActions, spawnDistributor, spawnpoints,
+            rounds.add(new Round(roundInfo.round(), waves, startActions, endActions, spawnDistributor, spawnpoints,
                 playerMap.values()));
         }
 
