@@ -121,7 +121,7 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
             PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer(player);
             ModifierHandler modifierHandler = ModifierHandler.Global.instance();
 
-            LocalInventory inventory = new LocalInventory(InventoryType.CHEST_6_ROW, computeTitle(playerView), playerView, page);
+            ModifierInventory inventory = new ModifierInventory(InventoryType.CHEST_6_ROW, computeTitle(playerView), playerView, page);
             inventory.addInventoryCondition((player1, slot, clickType, inventoryConditionResult) -> {
                 if (clickType != ClickType.LEFT_CLICK) {
                     inventoryConditionResult.setCancel(true);
@@ -160,11 +160,11 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
                 Placeholder.unparsed("modifier_count", Integer.toString(modifierCount)));
         }
 
-        private class LocalInventory extends Inventory {
+        private class ModifierInventory extends Inventory {
             private final PlayerView view;
             private final int page;
 
-            private LocalInventory(@NotNull InventoryType inventoryType, @NotNull Component title, @NotNull PlayerView view, int page) {
+            private ModifierInventory(@NotNull InventoryType inventoryType, @NotNull Component title, @NotNull PlayerView view, int page) {
                 super(inventoryType, title);
                 this.view = view;
                 this.page = page;
@@ -172,7 +172,7 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
 
             @Override
             public boolean leftClick(@NotNull Player player, int slot) {
-                if (slot > getInventoryType().getSize()) {
+                if (slot >= getInventoryType().getSize()) {
                     return false;
                 }
 
