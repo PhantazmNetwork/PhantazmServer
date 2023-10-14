@@ -1,8 +1,10 @@
 package org.phantazm.zombies.endless;
 
-import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.map.Round;
+import com.github.steanky.element.core.annotation.FactoryMethod;
 
-public interface Endless {
-    @NotNull Round generateRound(int round);
+public class Endless {
+    @FactoryMethod
+    public Endless() {
+        
+    }
 }
