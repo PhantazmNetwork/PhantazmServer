@@ -3,41 +3,46 @@ package org.phantazm.zombies.map.action.round;
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.player.PlayerView;
+import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.LazyComponent;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.function.Supplier;
 
 @Model("zombies.map.round.action.revive_players")
-@Cache(false)
-public class RevivePlayersAction implements Action<Round> {
-    private final Map<PlayerView, ZombiesPlayer> playerMap;
-    private final Pos respawnPos;
-
+@Cache
+public class RevivePlayersAction implements LazyComponent<ZombiesScene, Action<Round>> {
     @FactoryMethod
-    public RevivePlayersAction(@NotNull Map<PlayerView, ZombiesPlayer> playerMap, @NotNull Pos respawnPos) {
-        this.playerMap = Objects.requireNonNull(playerMap);
-        this.respawnPos = Objects.requireNonNull(respawnPos);
+    public RevivePlayersAction() {
+
     }
 
     @Override
-    public void perform(@NotNull Round round) {
-        for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-            boolean dead = zombiesPlayer.isDead();
-            if (dead || zombiesPlayer.isKnocked()) {
-                if (dead) {
-                    zombiesPlayer.getPlayer().ifPresent(player -> player.teleport(respawnPos));
-                }
+    public @NotNull Action<Round> apply(@NotNull InjectionStore injectionStore,
+        @NotNull Supplier<@NotNull ZombiesScene> sceneSupplier) {
+        return new Impl(sceneSupplier);
+    }
 
-                zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, AlivePlayerStateContext.regular());
+    private record Impl(Supplier<ZombiesScene> zombiesScene) implements Action<Round> {
+        @Override
+        public void perform(@NotNull Round round) {
+            ZombiesScene zombiesScene = this.zombiesScene.get();
+            for (ZombiesPlayer zombiesPlayer : zombiesScene.managedPlayers().values()) {
+                boolean dead = zombiesPlayer.isDead();
+                if (dead || zombiesPlayer.isKnocked()) {
+                    if (dead) {
+                        zombiesPlayer.getPlayer().ifPresent(player -> player
+                            .teleport(zombiesScene.map().objects().module().respawnPos()));
+                    }
+
+                    zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, AlivePlayerStateContext.regular());
+                }
             }
         }
     }

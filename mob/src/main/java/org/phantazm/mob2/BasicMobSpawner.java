@@ -15,7 +15,7 @@ public class BasicMobSpawner implements MobSpawner {
     private final Map<Key, MobCreator> mobCreators;
     private final InjectionStore.Builder builder;
 
-    private volatile InjectionStore injectionStore;
+    private InjectionStore injectionStore;
 
     public BasicMobSpawner(@NotNull Map<Key, MobCreator> mobCreators) {
         this.mobCreators = Map.copyOf(mobCreators);

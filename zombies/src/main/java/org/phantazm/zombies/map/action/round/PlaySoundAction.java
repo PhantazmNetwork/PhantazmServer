@@ -6,41 +6,49 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.player.PlayerView;
+import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.LazyComponent;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.function.Supplier;
 
 @Model("zombies.map.round.action.play_sound")
-@Cache(false)
-public class PlaySoundAction implements Action<Round> {
+@Cache
+public class PlaySoundAction implements LazyComponent<ZombiesScene, Action<Round>> {
     private final Data data;
-    private final Random random;
-    private final Map<PlayerView, ZombiesPlayer> playerMap;
 
     @FactoryMethod
-    public PlaySoundAction(@NotNull Data data, @NotNull Random random,
-        @NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
+    public PlaySoundAction(@NotNull Data data) {
         this.data = data;
-        this.random = random;
-        this.playerMap = playerMap;
     }
 
     @Override
-    public void perform(@NotNull Round round) {
-        for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-            if (!zombiesPlayer.hasQuit()) {
-                zombiesPlayer.getPlayer()
-                    .ifPresent(player -> player.playSound(Sound.sound(data.sound).seed(random.nextLong()).build()));
-            }
-        }
+    public @NotNull Action<Round> apply(@NotNull InjectionStore injectionStore,
+        @NotNull Supplier<@NotNull ZombiesScene> sceneSupplier) {
+        return new Impl(data, sceneSupplier);
     }
 
     @DataObject
     public record Data(@NotNull Sound sound) {
+    }
+
+    private record Impl(Data data,
+        Supplier<ZombiesScene> zombiesScene) implements Action<Round> {
+
+        @Override
+        public void perform(@NotNull Round round) {
+            ZombiesScene zombiesScene = this.zombiesScene.get();
+            for (ZombiesPlayer zombiesPlayer : zombiesScene.managedPlayers().values()) {
+                if (zombiesPlayer.hasQuit()) {
+                    continue;
+                }
+
+                zombiesPlayer.getPlayer().ifPresent(player -> player.playSound(Sound.sound(data.sound)
+                    .seed(zombiesScene.map().objects().module().random().nextLong()).build()));
+            }
+        }
     }
 }

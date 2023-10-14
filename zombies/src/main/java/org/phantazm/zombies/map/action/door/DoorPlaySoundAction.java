@@ -6,32 +6,45 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.LazyComponent;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.action.Action;
+import org.phantazm.zombies.scene2.ZombiesScene;
+
+import java.util.function.Supplier;
 
 @Model("zombies.map.door.action.play_sound")
-@Cache(false)
-public class DoorPlaySoundAction implements Action<Door> {
+@Cache
+public class DoorPlaySoundAction implements LazyComponent<ZombiesScene, Action<Door>> {
     private final Data data;
-    private final Instance instance;
 
     @FactoryMethod
-    public DoorPlaySoundAction(@NotNull Data data, @NotNull Instance instance) {
+    public DoorPlaySoundAction(@NotNull Data data) {
         this.data = data;
-        this.instance = instance;
     }
 
     @Override
-    public void perform(@NotNull Door door) {
-        Point pos = door.center();
+    public @NotNull Action<Door> apply(@NotNull InjectionStore injectionStore,
+        @NotNull Supplier<@NotNull ZombiesScene> zombiesScene) {
+        return new Impl(data, zombiesScene);
+    }
 
-        if (data.atInteractor) {
-            door.lastInteractor().ifPresent(zombiesPlayer -> zombiesPlayer.getPlayer()
-                .ifPresent(player -> zombiesPlayer.playSound(data.sound, pos.x(), pos.y(), pos.z())));
-        } else {
-            instance.playSound(data.sound, pos.x(), pos.y(), pos.z());
+    private record Impl(Data data,
+        Supplier<ZombiesScene> zombiesScene) implements Action<Door> {
+
+        @Override
+        public void perform(@NotNull Door door) {
+            Point pos = door.center();
+
+            if (data.atInteractor) {
+                door.lastInteractor().ifPresent(zombiesPlayer -> zombiesPlayer.getPlayer()
+                    .ifPresent(player -> zombiesPlayer.playSound(data.sound, pos.x(), pos.y(), pos.z())));
+                return;
+            }
+
+            zombiesScene.get().playSound(data.sound, pos.x(), pos.y(), pos.z());
         }
     }
 
