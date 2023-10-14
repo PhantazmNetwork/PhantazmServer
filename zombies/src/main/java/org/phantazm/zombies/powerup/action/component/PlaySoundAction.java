@@ -27,7 +27,7 @@ public class PlaySoundAction implements PowerupActionComponent {
 
     @Override
     public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
-        return new Action(data, scene.instance(), scene.map().mapObjects().module().random());
+        return new Action(data, scene.instance(), scene.map().objects().module().random());
     }
 
     @DataObject

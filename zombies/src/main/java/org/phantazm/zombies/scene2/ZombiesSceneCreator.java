@@ -195,7 +195,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
             return null;
         });
 
-        map.mapObjects().mobSpawner().init();
+        map.objects().mobSpawner().init();
         return scene;
     }
 

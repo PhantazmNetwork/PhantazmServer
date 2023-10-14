@@ -28,6 +28,7 @@ import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.scene2.ZombiesScene;
+import org.phantazm.zombies.spawn.SpawnDistributor;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -70,6 +71,8 @@ public interface MapObjects {
 
     @NotNull
     TickTaskScheduler taskScheduler();
+
+    @NotNull SpawnDistributor spawnDistributor();
 
     @NotNull
     interface Source {

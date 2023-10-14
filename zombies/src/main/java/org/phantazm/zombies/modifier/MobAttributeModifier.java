@@ -43,7 +43,7 @@ public class MobAttributeModifier implements DualComponent<ZombiesScene, Modifie
             UUID uuid = UUID.randomUUID();
             Attribute attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
             if (attribute.equals(Attribute.MAX_HEALTH)) {
-                scene.map().mapObjects().module().modifierSource().addModifier(ModifierSourceGroups.MOB_COIN_GAIN,
+                scene.map().objects().module().modifierSource().addModifier(ModifierSourceGroups.MOB_COIN_GAIN,
                     Transaction.modifier(Component.text("Health Modifier"),
                         convert(data.attributeOperation), -data.amount));
             }

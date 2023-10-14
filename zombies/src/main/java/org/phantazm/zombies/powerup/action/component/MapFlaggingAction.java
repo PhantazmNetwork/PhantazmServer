@@ -27,7 +27,7 @@ public class MapFlaggingAction implements PowerupActionComponent {
 
     @Override
     public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
-        return new Action(data, deactivationPredicate.apply(scene), scene.map().mapObjects().module().flags());
+        return new Action(data, deactivationPredicate.apply(scene), scene.map().objects().module().flags());
     }
 
     @DataObject

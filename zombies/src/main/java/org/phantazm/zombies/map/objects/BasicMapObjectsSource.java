@@ -136,11 +136,11 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobSpawner, windowTracker,
                 roomTracker);
 
-        List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, spawnDistributor, playerMap);
+        List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, scene);
 
         MapObjects mapObjects =
             new BasicMapObjects(spawnpoints, windowTracker, shopTracker, doorTracker, roomTracker, rounds, provider,
-                mobSpawner, origin, module, tickTaskScheduler);
+                mobSpawner, origin, module, tickTaskScheduler, spawnDistributor);
         mapObjectsWrapper.set(mapObjects);
 
         return mapObjects;
@@ -243,8 +243,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
     }
 
     private List<Round> buildRounds(List<RoundInfo> roundInfoList, List<Spawnpoint> spawnpoints,
-        DependencyProvider dependencyProvider, SpawnDistributor spawnDistributor,
-        Map<PlayerView, ZombiesPlayer> playerMap) {
+        DependencyProvider dependencyProvider, Supplier<ZombiesScene> sceneSupplier) {
         List<Round> rounds = new ArrayList<>(roundInfoList.size());
         for (RoundInfo roundInfo : roundInfoList) {
             List<Action<Round>> startActions = contextManager.makeContext(roundInfo.startActions())
@@ -268,8 +267,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                 waves.add(new Wave(wave.delayTicks(), count, spawnActions, wave.spawns()));
             }
 
-            rounds.add(new Round(roundInfo.round(), waves, startActions, endActions, spawnDistributor, spawnpoints,
-                playerMap.values()));
+            rounds.add(new Round(roundInfo.round(), waves, startActions, endActions, spawnpoints, sceneSupplier));
         }
 
         return rounds;

@@ -263,7 +263,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
 
         stageTransition.end();
         tickTaskScheduler.end();
-        map.mapObjects().module().powerupHandler().get().end();
+        map.objects().module().powerupHandler().get().end();
 
         if (!legit || !mapSettingsInfo.trackStats()) {
             return;

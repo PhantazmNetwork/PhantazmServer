@@ -10,6 +10,7 @@ import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.shop.Shop;
+import org.phantazm.zombies.spawn.SpawnDistributor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,12 +34,13 @@ public final class BasicMapObjects implements MapObjects {
     private final Point mapOrigin;
 
     private final TickTaskScheduler taskScheduler;
+    private final SpawnDistributor spawnDistributor;
 
     public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull BoundedTracker<Window> windows,
         @NotNull BoundedTracker<Shop> shops, @NotNull BoundedTracker<Door> doors,
         @NotNull BoundedTracker<Room> rooms, @NotNull List<Round> rounds,
         @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Point mapOrigin,
-        @NotNull Module module, @NotNull TickTaskScheduler taskScheduler) {
+        @NotNull Module module, @NotNull TickTaskScheduler taskScheduler, @NotNull SpawnDistributor spawnDistributor) {
         this.spawnpoints = List.copyOf(spawnpoints);
         this.rounds = List.copyOf(rounds);
 
@@ -60,6 +62,7 @@ public final class BasicMapObjects implements MapObjects {
         this.roomMap = Map.copyOf(map);
         this.mapOrigin = mapOrigin;
         this.taskScheduler = Objects.requireNonNull(taskScheduler);
+        this.spawnDistributor = Objects.requireNonNull(spawnDistributor);
     }
 
     @Override
@@ -122,5 +125,10 @@ public final class BasicMapObjects implements MapObjects {
     @Override
     public @NotNull TickTaskScheduler taskScheduler() {
         return taskScheduler;
+    }
+
+    @Override
+    public @NotNull SpawnDistributor spawnDistributor() {
+        return spawnDistributor;
     }
 }

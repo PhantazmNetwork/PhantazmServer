@@ -31,7 +31,7 @@ public class MapTransactionModifierAction implements PowerupActionComponent {
     @Override
     public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
         return new Action(data, deactivationPredicate.apply(scene),
-            scene.map().mapObjects().module().modifierSource());
+            scene.map().objects().module().modifierSource());
     }
 
     @DataObject

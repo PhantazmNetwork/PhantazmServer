@@ -51,7 +51,7 @@ public class ZombiesMobCreator extends MobCreatorBase {
 
     protected void setPathfinding(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         ZombiesScene scene = injectionStore.get(Keys.SCENE);
-        BoundedTracker<Window> windowTracker = scene.map().mapObjects().windowTracker();
+        BoundedTracker<Window> windowTracker = scene.map().objects().windowTracker();
 
         mob.pathfinding().setPenalty((x, y, z, h) -> {
             Optional<Window> windowOptional = windowTracker.atPoint(x, y + 1, z);

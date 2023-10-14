@@ -36,7 +36,7 @@ public class FlagToggleCommand extends SandboxLockedCommand {
         if (keyParser.isValidKey(flag)) {
             Key key = keyParser.parseKey(flag);
 
-            boolean res = scene.map().mapObjects().module().flags().toggleFlag(key);
+            boolean res = scene.map().objects().module().flags().toggleFlag(key);
             sender.sendMessage("Toggled flag " + key + " to " + res);
         } else {
             sender.sendMessage("Invalid key " + flag);

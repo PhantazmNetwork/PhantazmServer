@@ -50,7 +50,7 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
                 return false;
             }
 
-            ZombiesPlayer player = scene.map().mapObjects().module().playerMap().get(PlayerView.lookup(entity.getUuid()));
+            ZombiesPlayer player = scene.map().objects().module().playerMap().get(PlayerView.lookup(entity.getUuid()));
             if (player == null) {
                 return false;
             }

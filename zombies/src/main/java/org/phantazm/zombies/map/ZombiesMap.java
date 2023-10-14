@@ -33,7 +33,7 @@ public class ZombiesMap implements Tickable {
         this.doorHandler = Objects.requireNonNull(doorHandler);
     }
 
-    public @NotNull MapObjects mapObjects() {
+    public @NotNull MapObjects objects() {
         return mapObjects;
     }
 

@@ -36,7 +36,7 @@ public class BreakNearbyWindowGoal implements GoalCreator {
     public @NotNull ProximaGoal create(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         ZombiesScene scene = injectionStore.get(Keys.SCENE);
         ZombiesMap map = scene.map();
-        return new Goal(data, map.windowHandler().tracker(), map.mapObjects().roomTracker(), mob, scene);
+        return new Goal(data, map.windowHandler().tracker(), map.objects().roomTracker(), mob, scene);
     }
 
     @DataObject
