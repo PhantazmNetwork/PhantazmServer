@@ -71,12 +71,12 @@ public class BasicRoleStore implements RoleStore {
     @Override
     public @NotNull CompletableFuture<Boolean> giveRole(@NotNull UUID uuid, @NotNull String identifier) {
         if (identifier.equals(RoleStore.DEFAULT) || identifier.equals(Role.NONE.identifier())) {
-            return FutureUtils.nullCompletedFuture();
+            return FutureUtils.falseCompletedFuture();
         }
 
         Role role = roleMap.get(identifier);
         if (role == null) {
-            return FutureUtils.nullCompletedFuture();
+            return FutureUtils.falseCompletedFuture();
         }
 
         return CompletableFuture.supplyAsync(() -> {
@@ -102,12 +102,12 @@ public class BasicRoleStore implements RoleStore {
     @Override
     public @NotNull CompletableFuture<Boolean> removeRole(@NotNull UUID uuid, @NotNull String identifier) {
         if (identifier.equals(RoleStore.DEFAULT) || identifier.equals(Role.NONE.identifier())) {
-            return CompletableFuture.completedFuture(false);
+            return FutureUtils.falseCompletedFuture();
         }
 
         Role role = roleMap.get(identifier);
         if (role == null) {
-            return CompletableFuture.completedFuture(false);
+            return FutureUtils.falseCompletedFuture();
         }
 
         return CompletableFuture.supplyAsync(() -> {

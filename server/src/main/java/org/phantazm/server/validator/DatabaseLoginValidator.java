@@ -9,6 +9,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.Field;
 import org.jooq.Record;
+import org.phantazm.commons.FutureUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,8 @@ import static org.jooq.impl.DSL.*;
 
 public class DatabaseLoginValidator implements LoginValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseLoginValidator.class);
+    private static final CompletableFuture<LoginEntry> UNBANNED_FUTURE = FutureUtils.completedFuture(UNBANNED);
+    private static final CompletableFuture<BanHistory> NEVER_BANNED_FUTURE = FutureUtils.completedFuture(NEVER_BANNED);
 
     private final Cache<UUID, LoginEntry> banCache;
     private final Cache<UUID, Boolean> whitelistCache;
@@ -103,10 +106,10 @@ public class DatabaseLoginValidator implements LoginValidator {
         if (entry != null) {
             if (entry.shouldUnban()) {
                 pardon0(uuid);
-                return CompletableFuture.completedFuture(UNBANNED);
+                return UNBANNED_FUTURE;
             }
 
-            return CompletableFuture.completedFuture(entry);
+            return entry.equals(UNBANNED) ? UNBANNED_FUTURE : CompletableFuture.completedFuture(entry);
         }
 
         return CompletableFuture.supplyAsync(() -> entryFor(uuid), executor);
@@ -118,7 +121,7 @@ public class DatabaseLoginValidator implements LoginValidator {
 
         BanHistory history = banHistoryCache.getIfPresent(uuid);
         if (history != null) {
-            return CompletableFuture.completedFuture(history);
+            return history.equals(NEVER_BANNED) ? NEVER_BANNED_FUTURE : CompletableFuture.completedFuture(history);
         }
 
         return CompletableFuture.supplyAsync(() -> {

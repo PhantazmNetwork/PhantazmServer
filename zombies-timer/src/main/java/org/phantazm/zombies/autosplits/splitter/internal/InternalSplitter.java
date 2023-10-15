@@ -1,6 +1,7 @@
 package org.phantazm.zombies.autosplits.splitter.internal;
 
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FutureUtils;
 import org.phantazm.zombies.autosplits.splitter.AutoSplitSplitter;
 
 import java.util.concurrent.CompletableFuture;
@@ -12,7 +13,7 @@ public class InternalSplitter implements AutoSplitSplitter {
     @Override
     public @NotNull CompletableFuture<Void> startOrSplit() {
         splitTime = System.currentTimeMillis();
-        return CompletableFuture.completedFuture(null);
+        return FutureUtils.nullCompletedFuture();
     }
 
     public void cancel() {

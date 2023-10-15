@@ -14,6 +14,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FutureUtils;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
@@ -178,7 +179,7 @@ public class ZombiesJoinCommand extends Command {
         }
 
         if (bypassRestriction) {
-            return CompletableFuture.completedFuture(true);
+            return FutureUtils.trueCompletedFuture();
         }
 
         CompletableFuture<Boolean>[] futures = new CompletableFuture[playerViews.size()];
