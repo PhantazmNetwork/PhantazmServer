@@ -93,8 +93,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         Random random = new Random();
         MobSpawner mobSpawner = mobSpawnerSource.make(scene);
         ClientBlockHandler clientBlockHandler = clientBlockHandlerSource.forInstance(instance);
-        SpawnDistributor spawnDistributor =
-            new BasicSpawnDistributor(mobSpawner, random, playerMap.values());
+        SpawnDistributor spawnDistributor = new BasicSpawnDistributor(mobSpawner, scene);
 
         Flaggable flaggable = new BasicFlaggable();
         if (mapInfo.settings().canWallshoot()) {

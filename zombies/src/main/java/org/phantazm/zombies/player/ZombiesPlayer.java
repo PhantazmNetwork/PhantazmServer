@@ -87,7 +87,12 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     }
 
     default boolean isState(@NotNull PlayerStateKey<?> stateKey) {
-        return module().getStateSwitcher().getState().key().equals(stateKey.key());
+        ZombiesPlayerState currentState = module().getStateSwitcher().getState();
+        if (currentState == null) {
+            return false;
+        }
+
+        return currentState.key().equals(stateKey.key());
     }
 
     default boolean isAlive() {

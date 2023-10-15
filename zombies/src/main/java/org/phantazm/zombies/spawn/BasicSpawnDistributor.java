@@ -9,32 +9,34 @@ import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.map.SpawnInfo;
 import org.phantazm.zombies.map.Spawnpoint;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class BasicSpawnDistributor implements SpawnDistributor {
+    private static final int SPAWN_LIMIT = 250;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicSpawnDistributor.class);
 
     private final MobSpawner spawner;
-    private final Random random;
-    private final Collection<? extends ZombiesPlayer> zombiesPlayers;
+    private final Supplier<ZombiesScene> zombiesScene;
 
-    public BasicSpawnDistributor(@NotNull MobSpawner spawner,
-        @NotNull Random random, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers) {
+    public BasicSpawnDistributor(@NotNull MobSpawner spawner, @NotNull Supplier<ZombiesScene> zombiesScene) {
         this.spawner = Objects.requireNonNull(spawner);
-        this.random = Objects.requireNonNull(random);
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
+        this.zombiesScene = Objects.requireNonNull(zombiesScene);
     }
 
     @Override
     public @NotNull List<Mob> distributeSpawns(@NotNull List<? extends Spawnpoint> spawnpoints,
         @NotNull Collection<? extends SpawnInfo> spawns) {
         if (spawnpoints.isEmpty()) {
-            return new ArrayList<>(0);
+            return List.of();
         }
 
+        ZombiesScene zombiesScene = this.zombiesScene.get();
         List<Pair<Key, Key>> spawnList = new ArrayList<>(spawns.size());
         for (SpawnInfo spawnInfo : spawns) {
             Key id = spawnInfo.id();
@@ -53,9 +55,10 @@ public class BasicSpawnDistributor implements SpawnDistributor {
             return List.of();
         }
 
+        Collection<ZombiesPlayer> players = zombiesScene.managedPlayers().values();
         List<Spawnpoint> sortedSpawnpoints = new ArrayList<>(spawnpoints.size());
         for (Spawnpoint spawnpoint : spawnpoints) {
-            if (spawnpoint.canSpawnAny(zombiesPlayers)) {
+            if (spawnpoint.canSpawnAny(players)) {
                 sortedSpawnpoints.add(spawnpoint);
             }
         }
@@ -63,28 +66,34 @@ public class BasicSpawnDistributor implements SpawnDistributor {
         sortedSpawnpoints.sort((first, second) -> {
             double firstClosest = Double.POSITIVE_INFINITY;
             double secondClosest = Double.POSITIVE_INFINITY;
-            for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
+            for (ZombiesPlayer zombiesPlayer : players) {
+                if (!zombiesPlayer.canTriggerSLA()) {
+                    continue;
+                }
+
                 Optional<Player> playerOptional = zombiesPlayer.getPlayer();
-                if (playerOptional.isPresent()) {
-                    Player player = playerOptional.get();
+                if (playerOptional.isEmpty()) {
+                    continue;
+                }
 
-                    double firstDistance = player.getDistance(first.spawnPoint());
-                    double secondDistance = player.getDistance(second.spawnPoint());
+                Player player = playerOptional.get();
 
-                    if (firstDistance < firstClosest) {
-                        firstClosest = firstDistance;
-                    }
+                double firstDistance = player.getDistance(first.spawnPoint());
+                double secondDistance = player.getDistance(second.spawnPoint());
 
-                    if (secondDistance < secondClosest) {
-                        secondClosest = secondDistance;
-                    }
+                if (firstDistance < firstClosest) {
+                    firstClosest = firstDistance;
+                }
+
+                if (secondDistance < secondClosest) {
+                    secondClosest = secondDistance;
                 }
             }
 
             return Double.compare(firstClosest, secondClosest);
         });
 
-        Collections.shuffle(spawnList, random);
+        Collections.shuffle(spawnList, zombiesScene.map().objects().module().random());
 
         List<Mob> spawnedMobs = new ArrayList<>(spawnList.size());
         int candidateIndex = 0;
@@ -98,7 +107,7 @@ public class BasicSpawnDistributor implements SpawnDistributor {
                 Spawnpoint candidate = sortedSpawnpoints.get(candidateIndex++);
                 candidateIndex %= sortedSpawnpoints.size();
 
-                if (candidate.canSpawn(spawnIdentifier, spawnType, zombiesPlayers)) {
+                if (candidate.canSpawn(spawnIdentifier, spawnType, players)) {
                     Mob mob = candidate.spawn(spawnIdentifier);
                     spawnedMobs.add(mob);
                     spawned = true;

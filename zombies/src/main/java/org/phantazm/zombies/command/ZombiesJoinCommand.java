@@ -32,7 +32,6 @@ import java.util.concurrent.CompletableFuture;
 public class ZombiesJoinCommand extends Command {
     public static final Permission BYPASS_SANDBOX_RESTRICTION = new Permission("zombies.playtest.bypass_sandbox");
 
-    @SuppressWarnings("unchecked")
     public ZombiesJoinCommand(@NotNull ZombiesJoiner zombiesJoiner, @NotNull Map<? super UUID, ? extends Party> partyMap,
         @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, long ratelimit,
         @NotNull ZombiesDatabase zombiesDatabase) {
