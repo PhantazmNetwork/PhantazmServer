@@ -135,7 +135,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             buildSpawnpoints(origin, mapInfo.spawnpoints(), spawnruleInfoMap, instance, mobSpawner, windowTracker,
                 roomTracker);
 
-        List<Round> rounds = buildRounds(mapInfo.rounds(), spawnpoints, provider, scene);
+        List<Round> rounds = buildRounds(mapInfo.rounds(), provider, scene);
 
         MapObjects mapObjects =
             new BasicMapObjects(spawnpoints, windowTracker, shopTracker, doorTracker, roomTracker, rounds, provider,
@@ -241,7 +241,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
         return rooms;
     }
 
-    private List<Round> buildRounds(List<RoundInfo> roundInfoList, List<Spawnpoint> spawnpoints,
+    private List<Round> buildRounds(List<RoundInfo> roundInfoList,
         DependencyProvider dependencyProvider, Supplier<ZombiesScene> sceneSupplier) {
         List<Round> rounds = new ArrayList<>(roundInfoList.size());
         for (RoundInfo roundInfo : roundInfoList) {
@@ -261,7 +261,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                 waves.add(new Wave(wave.delayTicks(), spawnActions, wave.spawns()));
             }
 
-            rounds.add(new Round(roundInfo.round(), waves, startActions, endActions, spawnpoints, sceneSupplier));
+            rounds.add(new Round(roundInfo.round(), waves, startActions, endActions, sceneSupplier));
         }
 
         return rounds;

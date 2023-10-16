@@ -56,9 +56,6 @@ public class BasicEndless implements Endless {
     private static final double PI_2 = Math.PI * 2;
 
     public enum ScalingMethod {
-        /**
-         * {@code ax}, where {@code x} is the current endless round, and {@code a} is the slope (value increment)
-         */
         LINEAR,
         LINEAR_SINUSOIDAL,
         CONSTANT,
@@ -113,9 +110,9 @@ public class BasicEndless implements Endless {
     }
 
     @Override
-    public @NotNull Round generateRound(int roundIndex) {
+    public @NotNull Round generateRound(int round) {
         ZombiesScene zombiesScene = this.zombiesScene.get();
-        int endlessRound = roundIndex - zombiesScene.map().roundHandler().roundCount();
+        int endlessRound = round - zombiesScene.map().roundHandler().roundCount();
         if (endlessRound < 1) {
             throw new IllegalArgumentException("Tried to generate endless round before final round");
         }
@@ -124,7 +121,7 @@ public class BasicEndless implements Endless {
             throw new IllegalArgumentException("No defined themes");
         }
 
-        Theme roundTheme = themes.get(roundIndex % themes.size());
+        Theme roundTheme = themes.get((endlessRound - 1) % themes.size());
         List<WeightedMob> themeMobs = roundTheme.mobs();
         List<WeightedMob> introducedMobs = introducedMobs(endlessRound);
 
@@ -215,8 +212,7 @@ public class BasicEndless implements Endless {
             waves.add(new Wave(actualDelay, spawnActions, spawns));
         }
 
-        return new Round(roundIndex + 1, waves, roundTheme.startActions(), roundTheme.endActions(),
-            zombiesScene.map().objects().spawnpoints(), this.zombiesScene);
+        return new Round(round, waves, roundTheme.startActions(), roundTheme.endActions(), this.zombiesScene);
     }
 
     private List<WeightedMob> introducedMobs(int endlessRound) {
@@ -276,21 +272,18 @@ public class BasicEndless implements Endless {
                 return;
             }
 
-            AttributeInstance health = mob.getAttribute(Attribute.MAX_HEALTH);
-            AttributeInstance damage = mob.getAttribute(Attribute.ATTACK_DAMAGE);
-            AttributeInstance speed = mob.getAttribute(Attribute.MOVEMENT_SPEED);
-
-            health.addModifier(new AttributeModifier(HEALTH_MODIFIER, HEALTH_MODIFIER_STRING,
-                data.healthScaling.scale(endlessRound, health.getBaseValue()), AttributeOperation.ADDITION));
-
-            damage.addModifier(new AttributeModifier(DAMAGE_MODIFIER, DAMAGE_MODIFIER_STRING,
-                data.damageScaling.scale(endlessRound, damage.getBaseValue()), AttributeOperation.ADDITION));
-
-            speed.addModifier(new AttributeModifier(SPEED_MODIFIER, SPEED_MODIFIER_STRING,
-                data.speedScaling.scale(endlessRound, speed.getBaseValue()), AttributeOperation.ADDITION));
+            scaleAttribute(mob, Attribute.MAX_HEALTH, HEALTH_MODIFIER, HEALTH_MODIFIER_STRING, data.healthScaling, endlessRound);
+            scaleAttribute(mob, Attribute.ATTACK_DAMAGE, DAMAGE_MODIFIER, DAMAGE_MODIFIER_STRING, data.damageScaling, endlessRound);
+            scaleAttribute(mob, Attribute.MOVEMENT_SPEED, SPEED_MODIFIER, SPEED_MODIFIER_STRING, data.speedScaling, endlessRound);
 
             mob.heal();
         });
+    }
+
+    private static void scaleAttribute(Mob mob, Attribute attribute, UUID id, String name, ScalingValue scalingValue, int endlessRound) {
+        AttributeInstance instance = mob.getAttribute(attribute);
+        instance.addModifier(new AttributeModifier(id, name, scalingValue.scale(endlessRound, instance.getBaseValue()),
+            AttributeOperation.ADDITION));
     }
 
     public record ScalingValue(@NotNull ScalingMethod kind,

@@ -26,7 +26,6 @@ public class Round implements Tickable {
     private final List<Wave> waves;
     private final List<Action<Round>> startActions;
     private final List<Action<Round>> endActions;
-    private final List<Spawnpoint> spawnpoints;
     private final Map<UUID, Mob> spawnedMobs;
 
     private final Supplier<ZombiesScene> sceneSupplier;
@@ -41,15 +40,13 @@ public class Round implements Tickable {
      * Constructs a new instance of this class.
      */
     public Round(int round, @NotNull List<Wave> waves, @NotNull List<Action<Round>> startActions,
-        @NotNull List<Action<Round>> endActions, @NotNull List<Spawnpoint> spawnpoints,
-        @NotNull Supplier<ZombiesScene> sceneSupplier) {
+        @NotNull List<Action<Round>> endActions, @NotNull Supplier<ZombiesScene> sceneSupplier) {
         this.round = round;
         this.waves = List.copyOf(waves);
         this.startActions = List.copyOf(startActions);
         this.endActions = List.copyOf(endActions);
 
         this.spawnedMobs = new ConcurrentHashMap<>();
-        this.spawnpoints = Objects.requireNonNull(spawnpoints);
 
         this.totalMobCount = 0;
 
@@ -166,7 +163,8 @@ public class Round implements Tickable {
             throw new IllegalStateException("Round must be active to spawn mobs");
         }
 
-        List<Mob> spawns = spawnDistributor.distributeSpawns(spawnpoints, spawnInfo);
+        List<Mob> spawns = spawnDistributor.distributeSpawns(sceneSupplier.get().map().objects().spawnpoints(),
+            spawnInfo);
         for (Mob spawn : spawns) {
             spawnedMobs.put(spawn.getUuid(), spawn);
         }
