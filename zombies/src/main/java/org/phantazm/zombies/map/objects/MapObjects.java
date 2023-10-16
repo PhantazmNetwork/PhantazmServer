@@ -140,5 +140,7 @@ public interface MapObjects {
 
         @NotNull
         Wrapper<Long> ticksSinceStart();
+
+        @NotNull Supplier<ZombiesScene> zombiesScene();
     }
 }

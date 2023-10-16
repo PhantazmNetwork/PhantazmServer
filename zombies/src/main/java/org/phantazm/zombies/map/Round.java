@@ -140,18 +140,16 @@ public class Round implements Tickable {
         totalMobCount = 0;
 
         Iterator<Mob> spawnedIterator = spawnedMobs.values().iterator();
-        do {
-            while (spawnedIterator.hasNext()) {
+        while (spawnedIterator.hasNext()) {
+            do {
                 Mob mob = spawnedIterator.next();
                 spawnedIterator.remove();
-
-                mob.getAcquirable().sync(self -> {
-                    ((LivingEntity) self).kill();
-                });
+                mob.getAcquirable().sync(self -> ((LivingEntity) self).kill());
             }
+            while (spawnedIterator.hasNext());
 
             spawnedIterator = spawnedMobs.values().iterator();
-        } while (spawnedIterator.hasNext());
+        }
     }
 
     public @NotNull List<Mob> spawnMobs(@NotNull List<SpawnInfo> spawnInfo) {

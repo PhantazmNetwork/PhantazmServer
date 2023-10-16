@@ -5,4 +5,6 @@ import org.phantazm.zombies.map.Round;
 
 public interface Endless {
     @NotNull Round generateRound(int roundIndex);
+
+    void init();
 }

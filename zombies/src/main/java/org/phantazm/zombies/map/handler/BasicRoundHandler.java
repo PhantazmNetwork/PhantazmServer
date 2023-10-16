@@ -110,7 +110,13 @@ public class BasicRoundHandler implements RoundHandler {
         currentRound = null;
     }
 
-    public void setEndless(boolean endless) {
-        this.isEndless = endless;
+    @Override
+    public boolean isEndless() {
+        return isEndless;
+    }
+
+    @Override
+    public void enableEndless() {
+        this.isEndless = true;
     }
 }

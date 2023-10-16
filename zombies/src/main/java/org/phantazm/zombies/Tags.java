@@ -12,6 +12,6 @@ public final class Tags {
     public static final Tag<Component> DAMAGE_NAME = Tag.Component("damage_name");
 
     private Tags() {
+        throw new UnsupportedOperationException();
     }
-
 }

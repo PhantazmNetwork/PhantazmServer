@@ -412,7 +412,8 @@ public class BasicMapObjectsSource implements MapObjects.Source {
             return ticksSinceStart;
         }
 
-        public @NotNull Supplier<ZombiesScene> sceneSupplier() {
+        @Override
+        public @NotNull Supplier<ZombiesScene> zombiesScene() {
             return sceneSupplier;
         }
     }

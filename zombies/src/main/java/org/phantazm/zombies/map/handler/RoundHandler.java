@@ -21,4 +21,8 @@ public interface RoundHandler extends Tickable {
     int lastMobCount();
 
     void end();
+
+    boolean isEndless();
+
+    void enableEndless();
 }
