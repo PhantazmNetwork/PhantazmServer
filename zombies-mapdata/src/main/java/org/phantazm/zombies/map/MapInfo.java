@@ -24,6 +24,7 @@ public record MapInfo(
     @NotNull LeaderboardInfo leaderboard,
     @NotNull ConfigNode scoreboard,
     @NotNull ConfigNode corpse,
+    @NotNull ConfigNode endless,
     @NotNull WebhookInfo webhook) implements Keyed {
     /**
      * Constructs a new instances of this record.
@@ -42,7 +43,8 @@ public record MapInfo(
         @NotNull List<RoomInfo> rooms, @NotNull List<DoorInfo> doors, @NotNull List<ShopInfo> shops,
         @NotNull List<WindowInfo> windows, @NotNull List<RoundInfo> rounds, @NotNull List<SpawnruleInfo> spawnrules,
         @NotNull List<SpawnpointInfo> spawnpoints, @NotNull LeaderboardInfo leaderboard,
-        @NotNull ConfigNode scoreboard, @NotNull ConfigNode corpse, @NotNull WebhookInfo webhook) {
+        @NotNull ConfigNode scoreboard, @NotNull ConfigNode corpse, @NotNull ConfigNode endless,
+        @NotNull WebhookInfo webhook) {
         this.settings = Objects.requireNonNull(settings);
         this.playerCoins = Objects.requireNonNull(playerCoins);
         this.rooms = Objects.requireNonNull(rooms);
@@ -55,6 +57,7 @@ public record MapInfo(
         this.leaderboard = Objects.requireNonNull(leaderboard);
         this.scoreboard = Objects.requireNonNull(scoreboard);
         this.corpse = Objects.requireNonNull(corpse);
+        this.endless = Objects.requireNonNull(endless);
         this.webhook = Objects.requireNonNull(webhook);
     }
 

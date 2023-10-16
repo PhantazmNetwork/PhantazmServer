@@ -42,6 +42,7 @@ import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.corpse.CorpseCreator;
+import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.Loader;
 import org.phantazm.zombies.map.MapInfo;
@@ -138,9 +139,13 @@ public final class ZombiesFeature {
 
         EventNode<Event> globalEventNode = MinecraftServer.getGlobalEventHandler();
         ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource();
+
         for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
             CorpseCreator.Source corpseCreatorSource = mapDependencyProvider -> contextManager
                 .makeContext(entry.getValue().corpse()).provide(mapDependencyProvider);
+
+            Endless.Source endlessSource = dependencyProvider -> contextManager
+                .makeContext(entry.getValue().endless()).provide(dependencyProvider);
 
             ZombiesSceneCreator provider =
                 new ZombiesSceneCreator(zombiesConfig.maximumScenes(),
@@ -150,7 +155,7 @@ public final class ZombiesFeature {
                     new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,
                         EquipmentFeature::createEquipmentCreator, contextManager,
                         keyParser),
-                    corpseCreatorSource);
+                    corpseCreatorSource, endlessSource);
             providers.put(entry.getKey(), provider);
         }
 

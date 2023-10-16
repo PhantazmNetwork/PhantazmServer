@@ -39,6 +39,7 @@ import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.corpse.CorpseCreator;
+import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
 import org.phantazm.zombies.listener.*;
 import org.phantazm.zombies.map.*;
@@ -76,6 +77,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
     private final WindowHandler.Source windowHandlerSource;
     private final DoorHandler.Source doorHandlerSource;
     private final CorpseCreator.Source corpseCreatorSource;
+    private final Endless.Source endlessSource;
     private final SongLoader songLoader;
 
     public ZombiesSceneCreator(int sceneCap,
@@ -83,7 +85,8 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
         @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
         @NotNull PowerupHandler.Source powerupHandlerSource,
-        @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource) {
+        @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource,
+        @NotNull Endless.Source endlessSource) {
         this.sceneCap = sceneCap;
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction);
         this.mapInfo = Objects.requireNonNull(mapInfo);
@@ -108,6 +111,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         this.doorHandlerSource = new BasicDoorHandlerSource();
 
         this.corpseCreatorSource = Objects.requireNonNull(corpseCreatorSource);
+        this.endlessSource = Objects.requireNonNull(endlessSource);
         this.songLoader = Objects.requireNonNull(songLoader);
     }
 
@@ -138,7 +142,8 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
                 powerupHandlerWrapper, windowHandlerWrapper, eventNodeWrapper,
                 songPlayer, songLoader, tickTaskScheduler, ticksSinceStart);
 
-        RoundHandler roundHandler = new BasicRoundHandler(zombiesPlayers.values(), mapObjects.rounds());
+        Endless endless = createEndless(mapObjects.mapDependencyProvider());
+        RoundHandler roundHandler = new BasicRoundHandler(zombiesPlayers.values(), mapObjects.rounds(), endless);
         roundHandlerWrapper.set(roundHandler);
 
         PowerupHandler powerupHandler = powerupHandlerSource.make(sceneWrapper.unmodifiableView());
@@ -225,6 +230,10 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
 
     private CorpseCreator createCorpseCreator(DependencyProvider mapDependencyProvider) {
         return corpseCreatorSource.make(mapDependencyProvider);
+    }
+
+    private Endless createEndless(DependencyProvider mapDependencyProvider) {
+        return endlessSource.make(mapDependencyProvider);
     }
 
     private MapObjects createMapObjects(Supplier<ZombiesScene> scene, Instance instance,

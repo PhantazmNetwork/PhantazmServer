@@ -1,6 +1,7 @@
 package org.phantazm.zombies.map.handler;
 
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -12,6 +13,7 @@ import java.util.Optional;
 public class BasicRoundHandler implements RoundHandler {
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
     private final List<Round> rounds;
+    private final Endless endless;
 
     private Round currentRound;
     private int roundIndex;
@@ -20,9 +22,11 @@ public class BasicRoundHandler implements RoundHandler {
     private boolean hasEnded;
     private boolean isEndless;
 
-    public BasicRoundHandler(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull List<Round> rounds) {
+    public BasicRoundHandler(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull List<Round> rounds,
+        @NotNull Endless endless) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
         this.rounds = Objects.requireNonNull(rounds);
+        this.endless = Objects.requireNonNull(endless);
 
         if (rounds.isEmpty()) {
             hasEnded = true;

@@ -118,6 +118,10 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
             "corpse" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         ConfigNode corpse = Configuration.read(mapDirectory.resolve(corpsePath), codec).asNode();
 
+        String endlessPath =
+            "endless" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
+        ConfigNode endless = Configuration.read(mapDirectory.resolve(endlessPath), codec).asNode();
+
         String coinsPath =
             "coins" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
         PlayerCoinsInfo playerCoins = Configuration.read(mapDirectory.resolve(coinsPath), codec,
@@ -133,12 +137,11 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
         WebhookInfo webhook = Configuration.read(mapDirectory.resolve(webhookPath), codec,
             mappingProcessorSource.processorFor(Token.ofClass(WebhookInfo.class)));
 
-
         MapSettingsInfo mapSettingsInfo = Configuration.read(mapInfoFile, codec,
             mappingProcessorSource.processorFor(Token.ofClass(MapSettingsInfo.class)));
 
         return new MapInfo(mapSettingsInfo, playerCoins, rooms, doors, shops, windows, rounds, spawnrules, spawnpoints,
-            leaderboard, scoreboard, corpse, webhook);
+            leaderboard, scoreboard, corpse, endless, webhook);
     }
 
     @Override
@@ -219,6 +222,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
 
         Configuration.write(mapDirectory.resolve("sidebar" + extension), data.scoreboard(), codec);
         Configuration.write(mapDirectory.resolve("corpse" + extension), data.corpse(), codec);
+        Configuration.write(mapDirectory.resolve("endless" + extension), data.endless(), codec);
     }
 
     @Override
