@@ -258,12 +258,7 @@ public class BasicMapObjectsSource implements MapObjects.Source {
                     .provideCollection(ElementPath.EMPTY,
                         dependencyProvider, HANDLER);
 
-                int count = 0;
-                for (SpawnInfo spawnInfo : wave.spawns()) {
-                    count += spawnInfo.amount();
-                }
-
-                waves.add(new Wave(wave.delayTicks(), count, spawnActions, wave.spawns()));
+                waves.add(new Wave(wave.delayTicks(), spawnActions, wave.spawns()));
             }
 
             rounds.add(new Round(roundInfo.round(), waves, startActions, endActions, spawnpoints, sceneSupplier));

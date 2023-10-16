@@ -12,12 +12,18 @@ public class Wave {
     private final List<Action<List<Mob>>> spawnActions;
     private final List<SpawnInfo> spawns;
 
-    public Wave(long delayTicks, int mobCount, @NotNull List<Action<List<Mob>>> spawnActions,
+    public Wave(long delayTicks, @NotNull List<Action<List<Mob>>> spawnActions,
         @NotNull List<SpawnInfo> spawns) {
         this.delayTicks = delayTicks;
-        this.mobCount = mobCount;
         this.spawnActions = List.copyOf(spawnActions);
         this.spawns = List.copyOf(spawns);
+
+        int count = 0;
+        for (SpawnInfo info : spawns) {
+            count += info.amount();
+        }
+
+        this.mobCount = count;
     }
 
     /**

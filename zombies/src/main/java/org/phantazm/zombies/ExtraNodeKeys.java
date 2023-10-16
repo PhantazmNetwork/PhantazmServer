@@ -12,5 +12,6 @@ public final class ExtraNodeKeys {
     public static final String BYPASS_ENDLESS_SCALING = "bypassEndlessScaling";
 
     private ExtraNodeKeys() {
+        throw new UnsupportedOperationException();
     }
 }
