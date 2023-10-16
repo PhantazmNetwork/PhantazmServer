@@ -2,6 +2,7 @@ package org.phantazm.zombies.spawn;
 
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
@@ -17,8 +18,6 @@ import java.util.*;
 import java.util.function.Supplier;
 
 public class BasicSpawnDistributor implements SpawnDistributor {
-    private static final int SPAWN_LIMIT = 250;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicSpawnDistributor.class);
 
     private final MobSpawner spawner;
@@ -77,9 +76,10 @@ public class BasicSpawnDistributor implements SpawnDistributor {
                 }
 
                 Player player = playerOptional.get();
+                Pos playerPos = player.getPosition();
 
-                double firstDistance = player.getDistance(first.spawnPoint());
-                double secondDistance = player.getDistance(second.spawnPoint());
+                double firstDistance = playerPos.distanceSquared(first.spawnPoint());
+                double secondDistance = playerPos.distanceSquared(second.spawnPoint());
 
                 if (firstDistance < firstClosest) {
                     firstClosest = firstDistance;
