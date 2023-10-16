@@ -1,12 +1,12 @@
 package org.phantazm.zombies.endless;
 
-import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.mapper.annotation.Default;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeInstance;
@@ -62,6 +62,43 @@ public class BasicEndless implements Endless {
         SINUSOIDAL
     }
 
+    public record ScalingValue(@NotNull ScalingMethod kind,
+        double ceiling,
+        double floor,
+        double a,
+        double b,
+        double c,
+        double d) {
+        public double scale(int x, double base) {
+            return MathUtils.clamp(switch (kind) {
+                case LINEAR -> base + (a * x);
+                case LINEAR_SINUSOIDAL -> base + ((b * x) / a) + ((b / (PI_2)) * Math.sin((PI_2 / a) * x));
+                case CONSTANT -> base + a;
+                case SINUSOIDAL -> base + (Math.sin(Math.PI * (b * x + a)) * c);
+            }, floor, ceiling);
+        }
+
+        @Default("a")
+        public static @NotNull ConfigElement defaultA() {
+            return ConfigPrimitive.of(1);
+        }
+
+        @Default("b")
+        public static @NotNull ConfigElement defaultB() {
+            return ConfigPrimitive.of(1);
+        }
+
+        @Default("c")
+        public static @NotNull ConfigElement defaultC() {
+            return ConfigPrimitive.of(1);
+        }
+
+        @Default("d")
+        public static @NotNull ConfigElement defaultD() {
+            return ConfigPrimitive.of(1);
+        }
+    }
+
     public record WeightedMob(@NotNull Key key,
         @NotNull Key spawnType,
         int weight) {
@@ -83,14 +120,99 @@ public class BasicEndless implements Endless {
         @NotNull List<Action<Round>> endActions();
     }
 
-    public interface Introduction {
-        @NotNull List<WeightedMob> spawns();
+    @Model("zombies.endless.basic.wave_actions")
+    @Cache(false)
+    public static class IndicatedWaveActions {
+        private final Data data;
+        private final List<Action<List<Mob>>> spawnActions;
 
-        int startRound();
+        @FactoryMethod
+        public IndicatedWaveActions(@NotNull Data data,
+            @NotNull @Child("spawn_actions") List<Action<List<Mob>>> spawnActions) {
+            this.data = data;
+            this.spawnActions = spawnActions;
+        }
 
-        int period();
+        @DataObject
+        public record Data(int wave,
+            @NotNull @ChildPath("spawn_actions") ConfigList spawnActions) {
+        }
+    }
 
-        int count();
+    @Model("zombies.endless.basic.theme")
+    @Cache(false)
+    public static class BasicTheme implements Theme {
+        private final Data data;
+        private final Int2ObjectMap<List<Action<List<Mob>>>> actionMap;
+        private final List<Action<Round>> startActions;
+        private final List<Action<Round>> endActions;
+
+        @FactoryMethod
+        public BasicTheme(@NotNull Data data,
+            @NotNull @Child("wave_actions") List<IndicatedWaveActions> waveActions,
+            @NotNull @Child("start_actions") List<Action<Round>> startActions,
+            @NotNull @Child("end_actions") List<Action<Round>> endActions) {
+            this.data = data;
+            this.actionMap = new Int2ObjectOpenHashMap<>(waveActions.size());
+            this.startActions = startActions;
+            this.endActions = endActions;
+
+            for (IndicatedWaveActions actions : waveActions) {
+                this.actionMap.put(actions.data.wave, actions.spawnActions);
+            }
+        }
+
+        @Override
+        public @NotNull List<WeightedMob> mobs() {
+            return data.mobs;
+        }
+
+        @Override
+        public @NotNull ScalingValue waveWeight() {
+            return data.waveWeight;
+        }
+
+        @Override
+        public @NotNull ScalingValue baseWaveDelayTicks() {
+            return data.baseWaveDelayTicks;
+        }
+
+        @Override
+        public @NotNull ScalingValue offsetWaveDelayTicks() {
+            return data.offsetWaveDelayTicks;
+        }
+
+        @Override
+        public @NotNull List<Action<List<Mob>>> spawnActions(int wave) {
+            return actionMap.getOrDefault(wave, List.of());
+        }
+
+        @Override
+        public @NotNull List<Action<Round>> startActions() {
+            return startActions;
+        }
+
+        @Override
+        public @NotNull List<Action<Round>> endActions() {
+            return endActions;
+        }
+
+        @DataObject
+        public record Data(@NotNull List<WeightedMob> mobs,
+            @NotNull ScalingValue waveWeight,
+            @NotNull ScalingValue baseWaveDelayTicks,
+            @NotNull ScalingValue offsetWaveDelayTicks,
+            @NotNull @ChildPath("wave_actions") ConfigList waveActions,
+            @NotNull @ChildPath("start_actions") ConfigList startActions,
+            @NotNull @ChildPath("end_actions") ConfigList endActions) {
+        }
+    }
+
+    public record Introduction(@NotNull List<WeightedMob> spawns,
+        int startRound,
+        int period,
+        int count) {
+
     }
 
     private final Data data;
@@ -197,7 +319,7 @@ public class BasicEndless implements Endless {
                 int newTotal = totalMobCount + mobCount;
                 if (newTotal > totalMobs) {
                     mobCount -= newTotal - totalMobs;
-                    newTotal = cap;
+                    newTotal = totalMobs;
                 }
 
                 if (mobCount == 0) {
@@ -280,42 +402,11 @@ public class BasicEndless implements Endless {
         });
     }
 
-    private static void scaleAttribute(Mob mob, Attribute attribute, UUID id, String name, ScalingValue scalingValue, int endlessRound) {
+    private static void scaleAttribute(Mob mob, Attribute attribute, UUID id, String name, ScalingValue scalingValue,
+        int endlessRound) {
         AttributeInstance instance = mob.getAttribute(attribute);
         instance.addModifier(new AttributeModifier(id, name, scalingValue.scale(endlessRound, instance.getBaseValue()),
             AttributeOperation.ADDITION));
-    }
-
-    public record ScalingValue(@NotNull ScalingMethod kind,
-        double ceiling,
-        double floor,
-        double a,
-        double b,
-        double c,
-        double d) {
-        public double scale(int x, double base) {
-            return MathUtils.clamp(switch (kind) {
-                case LINEAR -> base + (a * x);
-                case LINEAR_SINUSOIDAL -> base + ((b * x) / a) + ((b / (PI_2)) * Math.sin((PI_2 / a) * x));
-                case CONSTANT -> base + a;
-                case SINUSOIDAL -> base + (Math.sin(Math.PI * (b * x + a)) * c);
-            }, floor, ceiling);
-        }
-
-        @Default("a")
-        public static @NotNull ConfigElement defaultA() {
-            return ConfigPrimitive.of(1);
-        }
-
-        @Default("b")
-        public static @NotNull ConfigElement defaultB() {
-            return ConfigPrimitive.of(1);
-        }
-
-        @Default("c")
-        public static @NotNull ConfigElement defaultC() {
-            return ConfigPrimitive.of(1);
-        }
     }
 
     @DataObject
