@@ -69,12 +69,17 @@ public class BasicEndless implements Endless {
         double c,
         double d) {
         public double scale(int x, double base) {
-            return MathUtils.clamp(switch (kind) {
-                case LINEAR -> base + (a * x);
-                case LINEAR_SINUSOIDAL -> base + ((b * x) / a) + ((b / (PI_2)) * Math.sin((PI_2 / a) * x));
-                case CONSTANT -> base + a;
-                case SINUSOIDAL -> base + (Math.sin(Math.PI * (b * x + a)) * c);
+            return base + MathUtils.clamp(switch (kind) {
+                case LINEAR -> (a * x);
+                case LINEAR_SINUSOIDAL -> ((b * x) / a) + ((b / (PI_2)) * Math.sin((PI_2 / a) * x));
+                case CONSTANT -> a;
+                case SINUSOIDAL -> (Math.sin(Math.PI * (b * x + a)) * c);
             }, floor, ceiling);
+        }
+
+        @Default("floor")
+        public static @NotNull ConfigElement defaultFloor() {
+            return ConfigPrimitive.of(0);
         }
 
         @Default("a")
@@ -221,19 +226,19 @@ public class BasicEndless implements Endless {
 
     @FactoryMethod
     public BasicEndless(@NotNull Data data, @NotNull Supplier<ZombiesScene> zombiesScene,
-        @NotNull List<Theme> themes, @NotNull List<Introduction> introductions) {
+        @NotNull @Child("themes") List<Theme> themes) {
         this.data = data;
         this.zombiesScene = zombiesScene;
         this.themes = themes;
 
-        this.introductions = new ArrayList<>(introductions);
+        this.introductions = new ArrayList<>(data.introductions);
         this.introductions.sort(Comparator.comparingInt(Introduction::startRound));
     }
 
     @Override
-    public @NotNull Round generateRound(int round) {
+    public @NotNull Round generateRound(int roundIndex) {
         ZombiesScene zombiesScene = this.zombiesScene.get();
-        int endlessRound = round - zombiesScene.map().roundHandler().roundCount();
+        int endlessRound = (roundIndex - zombiesScene.map().roundHandler().roundCount()) + 1;
         if (endlessRound < 1) {
             throw new IllegalArgumentException("Tried to generate endless round before final round");
         }
@@ -289,8 +294,7 @@ public class BasicEndless implements Endless {
 
         int totalMobs = 0;
         for (int j = 0; j < mergedCounts.length; j++) {
-            int additionalMobs = (int) Math.rint((j < themeMobs.size() ? themeMobs.get(j) :
-                introducedMobs.get(j - themeMobs.size())).weight * spawnPercentages[j]);
+            int additionalMobs = (int) Math.rint(spawnPercentages[j] * cap);
 
             int newTotal = totalMobs + additionalMobs;
             if (newTotal > cap) {
@@ -333,7 +337,7 @@ public class BasicEndless implements Endless {
             waves.add(new Wave(actualDelay, spawnActions, spawns));
         }
 
-        return new Round(round, waves, roundTheme.startActions(), roundTheme.endActions(), this.zombiesScene);
+        return new Round(roundIndex + 1, waves, roundTheme.startActions(), roundTheme.endActions(), this.zombiesScene);
     }
 
     private List<WeightedMob> introducedMobs(int endlessRound) {
@@ -368,7 +372,7 @@ public class BasicEndless implements Endless {
             }
         }
 
-        return introducedMobs;
+        return introducedMobs == null ? List.of() : introducedMobs;
     }
 
     @Override
@@ -415,6 +419,8 @@ public class BasicEndless implements Endless {
         @NotNull ScalingValue spawnAmountScaling,
         double spawnAmountBase,
         @NotNull ScalingValue waveScaling,
-        double waveBase) {
+        double waveBase,
+        @NotNull List<Introduction> introductions,
+        @NotNull @ChildPath("themes") List<String> themes) {
     }
 }

@@ -50,7 +50,7 @@ public class RoundCommand extends SandboxLockedCommand {
         int roundCount = handler.roundCount();
         int roundIndex = context.get(ROUND_NUMBER) - 1;
 
-        if (roundIndex < 0 || roundIndex >= roundCount) {
+        if (!handler.isEndless() && (roundIndex < 0 || roundIndex >= roundCount)) {
             sender.sendMessage(
                 Component.text("Round " + (roundIndex + 1) + " is out of bounds!", NamedTextColor.RED));
             return;

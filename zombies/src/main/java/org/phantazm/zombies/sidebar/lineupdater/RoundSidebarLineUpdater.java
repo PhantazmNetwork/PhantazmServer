@@ -40,8 +40,7 @@ public class RoundSidebarLineUpdater implements SidebarLineUpdater {
         int newIndex = roundHandler.currentRoundIndex();
         if ((lastRoundIndex == -1 || lastRoundIndex != newIndex) && newIndex != -1) {
             lastRoundIndex = newIndex;
-            TagResolver roundPlaceholder = Placeholder.component("round", Component.text(Math.min(lastRoundIndex + 1,
-                roundHandler.roundCount())));
+            TagResolver roundPlaceholder = Placeholder.component("round", Component.text(roundHandler.currentRoundIndex() + 1));
             return Optional.of(MiniMessage.miniMessage().deserialize(data.format, roundPlaceholder));
         }
 

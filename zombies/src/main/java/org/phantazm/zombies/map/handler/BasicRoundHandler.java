@@ -67,6 +67,8 @@ public class BasicRoundHandler implements RoundHandler {
             currentRound = endless.generateRound(roundIndex);
             currentRound.startRound();
             lastMobCount = currentRound.totalMobCount();
+
+            this.currentRound = currentRound;
         } else {
             this.hasEnded = true;
             this.currentRound = null;
