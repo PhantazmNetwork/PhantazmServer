@@ -12,5 +12,5 @@ public interface SceneCreator<T extends Scene> {
 
     int playerCap();
 
-    boolean hasPermission(@NotNull Set<? extends @NotNull PlayerView> players);
+    boolean canCreateOrJoin(@NotNull Set<? extends @NotNull PlayerView> players);
 }

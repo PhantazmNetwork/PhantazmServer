@@ -278,7 +278,7 @@ public class BasicEndless implements Endless {
 
         double[] waveWeights = new double[waveCount];
         for (int j = 0; j < waveCount; j++) {
-            waveWeights[j] = roundTheme.waveWeight().scale(j + 1, 0);
+            waveWeights[j] = roundTheme.waveWeight().scale(j + 1, data.waveWeightBase);
         }
 
         double waveWeightSum = 0;
@@ -308,7 +308,7 @@ public class BasicEndless implements Endless {
 
         int totalMobCount = 0;
         for (int j = 0; j < waveCount; j++) {
-            int baseDelay = (int) Math.rint(roundTheme.baseWaveDelayTicks().scale(endlessRound, 0));
+            int baseDelay = (int) Math.rint(roundTheme.baseWaveDelayTicks().scale(endlessRound, data.waveDelayBase));
             int actualDelay = MathUtils.clamp((int) Math.rint(roundTheme.offsetWaveDelayTicks()
                 .scale(j + 1, baseDelay)), ABSOLUTE_WAVE_DELAY_MINIMUM, ABSOLUTE_WAVE_DELAY_MAXIMUM);
 
@@ -420,6 +420,8 @@ public class BasicEndless implements Endless {
         double spawnAmountBase,
         @NotNull ScalingValue waveScaling,
         double waveBase,
+        double waveDelayBase,
+        double waveWeightBase,
         @NotNull List<Introduction> introductions,
         @NotNull @ChildPath("themes") List<String> themes) {
     }

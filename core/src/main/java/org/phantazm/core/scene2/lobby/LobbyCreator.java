@@ -82,7 +82,7 @@ public class LobbyCreator implements SceneCreator<Lobby> {
     }
 
     @Override
-    public boolean hasPermission(@NotNull Set<? extends @NotNull PlayerView> players) {
+    public boolean canCreateOrJoin(@NotNull Set<? extends @NotNull PlayerView> players) {
         return true;
     }
 }

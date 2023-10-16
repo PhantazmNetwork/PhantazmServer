@@ -122,6 +122,16 @@ public class ZombiesJoinCommand extends Command {
             }
 
             Set<Key> modifiers = ModifierHandler.Global.instance().getModifiers(joinerView);
+            MapInfo mapInfo = maps.get(targetMap);
+
+            for (Key modifier : modifiers) {
+                if (mapInfo.settings().disallowedModifiers().contains(modifier)) {
+                    sender.sendMessage(Component.text("One or more of your modifiers are disallowed on this map!",
+                        NamedTextColor.RED));
+                    return;
+                }
+            }
+
             boolean sandbox = context.get(sandboxArgument);
             boolean restricted = context.get(restrictedArgument);
 

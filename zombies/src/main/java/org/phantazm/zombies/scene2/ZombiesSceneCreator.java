@@ -215,7 +215,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
     }
 
     @Override
-    public boolean hasPermission(@NotNull Set<? extends @NotNull PlayerView> players) {
+    public boolean canCreateOrJoin(@NotNull Set<? extends @NotNull PlayerView> players) {
         List<Player> onlinePlayers = PlayerView.getMany(players, ArrayList::new);
         for (String permission : mapInfo.settings().requiredPermissions()) {
             for (Player player : onlinePlayers) {

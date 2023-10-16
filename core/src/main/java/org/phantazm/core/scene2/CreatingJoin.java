@@ -31,14 +31,14 @@ public abstract class CreatingJoin<T extends Scene> extends JoinAbstract<T> {
         }
 
         return (sceneCap < 0 || currentAmount + 1 <= sceneCap) && (playerCap < 0 || playerViews().size() <= playerCap)
-            && sceneCreator.hasPermission(playerViews());
+            && sceneCreator.canCreateOrJoin(playerViews());
     }
 
     @Override
     public boolean matches(@NotNull T scene) {
         int playerCap = sceneCreator.playerCap();
         return playerCap < 0 || scene.playerCount() + newPlayerCount(scene) <= playerCap &&
-            sceneCreator.hasPermission(playerViews());
+            sceneCreator.canCreateOrJoin(playerViews());
     }
 
     /**

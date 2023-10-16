@@ -64,6 +64,7 @@ public record MapSettingsInfo(
     int punchCooldown,
     boolean trackStats,
     boolean mobPlayerCollisions,
+    @NotNull Set<Key> disallowedModifiers,
     @NotNull Map<Key, List<Key>> defaultEquipment,
     @NotNull Map<Key, EquipmentGroupInfo> equipmentGroups,
     @NotNull String winTitleFormat,
@@ -154,7 +155,7 @@ public record MapSettingsInfo(
             new ArrayList<>(0), 400L, new ArrayList<>(0),
             Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F), "", 200L, "",
             Component.text(id.value()), 0, 4, 1, 0, 20, 3, 1, 20, 500, 20, 2, 10, false, new ArrayList<>(), 30, 5,
-            0, 4.5F, 0.4F, 20, true, false, new HashMap<>(0), new HashMap<>(), "", "", "", "", "", "", "", "", "",
+            0, 4.5F, 0.4F, 20, true, false, new HashSet<>(), new HashMap<>(0), new HashMap<>(), "", "", "", "", "", "", "", "", "",
             Sound.sound(Key.key("minecraft:block.brewing_stand.brew"), Sound.Source.MASTER, 1.0F, 1.0F), "", "", "",
             "", Sound.sound(Key.key("minecraft:entity.ender_dragon.growl"), Sound.Source.MASTER, 1.0F, 0.5F), "",
             "", Sound.sound(Key.key("minecraft:entity.player.hurt"), Sound.Source.MASTER, 1.0F, 1.0F), "", "",
@@ -210,5 +211,10 @@ public record MapSettingsInfo(
     @Default("modifierReportFormat")
     public static @NotNull ConfigElement defaultModifierReportFormat() {
         return ConfigPrimitive.of("Enabled modifiers: <modifiers>");
+    }
+
+    @Default("disallowedModifiers")
+    public static @NotNull ConfigElement defaultDisallowedModifiers() {
+        return ConfigList.of();
     }
 }
