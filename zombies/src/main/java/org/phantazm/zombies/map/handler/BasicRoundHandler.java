@@ -63,6 +63,10 @@ public class BasicRoundHandler implements RoundHandler {
             lastMobCount = currentRound.totalMobCount();
 
             this.currentRound = currentRound;
+        } else if (isEndless) {
+            currentRound = endless.generateRound(roundIndex);
+            currentRound.startRound();
+            lastMobCount = currentRound.totalMobCount();
         } else {
             this.hasEnded = true;
             this.currentRound = null;
@@ -76,19 +80,21 @@ public class BasicRoundHandler implements RoundHandler {
 
     @Override
     public int currentRoundIndex() {
-        return Math.min(roundIndex, rounds.size() - 1);
+        return isEndless ? this.roundIndex : Math.min(roundIndex, rounds.size() - 1);
     }
 
     @Override
     public void setCurrentRound(int roundIndex) {
-        Objects.checkIndex(roundIndex, rounds.size());
+        if (!isEndless) {
+            Objects.checkIndex(roundIndex, rounds.size());
+        }
 
         if (currentRound != null) {
             currentRound.endRound();
         }
 
         this.roundIndex = roundIndex;
-        currentRound = rounds.get(roundIndex);
+        currentRound = roundIndex < rounds.size() ? rounds.get(roundIndex) : endless.generateRound(roundIndex);
         currentRound.startRound();
         lastMobCount = currentRound.totalMobCount();
     }
