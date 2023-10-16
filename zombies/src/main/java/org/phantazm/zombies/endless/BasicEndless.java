@@ -3,7 +3,6 @@ package org.phantazm.zombies.endless;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
-import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -135,7 +134,7 @@ public class BasicEndless implements Endless {
 
         @DataObject
         public record Data(int wave,
-            @NotNull @ChildPath("spawn_actions") ConfigList spawnActions) {
+            @NotNull @ChildPath("spawn_actions") List<String> spawnActions) {
         }
     }
 
@@ -202,9 +201,9 @@ public class BasicEndless implements Endless {
             @NotNull ScalingValue waveWeight,
             @NotNull ScalingValue baseWaveDelayTicks,
             @NotNull ScalingValue offsetWaveDelayTicks,
-            @NotNull @ChildPath("wave_actions") ConfigList waveActions,
-            @NotNull @ChildPath("start_actions") ConfigList startActions,
-            @NotNull @ChildPath("end_actions") ConfigList endActions) {
+            @NotNull @ChildPath("wave_actions") List<String> waveActions,
+            @NotNull @ChildPath("start_actions") List<String> startActions,
+            @NotNull @ChildPath("end_actions") List<String> endActions) {
         }
     }
 
