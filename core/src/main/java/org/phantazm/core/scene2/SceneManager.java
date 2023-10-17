@@ -211,7 +211,7 @@ public final class SceneManager {
 
         /**
          * Join status used in {@link SceneJoinEvent} to indicate an internal error occurred. Players may have been
-         * moved, some state may have changed.
+         * moved, some state may have changed. This typically indicates a bug.
          */
         INTERNAL_ERROR
     }
@@ -814,7 +814,8 @@ public final class SceneManager {
      * however, a best-effort attempt is always made to find a suitable existing scene.
      * <p>
      * Finally, if one or more players attempt to participate in more than 1 Join at the same time, subsequent attempts
-     * will immediately fail (they will return a CompletableFuture containing {@code false}).
+     * will immediately fail (they will return a CompletableFuture containing a {@link JoinResult} indicating the
+     * failure, with a status of {@link JoinStatus#ALREADY_JOINING}).
      *
      * @param join the Join to fulfill
      * @param <T>  the type of scene
