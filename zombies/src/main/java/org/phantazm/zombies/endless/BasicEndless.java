@@ -9,8 +9,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeInstance;
-import net.minestom.server.attribute.AttributeModifier;
-import net.minestom.server.attribute.AttributeOperation;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.MathUtils;
 import org.phantazm.mob2.Mob;
@@ -26,21 +24,11 @@ import org.phantazm.zombies.scene2.ZombiesScene;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 @Model("zombies.endless.basic")
 @Cache(false)
 public class BasicEndless implements Endless {
-    private static final UUID HEALTH_MODIFIER = UUID.randomUUID();
-    private static final String HEALTH_MODIFIER_STRING = HEALTH_MODIFIER.toString();
-
-    private static final UUID DAMAGE_MODIFIER = UUID.randomUUID();
-    private static final String DAMAGE_MODIFIER_STRING = DAMAGE_MODIFIER.toString();
-
-    private static final UUID SPEED_MODIFIER = UUID.randomUUID();
-    private static final String SPEED_MODIFIER_STRING = SPEED_MODIFIER.toString();
-
     //could be substantially raised but will degrade client performance
     //maps can be configured to have lower spawn caps than this, but not higher!
     private static final int ABSOLUTE_MAX_SPAWN_AMOUNT = 250;
@@ -392,24 +380,22 @@ public class BasicEndless implements Endless {
                 return;
             }
 
-            int endlessRound = roundHandler.currentRoundIndex() - roundHandler.roundCount();
+            int endlessRound = (roundHandler.currentRoundIndex() - roundHandler.roundCount()) + 1;
             if (endlessRound < 1) {
                 return;
             }
 
-            scaleAttribute(mob, Attribute.MAX_HEALTH, HEALTH_MODIFIER, HEALTH_MODIFIER_STRING, data.healthScaling, endlessRound);
-            scaleAttribute(mob, Attribute.ATTACK_DAMAGE, DAMAGE_MODIFIER, DAMAGE_MODIFIER_STRING, data.damageScaling, endlessRound);
-            scaleAttribute(mob, Attribute.MOVEMENT_SPEED, SPEED_MODIFIER, SPEED_MODIFIER_STRING, data.speedScaling, endlessRound);
+            scaleAttribute(mob, Attribute.MAX_HEALTH, data.healthScaling, endlessRound);
+            scaleAttribute(mob, Attribute.ATTACK_DAMAGE, data.damageScaling, endlessRound);
+            scaleAttribute(mob, Attribute.MOVEMENT_SPEED, data.speedScaling, endlessRound);
 
             mob.heal();
         });
     }
 
-    private static void scaleAttribute(Mob mob, Attribute attribute, UUID id, String name, ScalingValue scalingValue,
-        int endlessRound) {
+    private static void scaleAttribute(Mob mob, Attribute attribute, ScalingValue scalingValue, int endlessRound) {
         AttributeInstance instance = mob.getAttribute(attribute);
-        instance.addModifier(new AttributeModifier(id, name, scalingValue.scale(endlessRound, instance.getBaseValue()),
-            AttributeOperation.ADDITION));
+        instance.setBaseValue((float) scalingValue.scale(endlessRound, instance.getBaseValue()));
     }
 
     @DataObject
