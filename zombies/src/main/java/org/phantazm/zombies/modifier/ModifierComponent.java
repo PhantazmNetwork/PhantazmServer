@@ -14,6 +14,8 @@ import java.util.Set;
 public interface ModifierComponent extends DualComponent<ZombiesScene, Modifier>, Keyed {
     @NotNull Component displayName();
 
+    @NotNull String webhookEmoji();
+
     @NotNull ItemStack displayItem();
 
     int ordinal();

@@ -29,6 +29,11 @@ class ModifierUtilsTest {
                 }
 
                 @Override
+                public @NotNull String webhookEmoji() {
+                    return ":skull:";
+                }
+
+                @Override
                 public @NotNull ItemStack displayItem() {
                     return ItemStack.AIR;
                 }

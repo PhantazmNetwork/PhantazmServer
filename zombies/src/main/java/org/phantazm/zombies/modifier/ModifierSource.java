@@ -37,6 +37,11 @@ public class ModifierSource implements ModifierComponent {
     }
 
     @Override
+    public @NotNull String webhookEmoji() {
+        return data.webhookEmoji();
+    }
+
+    @Override
     public @NotNull ItemStack displayItem() {
         return data.displayItem();
     }
