@@ -8,11 +8,8 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.metadata.ProjectileMeta;
-import net.minestom.server.event.EventDispatcher;
-import net.minestom.server.event.entity.EntityShootEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
-import net.minestom.server.event.entity.projectile.ProjectileUncollideEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
@@ -78,13 +75,6 @@ public class ProjectileMovementGoal implements ProximaGoal {
             projectileMeta.setShooter(shooter);
         }
 
-        EntityShootEvent shootEvent = new EntityShootEvent(shooter, entity, to, power, spread);
-        EventDispatcher.call(shootEvent);
-        if (shootEvent.isCancelled()) {
-            entity.remove();
-            return;
-        }
-
         Pos from = this.shooter.getPosition().add(0D, this.shooter.getEyeHeight(), 0D);
         double dx = to.x() - from.x();
         double dy = to.y() - from.y();
@@ -123,7 +113,6 @@ public class ProjectileMovementGoal implements ProximaGoal {
         } else if (collided) {
             collided = false;
             entity.setNoGravity(false);
-            EventDispatcher.call(new ProjectileUncollideEvent(entity));
         }
 
         this.previousPos = currentPos;
@@ -169,10 +158,8 @@ public class ProjectileMovementGoal implements ProximaGoal {
                 .intersectBox(previousPos.sub(blockPos.blockX(), blockPos.blockY(), blockPos.blockZ()),
                     entity.getBoundingBox())) {
 
-                final ProjectileCollideWithBlockEvent event =
-                    new ProjectileCollideWithBlockEvent(entity, previousPos, block);
                 entity.teleport(previousPos);
-                blockCollideCallback.accept(event);
+                blockCollideCallback.accept(new ProjectileCollideWithBlockEvent(entity, previousPos, block));
                 return true;
             }
 
@@ -186,9 +173,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
                     continue;
                 }
 
-                final ProjectileCollideWithEntityEvent event =
-                    new ProjectileCollideWithEntityEvent(entity, previousPos, victim);
-                projectileCollideCallback.accept(event);
+                projectileCollideCallback.accept(new ProjectileCollideWithEntityEvent(entity, previousPos, victim));
                 return collided || entity.isOnGround();
             }
         }
