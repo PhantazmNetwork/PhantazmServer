@@ -165,7 +165,7 @@ public class BasicWindowHandler implements WindowHandler {
 
                 Wrapper<Boolean> hasNearby = Wrapper.of(false);
                 targetWindow.instance().getEntityTracker()
-                    .nearbyEntitiesUntil(targetWindow.center(), 5, EntityTracker.Target.LIVING_ENTITIES,
+                    .nearbyEntitiesUntil(targetWindow.center(), 3, EntityTracker.Target.LIVING_ENTITIES,
                         candidate -> {
                             if (!(candidate instanceof Mob)) {
                                 return false;
