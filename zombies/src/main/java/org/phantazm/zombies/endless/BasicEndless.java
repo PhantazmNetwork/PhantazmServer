@@ -282,7 +282,7 @@ public class BasicEndless implements Endless {
 
         int totalMobs = 0;
         for (int j = 0; j < mergedCounts.length; j++) {
-            int additionalMobs = (int) Math.rint(spawnPercentages[j] * cap);
+            int additionalMobs = Math.max((int) Math.rint(spawnPercentages[j] * cap), 1);
 
             int newTotal = totalMobs + additionalMobs;
             if (newTotal > cap) {
@@ -305,7 +305,7 @@ public class BasicEndless implements Endless {
             int[] waveCounts = new int[mergedCounts.length];
             List<SpawnInfo> spawns = new ArrayList<>(waveCounts.length);
             for (int k = 0; k < waveCounts.length; k++) {
-                int mobCount = (int) Math.rint(mergedCounts[k] * waveWeights[j]);
+                int mobCount = Math.max((int) Math.rint(mergedCounts[k] * waveWeights[j]), 1);
 
                 int newTotal = totalMobCount + mobCount;
                 if (newTotal > totalMobs) {
