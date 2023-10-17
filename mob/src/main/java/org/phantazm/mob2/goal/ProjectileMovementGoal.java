@@ -171,13 +171,9 @@ public class ProjectileMovementGoal implements ProximaGoal {
 
                 final ProjectileCollideWithBlockEvent event =
                     new ProjectileCollideWithBlockEvent(entity, previousPos, block);
+                entity.teleport(previousPos);
                 blockCollideCallback.accept(event);
-
-                EventDispatcher.call(event);
-                if (!event.isCancelled()) {
-                    entity.teleport(previousPos);
-                    return true;
-                }
+                return true;
             }
 
             Collection<LivingEntity> entities = instance.getEntityTracker()
@@ -193,11 +189,7 @@ public class ProjectileMovementGoal implements ProximaGoal {
                 final ProjectileCollideWithEntityEvent event =
                     new ProjectileCollideWithEntityEvent(entity, previousPos, victim);
                 projectileCollideCallback.accept(event);
-
-                EventDispatcher.call(event);
-                if (!event.isCancelled()) {
-                    return collided || entity.isOnGround();
-                }
+                return collided || entity.isOnGround();
             }
         }
         return false;
