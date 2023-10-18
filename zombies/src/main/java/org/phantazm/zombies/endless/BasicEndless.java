@@ -296,7 +296,7 @@ public class BasicEndless implements Endless {
 
         int totalMobCount = 0;
         for (int j = 0; j < waveCount; j++) {
-            int baseDelay = (int) Math.rint(roundTheme.baseWaveDelayTicks().scale(endlessRound, data.waveDelayBase));
+            double baseDelay = roundTheme.baseWaveDelayTicks().scale(endlessRound, data.waveDelayBase);
             int actualDelay = MathUtils.clamp((int) Math.rint(roundTheme.offsetWaveDelayTicks()
                 .scale(j + 1, baseDelay)), ABSOLUTE_WAVE_DELAY_MINIMUM, ABSOLUTE_WAVE_DELAY_MAXIMUM);
 
