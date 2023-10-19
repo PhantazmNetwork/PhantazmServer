@@ -294,7 +294,47 @@ public class BasicEndless implements Endless {
             totalMobs = newTotal;
         }
 
-        int totalMobCount = 0;
+        int[][] allocatedMobs = new int[mergedCounts.length][waveCount];
+        for (int j = 0; j < mergedCounts.length; j++) {
+            int[] waveCounts = allocatedMobs[j];
+
+            int mobCount = mergedCounts[j];
+            int totalSpawned = 0;
+            for (int k = 0; k < waveCount; k++) {
+                int thisSpawn = (int) Math.rint(waveWeights[k] * mobCount);
+                if (totalSpawned + thisSpawn <= mobCount) {
+                    waveCounts[k] = thisSpawn;
+                    totalSpawned += thisSpawn;
+                }
+            }
+
+            //not all necessary spawns were allocated
+            if (totalSpawned < mobCount) {
+                int unspawnedMobs = mobCount - totalSpawned;
+
+                //assign to the highest weight that's got the fewest number of mobs
+                while (unspawnedMobs != 0) {
+                    int highestWeightIndex = -1;
+                    double highestWeight = Double.NEGATIVE_INFINITY;
+                    for (int k = 0; k < waveCount; k++) {
+                        double preference = waveWeights[k] / waveCounts[k];
+                        if (preference > highestWeight) {
+                            highestWeightIndex = k;
+                            highestWeight = preference;
+                        }
+                    }
+
+                    //should never happen, but don't break stuff if it does!
+                    if (highestWeightIndex == -1) {
+                        break;
+                    }
+
+                    waveCounts[highestWeightIndex] += 1;
+                    unspawnedMobs--;
+                }
+            }
+        }
+
         for (int j = 0; j < waveCount; j++) {
             double baseDelay = roundTheme.baseWaveDelayTicks().scale(endlessRound, data.waveDelayBase);
             int actualDelay = MathUtils.clamp((int) Math.rint(roundTheme.offsetWaveDelayTicks()
@@ -302,24 +342,10 @@ public class BasicEndless implements Endless {
 
             List<Action<List<Mob>>> spawnActions = roundTheme.spawnActions(j + 1);
 
-            int[] waveCounts = new int[mergedCounts.length];
-            List<SpawnInfo> spawns = new ArrayList<>(waveCounts.length);
-            for (int k = 0; k < waveCounts.length; k++) {
-                int mobCount = Math.max((int) Math.rint(mergedCounts[k] * waveWeights[j]), 1);
-
-                int newTotal = totalMobCount + mobCount;
-                if (newTotal > totalMobs) {
-                    mobCount -= newTotal - totalMobs;
-                    newTotal = totalMobs;
-                }
-
-                if (mobCount == 0) {
-                    continue;
-                }
-
+            List<SpawnInfo> spawns = new ArrayList<>(mergedCounts.length);
+            for (int k = 0; k < mergedCounts.length; k++) {
                 WeightedMob mob = k < themeMobs.size() ? themeMobs.get(k) : introducedMobs.get(k - themeMobs.size());
-                spawns.add(new SpawnInfo(mob.key, mob.spawnType, mobCount));
-                totalMobCount = newTotal;
+                spawns.add(new SpawnInfo(mob.key, mob.spawnType, allocatedMobs[k][j]));
             }
 
             waves.add(new Wave(actualDelay, spawnActions, spawns));
