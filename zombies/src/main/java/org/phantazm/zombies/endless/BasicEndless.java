@@ -344,8 +344,13 @@ public class BasicEndless implements Endless {
 
             List<SpawnInfo> spawns = new ArrayList<>(mergedCounts.length);
             for (int k = 0; k < mergedCounts.length; k++) {
+                int count = allocatedMobs[k][j];
+                if (count == 0) {
+                    continue;
+                }
+
                 WeightedMob mob = k < themeMobs.size() ? themeMobs.get(k) : introducedMobs.get(k - themeMobs.size());
-                spawns.add(new SpawnInfo(mob.key, mob.spawnType, allocatedMobs[k][j]));
+                spawns.add(new SpawnInfo(mob.key, mob.spawnType, count));
             }
 
             waves.add(new Wave(actualDelay, spawnActions, spawns));
