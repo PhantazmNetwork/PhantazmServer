@@ -302,36 +302,40 @@ public class BasicEndless implements Endless {
             int totalSpawned = 0;
             for (int k = 0; k < waveCount; k++) {
                 int thisSpawn = (int) Math.rint(waveWeights[k] * mobCount);
-                if (totalSpawned + thisSpawn <= mobCount) {
-                    waveCounts[k] = thisSpawn;
-                    totalSpawned += thisSpawn;
+                if (totalSpawned + thisSpawn > mobCount) {
+                    break;
                 }
+
+                waveCounts[k] = thisSpawn;
+                totalSpawned += thisSpawn;
+            }
+
+            if (totalSpawned == mobCount) {
+                continue;
             }
 
             //not all necessary spawns were allocated
-            if (totalSpawned < mobCount) {
-                int unspawnedMobs = mobCount - totalSpawned;
+            int unspawnedMobs = mobCount - totalSpawned;
 
-                //assign to the highest weight that's got the fewest number of mobs
-                while (unspawnedMobs != 0) {
-                    int highestWeightIndex = -1;
-                    double highestWeight = Double.NEGATIVE_INFINITY;
-                    for (int k = 0; k < waveCount; k++) {
-                        double preference = waveWeights[k] / waveCounts[k];
-                        if (preference > highestWeight) {
-                            highestWeightIndex = k;
-                            highestWeight = preference;
-                        }
+            //assign to the highest weight that's got the fewest number of mobs
+            while (unspawnedMobs != 0) {
+                int highestWeightIndex = -1;
+                double highestWeight = Double.NEGATIVE_INFINITY;
+                for (int k = 0; k < waveCount; k++) {
+                    double preference = waveWeights[k] / waveCounts[k];
+                    if (preference > highestWeight) {
+                        highestWeightIndex = k;
+                        highestWeight = preference;
                     }
-
-                    //should never happen, but don't break stuff if it does!
-                    if (highestWeightIndex == -1) {
-                        break;
-                    }
-
-                    waveCounts[highestWeightIndex] += 1;
-                    unspawnedMobs--;
                 }
+
+                //should never happen, but don't break stuff if it does!
+                if (highestWeightIndex == -1) {
+                    break;
+                }
+
+                waveCounts[highestWeightIndex] += 1;
+                unspawnedMobs--;
             }
         }
 
