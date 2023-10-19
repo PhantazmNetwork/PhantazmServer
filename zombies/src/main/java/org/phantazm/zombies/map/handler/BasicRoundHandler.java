@@ -57,14 +57,22 @@ public class BasicRoundHandler implements RoundHandler {
                 .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
         }
 
-        if (++roundIndex < rounds.size()) {
-            currentRound = rounds.get(roundIndex);
+        int nextIndex = ++roundIndex;
+        if (nextIndex == Integer.MAX_VALUE) { //would cause overflow of the round display
+            this.roundIndex = Integer.MAX_VALUE - 1;
+            this.hasEnded = true;
+            this.currentRound = null;
+            return;
+        }
+
+        if (nextIndex < rounds.size()) {
+            currentRound = rounds.get(nextIndex);
             currentRound.startRound();
             lastMobCount = currentRound.totalMobCount();
 
             this.currentRound = currentRound;
         } else if (isEndless) {
-            currentRound = endless.generateRound(roundIndex);
+            currentRound = endless.generateRound(nextIndex);
             currentRound.startRound();
             lastMobCount = currentRound.totalMobCount();
 
@@ -87,6 +95,10 @@ public class BasicRoundHandler implements RoundHandler {
 
     @Override
     public void setCurrentRound(int roundIndex) {
+        if (roundIndex < 0 || roundIndex == Integer.MAX_VALUE) {
+            return;
+        }
+
         if (!isEndless) {
             Objects.checkIndex(roundIndex, rounds.size());
         }
