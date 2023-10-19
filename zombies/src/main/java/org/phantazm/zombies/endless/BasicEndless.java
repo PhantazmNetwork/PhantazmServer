@@ -303,6 +303,9 @@ public class BasicEndless implements Endless {
             for (int k = 0; k < waveCount; k++) {
                 int thisSpawn = (int) Math.rint(waveWeights[k] * mobCount);
                 if (totalSpawned + thisSpawn > mobCount) {
+                    thisSpawn -= (totalSpawned + thisSpawn) - mobCount;
+                    waveCounts[k] = thisSpawn;
+                    totalSpawned = mobCount;
                     break;
                 }
 
@@ -311,6 +314,7 @@ public class BasicEndless implements Endless {
             }
 
             if (totalSpawned == mobCount) {
+                balanceAllocations(waveCounts, waveWeights);
                 continue;
             }
 
@@ -337,6 +341,8 @@ public class BasicEndless implements Endless {
                 waveCounts[highestWeightIndex] += 1;
                 unspawnedMobs--;
             }
+
+            balanceAllocations(waveCounts, waveWeights);
         }
 
         for (int j = 0; j < waveCount; j++) {
@@ -361,6 +367,28 @@ public class BasicEndless implements Endless {
         }
 
         return new Round(roundIndex + 1, waves, roundTheme.startActions(), roundTheme.endActions(), this.zombiesScene);
+    }
+
+    private static void balanceAllocations(int[] waveCounts, double[] waveWeights) {
+        for (int i = 0; i < waveCounts.length; i++) {
+            int thisCount = waveCounts[i];
+            double thisWeight = waveWeights[i];
+
+            for (int k = i + 1; k < waveCounts.length; k++) {
+                int thatCount = waveCounts[k];
+                double thatWeight = waveWeights[k];
+
+                //this has more mobs, but a smaller weight!
+                //this is just an off-by-one due to rounding
+                if (thisWeight < thatWeight && thisCount > thatCount) {
+                    waveCounts[i]--;
+                    waveCounts[k]++;
+                } else if (thisWeight > thatWeight && thisCount < thatCount) {
+                    waveCounts[k]--;
+                    waveCounts[i]++;
+                }
+            }
+        }
     }
 
     private List<WeightedMob> introducedMobs(int endlessRound) {
