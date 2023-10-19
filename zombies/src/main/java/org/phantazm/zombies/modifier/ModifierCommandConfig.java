@@ -15,7 +15,9 @@ public record ModifierCommandConfig(@NotNull String listFormat,
     @NotNull Component noEnabledModifiers,
     @NotNull Component enabledModifiers,
     @NotNull Component modifierKeyTooLong,
+    @NotNull Component noPermission,
     @NotNull String modifierDoesNotExistFormat) {
+
     public static ModifierCommandConfig DEFAULT = new ModifierCommandConfig("Modifier Key: <modifier_key><br>Modifiers: <modifiers>",
         "Removed <modifier_count> modifiers", "Conflicting modifiers: <conflicts>",
         Component.text("An internal error occurred when executing this command, please report this incident to server staff!", NamedTextColor.RED),
@@ -25,5 +27,6 @@ public record ModifierCommandConfig(@NotNull String listFormat,
         Component.text("There are no enabled modifiers!", NamedTextColor.RED),
         Component.text("Enabled modifiers!", NamedTextColor.GREEN),
         Component.text("That modifier key is too long!", NamedTextColor.RED),
+        Component.text("You do not have permission to use this modifier!", NamedTextColor.RED),
         "<red><modifier> does not exist!</red>");
 }

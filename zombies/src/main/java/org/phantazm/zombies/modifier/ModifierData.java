@@ -8,6 +8,7 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +20,7 @@ public record ModifierData(int ordinal,
     @NotNull ItemStack displayItem,
     @NotNull Set<Key> exclusiveModifiers,
     @NotNull String webhookEmoji,
+    @NotNull Set<Permission> requiredPermissions,
     @NotNull ConfigNode modifier) {
     @Default("displayName")
     public static @NotNull ConfigElement defaultDisplayName() {
@@ -33,6 +35,11 @@ public record ModifierData(int ordinal,
     @Default("webhookEmoji")
     public static @NotNull ConfigElement defaultWebhookEmoji() {
         return ConfigPrimitive.of("game_die");
+    }
+
+    @Default("requiredPermissions")
+    public static @NotNull ConfigElement defaultRequiredPermissions() {
+        return ConfigList.of();
     }
 
     @Default("modifier")

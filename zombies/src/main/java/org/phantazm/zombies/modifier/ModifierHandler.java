@@ -5,6 +5,8 @@ import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Player;
+import net.minestom.server.permission.Permission;
 import net.minestom.server.tag.Tag;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +24,8 @@ public final class ModifierHandler {
         MODIFIER_DISABLED,
         MODIFIER_ALREADY_ENABLED,
         CONFLICTING_MODIFIERS,
-        INVALID_MODIFIER
+        INVALID_MODIFIER,
+        NO_PERMISSIONS
     }
 
     public record ModifierResult(@NotNull ModifierHandler.ModifierStatus status,
@@ -33,6 +36,7 @@ public final class ModifierHandler {
     private static final ModifierResult ALREADY_ENABLED = new ModifierResult(ModifierStatus.MODIFIER_ALREADY_ENABLED, null);
     private static final ModifierResult DISABLED = new ModifierResult(ModifierStatus.MODIFIER_DISABLED, null);
     private static final ModifierResult INVALID = new ModifierResult(ModifierStatus.INVALID_MODIFIER, null);
+    private static final ModifierResult NO_PERMISSIONS = new ModifierResult(ModifierStatus.NO_PERMISSIONS, null);
 
     private static final Tag<List<String>> MODIFIERS_TAG = Tag.String("zombies_modifiers").list();
 
@@ -74,6 +78,27 @@ public final class ModifierHandler {
         this.injectionStore = Objects.requireNonNull(injectionStore);
     }
 
+    private boolean noPermissions(PlayerView playerView, ModifierComponent modifierComponent) {
+        Optional<Player> playerOptional = playerView.getPlayer();
+        if (playerOptional.isEmpty()) {
+            return true;
+        }
+
+        Set<Permission> requiredPermissions = modifierComponent.requiredPermissions();
+        if (requiredPermissions.isEmpty()) {
+            return false;
+        }
+
+        Player player = playerOptional.get();
+        for (Permission permission : requiredPermissions) {
+            if (!player.hasPermission(permission)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void applyModifiers(@NotNull Set<@NotNull Key> modifiers, @NotNull ZombiesScene scene) {
         Objects.requireNonNull(modifiers);
         Objects.requireNonNull(scene);
@@ -105,6 +130,11 @@ public final class ModifierHandler {
             List<String> mutableCopy = list == null ? new ArrayList<>(1) : new ArrayList<>(list);
             if (toggle && mutableCopy.remove(keyString)) {
                 return List.copyOf(mutableCopy);
+            }
+
+            if (noPermissions(player, toggledComponent)) {
+                result.set(NO_PERMISSIONS);
+                return list;
             }
 
             Set<ModifierComponent> conflictingModifiers = null;
@@ -154,6 +184,12 @@ public final class ModifierHandler {
 
         if (conflictingModifiers != null) {
             return new ModifierResult(ModifierStatus.CONFLICTING_MODIFIERS, List.copyOf(conflictingModifiers));
+        }
+
+        for (ModifierComponent component : components) {
+            if (noPermissions(playerView, component)) {
+                return NO_PERMISSIONS;
+            }
         }
 
         playerView.setTag(MODIFIERS_TAG, components.stream().map(modifierComponent ->

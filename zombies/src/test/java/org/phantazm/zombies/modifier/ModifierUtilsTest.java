@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.permission.Permission;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -45,6 +46,11 @@ class ModifierUtilsTest {
 
                 @Override
                 public @NotNull @Unmodifiable Set<Key> exclusiveModifiers() {
+                    return Set.of();
+                }
+
+                @Override
+                public @NotNull Set<Permission> requiredPermissions() {
                     return Set.of();
                 }
 

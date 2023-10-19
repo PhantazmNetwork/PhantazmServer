@@ -82,6 +82,7 @@ public class ModifierCommand extends Command {
                     sender.sendMessage(MiniMessage.miniMessage().deserialize(config.showConflictsFormat(), conflictsTag));
                 }
                 case INVALID_MODIFIER -> sender.sendMessage(config.internalError());
+                case NO_PERMISSIONS -> sender.sendMessage(config.noPermission());
             }
         }, modifierAction, modifierArgument);
 
@@ -162,6 +163,7 @@ public class ModifierCommand extends Command {
                         sender.sendMessage(MiniMessage.miniMessage().deserialize(config.showConflictsFormat(), conflictsTag));
                     }
                     case INVALID_MODIFIER -> sender.sendMessage(config.internalError());
+                    case NO_PERMISSIONS -> sender.sendMessage(config.noPermission());
                 }
             }, descriptorArgument);
         }

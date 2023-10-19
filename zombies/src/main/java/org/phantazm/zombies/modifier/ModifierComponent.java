@@ -4,6 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.DualComponent;
@@ -21,4 +22,6 @@ public interface ModifierComponent extends DualComponent<ZombiesScene, Modifier>
     int ordinal();
 
     @NotNull @Unmodifiable Set<Key> exclusiveModifiers();
+
+    @NotNull Set<Permission> requiredPermissions();
 }
