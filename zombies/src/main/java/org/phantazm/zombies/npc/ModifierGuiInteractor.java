@@ -67,6 +67,7 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
         @NotNull Component disabledAllMessage,
         @NotNull String conflictingModifiersFormat,
         @NotNull Component invalidModifierMessage,
+        @NotNull Component noPermissionMessage,
         @NotNull Sound successSound,
         @NotNull Sound failureSound) {
         @Default("modifierTogglePadding")
@@ -253,6 +254,10 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
                     case INVALID_MODIFIER -> {
                         player.playSound(data.failureSound);
                         player.sendMessage(data.invalidModifierMessage);
+                    }
+                    case NO_PERMISSIONS -> {
+                        player.playSound(data.failureSound);
+                        player.sendMessage(data.noPermissionMessage);
                     }
                 }
             }
