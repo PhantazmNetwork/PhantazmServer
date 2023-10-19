@@ -473,5 +473,19 @@ public class BasicEndless implements Endless {
         double waveWeightBase,
         @NotNull List<Introduction> introductions,
         @NotNull @ChildPath("themes") List<String> themes) {
+        @Default("waveBase")
+        public static @NotNull ConfigElement defaultWaveBase() {
+            return ConfigPrimitive.of(3);
+        }
+
+        @Default("waveDelayBase")
+        public static @NotNull ConfigElement defaultWaveDelayBase() {
+            return ConfigPrimitive.of(0);
+        }
+
+        @Default("waveWeightBase")
+        public static @NotNull ConfigElement defaultWaveWeightBase() {
+            return ConfigPrimitive.of(0);
+        }
     }
 }
