@@ -62,6 +62,12 @@ public class RoundCommand extends SandboxLockedCommand {
             return;
         }
 
+        if (isRestricted && handler.isEndless()) {
+            sender.sendMessage(Component.text("You do not have permission to use this command in Endless!",
+                NamedTextColor.RED));
+            return;
+        }
+
         scene.setLegit(false);
 
         StageTransition transition = scene.stageTransition();
