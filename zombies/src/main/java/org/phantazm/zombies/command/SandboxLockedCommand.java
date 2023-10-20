@@ -23,6 +23,6 @@ public abstract class SandboxLockedCommand extends SceneLocalCommand<ZombiesScen
 
     @Override
     protected boolean hasPermission(@NotNull CommandContext context, @NotNull ZombiesScene scene, @NotNull Player sender) {
-        return sender.hasPermission(permission) || scene.isSandbox();
+        return sender.hasPermission(permission) || (scene.isSandbox() && !scene.map().roundHandler().isEndless());
     }
 }
