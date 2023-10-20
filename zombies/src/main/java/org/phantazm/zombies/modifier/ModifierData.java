@@ -34,7 +34,7 @@ public record ModifierData(int ordinal,
 
     @Default("webhookEmoji")
     public static @NotNull ConfigElement defaultWebhookEmoji() {
-        return ConfigPrimitive.of("game_die");
+        return ConfigPrimitive.of(":game_die:");
     }
 
     @Default("requiredPermissions")
