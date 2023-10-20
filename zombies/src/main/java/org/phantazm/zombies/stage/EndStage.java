@@ -23,6 +23,7 @@ import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.WebhookInfo;
 import org.phantazm.zombies.map.handler.RoundHandler;
+import org.phantazm.zombies.modifier.ModifierComponent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
@@ -41,10 +42,10 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class EndStage implements Stage {
     private static final Logger LOGGER = LoggerFactory.getLogger(EndStage.class);
-    private static final CompletableFuture<?>[] EMPTY_COMPLETABLE_FUTURE_ARRAY = new CompletableFuture[0];
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
     private final Instance instance;
@@ -244,8 +245,16 @@ public class EndStage implements Stage {
             }
 
             String date = "<t:" + Instant.now().getEpochSecond() + ":f>";
+            String modifiers;
+            ZombiesScene zombiesScene = this.sceneSupplier.get();
+            Set<ModifierComponent> activeModifiers = zombiesScene.activeModifiers();
+            if (activeModifiers.isEmpty()) {
+                modifiers = "`None`";
+            } else {
+                modifiers = activeModifiers.stream().map(ModifierComponent::webhookEmoji).collect(Collectors.joining());
+            }
 
-            CompletableFuture.allOf(futures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY)).thenCompose(ignored -> {
+            CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).thenCompose(ignored -> {
                 List<String> formattedUsernames = new ArrayList<>(futures.size());
                 for (int i = 0; i < futures.size(); i++) {
                     formattedUsernames.add(
@@ -255,7 +264,7 @@ public class EndStage implements Stage {
 
                 String playerList = String.join(", ", formattedUsernames);
                 String output = MessageFormat.format(webhook.webhookFormat(), date, time, zombiesPlayers.size(),
-                    playerList);
+                    playerList, modifiers);
                 HttpRequest request = HttpRequest.newBuilder(URI.create(webhook.webhookURL()))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(output))
