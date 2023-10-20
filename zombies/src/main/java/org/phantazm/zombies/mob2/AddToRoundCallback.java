@@ -8,10 +8,7 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.skill.SpawnCallback;
 import org.phantazm.mob2.skill.SpawnCallbackComponent;
-import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.scene2.ZombiesScene;
-
-import java.util.Optional;
 
 @Model("zombies.mob.skill.spawn_mob.callback.add_to_round")
 @Cache
@@ -29,12 +26,9 @@ public class AddToRoundCallback implements SpawnCallbackComponent {
     private record Internal(ZombiesScene scene) implements SpawnCallback {
         @Override
         public void accept(@NotNull Mob mob) {
-            Optional<Round> roundOptional = scene.map().roundHandler().currentRound();
-            if (roundOptional.isEmpty()) {
-                return;
-            }
-
-            roundOptional.get().addMob(mob);
+            scene.getAcquirable().sync(self -> {
+                self.map().roundHandler().currentRound().ifPresent(round -> round.addMob(mob));
+            });
         }
     }
 }
