@@ -45,6 +45,7 @@ public class Mob extends ProximaEntity {
     private Reference<Player> lastInteractingPlayer;
 
     private boolean useStateHolder;
+    private UUID owner;
 
     private record TeamSettings(Component displayName,
         byte friendlyFlags,
@@ -118,6 +119,29 @@ public class Mob extends ProximaEntity {
     public void addSkill(@NotNull Skill skill) {
         Objects.requireNonNull(skill);
         addSkill0(skill);
+    }
+
+    /**
+     * Sets the owner UUID of this entity. This is typically the entity that resulted in the creation of this one. If
+     * {@code owner} equals this entity's UUID, this method will do nothing.
+     *
+     * @param owner the owner entity UUID
+     */
+    public void setOwner(@Nullable UUID owner) {
+        if (Objects.equals(owner, getUuid())) {
+            return;
+        }
+
+        this.owner = owner;
+    }
+
+    /**
+     * Gets the current owner UUID of this entity. The returned UUID will not be equal to this entity's UUID.
+     *
+     * @return the entity UUID of this entity's owner, or this UUID if none has been set
+     */
+    public @Nullable UUID getOwner() {
+        return this.owner;
     }
 
     /**

@@ -102,6 +102,7 @@ public class ShootProjectileSkill implements SkillComponent {
 
         private void shootAtPoint(Instance instance, Point target) {
             spawner.spawn(data.entity, instance, self.getPosition().add(0, self.getEyeHeight(), 0), self -> {
+                self.setOwner(this.self.getUuid());
                 callback.accept(self);
 
                 self.setNoGravity(!data.gravity);
