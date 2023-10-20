@@ -66,6 +66,10 @@ public class SpawnMobSkill implements SkillComponent {
         public static @NotNull ConfigElement defaultUseLocalCount() {
             return ConfigPrimitive.of(false);
         }
+
+        private boolean unlimitedSpawns() {
+            return maxSpawn < 0;
+        }
     }
 
     private static class Internal extends TargetedSkill {
@@ -82,7 +86,7 @@ public class SpawnMobSkill implements SkillComponent {
             this.mobSpawner = mobSpawner;
             this.callback = callback;
             this.spawnCountTag = spawnCountTag;
-            this.ownerTags = data.maxSpawn < 0 ? null : (data.useLocalCount ? self : findRootOwner()).tagHandler();
+            this.ownerTags = data.unlimitedSpawns() ? null : (data.useLocalCount ? self : findRootOwner()).tagHandler();
         }
 
         @Override
@@ -101,13 +105,7 @@ public class SpawnMobSkill implements SkillComponent {
                 return;
             }
 
-            boolean unlimited = data.maxSpawn < 0;
-            if (!unlimited) {
-                spawn(false, instance, points);
-                return;
-            }
-
-            spawn(true, instance, points);
+            spawn(instance, points);
         }
 
         private Mob findRootOwner() {
@@ -128,9 +126,9 @@ public class SpawnMobSkill implements SkillComponent {
             return current;
         }
 
-        private void spawn(boolean unlimited, Instance instance, Collection<? extends Point> points) {
-            if (unlimited) {
-                spawnAt(true, instance, points);
+        private void spawn(Instance instance, Collection<? extends Point> points) {
+            if (data.unlimitedSpawns()) {
+                spawnAt(instance, points);
                 return;
             }
 
@@ -156,27 +154,27 @@ public class SpawnMobSkill implements SkillComponent {
                 return currentAmount;
             });
 
-            spawnAt(false, instance, spawnTargets);
+            spawnAt(instance, spawnTargets);
         }
 
-        private void spawnAt(boolean unlimited, Instance instance, Collection<? extends Point> points) {
-            for (Point point : points) {
-                Mob mob = mobSpawner.spawn(data.identifier, instance, Pos.fromPoint(point), self -> {
-                    self.setOwner(super.self.getUuid());
-                    if (unlimited) {
-                        return;
-                    }
-
-                    self.addSkill(new Skill() {
-                        @Override
-                        public void end() {
-                            ownerTags.updateTag(spawnCountTag, value -> value - 1);
-                        }
-                    });
-                });
-
-                callback.accept(mob);
+        private void spawnAt(Instance instance, Collection<? extends Point> targets) {
+            for (Point point : targets) {
+                callback.accept(mobSpawner.spawn(data.identifier, instance, Pos.fromPoint(point), this::setup));
             }
+        }
+
+        private void setup(Mob self) {
+            self.setOwner(super.self.getUuid());
+            if (data.unlimitedSpawns()) {
+                return;
+            }
+
+            self.addSkill(new Skill() {
+                @Override
+                public void end() {
+                    ownerTags.updateTag(spawnCountTag, value -> value - 1);
+                }
+            });
         }
 
         @Override
