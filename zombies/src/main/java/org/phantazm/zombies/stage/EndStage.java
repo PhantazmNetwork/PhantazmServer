@@ -172,12 +172,14 @@ public class EndStage implements Stage {
                 MINI_MESSAGE.deserialize(settings.winSubtitleFormat(), roundPlaceholder));
 
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-                if (isLegit && settings.trackStats() && !scene.isModified()) {
+                if (isLegit && settings.trackStats()) {
                     ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
                     stats.setWins(stats.getWins() + 1);
 
-                    database.synchronizeBestTime(zombiesPlayer.getUUID(), settings.id(), zombiesPlayers.size(), "",
-                        ticksSinceStart.get());
+                    if (!scene.isModified()) {
+                        database.synchronizeBestTime(zombiesPlayer.getUUID(), settings.id(), zombiesPlayers.size(), "",
+                            ticksSinceStart.get());
+                    }
                 }
 
                 zombiesPlayer.getPlayer().ifPresent(player -> {
