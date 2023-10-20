@@ -59,6 +59,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
     private boolean legit;
     private boolean sandbox;
     private boolean restricted;
+    private boolean modified;
 
     private final Set<ModifierComponent> activeModifiers;
     private final Set<ModifierComponent> activeModifiersView;
@@ -351,8 +352,11 @@ public class ZombiesScene extends InstanceScene implements EventScene {
             this.tickingModifiers.add(actualModifier);
         }
 
-        //TODO: this is temporary, modifiers will eventually have dedicated leaderboards
-        this.legit = false;
+        this.modified = true;
+    }
+
+    public boolean isModified() {
+        return modified;
     }
 
     public @NotNull @UnmodifiableView Set<ModifierComponent> activeModifiers() {

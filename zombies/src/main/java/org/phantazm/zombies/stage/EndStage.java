@@ -140,7 +140,8 @@ public class EndStage implements Stage {
     public void start() {
         instance.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_DRAGON_DEATH, Sound.Source.MASTER, 1.0F, 1.0F));
 
-        boolean isLegit = sceneSupplier.get().isLegit() && ticksSinceStart.get() > 20;
+        ZombiesScene scene = this.sceneSupplier.get();
+        boolean isLegit = scene.isLegit() && ticksSinceStart.get() > 20;
         boolean anyAlive = false;
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (zombiesPlayer.isAlive()) {
@@ -171,7 +172,7 @@ public class EndStage implements Stage {
                 MINI_MESSAGE.deserialize(settings.winSubtitleFormat(), roundPlaceholder));
 
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-                if (isLegit && settings.trackStats()) {
+                if (isLegit && settings.trackStats() && !scene.isModified()) {
                     ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
                     stats.setWins(stats.getWins() + 1);
 
@@ -249,7 +250,7 @@ public class EndStage implements Stage {
             ZombiesScene zombiesScene = this.sceneSupplier.get();
             Set<ModifierComponent> activeModifiers = zombiesScene.activeModifiers();
             if (activeModifiers.isEmpty()) {
-                modifiers = "`None`";
+                modifiers = webhook.noModifierPlaceholder();
             } else {
                 modifiers = activeModifiers.stream().map(ModifierComponent::webhookEmoji).collect(Collectors.joining());
             }
