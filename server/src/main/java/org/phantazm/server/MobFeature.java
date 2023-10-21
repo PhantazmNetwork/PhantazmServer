@@ -1,42 +1,36 @@
 package org.phantazm.server;
 
+import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.context.ContextManager;
+import com.github.steanky.element.core.context.ElementContext;
+import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.bridge.Configuration;
+import com.github.steanky.ethylene.core.collection.ConfigEntry;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
-import it.unimi.dsi.fastutil.booleans.BooleanObjectPair;
+import com.github.steanky.ethylene.mapper.MappingProcessorSource;
+import com.github.steanky.ethylene.mapper.type.Token;
+import com.github.steanky.proxima.path.Pathfinder;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.metadata.villager.VillagerMeta;
+import net.minestom.server.entity.EquipmentSlot;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jglrxavpok.hephaistos.nbt.NBT;
-import org.phantazm.commons.ConfigProcessors;
 import org.phantazm.commons.FileUtils;
-import org.phantazm.core.config.processor.ItemStackConfigProcessors;
-import org.phantazm.core.config.processor.MinestomConfigProcessors;
-import org.phantazm.mob.MobModel;
-import org.phantazm.mob.config.MobModelConfigProcessor;
-import org.phantazm.mob.goal.*;
-import org.phantazm.mob.skill.*;
-import org.phantazm.mob.target.*;
-import org.phantazm.mob.validator.*;
-import org.phantazm.zombies.mob.goal.BreakNearbyWindowGoal;
-import org.phantazm.zombies.mob.skill.AttributeModifyingSkill;
-import org.phantazm.zombies.mob.skill.ShootProjectileSkill;
-import org.phantazm.zombies.mob.skill.SummonMobSkill;
-import org.phantazm.zombies.mob.skill.hit_action.AttributeModifierAction;
-import org.phantazm.zombies.mob.skill.hit_action.DamageAction;
-import org.phantazm.zombies.mob.validator.MobValidator;
-import org.phantazm.zombies.mob.validator.ZombiesPlayerValidator;
+import org.phantazm.mob2.MobCreator;
+import org.phantazm.mob2.MobData;
+import org.phantazm.mob2.goal.GoalApplier;
+import org.phantazm.mob2.skill.SkillComponent;
+import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
+import org.phantazm.proxima.bindings.minestom.Pathfinding;
+import org.phantazm.zombies.mob2.ZombiesMobCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,198 +39,115 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-/**
- * Main entrypoint for PhantazmMob related features.
- */
 public final class MobFeature {
+    public static final Path MOBS_PATH = Path.of("./mobs");
+
+    private static final ElementPath PATHFINDING = ElementPath.of("/pathfinding");
+    private static final ElementPath SKILLS = ElementPath.of("/skills");
+    private static final ElementPath GOALS = ElementPath.of("/goals");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MobFeature.class);
 
-    private static ConfigProcessor<MobModel> MODEL_PROCESSOR;
-    private static Map<Key, MobModel> models;
-    private static Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap;
+    private static Map<Key, MobCreator> creators;
 
     private MobFeature() {
         throw new UnsupportedOperationException();
     }
 
-    @SuppressWarnings("SameParameterValue")
-    static void initialize(@NotNull ContextManager contextManager, @NotNull Path mobPath, @NotNull ConfigCodec codec) {
-        MODEL_PROCESSOR = new MobModelConfigProcessor(contextManager, ItemStackConfigProcessors.snbt());
-
-        registerElementClasses(contextManager);
-
-        Map<BooleanObjectPair<String>, ConfigProcessor<?>> processorMap = new HashMap<>();
-        processorMap.put(BooleanObjectPair.of(false, byte.class.getName()), ConfigProcessor.BYTE);
-        processorMap.put(BooleanObjectPair.of(false, int.class.getName()), ConfigProcessor.INTEGER);
-        processorMap.put(BooleanObjectPair.of(false, float.class.getName()), ConfigProcessor.FLOAT);
-        processorMap.put(BooleanObjectPair.of(false, String.class.getName()), ConfigProcessor.STRING);
-        processorMap.put(BooleanObjectPair.of(false, Component.class.getName()), ConfigProcessors.component());
-        processorMap.put(BooleanObjectPair.of(true, Component.class.getName()),
-                ConfigProcessors.component().optionalProcessor());
-        processorMap.put(BooleanObjectPair.of(false, ItemStack.class.getName()), ItemStackConfigProcessors.snbt());
-        processorMap.put(BooleanObjectPair.of(false, boolean.class.getName()), ConfigProcessor.BOOLEAN);
-        processorMap.put(BooleanObjectPair.of(false, Point.class.getName()), MinestomConfigProcessors.point());
-        processorMap.put(BooleanObjectPair.of(true, Point.class.getName()),
-                MinestomConfigProcessors.point().optionalProcessor());
-        processorMap.put(BooleanObjectPair.of(false, Direction.class.getName()),
-                ConfigProcessor.enumProcessor(Direction.class));
-        processorMap.put(BooleanObjectPair.of(true, UUID.class.getName()), ConfigProcessors.uuid());
-        processorMap.put(BooleanObjectPair.of(true, Integer.class.getName()), new ConfigProcessor<Integer>() {
-
-            private final ConfigProcessor<Integer> delegate = ConfigProcessor.INTEGER;
-
-            @Override
-            public @Nullable Integer dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                if (element.isNull()) {
-                    return null;
-                }
-
-                return delegate.dataFromElement(element);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@Nullable Integer integer) throws ConfigProcessException {
-                if (integer == null) {
-                    return ConfigPrimitive.NULL;
-                }
-
-                return delegate.elementFromData(integer);
-            }
-        });
-        processorMap.put(BooleanObjectPair.of(false, NBT.class.getName()), MinestomConfigProcessors.nbt());
-        processorMap.put(BooleanObjectPair.of(false, VillagerMeta.VillagerData.class.getName()),
-                MinestomConfigProcessors.villagerData());
-        processorMap.put(BooleanObjectPair.of(false, Entity.Pose.class.getName()),
-                ConfigProcessor.enumProcessor(Entity.Pose.class));
-
-        MobFeature.processorMap = Map.copyOf(processorMap);
-
-        loadModels(mobPath, codec);
-    }
-
-    private static void registerElementClasses(@NotNull ContextManager contextManager) {
-        //goal appliers
-        contextManager.registerElementClass(CollectionGoalApplier.class);
-
-        //mob goals
-        contextManager.registerElementClass(FollowEntityGoal.class);
-        contextManager.registerElementClass(ChargeAtEntityGoal.class);
-        contextManager.registerElementClass(MeleeAttackGoal.class);
-        contextManager.registerElementClass(PlayStepSoundGoal.class);
-
-        //zombies mob goals
-        contextManager.registerElementClass(BreakNearbyWindowGoal.class);
-
-        //mob skills
-        contextManager.registerElementClass(AddVelocitySkill.class);
-        contextManager.registerElementClass(ApplyPotionSkill.class);
-        contextManager.registerElementClass(BleedEntitiesSkill.class);
-        contextManager.registerElementClass(DamageEntitySkill.class);
-        contextManager.registerElementClass(KnockbackEntitySkill.class);
-        contextManager.registerElementClass(PlaySoundSkill.class);
-        contextManager.registerElementClass(PushEntitySkill.class);
-        contextManager.registerElementClass(SendMessageSkill.class);
-        contextManager.registerElementClass(JumpTowardsTargetSkill.class);
-        contextManager.registerElementClass(SpawnParticleSkill.class);
-        contextManager.registerElementClass(RadialDamageEntitySkill.class);
-
-        contextManager.registerElementClass(SummonMobSkill.class);
-        contextManager.registerElementClass(AttributeModifyingSkill.class);
-        contextManager.registerElementClass(ShootProjectileSkill.class);
-        contextManager.registerElementClass(DamageAction.class);
-        contextManager.registerElementClass(AttributeModifierAction.class);
-
-        //mob meta skills
-        contextManager.registerElementClass(TimerSkill.class);
-        contextManager.registerElementClass(RandomSkill.class);
-        contextManager.registerElementClass(RandomTimerSkill.class);
-        contextManager.registerElementClass(GroupSkill.class);
-        contextManager.registerElementClass(TemporalSkill.class);
-
-        //mob selectors
-        contextManager.registerElementClass(SelfSelector.class);
-        contextManager.registerElementClass(NearestPlayerSelector.class);
-        contextManager.registerElementClass(NearestPlayersSelector.class);
-        contextManager.registerElementClass(LastHitEntitySelector.class);
-        contextManager.registerElementClass(AllPlayersSelector.class);
-        contextManager.registerElementClass(NearestEntitiesSelector.class);
-        contextManager.registerElementClass(AITargetSelector.class);
-
-        //mob validators
-        contextManager.registerElementClass(AlwaysValid.class);
-        contextManager.registerElementClass(AndValidator.class);
-        contextManager.registerElementClass(OrValidator.class);
-        contextManager.registerElementClass(NotSelfValidator.class);
-        contextManager.registerElementClass(LineOfSightValidator.class);
-        contextManager.registerElementClass(DistanceValidator.class);
-
-        //zombies mob validators
-        contextManager.registerElementClass(ZombiesPlayerValidator.class);
-        contextManager.registerElementClass(MobValidator.class);
-
-        LOGGER.info("Registered Mob element classes.");
-    }
-
-    private static void loadModels(@NotNull Path mobPath, @NotNull ConfigCodec codec) {
-        Map<Key, MobModel> loadedModels = new HashMap<>();
+    static void initialize(@NotNull ConfigCodec codec, @NotNull MappingProcessorSource processorSource,
+        @NotNull ContextManager contextManager, @NotNull Pathfinder pathfinder,
+        @NotNull Function<? super @NotNull Instance, ? extends InstanceSpawner.InstanceSettings> instanceSettingsFunction) {
+        ConfigProcessor<MobData> mobDataProcessor = processorSource.processorFor(Token.ofClass(MobData.class));
+        Map<Key, MobCreator> loadedCreators = new HashMap<>();
         try {
-            FileUtils.createDirectories(mobPath);
+            FileUtils.createDirectories(MobFeature.MOBS_PATH);
 
-            try (Stream<Path> paths = Files.walk(mobPath)) {
+            try (Stream<Path> paths = Files.walk(MobFeature.MOBS_PATH)) {
                 String ending = codec.getPreferredExtension();
-                PathMatcher matcher = mobPath.getFileSystem().getPathMatcher("glob:**" + ending);
+                PathMatcher matcher = MobFeature.MOBS_PATH.getFileSystem().getPathMatcher("glob:**" + ending);
                 paths.forEach(path -> {
                     if (matcher.matches(path) && Files.isRegularFile(path)) {
                         try {
-                            MobModel model = Configuration.read(path, codec, getModelProcessor());
-                            if (loadedModels.containsKey(model.key())) {
-                                LOGGER.warn("Duplicate key ({}), skipping...", model.key());
+                            ConfigElement element = Configuration.read(path, codec);
+                            if (!element.isNode()) {
+                                LOGGER.warn("Non-node mob file " + path);
+                                return;
                             }
-                            else {
-                                loadedModels.put(model.key(), model);
+
+                            ConfigNode node = element.asNode();
+                            ElementContext context = contextManager.makeContext(node);
+
+                            MobData data = mobDataProcessor.dataFromElement(node);
+
+                            if (loadedCreators.containsKey(data.key())) {
+                                LOGGER.warn("Duplicate key ({}), skipping...", data.key());
+                                return;
                             }
-                        }
-                        catch (IOException e) {
-                            LOGGER.warn("Could not load mob file", e);
+
+                            Pathfinding.Factory pathfinding = context.provide(PATHFINDING);
+
+                            Map<EquipmentSlot, ItemStack> equipmentMap = equipmentMap(data.equipment(), processorSource);
+                            Object2FloatMap<String> attributeMap = attributeMap(data.attributes());
+
+                            List<SkillComponent> skills = data.skills().isEmpty() ? List.of() : context
+                                .provideCollection(SKILLS, (Consumer<ElementException>) e ->
+                                    LOGGER.warn("ElementException when loading mob skills in " + path, e));
+                            List<GoalApplier> goals = data.goals().isEmpty() ? List.of() : context
+                                .provideCollection(GOALS, (Consumer<ElementException>) e ->
+                                    LOGGER.warn("ElementException when loading mob AI goals in " + path, e));
+
+                            loadedCreators.put(data.key(), new ZombiesMobCreator(data, pathfinding, skills, goals,
+                                pathfinder, instanceSettingsFunction, equipmentMap, attributeMap));
+                        } catch (IOException e) {
+                            LOGGER.warn("Could not load mob file " + path, e);
                         }
                     }
                 });
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOGGER.warn("Could not list files in mob directory", e);
             }
+        } catch (IOException e) {
+            LOGGER.warn("Failed to create directory {}", MobFeature.MOBS_PATH);
         }
-        catch (IOException e) {
-            LOGGER.warn("Failed to create directory {}", mobPath);
-        }
-        models = Map.copyOf(loadedModels);
-        LOGGER.info("Loaded {} mob files.", models.size());
+        creators = Map.copyOf(loadedCreators);
+        LOGGER.info("Loaded {} mob files.", creators.size());
     }
 
-    /**
-     * Gets a {@link ConfigProcessor} for {@link MobModel}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link MobModel}s.
-     */
-    public static @NotNull ConfigProcessor<MobModel> getModelProcessor() {
-        return MODEL_PROCESSOR;
+    @SuppressWarnings("unchecked")
+    private static Map<EquipmentSlot, ItemStack> equipmentMap(ConfigNode node, MappingProcessorSource processorSource) throws ConfigProcessException {
+        ConfigProcessor<EquipmentSlot> equipmentSlotProcessor = processorSource.processorFor(Token.ofClass(EquipmentSlot.class));
+        ConfigProcessor<ItemStack> itemStackProcessor = processorSource.processorFor(Token.ofClass(ItemStack.class));
+
+        Map.Entry<EquipmentSlot, ItemStack>[] entries = new Map.Entry[node.size()];
+        int i = 0;
+        for (ConfigEntry entry : node.entryCollection()) {
+            EquipmentSlot slot = equipmentSlotProcessor.dataFromElement(ConfigPrimitive.of(entry.getKey()));
+            ItemStack item = itemStackProcessor.dataFromElement(entry.getValue());
+            entries[i++] = Map.entry(slot, item);
+        }
+
+        return Map.ofEntries(entries);
     }
 
-    /**
-     * Gets the loaded {@link MobModel}s.
-     *
-     * @return The loaded {@link MobModel}s
-     */
+    private static Object2FloatMap<String> attributeMap(ConfigNode node) throws ConfigProcessException {
+        Object2FloatMap<String> map = new Object2FloatOpenHashMap<>(node.size());
+        for (ConfigEntry entry : node.entryCollection()) {
+            String attribute = entry.getKey();
+            float value = ConfigProcessor.FLOAT.dataFromElement(entry.getValue());
+            map.put(attribute, value);
+        }
+
+        return map;
+    }
+
     @SuppressWarnings("unused")
-    public static @NotNull @Unmodifiable Map<Key, MobModel> getModels() {
-        return FeatureUtils.check(models);
-    }
-
-    public static @NotNull Map<BooleanObjectPair<String>, ConfigProcessor<?>> getProcessorMap() {
-        return FeatureUtils.check(processorMap);
+    public static @NotNull @Unmodifiable Map<Key, MobCreator> getMobCreators() {
+        return FeatureUtils.check(creators);
     }
 }

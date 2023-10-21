@@ -19,7 +19,7 @@ public class WindowBlockIteration implements BlockIteration {
 
     @FactoryMethod
     public WindowBlockIteration(@NotNull MapObjects mapObjects) {
-        Objects.requireNonNull(mapObjects, "mapObjects");
+        Objects.requireNonNull(mapObjects);
         this.context = new Context() {
             @Override
             public boolean isValidEndpoint(@NotNull Point blockLocation, @NotNull Block block) {

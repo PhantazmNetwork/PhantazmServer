@@ -14,7 +14,7 @@ public record RoundStartPacket() implements Packet {
     public static final Key ID = Key.key(Namespaces.PHANTAZM, "server/round_start");
 
     public static @NotNull RoundStartPacket read(@NotNull DataReader reader) {
-        Objects.requireNonNull(reader, "reader");
+        Objects.requireNonNull(reader);
         return new RoundStartPacket();
     }
 

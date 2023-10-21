@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class InventoryObjectGroupTest {
 
     private @NotNull InventoryObjectGroup createGroup(@NotNull InventoryProfile profile, @NotNull IntSet slots) {
-        Objects.requireNonNull(slots, "slots");
+        Objects.requireNonNull(slots);
 
         return new InventoryObjectGroupAbstract(profile, slots) {
 

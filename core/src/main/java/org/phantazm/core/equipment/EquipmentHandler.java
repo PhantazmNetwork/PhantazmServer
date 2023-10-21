@@ -7,16 +7,20 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.core.event.equipment.EquipmentAddEvent;
 import org.phantazm.core.inventory.*;
+import org.phantazm.core.scene2.EventScene;
 
 import java.util.*;
 import java.util.function.Supplier;
 
 public class EquipmentHandler {
     private final InventoryAccessRegistry accessRegistry;
+    private final EventScene eventScene;
 
-    public EquipmentHandler(@NotNull InventoryAccessRegistry accessRegistry) {
-        this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
+    public EquipmentHandler(@NotNull InventoryAccessRegistry accessRegistry, @NotNull EventScene eventScene) {
+        this.accessRegistry = Objects.requireNonNull(accessRegistry);
+        this.eventScene = Objects.requireNonNull(eventScene);
     }
 
     public @NotNull InventoryAccessRegistry accessRegistry() {
@@ -24,8 +28,8 @@ public class EquipmentHandler {
     }
 
     public void addEquipment(@NotNull Equipment equipment, @NotNull Key groupKey) {
-        Objects.requireNonNull(equipment, "equipment");
-        Objects.requireNonNull(groupKey, "groupKey");
+        Objects.requireNonNull(equipment);
+        Objects.requireNonNull(groupKey);
 
         if (!accessRegistry.canPushTo(groupKey)) {
             throw new IllegalArgumentException("Can't push to group " + groupKey);
@@ -56,12 +60,12 @@ public class EquipmentHandler {
     }
 
     public boolean canAddEquipment(@NotNull Key groupKey) {
-        Objects.requireNonNull(groupKey, "groupKey");
-
+        Objects.requireNonNull(groupKey);
         return accessRegistry.canPushTo(groupKey);
     }
 
-    public @NotNull @Unmodifiable Collection<Equipment> getEquipment(@NotNull Key groupKey) {
+    public @NotNull
+    @Unmodifiable Collection<Equipment> getEquipment(@NotNull Key groupKey) {
         Optional<InventoryAccess> accessOptional = accessRegistry.getCurrentAccess();
         if (accessOptional.isEmpty()) {
             return List.of();
@@ -108,8 +112,12 @@ public class EquipmentHandler {
     }
 
     public @NotNull Result addOrReplaceEquipment(Key groupKey, Key equipmentKey, boolean allowReplace, int specificSlot,
-            boolean allowDuplicate, @NotNull Supplier<? extends Optional<? extends Equipment>> equipmentSupplier,
-            @Nullable Player player) {
+        boolean allowDuplicate, @NotNull Supplier<? extends Optional<? extends Equipment>> equipmentSupplier,
+        @Nullable Player player) {
+        if (player == null) {
+            return Result.FAILED;
+        }
+
         if (!allowDuplicate && hasEquipment(groupKey, equipmentKey)) {
             return Result.DUPLICATE;
         }
@@ -134,6 +142,10 @@ public class EquipmentHandler {
 
             Equipment equipment = equipmentOptional.get();
             if (specificSlot < 0) {
+                if (callEvent(equipment, player)) {
+                    return Result.CANCELLED;
+                }
+
                 addEquipment(equipment, groupKey);
                 return Result.ADDED;
             }
@@ -145,20 +157,24 @@ public class EquipmentHandler {
 
             InventoryProfile profile = group.getProfile();
             if (!profile.hasInventoryObject(specificSlot)) {
+                if (callEvent(equipment, player)) {
+                    return Result.CANCELLED;
+                }
+
                 accessRegistry.replaceObject(specificSlot, equipment);
                 return Result.ADDED;
             }
 
             InventoryObject currentObject = profile.getInventoryObject(specificSlot);
             if (allowReplace || group.defaultObject() == currentObject) {
+                if (callEvent(equipment, player)) {
+                    return Result.CANCELLED;
+                }
+
                 InventoryObject old = accessRegistry.replaceObject(specificSlot, equipment);
                 return old == null || old == group.defaultObject() ? Result.ADDED : Result.REPLACED;
             }
 
-            return Result.FAILED;
-        }
-
-        if (player == null) {
             return Result.FAILED;
         }
 
@@ -175,8 +191,18 @@ public class EquipmentHandler {
         }
 
         Equipment equipment = equipmentOptional.get();
+        if (callEvent(equipment, player)) {
+            return Result.CANCELLED;
+        }
+
         InventoryObject old = accessRegistry.replaceObject(targetSlot, equipment);
         return old == null || old == group.defaultObject() ? Result.ADDED : Result.REPLACED;
+    }
+
+    private boolean callEvent(Equipment equipment, Player player) {
+        EquipmentAddEvent addEvent = new EquipmentAddEvent(player, equipment);
+        eventScene.broadcastEvent(addEvent);
+        return addEvent.isCancelled();
     }
 
     private boolean invalidGroupSlot(InventoryObjectGroup group, int slot) {
@@ -187,7 +213,8 @@ public class EquipmentHandler {
         ADDED,
         REPLACED,
         DUPLICATE,
-        FAILED;
+        FAILED,
+        CANCELLED;
 
         public boolean success() {
             return this == ADDED || this == REPLACED;

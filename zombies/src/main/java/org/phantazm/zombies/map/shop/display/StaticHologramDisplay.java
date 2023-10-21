@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.shop.display;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -14,13 +15,14 @@ import org.phantazm.zombies.map.shop.Shop;
 import java.util.Objects;
 
 @Model("zombies.map.shop.display.static_hologram")
+@Cache(false)
 public class StaticHologramDisplay extends HologramDisplayBase {
     private final Data data;
 
     @FactoryMethod
     public StaticHologramDisplay(@NotNull Data data) {
         super(new InstanceHologram(Vec.ZERO, 0, Hologram.Alignment.LOWER));
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

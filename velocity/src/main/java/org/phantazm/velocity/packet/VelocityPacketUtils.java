@@ -10,7 +10,7 @@ import org.phantazm.zombies.map.MapSettingsInfo;
 
 public class VelocityPacketUtils {
 
-    public static byte @NotNull[] serialize(@NotNull Packet packet) {
+    public static byte @NotNull [] serialize(@NotNull Packet packet) {
         DataWriter dataWriter = new ByteArrayOutputDataWriter();
         packet.write(dataWriter);
         return dataWriter.toByteArray();

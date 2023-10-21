@@ -13,32 +13,39 @@ import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.PhysicsUtils;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.core.player.PlayerView;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Tags;
-import org.phantazm.zombies.event.ZombiesPlayerDeathEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerDamageEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerDeathEvent;
+import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.KnockedPlayerStateContext;
+import org.phantazm.zombies.scene2.ZombiesScene;
+import org.phantazm.zombies.stage.StageKeys;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
+import java.util.function.Supplier;
 
 public class PlayerDamageEventListener extends ZombiesPlayerEventListener<EntityDamageEvent> {
-
     private final MapObjects mapObjects;
+    private final MapSettingsInfo mapSettingsInfo;
 
     public PlayerDamageEventListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects) {
-        super(instance, zombiesPlayers);
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull MapObjects mapObjects,
+        @NotNull MapSettingsInfo mapSettingsInfo, @NotNull Supplier<ZombiesScene> scene) {
+        super(instance, zombiesPlayers, scene);
+        this.mapObjects = Objects.requireNonNull(mapObjects);
+        this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo);
     }
 
     @Override
-    protected void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull EntityDamageEvent event) {
+    protected void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull EntityDamageEvent event) {
         if (!zombiesPlayer.canTakeDamage()) {
             event.setCancelled(true);
             return;
@@ -49,7 +56,10 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
             return;
         }
 
-        if (event.getDamage().getAmount() < event.getEntity().getHealth()) {
+        ZombiesPlayerDamageEvent damageEvent = new ZombiesPlayerDamageEvent((Player) event.getEntity(), zombiesPlayer);
+        scene.broadcastEvent(damageEvent);
+
+        if (!damageEvent.shouldKnock() && event.getActualAmount() < event.getEntity().getHealth()) {
             return;
         }
 
@@ -58,15 +68,14 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
-            ZombiesPlayerDeathEvent deathEvent =
-                    new ZombiesPlayerDeathEvent(player, zombiesPlayer, event.getDamage());
+            ZombiesPlayerDeathEvent deathEvent = new ZombiesPlayerDeathEvent(player, zombiesPlayer, event.getDamage());
             EventDispatcher.call(deathEvent);
 
             if (deathEvent.isCancelled()) {
                 return;
             }
 
-            player.setHealth(player.getMaxHealth());
+            player.setHealth(player.getMaxHealth() * mapSettingsInfo.reviveHealthFactor());
         }
 
         Pos deathPosition = event.getEntity().getPosition();
@@ -82,14 +91,24 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         Component roomName = getRoomName(deathPosition);
 
         zombiesPlayer.setState(ZombiesPlayerStateKeys.KNOCKED,
-                new KnockedPlayerStateContext(event.getInstance(), deathPosition, roomName, killer));
+            new KnockedPlayerStateContext(event.getInstance(), deathPosition, roomName, killer));
+
+        boolean anyAlive = false;
+        for (ZombiesPlayer player : super.zombiesPlayers.values()) {
+            if (player.isAlive()) {
+                anyAlive = true;
+                break;
+            }
+        }
+
+        if (!anyAlive) {
+            scene.stageTransition().setCurrentStage(StageKeys.END);
+        }
     }
 
     private Component getEntityName(@NotNull Entity entity) {
-        PhantazmMob mob = mapObjects.module().mobStore().getMob(entity.getUuid());
-        Optional<Component> displayNameOptional;
-        if (mob != null && (displayNameOptional = mob.model().getDisplayName()).isPresent()) {
-            return displayNameOptional.get();
+        if (entity instanceof Mob hitMob) {
+            return hitMob.name();
         }
 
         Component message = entity.getCustomName();
@@ -115,7 +134,6 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
     private Component getRoomName(@NotNull Pos deathPosition) {
         return mapObjects.roomTracker().atPoint(deathPosition).map(room -> room.getRoomInfo().displayName())
-                .orElse(Component.text("an unknown room"));
+            .orElse(Component.text("an unknown room"));
     }
-
 }

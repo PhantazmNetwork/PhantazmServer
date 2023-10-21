@@ -8,14 +8,15 @@ import org.phantazm.messaging.packet.proxy.MapDataVersionResponsePacket;
 
 import java.util.Objects;
 
-public record MapDataVersionResponsePacketWrapper(@NotNull MapDataVersionResponsePacket packet) implements FabricPacket {
+public record MapDataVersionResponsePacketWrapper(
+    @NotNull MapDataVersionResponsePacket packet) implements FabricPacket {
 
     public static final PacketType<MapDataVersionResponsePacketWrapper> TYPE =
-            FabricPacketUtils.createPacketType(MapDataVersionResponsePacket.ID, MapDataVersionResponsePacket::read,
-                    MapDataVersionResponsePacketWrapper::new);
+        FabricPacketUtils.createPacketType(MapDataVersionResponsePacket.ID, MapDataVersionResponsePacket::read,
+            MapDataVersionResponsePacketWrapper::new);
 
     public MapDataVersionResponsePacketWrapper {
-        Objects.requireNonNull(packet, "packet");
+        Objects.requireNonNull(packet);
     }
 
     @Override

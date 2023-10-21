@@ -1,2 +1,3 @@
 nameFormat = "<green><name><green>"
 joinMessage = "Welcome to Phantazm."
+optifineMessage = "You are using OptiFine! Consider not using OptiFine for a better experience on this server."

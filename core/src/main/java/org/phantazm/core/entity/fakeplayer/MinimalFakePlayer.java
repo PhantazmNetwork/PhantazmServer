@@ -23,15 +23,15 @@ public class MinimalFakePlayer extends LivingEntity {
 
     private final PlayerSkin skin;
 
-    public MinimalFakePlayer(@NotNull SchedulerManager schedulerManager, @NotNull String username,
-            @Nullable PlayerSkin skin) {
-        super(EntityType.PLAYER, UUID.randomUUID());
+    protected MinimalFakePlayer(@NotNull SchedulerManager schedulerManager, @NotNull String username,
+        @Nullable PlayerSkin skin, boolean register) {
+        super(EntityType.PLAYER, UUID.randomUUID(), false);
 
-        this.schedulerManager = Objects.requireNonNull(schedulerManager, "schedulerManager");
-        this.username = Objects.requireNonNull(username, "username");
+        this.schedulerManager = Objects.requireNonNull(schedulerManager);
+        this.username = Objects.requireNonNull(username);
         this.skin = skin;
 
-        PlayerMeta meta = (PlayerMeta)getEntityMeta();
+        PlayerMeta meta = (PlayerMeta) getEntityMeta();
         meta.setNotifyAboutChanges(false);
         meta.setCapeEnabled(true);
         meta.setJacketEnabled(true);
@@ -41,6 +41,13 @@ public class MinimalFakePlayer extends LivingEntity {
         meta.setRightLegEnabled(true);
         meta.setHatEnabled(true);
         meta.setNotifyAboutChanges(true);
+
+        if (register) super.register();
+    }
+
+    public MinimalFakePlayer(@NotNull SchedulerManager schedulerManager, @NotNull String username,
+        @Nullable PlayerSkin skin) {
+        this(schedulerManager, username, skin, true);
     }
 
     public void init() {
@@ -67,23 +74,22 @@ public class MinimalFakePlayer extends LivingEntity {
 
     @SuppressWarnings("UnstableApiUsage")
     private void removeFromTabList(@NotNull PlayerConnection connection) {
-        Objects.requireNonNull(connection, "connection");
+        Objects.requireNonNull(connection);
         schedulerManager.buildTask(() -> connection.sendPacket(getRemovePlayerPacket())).delay(20, TimeUnit.SERVER_TICK)
-                .schedule();
+            .schedule();
     }
 
     private @NotNull PlayerInfoUpdatePacket getAddPlayerPacket() {
         List<PlayerInfoUpdatePacket.Property> properties;
         if (skin != null) {
             properties = List.of(new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature()));
-        }
-        else {
+        } else {
             properties = List.of();
         }
 
         return new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER,
-                new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false, 0, GameMode.SURVIVAL, null,
-                        null));
+            new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false, 0, GameMode.SURVIVAL, null,
+                null));
     }
 
     private @NotNull PlayerInfoRemovePacket getRemovePlayerPacket() {

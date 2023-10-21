@@ -5,8 +5,10 @@ import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public record AlivePlayerStateContext(@Nullable Component reviverName,
-                                      @Nullable Point reviveLocation, boolean isRevive) {
+public record AlivePlayerStateContext(
+    @Nullable Component reviverName,
+    @Nullable Point reviveLocation,
+    boolean isRevive) {
 
     public static @NotNull AlivePlayerStateContext regular() {
         return new AlivePlayerStateContext(null, null, false);

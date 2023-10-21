@@ -15,10 +15,10 @@ public class PartyLeaveCommand {
     }
 
     public static @NotNull Command leaveCommand(@NotNull PartyCommandConfig config,
-            @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull Random random, int creatorRank) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(partyMap, "partyMap");
-        Objects.requireNonNull(random, "random");
+        @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull Random random, int creatorRank) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(partyMap);
+        Objects.requireNonNull(random);
 
         Command command = new Command("leave");
         command.addConditionalSyntax((sender, commandString) -> {
@@ -39,7 +39,7 @@ public class PartyLeaveCommand {
 
             return true;
         }, (sender, context) -> {
-            UUID uuid = ((Player)sender).getUuid();
+            UUID uuid = ((Player) sender).getUuid();
             Party party = partyMap.remove(uuid);
             PartyMember oldMember = party.getMemberManager().removeMember(uuid);
 
@@ -48,19 +48,17 @@ public class PartyLeaveCommand {
             if (party.getOwner().get().getPlayerView().getUUID().equals(uuid)) {
                 if (party.getMemberManager().getMembers().isEmpty()) {
                     party.getOwner().set(null);
-                }
-                else {
+                } else {
                     Collection<PartyMember> online = new ArrayList<>(), offline = new ArrayList<>();
                     for (PartyMember member : party.getMemberManager().getMembers().values()) {
                         if (member.getPlayerView().getPlayer().isPresent()) {
                             online.add(member);
-                        }
-                        else {
+                        } else {
                             offline.add(member);
                         }
                     }
 
-                    Collection<PartyMember> candidates = online.size() != 0 ? online : offline;
+                    Collection<PartyMember> candidates = online.isEmpty() ? offline : online;
                     int memberIndex = random.nextInt(candidates.size());
                     Iterator<PartyMember> memberIterator = candidates.iterator();
                     PartyMember newOwner = memberIterator.next();

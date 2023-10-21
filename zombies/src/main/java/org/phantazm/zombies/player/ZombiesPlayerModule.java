@@ -10,16 +10,16 @@ import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.kill.PlayerKills;
 import org.phantazm.zombies.leaderboard.BestTimeLeaderboard;
-import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
 import org.phantazm.zombies.player.state.PlayerStateKey;
 import org.phantazm.zombies.player.state.PlayerStateSwitcher;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
-import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 
 import java.util.Map;
 import java.util.Objects;
@@ -47,33 +47,33 @@ public class ZombiesPlayerModule implements DependencyModule {
     private final BestTimeLeaderboard leaderboard;
 
     public ZombiesPlayerModule(@NotNull PlayerView playerView, @NotNull ZombiesPlayerMeta meta,
-            @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
-            @NotNull EquipmentCreator equipmentCreator, @NotNull ZombiesPlayerActionBar actionBar,
-            @NotNull InventoryAccessRegistry profileSwitcher, @NotNull PlayerStateSwitcher stateSwitcher,
-            @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions,
-            @NotNull Sidebar sidebar, @NotNull TabList tabList,
-            @NotNull TransactionModifierSource mapTransactionModifierSource,
-            @NotNull TransactionModifierSource playerTransactionModifierSource, @NotNull Flaggable flaggable,
-            @NotNull ZombiesPlayerMapStats stats, @NotNull BestTimeLeaderboard leaderboard) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.meta = Objects.requireNonNull(meta, "meta");
-        this.coins = Objects.requireNonNull(coins, "coins");
-        this.kills = Objects.requireNonNull(kills, "kills");
-        this.equipmentHandler = Objects.requireNonNull(equipmentHandler, "equipmentHandler");
-        this.equipmentCreator = Objects.requireNonNull(equipmentCreator, "equipmentCreator");
-        this.actionBar = Objects.requireNonNull(actionBar, "actionBar");
-        this.profileSwitcher = Objects.requireNonNull(profileSwitcher, "profileSwitcher");
-        this.stateSwitcher = Objects.requireNonNull(stateSwitcher, "stateSwitcher");
+        @NotNull PlayerCoins coins, @NotNull PlayerKills kills, @NotNull EquipmentHandler equipmentHandler,
+        @NotNull EquipmentCreator equipmentCreator, @NotNull ZombiesPlayerActionBar actionBar,
+        @NotNull InventoryAccessRegistry profileSwitcher, @NotNull PlayerStateSwitcher stateSwitcher,
+        @NotNull Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions,
+        @NotNull Sidebar sidebar, @NotNull TabList tabList,
+        @NotNull TransactionModifierSource mapTransactionModifierSource,
+        @NotNull TransactionModifierSource playerTransactionModifierSource, @NotNull Flaggable flaggable,
+        @NotNull ZombiesPlayerMapStats stats, @NotNull BestTimeLeaderboard leaderboard) {
+        this.playerView = Objects.requireNonNull(playerView);
+        this.meta = Objects.requireNonNull(meta);
+        this.coins = Objects.requireNonNull(coins);
+        this.kills = Objects.requireNonNull(kills);
+        this.equipmentHandler = Objects.requireNonNull(equipmentHandler);
+        this.equipmentCreator = Objects.requireNonNull(equipmentCreator);
+        this.actionBar = Objects.requireNonNull(actionBar);
+        this.profileSwitcher = Objects.requireNonNull(profileSwitcher);
+        this.stateSwitcher = Objects.requireNonNull(stateSwitcher);
         this.stateFunctions = Map.copyOf(stateFunctions);
-        this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
-        this.tabList = Objects.requireNonNull(tabList, "tabList");
+        this.sidebar = Objects.requireNonNull(sidebar);
+        this.tabList = Objects.requireNonNull(tabList);
         this.playerTransactionModifierSource =
-                Objects.requireNonNull(playerTransactionModifierSource, "playerTransactionModifierSource");
+            Objects.requireNonNull(playerTransactionModifierSource);
         this.compositeTransactionModifierSource =
-                TransactionModifierSource.compositeView(mapTransactionModifierSource, playerTransactionModifierSource);
-        this.flaggable = Objects.requireNonNull(flaggable, "flags");
-        this.stats = Objects.requireNonNull(stats, "stats");
-        this.leaderboard = Objects.requireNonNull(leaderboard, "leaderboard");
+            TransactionModifierSource.compositeView(mapTransactionModifierSource, playerTransactionModifierSource);
+        this.flaggable = Objects.requireNonNull(flaggable);
+        this.stats = Objects.requireNonNull(stats);
+        this.leaderboard = Objects.requireNonNull(leaderboard);
     }
 
     public @NotNull ZombiesPlayerMeta getMeta() {

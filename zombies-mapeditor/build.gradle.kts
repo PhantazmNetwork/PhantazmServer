@@ -48,6 +48,7 @@ dependencies {
     implementation(projects.phantazmCommons)
     implementation(projects.phantazmMessaging)
     implementation(projects.phantazmZombiesMapdata)
+    implementation(libs.element.core)
     implementation(libs.ethylene.yaml)
 
     include(libs.libgui)
@@ -56,17 +57,20 @@ dependencies {
     include(projects.phantazmCommons)
     include(projects.phantazmMessaging)
     include(projects.phantazmZombiesMapdata)
-    include(libs.vector.core)
     include(libs.adventure.api)
     include(libs.adventure.key)
     include(libs.adventure.text.minimessage)
+    include(libs.caffeine)
+    include(libs.element.core)
     include(libs.ethylene.core)
     include(libs.ethylene.yaml)
+    include(libs.ethylene.mapper)
     include(libs.examination.api)
     include(libs.examination.string)
     include(libs.snakeyaml)
     include(libs.toolkit.collection)
     include(libs.toolkit.function)
+    include(libs.vector.core)
 }
 
 tasks.processResources {

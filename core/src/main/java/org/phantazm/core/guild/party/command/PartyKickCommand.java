@@ -26,11 +26,11 @@ public class PartyKickCommand {
     }
 
     public static @NotNull Command kickCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
-            @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull PlayerViewProvider viewProvider) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(miniMessage, "miniMessage");
-        Objects.requireNonNull(partyMap, "partyMap");
-        Objects.requireNonNull(viewProvider, "viewProvider");
+        @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull PlayerViewProvider viewProvider) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(miniMessage);
+        Objects.requireNonNull(partyMap);
+        Objects.requireNonNull(viewProvider);
 
         Command command = new Command("kick");
         Argument<String> nameArgument = ArgumentType.Word("name");
@@ -50,10 +50,13 @@ public class PartyKickCommand {
                 return;
             }
 
+            String prefix = context.getOrDefault(nameArgument, "").trim().toLowerCase();
             for (PartyMember otherMember : party.getMemberManager().getMembers().values()) {
                 if (otherMember != member && permission.canExecute(member, otherMember)) {
                     otherMember.getPlayerView().getUsernameIfCached().ifPresent(username -> {
-                        suggestion.addEntry(new SuggestionEntry(username));
+                        if (username.toLowerCase().startsWith(prefix)) {
+                            suggestion.addEntry(new SuggestionEntry(username));
+                        }
                     });
                 }
             }
@@ -85,7 +88,7 @@ public class PartyKickCommand {
         }, (sender, context) -> {
             String name = context.get(nameArgument);
 
-            UUID uuid = ((Player)sender).getUuid();
+            UUID uuid = ((Player) sender).getUuid();
             Party party = partyMap.get(uuid);
             PartyMember kicker = party.getMemberManager().getMember(uuid);
 
@@ -96,7 +99,7 @@ public class PartyKickCommand {
                         playerView.getDisplayName().thenAccept(displayName -> {
                             TagResolver toKickPlaceholder = Placeholder.component("kicked", displayName);
                             Component message =
-                                    miniMessage.deserialize(config.toKickNotInPartyFormat(), toKickPlaceholder);
+                                miniMessage.deserialize(config.toKickNotInPartyFormat(), toKickPlaceholder);
                             sender.sendMessage(message);
                         });
                         return;
@@ -104,13 +107,14 @@ public class PartyKickCommand {
 
                     if (toKick == kicker) {
                         sender.sendMessage(config.cannotKickSelf());
+                        return;
                     }
 
                     if (!party.getKickPermission().canExecute(kicker, toKick)) {
                         playerView.getDisplayName().thenAccept(displayName -> {
                             TagResolver kickedPlaceholder = Placeholder.component("kicked", displayName);
                             Component message =
-                                    miniMessage.deserialize(config.cannotKickOtherFormat(), kickedPlaceholder);
+                                miniMessage.deserialize(config.cannotKickOtherFormat(), kickedPlaceholder);
                             sender.sendMessage(message);
                         });
                         return;

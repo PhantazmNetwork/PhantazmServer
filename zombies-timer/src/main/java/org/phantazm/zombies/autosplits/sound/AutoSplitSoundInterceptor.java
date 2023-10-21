@@ -17,8 +17,8 @@ public class AutoSplitSoundInterceptor implements ClientSoundCallback {
     private final CompositeSplitter compositeSplitter;
 
     public AutoSplitSoundInterceptor(@NotNull MinecraftClient client, @NotNull CompositeSplitter compositeSplitter) {
-        this.client = Objects.requireNonNull(client, "client");
-        this.compositeSplitter = Objects.requireNonNull(compositeSplitter, "compositeSplitter");
+        this.client = Objects.requireNonNull(client);
+        this.compositeSplitter = Objects.requireNonNull(compositeSplitter);
     }
 
     @Override
@@ -39,7 +39,8 @@ public class AutoSplitSoundInterceptor implements ClientSoundCallback {
 
     private boolean isRoundSound(SoundInstance sound) {
         Identifier identifier = sound.getId();
-        return identifier.equals(SoundEvents.ENTITY_WITHER_SPAWN.getId()) || identifier.equals(SoundEvents.ENTITY_ENDER_DRAGON_DEATH.getId());
+        return identifier.equals(SoundEvents.ENTITY_WITHER_SPAWN.getId()) || identifier.equals(
+            SoundEvents.ENTITY_ENDER_DRAGON_DEATH.getId());
     }
 
 }

@@ -39,10 +39,10 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
     private final MiniMessage miniMessage;
 
     public PartyNotification(@NotNull Collection<? extends PartyMember> partyMembers,
-            @NotNull Wrapper<PartyMember> owner, @NotNull PartyNotificationConfig config,
-            @NotNull TickFormatter tickFormatter, @NotNull MiniMessage miniMessage) {
-        Objects.requireNonNull(partyMembers, "partyMembers");
-        this.audience = (ForwardingAudience)() -> {
+        @NotNull Wrapper<PartyMember> owner, @NotNull PartyNotificationConfig config,
+        @NotNull TickFormatter tickFormatter, @NotNull MiniMessage miniMessage) {
+        Objects.requireNonNull(partyMembers);
+        this.audience = (ForwardingAudience) () -> {
             Collection<Audience> audiences = new ArrayList<>(partyMembers.size());
 
             for (PartyMember member : partyMembers) {
@@ -51,10 +51,10 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
 
             return audiences;
         };
-        this.owner = Objects.requireNonNull(owner, "owner");
-        this.config = Objects.requireNonNull(config, "config");
-        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+        this.owner = Objects.requireNonNull(owner);
+        this.config = Objects.requireNonNull(config);
+        this.tickFormatter = Objects.requireNonNull(tickFormatter);
+        this.miniMessage = Objects.requireNonNull(miniMessage);
     }
 
     @Override
@@ -89,10 +89,10 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
             TagResolver inviterPlaceholder = Placeholder.component("inviter", inviterDisplayName.join());
             TagResolver inviteePlaceholder = Placeholder.component("invitee", inviteeDisplayName.join());
             TagResolver durationPlaceholder =
-                    Placeholder.unparsed("duration", tickFormatter.format(invitationDuration));
+                Placeholder.unparsed("duration", tickFormatter.format(invitationDuration));
             Component message =
-                    miniMessage.deserialize(config.inviteToPartyFormat(), inviterPlaceholder, inviteePlaceholder,
-                            durationPlaceholder);
+                miniMessage.deserialize(config.inviteToPartyFormat(), inviterPlaceholder, inviteePlaceholder,
+                    durationPlaceholder);
             audience.sendMessage(message);
         });
 
@@ -108,42 +108,41 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
                     TagResolver ownerUsernamePlaceholder = Placeholder.parsed("owner-username", ownerUsername.join());
                     TagResolver ownerPlaceholder = Placeholder.component("owner", inviterDisplayName.join());
                     Component message =
-                            miniMessage.deserialize(config.inviteToInviteeFromOwnerFormat(), ownerUsernamePlaceholder,
-                                    ownerPlaceholder);
+                        miniMessage.deserialize(config.inviteToInviteeFromOwnerFormat(), ownerUsernamePlaceholder,
+                            ownerPlaceholder);
                     player.sendMessage(message);
                 });
             });
-        }
-        else {
+        } else {
             CompletableFuture<String> ownerUsername = owner.get().getPlayerView().getUsername();
             CompletableFuture<? extends Component> ownerDisplayName = owner.get().getPlayerView().getDisplayName();
             CompletableFuture.allOf(ownerUsername, ownerDisplayName, inviterDisplayName)
-                    .whenComplete((ignored, throwable) -> {
-                        if (throwable != null) {
-                            LOGGER.warn("Exception while sending invitation message", throwable);
-                            return;
-                        }
+                .whenComplete((ignored, throwable) -> {
+                    if (throwable != null) {
+                        LOGGER.warn("Exception while sending invitation message", throwable);
+                        return;
+                    }
 
-                        invitee.getPlayer().ifPresent(player -> {
-                            TagResolver ownerUsernamePlaceholder =
-                                    Placeholder.parsed("owner-username", ownerUsername.join());
-                            TagResolver ownerPlaceholder = Placeholder.component("owner", ownerDisplayName.join());
-                            TagResolver inviterPlaceholder =
-                                    Placeholder.component("inviter", inviterDisplayName.join());
-                            TagResolver durationPlaceholder = Formatter.date("duration",
-                                    Duration.of(invitationDuration, TimeUnit.SERVER_TICK).addTo(LocalDate.EPOCH));
+                    invitee.getPlayer().ifPresent(player -> {
+                        TagResolver ownerUsernamePlaceholder =
+                            Placeholder.parsed("owner-username", ownerUsername.join());
+                        TagResolver ownerPlaceholder = Placeholder.component("owner", ownerDisplayName.join());
+                        TagResolver inviterPlaceholder =
+                            Placeholder.component("inviter", inviterDisplayName.join());
+                        TagResolver durationPlaceholder = Formatter.date("duration",
+                            Duration.of(invitationDuration, TimeUnit.SERVER_TICK).addTo(LocalDate.EPOCH));
 
-                            Component message = miniMessage.deserialize(config.inviteToInviteeFromOtherFormat(),
-                                    ownerUsernamePlaceholder, ownerPlaceholder, inviterPlaceholder,
-                                    durationPlaceholder);
-                            player.sendMessage(message);
-                        });
+                        Component message = miniMessage.deserialize(config.inviteToInviteeFromOtherFormat(),
+                            ownerUsernamePlaceholder, ownerPlaceholder, inviterPlaceholder,
+                            durationPlaceholder);
+                        player.sendMessage(message);
                     });
+                });
         }
     }
 
     @Override
-    public void notifyExpiry(@NotNull PlayerView invitee) {
+    public void notifyExpiry(@NotNull PlayerView inviter, @NotNull PlayerView invitee) {
         invitee.getDisplayName().whenComplete((displayName, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Exception while sending invitation message", throwable);
@@ -155,15 +154,15 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
             audience.sendMessage(message);
         });
 
-        owner.get().getPlayerView().getDisplayName().whenComplete((displayName, throwable) -> {
+        inviter.getDisplayName().whenComplete((displayName, throwable) -> {
             if (throwable != null) {
                 LOGGER.warn("Exception while sending invitation expiry message", throwable);
                 return;
             }
 
             invitee.getPlayer().ifPresent(player -> {
-                TagResolver ownerPlaceholder = Placeholder.component("owner", displayName);
-                Component message = miniMessage.deserialize(config.expiryToInviteeFormat(), ownerPlaceholder);
+                TagResolver inviterPlaceholder = Placeholder.component("inviter", displayName);
+                Component message = miniMessage.deserialize(config.expiryToInviteeFormat(), inviterPlaceholder);
                 player.sendMessage(message);
             });
         });
@@ -200,7 +199,7 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
             TagResolver kickerPlaceholder = Placeholder.component("kicker", kickerName.join());
             TagResolver kickedPlaceholder = Placeholder.component("kicked", toKickName.join());
             Component message =
-                    miniMessage.deserialize(config.kickToPartyFormat(), kickerPlaceholder, kickedPlaceholder);
+                miniMessage.deserialize(config.kickToPartyFormat(), kickerPlaceholder, kickedPlaceholder);
             audience.sendMessage(message);
         });
 
@@ -224,13 +223,40 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
 
         CompletableFuture.allOf(fromDisplayName, toDisplayName).whenComplete((ignored, throwable) -> {
             if (throwable != null) {
-                LOGGER.warn("Exception while sending kick message", throwable);
+                LOGGER.warn("Exception while sending transfer message", throwable);
                 return;
             }
 
             TagResolver fromPlaceholder = Placeholder.component("from", fromDisplayName.join());
             TagResolver toPlaceholder = Placeholder.component("to", toDisplayName.join());
             Component message = miniMessage.deserialize(config.transferFormat(), fromPlaceholder, toPlaceholder);
+            audience.sendMessage(message);
+        });
+    }
+
+    public void notifyDisband() {
+        owner.get().getPlayerView().getDisplayName().whenComplete((displayName, throwable) -> {
+            if (throwable != null) {
+                LOGGER.warn("Exception while sending party disband message", throwable);
+                return;
+            }
+
+            TagResolver ownerPlaceholder = Placeholder.component("owner", displayName);
+            Component message = miniMessage.deserialize(config.disbandFormat(), ownerPlaceholder);
+            audience.sendMessage(message);
+        });
+    }
+
+    // TODO: change to adventure boolean choice whenever we update adventure
+    public void notifyAllInvite(@NotNull PartyMember enabler, boolean enabled) {
+        enabler.getPlayerView().getDisplayName().whenComplete((displayName, throwable) -> {
+            if (throwable != null) {
+                LOGGER.warn("Exception while sending party all-invite message", throwable);
+                return;
+            }
+
+            TagResolver enablerPlaceholder = Placeholder.component("enabler", displayName);
+            Component message = miniMessage.deserialize(enabled ? config.allInviteEnabledFormat() : config.allInviteDisabledFormat(), enablerPlaceholder);
             audience.sendMessage(message);
         });
     }

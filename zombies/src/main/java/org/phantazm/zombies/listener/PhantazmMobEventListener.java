@@ -3,20 +3,20 @@ package org.phantazm.zombies.listener;
 import net.minestom.server.event.trait.EntityInstanceEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-@SuppressWarnings("UnstableApiUsage")
 public abstract class PhantazmMobEventListener<TEvent extends EntityInstanceEvent> implements Consumer<TEvent> {
     protected final Instance instance;
-    protected final MobStore mobStore;
+    private final Supplier<ZombiesScene> scene;
 
-    public PhantazmMobEventListener(@NotNull Instance instance, @NotNull MobStore mobStore) {
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+    public PhantazmMobEventListener(@NotNull Instance instance, @NotNull Supplier<ZombiesScene> scene) {
+        this.instance = Objects.requireNonNull(instance);
+        this.scene = Objects.requireNonNull(scene);
     }
 
     @Override
@@ -24,15 +24,13 @@ public abstract class PhantazmMobEventListener<TEvent extends EntityInstanceEven
         if (event.getInstance() != instance) {
             return;
         }
-        PhantazmMob mob = mobStore.getMob(event.getEntity().getUuid());
-        if (mob != null) {
-            accept(mob, event);
+
+        if (!(event.getEntity() instanceof Mob mob)) {
+            return;
         }
+
+        scene.get().getAcquirable().sync(self -> accept(self, mob, event));
     }
 
-    protected abstract void accept(@NotNull PhantazmMob mob, @NotNull TEvent event);
-
-    protected @NotNull MobStore getMobStore() {
-        return mobStore;
-    }
+    protected abstract void accept(@NotNull ZombiesScene scene, @NotNull Mob mob, @NotNull TEvent event);
 }

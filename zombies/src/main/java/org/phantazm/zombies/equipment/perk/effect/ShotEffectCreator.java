@@ -2,18 +2,20 @@ package org.phantazm.zombies.equipment.perk.effect;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.element.core.annotation.document.Description;
+import net.minestom.server.Tickable;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
-import org.phantazm.zombies.event.EntityDamageByGunEvent;
+import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 @Description("An effect that can perform arbitrary actions on entities shot by the player who has the effect.")
 @Model("zombies.perk.effect.shot")
@@ -24,7 +26,7 @@ public class ShotEffectCreator implements PerkEffectCreator {
 
     @FactoryMethod
     public ShotEffectCreator(@NotNull EventNode<Event> rootNode,
-            @NotNull @Child("action") Collection<ShotEffect> actions) {
+        @NotNull @Child("action") Collection<ShotEffect> actions) {
         this.rootNode = rootNode;
         this.actions = List.copyOf(actions);
     }
@@ -62,8 +64,8 @@ public class ShotEffectCreator implements PerkEffectCreator {
             };
 
             this.tickableActions =
-                    actions.stream().filter(action -> action instanceof Tickable).map(action -> (Tickable)action)
-                            .toArray(Tickable[]::new);
+                actions.stream().filter(action -> action instanceof Tickable).map(action -> (Tickable) action)
+                    .toArray(Tickable[]::new);
         }
 
         @Override
@@ -99,7 +101,8 @@ public class ShotEffectCreator implements PerkEffectCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @Description(
+    public record Data(
+        @NotNull @Description(
             "The actions to be executed on the entities that are hit by gun shots") @ChildPath(
             "action") Collection<String> actions) {
     }

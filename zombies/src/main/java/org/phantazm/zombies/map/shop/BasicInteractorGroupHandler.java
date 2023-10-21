@@ -20,27 +20,28 @@ public class BasicInteractorGroupHandler implements InteractorGroupHandler {
 
     @Override
     public void subscribe(@NotNull Key group, @NotNull SelectionGroupInteractor interactor) {
-        Objects.requireNonNull(group, "group");
-        Objects.requireNonNull(interactor, "interactor");
+        Objects.requireNonNull(group);
+        Objects.requireNonNull(interactor);
 
         interactorGroups.computeIfAbsent(group, ignored -> new ArrayList<>()).add(interactor);
     }
 
     @Override
-    public @NotNull @Unmodifiable List<SelectionGroupInteractor> interactors(@NotNull Key group) {
-        Objects.requireNonNull(group, "group");
+    public @NotNull
+    @Unmodifiable List<SelectionGroupInteractor> interactors(@NotNull Key group) {
+        Objects.requireNonNull(group);
         return interactorGroups.getOrDefault(group, List.of());
     }
 
     @Override
     public void markChosen(@NotNull Key group) {
-        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(group);
         chosenMap.put(group, true);
     }
 
     @Override
     public boolean isChosen(@NotNull Key group) {
-        Objects.requireNonNull(group, "group");
+        Objects.requireNonNull(group);
         return chosenMap.getOrDefault(group, false);
     }
 }

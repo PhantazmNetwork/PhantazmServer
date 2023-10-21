@@ -30,10 +30,10 @@ public class UpgradeEquipmentInteractor implements ShopInteractor {
 
     @FactoryMethod
     public UpgradeEquipmentInteractor(@NotNull Data data, @NotNull @Child("upgrade_path") UpgradePath upgradePath,
-            @NotNull @Child("not_upgradable_interactors") List<ShopInteractor> notUpgradableInteractors,
-            @NotNull @Child("no_held_equipment_interactors") List<ShopInteractor> noHeldEquipmentInteractors,
-            @NotNull @Child("no_upgrade_interactors") List<ShopInteractor> noUpgradeInteractors,
-            @NotNull @Child("upgrade_interactors") List<ShopInteractor> upgradeInteractors) {
+        @NotNull @Child("not_upgradable_interactors") List<ShopInteractor> notUpgradableInteractors,
+        @NotNull @Child("no_held_equipment_interactors") List<ShopInteractor> noHeldEquipmentInteractors,
+        @NotNull @Child("no_upgrade_interactors") List<ShopInteractor> noUpgradeInteractors,
+        @NotNull @Child("upgrade_interactors") List<ShopInteractor> upgradeInteractors) {
         this.data = data;
         this.upgradePath = upgradePath;
         this.notUpgradableInteractors = notUpgradableInteractors;
@@ -94,7 +94,7 @@ public class UpgradeEquipmentInteractor implements ShopInteractor {
         TagResolver upgradedTag = Placeholder.component("upgraded_item", component);
 
         zombiesPlayer.getPlayer().ifPresent(player -> player.sendMessage(
-                MiniMessage.miniMessage().deserialize(data.upgradeFormatMessage, previousTag, upgradedTag)));
+            MiniMessage.miniMessage().deserialize(data.upgradeFormatMessage, previousTag, upgradedTag)));
 
         ShopInteractor.handle(upgradeInteractors, interaction);
         return true;
@@ -109,11 +109,12 @@ public class UpgradeEquipmentInteractor implements ShopInteractor {
     }
 
     @DataObject
-    public record Data(@NotNull String upgradeFormatMessage,
-                       @NotNull @ChildPath("upgrade_path") String upgradePath,
-                       @NotNull @ChildPath("not_upgradable_interactors") List<String> notUpgradableInteractors,
-                       @NotNull @ChildPath("no_held_equipment_interactors") List<String> noHeldEquipmentInteractors,
-                       @NotNull @ChildPath("no_upgrade_interactors") List<String> noUpgradeInteractors,
-                       @NotNull @ChildPath("upgrade_interactors") List<String> upgradeInteractors) {
+    public record Data(
+        @NotNull String upgradeFormatMessage,
+        @NotNull @ChildPath("upgrade_path") String upgradePath,
+        @NotNull @ChildPath("not_upgradable_interactors") List<String> notUpgradableInteractors,
+        @NotNull @ChildPath("no_held_equipment_interactors") List<String> noHeldEquipmentInteractors,
+        @NotNull @ChildPath("no_upgrade_interactors") List<String> noUpgradeInteractors,
+        @NotNull @ChildPath("upgrade_interactors") List<String> upgradeInteractors) {
     }
 }

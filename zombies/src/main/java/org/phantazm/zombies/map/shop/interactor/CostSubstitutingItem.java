@@ -61,7 +61,7 @@ public class CostSubstitutingItem implements UpdatingItem {
 
     private ItemStack computeItemStack(int cost) {
         return ItemStackUtils.buildItem(data.material, data.tag, data.displayName, data.lore,
-                Placeholder.unparsed("cost", Integer.toString(cost)));
+            Placeholder.unparsed("cost", Integer.toString(cost)));
     }
 
     private int cost() {
@@ -74,12 +74,13 @@ public class CostSubstitutingItem implements UpdatingItem {
     }
 
     @DataObject
-    public record Data(@NotNull Material material,
-                       @Nullable String displayName,
-                       @Nullable List<String> lore,
-                       @Nullable String tag,
-                       int cost,
-                       @NotNull Key modifier) {
+    public record Data(
+        @NotNull Material material,
+        @Nullable String displayName,
+        @Nullable List<String> lore,
+        @Nullable String tag,
+        int cost,
+        @NotNull Key modifier) {
         @Default("displayName")
         public static @NotNull ConfigElement defaultDisplayName() {
             return ConfigPrimitive.NULL;

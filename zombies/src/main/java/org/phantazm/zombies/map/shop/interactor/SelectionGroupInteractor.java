@@ -28,9 +28,9 @@ public class SelectionGroupInteractor implements ShopInteractor {
 
     @FactoryMethod
     public SelectionGroupInteractor(@NotNull Data data,
-            @NotNull @Child("active_interactors") List<ShopInteractor> activeInteractors,
-            @NotNull @Child("inactive_interactors") List<ShopInteractor> inactiveInteractors,
-            @NotNull InteractorGroupHandler handler, @NotNull Random random) {
+        @NotNull @Child("active_interactors") List<ShopInteractor> activeInteractors,
+        @NotNull @Child("inactive_interactors") List<ShopInteractor> inactiveInteractors,
+        @NotNull InteractorGroupHandler handler, @NotNull Random random) {
         this.data = data;
         this.activeInteractors = activeInteractors;
         this.inactiveInteractors = inactiveInteractors;
@@ -76,7 +76,7 @@ public class SelectionGroupInteractor implements ShopInteractor {
         }
 
         interactors.get(random.nextInt(interactors.size()))
-                .addInitializationCallback(interactor -> interactor.setActive(true));
+            .addInitializationCallback(interactor -> interactor.setActive(true));
     }
 
     @Override
@@ -92,10 +92,13 @@ public class SelectionGroupInteractor implements ShopInteractor {
     private void addInitializationCallback(@NotNull Consumer<? super SelectionGroupInteractor> consumer) {
         if (this.shop == null) {
             initializationCallbacks.add(consumer);
-        }
-        else {
+        } else {
             consumer.accept(this);
         }
+    }
+
+    public boolean isActive() {
+        return this.active;
     }
 
     public void setActive(boolean active) {
@@ -106,21 +109,17 @@ public class SelectionGroupInteractor implements ShopInteractor {
 
         if (active) {
             shop.flags().setFlag(data.group);
-        }
-        else {
+        } else {
             shop.flags().clearFlag(data.group);
         }
 
         this.active = active;
     }
 
-    public boolean isActive() {
-        return this.active;
-    }
-
     @DataObject
-    public record Data(@NotNull Key group,
-                       @NotNull @ChildPath("active_interactors") List<String> activeInteractors,
-                       @NotNull @ChildPath("inactive_interactors") List<String> inactiveInteractors) {
+    public record Data(
+        @NotNull Key group,
+        @NotNull @ChildPath("active_interactors") List<String> activeInteractors,
+        @NotNull @ChildPath("inactive_interactors") List<String> inactiveInteractors) {
     }
 }

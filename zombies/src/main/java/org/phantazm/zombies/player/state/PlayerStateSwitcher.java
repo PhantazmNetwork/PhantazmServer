@@ -1,7 +1,7 @@
 package org.phantazm.zombies.player.state;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 
 public class PlayerStateSwitcher implements Activable {
 

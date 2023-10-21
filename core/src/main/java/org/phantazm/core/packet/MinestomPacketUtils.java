@@ -6,7 +6,7 @@ import org.phantazm.messaging.packet.Packet;
 
 public class MinestomPacketUtils {
 
-    public static byte @NotNull[] serialize(@NotNull Packet packet) {
+    public static byte @NotNull [] serialize(@NotNull Packet packet) {
         return NetworkBuffer.makeArray(buffer -> {
             packet.write(BinaryDataWriter.fromNetworkBuffer(buffer));
         });

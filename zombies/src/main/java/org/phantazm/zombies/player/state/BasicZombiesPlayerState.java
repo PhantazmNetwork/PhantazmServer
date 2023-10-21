@@ -3,7 +3,7 @@ package org.phantazm.zombies.player.state;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 
 import java.util.Collection;
 import java.util.List;
@@ -16,9 +16,9 @@ public class BasicZombiesPlayerState implements ZombiesPlayerState {
     private final Collection<Activable> actions;
 
     public BasicZombiesPlayerState(@NotNull Component displayName, @NotNull Key key,
-            @NotNull Collection<Activable> actions) {
-        this.displayName = Objects.requireNonNull(displayName, "displayName");
-        this.key = Objects.requireNonNull(key, "key");
+        @NotNull Collection<Activable> actions) {
+        this.displayName = Objects.requireNonNull(displayName);
+        this.key = Objects.requireNonNull(key);
         this.actions = List.copyOf(actions);
     }
 

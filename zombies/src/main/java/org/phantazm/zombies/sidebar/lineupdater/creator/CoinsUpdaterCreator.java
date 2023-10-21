@@ -26,7 +26,7 @@ public class CoinsUpdaterCreator implements PlayerUpdaterCreator {
 
     @FactoryMethod
     public CoinsUpdaterCreator(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -45,9 +45,9 @@ public class CoinsUpdaterCreator implements PlayerUpdaterCreator {
         private boolean cacheInvalidated;
 
         private Updater(@NotNull Data data, @NotNull PlayerView playerView, @NotNull PlayerCoins coins) {
-            this.data = Objects.requireNonNull(data, "data");
-            this.playerView = Objects.requireNonNull(playerView, "playerView");
-            this.coins = Objects.requireNonNull(coins, "coins");
+            this.data = Objects.requireNonNull(data);
+            this.playerView = Objects.requireNonNull(playerView);
+            this.coins = Objects.requireNonNull(coins);
             this.cacheInvalidated = true;
         }
 
@@ -81,7 +81,7 @@ public class CoinsUpdaterCreator implements PlayerUpdaterCreator {
                 TagResolver coinsPlaceholder = Placeholder.component("coins", Component.text(newCoins));
 
                 return Optional.of(
-                        MiniMessage.miniMessage().deserialize(data.format, playerPlaceholder, coinsPlaceholder));
+                    MiniMessage.miniMessage().deserialize(data.format, playerPlaceholder, coinsPlaceholder));
             }
 
             return Optional.empty();

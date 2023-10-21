@@ -36,10 +36,9 @@ public class ChestStateInteractor implements ShopInteractor {
         }
 
         if (data.open) {
-            chunk.sendPacketToViewers(new BlockActionPacket(shop.center(), (byte)1, (byte)1, Block.CHEST));
-        }
-        else {
-            chunk.sendPacketToViewers(new BlockActionPacket(shop.center(), (byte)1, (byte)0, Block.CHEST));
+            chunk.sendPacketToViewers(new BlockActionPacket(shop.center(), (byte) 1, (byte) 1, Block.CHEST));
+        } else {
+            chunk.sendPacketToViewers(new BlockActionPacket(shop.center(), (byte) 1, (byte) 0, Block.CHEST));
         }
 
         return true;

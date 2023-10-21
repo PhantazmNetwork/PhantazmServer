@@ -31,11 +31,11 @@ public final class FileUtils {
      * @throws IOException if an IO error occurs, or if no files in root match the predicate
      */
     public static @NotNull Path findFirstOrThrow(@NotNull Path root,
-            @NotNull BiPredicate<Path, BasicFileAttributes> predicate, @NotNull Supplier<String> messageSupplier)
-            throws IOException {
-        Objects.requireNonNull(root, "root");
-        Objects.requireNonNull(predicate, "predicate");
-        Objects.requireNonNull(messageSupplier, "messageSupplier");
+        @NotNull BiPredicate<Path, BasicFileAttributes> predicate, @NotNull Supplier<String> messageSupplier)
+        throws IOException {
+        Objects.requireNonNull(root);
+        Objects.requireNonNull(predicate);
+        Objects.requireNonNull(messageSupplier);
 
         Path target;
         try (Stream<Path> pathStream = Files.find(root, 1, predicate, FileVisitOption.FOLLOW_LINKS)) {
@@ -55,18 +55,18 @@ public final class FileUtils {
      * @throws IOException if an IO error occurs
      */
     public static void forEachFileMatching(@NotNull Path root,
-            @NotNull BiPredicate<Path, BasicFileAttributes> predicate, @NotNull IOConsumer<? super Path> consumer)
-            throws IOException {
-        Objects.requireNonNull(root, "root");
-        Objects.requireNonNull(predicate, "predicate");
-        Objects.requireNonNull(consumer, "consumer");
+        @NotNull BiPredicate<Path, BasicFileAttributes> predicate, @NotNull IOConsumer<? super Path> consumer)
+        throws IOException {
+        Objects.requireNonNull(root);
+        Objects.requireNonNull(predicate);
+        Objects.requireNonNull(consumer);
 
         if (!Files.exists(root)) {
             return;
         }
 
         try (Stream<Path> stream = Files.find(root, 1, predicate, FileVisitOption.FOLLOW_LINKS)) {
-            for (Path path : (Iterable<? extends Path>)(stream::iterator)) {
+            for (Path path : (Iterable<? extends Path>) (stream::iterator)) {
                 consumer.accept(path);
             }
         }
@@ -75,8 +75,7 @@ public final class FileUtils {
     public static void createFileIfNotExists(@NotNull Path file) throws IOException {
         try {
             Files.createFile(file);
-        }
-        catch (FileAlreadyExistsException ignored) {
+        } catch (FileAlreadyExistsException ignored) {
         }
     }
 
@@ -87,7 +86,7 @@ public final class FileUtils {
      * @throws IOException if an IO error occurs
      */
     public static void deleteRecursivelyIfExists(@NotNull Path directory) throws IOException {
-        Objects.requireNonNull(directory, "directory");
+        Objects.requireNonNull(directory);
 
         if (!Files.isDirectory(directory)) {
             return;
@@ -118,8 +117,7 @@ public final class FileUtils {
     public static void createDirectories(@NotNull Path directory) throws IOException {
         try {
             Files.createDirectories(directory);
-        }
-        catch (FileAlreadyExistsException ignored) {
+        } catch (FileAlreadyExistsException ignored) {
             //swallow this exception here (we could have a symlink to a directory)
         }
     }

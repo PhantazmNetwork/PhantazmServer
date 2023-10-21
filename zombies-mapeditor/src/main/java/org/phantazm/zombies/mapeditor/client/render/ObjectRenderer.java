@@ -164,11 +164,11 @@ public interface ObjectRenderer {
          * @param text  the text to render
          */
         public TextObject(@NotNull Key key, @NotNull Color color, float x, float y, @NotNull Text text) {
-            this.key = Objects.requireNonNull(key, "key");
-            this.color = Objects.requireNonNull(color, "color");
+            this.key = Objects.requireNonNull(key);
+            this.color = Objects.requireNonNull(color);
             this.x = x;
             this.y = y;
-            this.text = Objects.requireNonNull(text, "text");
+            this.text = Objects.requireNonNull(text);
         }
 
         @Override
@@ -221,17 +221,17 @@ public interface ObjectRenderer {
          * @param color              the initial Color
          * @param shouldRender       the initial visibility state (true if visible, false if invisible)
          * @param renderThroughWalls if this object should initially render through walls or not
-         * @param bounds             the initial bounds array representing the corners of the bounding boxes to be displayed by this
-         *                           object
+         * @param bounds             the initial bounds array representing the corners of the bounding boxes to be
+         *                           displayed by this object
          */
         public RenderObject(@NotNull Key key, @NotNull RenderType type, @NotNull Color color, boolean shouldRender,
-                boolean renderThroughWalls, Vec3d... bounds) {
-            this.key = Objects.requireNonNull(key, "key");
-            this.type = Objects.requireNonNull(type, "type");
-            this.color = Objects.requireNonNull(color, "color");
+            boolean renderThroughWalls, Vec3d... bounds) {
+            this.key = Objects.requireNonNull(key);
+            this.type = Objects.requireNonNull(type);
+            this.color = Objects.requireNonNull(color);
             this.shouldRender = shouldRender;
             this.renderThroughWalls = renderThroughWalls;
-            this.bounds = Objects.requireNonNull(bounds, "bounds");
+            this.bounds = Objects.requireNonNull(bounds);
         }
 
         @Override

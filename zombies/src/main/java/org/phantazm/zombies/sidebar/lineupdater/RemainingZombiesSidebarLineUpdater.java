@@ -9,44 +9,42 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.handler.RoundHandler;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.IntSupplier;
 
 @Model("zombies.sidebar.line_updater.remaining_zombies")
 @Cache(false)
 public class RemainingZombiesSidebarLineUpdater implements SidebarLineUpdater {
     private final Data data;
-    private final Supplier<Optional<Round>> roundSupplier;
-    private int lastRemainingZombies = -1;
+    private final IntSupplier lastMobCountSupplier;
+    private int lastMobCount = -1;
 
     @FactoryMethod
     public RemainingZombiesSidebarLineUpdater(@NotNull Data data, @NotNull RoundHandler roundHandler) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.roundSupplier = Objects.requireNonNull(roundHandler::currentRound, "roundSupplier");
+        this.data = Objects.requireNonNull(data);
+        this.lastMobCountSupplier = Objects.requireNonNull(roundHandler::lastMobCount, "roundSupplier");
     }
 
     @Override
     public void invalidateCache() {
-        lastRemainingZombies = -1;
+        lastMobCount = -1;
     }
 
     @Override
     public @NotNull Optional<Component> tick(long time) {
-        return roundSupplier.get().map((Round round) -> {
-            int totalMobCount = round.getTotalMobCount();
-            if ((lastRemainingZombies == -1 || lastRemainingZombies != totalMobCount)) {
-                lastRemainingZombies = totalMobCount;
+        int newMobCount = lastMobCountSupplier.getAsInt();
+        if ((lastMobCount == -1 || lastMobCount != newMobCount)) {
+            lastMobCount = newMobCount;
 
-                TagResolver remainingZombiesPlaceholder = Placeholder.component("remaining_zombies", Component.text(lastRemainingZombies));
-                return MiniMessage.miniMessage().deserialize(data.format, remainingZombiesPlaceholder);
-            }
+            TagResolver remainingZombiesPlaceholder = Placeholder.component("remaining_zombies",
+                Component.text(lastMobCount));
+            return Optional.of(MiniMessage.miniMessage().deserialize(data.format, remainingZombiesPlaceholder));
+        }
 
-            return null;
-        });
+        return Optional.empty();
     }
 
     @DataObject

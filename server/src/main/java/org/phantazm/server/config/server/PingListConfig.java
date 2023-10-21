@@ -27,7 +27,7 @@ public record PingListConfig(@NotNull Component description) {
      * @param description The MOTD set in the server list
      */
     public PingListConfig {
-        Objects.requireNonNull(description, "description");
+        Objects.requireNonNull(description);
     }
 
 }

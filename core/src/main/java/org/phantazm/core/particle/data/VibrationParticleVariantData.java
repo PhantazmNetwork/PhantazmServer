@@ -15,7 +15,7 @@ public class VibrationParticleVariantData implements ParticleVariantData {
 
     @FactoryMethod
     public VibrationParticleVariantData(@NotNull Data data,
-            @NotNull @Child("position_source") PositionSource positionSource) {
+        @NotNull @Child("position_source") PositionSource positionSource) {
         this.data = data;
         this.positionSource = positionSource;
     }
@@ -33,6 +33,7 @@ public class VibrationParticleVariantData implements ParticleVariantData {
     }
 
     @DataObject
-    public record Data(int ticks, @NotNull @ChildPath("position_source") String positionSource) {
+    public record Data(int ticks,
+        @NotNull @ChildPath("position_source") String positionSource) {
     }
 }

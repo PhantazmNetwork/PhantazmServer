@@ -17,33 +17,33 @@ public class ZombiesAutoSplitsModMenuApiImpl implements ModMenuApi {
         ZombiesAutoSplitsConfig.Builder autoSplitsConfigBuilder = autoSplitsConfig.toBuilder();
 
         ConfigBuilder configBuilder = ConfigBuilder.create()
-                .setParentScreen(screen)
-                .setTitle(Text.of("Zombies AutoSplits Config"));
+            .setParentScreen(screen)
+            .setTitle(Text.of("Zombies AutoSplits Config"));
 
         ConfigEntryBuilder entryBuilder = configBuilder.entryBuilder();
         ConfigCategory main = configBuilder.getOrCreateCategory(Text.of("Config"));
         main.addEntry(entryBuilder.startStrField(Text.of("Host"), autoSplitsConfig.host())
-                .setDefaultValue(ZombiesAutoSplitsConfig.DEFAULT_HOST)
-                .setTooltip(Text.of("The host of the LiveSplits server. Most likely localhost."))
-                .setSaveConsumer(autoSplitsConfigBuilder::setHost)
-                .build());
+            .setDefaultValue(ZombiesAutoSplitsConfig.DEFAULT_HOST)
+            .setTooltip(Text.of("The host of the LiveSplits server. Most likely localhost."))
+            .setSaveConsumer(autoSplitsConfigBuilder::setHost)
+            .build());
         main.addEntry(entryBuilder.startIntField(Text.of("Port"), autoSplitsConfig.port())
-                .setDefaultValue(ZombiesAutoSplitsConfig.DEFAULT_PORT)
-                .setMin(1)
-                .setMax(65535)
-                .setTooltip(Text.of("The port of the LiveSplits server. Use -1 for the internal splitter."))
-                .setSaveConsumer(autoSplitsConfigBuilder::setPort)
-                .build());
+            .setDefaultValue(ZombiesAutoSplitsConfig.DEFAULT_PORT)
+            .setMin(1)
+            .setMax(65535)
+            .setTooltip(Text.of("The port of the LiveSplits server. Use -1 for the internal splitter."))
+            .setSaveConsumer(autoSplitsConfigBuilder::setPort)
+            .build());
         main.addEntry(entryBuilder.startBooleanToggle(Text.of("Use LiveSplits"), autoSplitsConfig.useLiveSplits())
-                .setDefaultValue(ZombiesAutoSplitsConfig.DEFAULT_USE_LIVE_SPLITS)
-                .setTooltip(Text.of("Whether to use the LiveSplits splitter."))
-                .setSaveConsumer(autoSplitsConfigBuilder::setUseLiveSplits)
-                .build());
+            .setDefaultValue(ZombiesAutoSplitsConfig.DEFAULT_USE_LIVE_SPLITS)
+            .setTooltip(Text.of("Whether to use the LiveSplits splitter."))
+            .setSaveConsumer(autoSplitsConfigBuilder::setUseLiveSplits)
+            .build());
         main.addEntry(entryBuilder.startBooleanToggle(Text.of("Use Internal"), autoSplitsConfig.useInternal())
-                .setDefaultValue(ZombiesAutoSplitsConfig.DEFAULT_USE_INTERNAL)
-                .setTooltip(Text.of("Whether to use the internal splitter."))
-                .setSaveConsumer(autoSplitsConfigBuilder::setUseInternal)
-                .build());
+            .setDefaultValue(ZombiesAutoSplitsConfig.DEFAULT_USE_INTERNAL)
+            .setTooltip(Text.of("Whether to use the internal splitter."))
+            .setSaveConsumer(autoSplitsConfigBuilder::setUseInternal)
+            .build());
 
         configBuilder.setSavingRunnable(() -> {
             autoSplits.setConfig(autoSplitsConfigBuilder.build());

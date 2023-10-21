@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.gui.Gui;
 import org.phantazm.core.gui.ItemUpdater;
 import org.phantazm.core.item.UpdatingItem;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.BasicPlayerInteraction;
 import org.phantazm.zombies.map.shop.InteractionTypes;
 import org.phantazm.zombies.map.shop.Shop;
@@ -31,21 +32,21 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     private boolean redraw;
 
     @FactoryMethod
-    public InteractingClickHandler(@NotNull Data data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull @Child("updating_item") UpdatingItem updatingItem,
-            @NotNull @Child("click_interactor") ShopInteractor clickInteractor) {
+    public InteractingClickHandler(@NotNull Data data, @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
+        @NotNull @Child("updating_item") UpdatingItem updatingItem,
+        @NotNull @Child("click_interactor") ShopInteractor clickInteractor) {
         super(data, playerMap);
-        this.updatingItem = Objects.requireNonNull(updatingItem, "updatingItem");
-        this.clickInteractor = Objects.requireNonNull(clickInteractor, "clickInteractor");
+        this.updatingItem = Objects.requireNonNull(updatingItem);
+        this.clickInteractor = Objects.requireNonNull(clickInteractor);
         this.itemStack = updatingItem.currentItem();
     }
 
     @Override
     public void handleClick(@NotNull Gui owner, @NotNull Player player, int slot, @NotNull ClickType clickType) {
-        ZombiesPlayer zombiesPlayer = playerMap.get(player.getUuid());
+        ZombiesPlayer zombiesPlayer = playerMap.get(PlayerView.lookup(player.getUuid()));
         if (zombiesPlayer != null && data.clickTypes.contains(clickType) != data.blacklist) {
             boolean success = clickInteractor.handleInteraction(
-                    new BasicPlayerInteraction(zombiesPlayer, InteractionTypes.CLICK_INVENTORY));
+                new BasicPlayerInteraction(zombiesPlayer, InteractionTypes.CLICK_INVENTORY));
 
             if (data.closeOnInteract && success) {
                 player.closeInventory();
@@ -82,11 +83,12 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     }
 
     @DataObject
-    public record Data(@NotNull Set<ClickType> clickTypes,
-                       boolean blacklist,
-                       @NotNull @ChildPath("updating_item") String updatingItem,
-                       @NotNull @ChildPath("click_interactor") String clickInteractor,
-                       boolean closeOnInteract) {
+    public record Data(
+        @NotNull Set<ClickType> clickTypes,
+        boolean blacklist,
+        @NotNull @ChildPath("updating_item") String updatingItem,
+        @NotNull @ChildPath("click_interactor") String clickInteractor,
+        boolean closeOnInteract) {
         @Default("closeOnInteract")
         public static @NotNull ConfigElement defaultCloseOnInteract() {
             return ConfigPrimitive.of(true);

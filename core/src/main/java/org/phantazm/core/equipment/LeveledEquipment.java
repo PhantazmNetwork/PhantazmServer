@@ -1,10 +1,11 @@
 package org.phantazm.core.equipment;
 
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 
 import java.util.Map;
 import java.util.Objects;
@@ -18,8 +19,8 @@ public class LeveledEquipment<TEquipment extends Equipment & UpgradeNode> implem
     private TEquipment currentLevel;
 
     public LeveledEquipment(@NotNull Key equipmentKey, @NotNull Key rootLevel,
-            @NotNull Map<Key, ? extends TEquipment> levelMap) {
-        this.equipmentKey = Objects.requireNonNull(equipmentKey, "equipmentKey");
+        @NotNull Map<Key, ? extends TEquipment> levelMap) {
+        this.equipmentKey = Objects.requireNonNull(equipmentKey);
         this.levelMap = Map.copyOf(levelMap);
 
         TEquipment equipment = this.levelMap.get(rootLevel);
@@ -62,12 +63,19 @@ public class LeveledEquipment<TEquipment extends Equipment & UpgradeNode> implem
     }
 
     @Override
-    public @Unmodifiable @NotNull Set<Key> getSuggestedUpgrades() {
+    public void attack(@NotNull Entity target) {
+        currentLevel.attack(target);
+    }
+
+    @Override
+    public @Unmodifiable
+    @NotNull Set<Key> getSuggestedUpgrades() {
         return currentLevel.upgrades();
     }
 
     @Override
-    public @Unmodifiable @NotNull Set<Key> getLevels() {
+    public @Unmodifiable
+    @NotNull Set<Key> getLevels() {
         return levelMap.keySet();
     }
 

@@ -29,12 +29,12 @@ public class GroundPathfindingFactory implements Pathfinding.Factory {
 
     @FactoryMethod
     public GroundPathfindingFactory(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public @NotNull Pathfinding make(@NotNull Pathfinder pathfinder,
-            @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler) {
+        @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler) {
         return new Pathfinding(pathfinder, nodeMapLocal, spaceHandler) {
             @Override
             protected float jumpHeight() {
@@ -54,34 +54,34 @@ public class GroundPathfindingFactory implements Pathfinding.Factory {
             @Override
             protected @NotNull Vec3IBiPredicate successPredicate() {
                 return data.targetDeviation <= 0
-                       ? (x1, y1, z1, x2, y2, z2) -> x1 == x2 && y1 == y2 && z1 == z2
-                       : (x1, y1, z1, x2, y2, z2) -> {
-                           if (Vec3D.distanceSquared(x1 + 0.5, y1, z1 + 0.5, x2 + 0.5, y2, z2 + 0.5) <=
-                                   data.targetDeviation * data.targetDeviation) {
-                               if (!data.lineOfSight) {
-                                   return true;
-                               }
+                    ? (x1, y1, z1, x2, y2, z2) -> x1 == x2 && y1 == y2 && z1 == z2
+                    : (x1, y1, z1, x2, y2, z2) -> {
+                    if (Vec3D.distanceSquared(x1 + 0.5, y1, z1 + 0.5, x2 + 0.5, y2, z2 + 0.5) <=
+                        data.targetDeviation * data.targetDeviation) {
+                        if (!data.lineOfSight) {
+                            return true;
+                        }
 
-                               Entity self = super.self;
-                               if (self == null) {
-                                   return true;
-                               }
+                        Entity self = super.self;
+                        if (self == null) {
+                            return true;
+                        }
 
-                               double eyeHeight = self.getEyeHeight();
-                               Instance instance = self.getInstance();
-                               Entity target = super.target;
-                               if (instance == null || target == null) {
-                                   return true;
-                               }
+                        double eyeHeight = self.getEyeHeight();
+                        Instance instance = self.getInstance();
+                        Entity target = super.target;
+                        if (instance == null || target == null) {
+                            return true;
+                        }
 
-                               Point end = new Vec(x2 + 0.5, y2 + target.getEyeHeight(), z2 + 0.5);
-                               Pos start = new Pos(x1 + 0.5, y1 + eyeHeight, z1 + 0.5).withLookAt(end);
-                               return CollisionUtils.isLineOfSightReachingShape(instance, self.getChunk(), start, end,
-                                       target.getBoundingBox());
-                           }
+                        Point end = new Vec(x2 + 0.5, y2 + target.getEyeHeight(), z2 + 0.5);
+                        Pos start = new Pos(x1 + 0.5, y1 + eyeHeight, z1 + 0.5).withLookAt(end);
+                        return CollisionUtils.isLineOfSightReachingShape(instance, self.getChunk(), start, end,
+                            target.getBoundingBox());
+                    }
 
-                           return false;
-                       };
+                    return false;
+                };
             }
 
             @Override
@@ -92,11 +92,12 @@ public class GroundPathfindingFactory implements Pathfinding.Factory {
     }
 
     @DataObject
-    public record Data(float jumpHeight,
-                       float fallTolerance,
-                       float stepHeight,
-                       double targetDeviation,
-                       boolean lineOfSight) {
+    public record Data(
+        float jumpHeight,
+        float fallTolerance,
+        float stepHeight,
+        double targetDeviation,
+        boolean lineOfSight) {
         @Default("targetDeviation")
         public static @NotNull ConfigElement defaultTargetDeviation() {
             return ConfigPrimitive.of(0.0);

@@ -3,17 +3,19 @@ package org.phantazm.zombies.map.objects;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.tracker.BoundedTracker;
-import org.phantazm.mob.spawner.MobSpawner;
+import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.shop.Shop;
+import org.phantazm.zombies.spawn.SpawnDistributor;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public final class BasicMapObjects implements MapObjects {
     private final List<Spawnpoint> spawnpoints;
@@ -32,28 +34,25 @@ public final class BasicMapObjects implements MapObjects {
     private final Point mapOrigin;
 
     private final TickTaskScheduler taskScheduler;
-
-    private final Team mobNoPushTeam;
-    private final Team corpseTeam;
+    private final SpawnDistributor spawnDistributor;
 
     public BasicMapObjects(@NotNull List<Spawnpoint> spawnpoints, @NotNull BoundedTracker<Window> windows,
-            @NotNull BoundedTracker<Shop> shops, @NotNull BoundedTracker<Door> doors,
-            @NotNull BoundedTracker<Room> rooms, @NotNull List<Round> rounds,
-            @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Point mapOrigin,
-            @NotNull Module module, @NotNull TickTaskScheduler taskScheduler, @Nullable Team mobNoPushTeam,
-            @NotNull Team corpseTeam) {
+        @NotNull BoundedTracker<Shop> shops, @NotNull BoundedTracker<Door> doors,
+        @NotNull BoundedTracker<Room> rooms, @NotNull List<Round> rounds,
+        @NotNull DependencyProvider mapDependencyProvider, @NotNull MobSpawner mobSpawner, @NotNull Point mapOrigin,
+        @NotNull Module module, @NotNull TickTaskScheduler taskScheduler, @NotNull SpawnDistributor spawnDistributor) {
         this.spawnpoints = List.copyOf(spawnpoints);
         this.rounds = List.copyOf(rounds);
 
-        this.mapDependencyProvider = Objects.requireNonNull(mapDependencyProvider, "mapDependencyProvider");
-        this.module = Objects.requireNonNull(module, "module");
+        this.mapDependencyProvider = Objects.requireNonNull(mapDependencyProvider);
+        this.module = Objects.requireNonNull(module);
 
-        this.windowTracker = Objects.requireNonNull(windows, "windows");
-        this.shopTracker = Objects.requireNonNull(shops, "shops");
-        this.doorTracker = Objects.requireNonNull(doors, "doors");
-        this.roomTracker = Objects.requireNonNull(rooms, "rooms");
+        this.windowTracker = Objects.requireNonNull(windows);
+        this.shopTracker = Objects.requireNonNull(shops);
+        this.doorTracker = Objects.requireNonNull(doors);
+        this.roomTracker = Objects.requireNonNull(rooms);
 
-        this.mobSpawner = Objects.requireNonNull(mobSpawner, "mobSpawner");
+        this.mobSpawner = Objects.requireNonNull(mobSpawner);
 
         Map<Key, Room> map = new HashMap<>(rooms.items().size());
         for (Room room : rooms.items()) {
@@ -62,18 +61,19 @@ public final class BasicMapObjects implements MapObjects {
 
         this.roomMap = Map.copyOf(map);
         this.mapOrigin = mapOrigin;
-        this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
-        this.mobNoPushTeam = mobNoPushTeam;
-        this.corpseTeam = Objects.requireNonNull(corpseTeam, "corpseTeam");
+        this.taskScheduler = Objects.requireNonNull(taskScheduler);
+        this.spawnDistributor = Objects.requireNonNull(spawnDistributor);
     }
 
     @Override
-    public @Unmodifiable @NotNull List<Spawnpoint> spawnpoints() {
+    public @Unmodifiable
+    @NotNull List<Spawnpoint> spawnpoints() {
         return spawnpoints;
     }
 
     @Override
-    public @Unmodifiable @NotNull List<Round> rounds() {
+    public @Unmodifiable
+    @NotNull List<Round> rounds() {
         return rounds;
     }
 
@@ -128,12 +128,7 @@ public final class BasicMapObjects implements MapObjects {
     }
 
     @Override
-    public @Nullable Team mobNoPushTeam() {
-        return mobNoPushTeam;
-    }
-
-    @Override
-    public @NotNull Team corpseTeam() {
-        return corpseTeam;
+    public @NotNull SpawnDistributor spawnDistributor() {
+        return spawnDistributor;
     }
 }

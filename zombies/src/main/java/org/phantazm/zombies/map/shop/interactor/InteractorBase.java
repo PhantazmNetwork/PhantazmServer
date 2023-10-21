@@ -8,6 +8,6 @@ public abstract class InteractorBase<TData> implements ShopInteractor {
     protected final TData data;
 
     public InteractorBase(@NotNull TData data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 }

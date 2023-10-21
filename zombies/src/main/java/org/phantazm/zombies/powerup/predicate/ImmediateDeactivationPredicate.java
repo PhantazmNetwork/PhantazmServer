@@ -3,12 +3,12 @@ package org.phantazm.zombies.powerup.predicate;
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-
-import java.util.function.Supplier;
+import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.deactivation_predicate.immediate")
 @Cache
-public class ImmediateDeactivationPredicate implements Supplier<DeactivationPredicate> {
+public class ImmediateDeactivationPredicate implements DeactivationPredicateComponent {
     public static final DeactivationPredicate INSTANCE = new Predicate();
 
     @FactoryMethod
@@ -16,7 +16,7 @@ public class ImmediateDeactivationPredicate implements Supplier<DeactivationPred
     }
 
     @Override
-    public DeactivationPredicate get() {
+    public @NotNull DeactivationPredicate apply(@NotNull ZombiesScene scene) {
         return INSTANCE;
     }
 

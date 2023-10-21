@@ -43,26 +43,26 @@ public class CountdownStage implements Stage {
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     protected CountdownStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull MapSettingsInfo settings, @NotNull Random random, @NotNull Wrapper<Long> ticksRemaining,
-            @NotNull LongList alertTicks, @NotNull TickFormatter tickFormatter,
-            @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator) {
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
-        this.settings = Objects.requireNonNull(settings, "settings");
-        this.random = Objects.requireNonNull(random, "random");
-        this.ticksRemaining = Objects.requireNonNull(ticksRemaining, "ticksRemaining");
+        @NotNull MapSettingsInfo settings, @NotNull Random random, @NotNull Wrapper<Long> ticksRemaining,
+        @NotNull LongList alertTicks, @NotNull TickFormatter tickFormatter,
+        @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator) {
+        this.instance = Objects.requireNonNull(instance);
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
+        this.settings = Objects.requireNonNull(settings);
+        this.random = Objects.requireNonNull(random);
+        this.ticksRemaining = Objects.requireNonNull(ticksRemaining);
         this.initialTicks = ticksRemaining.get();
-        this.alertTicks = Objects.requireNonNull(alertTicks, "countdownAlertTicks");
-        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
-        this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator, "sidebarUpdaterCreator");
+        this.alertTicks = Objects.requireNonNull(alertTicks);
+        this.tickFormatter = Objects.requireNonNull(tickFormatter);
+        this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator);
     }
 
     public CountdownStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
-            @NotNull MapSettingsInfo settings, @NotNull Random random, long countdownTicks,
-            @NotNull LongList alertTicks, @NotNull TickFormatter tickFormatter,
-            @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator) {
+        @NotNull MapSettingsInfo settings, @NotNull Random random, long countdownTicks,
+        @NotNull LongList alertTicks, @NotNull TickFormatter tickFormatter,
+        @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator) {
         this(instance, zombiesPlayers, settings, random, Wrapper.of(countdownTicks), alertTicks, tickFormatter,
-                sidebarUpdaterCreator);
+            sidebarUpdaterCreator);
     }
 
     @Override
@@ -87,7 +87,8 @@ public class CountdownStage implements Stage {
                 return;
             }
 
-            List<MessageWithDestination> messages = settings.introMessages().get(random.nextInt(settings.introMessages().size()));
+            List<MessageWithDestination> messages = settings.introMessages()
+                .get(random.nextInt(settings.introMessages().size()));
             for (MessageWithDestination message : messages) {
                 switch (message.destination()) {
                     case TITLE -> player.sendTitlePart(TitlePart.TITLE, message.component());
@@ -105,7 +106,8 @@ public class CountdownStage implements Stage {
         zombiesPlayer.module().getPlayerView().getDisplayName().thenAccept(displayName -> {
             TagResolver joinerPlaceholder = Placeholder.component("joiner", displayName);
             Component message = MiniMessage.miniMessage()
-                    .deserialize(settings.gameJoinFormat(), joinerPlaceholder, countPlaceholder, maxPlayersPlaceholder);
+                .deserialize(settings.gameJoinFormat(), joinerPlaceholder, countPlaceholder,
+                    maxPlayersPlaceholder);
             instance.sendMessage(message);
         });
     }
@@ -131,6 +133,16 @@ public class CountdownStage implements Stage {
     }
 
     @Override
+    public boolean canJoin() {
+        return true;
+    }
+
+    @Override
+    public boolean preventsShutdown() {
+        return false;
+    }
+
+    @Override
     public void start() {
         ticksRemaining.set(initialTicks);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
@@ -143,7 +155,8 @@ public class CountdownStage implements Stage {
                     return;
                 }
 
-                List<MessageWithDestination> messages = settings.introMessages().get(random.nextInt(settings.introMessages().size()));
+                List<MessageWithDestination> messages = settings.introMessages()
+                    .get(random.nextInt(settings.introMessages().size()));
                 for (MessageWithDestination message : messages) {
                     switch (message.destination()) {
                         case TITLE -> player.sendTitlePart(TitlePart.TITLE, message.component());
@@ -158,7 +171,7 @@ public class CountdownStage implements Stage {
 
     @Override
     public void tick(long time) {
-        if (alertTicks.contains((long)ticksRemaining.get())) {
+        if (alertTicks.contains((long) ticksRemaining.get())) {
             TagResolver timePlaceholder = Placeholder.unparsed("time", tickFormatter.format(ticksRemaining.get()));
             Component message = miniMessage.deserialize(settings.countdownTimeFormat(), timePlaceholder);
             instance.playSound(settings.countdownTickSound());
@@ -167,7 +180,7 @@ public class CountdownStage implements Stage {
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (!zombiesPlayer.hasQuit()) {
                 SidebarUpdater sidebarUpdater = sidebarUpdaters.computeIfAbsent(zombiesPlayer.getUUID(),
-                        unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
+                    unused -> sidebarUpdaterCreator.apply(zombiesPlayer));
                 sidebarUpdater.tick(time);
             }
         }

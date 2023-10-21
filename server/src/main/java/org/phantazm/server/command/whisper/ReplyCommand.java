@@ -14,7 +14,7 @@ import java.util.Objects;
 public class ReplyCommand {
 
     public static @NotNull Command replyCommand(@NotNull WhisperManager whisperManager) {
-        Objects.requireNonNull(whisperManager, "whisperManager");
+        Objects.requireNonNull(whisperManager);
 
         Argument<String[]> message = ArgumentType.StringArray("message");
         Command command = new Command("reply", "r");
@@ -25,7 +25,7 @@ public class ReplyCommand {
 
             if (!(sender instanceof Player || sender instanceof ConsoleSender)) {
                 sender.sendMessage(Component.text("You have to be a player or the console to use that command!",
-                        NamedTextColor.RED));
+                    NamedTextColor.RED));
                 return false;
             }
 

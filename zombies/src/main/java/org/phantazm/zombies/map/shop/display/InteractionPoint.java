@@ -32,13 +32,13 @@ public class InteractionPoint implements ShopDisplay {
         }
 
         Entity armorStand = new Entity(EntityType.ARMOR_STAND);
-        ArmorStandMeta meta = (ArmorStandMeta)armorStand.getEntityMeta();
+        ArmorStandMeta meta = (ArmorStandMeta) armorStand.getEntityMeta();
         meta.setHasNoGravity(true);
         meta.setInvisible(true);
         meta.setHasNoBasePlate(true);
 
         armorStand.setInstance(shop.instance(), shop.center()
-                .add(data.offset.x(), data.offset.y() - (armorStand.getBoundingBox().height() / 2), data.offset.z()));
+            .add(data.offset.x(), data.offset.y() - (armorStand.getBoundingBox().height() / 2), data.offset.z()));
         this.entity = armorStand;
     }
 

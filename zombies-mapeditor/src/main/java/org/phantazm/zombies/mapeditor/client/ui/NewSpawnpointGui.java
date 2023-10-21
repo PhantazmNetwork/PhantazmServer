@@ -36,7 +36,7 @@ public class NewSpawnpointGui extends NamedObjectGui {
     public NewSpawnpointGui(@NotNull EditorSession session) {
         super(LogicUtils.nullCoalesce(session.lastSpawnrule(), Key::value));
 
-        Objects.requireNonNull(session, "session");
+        Objects.requireNonNull(session);
 
         super.gridPanelRoot.setSize(200, 120);
 
@@ -56,8 +56,7 @@ public class NewSpawnpointGui extends NamedObjectGui {
         Vec3I linkTarget;
         if (session.getSelection().volume() != 1) {
             linkTarget = session.getSecondSelection().sub(mapOrigin);
-        }
-        else {
+        } else {
             linkTarget = null;
         }
 
@@ -66,14 +65,12 @@ public class NewSpawnpointGui extends NamedObjectGui {
             if (state) {
                 if (linkTarget != null) {
                     this.linkDisplayLabel.setText(
-                            Text.translatable(TranslationKeys.GUI_MAPEDITOR_EXPLICIT_WINDOW_LINK, linkTarget.x(),
-                                    linkTarget.y(), linkTarget.z()));
-                }
-                else {
+                        Text.translatable(TranslationKeys.GUI_MAPEDITOR_EXPLICIT_WINDOW_LINK, linkTarget.x(),
+                            linkTarget.y(), linkTarget.z()));
+                } else {
                     this.linkDisplayLabel.setText(Text.translatable(TranslationKeys.GUI_MAPEDITOR_NEAREST_WINDOW_LINK));
                 }
-            }
-            else {
+            } else {
                 this.linkDisplayLabel.setText(Text.of(StringUtils.EMPTY));
             }
         });
@@ -92,7 +89,7 @@ public class NewSpawnpointGui extends NamedObjectGui {
             boolean linkToWindow = toggleButtonLinkWindow.getToggle();
 
             currentMap.spawnpoints()
-                    .add(new SpawnpointInfo(firstSelected.sub(origin), spawnruleKey, linkToWindow, linkTarget));
+                .add(new SpawnpointInfo(firstSelected.sub(origin), spawnruleKey, linkToWindow, linkTarget));
             session.refreshSpawnpoints();
             ScreenUtils.closeCurrentScreen();
         });

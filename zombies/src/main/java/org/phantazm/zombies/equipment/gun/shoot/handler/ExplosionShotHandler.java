@@ -35,12 +35,12 @@ public class ExplosionShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public ExplosionShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;
@@ -48,8 +48,8 @@ public class ExplosionShotHandler implements ShotHandler {
 
         Point end = shot.end();
         ServerPacket packet =
-                new ExplosionPacket((float)end.x(), (float)end.y(), (float)end.z(), data.radius(), ZERO_BYTE_ARRAY, 0,
-                        0, 0);
+            new ExplosionPacket((float) end.x(), (float) end.y(), (float) end.z(), data.radius(), ZERO_BYTE_ARRAY, 0,
+                0, 0);
         instance.sendGroupedPacket(packet);
     }
 

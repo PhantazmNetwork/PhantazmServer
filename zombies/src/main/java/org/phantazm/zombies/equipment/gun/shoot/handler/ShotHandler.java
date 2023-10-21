@@ -18,13 +18,13 @@ public interface ShotHandler extends GunTickEffect {
     /**
      * Handles a shot.
      *
-     * @param gun
+     * @param gun          The firing gun
      * @param state        The state of the gun
      * @param attacker     The {@link Entity} that shot
      * @param previousHits The gun's previously hit targets
      * @param shot         The shot that was fired
      */
     void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot);
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot);
 
 }

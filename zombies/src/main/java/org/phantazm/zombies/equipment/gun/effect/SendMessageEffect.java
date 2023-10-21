@@ -12,6 +12,7 @@ import org.phantazm.zombies.equipment.gun.audience.AudienceProvider;
 import java.util.Objects;
 
 // TODO: priority support, also do priorities for titles
+
 /**
  * A {@link GunEffect} that sends a message to an {@link Audience}.
  */
@@ -30,9 +31,9 @@ public class SendMessageEffect implements GunEffect {
      */
     @FactoryMethod
     public SendMessageEffect(@NotNull Data data,
-            @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.audienceProvider = Objects.requireNonNull(audienceProvider, "actionBarSender");
+        @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
+        this.data = Objects.requireNonNull(data);
+        this.audienceProvider = Objects.requireNonNull(audienceProvider);
     }
 
     @Override
@@ -59,7 +60,8 @@ public class SendMessageEffect implements GunEffect {
      * @param message          The {@link Component} to send to the {@link Audience}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("audience_provider") String audienceProvider,
-                       @NotNull MessageWithDestination message) {
+    public record Data(
+        @NotNull @ChildPath("audience_provider") String audienceProvider,
+        @NotNull MessageWithDestination message) {
     }
 }

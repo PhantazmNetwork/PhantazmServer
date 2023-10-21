@@ -25,19 +25,19 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 val toSkip = gradle.startParameter.projectProperties.getOrDefault("skipBuild", "").split(",")
 
 sequenceOf(
-    "core",
-    "commons",
-    "messaging",
-    "mob",
-    "proxima-minestom",
-    "server",
-    "stats",
-    "zombies-timer",
-    "velocity",
-    "zombies",
-    "zombies-mapdata",
-    "zombies-mapeditor",
-    "snbt-builder"
+        "core",
+        "commons",
+        "messaging",
+        "mob",
+        "proxima-minestom",
+        "server",
+        "stats",
+        "zombies-timer",
+        "velocity",
+        "zombies",
+        "zombies-mapdata",
+        "zombies-mapeditor",
+        "snbt-builder"
 ).forEach {
     if (!toSkip.contains(it)) {
         include(":phantazm-$it")

@@ -4,13 +4,16 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A {@link PlayerViewProvider} based off of a {@link ConnectionManager}, which will be the ConnectionManager instance
@@ -24,7 +27,12 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     private final IdentitySource identitySource;
     private final ConnectionManager connectionManager;
-    private final Cache<UUID, BasicPlayerView> uuidToView;
+
+    //used only for the purposes of maintaining strong references to players who are online
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    private final Map<Player, PlayerViewImpl> onlinePlayers;
+
+    private final Cache<UUID, PlayerViewImpl> uuidToView;
     private final Cache<String, UUID> nameToUuid;
 
     /**
@@ -35,11 +43,13 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
      * @param duration          the duration for which name-to-UUID mappings will be cached
      */
     public BasicPlayerViewProvider(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
-            @NotNull Duration duration) {
-        this.identitySource = Objects.requireNonNull(identitySource, "identitySource");
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
+        @NotNull Duration duration) {
+        this.identitySource = Objects.requireNonNull(identitySource);
+        this.connectionManager = Objects.requireNonNull(connectionManager);
+        this.onlinePlayers = new ConcurrentHashMap<>();
+
         this.uuidToView = Caffeine.newBuilder().weakValues().build();
-        this.nameToUuid = Caffeine.newBuilder().expireAfterWrite(Objects.requireNonNull(duration, "duration")).build();
+        this.nameToUuid = Caffeine.newBuilder().expireAfterWrite(Objects.requireNonNull(duration)).build();
     }
 
     /**
@@ -50,19 +60,19 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
      * @param connectionManager the {@link ConnectionManager} used by this server
      */
     public BasicPlayerViewProvider(@NotNull IdentitySource identitySource,
-            @NotNull ConnectionManager connectionManager) {
+        @NotNull ConnectionManager connectionManager) {
         this(identitySource, connectionManager, DEFAULT_TIMEOUT);
     }
 
     @Override
     public @NotNull PlayerView fromUUID(@NotNull UUID uuid) {
-        Objects.requireNonNull(uuid, "uuid");
-        return uuidToView.get(uuid, key -> new BasicPlayerView(identitySource, connectionManager, key));
+        Objects.requireNonNull(uuid);
+        return uuidToView.get(uuid, key -> new PlayerViewImpl(identitySource, connectionManager, key));
     }
 
     @Override
     public @NotNull CompletableFuture<Optional<PlayerView>> fromName(@NotNull String name) {
-        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(name);
         Player player = connectionManager.getPlayer(name);
         if (player != null) {
             //if player is online, use the player object
@@ -86,7 +96,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     @Override
     public @NotNull Optional<PlayerView> fromNameIfOnline(@NotNull String name) {
-        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(name);
         Player player = connectionManager.getPlayer(name);
         if (player == null) {
             return Optional.empty();
@@ -97,8 +107,30 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
 
     @Override
     public @NotNull PlayerView fromPlayer(@NotNull Player player) {
-        Objects.requireNonNull(player, "player");
-        return uuidToView.get(player.getUuid(), key -> new BasicPlayerView(identitySource, connectionManager, player));
+        Objects.requireNonNull(player);
+        return uuidToView.get(player.getUuid(), key -> new PlayerViewImpl(identitySource, connectionManager, player));
     }
 
+    /**
+     * Adds a strong reference to a {@link PlayerViewImpl} associated with the given {@link Player}. If there is already
+     * a weakly or strongly referenced PlayerViewImpl associated with this player's UUID, that instance is used.
+     * Otherwise, a new instance is created and cached.
+     *
+     * @param player the player to add
+     */
+    @ApiStatus.Internal
+    void addPlayer(@NotNull Player player) {
+        onlinePlayers.put(player, uuidToView.get(player.getUuid(), key ->
+            new PlayerViewImpl(identitySource, connectionManager, player)));
+    }
+
+    /**
+     * Removes a strong reference to an associated {@link PlayerViewImpl}.
+     *
+     * @param player the player to remove an association with
+     */
+    @ApiStatus.Internal
+    void removePlayer(@NotNull Player player) {
+        onlinePlayers.remove(player);
+    }
 }

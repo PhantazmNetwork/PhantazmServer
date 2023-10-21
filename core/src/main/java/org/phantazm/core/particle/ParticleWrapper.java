@@ -17,7 +17,7 @@ public class ParticleWrapper {
 
     @FactoryMethod
     public ParticleWrapper(@NotNull Data data,
-            @NotNull @Child("variant_data") ParticleVariantData particleVariantData) {
+        @NotNull @Child("variant_data") ParticleVariantData particleVariantData) {
         this.data = data;
         this.particleVariantData = particleVariantData;
     }
@@ -30,25 +30,26 @@ public class ParticleWrapper {
         return particleVariantData;
     }
 
-    @DataObject
-    public record Data(@NotNull Particle particle,
-                       @NotNull @ChildPath("variant_data") String variantData,
-                       boolean distance,
-                       float offsetX,
-                       float offsetY,
-                       float offsetZ,
-                       float data,
-                       int particleCount) {
-    }
-
     public void sendTo(@NotNull PacketGroupingAudience audience, double x, double y, double z) {
         ServerPacket packet =
-                ParticleCreator.createParticlePacket(data.particle, data.distance, x, y, z, data.offsetX, data.offsetY,
-                        data.offsetZ, data.data, data.particleCount, particleVariantData::write);
+            ParticleCreator.createParticlePacket(data.particle, data.distance, x, y, z, data.offsetX, data.offsetY,
+                data.offsetZ, data.data, data.particleCount, particleVariantData::write);
         audience.sendGroupedPacket(packet);
     }
 
     public void sendTo(@NotNull PacketGroupingAudience audience, @NotNull Point point) {
         sendTo(audience, point.x(), point.y(), point.z());
+    }
+
+    @DataObject
+    public record Data(
+        @NotNull Particle particle,
+        @NotNull @ChildPath("variant_data") String variantData,
+        boolean distance,
+        float offsetX,
+        float offsetY,
+        float offsetZ,
+        float data,
+        int particleCount) {
     }
 }

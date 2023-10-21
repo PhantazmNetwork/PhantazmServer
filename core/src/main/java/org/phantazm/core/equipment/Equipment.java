@@ -1,7 +1,9 @@
 package org.phantazm.core.equipment;
 
 import net.kyori.adventure.key.Keyed;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.inventory.InventoryObject;
 
 /**
@@ -25,4 +27,10 @@ public interface Equipment extends InventoryObject, Keyed {
      */
     void leftClick();
 
+    /**
+     * Invoked when a player attacks a particular entity while holding this equipment.
+     *
+     * @param target the attacked entity
+     */
+    void attack(@NotNull Entity target);
 }

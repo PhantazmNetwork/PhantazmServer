@@ -32,7 +32,7 @@ public class MainGui extends SimplePanelGui {
     public MainGui(@NotNull EditorSession session) {
         super(220, 150);
 
-        Objects.requireNonNull(session, "session");
+        Objects.requireNonNull(session);
 
         //pre-initialization
         List<Key> mapNames = session.mapView().values().stream().map(map -> map.settings().id()).toList();
@@ -104,10 +104,11 @@ public class MainGui extends SimplePanelGui {
             }
 
             session.addMap(
-                    new MapInfo(new MapSettingsInfo(mapKey, session.getFirstSelection()), PlayerCoinsInfo.DEFAULT,
-                            new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-                            new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), LeaderboardInfo.DEFAULT,
-                            new LinkedConfigNode(0), new LinkedConfigNode(), WebhookInfo.DEFAULT));
+                new MapInfo(new MapSettingsInfo(mapKey, session.getFirstSelection()), PlayerCoinsInfo.DEFAULT,
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), LeaderboardInfo.DEFAULT,
+                    new LinkedConfigNode(0), new LinkedConfigNode(), new LinkedConfigNode(),
+                    WebhookInfo.DEFAULT));
             session.setCurrent(mapKey);
 
             refreshMainGui(session);
@@ -116,18 +117,18 @@ public class MainGui extends SimplePanelGui {
         deleteMap.setOnClick(() -> {
             if (requireMap(session, feedback)) {
                 MinecraftClient.getInstance().setScreen(new CottonClientScreen(
-                        new ConfirmationGui(Text.translatable(TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY), () -> {
-                            session.removeMap(session.getMap().settings().id());
-                            refreshMainGui(session);
-                        }, () -> refreshMainGui(session))));
+                    new ConfirmationGui(Text.translatable(TranslationKeys.GUI_MAPEDITOR_DELETE_MAP_QUERY), () -> {
+                        session.removeMap(session.getMap().settings().id());
+                        refreshMainGui(session);
+                    }, () -> refreshMainGui(session))));
             }
         });
 
         save.setOnClick(session::saveMapsToDisk);
         load.setOnClick(() -> {
             MinecraftClient.getInstance().setScreen(new CottonClientScreen(
-                    new ConfirmationGui(Text.translatable(TranslationKeys.GUI_MAPEDITOR_OVERWRITE_MAP_QUERY),
-                            () -> refreshMaps(session), () -> refreshMainGui(session))));
+                new ConfirmationGui(Text.translatable(TranslationKeys.GUI_MAPEDITOR_OVERWRITE_MAP_QUERY),
+                    () -> refreshMaps(session), () -> refreshMainGui(session))));
         });
     }
 
@@ -143,13 +144,13 @@ public class MainGui extends SimplePanelGui {
     private void updateMapeditorToggle(WToggleButton mapeditorToggle, boolean enabled) {
         mapeditorToggle.setToggle(enabled);
         mapeditorToggle.setLabel(enabled
-                                 ? Text.translatable(TranslationKeys.GUI_MAPEDITOR_ENABLED)
-                                 : Text.translatable(TranslationKeys.GUI_MAPEDITOR_DISABLED));
+            ? Text.translatable(TranslationKeys.GUI_MAPEDITOR_ENABLED)
+            : Text.translatable(TranslationKeys.GUI_MAPEDITOR_DISABLED));
     }
 
     private void updateCurrentMap(EditorSession session, WText currentMap) {
         currentMap.setText(session.hasMap() ? Text.translatable(TranslationKeys.GUI_MAPEDITOR_CURRENT_MAP,
-                session.getMap().settings().id().value()) : Text.translatable(TranslationKeys.GUI_MAPEDITOR_NO_MAP));
+            session.getMap().settings().id().value()) : Text.translatable(TranslationKeys.GUI_MAPEDITOR_NO_MAP));
     }
 
     private void refreshMainGui(EditorSession session) {

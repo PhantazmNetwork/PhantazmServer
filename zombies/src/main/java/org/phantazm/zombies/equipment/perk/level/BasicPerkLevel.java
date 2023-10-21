@@ -1,6 +1,7 @@
 package org.phantazm.zombies.equipment.perk.level;
 
 import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -19,9 +20,9 @@ public class BasicPerkLevel implements PerkLevel {
     private final Collection<PerkEffect> effects;
 
     public BasicPerkLevel(@NotNull Set<Key> upgrades, @NotNull PerkEquipment equipment,
-            @NotNull Collection<PerkEffect> effects) {
+        @NotNull Collection<PerkEffect> effects) {
         this.upgrades = Set.copyOf(upgrades);
-        this.equipment = Objects.requireNonNull(equipment, "equipment");
+        this.equipment = Objects.requireNonNull(equipment);
         this.effects = List.copyOf(effects);
     }
 
@@ -68,12 +69,18 @@ public class BasicPerkLevel implements PerkLevel {
     }
 
     @Override
+    public void attack(@NotNull Entity target) {
+        equipment.attack(target);
+    }
+
+    @Override
     public @NotNull Key key() {
         return Key.key(Namespaces.PHANTAZM, "null");
     }
 
     @Override
-    public @Unmodifiable @NotNull Set<Key> upgrades() {
+    public @Unmodifiable
+    @NotNull Set<Key> upgrades() {
         return upgrades;
     }
 

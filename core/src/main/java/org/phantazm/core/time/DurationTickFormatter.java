@@ -17,16 +17,15 @@ public class DurationTickFormatter implements TickFormatter {
 
     @FactoryMethod
     public DurationTickFormatter(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public @NotNull String format(long ticks) {
         long elapsedSeconds;
         if (data.ceil) {
-            elapsedSeconds = (long)Math.ceil((double)ticks / MinecraftServer.TICK_PER_SECOND);
-        }
-        else {
+            elapsedSeconds = (long) Math.ceil((double) ticks / MinecraftServer.TICK_PER_SECOND);
+        } else {
             elapsedSeconds = ticks / MinecraftServer.TICK_PER_SECOND;
         }
         long hours = elapsedSeconds / 3600;
@@ -38,8 +37,7 @@ public class DurationTickFormatter implements TickFormatter {
             builder.append(hours);
             if (data.verbose) {
                 builder.append(" hours");
-            }
-            else {
+            } else {
                 builder.append("h");
             }
         }
@@ -47,8 +45,7 @@ public class DurationTickFormatter implements TickFormatter {
             builder.append(minutes);
             if (data.verbose) {
                 builder.append(" minutes");
-            }
-            else {
+            } else {
                 builder.append("m");
             }
         }
@@ -56,8 +53,7 @@ public class DurationTickFormatter implements TickFormatter {
             builder.append(seconds);
             if (data.verbose) {
                 builder.append(" seconds");
-            }
-            else {
+            } else {
                 builder.append("s");
             }
         }
@@ -66,6 +62,7 @@ public class DurationTickFormatter implements TickFormatter {
     }
 
     @DataObject
-    public record Data(boolean verbose, boolean ceil) {
+    public record Data(boolean verbose,
+        boolean ceil) {
     }
 }

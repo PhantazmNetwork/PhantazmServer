@@ -1,7 +1,13 @@
 package org.phantazm.zombies.mapeditor.client;
 
+import com.github.steanky.element.core.key.BasicKeyParser;
+import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.mapper.MappingProcessorSource;
+import com.github.steanky.ethylene.mapper.signature.ScalarSignature;
+import com.github.steanky.ethylene.mapper.type.Token;
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen;
 import me.x150.renderer.event.RenderEvents;
 import me.x150.renderer.render.Renderer3d;
@@ -27,6 +33,8 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
+import org.phantazm.commons.Namespaces;
+import org.phantazm.commons.Signatures;
 import org.phantazm.messaging.packet.player.MapDataVersionQueryPacket;
 import org.phantazm.zombies.map.FileSystemMapLoader;
 import org.phantazm.zombies.map.MapSettingsInfo;
@@ -53,6 +61,7 @@ public class MapeditorClient implements ClientModInitializer {
      */
     private static final String MAPEDITOR_PATH = "mapeditor";
 
+    @SuppressWarnings("PatternValidation")
     @Override
     public void onInitializeClient() {
         ConfigCodec codec = new YamlCodec();
@@ -62,9 +71,14 @@ public class MapeditorClient implements ClientModInitializer {
         RenderEvents.WORLD.register(renderer::rendered);
         RenderEvents.HUD.register(renderer::hudRender);
 
-        EditorSession editorSession =
-                new BasicEditorSession(renderer, new FileSystemMapLoader(defaultMapDirectory, codec),
-                        defaultMapDirectory);
+        KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
+        EditorSession editorSession = new BasicEditorSession(renderer,
+                new FileSystemMapLoader(defaultMapDirectory, codec, Signatures.core(MappingProcessorSource.builder())
+                        .withScalarSignature(ScalarSignature.of(Token.ofClass(Key.class),
+                                element -> keyParser.parseKey(element.asString()),
+                                key -> key == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(key.asString())))
+                        .withStandardSignatures().withStandardTypeImplementations().ignoringLengths().build()),
+                defaultMapDirectory);
         editorSession.loadMapsFromDisk();
 
         UseBlockCallback.EVENT.register(editorSession::handleBlockUse);

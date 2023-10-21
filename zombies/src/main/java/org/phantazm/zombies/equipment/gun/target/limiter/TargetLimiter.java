@@ -21,7 +21,8 @@ public interface TargetLimiter {
      * @param targets The targets to shoot from
      * @return A modified {@link List} of targets to shoot from
      */
-    @NotNull List<Pair<? extends LivingEntity, Vec>> limitTargets(@NotNull Pos start,
-            @NotNull List<Pair<? extends LivingEntity, Vec>> targets);
+    @NotNull
+    List<Pair<? extends LivingEntity, Vec>> limitTargets(@NotNull Pos start,
+        @NotNull List<Pair<? extends LivingEntity, Vec>> targets);
 
 }

@@ -3,6 +3,7 @@ package org.phantazm.zombies.map.shop.gui;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.gui.Gui;
 import org.phantazm.core.gui.GuiItem;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.interactor.ShopInteractor;
@@ -14,13 +15,13 @@ import java.util.UUID;
 
 public abstract class ClickHandlerBase<TData> implements GuiItem, ShopInteractor {
     protected final TData data;
-    protected final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    protected final Map<PlayerView, ZombiesPlayer> playerMap;
 
     protected Shop shop;
 
-    public ClickHandlerBase(@NotNull TData data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.playerMap = Objects.requireNonNull(playerMap, "playerMap");
+    public ClickHandlerBase(@NotNull TData data, @NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
+        this.data = Objects.requireNonNull(data);
+        this.playerMap = Objects.requireNonNull(playerMap);
     }
 
     @Override

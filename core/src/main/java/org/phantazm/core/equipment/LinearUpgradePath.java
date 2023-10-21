@@ -19,7 +19,7 @@ public class LinearUpgradePath implements UpgradePath {
 
     @FactoryMethod
     public LinearUpgradePath(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

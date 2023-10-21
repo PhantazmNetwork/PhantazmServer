@@ -5,14 +5,16 @@ import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.handler.DoorHandler;
 import org.phantazm.zombies.map.handler.ShopHandler;
 import org.phantazm.zombies.map.shop.InteractionTypes;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
+import java.util.function.Supplier;
 
 public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<PlayerBlockInteractEvent> {
 
@@ -23,16 +25,17 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
     private final PlayerRightClickListener rightClickListener;
 
     public PlayerInteractBlockListener(@NotNull Instance instance,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
-            @NotNull DoorHandler doorHandler, @NotNull PlayerRightClickListener rightClickListener) {
-        super(instance, zombiesPlayers);
-        this.shopHandler = Objects.requireNonNull(shopHandler, "shopHandler");
-        this.doorHandler = Objects.requireNonNull(doorHandler, "doorHandler");
-        this.rightClickListener = Objects.requireNonNull(rightClickListener, "rightClickListener");
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, @NotNull ShopHandler shopHandler,
+        @NotNull DoorHandler doorHandler, @NotNull PlayerRightClickListener rightClickListener,
+        @NotNull Supplier<ZombiesScene> scene) {
+        super(instance, zombiesPlayers, scene);
+        this.shopHandler = Objects.requireNonNull(shopHandler);
+        this.doorHandler = Objects.requireNonNull(doorHandler);
+        this.rightClickListener = Objects.requireNonNull(rightClickListener);
     }
 
     @Override
-    public void accept(@NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerBlockInteractEvent event) {
+    public void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerBlockInteractEvent event) {
         event.setCancelled(true);
 
         if (event.getBlock().registry().material() != Material.CHEST) {
@@ -41,7 +44,7 @@ public class PlayerInteractBlockListener extends ZombiesPlayerEventListener<Play
 
         if (event.getHand() == Player.Hand.MAIN) {
             if (shopHandler.handleInteraction(zombiesPlayer, event.getBlockPosition(),
-                    InteractionTypes.RIGHT_CLICK_BLOCK)) {
+                InteractionTypes.RIGHT_CLICK_BLOCK)) {
                 return;
             }
 

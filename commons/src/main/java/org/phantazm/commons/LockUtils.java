@@ -30,8 +30,7 @@ public final class LockUtils {
         try {
             lock.lock();
             return supplier.get();
-        }
-        finally {
+        } finally {
             lock.unlock();
         }
     }
@@ -47,8 +46,7 @@ public final class LockUtils {
         try {
             lock.lock();
             runnable.run();
-        }
-        finally {
+        } finally {
             lock.unlock();
         }
     }
@@ -65,12 +63,11 @@ public final class LockUtils {
      * @apiNote The name of this method differs from {@link LockUtils#lock(Lock, Supplier)} to avoid ambiguity issues.
      */
     public static <TReturn> TReturn lockCallable(@NotNull Lock lock, @NotNull Callable<? extends TReturn> callable)
-            throws Exception {
+        throws Exception {
         try {
             lock.lock();
             return callable.call();
-        }
-        finally {
+        } finally {
             lock.unlock();
         }
     }

@@ -20,7 +20,7 @@ public class NoTargetLimiter implements TargetLimiter {
 
     @Override
     public @NotNull List<Pair<? extends LivingEntity, Vec>> limitTargets(@NotNull Pos start,
-            @NotNull List<Pair<? extends LivingEntity, Vec>> targets) {
+        @NotNull List<Pair<? extends LivingEntity, Vec>> targets) {
         return targets;
     }
 }

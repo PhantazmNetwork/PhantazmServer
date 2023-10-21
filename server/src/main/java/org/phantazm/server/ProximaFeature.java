@@ -1,14 +1,14 @@
 package org.phantazm.server;
 
-import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.proxima.path.BasicAsyncPathfinder;
 import com.github.steanky.proxima.path.BasicPathOperation;
 import com.github.steanky.proxima.path.Pathfinder;
-import net.minestom.server.event.Event;
-import net.minestom.server.event.EventNode;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.proxima.bindings.minestom.*;
+import org.phantazm.proxima.bindings.minestom.InstanceSettingsFunction;
+import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
+import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.server.config.server.PathfinderConfig;
 
 import java.util.concurrent.ForkJoinPool;
@@ -24,10 +24,7 @@ public final class ProximaFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull EventNode<Event> globalNode, @NotNull ContextManager contextManager,
-            @NotNull PathfinderConfig pathfinderConfig) {
-        registerElementClasses(contextManager);
-
+    static void initialize(@NotNull PathfinderConfig pathfinderConfig) {
         int threads = pathfinderConfig.threads();
         boolean asyncMode = pathfinderConfig.asyncMode();
         int corePoolSize = pathfinderConfig.corePoolSize();
@@ -37,15 +34,11 @@ public final class ProximaFeature {
         TimeUnit keepAliveTimeUnit = pathfinderConfig.keepAliveTimeUnit();
 
         ForkJoinPool fjp = new ForkJoinPool(threads, ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, asyncMode,
-                corePoolSize, maximumPoolSize, minimumRunnable, forkJoinPool -> true, keepAliveTime, keepAliveTimeUnit);
+            corePoolSize, maximumPoolSize, minimumRunnable, forkJoinPool -> true, keepAliveTime, keepAliveTimeUnit);
 
         pathfinder = new BasicAsyncPathfinder(fjp, BasicPathOperation::new, 1000000);
-        settingsFunction = new InstanceSettingsFunction(globalNode);
+        settingsFunction = new InstanceSettingsFunction(MinecraftServer.getGlobalEventHandler());
         spawner = new InstanceSpawner(pathfinder, settingsFunction);
-    }
-
-    private static void registerElementClasses(@NotNull ContextManager contextManager) {
-        contextManager.registerElementClass(GroundPathfindingFactory.class);
     }
 
     public static @NotNull Pathfinder getPathfinder() {

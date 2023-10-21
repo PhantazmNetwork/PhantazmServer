@@ -7,16 +7,17 @@ import java.util.Objects;
 /**
  * Config for server settings.
  *
- * @param serverIP        The IP to run the server on
- * @param port            The port to run the server on
- * @param authType        The type of authentication the server will use
- * @param proxySecret     The secret used for authentication
+ * @param serverIP    The IP to run the server on
+ * @param port        The port to run the server on
+ * @param authType    The type of authentication the server will use
+ * @param proxySecret The secret used for authentication
  */
-public record ServerInfoConfig(@NotNull String serverIP,
-                               int port,
-                               boolean whitelist,
-                               @NotNull AuthType authType,
-                               @NotNull String proxySecret) {
+public record ServerInfoConfig(
+    @NotNull String serverIP,
+    int port,
+    boolean whitelist,
+    @NotNull AuthType authType,
+    @NotNull String proxySecret) {
     /**
      * The default server address string.
      */
@@ -38,8 +39,8 @@ public record ServerInfoConfig(@NotNull String serverIP,
     public static final AuthType DEFAULT_AUTH_TYPE = AuthType.MOJANG;
 
     /**
-     * The default proxy secret. This is used so the config file gets filled in, but the empty string should NEVER
-     * be used as an actual secret during production.
+     * The default proxy secret. This is used so the config file gets filled in, but the empty string should NEVER be
+     * used as an actual secret during production.
      */
     public static final String DEFAULT_PROXY_SECRET = "default";
 
@@ -47,25 +48,25 @@ public record ServerInfoConfig(@NotNull String serverIP,
      * The default ServerInfoConfig instance.
      */
     public static final ServerInfoConfig DEFAULT =
-            new ServerInfoConfig(DEFAULT_SERVER_ADDRESS, DEFAULT_PORT, DEFAULT_WHITELIST,
-                    DEFAULT_AUTH_TYPE, DEFAULT_PROXY_SECRET);
+        new ServerInfoConfig(DEFAULT_SERVER_ADDRESS, DEFAULT_PORT, DEFAULT_WHITELIST,
+            DEFAULT_AUTH_TYPE, DEFAULT_PROXY_SECRET);
 
     /**
      * Creates config regarding server settings.
      *
-     * @param serverIP        The IP to run the server on
-     * @param port            The port to run the server on
-     * @param authType        The type of authentication the server will use
-     * @param proxySecret     The secret used for authentication
+     * @param serverIP    The IP to run the server on
+     * @param port        The port to run the server on
+     * @param authType    The type of authentication the server will use
+     * @param proxySecret The secret used for authentication
      */
     public ServerInfoConfig {
-        Objects.requireNonNull(serverIP, "serverIP");
-        Objects.requireNonNull(authType, "authType");
-        Objects.requireNonNull(proxySecret, "proxySecret");
+        Objects.requireNonNull(serverIP);
+        Objects.requireNonNull(authType);
+        Objects.requireNonNull(proxySecret);
     }
 
     public boolean isUnsafeConfiguration() {
         return (authType == AuthType.VELOCITY || authType == AuthType.BUNGEE) &&
-                proxySecret.equals(ServerInfoConfig.DEFAULT_PROXY_SECRET);
+            proxySecret.equals(ServerInfoConfig.DEFAULT_PROXY_SECRET);
     }
 }

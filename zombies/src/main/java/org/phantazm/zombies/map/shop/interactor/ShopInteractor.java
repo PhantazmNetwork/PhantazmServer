@@ -1,23 +1,13 @@
 package org.phantazm.zombies.map.shop.interactor;
 
+import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 
 public interface ShopInteractor extends Tickable {
-    boolean handleInteraction(@NotNull PlayerInteraction interaction);
-
-    @Override
-    default void tick(long time) {
-
-    }
-
-    default void initialize(@NotNull Shop shop) {
-    }
-
     static boolean handle(@NotNull Iterable<? extends ShopInteractor> interactors,
-            @NotNull PlayerInteraction interaction) {
+        @NotNull PlayerInteraction interaction) {
         boolean res = true;
         for (ShopInteractor interactor : interactors) {
             res &= interactor.handleInteraction(interaction);
@@ -36,5 +26,14 @@ public interface ShopInteractor extends Tickable {
         for (ShopInteractor interactor : interactors) {
             interactor.initialize(shop);
         }
+    }
+
+    boolean handleInteraction(@NotNull PlayerInteraction interaction);
+
+    default void initialize(@NotNull Shop shop) {
+    }
+
+    default void tick(long time) {
+        
     }
 }

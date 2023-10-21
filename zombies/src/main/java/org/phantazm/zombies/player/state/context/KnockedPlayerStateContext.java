@@ -23,21 +23,21 @@ public class KnockedPlayerStateContext {
     private final Entity vehicle;
 
     public KnockedPlayerStateContext(@NotNull Instance instance, @NotNull Point knockLocation,
-            @Nullable Component knockRoom, @Nullable Component killer) {
-        this.knockLocation = Objects.requireNonNull(knockLocation, "knockLocation");
+        @Nullable Component knockRoom, @Nullable Component killer) {
+        this.knockLocation = Objects.requireNonNull(knockLocation);
         this.knockRoom = knockRoom;
         this.killer = killer;
 
 
         Entity vehicle = new Entity(EntityType.ARMOR_STAND);
 
-        ArmorStandMeta armorStandMeta = (ArmorStandMeta)vehicle.getEntityMeta();
+        ArmorStandMeta armorStandMeta = (ArmorStandMeta) vehicle.getEntityMeta();
         armorStandMeta.setInvisible(true);
         armorStandMeta.setHasNoGravity(true);
         armorStandMeta.setMarker(true);
         vehicle.setInstance(instance, knockLocation.sub(0, 1, 0));
 
-        this.vehicle = Objects.requireNonNull(vehicle, "vehicle");
+        this.vehicle = Objects.requireNonNull(vehicle);
     }
 
     public @NotNull Point getKnockLocation() {

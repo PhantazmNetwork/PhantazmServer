@@ -6,7 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 
@@ -20,7 +20,7 @@ public class MapFlagPredicate extends PredicateBase<MapFlagPredicate.Data> {
     @FactoryMethod
     public MapFlagPredicate(@NotNull Data data, @NotNull Flaggable flaggable) {
         super(data);
-        this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
+        this.flaggable = Objects.requireNonNull(flaggable);
     }
 
     @Override
@@ -29,6 +29,7 @@ public class MapFlagPredicate extends PredicateBase<MapFlagPredicate.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull Key flag, boolean requireAbsent) {
+    public record Data(@NotNull Key flag,
+        boolean requireAbsent) {
     }
 }

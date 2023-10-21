@@ -2,12 +2,13 @@ package org.phantazm.zombies.powerup;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
+import net.minestom.server.Tickable;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
+import org.phantazm.zombies.powerup.predicate.PickupPredicate;
 import org.phantazm.zombies.powerup.visual.PowerupVisual;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class Powerup implements Tickable, Keyed {
     private final List<PowerupVisual> visuals;
     private final List<PowerupAction> actions;
     private final DeactivationPredicate despawnPredicate;
+    private final PickupPredicate pickupPredicate;
     private final Point spawnLocation;
 
     private boolean spawned;
@@ -27,13 +29,14 @@ public class Powerup implements Tickable, Keyed {
     private ZombiesPlayer activatingPlayer;
 
     public Powerup(@NotNull Key type, @NotNull Collection<PowerupVisual> visuals,
-            @NotNull Collection<PowerupAction> actions, @NotNull DeactivationPredicate despawnPredicate,
-            @NotNull Point spawnLocation) {
-        this.type = Objects.requireNonNull(type, "type");
+        @NotNull Collection<PowerupAction> actions, @NotNull DeactivationPredicate despawnPredicate,
+        @NotNull PickupPredicate pickupPredicate, @NotNull Point spawnLocation) {
+        this.type = Objects.requireNonNull(type);
         this.visuals = new ArrayList<>(visuals);
         this.actions = new ArrayList<>(actions);
-        this.despawnPredicate = Objects.requireNonNull(despawnPredicate, "despawnPredicate");
-        this.spawnLocation = Objects.requireNonNull(spawnLocation, "spawnLocation");
+        this.despawnPredicate = Objects.requireNonNull(despawnPredicate);
+        this.pickupPredicate = Objects.requireNonNull(pickupPredicate);
+        this.spawnLocation = Objects.requireNonNull(spawnLocation);
     }
 
     public void spawn() {
@@ -62,23 +65,25 @@ public class Powerup implements Tickable, Keyed {
             return;
         }
 
-        for (PowerupVisual visual : visuals) {
-            visual.despawn();
+        if (!pickupPredicate.canPickup(player)) {
+            return;
         }
 
         boolean anyActive = false;
         for (int i = actions.size() - 1; i >= 0; i--) {
             PowerupAction action = actions.get(i);
-
             action.activate(this, player, time);
 
             if (action.deactivationPredicate().shouldDeactivate(time)) {
                 action.deactivate(player);
                 actions.remove(i);
-            }
-            else {
+            } else {
                 anyActive = true;
             }
+        }
+
+        for (PowerupVisual visual : visuals) {
+            visual.despawn();
         }
 
         if (anyActive) {
@@ -87,6 +92,29 @@ public class Powerup implements Tickable, Keyed {
         }
 
         spawned = false;
+    }
+
+    public void deactivate() {
+        if (spawned) {
+            for (PowerupVisual visual : visuals) {
+                visual.despawn();
+            }
+
+            visuals.clear();
+            spawned = false;
+        }
+
+        if (!active) {
+            return;
+        }
+
+        for (PowerupAction action : actions) {
+            action.deactivate(activatingPlayer);
+        }
+
+        actions.clear();
+        active = false;
+        activatingPlayer = null;
     }
 
     public @NotNull Point spawnLocation() {
@@ -122,8 +150,7 @@ public class Powerup implements Tickable, Keyed {
             if (deactivationPredicate.shouldDeactivate(time)) {
                 action.deactivate(activatingPlayer);
                 actions.remove(i);
-            }
-            else {
+            } else {
                 anyActive = true;
             }
 

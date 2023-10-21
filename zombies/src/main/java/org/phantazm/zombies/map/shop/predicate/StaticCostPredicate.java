@@ -22,17 +22,18 @@ public class StaticCostPredicate extends PredicateBase<StaticCostPredicate.Data>
     @FactoryMethod
     public StaticCostPredicate(@NotNull Data data, @NotNull TransactionModifierSource transactionModifierSource) {
         super(data);
-        this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource, "modifierSource");
+        this.transactionModifierSource = Objects.requireNonNull(transactionModifierSource);
     }
 
     @Override
     public boolean canInteract(@NotNull PlayerInteraction interaction, @NotNull Shop shop) {
         PlayerCoins coins = interaction.player().module().getCoins();
         return coins.runTransaction(new Transaction(transactionModifierSource.modifiers(data.modifierType), -data.cost))
-                .isAffordable(coins);
+            .isAffordable(coins);
     }
 
     @DataObject
-    public record Data(int cost, @NotNull Key modifierType) {
+    public record Data(int cost,
+        @NotNull Key modifierType) {
     }
 }

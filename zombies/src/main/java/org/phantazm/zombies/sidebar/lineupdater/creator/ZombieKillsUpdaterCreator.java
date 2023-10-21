@@ -23,7 +23,7 @@ public class ZombieKillsUpdaterCreator implements PlayerUpdaterCreator {
 
     @FactoryMethod
     public ZombieKillsUpdaterCreator(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -38,8 +38,8 @@ public class ZombieKillsUpdaterCreator implements PlayerUpdaterCreator {
         private int killCount = -1;
 
         public Updater(@NotNull Data data, @NotNull PlayerKills playerKills) {
-            this.data = Objects.requireNonNull(data, "data");
-            this.playerKills = Objects.requireNonNull(playerKills, "playerKills");
+            this.data = Objects.requireNonNull(data);
+            this.playerKills = Objects.requireNonNull(playerKills);
         }
 
         @Override

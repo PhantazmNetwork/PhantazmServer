@@ -33,8 +33,9 @@ import java.util.*;
 @Cache(false)
 public class GuardianBeamShotHandler implements ShotHandler {
 
-    private final Queue<Beam> removalQueue = new PriorityQueue<>(Comparator.comparingLong(Beam::time));
+    private final Queue<Beam> removalQueue = new PriorityQueue<>(Comparator.comparingLong(Beam::ticks));
     private final Data data;
+    private long ticks = 0;
 
     /**
      * Creates a new {@link GuardianBeamShotHandler}.
@@ -43,7 +44,7 @@ public class GuardianBeamShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public GuardianBeamShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     /**
@@ -79,30 +80,30 @@ public class GuardianBeamShotHandler implements ShotHandler {
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         Instance instance = attacker.getInstance();
         if (instance == null) {
             return;
         }
 
         Entity armorStand = new Entity(EntityType.ARMOR_STAND);
-        ArmorStandMeta armorStandMeta = (ArmorStandMeta)armorStand.getEntityMeta();
+        ArmorStandMeta armorStandMeta = (ArmorStandMeta) armorStand.getEntityMeta();
         armorStandMeta.setMarker(true);
         armorStandMeta.setInvisible(true);
 
         Entity guardian = new Entity(data.entityType());
-        GuardianMeta guardianMeta = (GuardianMeta)guardian.getEntityMeta();
+        GuardianMeta guardianMeta = (GuardianMeta) guardian.getEntityMeta();
         guardianMeta.setTarget(armorStand);
         guardian.setInvisible(true);
 
         Pos start = attacker.getPosition().add(0, attacker.getEyeHeight(), 0);
         ServerPacket armorStandSpawnPacket =
-                new SpawnEntityPacket(armorStand.getEntityId(), armorStand.getUuid(), armorStand.getEntityType().id(),
-                        Pos.fromPoint(shot.end()), 0F, 0, (short)0, (short)0, (short)0);
+            new SpawnEntityPacket(armorStand.getEntityId(), armorStand.getUuid(), armorStand.getEntityType().id(),
+                Pos.fromPoint(shot.end()), 0F, 0, (short) 0, (short) 0, (short) 0);
         ServerPacket armorStandMetaPacket = armorStand.getMetadataPacket();
         ServerPacket guardianSpawnPacket =
-                new SpawnEntityPacket(guardian.getEntityId(), guardian.getUuid(), guardian.getEntityType().id(), start,
-                        start.yaw(), 0, (short)0, (short)0, (short)0);
+            new SpawnEntityPacket(guardian.getEntityId(), guardian.getUuid(), guardian.getEntityType().id(), start,
+                start.yaw(), 0, (short) 0, (short) 0, (short) 0);
         ServerPacket guardianMetaPacket = guardian.getMetadataPacket();
 
         instance.sendGroupedPacket(armorStandSpawnPacket);
@@ -110,18 +111,19 @@ public class GuardianBeamShotHandler implements ShotHandler {
         instance.sendGroupedPacket(guardianSpawnPacket);
         instance.sendGroupedPacket(guardianMetaPacket);
 
-        removalQueue.add(new Beam(new WeakReference<>(instance), guardian, armorStand, System.currentTimeMillis()));
+        removalQueue.add(new Beam(new WeakReference<>(instance), guardian, armorStand, ticks));
     }
 
     @Override
     public void tick(@NotNull GunState state, long time) {
-        for (Beam beam = removalQueue.peek(); beam != null && (time - beam.time()) / 50 > data.beamTime();
-                beam = removalQueue.peek()) {
+        ++ticks;
+        for (Beam beam = removalQueue.peek(); beam != null && ticks - beam.ticks() > data.beamTime();
+             beam = removalQueue.peek()) {
             removalQueue.remove();
             Instance instance = beam.instance().get();
             if (instance != null) {
                 instance.sendGroupedPacket(new DestroyEntitiesPacket(
-                        List.of(beam.armorStand().getEntityId(), beam.guardian().getEntityId())));
+                    List.of(beam.armorStand().getEntityId(), beam.guardian().getEntityId())));
             }
         }
     }
@@ -133,13 +135,15 @@ public class GuardianBeamShotHandler implements ShotHandler {
      * @param beamTime   The time in ticks the beam will last
      */
     @DataObject
-    public record Data(@NotNull EntityType entityType, long beamTime) {
+    public record Data(@NotNull EntityType entityType,
+        long beamTime) {
     }
 
-    private record Beam(@NotNull Reference<Instance> instance,
-                        @NotNull Entity guardian,
-                        @NotNull Entity armorStand,
-                        long time) {
+    private record Beam(
+        @NotNull Reference<Instance> instance,
+        @NotNull Entity guardian,
+        @NotNull Entity armorStand,
+        long ticks) {
 
     }
 

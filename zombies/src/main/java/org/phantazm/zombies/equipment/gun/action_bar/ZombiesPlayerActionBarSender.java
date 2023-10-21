@@ -20,8 +20,8 @@ public class ZombiesPlayerActionBarSender implements ActionBarSender {
 
     @FactoryMethod
     public ZombiesPlayerActionBarSender(@NotNull Data data, @NotNull ZombiesPlayerActionBar actionBar) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.actionBar = Objects.requireNonNull(actionBar, "actionBar");
+        this.data = Objects.requireNonNull(data);
+        this.actionBar = Objects.requireNonNull(actionBar);
     }
 
     @Override

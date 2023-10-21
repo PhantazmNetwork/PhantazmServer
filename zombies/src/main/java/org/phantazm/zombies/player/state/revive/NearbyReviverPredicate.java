@@ -6,9 +6,9 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayer;
-import org.phantazm.zombies.player.ZombiesPlayerMeta;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class NearbyReviverPredicate implements Predicate<ZombiesPlayer> {
@@ -18,7 +18,7 @@ public class NearbyReviverPredicate implements Predicate<ZombiesPlayer> {
     private final double reviveRadius;
 
     public NearbyReviverPredicate(@NotNull PlayerView playerView, double reviveRadius) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.playerView = Objects.requireNonNull(playerView);
         this.reviveRadius = reviveRadius;
     }
 
@@ -40,12 +40,8 @@ public class NearbyReviverPredicate implements Predicate<ZombiesPlayer> {
             return false;
         }
 
-        Optional<Player> reviverPlayerOptional = revivingPlayer.getPlayer();
-        if (reviverPlayerOptional.isEmpty()) {
-            return false;
-        }
-        Player player = reviverPlayerOptional.get();
+        return revivingPlayer.getPlayer()
+            .filter(player -> player.getPosition().distance(knockedPosition) <= reviveRadius).isPresent();
 
-        return player.getPosition().distance(knockedPosition) <= reviveRadius;
     }
 }

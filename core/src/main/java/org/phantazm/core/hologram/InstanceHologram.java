@@ -9,14 +9,17 @@ import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Instance-wide Hologram implementation. This object retains a strong reference to its instance, and therefore should
  * not be stored for longer than the lifetime of the instance.
  */
 public class InstanceHologram extends AbstractList<Component> implements Hologram {
-    private static final double MESSAGE_HEIGHT = 0.25;
+    public static final double MESSAGE_HEIGHT = 0.25;
 
     private final ArrayList<Entity> armorStands;
     private final ArrayList<Component> components;
@@ -35,8 +38,8 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      * @param alignment the alignment method
      */
     public InstanceHologram(@NotNull Point location, double gap, @NotNull Alignment alignment) {
-        this.alignment = Objects.requireNonNull(alignment, "alignment");
-        this.location = Objects.requireNonNull(location, "location");
+        this.alignment = Objects.requireNonNull(alignment);
+        this.location = Objects.requireNonNull(location);
         armorStands = new ArrayList<>();
         components = new ArrayList<>();
         this.gap = gap;
@@ -57,7 +60,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     @Override
     public void setAlignment(@NotNull Alignment alignment) {
-        Objects.requireNonNull(alignment, "alignmnet");
+        Objects.requireNonNull(alignment);
         synchronized (sync) {
             if (alignment != this.alignment) {
                 this.alignment = alignment;
@@ -73,7 +76,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     @Override
     public void setLocation(@NotNull Point location) {
-        Objects.requireNonNull(location, "location");
+        Objects.requireNonNull(location);
         synchronized (sync) {
             if (!location.equals(this.location)) {
                 this.location = location;
@@ -84,7 +87,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     @Override
     public void setInstance(@NotNull Instance instance) {
-        Objects.requireNonNull(instance, "instance");
+        Objects.requireNonNull(instance);
         synchronized (sync) {
             if (this.instance != instance) {
                 this.instance = instance;
@@ -95,8 +98,8 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     @Override
     public void setInstance(@NotNull Instance instance, @NotNull Point location) {
-        Objects.requireNonNull(instance, "instance");
-        Objects.requireNonNull(location, "location");
+        Objects.requireNonNull(instance);
+        Objects.requireNonNull(location);
         synchronized (sync) {
             if (this.instance != instance || !location.equals(this.location)) {
                 this.location = location;
@@ -125,13 +128,13 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     public @NotNull Component set(int index, @NotNull Component element) {
         synchronized (sync) {
             armorStands.get(index).setCustomName(element);
-            return components.set(index, Objects.requireNonNull(element, "element"));
+            return components.set(index, Objects.requireNonNull(element));
         }
     }
 
     public void add(int index, @NotNull Component component) {
         synchronized (sync) {
-            components.add(index, Objects.requireNonNull(component, "component"));
+            components.add(index, Objects.requireNonNull(component));
             armorStands.add(constructEntity(component));
             updateArmorStands();
         }
@@ -208,8 +211,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
             if (armorStand.getInstance() == instance) {
                 armorStand.teleport(pos).join();
-            }
-            else {
+            } else {
                 armorStand.setInstance(instance, pos).join();
             }
         }
@@ -226,7 +228,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      */
     protected @NotNull Entity constructEntity(@NotNull Component display) {
         Entity stand = new Entity(EntityType.ARMOR_STAND);
-        ArmorStandMeta meta = (ArmorStandMeta)stand.getEntityMeta();
+        ArmorStandMeta meta = (ArmorStandMeta) stand.getEntityMeta();
         meta.setMarker(true);
         meta.setHasNoGravity(true);
         meta.setCustomNameVisible(true);

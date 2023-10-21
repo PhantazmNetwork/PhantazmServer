@@ -35,7 +35,7 @@ public class MojangIdentitySource implements IdentitySource {
      * @param executor the executor used to run requests
      */
     public MojangIdentitySource(@NotNull Executor executor) {
-        this.executor = Objects.requireNonNull(executor, "executor");
+        this.executor = Objects.requireNonNull(executor);
     }
 
     @Override
@@ -44,8 +44,7 @@ public class MojangIdentitySource implements IdentitySource {
             JsonObject response = null;
             try {
                 response = MojangUtils.fromUuid(uuid.toString());
-            }
-            catch (RuntimeException exception) {
+            } catch (RuntimeException exception) {
                 LOGGER.error("RuntimeException thrown during name resolution of UUID {}: {}", uuid, exception);
             }
 
@@ -71,8 +70,7 @@ public class MojangIdentitySource implements IdentitySource {
             JsonObject response = null;
             try {
                 response = MojangUtils.fromUsername(name);
-            }
-            catch (RuntimeException exception) {
+            } catch (RuntimeException exception) {
                 LOGGER.error("RuntimeException thrown during UUID resolution of name {}: {}", name, exception);
             }
 
@@ -81,7 +79,8 @@ public class MojangIdentitySource implements IdentitySource {
                 if (idElement != null && idElement.isJsonPrimitive()) {
                     JsonPrimitive idPrimitive = idElement.getAsJsonPrimitive();
                     if (idPrimitive.isString()) {
-                        return Optional.of(UUID.fromString(idPrimitive.getAsString().replaceFirst("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5")));
+                        return Optional.of(UUID.fromString(idPrimitive.getAsString().replaceFirst(
+                            "(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5")));
                     }
                 }
 

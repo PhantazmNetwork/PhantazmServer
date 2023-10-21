@@ -5,21 +5,19 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
-import java.util.function.Supplier;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.deactivation_predicate.timed")
-public class TimedDeactivationPredicate implements Supplier<DeactivationPredicate> {
+public class TimedDeactivationPredicate implements DeactivationPredicateComponent {
     private final Data data;
 
     @FactoryMethod
     public TimedDeactivationPredicate(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = data;
     }
 
     @Override
-    public DeactivationPredicate get() {
+    public @NotNull DeactivationPredicate apply(@NotNull ZombiesScene scene) {
         return new Predicate(data);
     }
 
@@ -30,7 +28,7 @@ public class TimedDeactivationPredicate implements Supplier<DeactivationPredicat
 
     private static class Predicate implements DeactivationPredicate {
         private final Data data;
-        private long start = -1;
+        private int startTick = -1;
 
         private Predicate(Data data) {
             this.data = data;
@@ -38,16 +36,16 @@ public class TimedDeactivationPredicate implements Supplier<DeactivationPredicat
 
         @Override
         public void activate(long time) {
-            start = time;
+            startTick = MinecraftServer.currentTick();
         }
 
         @Override
         public boolean shouldDeactivate(long time) {
-            if (start < 0) {
+            if (startTick < 0) {
                 return false;
             }
 
-            return (time - start) / MinecraftServer.TICK_MS >= data.time;
+            return MinecraftServer.currentTick() - startTick >= data.time;
         }
     }
 }

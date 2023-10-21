@@ -30,14 +30,15 @@ public class SubstitutedTitleInteractor extends InteractorBase<SubstitutedTitleI
             return false;
         }
 
-        Component playerName = interaction.player().module().getPlayerView().getDisplayNameIfPresent();
+        Component playerName = interaction.player().module().getPlayerView().getDisplayNameIfCached()
+            .orElse(Component.empty());
+
         TagResolver playerPlaceholder = Placeholder.component("player", playerName);
         Component message = MiniMessage.miniMessage().deserialize(data.format, playerPlaceholder);
 
         if (data.broadcast) {
             shop.instance().sendTitlePart(data.titlePart, message);
-        }
-        else {
+        } else {
             interaction.player().getPlayer().ifPresent(player -> player.sendTitlePart(data.titlePart, message));
         }
 
@@ -50,6 +51,8 @@ public class SubstitutedTitleInteractor extends InteractorBase<SubstitutedTitleI
     }
 
     @DataObject
-    public record Data(@NotNull String format, boolean broadcast, TitlePart<Component> titlePart) {
+    public record Data(@NotNull String format,
+        boolean broadcast,
+        TitlePart<Component> titlePart) {
     }
 }

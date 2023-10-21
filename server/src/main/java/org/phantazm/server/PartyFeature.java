@@ -5,6 +5,7 @@ import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.Configuration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.timer.SchedulerManager;
@@ -14,6 +15,7 @@ import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.guild.party.PartyCreator;
+import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.guild.party.command.PartyCommand;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.TickFormatter;
@@ -23,7 +25,8 @@ import java.util.*;
 
 public class PartyFeature {
 
-    private static final GuildHolder<Party> partyHolder = new GuildHolder<>(new HashMap<>(), new ArrayList<>());
+    private static final GuildHolder<Party> partyHolder =
+        new GuildHolder<>(new HashMap<>(), Collections.newSetFromMap(new IdentityHashMap<>()));
 
     private static PartyConfig config;
 
@@ -32,26 +35,49 @@ public class PartyFeature {
     }
 
     static void initialize(@NotNull CommandManager commandManager, @NotNull PlayerViewProvider viewProvider,
-            @NotNull SchedulerManager schedulerManager, @NotNull ContextManager contextManager,
-            @NotNull PartyConfig config, @NotNull ConfigCodec partyCodec, @NotNull MiniMessage miniMessage)
-            throws IOException {
+        @NotNull SchedulerManager schedulerManager, @NotNull ContextManager contextManager,
+        @NotNull PartyConfig config, @NotNull ConfigCodec partyCodec) {
         PartyFeature.config = config;
-        ConfigElement partyConfigNode = Configuration.read(ConfigFeature.PARTY_CONFIG_PATH, partyCodec);
-        TickFormatter tickFormatter =
-                contextManager.makeContext(partyConfigNode.getNodeOrThrow("tickFormatter")).provide();
 
+        TickFormatter tickFormatter;
+        try {
+            ConfigElement partyConfigNode = Configuration.read(ConfigFeature.PARTY_CONFIG_PATH, partyCodec);
+            tickFormatter = contextManager.makeContext(partyConfigNode.getNodeOrThrow("tickFormatter")).provide();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        MiniMessage miniMessage = MiniMessage.miniMessage();
         PartyCreator partyCreator = new PartyCreator.Builder().setNotificationConfig(config.notificationConfig())
-                .setTickFormatter(tickFormatter).setMiniMessage(miniMessage).setCreatorRank(config.creatorRank())
-                .setDefaultRank(config.defaultRank()).setInvitationDuration(config.invitationDuration())
-                .setMinimumKickRank(config.minimumKickRank()).setMinimumInviteRank(config.minimumInviteRank())
-                .setMinimumJoinRank(config.minimumJoinRank()).build();
+            .setTickFormatter(tickFormatter).setMiniMessage(miniMessage).setCreatorRank(config.creatorRank())
+            .setDefaultRank(config.defaultRank()).setInvitationDuration(config.invitationDuration())
+            .setMinimumKickRank(config.minimumKickRank()).setMinimumInviteRank(config.minimumInviteRank())
+            .setMinimumJoinRank(config.minimumJoinRank())
+            .setMinimumAllInviteRank(config.minimumInviteRank()).build();
         Command partyCommand =
-                PartyCommand.partyCommand(config.commandConfig(), miniMessage, partyHolder, viewProvider, partyCreator,
-                        new Random(), config.creatorRank());
+            PartyCommand.partyCommand(config.commandConfig(), MinecraftServer.getConnectionManager(), miniMessage,
+                partyHolder, viewProvider, partyCreator, new Random(), config.creatorRank(),
+                config.defaultRank());
         commandManager.register(partyCommand);
 
         schedulerManager.scheduleTask(() -> {
-            partyHolder.guilds().removeIf(party -> party.getMemberManager().getMembers().isEmpty());
+            partyHolder.guilds().removeIf(party -> {
+                if (party.getMemberManager().getMembers().isEmpty()) {
+                    return true;
+                }
+
+                for (PartyMember member : party.getMemberManager().getMembers().values()) {
+                    if (member.isOnline()) {
+                        return false;
+                    }
+                }
+
+                for (PartyMember member : party.getMemberManager().getMembers().values()) {
+                    partyHolder.uuidToGuild().remove(member.getPlayerView().getUUID());
+                }
+
+                return true;
+            });
 
             Set<Party> ticked = Collections.newSetFromMap(new IdentityHashMap<>());
             long time = System.currentTimeMillis();

@@ -22,6 +22,7 @@ public class PlayerFlagPredicate extends PredicateBase<PlayerFlagPredicate.Data>
     }
 
     @DataObject
-    public record Data(@NotNull Key flag, boolean requireAbsent) {
+    public record Data(@NotNull Key flag,
+        boolean requireAbsent) {
     }
 }

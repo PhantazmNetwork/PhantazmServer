@@ -30,23 +30,24 @@ public class RefillAmmoInteractor extends InteractorBase<RefillAmmoInteractor.Da
                     result.set(true);
                 }
             });
-        }
-        else {
+        } else {
             interaction.player().module().getEquipmentHandler().accessRegistry().getCurrentAccess()
-                    .ifPresent(access -> {
-                        for (InventoryObject object : access.profile().objects()) {
-                            if (object instanceof Gun gun && (!data.matchKey || gun.key().equals(data.equipmentKey))) {
-                                gun.refill();
-                                result.set(true);
-                            }
+                .ifPresent(access -> {
+                    for (InventoryObject object : access.profile().objects()) {
+                        if (object instanceof Gun gun && (!data.matchKey || gun.key().equals(data.equipmentKey))) {
+                            gun.refill();
+                            result.set(true);
                         }
-                    });
+                    }
+                });
         }
 
         return result.get();
     }
 
     @DataObject
-    public record Data(@NotNull Key equipmentKey, boolean onlyHeld, boolean matchKey) {
+    public record Data(@NotNull Key equipmentKey,
+        boolean onlyHeld,
+        boolean matchKey) {
     }
 }

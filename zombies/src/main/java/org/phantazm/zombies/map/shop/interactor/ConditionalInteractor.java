@@ -21,12 +21,12 @@ public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.
 
     @FactoryMethod
     public ConditionalInteractor(@NotNull Data data, @Child("predicates") List<ShopPredicate> predicates,
-            @Child("success_interactors") List<ShopInteractor> successInteractors,
-            @Child("failure_interactors") List<ShopInteractor> failureInteractors) {
+        @Child("success_interactors") List<ShopInteractor> successInteractors,
+        @Child("failure_interactors") List<ShopInteractor> failureInteractors) {
         super(data);
-        this.predicates = Objects.requireNonNull(predicates, "predicates");
-        this.successInteractors = Objects.requireNonNull(successInteractors, "successInteractors");
-        this.failureInteractors = Objects.requireNonNull(failureInteractors, "failureInteractors");
+        this.predicates = Objects.requireNonNull(predicates);
+        this.successInteractors = Objects.requireNonNull(successInteractors);
+        this.failureInteractors = Objects.requireNonNull(failureInteractors);
     }
 
     @Override
@@ -50,10 +50,11 @@ public class ConditionalInteractor extends InteractorBase<ConditionalInteractor.
     }
 
     @DataObject
-    public record Data(@NotNull Evaluation evaluation,
-                       @NotNull @ChildPath("predicates") List<String> predicates,
-                       @NotNull @ChildPath("success_interactors") List<String> successInteractors,
-                       @NotNull @ChildPath("failure_interactors") List<String> failureInteractors) {
+    public record Data(
+        @NotNull Evaluation evaluation,
+        @NotNull @ChildPath("predicates") List<String> predicates,
+        @NotNull @ChildPath("success_interactors") List<String> successInteractors,
+        @NotNull @ChildPath("failure_interactors") List<String> failureInteractors) {
 
     }
 }

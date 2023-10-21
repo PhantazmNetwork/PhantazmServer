@@ -7,7 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.FlagAction;
-import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 
 import java.util.Objects;
@@ -20,7 +20,7 @@ public class MapFlaggingInteractor extends InteractorBase<MapFlaggingInteractor.
     @FactoryMethod
     public MapFlaggingInteractor(@NotNull Data data, @NotNull Flaggable flaggable) {
         super(data);
-        this.flaggable = Objects.requireNonNull(flaggable, "flaggable");
+        this.flaggable = Objects.requireNonNull(flaggable);
     }
 
     @Override
@@ -35,6 +35,7 @@ public class MapFlaggingInteractor extends InteractorBase<MapFlaggingInteractor.
     }
 
     @DataObject
-    public record Data(@NotNull Key flag, @NotNull FlagAction action) {
+    public record Data(@NotNull Key flag,
+        @NotNull FlagAction action) {
     }
 }

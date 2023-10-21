@@ -17,8 +17,7 @@ public final class TextPredicates {
             //noinspection PatternValidation
             Key.key(Namespaces.PHANTAZM, string);
             return true;
-        }
-        catch (InvalidKeyException ignored) {
+        } catch (InvalidKeyException ignored) {
             return false;
         }
     };

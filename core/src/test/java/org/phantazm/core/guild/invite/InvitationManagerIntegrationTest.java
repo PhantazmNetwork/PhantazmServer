@@ -6,7 +6,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.EnvTest;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.phantazm.core.guild.GuildMember;
@@ -61,12 +60,12 @@ public class InvitationManagerIntegrationTest {
 
             @Override
             public void notifyInvitation(@NotNull GuildMember inviter, @NotNull PlayerView invitee,
-                    long invitationDuration) {
+                long invitationDuration) {
 
             }
 
             @Override
-            public void notifyExpiry(@NotNull PlayerView invitee) {
+            public void notifyExpiry(@NotNull PlayerView inviter, @NotNull PlayerView invitee) {
 
             }
         };

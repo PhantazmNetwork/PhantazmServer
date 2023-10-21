@@ -26,7 +26,7 @@ public class NewDoorGui extends NamedObjectGui {
     public NewDoorGui(@NotNull EditorSession session) {
         super(LogicUtils.nullCoalesce(session.lastDoor(), door -> door.id().value()));
 
-        Objects.requireNonNull(session, "session");
+        Objects.requireNonNull(session);
 
         MapInfo currentMap = session.getMap();
         Bounds3I selected = session.getSelection().shift(currentMap.settings().origin().mul(-1));

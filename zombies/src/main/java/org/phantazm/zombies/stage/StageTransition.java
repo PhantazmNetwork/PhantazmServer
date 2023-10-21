@@ -2,8 +2,8 @@ package org.phantazm.zombies.stage;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Activable;
-import org.phantazm.commons.Tickable;
+import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.tick.Activable;
 
 public class StageTransition implements Activable {
 
@@ -47,15 +47,6 @@ public class StageTransition implements Activable {
         return currentStageIndex == stages.length;
     }
 
-    public void setCurrentStage(@NotNull Key stageKey) {
-        for (int i = 0; i < stages.length; i++) {
-            if (stages[i].key().equals(stageKey)) {
-                setCurrentStageIndex(i);
-                return;
-            }
-        }
-    }
-
     private void setCurrentStageIndex(int currentStageIndex) {
         if (currentStageIndex < 0 || currentStageIndex > stages.length) {
             throw new IllegalArgumentException("Invalid stage index: " + currentStageIndex);
@@ -69,14 +60,22 @@ public class StageTransition implements Activable {
         if (currentStageIndex != stages.length) {
             currentStage = stages[currentStageIndex];
             currentStage.start();
-        }
-        else {
+        } else {
             currentStage = null;
         }
     }
 
-    public Stage getCurrentStage() {
+    public @Nullable Stage getCurrentStage() {
         return currentStage;
+    }
+
+    public void setCurrentStage(@NotNull Key stageKey) {
+        for (int i = 0; i < stages.length; i++) {
+            if (stages[i].key().equals(stageKey)) {
+                setCurrentStageIndex(i);
+                return;
+            }
+        }
     }
 
     public void end() {

@@ -16,6 +16,7 @@ public class StaticItemDisplay extends ItemDisplayBase {
     }
 
     @DataObject
-    public record Data(@NotNull Vec3D offset, @NotNull ItemStack displayItem) {
+    public record Data(@NotNull Vec3D offset,
+        @NotNull ItemStack displayItem) {
     }
 }

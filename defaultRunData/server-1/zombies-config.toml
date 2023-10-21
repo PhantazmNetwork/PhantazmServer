@@ -1,4 +1,5 @@
 maximumScenes = 20
+joinRatelimit = 1000
 
 [gamereportConfig]
 idleStageFormat = "<#9096ad>Idle</#9096ad>"

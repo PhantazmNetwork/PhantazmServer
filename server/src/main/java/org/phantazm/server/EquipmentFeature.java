@@ -20,52 +20,14 @@ import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.equipment.EquipmentTypes;
-import org.phantazm.zombies.equipment.gun.*;
-import org.phantazm.zombies.equipment.gun.action_bar.ZombiesPlayerActionBarSender;
-import org.phantazm.zombies.equipment.gun.audience.EntityInstanceAudienceProvider;
-import org.phantazm.zombies.equipment.gun.audience.PlayerAudienceProvider;
-import org.phantazm.zombies.equipment.gun.effect.*;
+import org.phantazm.zombies.equipment.gun.Gun;
+import org.phantazm.zombies.equipment.gun.GunLevel;
+import org.phantazm.zombies.equipment.gun.GunModel;
+import org.phantazm.zombies.equipment.gun.ZombiesEquipmentModule;
 import org.phantazm.zombies.equipment.gun.event.GunShootEvent;
-import org.phantazm.zombies.equipment.gun.reload.StateReloadTester;
-import org.phantazm.zombies.equipment.gun.reload.actionbar.GradientActionBarChooser;
-import org.phantazm.zombies.equipment.gun.reload.actionbar.StaticActionBarChooser;
-import org.phantazm.zombies.equipment.gun.shoot.StateShootTester;
-import org.phantazm.zombies.equipment.gun.shoot.blockiteration.BasicBlockIteration;
-import org.phantazm.zombies.equipment.gun.shoot.blockiteration.WallshootingBlockIteration;
-import org.phantazm.zombies.equipment.gun.shoot.blockiteration.WindowBlockIteration;
-import org.phantazm.zombies.equipment.gun.shoot.endpoint.BasicShotEndpointSelector;
-import org.phantazm.zombies.equipment.gun.shoot.fire.HitScanFirer;
-import org.phantazm.zombies.equipment.gun.shoot.fire.SpreadFirer;
-import org.phantazm.zombies.equipment.gun.shoot.fire.projectile.PhantazmMobProjectileCollisionFilter;
-import org.phantazm.zombies.equipment.gun.shoot.fire.projectile.ProjectileFirer;
-import org.phantazm.zombies.equipment.gun.shoot.handler.*;
-import org.phantazm.zombies.equipment.gun.shoot.wallshooting.MapObjectsWallshootingChecker;
-import org.phantazm.zombies.equipment.gun.target.BasicTargetFinder;
-import org.phantazm.zombies.equipment.gun.target.entityfinder.directional.AroundEndFinder;
-import org.phantazm.zombies.equipment.gun.target.entityfinder.directional.BetweenPointsFinder;
-import org.phantazm.zombies.equipment.gun.target.entityfinder.positional.NearbyEntityFinder;
-import org.phantazm.zombies.equipment.gun.target.headshot.EyeHeightHeadshotTester;
-import org.phantazm.zombies.equipment.gun.target.headshot.StaticHeadshotTester;
-import org.phantazm.zombies.equipment.gun.target.intersectionfinder.RayTraceIntersectionFinder;
-import org.phantazm.zombies.equipment.gun.target.intersectionfinder.StaticIntersectionFinder;
-import org.phantazm.zombies.equipment.gun.target.limiter.DistanceTargetLimiter;
-import org.phantazm.zombies.equipment.gun.target.limiter.NoTargetLimiter;
-import org.phantazm.zombies.equipment.gun.target.tester.PhantazmMobTargetTester;
-import org.phantazm.zombies.equipment.gun.visual.ClipStackMapper;
-import org.phantazm.zombies.equipment.gun.visual.ReloadStackMapper;
 import org.phantazm.zombies.equipment.perk.BasicPerkCreator;
 import org.phantazm.zombies.equipment.perk.PerkCreator;
-import org.phantazm.zombies.equipment.perk.effect.*;
-import org.phantazm.zombies.equipment.perk.effect.shot.ApplyAttributeShotEffect;
-import org.phantazm.zombies.equipment.perk.effect.shot.ApplyFireShotEffect;
-import org.phantazm.zombies.equipment.perk.equipment.BasicPerkEquipmentCreator;
-import org.phantazm.zombies.equipment.perk.equipment.interactor.CooldownInteractorCreator;
-import org.phantazm.zombies.equipment.perk.equipment.interactor.MeleeInteractorCreator;
-import org.phantazm.zombies.equipment.perk.equipment.interactor.NoInteractorCreator;
-import org.phantazm.zombies.equipment.perk.equipment.visual.StaticVisualCreator;
-import org.phantazm.zombies.equipment.perk.level.NonUpgradeablePerkLevelCreator;
 import org.phantazm.zombies.equipment.perk.level.PerkLevelCreator;
-import org.phantazm.zombies.equipment.perk.level.UpgradeablePerkLevelCreator;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,15 +57,13 @@ final class EquipmentFeature {
     }
 
     static void initialize(@NotNull KeyParser keyParser, @NotNull ContextManager contextManager,
-            @NotNull ConfigCodec codec, @NotNull ConfigProcessor<EquipmentData> gunDataProcessor) {
-        EquipmentFeature.keyParser = Objects.requireNonNull(keyParser, "keyParser");
-        registerElementClasses(contextManager);
+        @NotNull ConfigCodec codec, @NotNull ConfigProcessor<EquipmentData> gunDataProcessor) {
+        EquipmentFeature.keyParser = Objects.requireNonNull(keyParser);
 
         String ending;
         if (codec.getPreferredExtensions().isEmpty()) {
             ending = "";
-        }
-        else {
+        } else {
             ending = "." + codec.getPreferredExtension();
         }
 
@@ -114,8 +74,7 @@ final class EquipmentFeature {
         try {
             FileUtils.createDirectories(guns);
             FileUtils.createDirectories(perks);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("Failed to create a necessary equipment directory.", e);
             return;
         }
@@ -125,14 +84,14 @@ final class EquipmentFeature {
 
         for (Path equipmentDirectory : equipmentDirectories) {
             try (Stream<Path> gunDirectories = Files.list(equipmentDirectory)) {
-                for (Path gunDirectory : (Iterable<? extends Path>)gunDirectories::iterator) {
+                for (Path gunDirectory : (Iterable<? extends Path>) gunDirectories::iterator) {
                     if (!Files.isDirectory(gunDirectory)) {
                         continue;
                     }
 
                     String infoFileName = codec.getPreferredExtensions().isEmpty()
-                                          ? "settings"
-                                          : "settings." + codec.getPreferredExtension();
+                        ? "settings"
+                        : "settings." + codec.getPreferredExtension();
                     Path infoPath = gunDirectory.resolve(infoFileName);
                     if (!Files.isRegularFile(infoPath)) {
                         LOGGER.warn("No equipment settings file at {}.", infoPath);
@@ -142,8 +101,7 @@ final class EquipmentFeature {
                     EquipmentData equipmentData;
                     try {
                         equipmentData = Configuration.read(infoPath, codec, gunDataProcessor);
-                    }
-                    catch (ConfigProcessException e) {
+                    } catch (ConfigProcessException e) {
                         LOGGER.warn("Failed to read equipment settings file at {}.", infoPath, e);
                         continue;
                     }
@@ -151,7 +109,7 @@ final class EquipmentFeature {
                     List<ElementContext> levelData = new ArrayList<>();
                     Path levelsPath = gunDirectory.resolve("levels");
                     try (Stream<Path> levelDirectories = Files.list(levelsPath)) {
-                        for (Path levelFile : (Iterable<? extends Path>)levelDirectories::iterator) {
+                        for (Path levelFile : (Iterable<? extends Path>) levelDirectories::iterator) {
                             if (!(Files.isRegularFile(levelFile) && matcher.matches(levelFile))) {
                                 continue;
                             }
@@ -159,21 +117,18 @@ final class EquipmentFeature {
                             try {
                                 ConfigNode node = Configuration.read(levelFile, codec, ConfigProcessor.CONFIG_NODE);
                                 levelData.add(contextManager.makeContext(node));
-                            }
-                            catch (IOException e) {
+                            } catch (IOException e) {
                                 LOGGER.warn("Failed to read level file at {}.", levelFile, e);
                             }
                         }
-                    }
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         LOGGER.warn("Failed to list levels directory at {}.", levelsPath, e);
                         continue;
                     }
 
                     equipmentLevelMap.put(equipmentData.name(), Pair.of(equipmentData, levelData));
                 }
-            }
-            catch (IOException e) {
+            } catch (IOException e) {
                 LOGGER.warn("Failed to list equipment directory at {}", guns, e);
             }
         }
@@ -182,90 +137,8 @@ final class EquipmentFeature {
         LOGGER.info("Loaded {} equipment.", equipmentLevelMap.size());
     }
 
-    private static void registerElementClasses(@NotNull ContextManager contextManager) {
-        contextManager.registerElementClass(GunLevel.class);
-        contextManager.registerElementClass(EntityInstanceAudienceProvider.class);
-        contextManager.registerElementClass(PlayerAudienceProvider.class);
-        contextManager.registerElementClass(ZombiesPlayerActionBarSender.class);
-        contextManager.registerElementClass(AlertNoAmmoEffect.class);
-        contextManager.registerElementClass(AmmoLevelEffect.class);
-        contextManager.registerElementClass(RecoilEffect.class);
-        contextManager.registerElementClass(PlaySoundEffect.class);
-        contextManager.registerElementClass(ReloadActionBarEffect.class);
-        contextManager.registerElementClass(SendMessageEffect.class);
-        contextManager.registerElementClass(ShootExpEffect.class);
-        contextManager.registerElementClass(GradientActionBarChooser.class);
-        contextManager.registerElementClass(StaticActionBarChooser.class);
-        contextManager.registerElementClass(StateReloadTester.class);
-        contextManager.registerElementClass(BasicShotEndpointSelector.class);
-        contextManager.registerElementClass(BasicBlockIteration.class);
-        contextManager.registerElementClass(WallshootingBlockIteration.class);
-        contextManager.registerElementClass(WindowBlockIteration.class);
-        contextManager.registerElementClass(PhantazmMobProjectileCollisionFilter.class);
-        contextManager.registerElementClass(ProjectileFirer.class);
-        contextManager.registerElementClass(HitScanFirer.class);
-        contextManager.registerElementClass(SpreadFirer.class);
-        contextManager.registerElementClass(ChainShotHandler.class);
-        contextManager.registerElementClass(DamageShotHandler.class);
-        contextManager.registerElementClass(ParticlePointShotHandler.class);
-        contextManager.registerElementClass(GiveCoinsShotHandler.class);
-        contextManager.registerElementClass(ExplosionShotHandler.class);
-        contextManager.registerElementClass(GuardianBeamShotHandler.class);
-        contextManager.registerElementClass(IgniteShotHandler.class);
-        contextManager.registerElementClass(KnockbackShotHandler.class);
-        contextManager.registerElementClass(MessageShotHandler.class);
-        contextManager.registerElementClass(ParticleTrailShotHandler.class);
-        contextManager.registerElementClass(PotionShotHandler.class);
-        contextManager.registerElementClass(SlowDownShotHandler.class);
-        contextManager.registerElementClass(SoundShotHandler.class);
-        contextManager.registerElementClass(MapObjectsWallshootingChecker.class);
-        contextManager.registerElementClass(StateShootTester.class);
-        contextManager.registerElementClass(AroundEndFinder.class);
-        contextManager.registerElementClass(BetweenPointsFinder.class);
-        contextManager.registerElementClass(NearbyEntityFinder.class);
-        contextManager.registerElementClass(EyeHeightHeadshotTester.class);
-        contextManager.registerElementClass(StaticHeadshotTester.class);
-        contextManager.registerElementClass(RayTraceIntersectionFinder.class);
-        contextManager.registerElementClass(StaticIntersectionFinder.class);
-        contextManager.registerElementClass(DistanceTargetLimiter.class);
-        contextManager.registerElementClass(NoTargetLimiter.class);
-        contextManager.registerElementClass(PhantazmMobTargetTester.class);
-        contextManager.registerElementClass(BasicTargetFinder.class);
-        contextManager.registerElementClass(ClipStackMapper.class);
-        contextManager.registerElementClass(ReloadStackMapper.class);
-        contextManager.registerElementClass(GunStats.class);
-
-        //PerkEffectCreators
-        contextManager.registerElementClass(FlaggingPerkEffectCreator.class);
-        contextManager.registerElementClass(ModifierPerkEffectCreator.class);
-        contextManager.registerElementClass(AddGroupSlotsCreator.class);
-        contextManager.registerElementClass(ShotEffectCreator.class);
-        contextManager.registerElementClass(TransactionModifierPerkEffectCreator.class);
-
-        //ShotEffects
-        contextManager.registerElementClass(ApplyAttributeShotEffect.class);
-        contextManager.registerElementClass(ApplyFireShotEffect.class);
-
-        //PerkInteractorCreators
-        contextManager.registerElementClass(CooldownInteractorCreator.class);
-        contextManager.registerElementClass(MeleeInteractorCreator.class);
-        contextManager.registerElementClass(NoInteractorCreator.class);
-
-        //PerkVisualCreators
-        contextManager.registerElementClass(StaticVisualCreator.class);
-
-        //PerkEquipmentCreators
-        contextManager.registerElementClass(BasicPerkEquipmentCreator.class);
-
-        //PerkLevelCreators
-        contextManager.registerElementClass(NonUpgradeablePerkLevelCreator.class);
-        contextManager.registerElementClass(UpgradeablePerkLevelCreator.class);
-
-        LOGGER.info("Registered Equipment element classes.");
-    }
-
     public static @NotNull EquipmentCreator createEquipmentCreator(@NotNull ZombiesEquipmentModule equipmentModule) {
-        Objects.requireNonNull(equipmentModule, "equipmentModule");
+        Objects.requireNonNull(equipmentModule);
         FeatureUtils.check(equipmentLevelMap);
         FeatureUtils.check(keyParser);
 
@@ -318,14 +191,12 @@ final class EquipmentFeature {
 
                 Key equipmentType = pair.left().type();
                 if (EquipmentTypes.PERK.equals(equipmentType)) {
-                    return (Optional<TEquipment>)loadPerk(equipmentKey);
+                    return (Optional<TEquipment>) loadPerk(equipmentKey);
+                } else if (EquipmentTypes.GUN.equals(equipmentType)) {
+                    return (Optional<TEquipment>) loadGun(pair, equipmentKey);
                 }
-                else if (EquipmentTypes.GUN.equals(equipmentType)) {
-                    return (Optional<TEquipment>)loadGun(pair, equipmentKey);
-                }
-                else {
-                    return Optional.empty();
-                }
+
+                return Optional.empty();
             }
 
             private Optional<Equipment> loadPerk(Key equipmentKey) {
@@ -368,11 +239,10 @@ final class EquipmentFeature {
 
                     if (!event.shot().headshotTargets().isEmpty()) {
                         equipmentModule.getMapStats()
-                                .setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + 1);
-                    }
-                    else if (!event.shot().regularTargets().isEmpty()) {
+                            .setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + 1);
+                    } else if (!event.shot().regularTargets().isEmpty()) {
                         equipmentModule.getMapStats()
-                                .setRegularHits(equipmentModule.getMapStats().getRegularHits() + 1);
+                            .setRegularHits(equipmentModule.getMapStats().getRegularHits() + 1);
                     }
                 });
 

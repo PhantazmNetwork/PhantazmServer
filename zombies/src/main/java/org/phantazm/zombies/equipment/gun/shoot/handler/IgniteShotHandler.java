@@ -4,34 +4,34 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
  * A {@link ShotHandler} that sets {@link Entity}s on fire.
  */
 @Model("zombies.gun.shot_handler.ignite")
-@Cache
+@Cache(false)
 public class IgniteShotHandler implements ShotHandler {
     private final Data data;
 
-    private final Tag<Long> lastFireDamage;
+    private final Tag<Long> lastFireDamageTicksTag;
     private final Deque<LivingEntity> targets;
-    private final MobStore mobStore;
 
     /**
      * Creates an {@link IgniteShotHandler}.
@@ -39,18 +39,17 @@ public class IgniteShotHandler implements ShotHandler {
      * @param data The {@link IgniteShotHandler}'s {@link Data}
      */
     @FactoryMethod
-    public IgniteShotHandler(@NotNull Data data, @NotNull MobStore mobStore) {
-        this.data = Objects.requireNonNull(data, "data");
+    public IgniteShotHandler(@NotNull Data data) {
+        this.data = Objects.requireNonNull(data);
 
         UUID uuid = UUID.randomUUID();
-        this.lastFireDamage = Tag.Long("last_fire_damage_time" + uuid).defaultValue(-1L);
+        this.lastFireDamageTicksTag = Tag.Long("last_fire_damage_ticks" + uuid).defaultValue(-1L);
         this.targets = new ConcurrentLinkedDeque<>();
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
     }
 
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
-            @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
+        @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         setFire(shot.regularTargets(), data.normalFireTicks);
         setFire(shot.headshotTargets(), data.headshotFireTicks);
     }
@@ -58,15 +57,19 @@ public class IgniteShotHandler implements ShotHandler {
     private void setFire(Collection<GunHit> hits, int duration) {
         for (GunHit target : hits) {
             LivingEntity entity = target.entity();
-            PhantazmMob mob = mobStore.getMob(entity.getUuid());
-            if (mob != null && mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_FIRE)) {
+            if (!(entity instanceof Mob mob)) {
+                return;
+            }
+
+            if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_FIRE)) {
                 continue;
             }
 
             entity.setFireForDuration(duration);
 
-            boolean alreadyActive = entity.getTag(lastFireDamage) != -1;
-            entity.setTag(lastFireDamage, System.currentTimeMillis());
+            long lastFireDamageTicks = entity.getTag(lastFireDamageTicksTag);
+            boolean alreadyActive = lastFireDamageTicks != -1;
+            entity.setTag(lastFireDamageTicksTag, ++lastFireDamageTicks);
 
             if (!alreadyActive) {
                 targets.add(entity);
@@ -82,9 +85,9 @@ public class IgniteShotHandler implements ShotHandler {
                 return true;
             }
 
-            if ((time - target.getTag(this.lastFireDamage)) / MinecraftServer.TICK_MS >= data.damageInterval) {
+            if (target.getTag(this.lastFireDamageTicksTag) >= data.damageInterval) {
                 damage(target);
-                target.setTag(this.lastFireDamage, time);
+                target.setTag(this.lastFireDamageTicksTag, 0L);
             }
 
             return false;
@@ -92,7 +95,7 @@ public class IgniteShotHandler implements ShotHandler {
     }
 
     private void remove(LivingEntity target) {
-        target.removeTag(lastFireDamage);
+        target.removeTag(lastFireDamageTicksTag);
     }
 
     private void damage(LivingEntity target) {
@@ -100,11 +103,12 @@ public class IgniteShotHandler implements ShotHandler {
     }
 
     @DataObject
-    public record Data(int normalFireTicks,
-                       int headshotFireTicks,
-                       int damageInterval,
-                       float damage,
-                       boolean bypassArmor) {
+    public record Data(
+        int normalFireTicks,
+        int headshotFireTicks,
+        int damageInterval,
+        float damage,
+        boolean bypassArmor) {
 
     }
 
