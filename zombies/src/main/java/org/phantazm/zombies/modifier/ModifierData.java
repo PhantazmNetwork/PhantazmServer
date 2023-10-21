@@ -17,6 +17,7 @@ import java.util.Set;
 public record ModifierData(int ordinal,
     @NotNull Key key,
     @Nullable Component displayName,
+    @NotNull Component abbreviatedDisplayName,
     @NotNull ItemStack displayItem,
     @NotNull Set<Key> exclusiveModifiers,
     @NotNull String webhookEmoji,
@@ -25,6 +26,11 @@ public record ModifierData(int ordinal,
     @Default("displayName")
     public static @NotNull ConfigElement defaultDisplayName() {
         return ConfigPrimitive.NULL;
+    }
+
+    @Default("abbreviatedDisplayName")
+    public static @NotNull ConfigElement defaultAbbreviatedDisplayName() {
+        return ConfigPrimitive.of("");
     }
 
     @Default("exclusiveModifiers")

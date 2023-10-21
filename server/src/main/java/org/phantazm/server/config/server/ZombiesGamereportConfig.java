@@ -3,6 +3,7 @@ package org.phantazm.server.config.server;
 import org.jetbrains.annotations.NotNull;
 
 public record ZombiesGamereportConfig(
+    @NotNull String playerFormat,
     @NotNull String idleStageFormat,
     @NotNull String countdownStageFormat,
     @NotNull String inGameFormat,
@@ -12,7 +13,7 @@ public record ZombiesGamereportConfig(
     @NotNull String previousPageFormat,
     @NotNull String pageFormat) {
     public static final ZombiesGamereportConfig DEFAULT =
-        new ZombiesGamereportConfig("Idle", "Countdown", "Round <current_round> - <game_time>", "Ended",
+        new ZombiesGamereportConfig("", "Idle", "Countdown", "Round <current_round> - <game_time>", "Ended",
             "<current_game>/<total_games> <game_uuid><br>  <player_list><br>  <map_name>: <game_state> " +
                 "<warp>[WARP]</warp>", "Click <next_page>here</next_page> for the next page",
             "Click <previous_page>here</previous_page> for the previous page",

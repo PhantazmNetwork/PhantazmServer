@@ -18,6 +18,7 @@ import java.util.*;
  * Defines the general settings for a map.
  */
 public record MapSettingsInfo(
+    int mapDifficulty,
     int mapDataVersion,
     int chunkLoadRange,
     @NotNull Key id,
@@ -150,7 +151,7 @@ public record MapSettingsInfo(
      *               otherwise specified
      */
     public MapSettingsInfo(@NotNull Key id, @NotNull Vec3I origin) {
-        this(MAP_DATA_VERSION, 10, id, List.of(), origin, 1.0F, -1, List.of(), 47, -1, Vec3I.ORIGIN, 0, 0,
+        this(1, MAP_DATA_VERSION, 10, id, List.of(), origin, 1.0F, -1, List.of(), 47, -1, Vec3I.ORIGIN, 0, 0,
             Component.text(id.value()), "{id:\"stone\",Count:1,tag:{Name:\"" + id.value() + "\"}}", 12000L,
             new ArrayList<>(0), 400L, new ArrayList<>(0),
             Sound.sound(Key.key("minecraft:entity.wolf.howl"), Sound.Source.MASTER, 1.0F, 1.0F), "", 200L, "",
@@ -166,6 +167,11 @@ public record MapSettingsInfo(
             Component.text("You cannot repair that window while enemies are nearby!", NamedTextColor.RED),
             Component.text("❤", NamedTextColor.RED), "", "",
             "<player> killed <mob>!", "Enabled modifiers: <modifiers>");
+    }
+
+    @Default("mapDifficulty")
+    public static @NotNull ConfigElement defaultMapDifficulty() {
+        return ConfigPrimitive.of(1);
     }
 
     @Default("trackStats")

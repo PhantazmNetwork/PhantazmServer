@@ -38,6 +38,11 @@ public class ModifierSource implements ModifierComponent {
     }
 
     @Override
+    public @NotNull Component abbreviatedDisplayName() {
+        return data.abbreviatedDisplayName();
+    }
+
+    @Override
     public @NotNull String webhookEmoji() {
         return data.webhookEmoji();
     }

@@ -17,15 +17,18 @@ import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.MiniMessageUtils;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.core.command.PermissionLockedCommand;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.scene2.Scene;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.time.AnalogTickFormatter;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.server.config.server.ZombiesGamereportConfig;
+import org.phantazm.zombies.map.Round;
+import org.phantazm.zombies.modifier.ModifierComponent;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.stage.EndStage;
 import org.phantazm.zombies.stage.InGameStage;
@@ -113,17 +116,40 @@ public class GamereportCommand extends PermissionLockedCommand {
 
                 TagResolver currentGameTag = Placeholder.unparsed("current_game", Integer.toString(i + 1));
                 TagResolver gameUUIDTag = Placeholder.unparsed("game_uuid", zombiesScene.identity().toString());
-                TagResolver notLegitTag = MiniMessageUtils.optional("not_legit", !zombiesScene.isLegit());
+                TagResolver notLegitTag = Formatter.choice("not_legit", !zombiesScene.isLegit() ? 1 : 0);
+                TagResolver zombiesLeftTag = Placeholder.unparsed("zombies_left",
+                    String.valueOf(zombiesScene.map().roundHandler().currentRound().map(Round::totalMobCount).orElse(0)));
+                TagResolver mapDiffcultyTag = Placeholder.unparsed("map_difficulty",
+                    String.valueOf(zombiesScene.mapSettingsInfo().mapDifficulty()));
+
+                Set<ModifierComponent> activeModifiers = zombiesScene.activeModifiers();
+                Component modifierList = Component.join(JoinConfiguration.commas(true),
+                    activeModifiers.stream().map(ModifierComponent::abbreviatedDisplayName).toList());
+                TagResolver hasModifiersTag = Formatter.choice("has_modifiers", activeModifiers.isEmpty() ? 0 : 1);
+                TagResolver modifierListTag = Placeholder.component("modifier_list", modifierList);
 
                 List<Component> playerNames = new ArrayList<>(zombiesScene.mapSettingsInfo().maxPlayers());
                 for (ZombiesPlayer player : zombiesScene.managedPlayers().values()) {
-                    player.getPlayer().ifPresent(actualPlayer -> {
-                        Component displayName = actualPlayer.getDisplayName();
-                        playerNames.add(displayName == null ? Component.text(actualPlayer.getUsername()) : displayName);
-                    });
+                    PlayerView view = player.module().getPlayerView();
+                    Component displayName = view.getDisplayNameIfCached()
+                        .orElseGet(() -> Component.text(view.getUUID().toString()));
+
+                    TagResolver playerDisplayNameTag = Placeholder.component("display_name", displayName);
+                    TagResolver playerKillsTag = Placeholder.unparsed("player_kills",
+                        String.valueOf(player.module().getKills().getKills()));
+
+                    ZombiesPlayerState state = player.module().getStateSwitcher().getState();
+                    TagResolver playerStateTag = Placeholder.component("player_state", state == null ?
+                        Component.empty() : state.getDisplayName());
+
+                    TagResolver playerCoinsTag = Placeholder.unparsed("player_coins",
+                        String.valueOf(player.module().getCoins().getCoins()));
+
+                    playerNames.add(MINI_MESSAGE.deserialize(config.playerFormat(), playerDisplayNameTag, playerKillsTag, playerStateTag, playerCoinsTag));
                 }
 
                 Component playerList = Component.join(JoinConfiguration.commas(true), playerNames);
+
                 TagResolver playerListTag = Placeholder.component("player_list", playerList);
                 TagResolver mapNameTag =
                     Placeholder.component("map_name", zombiesScene.mapSettingsInfo().displayName());
@@ -163,7 +189,8 @@ public class GamereportCommand extends PermissionLockedCommand {
 
                 gameEntries.add(
                     MINI_MESSAGE.deserialize(config.gameEntryFormat(), totalGamesTag, currentGameTag, gameUUIDTag,
-                        notLegitTag, playerListTag, mapNameTag, gameStateTag, warpTag));
+                        notLegitTag, playerListTag, mapNameTag, gameStateTag, warpTag, zombiesLeftTag, hasModifiersTag,
+                        modifierListTag, mapDiffcultyTag));
             }
 
             Component gameList = Component.join(JoinConfiguration.newlines(), gameEntries);
