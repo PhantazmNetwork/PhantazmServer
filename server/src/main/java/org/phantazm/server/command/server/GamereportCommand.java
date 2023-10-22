@@ -128,6 +128,7 @@ public class GamereportCommand extends PermissionLockedCommand {
                 TagResolver hasModifiersTag = Formatter.choice("has_modifiers", activeModifiers.isEmpty() ? 0 : 1);
                 TagResolver modifierListTag = Placeholder.component("modifier_list", modifierList);
 
+                List<Component> playerNamesDetailed = new ArrayList<>(zombiesScene.mapSettingsInfo().maxPlayers());
                 List<Component> playerNames = new ArrayList<>(zombiesScene.mapSettingsInfo().maxPlayers());
                 for (ZombiesPlayer player : zombiesScene.managedPlayers().values()) {
                     PlayerView view = player.module().getPlayerView();
@@ -145,12 +146,15 @@ public class GamereportCommand extends PermissionLockedCommand {
                     TagResolver playerCoinsTag = Placeholder.unparsed("player_coins",
                         String.valueOf(player.module().getCoins().getCoins()));
 
-                    playerNames.add(MINI_MESSAGE.deserialize(config.playerFormat(), playerDisplayNameTag, playerKillsTag, playerStateTag, playerCoinsTag));
+                    playerNamesDetailed.add(MINI_MESSAGE.deserialize(config.playerFormat(), playerDisplayNameTag, playerKillsTag, playerStateTag, playerCoinsTag));
+                    playerNames.add(displayName);
                 }
 
-                Component playerList = Component.join(JoinConfiguration.commas(true), playerNames);
+                Component playerList = Component.join(JoinConfiguration.commas(true), playerNamesDetailed);
 
                 TagResolver playerListTag = Placeholder.component("player_list", playerList);
+                TagResolver playerNamesTag = Placeholder.component("player_names",
+                    Component.join(JoinConfiguration.commas(true), playerNames));
                 TagResolver mapNameTag =
                     Placeholder.component("map_name", zombiesScene.mapSettingsInfo().displayName());
 
@@ -189,7 +193,7 @@ public class GamereportCommand extends PermissionLockedCommand {
 
                 gameEntries.add(
                     MINI_MESSAGE.deserialize(config.gameEntryFormat(), totalGamesTag, currentGameTag, gameUUIDTag,
-                        notLegitTag, playerListTag, mapNameTag, gameStateTag, warpTag, zombiesLeftTag, hasModifiersTag,
+                        notLegitTag, playerListTag, playerNamesTag, mapNameTag, gameStateTag, warpTag, zombiesLeftTag, hasModifiersTag,
                         modifierListTag, mapDiffcultyTag));
             }
 
