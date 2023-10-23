@@ -23,12 +23,12 @@ public class FriendRequestManager {
 
     public FriendRequestManager(@NotNull FriendDatabase friendDatabase, @NotNull FriendNotification notification,
             long requestDuration) {
-        this.friendDatabase = Objects.requireNonNull(friendDatabase, "friendDatabase");
-        this.notification = Objects.requireNonNull(notification, "notification");
+        this.friendDatabase = Objects.requireNonNull(friendDatabase);
+        this.notification = Objects.requireNonNull(notification);
         this.requestDuration = requestDuration;
     }
 
-    public void tick(long time) {
+    public void tick() {
         ++ticks;
 
         FriendRequest request = requests.peek();

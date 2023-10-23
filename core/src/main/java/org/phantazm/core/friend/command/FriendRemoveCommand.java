@@ -15,8 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class FriendRemoveCommand {
 
@@ -27,11 +25,14 @@ public class FriendRemoveCommand {
     }
 
     public static @NotNull Command removeCommand(@NotNull FriendCommandConfig config, @NotNull MiniMessage miniMessage,
-            @NotNull ConnectionManager connectionManager, @NotNull FriendDatabase database,
-            @NotNull FriendNotification notification, @NotNull PlayerViewProvider viewProvider) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(miniMessage, "miniMessage");
-        Objects.requireNonNull(connectionManager, "connectionManager");
+        @NotNull ConnectionManager connectionManager, @NotNull FriendDatabase database,
+        @NotNull FriendNotification notification, @NotNull PlayerViewProvider viewProvider) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(miniMessage);
+        Objects.requireNonNull(connectionManager);
+        Objects.requireNonNull(database);
+        Objects.requireNonNull(notification);
+        Objects.requireNonNull(viewProvider);
 
         Argument<String> nameArgument = ArgumentType.String("name");
         Command command = new Command("remove");
@@ -49,8 +50,7 @@ public class FriendRemoveCommand {
         }, (sender, context) -> {
             String name = context.get(nameArgument);
 
-            PlayerView remover = viewProvider.fromPlayer(((Player)sender));
-            CompletableFuture<Optional<PlayerView>> targetFuture = viewProvider.fromName(name);
+            PlayerView remover = viewProvider.fromPlayer(((Player) sender));
             viewProvider.fromName(name).whenComplete((playerViewOptional, throwable) -> {
                 if (throwable != null) {
                     LOGGER.warn("Failed to get PlayerView for {}", name);

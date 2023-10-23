@@ -28,15 +28,13 @@ public class FriendAddCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command addCommand(@NotNull FriendCommandConfig config, @NotNull MiniMessage miniMessage,
-            @NotNull ConnectionManager connectionManager, @NotNull FriendDatabase database,
-            @NotNull FriendRequestManager requestManager, @NotNull PlayerViewProvider viewProvider) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(miniMessage, "miniMessage");
-        Objects.requireNonNull(connectionManager, "connectionManager");
-        Objects.requireNonNull(database, "database");
-        Objects.requireNonNull(requestManager, "requestManager");
-        Objects.requireNonNull(viewProvider, "viewProvider");
+    public static @NotNull Command addCommand(@NotNull FriendCommandConfig config, @NotNull MiniMessage miniMessage, @NotNull ConnectionManager connectionManager, @NotNull FriendDatabase database, @NotNull FriendRequestManager requestManager, @NotNull PlayerViewProvider viewProvider) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(miniMessage);
+        Objects.requireNonNull(connectionManager);
+        Objects.requireNonNull(database);
+        Objects.requireNonNull(requestManager);
+        Objects.requireNonNull(viewProvider);
 
         Argument<String> nameArgument = ArgumentType.String("name");
         Command command = new Command("add");
@@ -52,7 +50,7 @@ public class FriendAddCommand {
 
             return true;
         }, (sender, context) -> {
-            PlayerView requester = viewProvider.fromUUID(((Player)sender).getUuid());
+            PlayerView requester = viewProvider.fromUUID(((Player) sender).getUuid());
 
             String name = context.get(nameArgument);
             Player targetPlayer = connectionManager.getPlayer(name);
@@ -68,7 +66,7 @@ public class FriendAddCommand {
                     return;
                 }
 
-                addInternal(config, miniMessage, connectionManager, database, requestManager, requester, target);
+                addInternal(config, miniMessage, database, requestManager, requester, target);
                 return;
             }
 
@@ -97,23 +95,20 @@ public class FriendAddCommand {
                     return;
                 }
 
-                addInternal(config, miniMessage, connectionManager, database, requestManager, requester, target);
+                addInternal(config, miniMessage, database, requestManager, requester, target);
             });
-
         }, nameArgument);
 
         return command;
     }
 
-    private static void addInternal(@NotNull FriendCommandConfig config, @NotNull MiniMessage miniMessage,
-            @NotNull ConnectionManager connectionManager, @NotNull FriendDatabase database,
-            @NotNull FriendRequestManager requestManager, @NotNull PlayerView requester, @NotNull PlayerView target) {
+    private static void addInternal(FriendCommandConfig config, MiniMessage miniMessage, FriendDatabase database,
+        FriendRequestManager requestManager, PlayerView requester, PlayerView target) {
         CompletableFuture<? extends Component> nameFuture = target.getDisplayName();
         CompletableFuture<Boolean> hasFriendFuture = database.hasFriend(requester.getUUID(), target.getUUID());
         hasFriendFuture.whenComplete((result, throwable) -> {
             if (throwable != null) {
-                LOGGER.warn("Failed to check if {} is a friend of {}", requester.getUUID(), target.getUUID(),
-                        throwable);
+                LOGGER.warn("Failed to check if {} is a friend of {}", requester.getUUID(), target.getUUID(), throwable);
             }
         });
 
@@ -124,6 +119,7 @@ public class FriendAddCommand {
                     Component message = miniMessage.deserialize(config.alreadyFriendsFormat(), namePlaceholder);
                     player.sendMessage(message);
                 });
+                return;
             }
 
             requestManager.sendRequest(requester, target);

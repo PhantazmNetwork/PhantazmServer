@@ -3,7 +3,7 @@ package org.phantazm.core.friend.command;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.friend.FriendDatabase;
+import org.phantazm.core.friend.FriendCache;
 
 import java.util.Objects;
 
@@ -13,9 +13,9 @@ public class FriendListCommand {
         throw new UnsupportedOperationException();
     }
 
-    public static @NotNull Command listCommand(@NotNull FriendCommandConfig config, @NotNull FriendDatabase database) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(database, "database");
+    public static @NotNull Command listCommand(@NotNull FriendCommandConfig config, @NotNull FriendCache cache) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(cache);
 
         Command command = new Command("list");
         command.addConditionalSyntax((sender, commandString) -> {
