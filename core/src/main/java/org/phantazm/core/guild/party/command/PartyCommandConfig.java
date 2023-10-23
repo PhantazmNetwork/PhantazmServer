@@ -29,12 +29,14 @@ public record PartyCommandConfig(
     @NotNull Component cannotTransferToSelf,
     @NotNull String toSpyNotInPartyFormat,
     @NotNull String nowSpyingFormat,
-    @NotNull String noLongerSpyingFormat) {
+    @NotNull String noLongerSpyingFormat,
+    @NotNull Component notInScene,
+    @NotNull Component notWarpable) {
 
     public static final PartyCommandConfig DEFAULT =
         new PartyCommandConfig(Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "",
             Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "", "",
             Component.empty(), Component.empty(), "", Component.empty(), "", "", "", "", "",
-            Component.empty(), "", "", "");
+            Component.empty(), "", "", "", Component.empty(), Component.empty());
 
 }

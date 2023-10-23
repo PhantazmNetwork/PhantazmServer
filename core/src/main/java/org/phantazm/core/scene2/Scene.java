@@ -232,4 +232,9 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
     default @NotNull Collection<@NotNull Player> getPlayers() {
         return PlayerView.getMany(playersView(), ArrayList::new);
     }
+
+    default @NotNull Optional<SceneManager.Key<?>> getDefaultJoinKey() {
+        return Optional.empty();
+    }
+
 }

@@ -40,9 +40,11 @@ public class PartyCreator {
 
     private final int minimumJoinRank;
 
+    private final int minimumWarpRank;
+
     public PartyCreator(@NotNull PartyNotificationConfig notificationConfig, @NotNull TickFormatter tickFormatter,
         @NotNull MiniMessage miniMessage, int creatorRank, int defaultRank, long invitationDuration,
-        int minimumKickRank, int minimumInviteRank, int minimumAllInviteRank, int minimumJoinRank) {
+        int minimumKickRank, int minimumInviteRank, int minimumAllInviteRank, int minimumJoinRank, int minimumWarpRank) {
         this.notificationConfig = Objects.requireNonNull(notificationConfig);
         this.tickFormatter = Objects.requireNonNull(tickFormatter);
         this.miniMessage = Objects.requireNonNull(miniMessage);
@@ -53,6 +55,7 @@ public class PartyCreator {
         this.minimumInviteRank = minimumInviteRank;
         this.minimumAllInviteRank = minimumAllInviteRank;
         this.minimumJoinRank = minimumJoinRank;
+        this.minimumWarpRank = minimumWarpRank;
     }
 
     public @NotNull Party createPartyFor(@NotNull PlayerView playerView) {
@@ -78,10 +81,11 @@ public class PartyCreator {
         SingleMemberPermission<PartyMember> invitePermission = new OrMultipleMemberPermission<>(List.of(rankInvitePermission, flagInvitePermission));
         SingleMemberPermission<PartyMember> allInvitePermission = new RankSingleMemberPermission<>(minimumAllInviteRank);
         SingleMemberPermission<PartyMember> joinPermission = new RankSingleMemberPermission<>(minimumJoinRank);
+        SingleMemberPermission<PartyMember> warpPermission = new RankSingleMemberPermission<>(minimumWarpRank);
 
         return new Party(memberManager, memberCreator, audience, spyAudience, notification, invitationManager,
             kickPermission,
-            invitePermission, joinPermission, allInvitePermission, ownerWrapper, flaggable);
+            invitePermission, joinPermission, allInvitePermission, warpPermission, ownerWrapper, flaggable);
     }
 
     private PartyMember createMember(PlayerView playerView) {
@@ -109,6 +113,8 @@ public class PartyCreator {
         private int minimumAllInviteRank = 1;
 
         private int minimumJoinRank = 1;
+
+        private int minimumWarpRank = 1;
 
         public @NotNull PartyNotificationConfig getNotificationConfig() {
             return notificationConfig;
@@ -200,9 +206,18 @@ public class PartyCreator {
             return this;
         }
 
+        public int getMinimumWarpRank() {
+            return minimumWarpRank;
+        }
+
+        public @NotNull Builder setMinimumWarpRank(int minimumWarpRank) {
+            this.minimumWarpRank = minimumWarpRank;
+            return this;
+        }
+
         public @NotNull PartyCreator build() {
             return new PartyCreator(notificationConfig, tickFormatter, miniMessage, creatorRank, defaultRank,
-                invitationDuration, minimumKickRank, minimumInviteRank, minimumAllInviteRank, minimumJoinRank);
+                invitationDuration, minimumKickRank, minimumInviteRank, minimumAllInviteRank, minimumJoinRank, minimumWarpRank);
         }
 
     }

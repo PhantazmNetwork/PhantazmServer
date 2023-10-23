@@ -52,8 +52,10 @@ public class PartyFeature {
             .setTickFormatter(tickFormatter).setMiniMessage(miniMessage).setCreatorRank(config.creatorRank())
             .setDefaultRank(config.defaultRank()).setInvitationDuration(config.invitationDuration())
             .setMinimumKickRank(config.minimumKickRank()).setMinimumInviteRank(config.minimumInviteRank())
+            .setMinimumAllInviteRank(config.minimumAllInviteRank())
             .setMinimumJoinRank(config.minimumJoinRank())
-            .setMinimumAllInviteRank(config.minimumInviteRank()).build();
+            .setMinimumWarpRank(config.minimumWarpRank())
+            .build();
         Command partyCommand =
             PartyCommand.partyCommand(config.commandConfig(), MinecraftServer.getConnectionManager(), miniMessage,
                 partyHolder, viewProvider, partyCreator, new Random(), config.creatorRank(),
