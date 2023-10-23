@@ -18,11 +18,11 @@ public final class ElementFeature {
     private static ContextManager contextManager;
 
     static void initialize(@NotNull MappingProcessorSource mappingProcessorSource, @NotNull KeyParser keyParser) {
-        Objects.requireNonNull(mappingProcessorSource, "mappingProcessorSource");
-        Objects.requireNonNull(keyParser, "keyParser");
+        Objects.requireNonNull(mappingProcessorSource);
+        Objects.requireNonNull(keyParser);
 
         contextManager = ContextManager.builder(Namespaces.PHANTAZM).withKeyParserFunction((ignored) -> keyParser)
-                .withMappingProcessorSourceSupplier(() -> mappingProcessorSource).build();
+            .withMappingProcessorSourceSupplier(() -> mappingProcessorSource).build();
         contextManager.registerElementClasses(ElementSearcher.getElementClassesInPackage(PHANTAZM_PACKAGE));
     }
 

@@ -16,10 +16,9 @@ import java.util.Locale;
 import java.util.PropertyResourceBundle;
 
 public final class LocalizationFeature {
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalizationFeature.class);
-
     public static final Path LANG_FOLDER = Path.of("./lang");
     public static final Key TRANSLATION_REGISTRY_KEY = Key.key(Namespaces.PHANTAZM, "translation");
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalizationFeature.class);
 
     private LocalizationFeature() {
         throw new UnsupportedOperationException();
@@ -46,16 +45,14 @@ public final class LocalizationFeature {
                         PropertyResourceBundle bundle = new PropertyResourceBundle(Files.newBufferedReader(path));
                         registry.registerAll(fileLocale, bundle, true);
                         count++;
-                    }
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         LOGGER.warn("Exception when loading localization file " + path, e);
                     }
                 }
             }
 
             LOGGER.info("Loaded {} localization files", count);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("Exception when loading localization info", e);
         }
 

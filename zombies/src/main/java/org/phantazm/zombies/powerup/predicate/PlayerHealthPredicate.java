@@ -5,7 +5,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Optional;
 
@@ -21,7 +21,7 @@ public class PlayerHealthPredicate implements PickupPredicateComponent {
         Player player = playerOptional.get();
         return player.getHealth() < player.getMaxHealth();
     };
-    
+
     @FactoryMethod
     public PlayerHealthPredicate() {
     }

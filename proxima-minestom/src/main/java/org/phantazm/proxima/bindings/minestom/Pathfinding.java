@@ -32,29 +32,15 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiPredicate;
 
 public class Pathfinding {
-    public interface Penalty {
-        Penalty NONE = (x, y, z, h) -> h;
-
-        float calculate(int x, int y, int z, float h);
-    }
-
     public static final double PLAYER_PATH_EPSILON = 0.0005;
     public static final double MOB_PATH_EPSILON = 1E-6;
     public static final double PLAYER_PATH_EPSILON_DOWNWARDS = MOB_PATH_EPSILON;
-
-    public interface Factory {
-        @NotNull Pathfinding make(@NotNull Pathfinder pathfinder,
-                @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler);
-    }
-
     protected final Pathfinder pathfinder;
     protected final ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal;
     protected final InstanceSpaceHandler spaceHandler;
-
     protected Entity self;
     protected Entity target;
     protected Penalty penalty;
-
     protected BoundingBox lastBoundingBox;
     protected Vec3IBiPredicate successPredicate;
     protected NodeSnapper nodeSnapper;
@@ -62,16 +48,15 @@ public class Pathfinding {
     protected Explorer explorer;
     protected Heuristic heuristic;
     protected NodeProcessor nodeProcessor;
-
     protected Navigator navigator;
     protected PathSettings pathSettings;
     protected Controller controller;
 
     public Pathfinding(@NotNull Pathfinder pathfinder, @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal,
-            @NotNull InstanceSpaceHandler spaceHandler) {
-        this.pathfinder = Objects.requireNonNull(pathfinder, "pathfinder");
-        this.nodeMapLocal = Objects.requireNonNull(nodeMapLocal, "nodeMapLocal");
-        this.spaceHandler = Objects.requireNonNull(spaceHandler, "spaceHandler");
+        @NotNull InstanceSpaceHandler spaceHandler) {
+        this.pathfinder = Objects.requireNonNull(pathfinder);
+        this.nodeMapLocal = Objects.requireNonNull(nodeMapLocal);
+        this.spaceHandler = Objects.requireNonNull(spaceHandler);
         this.penalty = Penalty.NONE;
     }
 
@@ -89,7 +74,7 @@ public class Pathfinding {
     }
 
     public void setPenalty(@NotNull Penalty penalty) {
-        Objects.requireNonNull(penalty, "penalty");
+        Objects.requireNonNull(penalty);
         if (penalty == this.penalty) {
             return;
         }
@@ -117,11 +102,14 @@ public class Pathfinding {
         if (lastBoundingBox != null && !boundingBox.equals(lastBoundingBox)) {
             cancel();
             return navigator =
-                    new BasicNavigator(pathfinder, pathSettings = generateSettings(this.lastBoundingBox = boundingBox));
+                new BasicNavigator(pathfinder,
+                    pathSettings = generateSettings(this.lastBoundingBox = boundingBox));
         }
 
         return Objects.requireNonNullElseGet(navigator, () -> navigator =
-                new BasicNavigator(pathfinder, pathSettings = generateSettings(this.lastBoundingBox = boundingBox)));
+            new BasicNavigator(pathfinder,
+                pathSettings = generateSettings(
+                    this.lastBoundingBox = boundingBox)));
     }
 
     public @NotNull PathSettings getSettings(@NotNull BoundingBox boundingBox) {
@@ -131,19 +119,19 @@ public class Pathfinding {
         }
 
         return Objects.requireNonNullElseGet(pathSettings,
-                () -> pathSettings = generateSettings(this.lastBoundingBox = boundingBox));
+            () -> pathSettings = generateSettings(this.lastBoundingBox = boundingBox));
     }
 
     public @NotNull Controller getController(@NotNull LivingEntity livingEntity) {
         return Objects.requireNonNullElseGet(controller,
-                () -> controller = new GroundController(livingEntity, stepHeight(), jumpHeight()));
+            () -> controller = new GroundController(livingEntity, stepHeight(), jumpHeight()));
     }
 
     public @NotNull PositionResolver positionResolverForTarget(@NotNull Entity entity) {
         BoundingBox boundingBox = entity.getBoundingBox();
         return PositionResolver.asIfByInitial(
-                new BasicNodeSnapper(spaceHandler.space(), boundingBox.width(), boundingBox.height(), fallTolerance(),
-                        jumpHeight(), PLAYER_PATH_EPSILON), 16, boundingBox.width(), PLAYER_PATH_EPSILON_DOWNWARDS);
+            new BasicNodeSnapper(spaceHandler.space(), boundingBox.width(), boundingBox.height(), fallTolerance(),
+                jumpHeight(), PLAYER_PATH_EPSILON), 16, boundingBox.width(), PLAYER_PATH_EPSILON_DOWNWARDS);
     }
 
     public @NotNull BiPredicate<Vec3D, Vec3D> targetChangePredicate(@NotNull Entity entity) {
@@ -162,7 +150,7 @@ public class Pathfinding {
 
     protected @NotNull PathSettings generateSettings(@NotNull BoundingBox boundingBox) {
         Vec3IBiPredicate successPredicate =
-                this.successPredicate = Objects.requireNonNull(successPredicate(), "successPredicate");
+            this.successPredicate = Objects.requireNonNull(successPredicate(), "successPredicate");
         this.nodeSnapper = Objects.requireNonNull(nodeSnapper(boundingBox), "nodeSnapper");
         this.pathLimiter = Objects.requireNonNull(pathLimiter(), "pathLimiter");
 
@@ -205,7 +193,7 @@ public class Pathfinding {
 
     protected @NotNull NodeSnapper nodeSnapper(@NotNull BoundingBox boundingBox) {
         return new BasicNodeSnapper(spaceHandler.space(), boundingBox.width(), boundingBox.height(), fallTolerance(),
-                jumpHeight(), MOB_PATH_EPSILON);
+            jumpHeight(), MOB_PATH_EPSILON);
     }
 
     protected @NotNull Explorer explorer() {
@@ -268,6 +256,18 @@ public class Pathfinding {
         double factor = ThreadLocalRandom.current().nextDouble() + 0.5;
 
         long count = pathResult.isSuccessful() ? pathResult.exploredCount() : pathResult.exploredCount() * 2L;
-        return Math.min((long)(count * factor), 3000);
+        return Math.min((long) (count * factor), 3000);
+    }
+
+    public interface Penalty {
+        Penalty NONE = (x, y, z, h) -> h;
+
+        float calculate(int x, int y, int z, float h);
+    }
+
+    public interface Factory {
+        @NotNull
+        Pathfinding make(@NotNull Pathfinder pathfinder,
+            @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler);
     }
 }

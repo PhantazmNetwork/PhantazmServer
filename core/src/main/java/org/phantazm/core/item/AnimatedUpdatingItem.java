@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,13 +15,13 @@ import java.util.Objects;
 public class AnimatedUpdatingItem implements UpdatingItem {
     private final Data data;
 
-    private long lastUpdateTime;
+    private long updateTicks = 0;
     private ItemAnimationFrame currentFrame;
     private int currentFrameIndex;
 
     @FactoryMethod
     public AnimatedUpdatingItem(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
         if (data.frames.isEmpty()) {
             throw new IllegalArgumentException("must have at least one animation frame");
         }
@@ -54,9 +53,9 @@ public class AnimatedUpdatingItem implements UpdatingItem {
             return false;
         }
 
-        long timeSinceLastUpdate = time - lastUpdateTime;
-        if (timeSinceLastUpdate * MinecraftServer.TICK_MS >= currentFrame.delayTicks()) {
-            lastUpdateTime = time;
+        ++updateTicks;
+        if (updateTicks >= currentFrame.delayTicks()) {
+            updateTicks = 0;
             return true;
         }
 

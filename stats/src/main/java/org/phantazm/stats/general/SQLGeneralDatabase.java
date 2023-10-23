@@ -28,8 +28,8 @@ public class SQLGeneralDatabase implements GeneralDatabase {
     private final DataSource dataSource;
 
     public SQLGeneralDatabase(@NotNull Executor executor, @NotNull DataSource dataSource) {
-        this.executor = Objects.requireNonNull(executor, "executor");
-        this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
+        this.executor = Objects.requireNonNull(executor);
+        this.dataSource = Objects.requireNonNull(dataSource);
     }
 
     @Override
@@ -38,12 +38,12 @@ public class SQLGeneralDatabase implements GeneralDatabase {
             long timestamp = time.toEpochSecond();
             DSLContext context = using(connection);
             context.insertInto(table("phantazm_player_stats"), field("player_uuid"), field("first_join"))
-                    .values(playerUUID.toString(), timestamp).onDuplicateKeyUpdate().set(field("first_join"),
-                            when(field("first_join").isNull(), timestamp).otherwise(field("first_join", SQLDataType.BIGINT)))
-                    .execute();
+                .values(playerUUID.toString(), timestamp).onDuplicateKeyUpdate().set(field("first_join"),
+                    when(field("first_join").isNull(), timestamp).otherwise(field("first_join", SQLDataType.BIGINT)))
+                .execute();
 
             context.update(table("phantazm_player_stats")).set(field("last_join"), timestamp)
-                    .where(field("player_uuid").eq(playerUUID)).execute();
+                .where(field("player_uuid").eq(playerUUID)).execute();
         });
     }
 
@@ -51,8 +51,7 @@ public class SQLGeneralDatabase implements GeneralDatabase {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection()) {
                 consumer.accept(connection);
-            }
-            catch (SQLException e) {
+            } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }, executor).whenComplete(this::logException);

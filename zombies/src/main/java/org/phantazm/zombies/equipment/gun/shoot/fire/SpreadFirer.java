@@ -12,8 +12,8 @@ import org.phantazm.zombies.equipment.gun.GunState;
 import java.util.*;
 
 /**
- * A {@link Firer} which delegates to multiple sub-{@link Firer}.
- * Sub-{@link Firer}s may shoot at a slightly different angle than the direction of the original shot.
+ * A {@link Firer} which delegates to multiple sub-{@link Firer}. Sub-{@link Firer}s may shoot at a slightly different
+ * angle than the direction of the original shot.
  */
 @Model("zombies.gun.firer.spread")
 @Cache(false)
@@ -32,15 +32,15 @@ public class SpreadFirer implements Firer {
      */
     @FactoryMethod
     public SpreadFirer(@NotNull Data data, @NotNull Random random,
-            @NotNull @Child("sub_firers") Collection<Firer> subFirers) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.random = Objects.requireNonNull(random, "random");
+        @NotNull @Child("sub_firers") Collection<Firer> subFirers) {
+        this.data = Objects.requireNonNull(data);
+        this.random = Objects.requireNonNull(random);
         this.subFirers = List.copyOf(subFirers);
     }
 
     @Override
     public void fire(@NotNull Gun gun, @NotNull GunState state, @NotNull Pos start,
-            @NotNull Collection<UUID> previousHits) {
+        @NotNull Collection<UUID> previousHits) {
         if (subFirers.isEmpty()) {
             return;
         }
@@ -60,7 +60,7 @@ public class SpreadFirer implements Firer {
             double newYaw = yaw + data.angleVariance() * (2 * random.nextDouble() - 1);
             double newPitch = pitch + data.angleVariance() * (2 * random.nextDouble() - 1);
             subFirers.get(i % subFirers.size())
-                    .fire(gun, state, start.withView((float)newYaw, (float)newPitch), previousHits);
+                .fire(gun, state, start.withView((float) newYaw, (float) newPitch), previousHits);
         }
     }
 
@@ -78,9 +78,10 @@ public class SpreadFirer implements Firer {
      * @param angleVariance The maximum angle variance for each sub-{@link Firer}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("sub_firers") Collection<String> subFirers,
-                       int amount,
-                       float angleVariance) {
+    public record Data(
+        @NotNull @ChildPath("sub_firers") Collection<String> subFirers,
+        int amount,
+        float angleVariance) {
         @Default("amount")
         public static @NotNull ConfigElement defaultAmount() {
             return ConfigPrimitive.of(-1);

@@ -8,6 +8,6 @@ public abstract class PredicateBase<TData> implements ShopPredicate {
     protected final TData data;
 
     public PredicateBase(@NotNull TData data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 }

@@ -35,7 +35,7 @@ public class PlayerHologramDisplayCreator implements PlayerDisplayCreator {
 
         private Display(Data data, ZombiesPlayer zombiesPlayer) {
             super(new ViewableHologram(Vec.ZERO, 0, Hologram.Alignment.LOWER,
-                    player -> player.getUuid().equals(zombiesPlayer.getUUID())));
+                player -> player.getUuid().equals(zombiesPlayer.getUUID())));
 
             this.data = data;
         }

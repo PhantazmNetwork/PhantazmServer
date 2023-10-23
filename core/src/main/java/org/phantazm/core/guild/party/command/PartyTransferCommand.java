@@ -25,12 +25,12 @@ public class PartyTransferCommand {
     }
 
     public static @NotNull Command transferCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
-            @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull PlayerViewProvider viewProvider,
-            int creatorRank, int defaultRank) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(miniMessage, "miniMessage");
-        Objects.requireNonNull(partyMap, "partyMap");
-        Objects.requireNonNull(viewProvider, "viewProvider");
+        @NotNull Map<? super UUID, ? extends Party> partyMap, @NotNull PlayerViewProvider viewProvider,
+        int creatorRank, int defaultRank) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(miniMessage);
+        Objects.requireNonNull(partyMap);
+        Objects.requireNonNull(viewProvider);
 
         Command command = new Command("transfer");
         Argument<String> nameArgument = ArgumentType.Word("name");
@@ -44,11 +44,14 @@ public class PartyTransferCommand {
                 return;
             }
 
+            String prefix = context.getOrDefault(nameArgument, "").trim().toLowerCase();
             PartyMember member = party.getMemberManager().getMember(player.getUuid());
             for (PartyMember otherMember : party.getMemberManager().getMembers().values()) {
                 if (otherMember != member) {
                     otherMember.getPlayerView().getUsernameIfCached().ifPresent(username -> {
-                        suggestion.addEntry(new SuggestionEntry(username));
+                        if (username.toLowerCase().startsWith(prefix)) {
+                            suggestion.addEntry(new SuggestionEntry(username));
+                        }
                     });
                 }
             }
@@ -79,7 +82,7 @@ public class PartyTransferCommand {
         }, (sender, context) -> {
             String name = context.get(nameArgument);
 
-            UUID uuid = ((Player)sender).getUuid();
+            UUID uuid = ((Player) sender).getUuid();
             Party party = partyMap.get(uuid);
             PartyMember oldOwner = party.getMemberManager().getMember(uuid);
 
@@ -90,7 +93,7 @@ public class PartyTransferCommand {
                         playerView.getDisplayName().thenAccept(displayName -> {
                             TagResolver toTransferPlaceholder = Placeholder.component("new_owner", displayName);
                             Component message =
-                                    miniMessage.deserialize(config.toTransferNotInPartyFormat(), toTransferPlaceholder);
+                                miniMessage.deserialize(config.toTransferNotInPartyFormat(), toTransferPlaceholder);
                             sender.sendMessage(message);
                         });
                         return;

@@ -75,7 +75,7 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
          * @return this instance, for chaining
          */
         public @NotNull Builder withClickHandler(@NotNull ClickHandler clickHandler) {
-            clickHandlers.add(Objects.requireNonNull(clickHandler, "clickHandler"));
+            clickHandlers.add(Objects.requireNonNull(clickHandler));
             return this;
         }
 
@@ -86,7 +86,7 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
          * @return this instance, for chaining
          */
         public @NotNull Builder withRemoveHandler(@NotNull RemoveHandler removeHandler) {
-            removeHandlers.add(Objects.requireNonNull(removeHandler, "removeHandler"));
+            removeHandlers.add(Objects.requireNonNull(removeHandler));
             return this;
         }
 
@@ -97,7 +97,7 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
          * @return this instance, for chaining
          */
         public @NotNull Builder withReplaceHandler(@NotNull ReplaceHandler replaceHandler) {
-            replaceHandlers.add(Objects.requireNonNull(replaceHandler, "replaceHandler"));
+            replaceHandlers.add(Objects.requireNonNull(replaceHandler));
             return this;
         }
 
@@ -109,7 +109,7 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
          * @return this instance, for chaining
          */
         public @NotNull Builder withItem(@NotNull ItemStack itemStack) {
-            this.itemStack = Objects.requireNonNull(itemStack, "itemStack");
+            this.itemStack = Objects.requireNonNull(itemStack);
             return this;
         }
 
@@ -126,8 +126,8 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
         }
 
         /**
-         * Builds a new {@link GuiItem} instance. Can be called multiple times to produce distinct {@link GuiItem}s
-         * that use the same handlers.
+         * Builds a new {@link GuiItem} instance. Can be called multiple times to produce distinct {@link GuiItem}s that
+         * use the same handlers.
          *
          * @return a new GuiItem instance
          */
@@ -149,7 +149,7 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
 
                 @Override
                 public void handleClick(@NotNull Gui owner, @NotNull Player player, int slot,
-                        @NotNull ClickType clickType) {
+                    @NotNull ClickType clickType) {
                     for (ClickHandler clickHandler : clickHandlers) {
                         clickHandler.handleClick(owner, player, slot, clickType);
                     }

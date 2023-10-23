@@ -37,7 +37,7 @@ public class ChangeSelectionGroupInteractor implements ShopInteractor {
 
     @FactoryMethod
     public ChangeSelectionGroupInteractor(@NotNull Data data, @NotNull InteractorGroupHandler groupHandler,
-            @NotNull Random random, @NotNull Supplier<? extends MapObjects> mapObjects) {
+        @NotNull Random random, @NotNull Supplier<? extends MapObjects> mapObjects) {
         this.data = data;
         this.groupHandler = groupHandler;
         this.random = random;
@@ -113,7 +113,7 @@ public class ChangeSelectionGroupInteractor implements ShopInteractor {
 
         MapObjects mapObjects = this.mapObjects.get();
         Component roomName = mapObjects.roomTracker().atPoint(newActive.shop().center())
-                .map(room -> room.getRoomInfo().displayName()).orElse(UNKNOWN_ROOM);
+            .map(room -> room.getRoomInfo().displayName()).orElse(UNKNOWN_ROOM);
 
         TagResolver roomNameTag = Placeholder.component("room_name", roomName);
         Component message = MiniMessage.miniMessage().deserialize(data.moveMessage, roomNameTag);
@@ -125,14 +125,16 @@ public class ChangeSelectionGroupInteractor implements ShopInteractor {
             }
 
             instance.sendMessage(message);
-        }
-        else {
+        } else {
             player.sendMessage(message);
         }
     }
 
     @DataObject
-    public record Data(@NotNull Key group, boolean excludeCurrent, @Nullable String moveMessage, boolean broadcast) {
+    public record Data(@NotNull Key group,
+        boolean excludeCurrent,
+        @Nullable String moveMessage,
+        boolean broadcast) {
         @Default("excludeCurrent")
         public static @NotNull ConfigElement defaultExcludeCurrent() {
             return ConfigPrimitive.of(true);

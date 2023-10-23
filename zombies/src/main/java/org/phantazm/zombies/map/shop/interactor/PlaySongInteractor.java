@@ -55,8 +55,7 @@ public class PlaySongInteractor implements ShopInteractor {
                 if (instance != null) {
                     if (data.atLocation) {
                         songPlayer.play(instance, data.source, shop.center(), notes, data.volume);
-                    }
-                    else {
+                    } else {
                         songPlayer.play(instance, data.source, Sound.Emitter.self(), notes, data.volume);
                     }
                 }
@@ -67,21 +66,21 @@ public class PlaySongInteractor implements ShopInteractor {
 
         if (data.atLocation) {
             playerOptional.ifPresent(player -> songPlayer.play(player, data.source, shop.center(), notes, data.volume));
-        }
-        else {
+        } else {
             playerOptional.ifPresent(
-                    player -> songPlayer.play(player, data.source, Sound.Emitter.self(), notes, data.volume));
+                player -> songPlayer.play(player, data.source, Sound.Emitter.self(), notes, data.volume));
         }
 
         return true;
     }
 
     @DataObject
-    public record Data(@NotNull Key songKey,
-                       boolean broadcast,
-                       boolean atLocation,
-                       float volume,
-                       @NotNull Sound.Source source) {
+    public record Data(
+        @NotNull Key songKey,
+        boolean broadcast,
+        boolean atLocation,
+        float volume,
+        @NotNull Sound.Source source) {
         @Default("broadcast")
         public static @NotNull ConfigElement broadcastDefault() {
             return ConfigPrimitive.of(false);

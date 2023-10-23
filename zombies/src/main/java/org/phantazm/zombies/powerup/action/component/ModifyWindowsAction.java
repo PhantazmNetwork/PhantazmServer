@@ -10,7 +10,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.action.InstantAction;
 import org.phantazm.zombies.powerup.action.PowerupAction;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.action.modify_windows")
 @Cache(false)
@@ -24,11 +24,12 @@ public class ModifyWindowsAction implements PowerupActionComponent {
 
     @Override
     public @NotNull PowerupAction apply(@NotNull ZombiesScene scene) {
-        return new Action(data, scene.getMap().windowHandler());
+        return new Action(data, scene.map().windowHandler());
     }
 
     @DataObject
-    public record Data(double radius, boolean shouldBreak) {
+    public record Data(double radius,
+        boolean shouldBreak) {
     }
 
     private static class Action extends InstantAction {
@@ -45,8 +46,7 @@ public class ModifyWindowsAction implements PowerupActionComponent {
             windowHandler.tracker().forEachInRangeToCenter(powerup.spawnLocation(), data.radius, window -> {
                 if (data.shouldBreak) {
                     window.updateIndex(0);
-                }
-                else {
+                } else {
                     window.updateIndex(window.getVolume());
                 }
             });

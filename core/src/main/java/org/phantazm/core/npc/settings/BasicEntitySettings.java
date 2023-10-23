@@ -16,13 +16,15 @@ import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.MonoComponent;
+import org.phantazm.commons.InjectionStore;
 
 import java.util.Map;
 import java.util.function.Consumer;
 
 @Model("npc.entity.settings")
 @Cache
-public class BasicEntitySettings implements Consumer<Entity> {
+public class BasicEntitySettings implements MonoComponent<Consumer<Entity>> {
     private final Data data;
 
     @FactoryMethod
@@ -31,42 +33,50 @@ public class BasicEntitySettings implements Consumer<Entity> {
     }
 
     @Override
-    public void accept(Entity entity) {
-        EntityMeta meta = entity.getEntityMeta();
+    public Consumer<Entity> apply(@NotNull InjectionStore injectionStore) {
+        return new Internal(data);
+    }
 
-        if (!data.displayName.equals(Component.empty())) {
-            meta.setCustomNameVisible(true);
-            meta.setCustomName(data.displayName);
-        }
+    private record Internal(Data data) implements Consumer<Entity> {
+        @Override
+        public void accept(Entity entity) {
+            EntityMeta meta = entity.getEntityMeta();
 
-        meta.setHasNoGravity(!data.hasGravity);
-        entity.setHasPhysics(data.hasPhysics);
-        meta.setOnFire(data.onFire);
-        meta.setPose(data.pose);
-        meta.setInvisible(data.invisible);
-        meta.setHasGlowingEffect(data.glowing);
-
-        if (entity instanceof LivingEntity livingEntity) {
-            for (Map.Entry<EquipmentSlot, ItemStack> entry : data.equipment.entrySet()) {
-                livingEntity.setEquipment(entry.getKey(), entry.getValue());
+            if (!data.displayName.equals(Component.empty())) {
+                meta.setCustomNameVisible(true);
+                meta.setCustomName(data.displayName);
             }
-        }
 
-        if (meta instanceof ArmorStandMeta armorStandMeta) {
-            armorStandMeta.setSmall(data.small);
+            meta.setHasNoGravity(!data.hasGravity);
+            entity.setHasPhysics(data.hasPhysics);
+            meta.setOnFire(data.onFire);
+            meta.setPose(data.pose);
+            meta.setInvisible(data.invisible);
+            meta.setHasGlowingEffect(data.glowing);
+
+            if (entity instanceof LivingEntity livingEntity) {
+                for (Map.Entry<EquipmentSlot, ItemStack> entry : data.equipment.entrySet()) {
+                    livingEntity.setEquipment(entry.getKey(), entry.getValue());
+                }
+            }
+
+            if (meta instanceof ArmorStandMeta armorStandMeta) {
+                armorStandMeta.setSmall(data.small);
+            }
         }
     }
 
     @DataObject
-    public record Data(@NotNull Component displayName,
-                       boolean hasGravity,
-                       boolean hasPhysics,
-                       boolean onFire,
-                       boolean invisible,
-                       boolean small,
-                       boolean glowing,
-                       @NotNull Entity.Pose pose,
-                       @NotNull Map<EquipmentSlot, ItemStack> equipment) {
+    public record Data(
+        @NotNull Component displayName,
+        boolean hasGravity,
+        boolean hasPhysics,
+        boolean onFire,
+        boolean invisible,
+        boolean small,
+        boolean glowing,
+        @NotNull Entity.Pose pose,
+        @NotNull Map<EquipmentSlot, ItemStack> equipment) {
         @Default("displayName")
         public static ConfigElement defaultDisplayName() {
             return ConfigPrimitive.of("");

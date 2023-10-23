@@ -19,7 +19,7 @@ public class PacketByteBufDataReader implements DataReader {
      * @param packetByteBuf The {@link PacketByteBuf} to read from
      */
     public PacketByteBufDataReader(@NotNull PacketByteBuf packetByteBuf) {
-        this.packetByteBuf = Objects.requireNonNull(packetByteBuf, "packetByteBuf");
+        this.packetByteBuf = Objects.requireNonNull(packetByteBuf);
     }
 
     @Override

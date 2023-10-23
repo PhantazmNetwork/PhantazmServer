@@ -8,7 +8,9 @@ import java.util.Objects;
 /**
  * Defines a particular type and amount of mobs to spawn.
  */
-public record SpawnInfo(@NotNull Key id, @NotNull Key spawnType, int amount) {
+public record SpawnInfo(@NotNull Key id,
+    @NotNull Key spawnType,
+    int amount) {
     /**
      * Creates a new instance of this record.
      *
@@ -16,6 +18,6 @@ public record SpawnInfo(@NotNull Key id, @NotNull Key spawnType, int amount) {
      * @param amount the amount of mobs to spawn
      */
     public SpawnInfo {
-        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(id);
     }
 }

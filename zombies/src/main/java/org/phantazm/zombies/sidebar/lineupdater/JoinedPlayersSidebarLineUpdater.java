@@ -10,11 +10,11 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.core.player.PlayerView;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Model("zombies.sidebar.line_updater.joined_players")
 @Cache(false)
@@ -29,7 +29,7 @@ public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
 
     @FactoryMethod
     public JoinedPlayersSidebarLineUpdater(@NotNull Data data,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers, int maxPlayers) {
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers, int maxPlayers) {
         this.data = data;
         this.zombiesPlayers = zombiesPlayers.values();
         this.maxPlayers = maxPlayers;
@@ -46,12 +46,12 @@ public class JoinedPlayersSidebarLineUpdater implements SidebarLineUpdater {
             currentPlayers = zombiesPlayers.size();
 
             TagResolver currentPlayerCountPlaceholder =
-                    Placeholder.component("current_player_count", Component.text(currentPlayers));
+                Placeholder.component("current_player_count", Component.text(currentPlayers));
             TagResolver maxPlayerCountPlaceholder =
-                    Placeholder.component("max_player_count", Component.text(maxPlayers));
+                Placeholder.component("max_player_count", Component.text(maxPlayers));
 
             return Optional.of(MiniMessage.miniMessage()
-                    .deserialize(data.format, currentPlayerCountPlaceholder, maxPlayerCountPlaceholder));
+                .deserialize(data.format, currentPlayerCountPlaceholder, maxPlayerCountPlaceholder));
         }
 
         return Optional.empty();

@@ -12,8 +12,8 @@ import org.phantazm.zombies.equipment.gun.shoot.handler.ShotHandler;
 import java.util.Objects;
 
 /**
- * A gun's generic stats. These stats only pertain to shooting, not aspects such as damage or knockback.
- * These are handled by individual {@link ShotHandler}s.
+ * A gun's generic stats. These stats only pertain to shooting, not aspects such as damage or knockback. These are
+ * handled by individual {@link ShotHandler}s.
  */
 @Model("zombies.gun.stats")
 @Cache
@@ -24,7 +24,7 @@ public final class GunStats {
 
     @FactoryMethod
     public GunStats(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     /**
@@ -116,7 +116,12 @@ public final class GunStats {
      * @param shotInterval The interval between gun fire
      */
     @DataObject
-    public record Data(long shootSpeed, long reloadSpeed, int maxAmmo, int maxClip, int shots, long shotInterval) {
+    public record Data(long shootSpeed,
+        long reloadSpeed,
+        int maxAmmo,
+        int maxClip,
+        int shots,
+        long shotInterval) {
 
     }
 

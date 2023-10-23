@@ -45,7 +45,7 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
     private static ZombiesAutoSplitsClient instance = null;
 
     private final KeyBinding autoSplitsKeybind =
-            new KeyBinding("Toggle AutoSplits", GLFW.GLFW_KEY_SEMICOLON, "Phantazm");
+        new KeyBinding("Toggle AutoSplits", GLFW.GLFW_KEY_SEMICOLON, "Phantazm");
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -54,7 +54,7 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
     private final ConfigHandler configHandler = new BasicConfigHandler();
 
     private final ConfigHandler.ConfigKey<ZombiesAutoSplitsConfig> configKey =
-            new ConfigHandler.ConfigKey<>(ZombiesAutoSplitsConfig.class, MODID + "_config");
+        new ConfigHandler.ConfigKey<>(ZombiesAutoSplitsConfig.class, MODID + "_config");
 
     private final Collection<AutoSplitSplitter> splitters = new CopyOnWriteArrayList<>();
 
@@ -91,8 +91,7 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
             InternalSplitter internalSplitter = new InternalSplitter();
             splitters.add(internalSplitter);
             renderTimeHandler.setSplitter(internalSplitter);
-        }
-        else {
+        } else {
             renderTimeHandler.setSplitter(null);
         }
     }
@@ -126,15 +125,13 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
         String configFileName;
         if (codec.getPreferredExtensions().isEmpty()) {
             configFileName = "config";
-        }
-        else {
+        } else {
             configFileName = "config." + codec.getPreferredExtension();
         }
 
         try {
             Files.createDirectories(configPath);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             logger.error("Failed to create config directory", e);
             return;
         }
@@ -143,7 +140,7 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
         ZombiesAutoSplitsConfig defaultConfig = ZombiesAutoSplitsConfig.DEFAULT;
         ConfigProcessor<ZombiesAutoSplitsConfig> configProcessor = new ZombiesAutoSplitsConfigProcessor();
         ConfigLoader<ZombiesAutoSplitsConfig> configLoader =
-                new SyncFileConfigLoader<>(configProcessor, defaultConfig, configFile, codec);
+            new SyncFileConfigLoader<>(configProcessor, defaultConfig, configFile, codec);
         configHandler.registerLoader(configKey, configLoader);
 
         ZombiesAutoSplitsConfig loadedConfig = loadConfigFromFile().join();
@@ -152,7 +149,7 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
 
     private void initEvents() {
         AutoSplitSoundInterceptor soundInterceptor =
-                new AutoSplitSoundInterceptor(MinecraftClient.getInstance(), compositeSplitter);
+            new AutoSplitSoundInterceptor(MinecraftClient.getInstance(), compositeSplitter);
         ClientTickEvents.END_CLIENT_TICK.register(new KeyInputHandler(autoSplitsKeybind, compositeSplitter));
         HudRenderCallback.EVENT.register(renderTimeHandler);
         ClientSoundCallback.EVENT.register(soundInterceptor);
@@ -173,8 +170,7 @@ public class ZombiesAutoSplitsClient implements ClientModInitializer {
             if (!executor.awaitTermination(5L, TimeUnit.SECONDS)) {
                 logger.warn("Executor did not terminate");
             }
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
         }

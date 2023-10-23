@@ -12,7 +12,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 1);
 
-        assertArrayEquals(new int[] {4}, slots);
+        assertArrayEquals(new int[]{4}, slots);
     }
 
     @Test
@@ -20,7 +20,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 2);
 
-        assertArrayEquals(new int[] {3, 5}, slots);
+        assertArrayEquals(new int[]{3, 5}, slots);
     }
 
     @Test
@@ -28,7 +28,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 3);
 
-        assertArrayEquals(new int[] {3, 4, 5}, slots);
+        assertArrayEquals(new int[]{3, 4, 5}, slots);
     }
 
     @Test
@@ -36,7 +36,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 4);
 
-        assertArrayEquals(new int[] {0, 1, 2, 7}, slots);
+        assertArrayEquals(new int[]{0, 1, 2, 7}, slots);
     }
 
     @Test
@@ -44,7 +44,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 5);
 
-        assertArrayEquals(new int[] {0, 1, 2, 6, 8}, slots);
+        assertArrayEquals(new int[]{0, 1, 2, 6, 8}, slots);
     }
 
     @Test
@@ -52,7 +52,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 6);
 
-        assertArrayEquals(new int[] {0, 1, 2, 6, 7, 8}, slots);
+        assertArrayEquals(new int[]{0, 1, 2, 6, 7, 8}, slots);
     }
 
     @Test
@@ -60,7 +60,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 7);
 
-        assertArrayEquals(new int[] {0, 1, 2, 3, 4, 5, 7}, slots);
+        assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5, 7}, slots);
     }
 
     @Test
@@ -68,7 +68,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 8);
 
-        assertArrayEquals(new int[] {0, 1, 2, 3, 4, 5, 6, 8}, slots);
+        assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5, 6, 8}, slots);
     }
 
     @Test
@@ -76,7 +76,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(0);
         int[] slots = slotDistributor.distribute(3, 3, 9);
 
-        assertArrayEquals(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8}, slots);
+        assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8}, slots);
     }
 
     @Test
@@ -85,7 +85,7 @@ class BasicSlotDistributorTest {
             SlotDistributor slotDistributor = new BasicSlotDistributor(i);
             int[] slots = slotDistributor.distribute(3, 3, 1);
 
-            assertArrayEquals(new int[] {4}, slots);
+            assertArrayEquals(new int[]{4}, slots);
         }
     }
 
@@ -94,7 +94,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
         int[] slots = slotDistributor.distribute(3, 3, 2);
 
-        assertArrayEquals(new int[] {3, 5}, slots);
+        assertArrayEquals(new int[]{3, 5}, slots);
     }
 
     @Test
@@ -102,7 +102,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
         int[] slots = slotDistributor.distribute(3, 3, 3);
 
-        assertArrayEquals(new int[] {0, 2, 7}, slots);
+        assertArrayEquals(new int[]{0, 2, 7}, slots);
     }
 
     @Test
@@ -110,7 +110,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(1);
         int[] slots = slotDistributor.distribute(3, 3, 4);
 
-        assertArrayEquals(new int[] {0, 2, 6, 8}, slots);
+        assertArrayEquals(new int[]{0, 2, 6, 8}, slots);
     }
 
     @Test
@@ -119,7 +119,7 @@ class BasicSlotDistributorTest {
             SlotDistributor slotDistributor = new BasicSlotDistributor(i);
             int[] slots = Assertions.assertDoesNotThrow(() -> slotDistributor.distribute(3, 3, 4), "i: " + i);
 
-            assertArrayEquals(new int[] {0, 2, 6, 8}, slots, "i: " + i);
+            assertArrayEquals(new int[]{0, 2, 6, 8}, slots, "i: " + i);
         }
     }
 
@@ -129,7 +129,7 @@ class BasicSlotDistributorTest {
             SlotDistributor slotDistributor = new BasicSlotDistributor(i);
             int[] slots = Assertions.assertDoesNotThrow(() -> slotDistributor.distribute(3, 3, 9), "i: " + i);
 
-            assertArrayEquals(new int[] {0, 1, 2, 3, 4, 5, 6, 7, 8}, slots, "i: " + i);
+            assertArrayEquals(new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8}, slots, "i: " + i);
         }
     }
 
@@ -139,7 +139,7 @@ class BasicSlotDistributorTest {
         SlotDistributor slotDistributor = new BasicSlotDistributor(2);
         int[] slots = slotDistributor.distribute(3, 3, 2);
 
-        assertArrayEquals(new int[] {3, 5}, slots);
+        assertArrayEquals(new int[]{3, 5}, slots);
     }
 
     @Test

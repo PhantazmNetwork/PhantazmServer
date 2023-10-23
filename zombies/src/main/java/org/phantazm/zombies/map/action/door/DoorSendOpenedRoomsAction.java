@@ -40,10 +40,10 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
 
     @FactoryMethod
     public DoorSendOpenedRoomsAction(@NotNull Data data, @NotNull Supplier<? extends MapObjects> mapObjects,
-            @NotNull Instance instance) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.mapObjects = Objects.requireNonNull(mapObjects, "mapObjects");
-        this.instance = Objects.requireNonNull(instance, "instance");
+        @NotNull Instance instance) {
+        this.data = Objects.requireNonNull(data);
+        this.mapObjects = Objects.requireNonNull(mapObjects);
+        this.instance = Objects.requireNonNull(instance);
     }
 
     @Override
@@ -51,18 +51,17 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
         Optional<ZombiesPlayer> lastInteractorOptional = door.lastInteractor();
         if (lastInteractorOptional.isPresent()) {
             lastInteractorOptional.get().module().getPlayerView().getDisplayName()
-                    .whenComplete((displayName, throwable) -> {
-                        if (throwable != null) {
-                            LOGGER.warn("Error resolving display name of door-opening player", throwable);
-                            return;
-                        }
+                .whenComplete((displayName, throwable) -> {
+                    if (throwable != null) {
+                        LOGGER.warn("Error resolving display name of door-opening player", throwable);
+                        return;
+                    }
 
-                        TagResolver openerPlaceholder = Placeholder.component("opener", displayName);
-                        instance.sendTitlePart(data.nameTitlePart,
-                                miniMessage.deserialize(data.nameFormat, openerPlaceholder));
-                    });
-        }
-        else {
+                    TagResolver openerPlaceholder = Placeholder.component("opener", displayName);
+                    instance.sendTitlePart(data.nameTitlePart,
+                        miniMessage.deserialize(data.nameFormat, openerPlaceholder));
+                });
+        } else {
             LOGGER.warn("Interacting player was null, cannot announce opener");
             TagResolver openerPlaceholder = Placeholder.component("opener", UNKNOWN_COMPONENT);
             instance.sendTitlePart(data.nameTitlePart, miniMessage.deserialize(data.nameFormat, openerPlaceholder));
@@ -70,19 +69,18 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
 
         Map<? super Key, ? extends Room> roomMap = mapObjects.get().roomMap();
         List<Room> opensTo =
-                door.doorInfo().opensTo().stream().map(target -> (Room)roomMap.get(target)).filter(room -> {
-                    if (room == null) {
-                        return false;
-                    }
+            door.doorInfo().opensTo().stream().map(target -> (Room) roomMap.get(target)).filter(room -> {
+                if (room == null) {
+                    return false;
+                }
 
-                    return !room.isOpen();
-                }).toList();
+                return !room.isOpen();
+            }).toList();
 
         List<Component> roomNames = new ArrayList<>(opensTo.size());
         if (opensTo.isEmpty()) {
             roomNames.add(Component.text("..."));
-        }
-        else {
+        } else {
             for (Room room : opensTo) {
                 roomNames.add(room.getRoomInfo().displayName());
             }
@@ -90,15 +88,16 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
         TagResolver roomsPlaceholder = MiniMessageUtils.list("rooms", roomNames);
 
         instance.sendTitlePart(data.openedRoomsTitlePart,
-                miniMessage.deserialize(data.openedRoomsFormat, roomsPlaceholder));
+            miniMessage.deserialize(data.openedRoomsFormat, roomsPlaceholder));
     }
 
     @DataObject
-    public record Data(@NotNull String nameFormat,
-                       @NotNull String openedRoomsFormat,
-                       @NotNull String separator,
-                       @NotNull TitlePart<Component> nameTitlePart,
-                       @NotNull TitlePart<Component> openedRoomsTitlePart) {
+    public record Data(
+        @NotNull String nameFormat,
+        @NotNull String openedRoomsFormat,
+        @NotNull String separator,
+        @NotNull TitlePart<Component> nameTitlePart,
+        @NotNull TitlePart<Component> openedRoomsTitlePart) {
         @Default("separator")
         public static ConfigElement separatorDefault() {
             return ConfigPrimitive.of(", ");

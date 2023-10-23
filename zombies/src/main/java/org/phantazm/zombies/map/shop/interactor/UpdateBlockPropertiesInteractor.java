@@ -43,6 +43,7 @@ public class UpdateBlockPropertiesInteractor extends InteractorBase<UpdateBlockP
     }
 
     @DataObject
-    public record Data(@NotNull Vec3I coordinate, @NotNull Map<String, String> properties) {
+    public record Data(@NotNull Vec3I coordinate,
+        @NotNull Map<String, String> properties) {
     }
 }

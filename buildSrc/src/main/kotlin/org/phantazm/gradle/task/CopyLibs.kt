@@ -30,7 +30,7 @@ abstract class CopyLibs : DefaultTask() {
     val artifactOutputs: FileCollection
         @OutputFiles get() = project.files(libraryDirectory?.let {
             getArtifacts(
-                it, targetConfiguration.resolvedConfiguration.resolvedArtifacts
+                    it, targetConfiguration.resolvedConfiguration.resolvedArtifacts
             ).map {
                 it.second
             }
@@ -83,9 +83,9 @@ abstract class CopyLibs : DefaultTask() {
                     val artifactFileName = relative.nameWithoutExtension
 
                     if (resolvedArtifacts.none { artifact ->
-                            artifact.moduleVersion.id.group.equals(artifactFileGroup, true) &&
-                                    artifact.file.nameWithoutExtension.equals(artifactFileName, true)
-                        }) {
+                                artifact.moduleVersion.id.group.equals(artifactFileGroup, true) &&
+                                        artifact.file.nameWithoutExtension.equals(artifactFileName, true)
+                            }) {
                         logger.info("Deleting $it because it does not match any known artifacts.")
                         it.delete()
                     }

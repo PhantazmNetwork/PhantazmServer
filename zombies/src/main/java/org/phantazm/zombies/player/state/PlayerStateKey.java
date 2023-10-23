@@ -10,7 +10,7 @@ import java.util.Objects;
 public record PlayerStateKey<TContext>(@NotNull Key key) implements Keyed {
 
     public PlayerStateKey {
-        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(key);
     }
 
 }

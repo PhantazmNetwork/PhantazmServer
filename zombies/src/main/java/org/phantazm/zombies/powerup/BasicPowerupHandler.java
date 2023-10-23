@@ -1,11 +1,15 @@
 package org.phantazm.zombies.powerup;
 
+import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.EntityTracker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.action.PowerupAction;
@@ -14,13 +18,13 @@ import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.powerup.predicate.PickupPredicateComponent;
 import org.phantazm.zombies.powerup.visual.PowerupVisual;
 import org.phantazm.zombies.powerup.visual.PowerupVisualComponent;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
 import java.util.function.Supplier;
 
 public class BasicPowerupHandler implements PowerupHandler {
-    private static final int PICKUP_CHECK_INTERVAL = 100; //check every 2 ticks for powerup pickups
+    private static final int PICKUP_CHECK_INTERVAL = 2; //check every 2 ticks for powerup pickups
 
     private final Supplier<? extends @NotNull ZombiesScene> scene;
     private final Map<Key, PowerupComponents> components;
@@ -28,11 +32,11 @@ public class BasicPowerupHandler implements PowerupHandler {
     private final List<Powerup> spawnedOrActivePowerups;
     private final Collection<Powerup> powerupView;
 
-    private long lastPickupCheck = 0L;
+    private long pickupCheckTicks = 0L;
 
     public BasicPowerupHandler(@NotNull Supplier<? extends @NotNull ZombiesScene> scene,
-            @NotNull Map<Key, PowerupComponents> components) {
-        this.scene = Objects.requireNonNull(scene, "scene");
+        @NotNull Map<Key, PowerupComponents> components) {
+        this.scene = Objects.requireNonNull(scene);
         this.components = Map.copyOf(components);
         this.spawnedOrActivePowerups = new ArrayList<>(16);
         this.powerupView = Collections.unmodifiableCollection(this.spawnedOrActivePowerups);
@@ -45,9 +49,9 @@ public class BasicPowerupHandler implements PowerupHandler {
         }
 
         //don't check for pickups too many times
-        boolean pickupCheckTick = time - lastPickupCheck >= PICKUP_CHECK_INTERVAL;
+        boolean pickupCheckTick = ++pickupCheckTicks >= PICKUP_CHECK_INTERVAL;
         if (pickupCheckTick) {
-            lastPickupCheck = time;
+            pickupCheckTicks = 0;
         }
 
         for (int i = spawnedOrActivePowerups.size() - 1; i >= 0; i--) {
@@ -58,8 +62,7 @@ public class BasicPowerupHandler implements PowerupHandler {
 
             if (!active && !spawned) {
                 spawnedOrActivePowerups.remove(i);
-            }
-            else {
+            } else {
                 if (spawned && pickupCheckTick) {
                     maybePickup(powerup, time);
                 }
@@ -72,17 +75,27 @@ public class BasicPowerupHandler implements PowerupHandler {
     private void maybePickup(Powerup powerup, long time) {
         ZombiesScene scene = this.scene.get();
 
+        double powerupPickupRadius = scene.mapSettingsInfo().powerupPickupRadius();
         scene.instance().getEntityTracker()
-                .nearbyEntitiesUntil(powerup.spawnLocation(), scene.getMapSettingsInfo().powerupPickupRadius(),
-                        EntityTracker.Target.PLAYERS, player -> {
-                            ZombiesPlayer zombiesPlayer = scene.getZombiesPlayers().get(player.getUuid());
-                            if (zombiesPlayer != null && zombiesPlayer.canPickupPowerup(powerup)) {
-                                powerup.activate(zombiesPlayer, time);
-                                return true;
-                            }
+            .nearbyEntitiesUntil(powerup.spawnLocation(), powerupPickupRadius + 2, EntityTracker.Target.PLAYERS,
+                player -> {
+                    Point powerupSpawnLocation = powerup.spawnLocation();
+                    Pos playerPosition = player.getPosition();
+                    double horizontalDistanceSquared =
+                        Vec3D.distanceSquared(playerPosition.x(), 0, playerPosition.z(),
+                            powerupSpawnLocation.x(), 0, powerupSpawnLocation.z());
+                    if (horizontalDistanceSquared > powerupPickupRadius * powerupPickupRadius) {
+                        return false;
+                    }
 
-                            return false;
-                        });
+                    ZombiesPlayer zombiesPlayer = scene.managedPlayers().get(PlayerView.lookup(player.getUuid()));
+                    if (zombiesPlayer != null && zombiesPlayer.canPickupPowerup(powerup)) {
+                        powerup.activate(zombiesPlayer, time);
+                        return true;
+                    }
+
+                    return false;
+                });
     }
 
     @Override
@@ -111,7 +124,7 @@ public class BasicPowerupHandler implements PowerupHandler {
         }
 
         Powerup newPowerup = new Powerup(powerupType, visuals, actions, deactivationPredicateComponent.apply(scene),
-                pickupPredicateComponent.apply(scene), new Vec(x, y, z));
+            pickupPredicateComponent.apply(scene), new Vec(x, y, z));
         newPowerup.spawn();
 
         spawnedOrActivePowerups.add(newPowerup);
@@ -149,7 +162,8 @@ public class BasicPowerupHandler implements PowerupHandler {
     }
 
     @Override
-    public @NotNull @UnmodifiableView Collection<Powerup> spawnedOrActivePowerups() {
+    public @NotNull
+    @UnmodifiableView Collection<Powerup> spawnedOrActivePowerups() {
         return powerupView;
     }
 }

@@ -26,7 +26,6 @@ public class AnnounceRoundAction implements Action<Round> {
     private final Instance instance;
     private final TickFormatter tickFormatter;
     private final Wrapper<Long> ticksSinceStart;
-    private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     /**
      * Creates a new instance of this class from the provided contextual data.
@@ -36,20 +35,20 @@ public class AnnounceRoundAction implements Action<Round> {
      */
     @FactoryMethod
     public AnnounceRoundAction(@NotNull Data data, @NotNull Instance instance, @NotNull Wrapper<Long> ticksSinceStart,
-            @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.tickFormatter = Objects.requireNonNull(tickFormatter, "tickFormatter");
-        this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart, "ticksSinceStart");
+        @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
+        this.data = Objects.requireNonNull(data);
+        this.instance = Objects.requireNonNull(instance);
+        this.tickFormatter = Objects.requireNonNull(tickFormatter);
+        this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart);
     }
 
     @Override
     public void perform(@NotNull Round round) {
-        TagResolver roundPlaceholder = Placeholder.component("round", Component.text(round.getRoundInfo().round()));
+        TagResolver roundPlaceholder = Placeholder.component("round", Component.text(round.round()));
         String timeString = tickFormatter.format(ticksSinceStart.get());
         TagResolver timePlaceholder = Placeholder.unparsed("time", timeString);
 
-        Component message = miniMessage.deserialize(data.format(), roundPlaceholder, timePlaceholder);
+        Component message = MiniMessage.miniMessage().deserialize(data.format(), roundPlaceholder, timePlaceholder);
         switch (data.destination()) {
             case TITLE -> instance.sendTitlePart(TitlePart.TITLE, message);
             case SUBTITLE -> instance.sendTitlePart(TitlePart.SUBTITLE, message);
@@ -59,9 +58,10 @@ public class AnnounceRoundAction implements Action<Round> {
     }
 
     @DataObject
-    public record Data(@NotNull String format,
-                       @NotNull ChatDestination destination,
-                       @NotNull @ChildPath("tick_formatter") String tickFormatter) {
+    public record Data(
+        @NotNull String format,
+        @NotNull ChatDestination destination,
+        @NotNull @ChildPath("tick_formatter") String tickFormatter) {
 
     }
 

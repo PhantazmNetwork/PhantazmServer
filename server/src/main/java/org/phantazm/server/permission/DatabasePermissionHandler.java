@@ -9,8 +9,11 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.phantazm.server.role.Role;
+import org.phantazm.server.role.RoleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +22,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
@@ -33,65 +37,36 @@ public class DatabasePermissionHandler implements PermissionHandler {
     private final Cache<String, Set<Permission>> groupPermissionCache;
     private final DataSource dataSource;
     private final Executor executor;
+    private final RoleStore roleStore;
 
-    public DatabasePermissionHandler(@NotNull DataSource dataSource, @NotNull Executor executor) {
+    public DatabasePermissionHandler(@NotNull DataSource dataSource, @NotNull Executor executor,
+        @NotNull RoleStore roleStore) {
         this.playerPermissionGroupCache =
-                Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
+            Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.groupPermissionCache =
-                Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
-        this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
-        this.executor = Objects.requireNonNull(executor, "executor");
+            Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
+        this.dataSource = Objects.requireNonNull(dataSource);
+        this.executor = Objects.requireNonNull(executor);
+        this.roleStore = Objects.requireNonNull(roleStore);
     }
 
-    private void applyAll0() {
-        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            applyPermissions0(player.getUuid(), player);
-        }
-    }
-
-    private void applyPermissions0(UUID uuid, CommandSender sender) {
-        sender.getAllPermissions().clear();
-
-        Set<String> permissionGroups = playerPermissionGroupCache.get(uuid, key -> {
-            return read(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    return using(connection).selectFrom(table("player_permission_groups"))
-                            .where(field("player_uuid").eq(key)).fetch();
-                }
-            }, DatabasePermissionHandler::groupsFromResult, CopyOnWriteArraySet::new);
-        });
-
-        for (String group : permissionGroups) {
-            applyGroup(group, sender);
-        }
-
-        applyGroup(EVERYONE_GROUP, sender);
-
-        if (sender instanceof Player player) {
-            player.sendPacket(MinecraftServer.getCommandManager().createDeclareCommandsPacket(player));
+    private static void write(ThrowingRunnable<SQLException> supplier) {
+        try {
+            supplier.run();
+        } catch (SQLException e) {
+            LOGGER.warn("Exception when writing to permission database", e);
         }
     }
 
-    private void applyGroup(String group, CommandSender commandSender) {
-        Set<Permission> permissions = groupPermissionCache.get(group, key -> {
-            return read(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    return using(connection).selectFrom(table("permission_groups"))
-                            .where(field("permission_group").eq(key)).fetch();
-                }
-            }, DatabasePermissionHandler::permissionsFromResult, CopyOnWriteArraySet::new);
-        });
-
-        for (Permission permission : permissions) {
-            commandSender.addPermission(permission);
+    private static <T> T read(ThrowingSupplier<? extends Result<Record>, ? extends SQLException> reader,
+        Function<? super Result<Record>, ? extends T> mapper, Supplier<? extends T> defaultValue) {
+        try {
+            return mapper.apply(reader.get());
+        } catch (SQLException e) {
+            LOGGER.warn("Exception when querying permission database", e);
         }
-    }
 
-    private void applyOptionalPlayer(UUID uuid) {
-        Player target = MinecraftServer.getConnectionManager().getPlayer(uuid);
-        if (target != null) {
-            applyPermissions0(uuid, target);
-        }
+        return defaultValue.get();
     }
 
     private static Set<String> groupsFromResult(Result<Record> result) {
@@ -101,7 +76,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
 
         List<String> temp = new ArrayList<>(result.size());
         for (Record record : result) {
-            String group = (String)record.get("player_group");
+            String group = (String) record.get("player_group");
             if (group == null) {
                 continue;
             }
@@ -119,7 +94,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
 
         List<Permission> temp = new ArrayList<>(result.size());
         for (Record record : result) {
-            String permission = (String)record.get("permission");
+            String permission = (String) record.get("permission");
             if (permission == null) {
                 continue;
             }
@@ -131,9 +106,10 @@ public class DatabasePermissionHandler implements PermissionHandler {
     }
 
     @Override
-    public void applyPermissions(@NotNull UUID uuid, @NotNull CommandSender sender) {
+    public void applyPermissions(@NotNull Player target) {
+        Objects.requireNonNull(target);
         executor.execute(() -> {
-            applyPermissions0(uuid, sender);
+            applyPermissions0(target.getUuid(), target);
         });
     }
 
@@ -151,8 +127,8 @@ public class DatabasePermissionHandler implements PermissionHandler {
                 String permissionName = permission.getPermissionName();
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).insertInto(table("permission_groups"), field("permission_group"),
-                                    field("permission")).values(group, permissionName).onDuplicateKeyUpdate()
-                            .set(field("permission"), permissionName).execute();
+                            field("permission")).values(group, permissionName).onDuplicateKeyUpdate()
+                        .set(field("permission"), permissionName).execute();
                 }
             });
 
@@ -168,7 +144,9 @@ public class DatabasePermissionHandler implements PermissionHandler {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).deleteFrom(table("permission_groups")).where(field("permission_group").eq(group)
-                            .and(field("permission").eq(permission.getPermissionName()))).execute();
+                            .and(field("permission").eq(
+                                permission.getPermissionName())))
+                        .execute();
                 }
             });
 
@@ -188,8 +166,8 @@ public class DatabasePermissionHandler implements PermissionHandler {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).insertInto(table("player_permission_groups"), field("player_uuid"),
-                                    field("player_group")).values(uuid, group).onDuplicateKeyUpdate()
-                            .set(field("player_group"), group).execute();
+                            field("player_group")).values(uuid, group).onDuplicateKeyUpdate()
+                        .set(field("player_group"), group).execute();
                 }
             });
 
@@ -209,7 +187,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
             write(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     using(connection).deleteFrom(table("player_permission_groups"))
-                            .where(field("player_uuid").eq(uuid).and(field("player_group").eq(group))).execute();
+                        .where(field("player_uuid").eq(uuid).and(field("player_group").eq(group))).execute();
                 }
             });
 
@@ -217,24 +195,72 @@ public class DatabasePermissionHandler implements PermissionHandler {
         });
     }
 
-    private static void write(ThrowingRunnable<SQLException> supplier) {
-        try {
-            supplier.run();
+    @Override
+    public @NotNull CompletableFuture<@Unmodifiable Set<String>> groups(@NotNull UUID uuid) {
+        Set<String> groups = this.playerPermissionGroupCache.getIfPresent(uuid);
+        if (groups != null) {
+            return CompletableFuture.completedFuture(groups);
         }
-        catch (SQLException e) {
-            LOGGER.warn("Exception when writing to permission database", e);
+
+        return CompletableFuture.supplyAsync(() -> {
+            return this.playerPermissionGroupCache.get(uuid, this::readPermissionGroups);
+        }, executor);
+    }
+
+    private Set<String> readPermissionGroups(UUID uuid) {
+        return read(() -> {
+            try (Connection connection = dataSource.getConnection()) {
+                return using(connection).selectFrom(table("player_permission_groups"))
+                    .where(field("player_uuid").eq(uuid)).fetch();
+            }
+        }, DatabasePermissionHandler::groupsFromResult, CopyOnWriteArraySet::new);
+    }
+
+    private void applyPermissions0(UUID uuid, CommandSender sender) {
+        sender.clearPermissions();
+
+        Set<String> permissionGroups = playerPermissionGroupCache.get(uuid, this::readPermissionGroups);
+
+        for (String group : permissionGroups) {
+            applyGroup(group, sender);
+        }
+
+        applyGroup(EVERYONE_GROUP, sender);
+
+        roleStore.roles(uuid).thenAccept(roles -> {
+            for (Role role : roles) {
+                sender.addPermissions(role.grantedPermissions());
+            }
+        }).whenComplete((ignored, error) -> {
+            if (sender instanceof Player player) {
+                player.sendPacket(MinecraftServer.getCommandManager().createDeclareCommandsPacket(player));
+            }
+        });
+    }
+
+    private void applyAll0() {
+        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            applyPermissions0(player.getUuid(), player);
         }
     }
 
-    private static <T> T read(ThrowingSupplier<? extends Result<Record>, ? extends SQLException> reader,
-            Function<? super Result<Record>, ? extends T> mapper, Supplier<? extends T> defaultValue) {
-        try {
-            return mapper.apply(reader.get());
-        }
-        catch (SQLException e) {
-            LOGGER.warn("Exception when querying permission database", e);
-        }
+    private void applyGroup(String group, CommandSender commandSender) {
+        Set<Permission> permissions = groupPermissionCache.get(group, key -> {
+            return read(() -> {
+                try (Connection connection = dataSource.getConnection()) {
+                    return using(connection).selectFrom(table("permission_groups"))
+                        .where(field("permission_group").eq(key)).fetch();
+                }
+            }, DatabasePermissionHandler::permissionsFromResult, CopyOnWriteArraySet::new);
+        });
 
-        return defaultValue.get();
+        commandSender.addPermissions(permissions);
+    }
+
+    private void applyOptionalPlayer(UUID uuid) {
+        Player target = MinecraftServer.getConnectionManager().getPlayer(uuid);
+        if (target != null) {
+            applyPermissions0(uuid, target);
+        }
     }
 }

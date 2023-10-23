@@ -21,6 +21,6 @@ public class SignHandler implements BlockHandler {
     @Override
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
         return List.of(Tag.Boolean("GlowingText"), Tag.String("Color"), Tag.String("Text1"), Tag.String("Text2"),
-                Tag.String("Text3"), Tag.String("Text4"));
+            Tag.String("Text3"), Tag.String("Text4"));
     }
 }

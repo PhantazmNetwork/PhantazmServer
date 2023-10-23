@@ -21,10 +21,10 @@ public class CompositeSplitter {
     private boolean enabled = true;
 
     public CompositeSplitter(@NotNull MinecraftClient client, @NotNull Logger logger,
-            @NotNull Collection<AutoSplitSplitter> splitters) {
-        this.client = Objects.requireNonNull(client, "client");
-        this.logger = Objects.requireNonNull(logger, "logger");
-        this.splitters = Objects.requireNonNull(splitters, "splitters");
+        @NotNull Collection<AutoSplitSplitter> splitters) {
+        this.client = Objects.requireNonNull(client);
+        this.logger = Objects.requireNonNull(logger);
+        this.splitters = Objects.requireNonNull(splitters);
     }
 
     public void split() {

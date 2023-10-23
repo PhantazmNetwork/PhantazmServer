@@ -21,9 +21,11 @@ public interface IntersectionFinder {
      * @param start                The start of the shot
      * @param end                  The endpoint of the shot
      * @param distanceLimitSquared The squared distance between {@code start} and {@code end}
-     * @return The intersection of the shot and the {@link Entity}, or {@link Optional#empty()} if there is no intersection
+     * @return The intersection of the shot and the {@link Entity}, or {@link Optional#empty()} if there is no
+     * intersection
      */
-    @NotNull Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start, @NotNull Point end,
-            double distanceLimitSquared);
+    @NotNull
+    Optional<Vec> getHitLocation(@NotNull Entity entity, @NotNull Pos start, @NotNull Point end,
+        double distanceLimitSquared);
 
 }

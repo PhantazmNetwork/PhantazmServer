@@ -17,11 +17,15 @@ public final class MathUtils {
     }
 
     public static long randomInterval(long min, long max) {
-        return (long)(Math.random() * (min - max)) + min;
+        return (long) (Math.random() * (min - max)) + min;
+    }
+
+    public static int randomInterval(int min, int max) {
+        return (int) (Math.random() * (min - max)) + min;
     }
 
     public static int ceilDiv(double dividend, double divisor) {
-        return (int)Math.ceil(dividend / divisor);
+        return (int) Math.ceil(dividend / divisor);
     }
 
     /**
@@ -48,6 +52,10 @@ public final class MathUtils {
         return Math.min(Math.max(value, min), max);
     }
 
+    public static int clamp(int value, int min, int max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
     /**
      * Computes the lambertW (product logarithm) for a given real value and branch.
      *
@@ -62,7 +70,7 @@ public final class MathUtils {
 
         if (z < -E_INVERSE) {
             throw new IllegalArgumentException(
-                    "The real branches of Lambert W function are not defined for z < -1/e," + " value was " + z);
+                "The real branches of Lambert W function are not defined for z < -1/e," + " value was " + z);
         }
 
         double w = initW(branch, z);
@@ -95,34 +103,27 @@ public final class MathUtils {
             if (branch == 0) {
                 if (z <= 500.0) {
                     w = 0.665 * (1 + 0.0195 * Math.log(z + 1.0)) * Math.log(z + 1.0) + 0.04;
-                }
-                else {
+                } else {
                     w = Math.log(z - 4.0) - (1.0 - 1.0 / Math.log(z)) * Math.log(Math.log(z));
                 }
-            }
-            else {
+            } else {
                 w = Double.NaN;
             }
-        }
-        else {
+        } else {
             if (Math.abs(z + Math.exp(-1)) > 0.01) {
                 if (branch == 0) {
                     w = 0;
-                }
-                else {
+                } else {
                     w = Math.log(-z) - Math.log(-Math.log(-z));
                 }
-            }
-            else {
+            } else {
                 if (z == -Math.exp(-1)) {
                     w = -1;
-                }
-                else {
+                } else {
                     double sqrt = Math.sqrt(2 * (Math.exp(1) * z + 1));
                     if (branch == 0) {
                         w = -1 + sqrt;
-                    }
-                    else {
+                    } else {
                         w = -1 - sqrt;
                     }
                 }

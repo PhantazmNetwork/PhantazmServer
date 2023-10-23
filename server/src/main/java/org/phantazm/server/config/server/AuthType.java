@@ -48,7 +48,7 @@ public enum AuthType {
      * @return An {@link Optional} of the {@link AuthType} associated with the name
      */
     public static @NotNull Optional<AuthType> getByName(@NotNull String name) {
-        Objects.requireNonNull(name, "name");
+        Objects.requireNonNull(name);
         return Optional.ofNullable(BY_NAME.get(name));
     }
 }

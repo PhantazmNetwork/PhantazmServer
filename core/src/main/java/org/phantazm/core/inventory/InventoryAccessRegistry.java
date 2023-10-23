@@ -47,7 +47,7 @@ public interface InventoryAccessRegistry {
     }
 
     @Nullable InventoryObject replaceObject(@NotNull InventoryAccess currentAccess, int slot,
-            @NotNull InventoryObject newObject);
+        @NotNull InventoryObject newObject);
 
     default @Nullable InventoryObject removeObject(int slot) {
         return getCurrentAccess().map(access -> removeObject(access, slot)).orElse(null);

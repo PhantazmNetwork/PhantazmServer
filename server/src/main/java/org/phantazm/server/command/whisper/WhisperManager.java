@@ -27,11 +27,11 @@ public class WhisperManager {
     private final MiniMessage miniMessage;
 
     public WhisperManager(@NotNull ConnectionManager connectionManager, @NotNull ConsoleSender consoleSender,
-            @NotNull WhisperConfig whisperConfig, @NotNull MiniMessage miniMessage) {
-        this.connectionManager = Objects.requireNonNull(connectionManager, "connectionManager");
-        this.consoleSender = Objects.requireNonNull(consoleSender, "consoleSender");
-        this.whisperConfig = Objects.requireNonNull(whisperConfig, "whisperConfig");
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
+        @NotNull WhisperConfig whisperConfig, @NotNull MiniMessage miniMessage) {
+        this.connectionManager = Objects.requireNonNull(connectionManager);
+        this.consoleSender = Objects.requireNonNull(consoleSender);
+        this.whisperConfig = Objects.requireNonNull(whisperConfig);
+        this.miniMessage = Objects.requireNonNull(miniMessage);
     }
 
     public void whisper(@NotNull Audience sender, @NotNull Audience target, @NotNull String message) {
@@ -40,13 +40,13 @@ public class WhisperManager {
         TagResolver messagePlaceholder = Placeholder.unparsed("message", message);
 
         Component toTarget =
-                miniMessage.deserialize(whisperConfig.toTargetFormat(), senderPlaceholder, targetPlaceholder,
-                        messagePlaceholder);
+            miniMessage.deserialize(whisperConfig.toTargetFormat(), senderPlaceholder, targetPlaceholder,
+                messagePlaceholder);
         target.sendMessage(toTarget);
 
         Component toSender =
-                miniMessage.deserialize(whisperConfig.toSenderFormat(), senderPlaceholder, targetPlaceholder,
-                        messagePlaceholder);
+            miniMessage.deserialize(whisperConfig.toSenderFormat(), senderPlaceholder, targetPlaceholder,
+                messagePlaceholder);
         sender.sendMessage(toSender);
 
         UUID senderUUID = resolveUUID(sender);
@@ -54,6 +54,7 @@ public class WhisperManager {
 
         if (senderUUID != null && targetUUID != null) {
             previousConverser.put(targetUUID, senderUUID);
+            previousConverser.put(senderUUID, targetUUID);
         }
     }
 
@@ -91,14 +92,13 @@ public class WhisperManager {
 
         Optional<Component> displayName = audience.get(Identity.DISPLAY_NAME);
         return displayName.map(component -> component.colorIfAbsent(whisperConfig.fallbackNameColor()))
-                .orElse(whisperConfig.defaultName());
+            .orElse(whisperConfig.defaultName());
     }
 
     private @Nullable UUID resolveUUID(Audience audience) {
         if (audience instanceof Player player) {
             return player.getUuid();
-        }
-        else if (audience instanceof ConsoleSender) {
+        } else if (audience instanceof ConsoleSender) {
             return consoleSender.identity().uuid();
         }
 

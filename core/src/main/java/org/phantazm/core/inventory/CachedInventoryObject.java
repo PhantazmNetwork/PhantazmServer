@@ -6,8 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 /**
- * Implementation of an {@link InventoryObject} which uses caching for {@link ItemStack}s and recomputes
- * their representation every single time they are marked as dirty.
+ * Implementation of an {@link InventoryObject} which uses caching for {@link ItemStack}s and recomputes their
+ * representation every single time they are marked as dirty.
  */
 public abstract class CachedInventoryObject implements InventoryObject {
 

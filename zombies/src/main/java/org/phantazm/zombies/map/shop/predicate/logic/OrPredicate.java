@@ -40,7 +40,8 @@ public class OrPredicate extends PredicateBase<OrPredicate.Data> {
     }
 
     @DataObject
-    public record Data(boolean shortCircuit, @NotNull @ChildPath("predicates") List<String> paths) {
+    public record Data(boolean shortCircuit,
+        @NotNull @ChildPath("predicates") List<String> paths) {
         @Default("shortCircuit")
         public static @NotNull ConfigElement shortCircuitDefault() {
             return ConfigPrimitive.of(true);

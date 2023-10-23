@@ -17,7 +17,7 @@ public class NotPredicate extends PredicateBase<NotPredicate.Data> {
     @FactoryMethod
     public NotPredicate(@NotNull Data data, @Child("predicate") ShopPredicate predicate) {
         super(data);
-        this.predicate = Objects.requireNonNull(predicate, "predicate");
+        this.predicate = Objects.requireNonNull(predicate);
     }
 
     @Override

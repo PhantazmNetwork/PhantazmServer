@@ -4,30 +4,31 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.CancellableState;
-import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.zombies.Attributes;
-import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final ZombiesScene scene;
     private final ZombiesPlayerModule module;
-    private final Map<UUID, CancellableState> stateMap;
     private final TickTaskScheduler taskScheduler;
 
+    private final AtomicBoolean blockHandAnimation;
+
     public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module,
-            @NotNull Map<UUID, CancellableState> stateMap, @NotNull TickTaskScheduler taskScheduler) {
-        this.scene = Objects.requireNonNull(scene, "scene");
-        this.module = Objects.requireNonNull(module, "module");
-        this.stateMap = Objects.requireNonNull(stateMap, "stateMap");
-        this.taskScheduler = Objects.requireNonNull(taskScheduler, "taskScheduler");
+        @NotNull TickTaskScheduler taskScheduler) {
+        this.scene = Objects.requireNonNull(scene);
+        this.module = Objects.requireNonNull(module);
+        this.taskScheduler = Objects.requireNonNull(taskScheduler);
+        this.blockHandAnimation = new AtomicBoolean();
     }
 
     @Override
@@ -37,8 +38,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     @Override
     public long getReviveTime() {
-        return getPlayer().map(player -> (long)player.getAttributeValue(Attributes.REVIVE_TICKS))
-                .orElse((long)Attributes.REVIVE_TICKS.defaultValue());
+        return getPlayer().map(player -> (long) player.getAttributeValue(Attributes.REVIVE_TICKS))
+            .orElse((long) Attributes.REVIVE_TICKS.defaultValue());
     }
 
     @Override
@@ -47,27 +48,13 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     }
 
     @Override
-    public void registerCancellable(@NotNull CancellableState cancellable, boolean endOld) {
-        if (hasQuit()) {
-            return;
-        }
-
-        CancellableState oldCancellable = stateMap.put(cancellable.id(), cancellable);
-
-        if (oldCancellable != null && endOld) {
-            oldCancellable.end();
-        }
-
-        cancellable.start();
+    public void setBlockHandAnimation() {
+        blockHandAnimation.set(true);
     }
 
     @Override
-    public void removeCancellable(@NotNull UUID id) {
-        CancellableState state = stateMap.remove(id);
-
-        if (state != null) {
-            state.end();
-        }
+    public boolean blockHandAnimation() {
+        return blockHandAnimation.getAndSet(false);
     }
 
     @Override
@@ -95,7 +82,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
             setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(false));
         }
         module.getStateSwitcher().end();
-        getPlayer().ifPresent(player -> player.tagHandler().clearTags());
     }
 
     private void inventoryTick(Player player, long time) {

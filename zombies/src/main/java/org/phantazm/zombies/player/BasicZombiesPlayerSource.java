@@ -26,10 +26,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
 import org.jglrxavpok.hephaistos.parser.SNBTParser;
-import org.phantazm.commons.Activable;
-import org.phantazm.commons.BasicTickTaskScheduler;
-import org.phantazm.commons.CancellableState;
-import org.phantazm.commons.TickTaskScheduler;
+import org.phantazm.core.tick.Activable;
+import org.phantazm.core.tick.BasicTickTaskScheduler;
+import org.phantazm.core.tick.TickTaskScheduler;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;
@@ -40,9 +40,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.time.TickFormatter;
-import org.phantazm.mob.MobModel;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.spawner.MobSpawner;
+import org.phantazm.mob2.MobSpawner;
 import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
 import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
@@ -67,13 +65,12 @@ import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 import org.phantazm.zombies.player.state.revive.NearbyReviverPredicate;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -90,46 +87,42 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
     private final Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction;
 
-    private final Map<Key, MobModel> mobModelMap;
-
     private final ContextManager contextManager;
 
     private final KeyParser keyParser;
 
-    public BasicZombiesPlayerSource(@NotNull ZombiesDatabase database,
-                                    @NotNull Executor executor, @NotNull PlayerViewProvider viewProvider,
-                                    @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
-                                    @NotNull Map<Key, MobModel> mobModelMap, @NotNull ContextManager contextManager,
-                                    @NotNull KeyParser keyParser) {
-        this.database = Objects.requireNonNull(database, "database");
-        this.executor = Objects.requireNonNull(executor, "executor");
-        this.viewProvider = Objects.requireNonNull(viewProvider, "viewProvider");
-        this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction, "equipmentCreatorFunction");
-        this.mobModelMap = Objects.requireNonNull(mobModelMap, "mobModelMap");
-        this.contextManager = Objects.requireNonNull(contextManager, "contextManager");
-        this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
+    public BasicZombiesPlayerSource(@NotNull ZombiesDatabase database, @NotNull Executor executor,
+        @NotNull PlayerViewProvider viewProvider,
+        @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
+        @NotNull ContextManager contextManager, @NotNull KeyParser keyParser) {
+        this.database = Objects.requireNonNull(database);
+        this.executor = Objects.requireNonNull(executor);
+        this.viewProvider = Objects.requireNonNull(viewProvider);
+        this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction);
+        this.contextManager = Objects.requireNonNull(contextManager);
+        this.keyParser = Objects.requireNonNull(keyParser);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
-                                               @NotNull Map<? super UUID, ? extends ZombiesPlayer> zombiesPlayers,
-                                               @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
-                                               @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
-                                               @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
-                                               @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
-                                               @NotNull MobStore mobStore, @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
-                                               @NotNull BelowNameTag belowNameTag) {
+        @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers,
+        @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
+        @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
+        @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
+        @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
+        @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
+        @NotNull BelowNameTag belowNameTag) {
         TransactionModifierSource playerTransactionModifierSource = new BasicTransactionModifierSource();
 
         ZombiesPlayerMeta meta = new ZombiesPlayerMeta();
         ZombiesPlayerMapStats stats =
-                BasicZombiesPlayerMapStats.createBasicStats(playerView.getUUID(), mapSettingsInfo.id());
+            BasicZombiesPlayerMapStats.createBasicStats(playerView.getUUID(), mapSettingsInfo.id());
 
         ZombiesPlayerActionBar actionBar = new ZombiesPlayerActionBar(playerView);
 
         PlayerCoins coins = new BasicPlayerCoins(stats,
-                new BasicTransactionMessager(actionBar, MiniMessage.miniMessage(), playerCoinsInfo), 0);
+            new BasicTransactionMessager(actionBar, MiniMessage.miniMessage(), playerCoinsInfo), 0);
         PlayerKills kills = new BasicPlayerKills(stats);
 
         InventoryProfile livingProfile = new BasicInventoryProfile(45);
@@ -149,7 +142,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             if (!defaultItemString.isEmpty()) {
                 try {
                     if (new SNBTParser(
-                            new StringReader(groupInfo.defaultItem())).parse() instanceof NBTCompound compound) {
+                        new StringReader(groupInfo.defaultItem())).parse() instanceof NBTCompound compound) {
                         itemStack = ItemStack.fromItemNBT(compound);
                     }
                 } catch (NBTException e) {
@@ -158,24 +151,24 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             }
 
             inventoryObjectGroupEntries[i] = Map.entry(entry.getKey(),
-                    new BasicInventoryObjectGroup(livingProfile, groupInfo.slots(),
-                            itemStack == null ? null : new StaticInventoryObject(itemStack)));
+                new BasicInventoryObjectGroup(livingProfile, groupInfo.slots(),
+                    itemStack == null ? null : new StaticInventoryObject(itemStack)));
         }
 
         InventoryAccess livingInventoryAccess =
-                new InventoryAccess(livingProfile, Map.ofEntries(inventoryObjectGroupEntries));
+            new InventoryAccess(livingProfile, Map.ofEntries(inventoryObjectGroupEntries));
         InventoryAccess deadInventoryAccess = new InventoryAccess(new BasicInventoryProfile(45), Map.of());
 
         InventoryAccessRegistry accessRegistry = new BasicInventoryAccessRegistry(playerView);
         accessRegistry.registerAccess(InventoryKeys.ALIVE_ACCESS, livingInventoryAccess);
         accessRegistry.registerAccess(InventoryKeys.DEAD_ACCESS, deadInventoryAccess);
 
-        EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry);
+        EquipmentHandler equipmentHandler = new EquipmentHandler(accessRegistry, scene);
 
         Wrapper<ZombiesPlayer> zombiesPlayerWrapper = Wrapper.ofNull();
         ZombiesEquipmentModule equipmentModule =
-                new ZombiesEquipmentModule(zombiesPlayers, playerView, stats, actionBar, mobSpawner, mobStore,
-                        eventNode, random, mapObjects, zombiesPlayerWrapper, mobModelMap::get);
+            new ZombiesEquipmentModule(scene, zombiesPlayers, playerView, stats, actionBar, mobSpawner,
+                eventNode, random, mapObjects, zombiesPlayerWrapper);
         EquipmentCreator equipmentCreator = equipmentCreatorFunction.apply(equipmentModule);
 
         Sidebar sidebar = new Sidebar(mapSettingsInfo.scoreboardHeader());
@@ -183,74 +176,74 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         Function<AlivePlayerStateContext, ZombiesPlayerState> aliveStateCreator = context -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE"), ZombiesPlayerStateKeys.ALIVE.key(),
-                    List.of(new BasicAliveStateActivable(context, instance, accessRegistry, playerView, meta,
-                            mapSettingsInfo, sidebar, tabList, belowNameTag)));
+                List.of(new BasicAliveStateActivable(context, instance, accessRegistry, playerView, meta,
+                    mapSettingsInfo, sidebar, tabList, belowNameTag)));
         };
         BiFunction<DeadPlayerStateContext, Collection<Activable>, ZombiesPlayerState> deadStateCreator =
-                (context, activables) -> {
-                    List<Activable> combinedActivables = new ArrayList<>(activables);
-                    combinedActivables.add(
-                            new BasicDeadStateActivable(accessRegistry, context, instance, playerView, meta,
-                                    mapSettingsInfo, sidebar, tabList, belowNameTag, stats));
-                    return new BasicZombiesPlayerState(Component.text("DEAD").color(NamedTextColor.RED),
-                            ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
-                };
+            (context, activables) -> {
+                List<Activable> combinedActivables = new ArrayList<>(activables);
+                combinedActivables.add(
+                    new BasicDeadStateActivable(accessRegistry, context, instance, playerView, meta,
+                        mapSettingsInfo, sidebar, tabList, belowNameTag, stats));
+                return new BasicZombiesPlayerState(Component.text("DEAD").color(NamedTextColor.RED),
+                    ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
+            };
         Function<KnockedPlayerStateContext, ZombiesPlayerState> knockedStateCreator = context -> {
             TickFormatter tickFormatter = new PrecisionSecondTickFormatter(new PrecisionSecondTickFormatter.Data(1));
 
             Wrapper<CorpseCreator.Corpse> corpseWrapper = Wrapper.ofNull();
             Supplier<ZombiesPlayerState> deadStateSupplier = () -> {
                 DeadPlayerStateContext deathContext =
-                        DeadPlayerStateContext.killed(context.getKnockLocation(), context.getKiller().orElse(null),
-                                context.getKnockRoom().orElse(null));
+                    DeadPlayerStateContext.killed(context.getKnockLocation(), context.getKiller().orElse(null),
+                        context.getKnockRoom().orElse(null));
                 return deadStateCreator.apply(deathContext,
-                        List.of(corpseWrapper.get().asDeathActivable(), new Activable() {
-                            @Override
-                            public void end() {
-                                meta.setCorpse(null);
-                            }
-                        }));
+                    List.of(corpseWrapper.get().asDeathActivable(), new Activable() {
+                        @Override
+                        public void end() {
+                            meta.setCorpse(null);
+                        }
+                    }));
             };
 
             ReviveHandler reviveHandler =
-                    new ReviveHandler(context, zombiesPlayers.values(), aliveStateCreator, deadStateSupplier,
-                            new NearbyReviverPredicate(playerView, mapSettingsInfo.reviveRadius()), 500L);
+                new ReviveHandler(context, zombiesPlayers.values(), aliveStateCreator, deadStateSupplier,
+                    new NearbyReviverPredicate(playerView, mapSettingsInfo.reviveRadius()), 500L);
 
             CorpseCreator.Corpse corpse =
-                    corpseCreator.forPlayer(instance, zombiesPlayerWrapper.get(), context.getKnockLocation(),
-                            reviveHandler);
+                corpseCreator.forPlayer(instance, zombiesPlayerWrapper.get(), context.getKnockLocation(),
+                    reviveHandler);
 
             corpseWrapper.set(corpse);
             return new KnockedPlayerState(reviveHandler,
-                    List.of(new BasicKnockedStateActivable(context, instance, playerView, meta, actionBar,
-                                    mapSettingsInfo, reviveHandler, tickFormatter, sidebar, tabList, belowNameTag, stats),
-                            corpse.asKnockActivable(), new Activable() {
-                                @Override
-                                public void start() {
-                                    meta.setCorpse(corpse);
-                                }
-                            }));
+                List.of(new BasicKnockedStateActivable(context, instance, playerView, meta, actionBar,
+                        mapSettingsInfo, reviveHandler, tickFormatter, sidebar, tabList, belowNameTag, stats,
+                        mapSettingsInfo, zombiesPlayerWrapper.unmodifiableView()), corpse.asKnockActivable(),
+                    new Activable() {
+                        @Override
+                        public void start() {
+                            meta.setCorpse(corpse);
+                        }
+                    }));
         };
-        Map<UUID, CancellableState> stateMap = new ConcurrentHashMap<>();
         TickTaskScheduler taskScheduler = new BasicTickTaskScheduler();
         Function<QuitPlayerStateContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT").color(NamedTextColor.RED),
-                    ZombiesPlayerStateKeys.QUIT.key(),
-                    List.of(new BasicQuitStateActivable(instance, playerView, mapSettingsInfo, sidebar, tabList,
-                            belowNameTag, accessRegistry, stateMap, taskScheduler)));
+                ZombiesPlayerStateKeys.QUIT.key(),
+                List.of(new BasicQuitStateActivable(instance, playerView, mapSettingsInfo, sidebar, tabList,
+                    belowNameTag, accessRegistry, taskScheduler)));
         };
 
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =
-                Map.of(ZombiesPlayerStateKeys.ALIVE, aliveStateCreator, ZombiesPlayerStateKeys.DEAD,
-                        (Function<DeadPlayerStateContext, ZombiesPlayerState>) context -> deadStateCreator.apply(context,
-                                List.of()), ZombiesPlayerStateKeys.KNOCKED, knockedStateCreator,
-                        ZombiesPlayerStateKeys.QUIT, quitStateCreator);
+            Map.of(ZombiesPlayerStateKeys.ALIVE, aliveStateCreator, ZombiesPlayerStateKeys.DEAD,
+                (Function<DeadPlayerStateContext, ZombiesPlayerState>) context -> deadStateCreator.apply(context,
+                    List.of()), ZombiesPlayerStateKeys.KNOCKED, knockedStateCreator,
+                ZombiesPlayerStateKeys.QUIT, quitStateCreator);
 
         PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher();
 
         Point location = VecUtils.toPoint(mapSettingsInfo.origin()).add(VecUtils.toPoint(leaderboardInfo.location()));
         Hologram hologram = new ViewableHologram(location, leaderboardInfo.gap(),
-                viewer -> viewer.getUuid().equals(playerView.getUUID()));
+            viewer -> viewer.getUuid().equals(playerView.getUUID()));
         hologram.setInstance(instance);
         Entity armorStand = new Entity(EntityType.ARMOR_STAND);
         armorStand.setNoGravity(true);
@@ -258,10 +251,10 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
         armorStand.updateViewableRule(player -> player.getUuid().equals(playerView.getUUID()));
         armorStand.setInstance(instance);
         DependencyModule leaderboardModule =
-                new BestTimeLeaderboard.Module(database, playerView.getUUID(), hologram, leaderboardInfo.gap(), armorStand, mapSettingsInfo, viewProvider,
-                        MiniMessage.miniMessage(), executor);
+            new BestTimeLeaderboard.Module(database, playerView.getUUID(), hologram, leaderboardInfo.gap(),
+                armorStand, mapSettingsInfo, viewProvider, MiniMessage.miniMessage(), executor);
         BestTimeLeaderboard leaderboard = contextManager.makeContext(leaderboardInfo.data())
-                .provide(new ModuleDependencyProvider(keyParser, leaderboardModule));
+            .provide(new ModuleDependencyProvider(keyParser, leaderboardModule));
         eventNode.addListener(PlayerEntityInteractEvent.class, event -> {
             if (event.getPlayer().getUuid().equals(playerView.getUUID()) && event.getTarget() == armorStand) {
                 playerView.getPlayer().ifPresent(player -> player.playSound(leaderboardInfo.clickSound(), armorStand));
@@ -269,18 +262,18 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             }
         });
         eventNode.addListener(EntityAttackEvent.class, event -> {
-           if (event.getEntity().getUuid().equals(playerView.getUUID()) && event.getTarget() == armorStand) {
-               playerView.getPlayer().ifPresent(player -> player.playSound(leaderboardInfo.clickSound(), armorStand));
-               leaderboard.cycle();
-           }
+            if (event.getEntity().getUuid().equals(playerView.getUUID()) && event.getTarget() == armorStand) {
+                playerView.getPlayer().ifPresent(player -> player.playSound(leaderboardInfo.clickSound(), armorStand));
+                leaderboard.cycle();
+            }
         });
 
         ZombiesPlayerModule module =
-                new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator, actionBar,
-                        accessRegistry, stateSwitcher, stateFunctions, sidebar, tabList, mapTransactionModifierSource,
-                        playerTransactionModifierSource, flaggable, stats, leaderboard);
+            new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator, actionBar,
+                accessRegistry, stateSwitcher, stateFunctions, sidebar, tabList, mapTransactionModifierSource,
+                playerTransactionModifierSource, flaggable, stats, leaderboard);
 
-        ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module, stateMap, taskScheduler);
+        ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module, taskScheduler);
         zombiesPlayerWrapper.set(zombiesPlayer);
         return zombiesPlayer;
     }

@@ -14,7 +14,7 @@ public class PartyAudience implements PacketGroupingAudience {
     private final Collection<? extends GuildMember> guildMembers;
 
     public PartyAudience(@NotNull Collection<? extends GuildMember> guildMembers) {
-        this.guildMembers = Objects.requireNonNull(guildMembers, "guildMembers");
+        this.guildMembers = Objects.requireNonNull(guildMembers);
     }
 
     @Override

@@ -15,11 +15,11 @@ public class FileSystemPowerupDataLoader extends FilesystemLoader<PowerupData> {
     private final ConfigProcessor<PowerupData> powerupDataConfigProcessor;
 
     public FileSystemPowerupDataLoader(@NotNull Path root, @NotNull ConfigCodec codec,
-            @NotNull ConfigProcessor<PowerupData> powerupDataConfigProcessor) {
+        @NotNull ConfigProcessor<PowerupData> powerupDataConfigProcessor) {
         super(root);
-        this.codec = Objects.requireNonNull(codec, "codec");
+        this.codec = Objects.requireNonNull(codec);
         this.powerupDataConfigProcessor =
-                Objects.requireNonNull(powerupDataConfigProcessor, "powerupDataConfigProcessor");
+            Objects.requireNonNull(powerupDataConfigProcessor);
     }
 
     @Override

@@ -26,7 +26,7 @@ public class PlayerAudienceProvider implements AudienceProvider {
      */
     @FactoryMethod
     public PlayerAudienceProvider(@NotNull PlayerView playerView) {
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
+        this.playerView = Objects.requireNonNull(playerView);
     }
 
     @Override

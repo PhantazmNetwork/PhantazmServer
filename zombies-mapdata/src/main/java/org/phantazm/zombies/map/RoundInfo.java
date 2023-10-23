@@ -9,10 +9,11 @@ import java.util.Objects;
 /**
  * Defines a round.
  */
-public record RoundInfo(int round,
-                        @NotNull ConfigList startActions,
-                        @NotNull ConfigList endActions,
-                        @NotNull List<WaveInfo> waves) {
+public record RoundInfo(
+    int round,
+    @NotNull ConfigList startActions,
+    @NotNull ConfigList endActions,
+    @NotNull List<WaveInfo> waves) {
 
     /**
      * Creates a new instance of this record.
@@ -21,6 +22,6 @@ public record RoundInfo(int round,
      * @param waves the waves that make up this round
      */
     public RoundInfo {
-        Objects.requireNonNull(waves, "waves");
+        Objects.requireNonNull(waves);
     }
 }

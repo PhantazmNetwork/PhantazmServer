@@ -28,7 +28,7 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
      */
     @FactoryMethod
     public NearbyEntityFinder(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

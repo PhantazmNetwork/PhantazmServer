@@ -21,13 +21,14 @@ public interface ClickHandler {
     void handleClick(@NotNull Gui owner, @NotNull Player player, int slot, @NotNull GuiItem.ClickType clickType);
 
     /**
-     * Returns a new ClickHandler which will invoke the current ClickHandler only if the required ClickType is supplied.
+     * Returns a new ClickHandler which will invoke the current ClickHandler only if the required ClickType is
+     * supplied.
      *
      * @param requiredType the necessary ClickType
      * @return a new ClickHandler instance
      */
     default @NotNull ClickHandler filter(@NotNull GuiItem.ClickType requiredType) {
-        Objects.requireNonNull(requiredType, "requiredType");
+        Objects.requireNonNull(requiredType);
 
         return (owner, player, slot, clickType) -> {
             if (clickType == requiredType) {
@@ -43,7 +44,7 @@ public interface ClickHandler {
      * @return a new ClickHandler instance
      */
     default @NotNull ClickHandler filter(@NotNull Predicate<? super GuiItem.ClickType> clickPredicate) {
-        Objects.requireNonNull(clickPredicate, "requiredType");
+        Objects.requireNonNull(clickPredicate);
 
         return (owner, player, slot, clickType) -> {
             if (clickPredicate.test(clickType)) {

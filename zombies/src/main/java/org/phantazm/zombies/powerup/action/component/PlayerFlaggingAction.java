@@ -9,7 +9,7 @@ import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.action.PowerupActionBase;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.action.player_flagging")
 @Cache(false)
@@ -19,7 +19,7 @@ public class PlayerFlaggingAction implements PowerupActionComponent {
 
     @FactoryMethod
     public PlayerFlaggingAction(@NotNull Data data,
-            @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
+        @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
         this.data = data;
         this.deactivationPredicate = deactivationPredicate;
     }
@@ -30,7 +30,8 @@ public class PlayerFlaggingAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(@NotNull Key flag, @NotNull @ChildPath("deactivation_predicate") String deactivationPredicate) {
+    public record Data(@NotNull Key flag,
+        @NotNull @ChildPath("deactivation_predicate") String deactivationPredicate) {
     }
 
     private static class Action extends PowerupActionBase {

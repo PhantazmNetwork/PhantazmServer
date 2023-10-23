@@ -27,7 +27,7 @@ public class NewObjectGui extends SimplePanelGui {
     public NewObjectGui(@NotNull EditorSession session) {
         super(100, 150);
 
-        Objects.requireNonNull(session, "session");
+        Objects.requireNonNull(session);
 
         WButton newRoom = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_NEW_ROOM));
         WButton newDoor = new WButton(Text.translatable(TranslationKeys.GUI_MAPEDITOR_NEW_DOOR));
@@ -46,9 +46,9 @@ public class NewObjectGui extends SimplePanelGui {
         Bounds3I selected = session.getSelection();
 
         newRoom.setOnClick(
-                () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewRoomGui(session))));
+            () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewRoomGui(session))));
         newDoor.setOnClick(
-                () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewDoorGui(session))));
+            () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewDoorGui(session))));
         newWindow.setOnClick(() -> {
             PlayerEntity playerEntity = MinecraftClient.getInstance().player;
             if (playerEntity == null) {
@@ -61,8 +61,8 @@ public class NewObjectGui extends SimplePanelGui {
             ScreenUtils.closeCurrentScreen();
         });
         newSpawnpoint.setOnClick(
-                () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewSpawnpointGui(session))));
+            () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewSpawnpointGui(session))));
         newShop.setOnClick(
-                () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewShopGui(session))));
+            () -> MinecraftClient.getInstance().setScreen(new CottonClientScreen(new NewShopGui(session))));
     }
 }

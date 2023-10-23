@@ -101,7 +101,8 @@ public final class TranslationKeys {
      */
     public static final String GUI_MAPEDITOR_NO_MAP = "gui.mapeditor.no_map";
     /**
-     * Shown in the confirmation dialog when attempting to delete a map, asking the player if they really want to do so.
+     * Shown in the confirmation dialog when attempting to delete a map, asking the player if they really want to do
+     * so.
      */
     public static final String GUI_MAPEDITOR_DELETE_MAP_QUERY = "gui.mapeditor.delete_map_query";
     /**
@@ -131,10 +132,10 @@ public final class TranslationKeys {
     public static final String GUI_MAPEDITOR_COORDINATE_DISPLAY = "gui.mapeditor.coordinate_display";
 
     public static final String CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_SYNCED = "chat.mapeditor.mapdata_version_sync" +
-            ".synced";
+        ".synced";
 
     public static final String CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED = "chat.mapeditor.mapdata_version_sync" +
-            ".not_synced";
+        ".not_synced";
 
     private TranslationKeys() {
         throw new UnsupportedOperationException();

@@ -32,11 +32,11 @@ public final class GeneralStatsFeature {
         }
 
         generalDatabase.handleJoin(event.getPlayer().getUuid(), ZonedDateTime.now())
-                .whenComplete((ignored, throwable) -> {
-                    if (throwable != null) {
-                        LOGGER.warn("Failed to update join times for {}", event.getPlayer().getUuid(), throwable);
-                    }
-                });
+            .whenComplete((ignored, throwable) -> {
+                if (throwable != null) {
+                    LOGGER.warn("Failed to update join times for {}", event.getPlayer().getUuid(), throwable);
+                }
+            });
     }
 
 }

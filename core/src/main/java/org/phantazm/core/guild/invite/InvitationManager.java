@@ -2,8 +2,8 @@ package org.phantazm.core.guild.invite;
 
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
+import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Tickable;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.GuildMemberManager;
 import org.phantazm.core.player.PlayerView;
@@ -28,8 +28,8 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
     private long ticks = 0;
 
     public InvitationManager(@NotNull GuildMemberManager<TMember> memberManager,
-            @NotNull Function<? super PlayerView, ? extends TMember> playerCreator,
-            @NotNull InvitationNotification<TMember> notification, long invitationDuration) {
+        @NotNull Function<? super PlayerView, ? extends TMember> playerCreator,
+        @NotNull InvitationNotification<TMember> notification, long invitationDuration) {
         this.memberManager = Objects.requireNonNull(memberManager, "memberManager");
         this.playerCreator = Objects.requireNonNull(playerCreator, "playerCreator");
         this.notification = Objects.requireNonNull(notification, "notification");
@@ -45,7 +45,7 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
             if (latestInviteTimes.getLong(invitation.invitee().getUUID()) == invitation.expirationTime()) {
                 latestInviteTimes.removeLong(invitation.invitee().getUUID());
             }
-            notification.notifyExpiry(invitation.invitee());
+            notification.notifyExpiry(invitation.inviter(), invitation.invitee());
 
             invitations.remove();
             invitation = invitations.peek();
@@ -55,12 +55,12 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
     public void invite(@NotNull TMember inviter, @NotNull PlayerView invitee) {
         if (invitationDuration == 0) {
             notification.notifyInvitation(inviter, invitee, invitationDuration);
-            notification.notifyExpiry(invitee);
+            notification.notifyExpiry(inviter.getPlayerView(), invitee);
             return;
         }
 
         long expirationTime = ticks + invitationDuration;
-        invitations.add(new Invitation(invitee, expirationTime));
+        invitations.add(new Invitation(inviter.getPlayerView(), invitee, expirationTime));
         latestInviteTimes.put(invitee.getUUID(), expirationTime);
         notification.notifyInvitation(inviter, invitee, invitationDuration);
     }
@@ -94,7 +94,9 @@ public class InvitationManager<TMember extends GuildMember> implements Tickable 
         notification.notifyJoin(newMember);
     }
 
-    private record Invitation(@NotNull PlayerView invitee, long expirationTime) {
+    private record Invitation(@NotNull PlayerView inviter,
+        @NotNull PlayerView invitee,
+        long expirationTime) {
 
     }
 

@@ -6,6 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.sound.Sound;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -19,11 +20,11 @@ import java.util.UUID;
 public class PlaySoundAction implements Action<Round> {
     private final Data data;
     private final Random random;
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
 
     @FactoryMethod
     public PlaySoundAction(@NotNull Data data, @NotNull Random random,
-            @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap) {
+        @NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
         this.data = data;
         this.random = random;
         this.playerMap = playerMap;
@@ -34,7 +35,7 @@ public class PlaySoundAction implements Action<Round> {
         for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
             if (!zombiesPlayer.hasQuit()) {
                 zombiesPlayer.getPlayer()
-                        .ifPresent(player -> player.playSound(Sound.sound(data.sound).seed(random.nextLong()).build()));
+                    .ifPresent(player -> player.playSound(Sound.sound(data.sound).seed(random.nextLong()).build()));
             }
         }
     }

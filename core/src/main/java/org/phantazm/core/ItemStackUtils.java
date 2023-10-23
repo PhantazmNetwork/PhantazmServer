@@ -17,13 +17,12 @@ import java.util.List;
 
 public final class ItemStackUtils {
     public static @NotNull ItemStack buildItem(@NotNull Material material, @Nullable String tag,
-            @Nullable String displayName, @Nullable List<String> lore, @NotNull TagResolver @NotNull ... tags) {
+        @Nullable String displayName, @Nullable List<String> lore, @NotNull TagResolver @NotNull ... tags) {
         ItemStack.Builder builder = ItemStack.builder(material);
         if (tag != null) {
             try {
-                builder.meta((NBTCompound)new SNBTParser(new StringReader(tag)).parse());
-            }
-            catch (NBTException ignored) {
+                builder.meta((NBTCompound) new SNBTParser(new StringReader(tag)).parse());
+            } catch (NBTException ignored) {
             }
         }
 

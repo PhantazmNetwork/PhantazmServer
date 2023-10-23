@@ -29,7 +29,7 @@ public class NewRoomGui extends NamedObjectGui {
     public NewRoomGui(@NotNull EditorSession session) {
         super(LogicUtils.nullCoalesce(session.lastRoom(), room -> room.id().value()));
 
-        Objects.requireNonNull(session, "session");
+        Objects.requireNonNull(session);
 
         MapInfo currentMap = session.getMap();
         Bounds3I selected = session.getSelection().shift(session.getMap().settings().origin().mul(-1));

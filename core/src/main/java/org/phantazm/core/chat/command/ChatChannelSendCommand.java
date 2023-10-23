@@ -18,7 +18,7 @@ public class ChatChannelSendCommand {
     }
 
     public static @NotNull Command chatChannelSend(@NotNull String commandName, @NotNull ChatChannel channel) {
-        Objects.requireNonNull(channel, "channel");
+        Objects.requireNonNull(channel);
         Command command = new Command(commandName);
 
         Argument<String[]> message = ArgumentType.StringArray("message");
@@ -33,17 +33,8 @@ public class ChatChannelSendCommand {
 
             return true;
         }, (sender, context) -> {
-            Player player = (Player)sender;
-            channel.findAudience(player.getUuid(), audience -> {
-                channel.formatMessage(player, String.join(" ", context.get(message)))
-                        .whenComplete((component, throwable) -> {
-                            if (component == null) {
-                                return;
-                            }
-
-                            audience.sendMessage(component);
-                        });
-            }, (failure) -> {
+            Player player = (Player) sender;
+            channel.sendMessage(player, String.join(" ", context.get(message)), failure -> {
                 player.sendMessage(failure.left());
             });
         }, message);

@@ -37,7 +37,7 @@ public class BasicInventoryProfile implements InventoryProfile {
 
     @Override
     public @NotNull InventoryObject setInventoryObject(int slot, @NotNull InventoryObject object) {
-        Objects.requireNonNull(object, "object");
+        Objects.requireNonNull(object);
 
         if (hasInventoryObject(slot)) {
             throw new IllegalArgumentException("Can't set inventory object in occupied slot");

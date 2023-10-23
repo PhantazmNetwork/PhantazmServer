@@ -4,7 +4,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record ZombiesAutoSplitsConfig(@NotNull String host, int port, boolean useLiveSplits, boolean useInternal) {
+public record ZombiesAutoSplitsConfig(@NotNull String host,
+    int port,
+    boolean useLiveSplits,
+    boolean useInternal) {
 
     public static final String DEFAULT_HOST = "localhost";
 
@@ -15,10 +18,10 @@ public record ZombiesAutoSplitsConfig(@NotNull String host, int port, boolean us
     public static final boolean DEFAULT_USE_INTERNAL = true;
 
     public static final ZombiesAutoSplitsConfig DEFAULT =
-            new ZombiesAutoSplitsConfig(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USE_LIVE_SPLITS, DEFAULT_USE_INTERNAL);
+        new ZombiesAutoSplitsConfig(DEFAULT_HOST, DEFAULT_PORT, DEFAULT_USE_LIVE_SPLITS, DEFAULT_USE_INTERNAL);
 
     public ZombiesAutoSplitsConfig {
-        Objects.requireNonNull(host, "host");
+        Objects.requireNonNull(host);
     }
 
     public @NotNull Builder toBuilder() {
@@ -36,7 +39,7 @@ public record ZombiesAutoSplitsConfig(@NotNull String host, int port, boolean us
         private boolean useInternal = DEFAULT_USE_INTERNAL;
 
         public @NotNull Builder setHost(String host) {
-            Objects.requireNonNull(host, "host");
+            Objects.requireNonNull(host);
             this.host = host;
             return this;
         }

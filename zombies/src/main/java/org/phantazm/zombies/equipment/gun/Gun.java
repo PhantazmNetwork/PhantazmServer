@@ -12,16 +12,15 @@ import org.phantazm.core.inventory.CachedInventoryObject;
 import org.phantazm.zombies.equipment.gun.effect.GunEffect;
 import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.visual.GunStackMapper;
-import org.phantazm.zombies.event.GunLoseAmmoEvent;
+import org.phantazm.zombies.event.equipment.GunLoseAmmoEvent;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Represents an equipment that can shoot.
- * This class mostly maintains state as the definition of shooting is very flexible.
- * The gun's {@link Firer} is responsible for the actual shooting.
+ * Represents an equipment that can shoot. This class mostly maintains state as the definition of shooting is very
+ * flexible. The gun's {@link Firer} is responsible for the actual shooting.
  */
 public class Gun extends CachedInventoryObject implements Equipment, Upgradable {
     private final Key equipmentKey;
@@ -39,10 +38,10 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
      * @param model          The {@link GunModel} of the {@link Gun}
      */
     public Gun(@NotNull Key equipmentKey, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-            @NotNull GunModel model) {
-        this.equipmentKey = Objects.requireNonNull(equipmentKey, "equipmentKey");
-        this.entitySupplier = Objects.requireNonNull(entitySupplier, "entitySupplier");
-        this.model = Objects.requireNonNull(model, "model");
+        @NotNull GunModel model) {
+        this.equipmentKey = Objects.requireNonNull(equipmentKey);
+        this.entitySupplier = Objects.requireNonNull(entitySupplier);
+        this.model = Objects.requireNonNull(model);
         this.tickingLevels = Collections.newSetFromMap(new IdentityHashMap<>(model.levels().size()));
         this.levelKey = model.rootLevel();
         this.level = model.levels().get(levelKey);
@@ -50,7 +49,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
         GunStats stats = level.stats();
         this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats.reloadSpeed(), false, stats.maxAmmo(),
-                stats.maxClip(), false, 0);
+            stats.maxClip(), false, 0);
     }
 
     /**
@@ -66,9 +65,13 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         }
     }
 
+    public @NotNull Optional<? extends Entity> owner() {
+        return entitySupplier.get();
+    }
+
     /**
-     * Makes the gun fire an individual shot.
-     * Use {@link #shoot()} to shoot a volley of shots, which should call this internally.
+     * Makes the gun fire an individual shot. Use {@link #shoot()} to shoot a volley of shots, which should call this
+     * internally.
      */
     protected void fire() {
         Optional<? extends Entity> entityOptional = entitySupplier.get();
@@ -78,8 +81,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             GunLoseAmmoEvent event = new GunLoseAmmoEvent(entityOptional.get(), this, 1);
             EventDispatcher.call(event);
             ammoLoss = event.getAmmoLost();
-        }
-        else {
+        } else {
             ammoLoss = 1;
         }
 
@@ -92,8 +94,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         if (state.clip() == 0) {
             if (state.ammo() > 0) {
                 reload();
-            }
-            else {
+            } else {
                 for (GunEffect effect : level.noAmmoEffects()) {
                     effect.apply(state);
                 }
@@ -191,8 +192,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             }
             if (level.reloadTester().isReloading(state)) {
                 builder.setTicksSinceLastReload(builder.getTicksSinceLastReload() + 1);
-            }
-            else if (!builder.isReloadComplete()) {
+            } else if (!builder.isReloadComplete()) {
                 builder.setClip(Math.min(level.stats().maxClip(), getState().ammo()));
                 builder.setReloadComplete(true);
             }
@@ -202,8 +202,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             if (level.shootTester().canFire(state)) {
                 fire();
                 modifyState(builder -> builder.setQueuedShots(state.queuedShots() - 1));
-            }
-            else if (!level.shootTester().isFiring(state)) {
+            } else if (!level.shootTester().isFiring(state)) {
                 modifyState(builder -> builder.setQueuedShots(0));
             }
 
@@ -244,7 +243,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
     @Override
     public void setLevel(@NotNull Key key) {
-        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(key);
         if (levelKey.equals(key)) {
             return;
         }

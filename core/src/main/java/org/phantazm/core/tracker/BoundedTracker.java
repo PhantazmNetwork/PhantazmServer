@@ -12,21 +12,25 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public interface BoundedTracker<T extends Bounded> {
+    static <T extends Bounded> @NotNull BoundedTracker<T> tracker(@NotNull Collection<T> collection) {
+        return new BoundedTrackerImpl<>(collection);
+    }
+
     @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height, double depth,
-            double distance);
+        double distance);
 
     @NotNull Optional<Pair<T, Vec>> closestInRangeToBoundsWithVec(@NotNull Point origin, double width, double height,
-            double depth, double distance);
+        double depth, double distance);
 
     default @NotNull Optional<Pair<T, Vec>> closestInRangeToBoundsWithVec(@NotNull Point origin, double width,
-            double height, double distance) {
+        double height, double distance) {
         return closestInRangeToBoundsWithVec(origin, width, height, width, distance);
     }
 
     @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double distance);
 
     default @NotNull Optional<T> closestInRangeToBounds(@NotNull Point origin, double width, double height,
-            double distance) {
+        double distance) {
         return closestInRangeToBounds(origin, width, height, width, distance);
     }
 
@@ -39,8 +43,4 @@ public interface BoundedTracker<T extends Bounded> {
     }
 
     @NotNull @Unmodifiable List<T> items();
-
-    static <T extends Bounded> @NotNull BoundedTracker<T> tracker(@NotNull Collection<T> collection) {
-        return new BoundedTrackerImpl<>(collection);
-    }
 }

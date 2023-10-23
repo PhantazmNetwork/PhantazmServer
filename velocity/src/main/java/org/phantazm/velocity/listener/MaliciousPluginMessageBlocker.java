@@ -19,7 +19,7 @@ public class MaliciousPluginMessageBlocker {
     private final Set<? extends ChannelIdentifier> blockedIdentifiers;
 
     public MaliciousPluginMessageBlocker(@NotNull Set<? extends ChannelIdentifier> blockedIdentifiers) {
-        this.blockedIdentifiers = Objects.requireNonNull(blockedIdentifiers, "blockedIdentifiers");
+        this.blockedIdentifiers = Objects.requireNonNull(blockedIdentifiers);
     }
 
     /**

@@ -18,7 +18,7 @@ public class DeadPlayerStateContext {
     private final boolean isRejoin;
 
     protected DeadPlayerStateContext(@Nullable Point deathLocation, @Nullable Component killer,
-            @Nullable Component deathRoomName, boolean isRejoin) {
+        @Nullable Component deathRoomName, boolean isRejoin) {
         this.deathLocation = deathLocation;
         this.killer = killer;
         this.deathRoomName = deathRoomName;
@@ -26,7 +26,7 @@ public class DeadPlayerStateContext {
     }
 
     public static DeadPlayerStateContext killed(@Nullable Point knockLocation, @Nullable Component killer,
-            @Nullable Component deathRoomName) {
+        @Nullable Component deathRoomName) {
         return new DeadPlayerStateContext(knockLocation, killer, deathRoomName, false);
     }
 

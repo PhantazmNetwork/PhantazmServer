@@ -22,7 +22,7 @@ public class StaticHologramDisplay extends HologramDisplayBase {
     @FactoryMethod
     public StaticHologramDisplay(@NotNull Data data) {
         super(new InstanceHologram(Vec.ZERO, 0, Hologram.Alignment.LOWER));
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override

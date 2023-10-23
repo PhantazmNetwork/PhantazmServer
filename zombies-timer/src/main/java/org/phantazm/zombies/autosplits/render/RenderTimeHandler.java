@@ -13,13 +13,11 @@ import java.util.Objects;
 public class RenderTimeHandler implements HudRenderCallback {
 
     private final MinecraftClient client;
-
+    private final int color;
     private InternalSplitter internalSplitter;
 
-    private final int color;
-
     public RenderTimeHandler(@NotNull MinecraftClient client, int color) {
-        this.client = Objects.requireNonNull(client, "client");
+        this.client = Objects.requireNonNull(client);
         this.color = color;
     }
 
@@ -36,7 +34,7 @@ public class RenderTimeHandler implements HudRenderCallback {
         int screenHeight = window.getScaledHeight();
         drawContext.getMatrices().push();
         drawContext.drawTextWithShadow(client.textRenderer, time, screenWidth - width,
-                screenHeight - client.textRenderer.fontHeight, color);
+            screenHeight - client.textRenderer.fontHeight, color);
         drawContext.getMatrices().pop();
     }
 

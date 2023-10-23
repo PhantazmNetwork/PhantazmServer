@@ -22,7 +22,7 @@ public class CumulativeTransactionModifierInteractor implements ShopInteractor {
 
     @FactoryMethod
     public CumulativeTransactionModifierInteractor(@NotNull Data data,
-            @NotNull TransactionModifierSource modifierSource) {
+        @NotNull TransactionModifierSource modifierSource) {
         this.data = data;
         this.modifierSource = modifierSource;
     }
@@ -30,16 +30,17 @@ public class CumulativeTransactionModifierInteractor implements ShopInteractor {
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         modifierSource.addModifier(data.modifierGroup,
-                Transaction.modifier(data.displayName, data.modifierAction, data.amount, data.priority));
+            Transaction.modifier(data.displayName, data.modifierAction, data.amount, data.priority));
         return true;
     }
 
     @DataObject
-    public record Data(@NotNull Key modifierGroup,
-                       @NotNull Component displayName,
-                       @NotNull Transaction.Modifier.Action modifierAction,
-                       double amount,
-                       int priority) {
+    public record Data(
+        @NotNull Key modifierGroup,
+        @NotNull Component displayName,
+        @NotNull Transaction.Modifier.Action modifierAction,
+        double amount,
+        int priority) {
         @Default("displayName")
         public static @NotNull ConfigElement defaultDisplayName() {
             return ConfigPrimitive.of("");

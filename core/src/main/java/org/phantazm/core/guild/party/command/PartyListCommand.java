@@ -30,10 +30,10 @@ public class PartyListCommand {
     }
 
     public static @NotNull Command listCommand(@NotNull PartyCommandConfig config, @NotNull MiniMessage miniMessage,
-            @NotNull Map<? super UUID, Party> partyMap) {
-        Objects.requireNonNull(config, "config");
-        Objects.requireNonNull(miniMessage, "miniMessage");
-        Objects.requireNonNull(partyMap, "partyMap");
+        @NotNull Map<? super UUID, Party> partyMap) {
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(miniMessage);
+        Objects.requireNonNull(partyMap);
 
         Command command = new Command("list");
         command.addConditionalSyntax((sender, commandString) -> {
@@ -54,7 +54,7 @@ public class PartyListCommand {
 
             return true;
         }, (sender, context) -> {
-            Party party = partyMap.get(((Player)sender).getUuid());
+            Party party = partyMap.get(((Player) sender).getUuid());
             int memberCount = party.getMemberManager().getMembers().size();
             List<CompletableFuture<? extends Component>> displayNameFutures = new ArrayList<>(memberCount);
             BooleanList online = new BooleanArrayList(memberCount);
@@ -66,43 +66,42 @@ public class PartyListCommand {
             displayNameFutures.add(party.getOwner().get().getPlayerView().getDisplayName());
 
             CompletableFuture.allOf(displayNameFutures.toArray(EMPTY_COMPLETABLE_FUTURE_ARRAY))
-                    .whenComplete((ignored, throwable) -> {
-                        if (throwable != null) {
-                            LOGGER.warn("Exception while sending list message", throwable);
-                            return;
+                .whenComplete((ignored, throwable) -> {
+                    if (throwable != null) {
+                        LOGGER.warn("Exception while sending list message", throwable);
+                        return;
+                    }
+
+                    Collection<Component> displayNames = new ArrayList<>(memberCount);
+                    int onlineCount = 0;
+                    for (int i = 0; i < memberCount; ++i) {
+                        TagResolver memberPlaceholder =
+                            Placeholder.component("member", displayNameFutures.get(i).join());
+                        if (online.getBoolean(i)) {
+                            ++onlineCount;
+                            displayNames.add(
+                                miniMessage.deserialize(config.onlineMemberFormat(), memberPlaceholder));
+                        } else {
+                            displayNames.add(
+                                miniMessage.deserialize(config.offlineMemberFormat(), memberPlaceholder));
                         }
+                    }
 
-                        Collection<Component> displayNames = new ArrayList<>(memberCount);
-                        int onlineCount = 0;
-                        for (int i = 0; i < memberCount; ++i) {
-                            TagResolver memberPlaceholder =
-                                    Placeholder.component("member", displayNameFutures.get(i).join());
-                            if (online.getBoolean(i)) {
-                                ++onlineCount;
-                                displayNames.add(
-                                        miniMessage.deserialize(config.onlineMemberFormat(), memberPlaceholder));
-                            }
-                            else {
-                                displayNames.add(
-                                        miniMessage.deserialize(config.offlineMemberFormat(), memberPlaceholder));
-                            }
-                        }
+                    TagResolver ownerPlaceholder = Placeholder.component("owner",
+                        displayNameFutures.get(displayNameFutures.size() - 1).join());
+                    TagResolver memberCountPlaceholder =
+                        Placeholder.component("member_count", Component.text(memberCount));
+                    TagResolver onlineCountPlaceholder =
+                        Placeholder.component("online_count", Component.text(onlineCount));
+                    TagResolver offlineCountPlaceholder =
+                        Placeholder.component("offline_count", Component.text(memberCount - onlineCount));
+                    TagResolver membersPlaceholder = MiniMessageUtils.list("members", displayNames);
 
-                        TagResolver ownerPlaceholder = Placeholder.component("owner",
-                                displayNameFutures.get(displayNameFutures.size() - 1).join());
-                        TagResolver memberCountPlaceholder =
-                                Placeholder.component("member_count", Component.text(memberCount));
-                        TagResolver onlineCountPlaceholder =
-                                Placeholder.component("online_count", Component.text(onlineCount));
-                        TagResolver offlineCountPlaceholder =
-                                Placeholder.component("offline_count", Component.text(memberCount - onlineCount));
-                        TagResolver membersPlaceholder = MiniMessageUtils.list("members", displayNames);
-
-                        Component message =
-                                miniMessage.deserialize(config.listFormat(), ownerPlaceholder, membersPlaceholder,
-                                        onlineCountPlaceholder, offlineCountPlaceholder, memberCountPlaceholder);
-                        sender.sendMessage(message);
-                    });
+                    Component message =
+                        miniMessage.deserialize(config.listFormat(), ownerPlaceholder, membersPlaceholder,
+                            onlineCountPlaceholder, offlineCountPlaceholder, memberCountPlaceholder);
+                    sender.sendMessage(message);
+                });
         });
 
         return command;

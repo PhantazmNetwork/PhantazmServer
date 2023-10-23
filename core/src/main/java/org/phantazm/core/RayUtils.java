@@ -22,16 +22,17 @@ public class RayUtils {
     }
 
     /**
-     * Ray traces a {@link Shape} and finds an intersection position. This does not ray trace a {@link Shape}'s children.
+     * Ray traces a {@link Shape} and finds an intersection position. This does not ray trace a {@link Shape}'s
+     * children.
      *
      * @param shape         The {@link Shape} to ray trace
      * @param shapeLocation The location of the {@link Shape} in an {@link Instance}
      * @param start         The start position of the ray
      * @return The intersection position if it exists, otherwise {@link Optional#empty()}
      */
-    @SuppressWarnings({"DuplicatedCode", "UnstableApiUsage"})
+    @SuppressWarnings("DuplicatedCode")
     public static @NotNull Optional<Vec> rayTrace(@NotNull Shape shape, @NotNull Point shapeLocation,
-            @NotNull Pos start) {
+        @NotNull Pos start) {
         Point shapeStart = shape.relativeStart();
         Point shapeEnd = shape.relativeEnd();
         double minX = shapeStart.x() + shapeLocation.x();
@@ -59,8 +60,7 @@ public class RayUtils {
         if (directionX >= 0D) {
             minMultiplier = (minX - startX) * divX;
             maxMultiplier = (maxX - startX) * divX;
-        }
-        else {
+        } else {
             minMultiplier = (maxX - startX) * divX;
             maxMultiplier = (minX - startX) * divX;
         }
@@ -69,8 +69,7 @@ public class RayUtils {
         if (directionY >= 0D) {
             minYMultiplier = (minY - startY) * divY;
             maxYMultiplier = (maxY - startY) * divY;
-        }
-        else {
+        } else {
             minYMultiplier = (maxY - startY) * divY;
             maxYMultiplier = (minY - startY) * divY;
         }
@@ -88,8 +87,7 @@ public class RayUtils {
         if (directionZ >= 0D) {
             minZMultiplier = (minZ - startZ) * divZ;
             maxZMultiplier = (maxZ - startZ) * divZ;
-        }
-        else {
+        } else {
             minZMultiplier = (maxZ - startZ) * divZ;
             maxZMultiplier = (minZ - startZ) * divZ;
         }
@@ -112,16 +110,16 @@ public class RayUtils {
     }
 
     /**
-     * Finds the exact intersection position of a ray with a {@link Shape}. This does ray trace a {@link Shape}'s children.
+     * Finds the exact intersection position of a ray with a {@link Shape}. This does ray trace a {@link Shape}'s
+     * children.
      *
      * @param shape         The {@link Shape} to ray trace
      * @param shapeLocation The location of the {@link Shape} in an {@link Instance}
      * @param start         The start position of the ray
      * @return The intersection position if it exists, otherwise {@link Optional#empty()}
      */
-    @SuppressWarnings("UnstableApiUsage")
     public static @NotNull Optional<Vec> getIntersectionPosition(@NotNull Shape shape, @NotNull Point shapeLocation,
-            @NotNull Pos start) {
+        @NotNull Pos start) {
         return RayUtils.rayTrace(shape, shapeLocation, start).map(trace -> {
             if (shape.childBounds().isEmpty()) {
                 return trace;

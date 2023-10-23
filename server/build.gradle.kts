@@ -42,11 +42,11 @@ tasks.jar {
 
     manifest {
         attributes(
-            "Class-Path" to copyLibsTask.outputs.files.joinToString(" ") {
-                "libs/${it.relativeTo(copyLibsTask.libraryDirectory!!).toPath().joinToString("/")}"
-            },
-            "Main-Class" to "org.phantazm.server.PhantazmServer",
-            "Multi-Release" to true
+                "Class-Path" to copyLibsTask.outputs.files.joinToString(" ") {
+                    "libs/${it.relativeTo(copyLibsTask.libraryDirectory!!).toPath().joinToString("/")}"
+                },
+                "Main-Class" to "org.phantazm.server.PhantazmServer",
+                "Multi-Release" to true
         )
     }
 }

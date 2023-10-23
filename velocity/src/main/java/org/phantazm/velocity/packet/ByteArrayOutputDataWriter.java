@@ -20,7 +20,7 @@ public class ByteArrayOutputDataWriter implements DataWriter {
      * @param output The delegate {@link ByteArrayDataOutput}
      */
     public ByteArrayOutputDataWriter(@NotNull ByteArrayDataOutput output) {
-        this.output = Objects.requireNonNull(output, "output");
+        this.output = Objects.requireNonNull(output);
     }
 
     public ByteArrayOutputDataWriter() {

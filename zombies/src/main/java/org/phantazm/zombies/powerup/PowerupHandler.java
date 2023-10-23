@@ -1,19 +1,20 @@
 package org.phantazm.zombies.powerup;
 
 import net.kyori.adventure.key.Key;
+import net.minestom.server.Tickable;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
-import org.phantazm.commons.Tickable;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public interface PowerupHandler extends Tickable {
-    @NotNull Powerup spawn(@NotNull Key powerupType, double x, double y, double z);
+    @NotNull
+    Powerup spawn(@NotNull Key powerupType, double x, double y, double z);
 
     void assignPowerup(@NotNull LivingEntity livingEntity, @NotNull Key powerupKey);
 
@@ -38,9 +39,12 @@ public interface PowerupHandler extends Tickable {
         return spawnIfExists(powerupType, point.x(), point.y(), point.z());
     }
 
-    @NotNull @UnmodifiableView Collection<Powerup> spawnedOrActivePowerups();
+    @NotNull
+    @UnmodifiableView
+    Collection<Powerup> spawnedOrActivePowerups();
 
     interface Source {
-        @NotNull PowerupHandler make(@NotNull Supplier<? extends @NotNull ZombiesScene> scene);
+        @NotNull
+        PowerupHandler make(@NotNull Supplier<? extends @NotNull ZombiesScene> scene);
     }
 }

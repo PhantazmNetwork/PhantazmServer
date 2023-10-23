@@ -34,20 +34,20 @@ public class ElementSidebarUpdaterCreator implements Function<ZombiesPlayer, Sid
     private final ElementPath updaterPath;
 
     public ElementSidebarUpdaterCreator(@NotNull SidebarModule sidebarModule, @NotNull ElementContext sidebarContext,
-            @NotNull KeyParser keyParser, @NotNull ElementPath updaterPath) {
-        this.sidebarModule = Objects.requireNonNull(sidebarModule, "sidebarModule");
-        this.sidebarContext = Objects.requireNonNull(sidebarContext, "sidebarContext");
-        this.keyParser = Objects.requireNonNull(keyParser, "keyParser");
-        this.updaterPath = Objects.requireNonNull(updaterPath, "updaterPath");
+        @NotNull KeyParser keyParser, @NotNull ElementPath updaterPath) {
+        this.sidebarModule = Objects.requireNonNull(sidebarModule);
+        this.sidebarContext = Objects.requireNonNull(sidebarContext);
+        this.keyParser = Objects.requireNonNull(keyParser);
+        this.updaterPath = Objects.requireNonNull(updaterPath);
     }
 
     @Override
     public SidebarUpdater apply(ZombiesPlayer zombiesPlayer) {
         DependencyProvider composite =
-                DependencyProvider.composite(new ModuleDependencyProvider(keyParser, sidebarModule),
-                        new ModuleDependencyProvider(keyParser, zombiesPlayer.module()));
+            DependencyProvider.composite(new ModuleDependencyProvider(keyParser, sidebarModule),
+                new ModuleDependencyProvider(keyParser, zombiesPlayer.module()));
         SidebarUpdater updater = sidebarContext.provide(updaterPath, composite, HANDLER,
-                () -> new SidebarUpdater(new Sidebar(Component.empty()), List.of()));
+            () -> new SidebarUpdater(new Sidebar(Component.empty()), List.of()));
         updater.start();
         return updater;
     }

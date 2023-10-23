@@ -16,7 +16,7 @@ import net.minestom.server.scoreboard.BelowNameTag;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.Activable;
+import org.phantazm.core.tick.Activable;
 import org.phantazm.commons.MiniMessageUtils;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
@@ -28,7 +28,6 @@ import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 import java.util.*;
 
 public class BasicAliveStateActivable implements Activable {
-    private static final TagResolver[] EMPTY_TAG_RESOLVER_ARRAY = new TagResolver[0];
     private final AlivePlayerStateContext context;
     private final Instance instance;
     private final InventoryAccessRegistry accessRegistry;
@@ -40,21 +39,23 @@ public class BasicAliveStateActivable implements Activable {
     private final BelowNameTag belowNameTag;
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
-    private long lastHeal;
+    private long healTicks = 0;
+
+    private int lastTickHp = -1;
 
     public BasicAliveStateActivable(@NotNull AlivePlayerStateContext context, @NotNull Instance instance,
-            @NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
-            @NotNull ZombiesPlayerMeta meta, @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar,
-            @NotNull TabList tabList, @NotNull BelowNameTag belowNameTag) {
-        this.context = Objects.requireNonNull(context, "context");
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.accessRegistry = Objects.requireNonNull(accessRegistry, "accessRegistry");
-        this.playerView = Objects.requireNonNull(playerView, "playerView");
-        this.meta = Objects.requireNonNull(meta, "meta");
-        this.settings = Objects.requireNonNull(settings, "settings");
-        this.sidebar = Objects.requireNonNull(sidebar, "sidebar");
-        this.tabList = Objects.requireNonNull(tabList, "tabList");
-        this.belowNameTag = Objects.requireNonNull(belowNameTag, "belowNameTag");
+        @NotNull InventoryAccessRegistry accessRegistry, @NotNull PlayerView playerView,
+        @NotNull ZombiesPlayerMeta meta, @NotNull MapSettingsInfo settings, @NotNull Sidebar sidebar,
+        @NotNull TabList tabList, @NotNull BelowNameTag belowNameTag) {
+        this.context = Objects.requireNonNull(context);
+        this.instance = Objects.requireNonNull(instance);
+        this.accessRegistry = Objects.requireNonNull(accessRegistry);
+        this.playerView = Objects.requireNonNull(playerView);
+        this.meta = Objects.requireNonNull(meta);
+        this.settings = Objects.requireNonNull(settings);
+        this.sidebar = Objects.requireNonNull(sidebar);
+        this.tabList = Objects.requireNonNull(tabList);
+        this.belowNameTag = Objects.requireNonNull(belowNameTag);
     }
 
     @Override
@@ -67,16 +68,23 @@ public class BasicAliveStateActivable implements Activable {
             sidebar.addViewer(player);
             tabList.addViewer(player);
             belowNameTag.addViewer(player);
+
+            player.getAttribute(Attributes.HEAL_TICKS).setBaseValue(settings.healTicks());
+            player.getAttribute(Attributes.REVIVE_TICKS).setBaseValue(settings.baseReviveTicks());
         });
 
         if (context.isRevive()) {
+            playerView.getPlayer().ifPresent(player -> {
+                player.setNextHurtTick(MinecraftServer.currentTick() + settings.reviveInvulnerabilityTicks());
+            });
+
             // TODO: theoretical memleaks here
             playerView.getDisplayName().thenAccept(displayName -> {
                 TagResolver[] tagResolvers = getTagResolvers(displayName);
 
                 if (meta.isInGame()) {
                     playerView.getPlayer().ifPresent(player -> player.sendMessage(
-                            miniMessage.deserialize(settings.reviveMessageToRevivedFormat(), tagResolvers)));
+                        miniMessage.deserialize(settings.reviveMessageToRevivedFormat(), tagResolvers)));
                 }
 
                 Set<Player> players = new HashSet<>(instance.getPlayers());
@@ -84,14 +92,13 @@ public class BasicAliveStateActivable implements Activable {
                 Audience filteredAudience = PacketGroupingAudience.of(players);
 
                 filteredAudience.sendMessage(
-                        miniMessage.deserialize(settings.reviveMessageToOthersFormat(), tagResolvers));
+                    miniMessage.deserialize(settings.reviveMessageToOthersFormat(), tagResolvers));
             });
 
             Point point = context.reviveLocation();
             if (point != null) {
                 instance.playSound(settings.reviveSound(), point.x(), point.y(), point.z());
-            }
-            else {
+            } else {
                 playerView.getPlayer().ifPresent(player -> {
                     Pos location = player.getPosition();
                     instance.playSound(settings.reviveSound(), location.x(), location.y(), location.z());
@@ -104,13 +111,21 @@ public class BasicAliveStateActivable implements Activable {
 
     @Override
     public void tick(long time) {
+        ++healTicks;
         playerView.getPlayer().ifPresent(player -> {
-            if ((time - lastHeal) / MinecraftServer.TICK_MS >= (int)player.getAttributeValue(Attributes.HEAL_TICKS)) {
-                player.setHealth(player.getHealth() + 1F);
-                lastHeal = time;
+            int playerHealTicks = (int) player.getAttributeValue(Attributes.HEAL_TICKS);
+            if (playerHealTicks >= 0) {
+                if (healTicks >= playerHealTicks) {
+                    player.setHealth(player.getHealth() + 1F);
+                    healTicks = 0;
+                }
             }
 
-            belowNameTag.updateScore(player, (int)Math.floor(player.getHealth()));
+            int currentHp = (int) Math.floor(player.getHealth());
+            if (currentHp != lastTickHp) {
+                belowNameTag.updateScore(player, currentHp);
+                lastTickHp = currentHp;
+            }
         });
     }
 
@@ -137,7 +152,7 @@ public class BasicAliveStateActivable implements Activable {
             tagResolvers.add(Placeholder.component("reviver", context.reviverName()));
         }
 
-        return tagResolvers.toArray(EMPTY_TAG_RESOLVER_ARRAY);
+        return tagResolvers.toArray(TagResolver[]::new);
     }
 
 }

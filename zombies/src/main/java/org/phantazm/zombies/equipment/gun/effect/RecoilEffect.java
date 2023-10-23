@@ -32,7 +32,7 @@ public class RecoilEffect implements GunEffect {
             Pos direction = position.withDirection(knockbackDirection);
 
             double rad = Math.toRadians(direction.yaw());
-            player.takeKnockback((float)data.knockbackStrength, true, Math.sin(rad), -Math.cos(rad));
+            player.takeKnockback((float) data.knockbackStrength, true, Math.sin(rad), -Math.cos(rad));
         });
     }
 

@@ -1,6 +1,7 @@
 package org.phantazm.zombies.map.handler;
 
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -12,15 +13,19 @@ import java.util.Optional;
 public class BasicRoundHandler implements RoundHandler {
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
     private final List<Round> rounds;
+    private final Endless endless;
 
     private Round currentRound;
     private int roundIndex;
 
     private boolean hasEnded;
+    private boolean isEndless;
 
-    public BasicRoundHandler(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull List<Round> rounds) {
-        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers, "zombiesPlayers");
-        this.rounds = Objects.requireNonNull(rounds, "rounds");
+    public BasicRoundHandler(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull List<Round> rounds,
+        @NotNull Endless endless) {
+        this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
+        this.rounds = Objects.requireNonNull(rounds);
+        this.endless = Objects.requireNonNull(endless);
 
         if (rounds.isEmpty()) {
             hasEnded = true;
@@ -47,16 +52,28 @@ public class BasicRoundHandler implements RoundHandler {
             }
 
             zombiesPlayer.module().getStats()
-                    .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
+                .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
         }
 
-        if (++roundIndex < rounds.size()) {
-            currentRound = rounds.get(roundIndex);
-            currentRound.startRound(time);
+        int nextIndex = ++roundIndex;
+        if (nextIndex == Integer.MAX_VALUE) { //would cause overflow of the round display
+            this.roundIndex = Integer.MAX_VALUE - 1;
+            this.hasEnded = true;
+            this.currentRound = null;
+            return;
+        }
+
+        if (nextIndex < rounds.size()) {
+            currentRound = rounds.get(nextIndex);
+            currentRound.startRound();
 
             this.currentRound = currentRound;
-        }
-        else {
+        } else if (isEndless) {
+            currentRound = endless.generateRound(nextIndex);
+            currentRound.startRound();
+
+            this.currentRound = currentRound;
+        } else {
             this.hasEnded = true;
             this.currentRound = null;
         }
@@ -69,20 +86,26 @@ public class BasicRoundHandler implements RoundHandler {
 
     @Override
     public int currentRoundIndex() {
-        return Math.min(roundIndex, rounds.size() - 1);
+        return isEndless ? this.roundIndex : Math.min(roundIndex, rounds.size() - 1);
     }
 
     @Override
     public void setCurrentRound(int roundIndex) {
-        Objects.checkIndex(roundIndex, rounds.size());
+        if (roundIndex < 0 || roundIndex == Integer.MAX_VALUE) {
+            return;
+        }
+
+        if (!isEndless) {
+            Objects.checkIndex(roundIndex, rounds.size());
+        }
 
         if (currentRound != null) {
             currentRound.endRound();
         }
 
         this.roundIndex = roundIndex;
-        currentRound = rounds.get(roundIndex);
-        currentRound.startRound(System.currentTimeMillis());
+        currentRound = roundIndex < rounds.size() ? rounds.get(roundIndex) : endless.generateRound(roundIndex);
+        currentRound.startRound();
     }
 
     @Override
@@ -99,5 +122,15 @@ public class BasicRoundHandler implements RoundHandler {
     public void end() {
         hasEnded = true;
         currentRound = null;
+    }
+
+    @Override
+    public boolean isEndless() {
+        return isEndless;
+    }
+
+    @Override
+    public void enableEndless() {
+        this.isEndless = true;
     }
 }

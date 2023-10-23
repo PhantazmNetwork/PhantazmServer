@@ -17,7 +17,7 @@ public record MapDataVersionQueryPacket() implements Packet {
     public static final Key ID = Key.key(Namespaces.PHANTAZM, "client/mapdata_version_query");
 
     public static @NotNull MapDataVersionQueryPacket read(@NotNull DataReader reader) {
-        Objects.requireNonNull(reader, "reader");
+        Objects.requireNonNull(reader);
         return new MapDataVersionQueryPacket();
     }
 

@@ -23,6 +23,7 @@ public class TypePredicate extends PredicateBase<TypePredicate.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull Set<Key> types, boolean blacklist) {
+    public record Data(@NotNull Set<Key> types,
+        boolean blacklist) {
     }
 }

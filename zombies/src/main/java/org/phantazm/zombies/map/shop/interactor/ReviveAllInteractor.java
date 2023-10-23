@@ -13,6 +13,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -24,20 +25,19 @@ import org.phantazm.zombies.player.state.revive.KnockedPlayerState;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 @Model("zombies.map.shop.interactor.revive_all")
 @Cache(false)
 public class ReviveAllInteractor implements ShopInteractor {
     private final Data data;
-    private final Map<? super UUID, ? extends ZombiesPlayer> playerMap;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
     private final Pos respawnPos;
     private Instance instance;
 
     @FactoryMethod
-    public ReviveAllInteractor(@NotNull Data data, @NotNull Map<? super UUID, ? extends ZombiesPlayer> playerMap,
-            @NotNull Pos respawnPos) {
-        this.data = Objects.requireNonNull(data, "data");
+    public ReviveAllInteractor(@NotNull Data data, @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
+        @NotNull Pos respawnPos) {
+        this.data = Objects.requireNonNull(data);
         this.playerMap = playerMap;
         this.respawnPos = respawnPos;
     }
@@ -76,7 +76,7 @@ public class ReviveAllInteractor implements ShopInteractor {
                 }
 
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE,
-                        AlivePlayerStateContext.revive(reviveName, reviveLocation));
+                    AlivePlayerStateContext.revive(reviveName, reviveLocation));
                 ++reviveCount;
             }
         }
@@ -93,7 +93,8 @@ public class ReviveAllInteractor implements ShopInteractor {
     }
 
     @DataObject
-    public record Data(String messageFormat, boolean broadcast) {
+    public record Data(String messageFormat,
+        boolean broadcast) {
 
     }
 

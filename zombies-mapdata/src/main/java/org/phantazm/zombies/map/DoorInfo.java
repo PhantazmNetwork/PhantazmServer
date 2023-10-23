@@ -14,21 +14,22 @@ import java.util.Objects;
 /**
  * Defines a door.
  */
-public record DoorInfo(@NotNull Key id,
-                       @NotNull List<Key> opensTo,
-                       @NotNull List<Integer> costs,
-                       @NotNull List<HologramInfo> holograms,
-                       @NotNull List<Bounds3I> regions,
-                       @NotNull Sound openSound,
-                       @NotNull ConfigList openActions,
-                       @NotNull ConfigList closeActions,
-                       @NotNull ConfigList failOpenActions) {
+public record DoorInfo(
+    @NotNull Key id,
+    @NotNull List<Key> opensTo,
+    @NotNull List<Integer> costs,
+    @NotNull List<HologramInfo> holograms,
+    @NotNull List<Bounds3I> regions,
+    @NotNull Sound openSound,
+    @NotNull ConfigList openActions,
+    @NotNull ConfigList closeActions,
+    @NotNull ConfigList failOpenActions) {
 
     /**
      * The default sound played when a door opens.
      */
     public static final Sound DEFAULT_OPEN_SOUND =
-            Sound.sound(Key.key("minecraft:block.wooden_door.open"), Sound.Source.BLOCK, 2.0F, 1.0F);
+        Sound.sound(Key.key("minecraft:block.wooden_door.open"), Sound.Source.BLOCK, 2.0F, 1.0F);
 
     /**
      * Creates a new instance of this record.
@@ -42,15 +43,15 @@ public record DoorInfo(@NotNull Key id,
      * @param openSound the sound to play when opening the door
      */
     public DoorInfo {
-        Objects.requireNonNull(id, "id");
-        Objects.requireNonNull(opensTo, "opensTo");
-        Objects.requireNonNull(costs, "costs");
-        Objects.requireNonNull(holograms, "holograms");
-        Objects.requireNonNull(regions, "regions");
-        Objects.requireNonNull(openSound, "openSound");
-        Objects.requireNonNull(openActions, "openActions");
-        Objects.requireNonNull(closeActions, "closeActions");
-        Objects.requireNonNull(failOpenActions, "failOpenActions");
+        Objects.requireNonNull(id);
+        Objects.requireNonNull(opensTo);
+        Objects.requireNonNull(costs);
+        Objects.requireNonNull(holograms);
+        Objects.requireNonNull(regions);
+        Objects.requireNonNull(openSound);
+        Objects.requireNonNull(openActions);
+        Objects.requireNonNull(closeActions);
+        Objects.requireNonNull(failOpenActions);
     }
 
     /**
@@ -61,6 +62,6 @@ public record DoorInfo(@NotNull Key id,
      */
     public DoorInfo(@NotNull Key id, @NotNull List<Bounds3I> regions) {
         this(id, new ArrayList<>(0), new ArrayList<>(0), new ArrayList<>(0), regions, DEFAULT_OPEN_SOUND,
-                new ArrayConfigList(0), new ArrayConfigList(0), new ArrayConfigList(0));
+            new ArrayConfigList(0), new ArrayConfigList(0), new ArrayConfigList(0));
     }
 }

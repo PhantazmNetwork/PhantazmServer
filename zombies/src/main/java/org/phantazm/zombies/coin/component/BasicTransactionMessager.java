@@ -32,10 +32,10 @@ public class BasicTransactionMessager implements TransactionMessager {
     private long ticks;
 
     public BasicTransactionMessager(@NotNull ZombiesPlayerActionBar actionBar, @NotNull MiniMessage miniMessage,
-            @NotNull PlayerCoinsInfo coinsInfo) {
-        this.actionBar = Objects.requireNonNull(actionBar, "actionBar");
-        this.miniMessage = Objects.requireNonNull(miniMessage, "miniMessage");
-        this.coinsInfo = Objects.requireNonNull(coinsInfo, "coinsInfo");
+        @NotNull PlayerCoinsInfo coinsInfo) {
+        this.actionBar = Objects.requireNonNull(actionBar);
+        this.miniMessage = Objects.requireNonNull(miniMessage);
+        this.coinsInfo = Objects.requireNonNull(coinsInfo);
     }
 
     @Override
@@ -46,13 +46,13 @@ public class BasicTransactionMessager implements TransactionMessager {
         Collection<Component> mappedDisplays = new ArrayList<>(displays.size());
         for (Component display : displays) {
             mappedDisplays.add(miniMessage.deserialize(coinsInfo.transactionDisplayFormat(),
-                    Placeholder.component("display", display)));
+                Placeholder.component("display", display)));
         }
         TagResolver displaysPlaceholder = MiniMessageUtils.list("displays", mappedDisplays);
 
         lastMessage =
-                miniMessage.deserialize(coinsInfo.transactionMessageFormat(), positivePlaceholder, changePlaceholder,
-                        displaysPresentPlaceholder, displaysPlaceholder);
+            miniMessage.deserialize(coinsInfo.transactionMessageFormat(), positivePlaceholder, changePlaceholder,
+                displaysPresentPlaceholder, displaysPlaceholder);
         lastMessageTick = ticks;
     }
 
@@ -64,8 +64,9 @@ public class BasicTransactionMessager implements TransactionMessager {
             if (ticks - lastMessageTick > coinsInfo.actionBarDuration()) {
                 lastMessage = null;
             } else {
-                float progress = (float)(ticks - lastMessageTick) / coinsInfo.actionBarDuration();
-                actionBar.sendActionBar(lerpColorRecursive(lastMessage, progress).asComponent(), ZombiesPlayerActionBar.COINS_PRIORITY);
+                float progress = (float) (ticks - lastMessageTick) / coinsInfo.actionBarDuration();
+                actionBar.sendActionBar(lerpColorRecursive(lastMessage, progress).asComponent(),
+                    ZombiesPlayerActionBar.COINS_PRIORITY);
             }
         }
     }

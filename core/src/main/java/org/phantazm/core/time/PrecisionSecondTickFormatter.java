@@ -16,12 +16,12 @@ public class PrecisionSecondTickFormatter implements TickFormatter {
 
     @FactoryMethod
     public PrecisionSecondTickFormatter(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public @NotNull String format(long ticks) {
-        return String.format("%." + data.decimalPlaces + "f", ((double)ticks / MinecraftServer.TICK_PER_SECOND));
+        return String.format("%." + data.decimalPlaces + "f", ((double) ticks / MinecraftServer.TICK_PER_SECOND));
     }
 
     @DataObject

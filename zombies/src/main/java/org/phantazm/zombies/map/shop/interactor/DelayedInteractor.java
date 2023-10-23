@@ -1,7 +1,6 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.*;
-import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
@@ -15,13 +14,12 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
 
     private final Deque<Interaction> interactions;
 
-    private record Interaction(long startTime, PlayerInteraction interaction) {
-    }
+    private long ticks = 0;
 
     @FactoryMethod
     public DelayedInteractor(@NotNull Data data, @NotNull @Child("target") List<ShopInteractor> interactors) {
         super(data);
-        this.interactors = Objects.requireNonNull(interactors, "interactors");
+        this.interactors = Objects.requireNonNull(interactors);
         this.interactions = new ArrayDeque<>();
     }
 
@@ -32,20 +30,18 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
 
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
-        interactions.add(new Interaction(System.currentTimeMillis(), interaction));
+        interactions.add(new Interaction(ticks, interaction));
         return true;
     }
 
     @Override
     public void tick(long time) {
-        long currentTime = System.currentTimeMillis();
-
+        ++ticks;
         Iterator<Interaction> interactionIterator = interactions.iterator();
         while (interactionIterator.hasNext()) {
             Interaction interaction = interactionIterator.next();
 
-            long elapsedTicks = (currentTime - interaction.startTime) / MinecraftServer.TICK_MS;
-            if (elapsedTicks < data.delayTicks) {
+            if (ticks - interaction.startTicks < data.delayTicks) {
                 break;
             }
 
@@ -56,8 +52,13 @@ public class DelayedInteractor extends InteractorBase<DelayedInteractor.Data> {
         ShopInteractor.tick(interactors, time);
     }
 
+    private record Interaction(long startTicks,
+        PlayerInteraction interaction) {
+    }
+
     @DataObject
-    public record Data(@ChildPath("target") List<String> interactors, int delayTicks) {
+    public record Data(@ChildPath("target") List<String> interactors,
+        int delayTicks) {
 
     }
 }

@@ -11,7 +11,8 @@ import java.util.Objects;
  * Represents a hologram (typically, text displayed using an invisible armorstand with interaction and gravity
  * disabled).
  */
-public record HologramInfo(@NotNull List<Component> text, @NotNull Vec3D position) {
+public record HologramInfo(@NotNull List<Component> text,
+    @NotNull Vec3D position) {
     /**
      * Creates a new instance of this record.
      *
@@ -20,7 +21,7 @@ public record HologramInfo(@NotNull List<Component> text, @NotNull Vec3D positio
      *                 vector
      */
     public HologramInfo {
-        Objects.requireNonNull(text, "text");
-        Objects.requireNonNull(position, "position");
+        Objects.requireNonNull(text);
+        Objects.requireNonNull(position);
     }
 }

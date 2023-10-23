@@ -20,8 +20,8 @@ public interface Hologram extends List<Component> {
     void setAlignment(@NotNull Alignment alignment);
 
     /**
-     * Gets the current location of the hologram. Depending on the alignment used, this is either the center, bottom,
-     * or top of the hologram lines.
+     * Gets the current location of the hologram. Depending on the alignment used, this is either the center, bottom, or
+     * top of the hologram lines.
      *
      * @return the center location of the hologram
      */

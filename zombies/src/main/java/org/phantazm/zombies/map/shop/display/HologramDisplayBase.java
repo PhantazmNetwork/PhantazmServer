@@ -11,7 +11,7 @@ public abstract class HologramDisplayBase implements ShopDisplay {
 
     public HologramDisplayBase(@NotNull Hologram hologram) {
         //initial origin does not matter, the location will be set in initialize
-        this.hologram = Objects.requireNonNull(hologram, "hologram");
+        this.hologram = Objects.requireNonNull(hologram);
     }
 
     @Override

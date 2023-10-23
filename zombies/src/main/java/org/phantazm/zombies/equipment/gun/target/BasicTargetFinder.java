@@ -9,6 +9,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.target.entityfinder.directional.DirectionalEntityFinder;
 import org.phantazm.zombies.equipment.gun.target.headshot.HeadshotTester;
@@ -41,20 +42,20 @@ public class BasicTargetFinder implements TargetFinder {
      */
     @FactoryMethod
     public BasicTargetFinder(@NotNull @Child("entity_finder") DirectionalEntityFinder entityFinder,
-            @NotNull @Child("target_tester") TargetTester targetTester,
-            @NotNull @Child("intersection_finder") IntersectionFinder intersectionFinder,
-            @NotNull @Child("headshot_tester") HeadshotTester headshotTester,
-            @NotNull @Child("target_limiter") TargetLimiter targetLimiter) {
-        this.entityFinder = Objects.requireNonNull(entityFinder, "entityFinder");
-        this.targetTester = Objects.requireNonNull(targetTester, "targetTester");
-        this.intersectionFinder = Objects.requireNonNull(intersectionFinder, "intersectionFinder");
-        this.headshotTester = Objects.requireNonNull(headshotTester, "headshotTester");
-        this.targetLimiter = Objects.requireNonNull(targetLimiter, "targetLimiter");
+        @NotNull @Child("target_tester") TargetTester targetTester,
+        @NotNull @Child("intersection_finder") IntersectionFinder intersectionFinder,
+        @NotNull @Child("headshot_tester") HeadshotTester headshotTester,
+        @NotNull @Child("target_limiter") TargetLimiter targetLimiter) {
+        this.entityFinder = Objects.requireNonNull(entityFinder);
+        this.targetTester = Objects.requireNonNull(targetTester);
+        this.intersectionFinder = Objects.requireNonNull(intersectionFinder);
+        this.headshotTester = Objects.requireNonNull(headshotTester);
+        this.targetLimiter = Objects.requireNonNull(targetLimiter);
     }
 
     @Override
-    public @NotNull Result findTarget(@NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
-            @NotNull Collection<UUID> previousHits) {
+    public @NotNull Result findTarget(@NotNull Gun gun, @NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
+        @NotNull Collection<UUID> previousHits) {
         Instance instance = shooter.getInstance();
         if (instance == null) {
             return new Result(new ArrayList<>(0), new ArrayList<>(0));
@@ -65,7 +66,7 @@ public class BasicTargetFinder implements TargetFinder {
 
         double distanceLimitSquared = start.distanceSquared(end);
         for (LivingEntity entity : nearbyEntities) {
-            if (targetTester.useTarget(entity, previousHits)) {
+            if (targetTester.useTarget(gun, entity, previousHits)) {
                 intersectionFinder.getHitLocation(entity, start, end, distanceLimitSquared).ifPresent(intersection -> {
                     locations.add(Pair.of(entity, intersection));
                 });
@@ -79,8 +80,7 @@ public class BasicTargetFinder implements TargetFinder {
         for (Pair<? extends LivingEntity, Vec> pair : adjustedLocations) {
             if (headshotTester.isHeadshot(shooter, pair.left(), pair.right())) {
                 headshots.add(new GunHit(pair.left(), pair.right()));
-            }
-            else {
+            } else {
                 targets.add(new GunHit(pair.left(), pair.right()));
             }
             previousHits.add(pair.left().getUuid());
@@ -99,11 +99,12 @@ public class BasicTargetFinder implements TargetFinder {
      * @param targetLimiter      A path to the {@link BasicTargetFinder}'s {@link TargetLimiter}
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("entity_finder") String entityFinder,
-                       @NotNull @ChildPath("target_tester") String targetTester,
-                       @NotNull @ChildPath("intersection_finder") String intersectionFinder,
-                       @NotNull @ChildPath("headshot_tester") String headshotTester,
-                       @NotNull @ChildPath("target_limiter") String targetLimiter) {
+    public record Data(
+        @NotNull @ChildPath("entity_finder") String entityFinder,
+        @NotNull @ChildPath("target_tester") String targetTester,
+        @NotNull @ChildPath("intersection_finder") String intersectionFinder,
+        @NotNull @ChildPath("headshot_tester") String headshotTester,
+        @NotNull @ChildPath("target_limiter") String targetLimiter) {
 
 
     }

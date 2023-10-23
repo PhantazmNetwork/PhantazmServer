@@ -12,17 +12,11 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.chat.ChatConfig;
 import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.server.command.whisper.WhisperConfig;
-import org.phantazm.server.config.loader.LobbiesConfigProcessor;
-import org.phantazm.server.config.loader.PathfinderConfigProcessor;
-import org.phantazm.server.config.loader.ServerConfigProcessor;
-import org.phantazm.server.config.loader.ShutdownConfigProcessor;
 import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
-import org.phantazm.server.config.server.PathfinderConfig;
-import org.phantazm.server.config.server.ServerConfig;
-import org.phantazm.server.config.server.ShutdownConfig;
-import org.phantazm.server.config.server.StartupConfig;
+import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
+import org.phantazm.zombies.modifier.ModifierCommandConfig;
 
 import java.nio.file.Path;
 
@@ -59,48 +53,58 @@ public final class ConfigFeature {
 
     public static final Path CHAT_CONFIG_PATH = Path.of("./chat-config.yml");
 
+    public static final Path JOIN_REPORT_CONFIG_PATH = Path.of("./join-report-config.toml");
+
     public static final Path ZOMBIES_CONFIG_PATH = Path.of("./zombies-config.toml");
 
+    public static final Path MODIFIER_COMMAND_CONFIG_PATH = Path.of("./modifier-config.toml");
+
     public static final ConfigHandler.ConfigKey<PlayerConfig> PLAYER_CONFIG_KEY = new ConfigHandler.ConfigKey<>(
-            PlayerConfig.class, "player_config");
+        PlayerConfig.class, "player_config");
 
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link ServerConfig} loader.
      */
     public static final ConfigHandler.ConfigKey<ServerConfig> SERVER_CONFIG_KEY =
-            new ConfigHandler.ConfigKey<>(ServerConfig.class, "server_config");
+        new ConfigHandler.ConfigKey<>(ServerConfig.class, "server_config");
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link LobbiesConfig} loader.
      */
     public static final ConfigHandler.ConfigKey<LobbiesConfig> LOBBIES_CONFIG_KEY =
-            new ConfigHandler.ConfigKey<>(LobbiesConfig.class, "lobbies_config");
+        new ConfigHandler.ConfigKey<>(LobbiesConfig.class, "lobbies_config");
 
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link PathfinderConfig} loader.
      */
     public static final ConfigHandler.ConfigKey<PathfinderConfig> PATHFINDER_CONFIG_KEY =
-            new ConfigHandler.ConfigKey<>(PathfinderConfig.class, "pathfinder_config");
+        new ConfigHandler.ConfigKey<>(PathfinderConfig.class, "pathfinder_config");
 
     /**
      * The {@link ConfigHandler.ConfigKey} instance used to refer to the primary {@link PathfinderConfig} loader.
      */
     public static final ConfigHandler.ConfigKey<ShutdownConfig> SHUTDOWN_CONFIG_KEY =
-            new ConfigHandler.ConfigKey<>(ShutdownConfig.class, "shutdown_config");
+        new ConfigHandler.ConfigKey<>(ShutdownConfig.class, "shutdown_config");
 
     public static final ConfigHandler.ConfigKey<StartupConfig> STARTUP_CONFIG_KEY =
-            new ConfigHandler.ConfigKey<>(StartupConfig.class, "startup_config");
+        new ConfigHandler.ConfigKey<>(StartupConfig.class, "startup_config");
 
     public static final ConfigHandler.ConfigKey<PartyConfig> PARTY_CONFIG_KEY =
-            new ConfigHandler.ConfigKey<>(PartyConfig.class, "party_config");
+        new ConfigHandler.ConfigKey<>(PartyConfig.class, "party_config");
 
     public static final ConfigHandler.ConfigKey<WhisperConfig> WHISPER_CONFIG_KEY =
-            new ConfigHandler.ConfigKey<>(WhisperConfig.class, "whisper_config");
+        new ConfigHandler.ConfigKey<>(WhisperConfig.class, "whisper_config");
 
     public static final ConfigHandler.ConfigKey<ChatConfig> CHAT_CONFIG_KEY =
-            new ConfigHandler.ConfigKey<>(ChatConfig.class, "chat_config");
+        new ConfigHandler.ConfigKey<>(ChatConfig.class, "chat_config");
+
+    public static final ConfigHandler.ConfigKey<JoinReportConfig> JOIN_REPORT_CONFIG_KEY =
+        new ConfigHandler.ConfigKey<>(JoinReportConfig.class, "join_report_config");
 
     public static final ConfigHandler.ConfigKey<ZombiesConfig> ZOMBIES_CONFIG_KEY =
-            new ConfigHandler.ConfigKey<>(ZombiesConfig.class, "zombies_config");
+        new ConfigHandler.ConfigKey<>(ZombiesConfig.class, "zombies_config");
+
+    public static final ConfigHandler.ConfigKey<ModifierCommandConfig> MODIFIER_COMMAND_CONFIG_KEY =
+        new ConfigHandler.ConfigKey<>(ModifierCommandConfig.class, "modifier_command_config");
 
     private static ConfigHandler handler;
 
@@ -109,7 +113,8 @@ public final class ConfigFeature {
     }
 
     /**
-     * Initializes server configuration features. Should only be called once from {@link PhantazmServer#main(String[])}.
+     * Initializes server configuration features. Should only be called once from
+     * {@link PhantazmServer#main(String[])}.
      */
     static void initialize(@NotNull MappingProcessorSource mappingProcessorSource) {
         handler = new BasicConfigHandler();
@@ -117,44 +122,52 @@ public final class ConfigFeature {
         ConfigCodec tomlCodec = new TomlCodec();
         ConfigCodec yamlCodec = new YamlCodec();
         handler.registerLoader(PLAYER_CONFIG_KEY,
-                new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(PlayerConfig.class)),
-                        PlayerConfig.DEFAULT, PLAYER_CONFIG_PATH, tomlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(PlayerConfig.class)),
+                PlayerConfig.DEFAULT, PLAYER_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(SERVER_CONFIG_KEY,
-                new SyncFileConfigLoader<>(new ServerConfigProcessor(), ServerConfig.DEFAULT, SERVER_CONFIG_PATH,
-                        tomlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ServerConfig.class)),
+                ServerConfig.DEFAULT, SERVER_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(LOBBIES_CONFIG_KEY,
-                new SyncFileConfigLoader<>(new LobbiesConfigProcessor(), LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH,
-                        yamlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(LobbiesConfig.class)),
+                LobbiesConfig.DEFAULT, LOBBIES_CONFIG_PATH, yamlCodec));
 
         handler.registerLoader(PATHFINDER_CONFIG_KEY,
-                new SyncFileConfigLoader<>(new PathfinderConfigProcessor(), PathfinderConfig.DEFAULT,
-                        PATHFINDER_CONFIG_PATH, tomlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(PathfinderConfig.class)),
+                PathfinderConfig.DEFAULT, PATHFINDER_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(SHUTDOWN_CONFIG_KEY,
-                new SyncFileConfigLoader<>(new ShutdownConfigProcessor(), ShutdownConfig.DEFAULT, SHUTDOWN_CONFIG_PATH,
-                        tomlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ShutdownConfig.class)),
+                ShutdownConfig.DEFAULT, SHUTDOWN_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(STARTUP_CONFIG_KEY,
-                new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(StartupConfig.class)),
-                        StartupConfig.DEFAULT, STARTUP_CONFIG_PATH, tomlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(StartupConfig.class)),
+                StartupConfig.DEFAULT, STARTUP_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(PARTY_CONFIG_KEY,
-                new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(PartyConfig.class)),
-                        PartyConfig.DEFAULT, PARTY_CONFIG_PATH, tomlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(PartyConfig.class)),
+                PartyConfig.DEFAULT, PARTY_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(WHISPER_CONFIG_KEY,
-                new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(WhisperConfig.class)),
-                        WhisperConfig.DEFAULT, WHISPER_CONFIG_PATH, tomlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(WhisperConfig.class)),
+                WhisperConfig.DEFAULT, WHISPER_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(CHAT_CONFIG_KEY,
-                new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ChatConfig.class)),
-                        ChatConfig.DEFAULT, CHAT_CONFIG_PATH, yamlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ChatConfig.class)),
+                ChatConfig.DEFAULT, CHAT_CONFIG_PATH, yamlCodec));
+
+        handler.registerLoader(JOIN_REPORT_CONFIG_KEY,
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(JoinReportConfig.class)),
+                JoinReportConfig.DEFAULT, JOIN_REPORT_CONFIG_PATH, tomlCodec));
 
         handler.registerLoader(ZOMBIES_CONFIG_KEY,
-                new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ZombiesConfig.class)),
-                        ZombiesConfig.DEFAULT, ZOMBIES_CONFIG_PATH, tomlCodec));
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ZombiesConfig.class)),
+                ZombiesConfig.DEFAULT, ZOMBIES_CONFIG_PATH, tomlCodec));
+
+        handler.registerLoader(MODIFIER_COMMAND_CONFIG_KEY,
+            new SyncFileConfigLoader<>(mappingProcessorSource.processorFor(Token.ofClass(ModifierCommandConfig.class)),
+                ModifierCommandConfig.DEFAULT, MODIFIER_COMMAND_CONFIG_PATH, tomlCodec));
     }
 
     /**

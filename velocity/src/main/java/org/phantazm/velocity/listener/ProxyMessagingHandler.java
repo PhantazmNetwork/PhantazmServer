@@ -26,13 +26,15 @@ public class ProxyMessagingHandler {
      * Creates a new {@link ProxyMessagingHandler}.
      */
     public ProxyMessagingHandler(@NotNull Map<ChannelIdentifier, BiConsumer<Player, byte[]>> packetHandlers) {
-        this.packetHandlers = Objects.requireNonNull(packetHandlers, "packetHandlers");
+        this.packetHandlers = Objects.requireNonNull(packetHandlers);
     }
 
     public static @NotNull ProxyMessagingHandler createDefault() {
-        Map<ChannelIdentifier, BiConsumer<Player, byte[]>> packetHandlers = Map.of(MinecraftChannelIdentifier.from(MapDataVersionQueryPacket.ID), (player, data) -> {
-            VelocityPacketUtils.sendPacket(player, new MapDataVersionResponsePacket(MapSettingsInfo.MAP_DATA_VERSION));
-        });
+        Map<ChannelIdentifier, BiConsumer<Player, byte[]>> packetHandlers = Map.of(
+            MinecraftChannelIdentifier.from(MapDataVersionQueryPacket.ID), (player, data) -> {
+                VelocityPacketUtils.sendPacket(player,
+                    new MapDataVersionResponsePacket(MapSettingsInfo.MAP_DATA_VERSION));
+            });
 
         return new ProxyMessagingHandler(packetHandlers);
     }

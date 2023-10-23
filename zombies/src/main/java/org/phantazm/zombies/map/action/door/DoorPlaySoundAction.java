@@ -29,14 +29,14 @@ public class DoorPlaySoundAction implements Action<Door> {
 
         if (data.atInteractor) {
             door.lastInteractor().ifPresent(zombiesPlayer -> zombiesPlayer.getPlayer()
-                    .ifPresent(player -> zombiesPlayer.playSound(data.sound, pos.x(), pos.y(), pos.z())));
-        }
-        else {
+                .ifPresent(player -> zombiesPlayer.playSound(data.sound, pos.x(), pos.y(), pos.z())));
+        } else {
             instance.playSound(data.sound, pos.x(), pos.y(), pos.z());
         }
     }
 
     @DataObject
-    public record Data(boolean atInteractor, @NotNull Sound sound) {
+    public record Data(boolean atInteractor,
+        @NotNull Sound sound) {
     }
 }

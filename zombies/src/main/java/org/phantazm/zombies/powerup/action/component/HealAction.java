@@ -13,7 +13,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.action.InstantAction;
 import org.phantazm.zombies.powerup.action.PowerupAction;
-import org.phantazm.zombies.scene.ZombiesScene;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Optional;
 
@@ -33,7 +33,8 @@ public class HealAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(float amount, boolean noTakeOnFull) {
+    public record Data(float amount,
+        boolean noTakeOnFull) {
         @Default("noTakeOnFull")
         public static @NotNull ConfigElement defaultNoTakeOnFull() {
             return ConfigPrimitive.of(true);

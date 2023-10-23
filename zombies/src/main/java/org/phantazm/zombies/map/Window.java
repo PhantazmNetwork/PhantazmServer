@@ -50,13 +50,13 @@ public class Window extends BoundedBase {
      * @param clientBlockHandler the {@link ClientBlockHandler} used to set client-only barrier blocks
      */
     public Window(@NotNull Point mapOrigin, @NotNull Instance instance, @NotNull WindowInfo windowInfo,
-            @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
-            @NotNull List<Action<Window>> breakActions, @NotNull BoundedTracker<Room> roomTracker) {
+        @NotNull ClientBlockHandler clientBlockHandler, @NotNull List<Action<Window>> repairActions,
+        @NotNull List<Action<Window>> breakActions, @NotNull BoundedTracker<Room> roomTracker) {
         super(mapOrigin, windowInfo.frameRegion());
 
-        this.instance = Objects.requireNonNull(instance, "instance");
-        this.windowInfo = Objects.requireNonNull(windowInfo, "data");
-        this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler, "clientBlockHandler");
+        this.instance = Objects.requireNonNull(instance);
+        this.windowInfo = Objects.requireNonNull(windowInfo);
+        this.clientBlockHandler = Objects.requireNonNull(clientBlockHandler);
 
         this.repairActions = List.copyOf(repairActions);
         this.breakActions = List.copyOf(breakActions);
@@ -76,8 +76,7 @@ public class Window extends BoundedBase {
             this.linkedRoom = null;
             LOGGER.warn("No linkable room found within 10 blocks for window at ~" + center);
             LOGGER.warn("If any spawnpoints link to this window, they will never be able to spawn.");
-        }
-        else {
+        } else {
             this.linkedRoom = closestRoom.get();
         }
 
@@ -110,7 +109,7 @@ public class Window extends BoundedBase {
      * @return true if the point is in range, false otherwise
      */
     public boolean isInRange(@NotNull Point point, double range) {
-        Objects.requireNonNull(point, "point");
+        Objects.requireNonNull(point);
         return point.distanceSquared(center) < range * range;
     }
 
@@ -148,8 +147,7 @@ public class Window extends BoundedBase {
                 for (Action<Window> breakAction : breakActions) {
                     breakAction.perform(this);
                 }
-            }
-            else {
+            } else {
                 //play the repair sound
                 instance.playSound(newIndex == volume ? windowInfo.repairAllSound() : windowInfo.repairSound(), center);
 
@@ -190,8 +188,8 @@ public class Window extends BoundedBase {
     }
 
     /**
-     * Returns the current "repair index". This is equal to 0 for a fully broken window and {@code getVolume()} for
-     * a fully repaired window.
+     * Returns the current "repair index". This is equal to 0 for a fully broken window and {@code getVolume()} for a
+     * fully repaired window.
      *
      * @return the current repair index
      */
@@ -213,8 +211,8 @@ public class Window extends BoundedBase {
     }
 
     /**
-     * Checks if the block is currently broken. Accepts world coordinates. The behavior of this function is undefined
-     * if the position specified is outside of the bounds of this window.
+     * Checks if the block is currently broken. Accepts world coordinates. The behavior of this function is undefined if
+     * the position specified is outside of the bounds of this window.
      *
      * @param x the x-coordinate
      * @param y the y-coordinate
@@ -222,11 +220,7 @@ public class Window extends BoundedBase {
      * @return true if the block is broken, false otherwise
      */
     public boolean isBlockBroken(int x, int y, int z) {
-        int index = coordinateToIndex(x, y, z);
-
-        synchronized (sync) {
-            return index >= this.index;
-        }
+        return coordinateToIndex(x, y, z) >= this.index;
     }
 
     private Point indexToCoordinate(int index) {
@@ -239,8 +233,7 @@ public class Window extends BoundedBase {
             x = (index / (frameRegion.lengthZ() * frameRegion.lengthY())) % frameRegion.lengthX();
             y = (index / frameRegion.lengthZ()) % frameRegion.lengthY();
             z = index % frameRegion.lengthZ();
-        }
-        else {
+        } else {
             x = index % frameRegion.lengthX();
             y = (index / frameRegion.lengthX()) % frameRegion.lengthY();
             z = (index / (frameRegion.lengthX() * frameRegion.lengthY())) % frameRegion.lengthZ();
@@ -257,10 +250,10 @@ public class Window extends BoundedBase {
         Bounds3I frameRegion = windowInfo.frameRegion();
         if (frameRegion.lengthZ() > frameRegion.lengthX()) {
             return frameRelativeZ + (frameRelativeY * frameRegion.lengthZ()) +
-                    (frameRelativeX * frameRegion.lengthZ() * frameRegion.lengthY());
+                (frameRelativeX * frameRegion.lengthZ() * frameRegion.lengthY());
         }
 
         return frameRelativeX + (frameRelativeY * frameRegion.lengthX()) +
-                (frameRelativeZ * frameRegion.lengthX() * frameRegion.lengthY());
+            (frameRelativeZ * frameRegion.lengthX() * frameRegion.lengthY());
     }
 }

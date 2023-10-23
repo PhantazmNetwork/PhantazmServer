@@ -14,15 +14,13 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Flags;
-import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.coin.ModifierSourceGroups;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
-import org.phantazm.zombies.map.Flaggable;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -31,39 +29,51 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Description("""
-        Interactor capable of hitting a mob in a Zombies game. Supports variable knockback, damage, and armor bypassing
-        capabilities.
-        """)
+    Interactor capable of hitting a mob in a Zombies game. Supports variable knockback, damage, and armor bypassing
+    capabilities.
+    """)
 @Model("zombies.perk.interactor.melee")
 @Cache(false)
 public class MeleeInteractorCreator implements PerkInteractorCreator {
     private final Data data;
-    private final MobStore mobStore;
     private final Flaggable mapFlags;
 
     @FactoryMethod
-    public MeleeInteractorCreator(@NotNull Data data, @NotNull MobStore mobStore, @NotNull MapObjects mapObjects) {
-        this.data = Objects.requireNonNull(data, "data");
-        this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+    public MeleeInteractorCreator(@NotNull Data data, @NotNull MapObjects mapObjects) {
+        this.data = Objects.requireNonNull(data);
         this.mapFlags = mapObjects.module().flags();
     }
 
     @Override
     public @NotNull PerkInteractor forPlayer(@NotNull ZombiesPlayer zombiesPlayer) {
-        return new Interactor(data, zombiesPlayer, mobStore, mapFlags);
+        return new Interactor(data, zombiesPlayer, mapFlags);
     }
 
-    private static class Interactor implements PerkInteractor {
-        private final Data data;
-        private final ZombiesPlayer zombiesPlayer;
-        private final MobStore mobStore;
-        private final Flaggable mapFlags;
+    @DataObject
+    public record Data(
+        @Description("The damage it does on a successful hit") float damage,
+        @Description("The amount of knockback the weapon deals; 0.4 is the vanilla knockback from an " +
+            "unarmed hand") float knockback,
+        @Description("The number of coins to give on a successful hit.") int coins,
+        @Description("The number of coins to give when instakill is active.") int instaKillCoins,
+        @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor) {
+        @Default("instaKillCoins")
+        public static @NotNull ConfigElement defaultInstaKillCoins() {
+            return ConfigPrimitive.of(50);
+        }
 
-        private Interactor(@NotNull Data data, @NotNull ZombiesPlayer zombiesPlayer, @NotNull MobStore mobStore,
-                Flaggable mapFlags) {
-            this.data = Objects.requireNonNull(data, "data");
-            this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer, "zombiesPlayer");
-            this.mobStore = Objects.requireNonNull(mobStore, "mobStore");
+        @Default("bypassArmor")
+        public static @NotNull ConfigElement defaultBypassArmor() {
+            return ConfigPrimitive.of(false);
+        }
+    }
+
+    private record Interactor(Data data,
+        ZombiesPlayer zombiesPlayer,
+        Flaggable mapFlags) implements PerkInteractor {
+        private Interactor(@NotNull Data data, @NotNull ZombiesPlayer zombiesPlayer, Flaggable mapFlags) {
+            this.data = Objects.requireNonNull(data);
+            this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
             this.mapFlags = mapFlags;
         }
 
@@ -93,53 +103,35 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 return false;
             }
 
-            PhantazmMob hitMob = mobStore.getMob(livingEntity.getUuid());
-            if (hitMob == null) {
+            if (!(livingEntity instanceof Mob hitMob)) {
                 return false;
             }
 
             Player player = playerOptional.get();
             Pos playerPosition = player.getPosition();
 
-            boolean isInstaKill;
-            if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
-                    (!hitMob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
-                livingEntity.setTag(Tags.LAST_HIT_BY, player.getUuid());
-                livingEntity.kill();
-                isInstaKill = true;
-            }
-            else {
-                double angle = playerPosition.yaw() * (Math.PI / 180);
-                livingEntity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
-                livingEntity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
-                isInstaKill = false;
-            }
+            livingEntity.getAcquirable().sync(ignored -> {
+                boolean isInstaKill;
+                if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
+                    (!hitMob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
+                    livingEntity.damage(Damage.fromPlayer(player, livingEntity.getHealth()), true);
+                    isInstaKill = true;
+                } else {
+                    double angle = playerPosition.yaw() * (Math.PI / 180);
+                    livingEntity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
+                    livingEntity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
+                    isInstaKill = false;
+                }
 
-            PlayerCoins coins = zombiesPlayer.module().getCoins();
-            Collection<Transaction.Modifier> modifiers = zombiesPlayer.module().compositeTransactionModifiers()
+                PlayerCoins coins = zombiesPlayer.module().getCoins();
+                Collection<Transaction.Modifier> modifiers = zombiesPlayer.module().compositeTransactionModifiers()
                     .modifiers(ModifierSourceGroups.MOB_COIN_GAIN);
 
-            coins.runTransaction(new Transaction(modifiers, isInstaKill ? data.instaKillCoins : data.coins))
+                coins.runTransaction(new Transaction(modifiers, isInstaKill ? data.instaKillCoins : data.coins))
                     .applyIfAffordable(coins);
+            });
+
             return true;
-        }
-    }
-
-    @DataObject
-    public record Data(@Description("The damage it does on a successful hit") float damage,
-                       @Description("The amount of knockback the weapon deals; 0.4 is the vanilla knockback from an " +
-                               "unarmed hand") float knockback,
-                       @Description("The number of coins to give on a successful hit.") int coins,
-                       @Description("The number of coins to give when instakill is active.") int instaKillCoins,
-                       @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor) {
-        @Default("instaKillCoins")
-        public static @NotNull ConfigElement defaultInstaKillCoins() {
-            return ConfigPrimitive.of(50);
-        }
-
-        @Default("bypassArmor")
-        public static @NotNull ConfigElement defaultBypassArmor() {
-            return ConfigPrimitive.of(false);
         }
     }
 }

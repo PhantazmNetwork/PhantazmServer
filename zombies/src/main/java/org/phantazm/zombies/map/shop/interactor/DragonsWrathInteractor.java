@@ -12,14 +12,13 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.mob.MobStore;
-import org.phantazm.mob.PhantazmMob;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
-import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
@@ -33,15 +32,12 @@ import java.util.function.Supplier;
 public class DragonsWrathInteractor implements ShopInteractor {
     private final Data data;
     private final Supplier<? extends RoundHandler> roundHandler;
-    private final MobStore mobStore;
     private Shop shop;
 
     @FactoryMethod
-    public DragonsWrathInteractor(@NotNull Data data, @NotNull Supplier<? extends RoundHandler> roundHandler,
-            @NotNull MobStore mobStore) {
+    public DragonsWrathInteractor(@NotNull Data data, @NotNull Supplier<? extends RoundHandler> roundHandler) {
         this.data = data;
         this.roundHandler = roundHandler;
-        this.mobStore = mobStore;
     }
 
     @Override
@@ -61,27 +57,33 @@ public class DragonsWrathInteractor implements ShopInteractor {
         Round currentRound = currentRoundOptional.get();
         Wrapper<Integer> killCount = Wrapper.of(0);
         instance.getEntityTracker()
-                .nearbyEntities(shop.center(), data.radius, EntityTracker.Target.LIVING_ENTITIES, entity -> {
-                    if (!currentRound.hasMob(entity.getUuid())) {
-                        return;
-                    }
+            .nearbyEntities(shop.center(), data.radius, EntityTracker.Target.LIVING_ENTITIES, entity -> {
+                if (!currentRound.hasMob(entity.getUuid())) {
+                    return;
+                }
 
-                    PhantazmMob mob = mobStore.getMob(entity.getUuid());
-                    if (mob == null ||
-                            mob.model().getExtraNode().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
-                        return;
-                    }
+                if (!(entity instanceof Mob mob)) {
+                    return;
+                }
 
-                    Entity lightningBolt = new Entity(EntityType.LIGHTNING_BOLT);
-                    lightningBolt.setInstance(instance, entity.getPosition());
-                    lightningBolt.scheduleRemove(20, TimeUnit.SERVER_TICK);
+                if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                    return;
+                }
 
-                    instance.playSound(data.sound());
+                Entity lightningBolt = new Entity(EntityType.LIGHTNING_BOLT);
+                lightningBolt.setInstance(instance, entity.getPosition());
+                lightningBolt.scheduleRemove(20, TimeUnit.SERVER_TICK);
 
-                    entity.setTag(Tags.LAST_HIT_BY, interaction.player().module().getPlayerView().getUUID());
-                    entity.kill();
-                    killCount.set(killCount.get() + 1);
+                instance.playSound(data.sound());
+
+                interaction.player().getPlayer().ifPresent(player -> {
+                    entity.getAcquirable().sync(ignored -> {
+                        entity.damage(Damage.fromPlayer(player, entity.getHealth()), true);
+                    });
                 });
+
+                killCount.set(killCount.get() + 1);
+            });
 
         TagResolver killCountPlaceholder = Placeholder.component("kill_count", Component.text(killCount.get()));
         Component message = MiniMessage.miniMessage().deserialize(data.messageFormat(), killCountPlaceholder);
@@ -95,6 +97,9 @@ public class DragonsWrathInteractor implements ShopInteractor {
     }
 
     @DataObject
-    public record Data(@NotNull Sound sound, @NotNull String messageFormat, boolean broadcast, double radius) {
+    public record Data(@NotNull Sound sound,
+        @NotNull String messageFormat,
+        boolean broadcast,
+        double radius) {
     }
 }

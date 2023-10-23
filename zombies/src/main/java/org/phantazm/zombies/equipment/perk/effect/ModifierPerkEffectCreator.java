@@ -16,36 +16,36 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Description("""
-        Modifies a player attribute for the duration the perk is active.
-                
-        Player attributes can be any of the attributes listed on https://minecraft.fandom.com/wiki/Attribute. However,
-        only a subset of these *currently* have any effect. These are:
-                
-        * `generic.max_health`
-        * `generic.movement_speed`
-        * `generic.knockback_resistance`
-        * `generic.armor`
-        * `generic.armor_toughness`
-                
-        There are also several custom attributes defined by Phantazm Zombies:
-                
-        * `phantazm.fire_rate`
-        * `phantazm.revive_ticks`
-        * `phantazm.heal_rate`
-                
-        `phantazm.fire_rate` is itself a multiplier. Its base value is 1. `phantazm.revive_ticks` is the number of ticks
-        it takes to revive a player. It defaults to 30. `phantazm.heal_rate` is the number of ticks between every
-        regeneration of a single hitpoint. It defaults to 20.
-                
-        These attributes can be modified by providing some amount and an AttributeOperation. The operation may be any of
-        the following values:
-                
-        * `ADDITION`
-        * `MULTIPLY_BASE`
-        * `MULTIPLY_TOTAL`
-                
-        The effects of these multipliers use the rules outlined at https://minecraft.fandom.com/wiki/Attribute#Modifiers.
-        """)
+    Modifies a player attribute for the duration the perk is active.
+            
+    Player attributes can be any of the attributes listed on https://minecraft.fandom.com/wiki/Attribute. However,
+    only a subset of these *currently* have any effect. These are:
+            
+    * `generic.max_health`
+    * `generic.movement_speed`
+    * `generic.knockback_resistance`
+    * `generic.armor`
+    * `generic.armor_toughness`
+            
+    There are also several custom attributes defined by Phantazm Zombies:
+            
+    * `phantazm.fire_rate`
+    * `phantazm.revive_ticks`
+    * `phantazm.heal_rate`
+            
+    `phantazm.fire_rate` is itself a multiplier. Its base value is 1. `phantazm.revive_ticks` is the number of ticks
+    it takes to revive a player. It defaults to 30. `phantazm.heal_rate` is the number of ticks between every
+    regeneration of a single hitpoint. It defaults to 20.
+            
+    These attributes can be modified by providing some amount and an AttributeOperation. The operation may be any of
+    the following values:
+            
+    * `ADDITION`
+    * `MULTIPLY_BASE`
+    * `MULTIPLY_TOTAL`
+            
+    The effects of these multipliers use the rules outlined at https://minecraft.fandom.com/wiki/Attribute#Modifiers.
+    """)
 @Model("zombies.perk.effect.attribute_modifier")
 @Cache(false)
 public class ModifierPerkEffectCreator implements PerkEffectCreator {
@@ -53,7 +53,7 @@ public class ModifierPerkEffectCreator implements PerkEffectCreator {
 
     @FactoryMethod
     public ModifierPerkEffectCreator(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data, "data");
+        this.data = Objects.requireNonNull(data);
     }
 
     @Override
@@ -80,7 +80,9 @@ public class ModifierPerkEffectCreator implements PerkEffectCreator {
         @Override
         public void start() {
             zombiesPlayer.getPlayer().ifPresent(player -> player.getAttribute(attribute)
-                    .addModifier(new AttributeModifier(uuid, name, data.amount, data.attributeOperation)));
+                .addModifier(
+                    new AttributeModifier(uuid, name, data.amount,
+                        data.attributeOperation)));
         }
 
         @Override
@@ -96,10 +98,11 @@ public class ModifierPerkEffectCreator implements PerkEffectCreator {
     }
 
     @DataObject
-    public record Data(@NotNull @Description("The modifier name") String attribute,
-                       @Description("The amount by which to modify this attribute") double amount,
-                       @NotNull @Description(
-                               "The operation to use in order to modify this attribute") AttributeOperation attributeOperation) {
+    public record Data(
+        @NotNull @Description("The modifier name") String attribute,
+        @Description("The amount by which to modify this attribute") double amount,
+        @NotNull @Description(
+            "The operation to use in order to modify this attribute") AttributeOperation attributeOperation) {
 
     }
 }

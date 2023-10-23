@@ -15,7 +15,7 @@ public class CollectionSidebarSection implements SidebarSection {
 
     @FactoryMethod
     public CollectionSidebarSection(
-            @NotNull @Child("line_updaters") Collection<? extends SidebarLineUpdater> lineUpdaters) {
+        @NotNull @Child("line_updaters") Collection<? extends SidebarLineUpdater> lineUpdaters) {
         this.lineUpdaters = List.copyOf(lineUpdaters);
     }
 
@@ -44,7 +44,7 @@ public class CollectionSidebarSection implements SidebarSection {
     public record Data(@NotNull @ChildPath("line_updaters") Collection<String> lineUpdaterPaths) {
 
         public Data {
-            Objects.requireNonNull(lineUpdaterPaths, "lineUpdaters");
+            Objects.requireNonNull(lineUpdaterPaths);
         }
 
     }

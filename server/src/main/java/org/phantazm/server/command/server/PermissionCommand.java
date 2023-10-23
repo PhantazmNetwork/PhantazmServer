@@ -1,16 +1,16 @@
 package org.phantazm.server.command.server;
 
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.server.permission.PermissionHandler;
 
 import java.util.UUID;
 
-public class PermissionCommand extends Command {
+public class PermissionCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.permission");
 
     public static final Permission PERMISSION_RELOAD = new Permission("admin.permission.reload");
@@ -26,9 +26,8 @@ public class PermissionCommand extends Command {
     private static final ArgumentWord PERMISSION_ARGUMENT = ArgumentType.Word("permission");
 
     public PermissionCommand(@NotNull PermissionHandler permissionHandler, @NotNull IdentitySource identitySource) {
-        super("permission");
+        super("permission", PERMISSION);
 
-        setCondition((sender, commandString) -> sender.hasPermission(PERMISSION));
         addSubcommand(new Add(permissionHandler));
         addSubcommand(new Remove(permissionHandler));
         addSubcommand(new GroupSet(permissionHandler, identitySource));
@@ -36,23 +35,21 @@ public class PermissionCommand extends Command {
         addSubcommand(new Reload(permissionHandler));
     }
 
-    private static class Reload extends Command {
+    private static class Reload extends PermissionLockedCommand {
         private Reload(PermissionHandler permissionHandler) {
-            super("reload");
+            super("reload", PERMISSION_RELOAD);
 
-            setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_RELOAD));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 permissionHandler.reload();
             });
         }
     }
 
-    private static class GroupSet extends Command {
+    private static class GroupSet extends PermissionLockedCommand {
         private GroupSet(PermissionHandler permissionHandler, IdentitySource identitySource) {
-            super("group_set");
+            super("group_set", PERMISSION_GROUP_SET);
 
-            setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_GROUP_SET));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 String group = context.get(GROUP_ARGUMENT);
                 String player = context.get(PLAYER_ARGUMENT);
                 identitySource.getUUID(player).whenComplete((uuidOptional, throwable) -> {
@@ -60,8 +57,7 @@ public class PermissionCommand extends Command {
                         UUID uuid = uuidOptional.get();
                         permissionHandler.addToGroup(uuid, group);
                         sender.sendMessage("Added " + uuid + " (" + player + ") to group " + group);
-                    }
-                    else {
+                    } else {
                         sender.sendMessage("Error when resolving player UUID");
                     }
                 });
@@ -69,12 +65,11 @@ public class PermissionCommand extends Command {
         }
     }
 
-    private static class GroupClear extends Command {
+    private static class GroupClear extends PermissionLockedCommand {
         private GroupClear(PermissionHandler permissionHandler, IdentitySource identitySource) {
-            super("group_clear");
+            super("group_clear", PERMISSION_GROUP_CLEAR);
 
-            setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_GROUP_CLEAR));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 String group = context.get(GROUP_ARGUMENT);
                 String player = context.get(PLAYER_ARGUMENT);
                 identitySource.getUUID(player).whenComplete((uuidOptional, throwable) -> {
@@ -82,8 +77,7 @@ public class PermissionCommand extends Command {
                         UUID uuid = uuidOptional.get();
                         permissionHandler.removeFromGroup(uuid, group);
                         sender.sendMessage("Removed " + uuid + " (" + player + ") from group " + group);
-                    }
-                    else {
+                    } else {
                         sender.sendMessage("Error when resolving player UUID");
                     }
                 });
@@ -91,12 +85,11 @@ public class PermissionCommand extends Command {
         }
     }
 
-    private static class Add extends Command {
+    private static class Add extends PermissionLockedCommand {
         private Add(PermissionHandler permissionHandler) {
-            super("add");
+            super("add", PERMISSION_ADD_GROUP);
 
-            setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_ADD_GROUP));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 String group = context.get(GROUP_ARGUMENT);
                 String permission = context.get(PERMISSION_ARGUMENT);
 
@@ -106,12 +99,11 @@ public class PermissionCommand extends Command {
         }
     }
 
-    private static class Remove extends Command {
+    private static class Remove extends PermissionLockedCommand {
         private Remove(PermissionHandler permissionHandler) {
-            super("remove");
+            super("remove", PERMISSION_REMOVE_GROUP);
 
-            setCondition((sender, commandString) -> sender.hasPermission(PERMISSION_REMOVE_GROUP));
-            addConditionalSyntax(getCondition(), (sender, context) -> {
+            addSyntax((sender, context) -> {
                 String group = context.get(GROUP_ARGUMENT);
                 String permission = context.get(PERMISSION_ARGUMENT);
 
