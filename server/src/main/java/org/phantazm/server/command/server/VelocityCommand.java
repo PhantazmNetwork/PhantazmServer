@@ -11,7 +11,12 @@ import net.minestom.server.permission.Permission;
 import org.phantazm.core.command.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
 
+import java.util.UUID;
+
 public class VelocityCommand extends PermissionLockedCommand {
+    private static final UUID PERSON_WHO_SHOULDNT_USE_VELO =
+        UUID.fromString("7825e26a-df0b-4391-baf4-4c9ce151293d");
+
     public enum Type {
         VERTICAL,
         HORIZONTAL,
@@ -30,6 +35,11 @@ public class VelocityCommand extends PermissionLockedCommand {
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), ((sender, context) -> {
             Player senderPlayer = (Player) sender;
+            if (senderPlayer.getUuid().equals(PERSON_WHO_SHOULDNT_USE_VELO)) {
+                senderPlayer.sendMessage(Component.text(":tr:", NamedTextColor.RED));
+                senderPlayer.kill();
+                return;
+            }
 
             Player player = MinecraftServer.getConnectionManager().getPlayer(context.get(PLAYER));
             if (player == null) {
