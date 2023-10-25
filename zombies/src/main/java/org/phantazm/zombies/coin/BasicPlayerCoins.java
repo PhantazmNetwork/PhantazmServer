@@ -73,7 +73,7 @@ public class BasicPlayerCoins implements PlayerCoins, Tickable {
 
     @Override
     public void set(int newValue) {
-        coins = newValue;
+        coins = Math.max(0, newValue);
     }
 
     @Override
