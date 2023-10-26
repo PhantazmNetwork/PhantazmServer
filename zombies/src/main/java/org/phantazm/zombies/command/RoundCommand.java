@@ -64,7 +64,7 @@ public class RoundCommand extends SandboxLockedCommand {
         StageTransition transition = scene.stageTransition();
         Stage current = transition.getCurrentStage();
         if (current == null || current.key().equals(StageKeys.END)) {
-            sender.sendMessage(Component.text("You cannot use the round command in this stage!"));
+            sender.sendMessage(Component.text("You cannot use the round command in this stage!", NamedTextColor.RED));
             return;
         }
 
