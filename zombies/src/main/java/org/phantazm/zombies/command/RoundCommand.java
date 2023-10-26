@@ -2,7 +2,6 @@ package org.phantazm.zombies.command;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -66,15 +65,18 @@ public class RoundCommand extends SandboxLockedCommand {
 
         StageTransition transition = scene.stageTransition();
         Stage current = transition.getCurrentStage();
-        MinecraftServer.getSchedulerManager().scheduleNextProcess(() -> {
-            if (current == null || !current.key().equals(StageKeys.IN_GAME)) {
-                transition.setCurrentStage(StageKeys.IN_GAME);
-                if (roundIndex != 0) {
-                    handler.setCurrentRound(roundIndex);
-                }
-            } else {
+        if (current == null || current.key().equals(StageKeys.END)) {
+            sender.sendMessage(Component.text("You cannot use the round command in this stage!"));
+            return;
+        }
+
+        if (!current.key().equals(StageKeys.IN_GAME)) {
+            transition.setCurrentStage(StageKeys.IN_GAME);
+            if (roundIndex != 0) {
                 handler.setCurrentRound(roundIndex);
             }
-        });
+        } else {
+            handler.setCurrentRound(roundIndex);
+        }
     }
 }
