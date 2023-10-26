@@ -61,14 +61,14 @@ public class RoundCommand extends SandboxLockedCommand {
             return;
         }
 
-        scene.setLegit(false);
-
         StageTransition transition = scene.stageTransition();
         Stage current = transition.getCurrentStage();
         if (current == null || current.key().equals(StageKeys.END)) {
             sender.sendMessage(Component.text("You cannot use the round command in this stage!"));
             return;
         }
+
+        scene.setLegit(false);
 
         if (!current.key().equals(StageKeys.IN_GAME)) {
             transition.setCurrentStage(StageKeys.IN_GAME);
