@@ -21,7 +21,7 @@ public class AbstractPartyCommandIntegrationTest {
         new PartyCommandConfig(Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "",
             Component.empty(), Component.empty(), Component.empty(), Component.empty(), "", "", "",
             Component.empty(), Component.empty(), "", Component.empty(), "", "", "", "", "",
-            Component.empty(), "", "", "");
+            Component.empty(), "", "", "", Component.empty(), Component.empty());
 
     protected GuildHolder<Party> partyHolder;
 

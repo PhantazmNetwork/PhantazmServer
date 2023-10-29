@@ -30,6 +30,11 @@ class ModifierUtilsTest {
                 }
 
                 @Override
+                public @NotNull Component abbreviatedDisplayName() {
+                    return Component.empty();
+                }
+
+                @Override
                 public @NotNull String webhookEmoji() {
                     return ":skull:";
                 }
