@@ -15,6 +15,7 @@ import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FutureUtils;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
@@ -136,7 +137,7 @@ public class ZombiesJoinCommand extends Command {
             boolean restricted = context.get(restrictedArgument);
 
             if (sandbox || !modifiers.isEmpty()) {
-                hasAtLeastOneWin(zombiesDatabase, targetMap, playerViews).whenComplete((result, error) -> {
+                hasAtLeastOneWin(zombiesDatabase, targetMap, playerViews, modifiers).whenComplete((result, error) -> {
                     if (result == null || error != null) {
                         return;
                     }
@@ -173,7 +174,12 @@ public class ZombiesJoinCommand extends Command {
 
     @SuppressWarnings("unchecked")
     private CompletableFuture<Boolean> hasAtLeastOneWin(ZombiesDatabase zombiesDatabase, Key targetMap,
-        Collection<PlayerView> playerViews) {
+        Collection<PlayerView> playerViews, Set<Key> modifiers) {
+        //TODO: add to map config, or get rid of since it's not usually necessary
+        if (modifiers.isEmpty() && targetMap.equals(Key.key(Namespaces.PHANTAZM, "gau_infernal"))) {
+            return FutureUtils.trueCompletedFuture();
+        }
+
         boolean bypassRestriction = true;
         for (PlayerView playerView : playerViews) {
             Optional<Player> optional = playerView.getPlayer();
