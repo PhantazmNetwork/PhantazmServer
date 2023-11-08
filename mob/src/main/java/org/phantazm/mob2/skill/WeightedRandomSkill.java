@@ -90,11 +90,11 @@ public class WeightedRandomSkill implements SkillComponent {
                 }
             }
 
-            this.needsTicking = !tickingDelegates.isEmpty();
+            this.needsTicking = true;
             this.tickingDelegates = List.copyOf(tickingDelegates);
 
             int[] weights = ensureLength(data.weights, delegates.size());
-            removeNegatives(weights);
+            removeZeroes(weights);
 
             List<DelegateEntry> delegateEntries = new ArrayList<>(delegates.size());
             for (int i = 0; i < weights.length; i++) {
@@ -113,12 +113,12 @@ public class WeightedRandomSkill implements SkillComponent {
             this.cap = sum;
         }
 
-        private static void removeNegatives(int[] input) {
+        private static void removeZeroes(int[] input) {
             int smallestIndex = -1;
             int smallestValue = Integer.MAX_VALUE;
             for (int i = 0; i < input.length; i++) {
                 int value = input[i];
-                if (value < 0 && value < smallestValue) {
+                if (value <= 0 && value < smallestValue) {
                     smallestIndex = i;
                     smallestValue = value;
                 }
@@ -128,9 +128,9 @@ public class WeightedRandomSkill implements SkillComponent {
                 return;
             }
 
-            int amount = -smallestValue;
+            int offset = 1 - smallestValue;
             for (int i = 0; i < input.length; i++) {
-                input[i] += amount;
+                input[i] += offset;
             }
         }
 
