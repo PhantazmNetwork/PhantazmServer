@@ -75,7 +75,7 @@ mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version 
 
 modmenu = { module = "com.terraformersmc:modmenu", version = "7.1.0" }
 
-proxima-core = { module = "com.github.steanky:proxima-core", version = "0.8.1" }
+proxima-core = { module = "com.github.steanky:proxima-core", version = "0.9.0" }
 
 renderer = { module = "com.github.0x3C50:Renderer", version = "e1bb03f45e" }
 
