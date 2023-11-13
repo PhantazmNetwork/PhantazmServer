@@ -40,7 +40,13 @@ public class TemporalSkill implements SkillComponent {
         @Nullable Trigger trigger,
         @NotNull @ChildPath("delegate") String delegate,
         int minDuration,
-        int maxDuration) {
+        int maxDuration,
+        boolean endImmediately) {
+        @Default("endImmediately")
+        public static @NotNull ConfigElement defaultEndImmediately() {
+            return ConfigPrimitive.of(false);
+        }
+
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -138,10 +144,12 @@ public class TemporalSkill implements SkillComponent {
                     int ticksRemaining = this.actualDelay - this.startTicks;
                     if (ticksRemaining <= 0) {
                         end = true;
-                    } else {
+                    } else if (!data.endImmediately) {
                         MinecraftServer.getSchedulerManager()
                             .scheduleTask(delegate::end, TaskSchedule.tick(ticksRemaining), TaskSchedule.stop(),
                                 ExecutionType.SYNC);
+                    } else {
+                        end = true;
                     }
                 }
             } finally {
