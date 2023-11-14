@@ -142,14 +142,12 @@ public class TemporalSkill implements SkillComponent {
                     end = true;
                 } else {
                     int ticksRemaining = this.actualDelay - this.startTicks;
-                    if (ticksRemaining <= 0) {
+                    if (ticksRemaining <= 0 || data.endImmediately) {
                         end = true;
-                    } else if (!data.endImmediately) {
+                    } else {
                         MinecraftServer.getSchedulerManager()
                             .scheduleTask(delegate::end, TaskSchedule.tick(ticksRemaining), TaskSchedule.stop(),
                                 ExecutionType.SYNC);
-                    } else {
-                        end = true;
                     }
                 }
             } finally {

@@ -47,39 +47,36 @@ public class ApplyFireSkill implements SkillComponent {
     private static final class Impl extends TargetedSkill {
         private final Data data;
         private final Set<Entity> entities;
-        private final Object lock;
 
         public Impl(@NotNull Mob self, @NotNull Selector selector, @NotNull Data data) {
             super(self, selector);
             this.entities = Collections.newSetFromMap(new WeakHashMap<>());
             this.data = data;
-            this.lock = new Object();
         }
 
         @Override
         protected void useOnTarget(@NotNull Target target) {
-            synchronized (lock) {
+            self.getAcquirable().sync(self -> {
                 target.forType(Entity.class, entity -> {
                     entity.setOnFire(true);
                     entities.add(entity);
                 });
-            }
+            });
         }
 
         @Override
         public void end() {
-            synchronized (lock) {
-                Iterator<Entity> iterator = entities.iterator();
-                while (iterator.hasNext()) {
-                    Entity entity = iterator.next();
-                    if (entity.isRemoved()) {
-                        iterator.remove();
-                        continue;
-                    }
-
-                    entity.setOnFire(false);
+            self.getAcquirable().sync(self -> {
+                for (Entity entity : entities) {
+                    entity.getAcquirable().sync(target -> {
+                        if (!target.isRemoved()) {
+                            target.setOnFire(false);
+                        }
+                    });
                 }
-            }
+
+                entities.clear();
+            });
         }
 
         @Override
