@@ -4,15 +4,16 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.timer.ExecutionType;
+import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.commons.MathUtils;
+import org.phantazm.mob2.Keys;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Trigger;
 
@@ -32,7 +33,8 @@ public class TemporalSkill implements SkillComponent {
 
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, delegate.apply(mob, injectionStore), mob);
+        Scheduler scheduler = injectionStore.get(Keys.SCHEDULER);
+        return new Internal(data, delegate.apply(mob, injectionStore), mob, scheduler);
     }
 
     @DataObject
@@ -58,15 +60,18 @@ public class TemporalSkill implements SkillComponent {
         private final Skill delegate;
         private final boolean tickDelegate;
         private final Mob self;
+        private final Scheduler scheduler;
 
         private int startTicks;
         private int actualDelay;
 
-        private Internal(Data data, Skill delegate, Mob self) {
+        private Internal(Data data, Skill delegate, Mob self, Scheduler scheduler) {
             this.data = data;
             this.delegate = delegate;
             this.tickDelegate = delegate.needsTicking();
             this.self = self;
+            this.scheduler = scheduler;
+
             this.startTicks = -1;
             this.actualDelay = -1;
         }
@@ -145,9 +150,8 @@ public class TemporalSkill implements SkillComponent {
                     if (ticksRemaining <= 0 || data.endImmediately) {
                         end = true;
                     } else {
-                        MinecraftServer.getSchedulerManager()
-                            .scheduleTask(delegate::end, TaskSchedule.tick(ticksRemaining), TaskSchedule.stop(),
-                                ExecutionType.SYNC);
+                        scheduler.scheduleTask(delegate::end, TaskSchedule.tick(ticksRemaining), TaskSchedule.stop(),
+                            ExecutionType.SYNC);
                     }
                 }
             } finally {

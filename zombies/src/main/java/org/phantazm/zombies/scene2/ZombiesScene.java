@@ -12,6 +12,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.thread.Acquirable;
+import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -53,6 +54,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
     private final ZombiesDatabase database;
     private final EventNode<Event> sceneNode;
     private final TickTaskScheduler tickTaskScheduler;
+    private final Scheduler scheduler;
 
     private final Pos spawnPos;
 
@@ -86,6 +88,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         this.database = Objects.requireNonNull(database);
         this.sceneNode = Objects.requireNonNull(sceneNode);
         this.tickTaskScheduler = Objects.requireNonNull(tickTaskScheduler);
+        this.scheduler = Scheduler.newScheduler();
 
         Vec3I spawnBlock = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         this.spawnPos = new Pos(spawnBlock.x() + 0.5, spawnBlock.y(), spawnBlock.z() + 0.5, mapSettingsInfo.yaw(),
@@ -244,6 +247,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         stageTransition.tick(time);
         map.tick(time);
         tickTaskScheduler.tick(time);
+        scheduler.processTick();
 
         for (ZombiesPlayer zombiesPlayer : managedPlayers.values()) {
             if (zombiesPlayer.hasQuit()) {
@@ -365,6 +369,10 @@ public class ZombiesScene extends InstanceScene implements EventScene {
 
     public @Nullable Stage currentStage() {
         return stageTransition.getCurrentStage();
+    }
+
+    public @NotNull Scheduler getScheduler() {
+        return scheduler;
     }
 
     @SuppressWarnings("unchecked")
