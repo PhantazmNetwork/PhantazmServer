@@ -8,12 +8,12 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class FileLoaderException extends IOException {
+public class LoaderException extends IOException {
     private final Path path;
     private final ConfigElement element;
     private final ElementPath elementPath;
 
-    private FileLoaderException(String message, Throwable cause, Path path, ConfigElement element, ElementPath elementPath) {
+    private LoaderException(String message, Throwable cause, Path path, ConfigElement element, ElementPath elementPath) {
         super(message, cause);
         this.path = path;
         this.element = element;
@@ -63,8 +63,8 @@ public class FileLoaderException extends IOException {
         private Builder() {
         }
 
-        public @NotNull FileLoaderException build() {
-            return new FileLoaderException(message, cause, path, element, elementPath);
+        public @NotNull LoaderException build() {
+            return new LoaderException(message, cause, path, element, elementPath);
         }
 
         public @NotNull Builder withPath(@Nullable Path path) {

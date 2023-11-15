@@ -75,7 +75,7 @@ public interface DataSource extends Closeable {
             this.symlink = symlink;
         }
 
-        private Iterator<Path> getIterator() throws FileLoaderException {
+        private Iterator<Path> getIterator() throws LoaderException {
             if (iterator != null) {
                 return iterator;
             }
@@ -87,42 +87,42 @@ public interface DataSource extends Closeable {
             try {
                 return iterator = (stream = Files.walk(root, symlink ? VISIT_SYMLINKS : NO_VISIT_SYMLINKS)).iterator();
             } catch (IOException e) {
-                throw FileLoaderException.builder()
+                throw LoaderException.builder()
                     .withCause(e)
                     .withMessage("failed to initialize data stream")
                     .build();
             }
         }
 
-        private boolean hasNext0() throws FileLoaderException {
+        private boolean hasNext0() throws LoaderException {
             Iterator<Path> itr = getIterator();
             try {
                 return itr.hasNext();
             } catch (UncheckedIOException e) {
-                throw FileLoaderException.builder()
+                throw LoaderException.builder()
                     .withCause(e)
                     .withMessage("failed to access file")
                     .build();
             }
         }
 
-        private Path next0() throws FileLoaderException {
+        private Path next0() throws LoaderException {
             Iterator<Path> itr = getIterator();
             try {
                 return itr.next();
             } catch (UncheckedIOException e) {
-                throw FileLoaderException.builder()
+                throw LoaderException.builder()
                     .withCause(e)
                     .withMessage("failed to access file")
                     .build();
             }
         }
 
-        private ConfigElement load(Path path) throws FileLoaderException {
+        private ConfigElement load(Path path) throws LoaderException {
             try {
                 return Configuration.read(path, codec);
             } catch (IOException e) {
-                throw FileLoaderException.builder()
+                throw LoaderException.builder()
                     .withCause(e)
                     .withMessage("failed to load data from file")
                     .withPath(path)
@@ -130,26 +130,23 @@ public interface DataSource extends Closeable {
             }
         }
 
-        private void validateOpen() throws FileLoaderException {
-            if (closed) throw FileLoaderException.builder()
+        private void validateOpen() throws LoaderException {
+            if (closed) throw LoaderException.builder()
                 .withMessage("this resource has been closed")
                 .build();
         }
 
         @Override
-        public boolean hasNext() throws FileLoaderException {
+        public boolean hasNext() throws LoaderException {
             validateOpen();
             if (cache != null) {
                 return true;
             }
 
-            if (pathMatcher == null) {
-                return hasNext0();
-            }
-
             while (hasNext0()) {
                 Path check = next0();
-                if (pathMatcher.matches(check)) {
+                if ((pathMatcher == null || pathMatcher.matches(check)) &&
+                    Files.isRegularFile(check, symlink ? SYMLINK : NO_SYMLINK)) {
                     cache = check;
                     return true;
                 }
@@ -159,7 +156,7 @@ public interface DataSource extends Closeable {
         }
 
         @Override
-        public @NotNull ConfigElement next() throws FileLoaderException {
+        public @NotNull ConfigElement next() throws LoaderException {
             validateOpen();
             Path cache = this.cache;
             if (cache != null) {
@@ -167,15 +164,11 @@ public interface DataSource extends Closeable {
                 return load(cache);
             }
 
-            if (pathMatcher == null) {
-                return load(next0());
-            }
-
             Path path;
             do {
                 path = next0();
-            }
-            while (!pathMatcher.matches(path));
+            } while ((pathMatcher != null && !pathMatcher.matches(path)) ||
+                !Files.isRegularFile(path, symlink ? SYMLINK : NO_SYMLINK));
 
             return load(path);
         }
