@@ -39,6 +39,7 @@ public final class ServerCommandFeature {
         manager.register(new PardonCommand(IdentitySource.MOJANG, validator));
         manager.register(new WhitelistCommand(IdentitySource.MOJANG, validator, whitelist));
         manager.register(new PermissionCommand(permissionHandler, IdentitySource.MOJANG));
+        manager.register(new ReloadCommand());
         manager.register(new OrderlyShutdownCommand(shutdownConfig));
         manager.register(new DebugCommand());
         manager.register(new GamereportCommand(zombiesGamereportConfig));
