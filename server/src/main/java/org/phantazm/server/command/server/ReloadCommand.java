@@ -13,7 +13,7 @@ public class ReloadCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.reload");
 
     public ReloadCommand() {
-        super("gamemode", PERMISSION);
+        super("reload", PERMISSION);
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             try {
