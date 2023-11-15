@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl {
     InjectionStore EMPTY = new InjectionStoreImpl(Map.of());
@@ -71,6 +72,8 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
     <T> @NotNull T get(@NotNull Key<T> key);
 
     <T> boolean has(@NotNull Key<T> key);
+
+    <T> @NotNull T getOrDefault(@NotNull Key<T> key, @NotNull Supplier<@NotNull T> defaultSupplier);
 
     @NotNull
     @Unmodifiable
@@ -211,6 +214,17 @@ public sealed interface InjectionStore permits InjectionStore.InjectionStoreImpl
         @Override
         public <T> boolean has(@NotNull Key<T> key) {
             return mappings.containsKey(key);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T> @NotNull T getOrDefault(@NotNull Key<T> key, @NotNull Supplier<@NotNull T> defaultSupplier) {
+            Object object = mappings.get(key);
+            if (object != null) {
+                return (T) object;
+            }
+
+            return Objects.requireNonNull(defaultSupplier.get());
         }
 
         @Override
