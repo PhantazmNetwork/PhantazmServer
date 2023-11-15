@@ -285,7 +285,7 @@ public final class PhantazmServer {
 
             ZombiesFeature.initialize(contextManager, keyParser, ProximaFeature.instanceSettingsFunction(), viewProvider,
                 PartyFeature.getPartyHolder().uuidToGuild(), SongFeature.songLoader(),
-                zombiesConfig, mappingProcessorSource, MobFeature::getMobCreators, modifierCommandConfig);
+                zombiesConfig, mappingProcessorSource, MobFeature::mobCreators, modifierCommandConfig);
 
             LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
             ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),

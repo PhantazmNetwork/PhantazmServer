@@ -99,7 +99,7 @@ public final class MobFeature {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        
+
         LOGGER.info("Loaded {} mob file(s)", loader.data().size());
 
         MobFeature.loader = loader;
@@ -133,7 +133,7 @@ public final class MobFeature {
     }
 
     @SuppressWarnings("unused")
-    public static @NotNull @Unmodifiable Map<Key, MobCreator> getMobCreators() {
+    public static @NotNull @Unmodifiable Map<Key, MobCreator> mobCreators() {
         return FeatureUtils.check(loader).data();
     }
 
