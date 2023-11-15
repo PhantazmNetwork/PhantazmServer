@@ -66,6 +66,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public final class ZombiesFeature {
@@ -89,7 +90,7 @@ public final class ZombiesFeature {
         @NotNull PlayerViewProvider viewProvider,
         @NotNull Map<? super UUID, ? extends Party> parties,
         @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
-        @NotNull MappingProcessorSource mappingProcessorSource, @NotNull Map<Key, MobCreator> mobCreatorMap,
+        @NotNull MappingProcessorSource mappingProcessorSource, @NotNull Supplier<? extends Map<Key, MobCreator>> mobCreatorMap,
         @NotNull ModifierCommandConfig commandConfig) {
         try {
             FileUtils.createDirectories(MAPS_FOLDER);
