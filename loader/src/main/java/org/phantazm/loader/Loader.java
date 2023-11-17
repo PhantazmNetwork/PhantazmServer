@@ -59,7 +59,7 @@ public interface Loader<T> {
 
                             try {
                                 entries = extract(location, extractor, element);
-                            } catch (IOException exception) {
+                            } catch (Exception exception) {
                                 if (exception instanceof LoaderException loaderException) {
                                     throw loaderException;
                                 }
