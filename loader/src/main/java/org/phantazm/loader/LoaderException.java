@@ -9,13 +9,13 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class LoaderException extends IOException {
-    private final Path path;
+    private final DataLocation location;
     private final ConfigElement element;
     private final ElementPath elementPath;
 
-    private LoaderException(String message, Throwable cause, Path path, ConfigElement element, ElementPath elementPath) {
+    private LoaderException(String message, Throwable cause, DataLocation location, ConfigElement element, ElementPath elementPath) {
         super(message, cause);
-        this.path = path;
+        this.location = location;
         this.element = element;
         this.elementPath = elementPath;
     }
@@ -28,10 +28,10 @@ public class LoaderException extends IOException {
         StringBuilder builder = new StringBuilder();
         builder.append(detail);
 
-        if (path != null) {
+        if (location != null) {
             builder.append(sep);
-            builder.append("path: ");
-            builder.append(path);
+            builder.append("location: ");
+            builder.append(location);
         }
 
         if (element != null) {
@@ -54,7 +54,7 @@ public class LoaderException extends IOException {
     }
 
     public static class Builder {
-        private Path path;
+        private DataLocation location;
         private ConfigElement element;
         private ElementPath elementPath;
         private String message;
@@ -64,11 +64,11 @@ public class LoaderException extends IOException {
         }
 
         public @NotNull LoaderException build() {
-            return new LoaderException(message, cause, path, element, elementPath);
+            return new LoaderException(message, cause, location, element, elementPath);
         }
 
-        public @NotNull Builder withPath(@Nullable Path path) {
-            this.path = path;
+        public @NotNull Builder withDataLocation(@Nullable DataLocation location) {
+            this.location = location;
             return this;
         }
 

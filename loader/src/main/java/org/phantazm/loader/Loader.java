@@ -2,7 +2,6 @@ package org.phantazm.loader;
 
 import com.github.steanky.element.core.ElementException;
 import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigContainer;
 import com.github.steanky.toolkit.function.ExceptionHandler;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -17,20 +16,21 @@ public interface Loader<T> {
 
     void load() throws IOException;
 
-    static <T> @NotNull Loader<T> loader(@NotNull Supplier<? extends @NotNull DataSource> dataSourceSupplier,
-        @NotNull ObjectExtractor<T> extractor) {
+    static <T, V extends ConfigElement> @NotNull Loader<T> loader(
+        @NotNull Supplier<? extends @NotNull DataSource> dataSourceSupplier,
+        @NotNull ObjectExtractor<T, V> extractor) {
         Objects.requireNonNull(dataSourceSupplier);
         Objects.requireNonNull(extractor);
         return new Impl<>(dataSourceSupplier, extractor);
     }
 
-    class Impl<T> implements Loader<T> {
+    class Impl<T, V extends ConfigElement> implements Loader<T> {
         private final Supplier<? extends DataSource> dataSourceSupplier;
-        private final ObjectExtractor<T> extractor;
+        private final ObjectExtractor<T, V> extractor;
 
         private Map<Key, T> data;
 
-        private Impl(Supplier<? extends @NotNull DataSource> dataSourceSupplier, ObjectExtractor<T> extractor) {
+        private Impl(Supplier<? extends @NotNull DataSource> dataSourceSupplier, ObjectExtractor<T, V> extractor) {
             this.dataSourceSupplier = dataSourceSupplier;
             this.extractor = extractor;
         }
@@ -53,33 +53,32 @@ public interface Loader<T> {
                 try (DataSource dataSource = dataSourceSupplier.get()) {
                     while (dataSource.hasNext()) {
                         ConfigElement element = dataSource.next();
+                        DataLocation location = dataSource.lastLocation();
 
                         handler.run(() -> {
-                            if (!element.isContainer()) {
+                            Collection<ObjectExtractor.Entry<T>> entries;
+
+                            try {
+                                entries = extract(location, extractor, element);
+                            } catch (Exception exception) {
+                                if (exception instanceof LoaderException loaderException) {
+                                    throw loaderException;
+                                }
+
                                 throw LoaderException.builder()
                                     .withElement(element)
-                                    .withMessage("expected element to be a container")
-                                    .build();
-                            }
-
-                            ConfigContainer container = element.asContainer();
-
-                            Collection<ObjectExtractor.Entry<T>> entries;
-                            try {
-                                entries = extractor.extract(container);
-                            } catch (ElementException e) {
-                                throw LoaderException.builder()
-                                    .withElement(container)
                                     .withMessage("exception when loading from container")
-                                    .withCause(e)
+                                    .withDataLocation(location)
+                                    .withCause(exception)
                                     .build();
                             }
 
                             for (ObjectExtractor.Entry<T> entry : entries) {
                                 if (map.putIfAbsent(entry.identifier(), entry.object()) != null) {
                                     throw LoaderException.builder()
-                                        .withElement(container)
+                                        .withElement(element)
                                         .withMessage("duplicate key " + entry.identifier())
+                                        .withDataLocation(location)
                                         .build();
                                 }
                             }
@@ -89,6 +88,21 @@ public interface Loader<T> {
             }
 
             this.data = Map.copyOf(map);
+        }
+
+        private static <T, V extends ConfigElement> Collection<ObjectExtractor.Entry<T>> extract(
+            DataLocation dataLocation,
+            ObjectExtractor<T, V> extractor, ConfigElement element) throws IOException {
+            Class<V> type = extractor.allowedType();
+            if (!type.isAssignableFrom(element.getClass())) {
+                throw LoaderException.builder()
+                    .withElement(element)
+                    .withMessage("bad element type, expected " + type + " but was " + element.getClass())
+                    .withDataLocation(dataLocation)
+                    .build();
+            }
+
+            return extractor.extract(dataLocation, type.cast(element));
         }
     }
 }

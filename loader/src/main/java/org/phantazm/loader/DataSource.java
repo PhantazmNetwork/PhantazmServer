@@ -23,6 +23,8 @@ public interface DataSource extends Closeable {
 
     @NotNull ConfigElement next() throws IOException;
 
+    @NotNull DataLocation lastLocation();
+
     static @NotNull DataSource directory(@NotNull Path root, @NotNull ConfigCodec codec) {
         Objects.requireNonNull(root);
         Objects.requireNonNull(codec);
@@ -67,6 +69,7 @@ public interface DataSource extends Closeable {
         private Iterator<Path> iterator;
 
         private Path cache;
+        private Path last;
 
         private Directory(Path root, ConfigCodec codec, String pathMatcher, boolean symlink) {
             this.root = root;
@@ -125,7 +128,7 @@ public interface DataSource extends Closeable {
                 throw LoaderException.builder()
                     .withCause(e)
                     .withMessage("failed to load data from file")
-                    .withPath(path)
+                    .withDataLocation(DataLocation.path(path))
                     .build();
             }
         }
@@ -161,6 +164,7 @@ public interface DataSource extends Closeable {
             Path cache = this.cache;
             if (cache != null) {
                 this.cache = null;
+                this.last = cache;
                 return load(cache);
             }
 
@@ -170,7 +174,18 @@ public interface DataSource extends Closeable {
             } while ((pathMatcher != null && !pathMatcher.matches(path)) ||
                 !Files.isRegularFile(path, symlink ? SYMLINK : NO_SYMLINK));
 
+            this.last = path;
             return load(path);
+        }
+
+        @Override
+        public @NotNull DataLocation lastLocation() {
+            Path last = this.last;
+            if (last == null) {
+                throw new IllegalStateException("did not call next() before lastLocation()");
+            }
+
+            return DataLocation.path(last);
         }
 
         @Override
@@ -182,6 +197,7 @@ public interface DataSource extends Closeable {
                 this.stream = null;
                 this.iterator = null;
                 this.cache = null;
+                this.last = null;
 
                 stream.close();
             }

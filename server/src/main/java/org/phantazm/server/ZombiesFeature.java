@@ -8,6 +8,7 @@ import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.Configuration;
+import com.github.steanky.ethylene.core.collection.ConfigContainer;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
@@ -34,6 +35,9 @@ import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.sound.SongLoader;
+import org.phantazm.loader.DataSource;
+import org.phantazm.loader.LoaderException;
+import org.phantazm.loader.ObjectExtractor;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
@@ -61,6 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -98,8 +103,7 @@ public final class ZombiesFeature {
             FileUtils.createDirectories(INSTANCES_FOLDER);
             FileUtils.createDirectories(MODIFIERS_FOLDER);
         } catch (IOException e) {
-            LOGGER.error("Error creating some directories", e);
-            throw new RuntimeException();
+            throw new UncheckedIOException(e);
         }
 
         Attributes.registerAll();
@@ -163,35 +167,26 @@ public final class ZombiesFeature {
         ConfigProcessor<ModifierData> dataConfigProcessor = mappingProcessorSource
             .processorFor(Token.ofClass(ModifierData.class));
 
-        Map<Key, ModifierComponent> modifierComponents = new HashMap<>();
-        try (Stream<Path> files = Files.list(MODIFIERS_FOLDER)) {
-            for (Path path : (Iterable<Path>) files::iterator) {
-                ConfigElement config = Configuration.read(path, codec);
-                if (!config.isNode()) {
-                    LOGGER.error("Expected top-level node in {}", path);
-                    continue;
-                }
-
-                ConfigNode node = config.asNode();
+        org.phantazm.loader.Loader<ModifierComponent> componentLoader = org.phantazm.loader.Loader.loader(() ->
+                DataSource.directory(MODIFIERS_FOLDER, codec, "glob:**.{yml,yaml}"),
+            ObjectExtractor.extractor(ConfigNode.class, (location, node) -> {
                 ModifierData modifierData = dataConfigProcessor.dataFromElement(node);
 
                 ElementContext context = contextManager.makeContext(modifierData.modifier());
-                DualComponent<ZombiesScene, Modifier> modifierComponent = context.provide(DependencyProvider.EMPTY, exception -> {
-                    LOGGER.warn("Error loading modifier in {}: {}", path, exception);
-                }, () -> null);
-                if (modifierComponent == null) {
-                    continue;
-                }
+                DualComponent<ZombiesScene, Modifier> modifierComponent = context.provide(DependencyProvider.EMPTY,
+                    ElementContext.DEFAULT_EXCEPTION_HANDLER, () -> null);
 
-                modifierComponents.put(modifierData.key(), new ModifierSource(modifierData, modifierComponent));
-            }
+                return List.of(new ObjectExtractor.Entry<>(modifierData.key(), new ModifierSource(modifierData, modifierComponent)));
+            }));
+
+        try {
+            componentLoader.load();
         } catch (IOException e) {
-            LOGGER.error("Error enumerating modifiers folder", e);
-            throw new RuntimeException();
+            throw new UncheckedIOException(e);
         }
 
-        LOGGER.info("Loaded {} modifiers", modifierComponents.size());
-        ModifierHandler.Global.init(modifierComponents, InjectionStore.of());
+        LOGGER.info("Loaded {} modifiers", componentLoader.data().size());
+        ModifierHandler.Global.init(componentLoader.data(), InjectionStore.of());
 
         ZombiesJoiner joiner = new ZombiesJoiner(providers);
 

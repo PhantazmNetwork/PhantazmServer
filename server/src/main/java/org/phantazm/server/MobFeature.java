@@ -65,34 +65,23 @@ public final class MobFeature {
 
         Loader<MobCreator> loader = Loader.loader(() ->
                 DataSource.directory(MobFeature.MOBS_PATH, codec, "glob:**.{yml,yaml}"),
-            new ObjectExtractor<>() {
-                @Override
-                public @NotNull Collection<@NotNull Entry<MobCreator>> extract(@NotNull ConfigContainer container) throws IOException {
-                    if (!container.isNode()) {
-                        throw LoaderException.builder()
-                            .withElement(container)
-                            .withMessage("non-node mob file")
-                            .build();
-                    }
+            ObjectExtractor.extractor(ConfigNode.class, (location, node) -> {
+                ElementContext context = contextManager.makeContext(node);
+                MobData data = mobDataProcessor.dataFromElement(node);
 
-                    ConfigNode node = container.asNode();
-                    ElementContext context = contextManager.makeContext(node);
-                    MobData data = mobDataProcessor.dataFromElement(node);
+                Pathfinding.Factory pathfinding = context.provide(PATHFINDING);
 
-                    Pathfinding.Factory pathfinding = context.provide(PATHFINDING);
+                Map<EquipmentSlot, ItemStack> equipmentMap = equipmentMap(data.equipment(), processorSource);
+                Object2FloatMap<String> attributeMap = attributeMap(data.attributes());
 
-                    Map<EquipmentSlot, ItemStack> equipmentMap = equipmentMap(data.equipment(), processorSource);
-                    Object2FloatMap<String> attributeMap = attributeMap(data.attributes());
+                List<SkillComponent> skills = data.skills().isEmpty() ? List.of() : context
+                    .provideCollection(SKILLS);
+                List<GoalApplier> goals = data.goals().isEmpty() ? List.of() : context
+                    .provideCollection(GOALS);
 
-                    List<SkillComponent> skills = data.skills().isEmpty() ? List.of() : context
-                        .provideCollection(SKILLS);
-                    List<GoalApplier> goals = data.goals().isEmpty() ? List.of() : context
-                        .provideCollection(GOALS);
-
-                    return List.of(new ObjectExtractor.Entry<>(data.key(), new ZombiesMobCreator(data, pathfinding,
-                        skills, goals, pathfinder, instanceSettingsFunction, equipmentMap, attributeMap)));
-                }
-            });
+                return List.of(new ObjectExtractor.Entry<>(data.key(), new ZombiesMobCreator(data, pathfinding, skills, goals,
+                    pathfinder, instanceSettingsFunction, equipmentMap, attributeMap)));
+            }));
 
         try {
             loader.load();
