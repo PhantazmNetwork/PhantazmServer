@@ -1,6 +1,5 @@
 package org.phantazm.loader;
 
-import com.github.steanky.element.core.ElementException;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.toolkit.function.ExceptionHandler;
 import net.kyori.adventure.key.Key;
@@ -60,7 +59,7 @@ public interface Loader<T> {
 
                             try {
                                 entries = extract(location, extractor, element);
-                            } catch (Exception exception) {
+                            } catch (IOException exception) {
                                 if (exception instanceof LoaderException loaderException) {
                                     throw loaderException;
                                 }

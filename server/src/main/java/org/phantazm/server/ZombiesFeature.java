@@ -6,9 +6,6 @@ import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.bridge.Configuration;
-import com.github.steanky.ethylene.core.collection.ConfigContainer;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
@@ -36,7 +33,6 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.loader.DataSource;
-import org.phantazm.loader.LoaderException;
 import org.phantazm.loader.ObjectExtractor;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
@@ -66,13 +62,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public final class ZombiesFeature {
     public static final Path MAPS_FOLDER = Path.of("./zombies/maps");
@@ -176,7 +170,7 @@ public final class ZombiesFeature {
                 DualComponent<ZombiesScene, Modifier> modifierComponent = context.provide(DependencyProvider.EMPTY,
                     ElementContext.DEFAULT_EXCEPTION_HANDLER, () -> null);
 
-                return List.of(new ObjectExtractor.Entry<>(modifierData.key(), new ModifierSource(modifierData, modifierComponent)));
+                return List.of(ObjectExtractor.entry(modifierData.key(), new ModifierSource(modifierData, modifierComponent)));
             }));
 
         try {

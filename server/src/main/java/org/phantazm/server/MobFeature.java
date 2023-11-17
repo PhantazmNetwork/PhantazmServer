@@ -5,7 +5,6 @@ import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
-import com.github.steanky.ethylene.core.collection.ConfigContainer;
 import com.github.steanky.ethylene.core.collection.ConfigEntry;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
@@ -23,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.loader.DataSource;
 import org.phantazm.loader.Loader;
-import org.phantazm.loader.LoaderException;
 import org.phantazm.loader.ObjectExtractor;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.mob2.MobData;
@@ -38,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -79,7 +76,7 @@ public final class MobFeature {
                 List<GoalApplier> goals = data.goals().isEmpty() ? List.of() : context
                     .provideCollection(GOALS);
 
-                return List.of(new ObjectExtractor.Entry<>(data.key(), new ZombiesMobCreator(data, pathfinding, skills, goals,
+                return List.of(ObjectExtractor.entry(data.key(), new ZombiesMobCreator(data, pathfinding, skills, goals,
                     pathfinder, instanceSettingsFunction, equipmentMap, attributeMap)));
             }));
 
