@@ -66,7 +66,7 @@ public interface Loader<T> {
 
                                 throw LoaderException.builder()
                                     .withElement(element)
-                                    .withMessage("exception when loading from container")
+                                    .withMessage("exception when loading data from configuration")
                                     .withDataLocation(location)
                                     .withCause(exception)
                                     .build();

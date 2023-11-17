@@ -35,7 +35,7 @@ public interface ObjectExtractor<T, V extends ConfigElement> {
         };
     }
 
-    static <T> @NotNull Entry<T> entry(@NotNull Key identifier, T object) {
+    static <T> @NotNull Entry<T> entry(@NotNull Key identifier, @NotNull T object) {
         return new Entry<>(identifier, object);
     }
 
