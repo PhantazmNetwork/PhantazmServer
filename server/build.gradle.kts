@@ -18,8 +18,11 @@ dependencies {
 
     implementation(libs.adventure.text.minimessage)
     implementation(libs.ethylene.toml)
+    implementation(libs.toml)
     implementation(libs.ethylene.yaml)
+    implementation(libs.yaml)
     implementation(libs.ethylene.json)
+    implementation(libs.gson)
     implementation(libs.element.core)
     implementation(libs.ethylene.mapper)
 

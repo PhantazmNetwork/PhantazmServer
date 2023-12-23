@@ -50,6 +50,7 @@ dependencies {
     implementation(projects.phantazmZombiesMapdata)
     implementation(libs.element.core)
     implementation(libs.ethylene.yaml)
+    implementation(libs.yaml)
 
     include(libs.libgui)
     include(libs.renderer)

@@ -34,6 +34,7 @@ dependencies {
     implementation(projects.phantazmCommons)
     implementation(projects.phantazmMessaging)
     implementation(libs.ethylene.yaml)
+    implementation(libs.yaml)
 
     include(projects.phantazmCommons)
     include(projects.phantazmMessaging)
