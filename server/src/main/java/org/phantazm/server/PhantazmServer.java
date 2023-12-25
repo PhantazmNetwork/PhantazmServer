@@ -10,6 +10,7 @@ import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.event.Event;
@@ -35,6 +36,7 @@ import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
+import org.phantazm.stats.zombies.BasicLeaderbordDatabase;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -50,6 +52,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -300,6 +303,11 @@ public final class PhantazmServer {
         });
 
         CompletableFuture.allOf(independentFeatures, databaseFeatures, databaseDependents, game).join();
+
+        BasicLeaderbordDatabase lb = new BasicLeaderbordDatabase(databaseFeatures.defaultExecutor(),
+            HikariFeature.getDataSource());
+        lb.submitGame(Set.of(UUID.randomUUID()), "0", Key.key("test"), 0, 0);
+        System.out.println("T");
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig,

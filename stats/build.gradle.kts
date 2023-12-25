@@ -7,6 +7,7 @@ dependencies {
     api(libs.jooq)
     api(libs.hikariCP)
     api(libs.fastutil)
+    implementation(project(":phantazm-commons"))
     implementation(libs.toolkit.function)
     implementation(libs.caffeine)
 }
