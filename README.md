@@ -105,10 +105,12 @@ something like this (obviously the actual numbers may vary):
 
 ```yml
 services:
-    phantazm_server:
+    phantazm_server: &server
         environment:
             PHANTAZM_CONF_REPO_URL: "https://[your-github-username]:[your-github-access-token]@[repository]"
         user: "1000:1000"
+    phantazm_server_debug:
+        <<: *server
     phantazm_proxy:
         user: "1000:1000"
 ```
