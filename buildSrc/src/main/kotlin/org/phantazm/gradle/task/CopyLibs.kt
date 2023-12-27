@@ -68,7 +68,7 @@ abstract class CopyLibs : DefaultTask() {
         libraryDirectory?.walkTopDown()?.forEach {
             if (it.isDirectory) {
                 val files = it.listFiles()
-                if (files != null && files.size == 0) {
+                if (files != null && files.isEmpty()) {
                     it.delete()
                 }
             } else {

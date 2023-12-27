@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  phantazm_server:
+    build:
+      context: '.'
+      target: 'server_base'
+    environment:
+      # To auto-import game config files, add a docker-compose.override.yml file and specify the repo URL
+      # If you're a Phantazm developer and you've been given a public key, you should (IN THE OVERRIDE!)
+      # set the URL to https://[your-github-username]:[personal-access-token]@github.com/PhantazmNetwork/Configuration
+      # You can generate a token here: https://github.com/settings/tokens/new
+      PHANTAZM_CONF_REPO_URL: ''
+
+      # If any other value besides 'true' (case-sensitive), Phantazm's world files will not be automatically downloaded from
+      # a Google Drive host.
+      # Don't change this value unless you're developing your own server!
+      PHANTAZM_AUTO_DL_WORLDS: 'true'
+
+      # Used to let scripts know they're running in the container.
+      # Do not change!
+      PHANTAZM_IS_DOCKER_CONTAINER: 'true'
+    hostname: 'server'
+    working_dir: '/server'
+    volumes:
+      - './:/server'
+    command: './setup.sh'
+  phantazm_proxy:
+    build:
+      context: '.'
+      target: 'java_base'
+    hostname: 'proxy'
+    command: 'sh -c "java -Xms512M -Xmx512M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -Dfile.encoding=UTF-8 -jar velocity.jar"'
+    working_dir: '/velocity'
+    ports:
+      - '25565:25565'
+    volumes:
+      - './defaultRunData/velocity:/velocity'
+  db:
+    build:
+      context: '.'
+      target: 'mariadb'
+    hostname: 'db'
+    ports:
+      - '3306:3306'
+    environment:
+      MARIADB_USER: phantazm
+      MARIADB_PASSWORD: secret
+      MARIADB_ROOT_PASSWORD: secret
+      MARIADB_DATABASE: phantazm_db
