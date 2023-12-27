@@ -2,7 +2,6 @@
   <configuration default="false" name="Launch Phantazm" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
     <deployment type="docker-compose.yml">
       <settings>
-        <option name="buildKitEnabledForCompose" value="true" />
         <option name="envFilePath" value="" />
         <option name="profiles">
           <list>

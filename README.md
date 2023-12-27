@@ -48,6 +48,9 @@ Phantazm currently makes use of three separate Docker containers — a database,
 All three may be launched at once by running `docker compose up` in the project root. You can also use the provided
 IntelliJ run configuration `Launch Phantazm`, which does the same thing.
 
+**Warning for IntelliJ users**: In order for the run configurations to work correctly, users will have to enable Compose
+v2. Go to `Settings`, then `Build, Execution & Deployment` > `Docker` > `Tools` and then check the `Use Compose v2` box.
+
 By default, launching this way will attempt to download the Minecraft world files we use on our official server. If you
 are not developing for our network, you can disable this by editing `docker-compose.yml`.
 

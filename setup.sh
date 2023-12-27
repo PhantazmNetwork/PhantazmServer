@@ -42,15 +42,21 @@ if [ ! -d "./run/server-1" ]; then
 
     # Clone the configuration repository, if applicable (environment variable should be supplied via docker-compose.yml)
     git clone "${PHANTAZM_CONF_REPO_URL}" ./run/server-1
-    cp -a "./defaultRunData/server-1/." "./run/server-1"
   else
     echo "[WARNING] No configuration repository has been provided!"
     echo "[WARNING] Phantazm maps will not work correctly."
   fi
+
+  cp -a "./defaultRunData/server-1/." "./run/server-1"
 fi
 
 # Automatically download worlds
 if [ "${PHANTAZM_AUTO_DL_WORLDS}" = "true" ]; then
+  # Delete ./tmp if it already exists (maybe setup proc was terminated before it could clean up?)
+  if [ -d "./tmp" ]; then
+      rm -rf "./tmp"
+  fi
+
   mkdir -p "./run/server-1/zombies/instances"
   mkdir -p "./run/server-1/lobbies/instances"
 

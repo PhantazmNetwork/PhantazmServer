@@ -6,3 +6,4 @@ local.settings.gradle.kts
 .gradle-home/*
 !.gradle-home/README
 docker-compose.override.yml
+/tmp

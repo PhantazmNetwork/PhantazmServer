@@ -1,8 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Launch Phantazm (debug)" type="docker-deploy" factoryName="docker-compose.yml" singleton="false" server-name="Docker">
+  <configuration default="false" name="Launch Phantazm (debug)" type="docker-deploy" factoryName="docker-compose.yml" singleton="true" server-name="Docker">
     <deployment type="docker-compose.yml">
       <settings>
-        <option name="buildKitEnabledForCompose" value="true" />
         <option name="envFilePath" value="" />
         <option name="profiles">
           <list>
