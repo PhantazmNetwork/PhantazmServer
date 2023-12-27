@@ -33,7 +33,11 @@ untapped potential in the space.
 including the database and Minecraft server itself, due to using **default credentials**.
 
 Local development builds may be started with [Docker Compose](https://docs.docker.com/compose/), which is a tool for
-orchestrating multiple virtual containers.
+orchestrating multiple virtual containers. If you are on
+Windows, [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) should be all you need to install
+beforehand. If you are on Linux, you can also set up Docker Desktop (although it may be more complicated depending on
+your distribution). If you do **not** go with Docker Desktop, make sure you have installed
+both [Docker Engine](https://docs.docker.com/engine/) and Docker Compose.
 
 Phantazm currently makes use of three separate Docker containers — a database, Velocity proxy, and the Minestom server.
 All three may be launched at once by running `docker compose up` in the project root. You can also use the provided
