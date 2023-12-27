@@ -9,8 +9,9 @@ This repository contains:
 1. The code for our minigames
 2. Supporting libraries such as `phantazm-commons`
 3. Advanced utilities for creating games, such as `phantazm-zombies-mapeditor`
+4. Build files, setup scripts, and some essential configuration files
 
-If you want to join our Discord, please join https://discord.gg/Rb6NkK4EQ8.
+If you want to interact with the community, please join our [Discord server](https://discord.gg/Rb6NkK4EQ8)!
 
 ## Table of Contents
 
