@@ -40,6 +40,10 @@ beforehand. If you are on Linux, you can also set up Docker Desktop (although it
 your distribution). If you do **not** go with Docker Desktop, make sure you have installed
 both [Docker Engine](https://docs.docker.com/engine/) and Docker Compose.
 
+If you are a Windows user, it is additionally very important to ensure that CRLF line endings won't cause Docker to have
+issues building the project. Open up Git Bash and run the command `git config --global core.autocrlf false` — or
+manually update the config file — to prevent issues from arising.
+
 Phantazm currently makes use of three separate Docker containers — a database, Velocity proxy, and the Minestom server.
 All three may be launched at once by running `docker compose up` in the project root. You can also use the provided
 IntelliJ run configuration `Launch Phantazm`, which does the same thing.
@@ -56,9 +60,11 @@ something like this:
 
 ```yml
 services:
-    phantazm_server:
+    phantazm_server: &server
         environment:
             PHANTAZM_CONF_REPO_URL: "https://[your-github-username]:[your-github-access-token]@[repository]"
+    phantazm_server_debug:
+        <<: *server 
 ```
 
 An example `PHANTAZM_CONF_REPO_URL` would
@@ -84,10 +90,12 @@ repository), you will have to add some additional options:
 
 ```yml
 services:
-    phantazm_server:
+    phantazm_server: &server
         environment:
             PHANTAZM_CONF_REPO_URL: "https://[your-github-username]:[your-github-access-token]@[repository]"
         user: "[uid]:[gid]"
+    phantazm_server_debug:
+        <<: *server
     phantazm_proxy:
         user: "[uid]:[gid]"
 ```
@@ -110,6 +118,14 @@ services:
 Once you've set up your development environment and run `docker compose up`, you should have a running proxy, server,
 and database. You can connect to the server (through the proxy) by joining `localhost` on a vanilla 1.19.4 Minecraft
 client.
+
+### Debugging
+
+Up until now, the examples have shown the project being run without debugging enabled. However, there is an alternate
+Docker profile you can enable that will allow you to connect to the Minecraft server with a JVM debugger. Just
+run `docker compose --profile debug up`,
+or use the IntelliJ run configuration `Launch Phantazm (debug)`. Then, you can connect the debugger to `localhost:5005`,
+or run the `Debug Phantazm` configuration in IntelliJ, and set breakpoints as usual.
 
 ### Configuration
 
