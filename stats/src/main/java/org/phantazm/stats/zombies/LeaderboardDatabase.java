@@ -1,8 +1,11 @@
 package org.phantazm.stats.zombies;
 
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
+import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -15,6 +18,9 @@ public interface LeaderboardDatabase {
     record LeaderboardEntry(@NotNull Set<@NotNull UUID> team,
         long timeTaken) {
     }
+
+    @Blocking
+    void initTables(@NotNull IntSet teamSizes, @NotNull Set<String> validModifierKeys) throws SQLException;
 
     @NotNull CompletableFuture<Long> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
         @NotNull String modifierKey);
