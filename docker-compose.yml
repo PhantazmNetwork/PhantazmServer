@@ -23,6 +23,7 @@ services:
     profiles:
       - 'nodebug'
     hostname: 'server'
+    user: "1000:1000"
     depends_on:
       - db
       - phantazm_proxy
@@ -46,6 +47,7 @@ services:
       context: '.'
       target: 'java_base'
     hostname: 'proxy'
+    user: "1000:1000"
     command: 'sh -c "java -Xms512M -Xmx512M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -Dfile.encoding=UTF-8 -jar velocity.jar"'
     working_dir: '/velocity'
     ports:

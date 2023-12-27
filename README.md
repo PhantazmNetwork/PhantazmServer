@@ -54,9 +54,8 @@ are not developing for our network, you can disable this by editing `docker-comp
 In addition to the files included in this repository, to properly run Phantazm you will need access to a Git repository
 containing valid configuration files, as these define most aspects of gameplay and are essential. Whether you are
 developing for our network or not, you must add a specify to the configuration repository. You must do this by including
-a file named `docker-compose.override.yml` in the project root (it will be ignored by Git). The file should initially
-look
-something like this:
+a file named `docker-compose.override.yml` in the project root (it will be ignored by Git). The file should
+look something like this:
 
 ```yml
 services:
@@ -69,51 +68,6 @@ services:
 
 An example `PHANTAZM_CONF_REPO_URL` would
 be `https://steanky:[token-redacted]@github.com/PhantazmNetwork/Configuration`.
-
-### Additional setup (required for Linux users)
-
-Depending on how your Docker installation is configured, and as a consequence of how Linux file permissions work, you
-may run into errors such as files being rendered unmodifiable due to having their user set by the Docker container.
-These are fixable, although they unfortunately require some user-specific configuration.
-
-First, open up your terminal of choice and run the command `id`. You will get an output resembling this:
-
-```
-uid=1000(steank) gid=1000(steank)
-```
-
-Where `steank` is replaced by your current username. There might be additional output pertaining to *user groups*; we
-don't care about those. Just note your `uid` and `gid`. In my case, those are both the same number — 1000.
-
-Now, in your `docker-compose.override.yml` (you should have created one already in order to set up a configuration
-repository), you will have to add some additional options:
-
-```yml
-services:
-    phantazm_server: &server
-        environment:
-            PHANTAZM_CONF_REPO_URL: "https://[your-github-username]:[your-github-access-token]@[repository]"
-        user: "[uid]:[gid]"
-    phantazm_server_debug:
-        <<: *server
-    phantazm_proxy:
-        user: "[uid]:[gid]"
-```
-
-Replace `[uid]` with the UID you found from running `id`, and `[gid]` with the GID. At the end, your file should look
-something like this (obviously the actual numbers may vary):
-
-```yml
-services:
-    phantazm_server: &server
-        environment:
-            PHANTAZM_CONF_REPO_URL: "https://[your-github-username]:[your-github-access-token]@[repository]"
-        user: "1000:1000"
-    phantazm_server_debug:
-        <<: *server
-    phantazm_proxy:
-        user: "1000:1000"
-```
 
 ### Joining the local development server
 
