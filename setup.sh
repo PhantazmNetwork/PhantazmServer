@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "[INFO] Starting setup script..."
+
 # This script file is expected to be run through a Docker container only.
 if [ "${PHANTAZM_IS_DOCKER_CONTAINER}" != "true" ]; then
   echo "[ERROR] This script file can only be executed in Phantazm's development container!"
@@ -73,6 +75,14 @@ if [ "${PHANTAZM_AUTO_DL_WORLDS}" = "true" ]; then
 fi
 
 # Now that we've constructed everything else, build the project, copy the libraries, and run the server
-./gradlew -PskipBuild=zombies-mapeditor,zombies-timer,snbt-builder phantazm-server:copyJar --no-daemon && \
-cd "./run/server-1" && \
-java -Dfile.encoding=UTF-8 -Dminestom.packet-queue-size=-1 -Dminestom.keep-alive-kick=-1 -jar server.jar unsafe
+./gradlew -PskipBuild=zombies-mapeditor,zombies-timer,snbt-builder phantazm-server:copyJar --no-daemon
+cd "./run/server-1" || exit
+
+if [ "${PHANTAZM_DEBUG_ENABLED}" != "true" ]; then
+  echo "[INFO] Debugging not enabled."
+  java -Dfile.encoding=UTF-8 -Dminestom.packet-queue-size=-1 -Dminestom.keep-alive-kick=-1 -jar server.jar unsafe
+else
+  debug_args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+  echo "[INFO] Debugging enabled."
+  java -Dfile.encoding=UTF-8 -Dminestom.packet-queue-size=-1 -Dminestom.keep-alive-kick=-1 -jar "${debug_args}" server.jar unsafe
+fi

@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  phantazm_server:
+  phantazm_server: &server
     build:
       context: '.'
       target: 'server_base'
@@ -20,11 +20,27 @@ services:
       # Used to let scripts know they're running in the container.
       # Do not change!
       PHANTAZM_IS_DOCKER_CONTAINER: 'true'
+    profiles:
+      - 'nodebug'
     hostname: 'server'
+    depends_on:
+      - db
+      - phantazm_proxy
     working_dir: '/server'
     volumes:
       - './:/server'
     command: './setup.sh'
+  phantazm_server_debug:
+    <<: *server
+    environment:
+      PHANTAZM_CONF_REPO_URL: ''
+      PHANTAZM_AUTO_DL_WORLDS: 'true'
+      PHANTAZM_IS_DOCKER_CONTAINER: 'true'
+      PHANTAZM_DEBUG_ENABLED: true
+    profiles:
+      - 'debug'
+    ports:
+      - '5005:5005' # Open for possible debugging
   phantazm_proxy:
     build:
       context: '.'
