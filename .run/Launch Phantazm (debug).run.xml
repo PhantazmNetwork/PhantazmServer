@@ -9,6 +9,11 @@
           </list>
         </option>
         <option name="removeOrphansOnComposeDown" value="false" />
+        <option name="secondarySourceFiles">
+          <list>
+            <option value="docker-compose.override.yml" />
+          </list>
+        </option>
         <option name="sourceFilePath" value="docker-compose.yml" />
         <option name="upAbortOnContainerExit" value="true" />
         <option name="upDetach" value="false" />
