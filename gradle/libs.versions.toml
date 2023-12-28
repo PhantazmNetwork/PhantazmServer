@@ -102,6 +102,6 @@ yarn-mappings-oneNineteen = { module = "net.fabricmc:yarn", version = "1.19.4+bu
 yarn-mappings-oneTwenty = { module = "net.fabricmc:yarn", version = "1.20.1+build.9" }
 
 [plugins]
-fabric-loom = { id = "fabric-loom", version = "1.1.9" }
+fabric-loom = { id = "fabric-loom", version = "1.4-SNAPSHOT" }
 
 shadow = { id = "com.github.johnrengelman.shadow", version = "7.1.2" }

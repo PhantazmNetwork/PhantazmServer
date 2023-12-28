@@ -61,3 +61,7 @@ tasks.jar {
         rename { "${it}_${archiveBaseName.get()}" }
     }
 }
+
+tasks.remapJar {
+    this.doNotTrackState("Required to enable configuration caching")
+}
