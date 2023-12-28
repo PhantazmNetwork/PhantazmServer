@@ -59,15 +59,11 @@ are not developing for our network, you can disable this by editing `docker-comp
 In addition to the files included in this repository, to properly run Phantazm you will need access to a Git repository
 containing valid configuration files, as these define most aspects of gameplay and are essential. Whether you are
 developing for our network or not, you must add a specify to the configuration repository. You must do this by including
-a file named `docker-compose.override.yml` in the project root (it will be ignored by Git). The file should
+a file named `.override.env` in the project root (it will be ignored by Git). The file should
 look something like this:
 
-```yml
-services:
-    phantazm_server: &server
-        environment:
-            PHANTAZM_CONF_REPO_URL: "https://[your-github-username]:[your-github-access-token]@[repository]"
-    phantazm_server_debug: *server
+```env
+PHANTAZM_CONF_REPO_URL='https://[your-github-username]:[your-github-access-token]@[repository]'
 ```
 
 An example `PHANTAZM_CONF_REPO_URL` would
@@ -84,27 +80,15 @@ uid=1000(steank) gid=1000(steank)
 
 Make note of your current user name (the one that owns all the project files; in this example it is `steank`) and
 its `uid` and `gid`. _If `uid` and `gid` are both 1000, you do not need to do anything else._ However, if one differs,
-you will need to add some additional configuration to `docker-compose.override.yml`:
+you will need to add some additional configuration to `.override.env`:
 
-```yml
-services:
-    phantazm_server: &server
-        environment:
-            PHANTAZM_CONF_REPO_URL: "https://[your-github-username]:[your-github-access-token]@[repository]"
-        build: &build
-            args:
-                DOCKER_UID: 1001 # Your User ID goes here
-                DOCKER_GID: 1001 # Your Group ID goes here
-        user: '1001:1001' # UID:GID
-    phantazm_server_debug: *server
-    phantazm_proxy:
-        <<: *server
-        environment: { }
+```env
+# This example assumes your UID and GID are 1001
+PHANTAZM_UID='1001'
+PHANTAZM_GID='1001'
 ```
 
-Set `DOCKER_UID` to your `uid` and `DOCKER_GID` to your `gid`, and set `user` to the string `uid:gid` under
-both `phantazm_server` and `phantazm_proxy` (`phantazm_server_debug` should be an exact copy of `phantazm_server`, so
-use the YML anchor syntax).
+In other words, set `PHANTAZM_UID` to your `uid` and `PHANTAZM_GID` to your `gid`.
 
 ### Joining the local development server
 

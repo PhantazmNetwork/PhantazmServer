@@ -5,24 +5,23 @@ services:
     build:
       context: '.'
       target: 'server_base'
-    environment:
-      # To auto-import game config files, add a docker-compose.override.yml file and specify the repo URL
-      # If you're a Phantazm developer and you've been given a public key, you should (IN THE OVERRIDE!)
-      # set the URL to https://[your-github-username]:[personal-access-token]@github.com/PhantazmNetwork/Configuration
-      # You can generate a token here: https://github.com/settings/tokens/new
-      PHANTAZM_CONF_REPO_URL: ''
-
-      # If any other value besides 'true' (case-sensitive), Phantazm's world files will not be automatically downloaded from
-      # a Google Drive host.
-      # Don't change this value unless you're developing your own server!
-      PHANTAZM_AUTO_DL_WORLDS: 'true'
-
-      # Used to let scripts know they're running in the container.
-      # Do not change!
-      PHANTAZM_IS_DOCKER_CONTAINER: 'true'
+      args: &build_args
+        uid: '${PHANTAZM_UID}'
+        gid: '${PHANTAZM_GID}'
+    env_file:
+      - '.override.env'
+    environment: &shared_environment
+      # Pass in many of our environment variables
+      PHANTAZM_AUTO_DL_WORLDS: '${PHANTAZM_AUTO_DL_WORLDS}'
+      PHANTAZM_IS_DOCKER_CONTAINER: '${PHANTAZM_IS_DOCKER_CONTAINER}'
+      PHANTAZM_GRADLE_ARGS: '${PHANTAZM_GRADLE_ARGS}'
+      PHANTAZM_SERVER_JVM_ARGS: '${PHANTAZM_SERVER_JVM_ARGS}'
+      PHANTAZM_SERVER_ARGS: '${PHANTAZM_SERVER_ARGS}'
+      PHANTAZM_SERVER_FILE: '${PHANTAZM_SERVER_FILE}'
     profiles:
       - 'nodebug'
     hostname: 'server'
+    user: '${PHANTAZM_UID}:${PHANTAZM_GID}'
     depends_on:
       - db
       - phantazm_proxy
@@ -33,33 +32,49 @@ services:
   phantazm_server_debug:
     <<: *server
     environment:
-      PHANTAZM_CONF_REPO_URL: ''
-      PHANTAZM_AUTO_DL_WORLDS: 'true'
-      PHANTAZM_IS_DOCKER_CONTAINER: 'true'
-      PHANTAZM_DEBUG_ENABLED: true
+      <<: *shared_environment
+      PHANTAZM_SERVER_JVM_ARGS: '-Dfile.encoding=UTF-8 -Dminestom.packet-queue-size=-1 -Dminestom.keep-alive-kick=-1 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${PHANTAZM_DEBUG_PORT_CONTAINER} -jar'
     profiles:
       - 'debug'
     ports:
-      - '5005:5005' # Open for possible debugging
+      - '${PHANTAZM_DEBUG_PORT_HOST}:${PHANTAZM_DEBUG_PORT_CONTAINER}'
   phantazm_proxy:
     build:
       context: '.'
       target: 'java_base'
+      args: *build_args
+    env_file:
+      - '.override.env'
+    environment: *shared_environment
     hostname: 'proxy'
-    command: 'sh -c "java -Xms512M -Xmx512M -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -Dfile.encoding=UTF-8 -jar velocity.jar"'
+    user: '${PHANTAZM_UID}:${PHANTAZM_GID}'
+    command: 'sh -c "java \
+    -Xms512M \
+    -Xmx512M \
+    -XX:+UseG1GC \
+    -XX:G1HeapRegionSize=4M \
+    -XX:+UnlockExperimentalVMOptions \
+    -XX:+ParallelRefProcEnabled \
+    -XX:+AlwaysPreTouch \
+    -Dfile.encoding=UTF-8 \
+    -jar \
+    velocity.jar"'
     working_dir: '/velocity'
     ports:
-      - '25565:25565'
+      - '${PHANTAZM_PROXY_PORT_HOST}:${PHANTAZM_PROXY_PORT_CONTAINER}'
     volumes:
       - './defaultRunData/velocity:/velocity'
   db:
     build:
       context: '.'
       target: 'mariadb'
+    env_file:
+      - '.override.env'
     hostname: 'db'
     ports:
-      - '3306:3306'
+      - '${PHANTAZM_DB_PORT_HOST}:${PHANTAZM_DB_PORT_CONTAINER}'
     environment:
+      # Include full credentials, this build should only ever be used for local development and debugging!
       MARIADB_USER: phantazm
       MARIADB_PASSWORD: secret
       MARIADB_ROOT_PASSWORD: secret
