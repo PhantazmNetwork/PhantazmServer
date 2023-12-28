@@ -29,6 +29,8 @@ services:
     volumes:
       - './:/server'
     command: './setup.sh'
+    stdin_open: true
+    tty: true
   phantazm_server_debug:
     <<: *server
     environment:
