@@ -95,12 +95,16 @@ services:
             args:
                 DOCKER_UID: 1001 # Your User ID goes here
                 DOCKER_GID: 1001 # Your Group ID goes here
+        user: '1001:1001' # UID:GID
     phantazm_server_debug: *server
     phantazm_proxy:
-        build: *build
+        <<: *server
+        environment: { }
 ```
 
-Set `DOCKER_UID` to your `uid` and `DOCKER_GID` to your `gid`.
+Set `DOCKER_UID` to your `uid` and `DOCKER_GID` to your `gid`, and set `user` to the string `uid:gid` under
+both `phantazm_server` and `phantazm_proxy` (`phantazm_server_debug` should be an exact copy of `phantazm_server`, so
+use the YML anchor syntax).
 
 ### Joining the local development server
 
