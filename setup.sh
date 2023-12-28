@@ -90,5 +90,5 @@ if [ "${PHANTAZM_DEBUG_ENABLED}" != "true" ]; then
 else
   debug_args="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
   echo "[INFO] Debugging enabled."
-  java -Dfile.encoding=UTF-8 -Dminestom.packet-queue-size=-1 -Dminestom.keep-alive-kick=-1 -jar "${debug_args}" server.jar unsafe
+  java -Dfile.encoding=UTF-8 -Dminestom.packet-queue-size=-1 -Dminestom.kdiseep-alive-kick=-1 -jar "${debug_args}" server.jar unsafe
 fi

@@ -28,6 +28,11 @@ If you want to interact with the community, please join our [Discord server](htt
 This project started out of a perceived lack of PvE-focused Minecraft servers. We believe that this is an area of
 untapped potential in the space.
 
+## Downloading
+
+Run `git clone --recurse-submodules https://github.com/PhantazmNetwork/PhantazmServer` to download the source code. If
+you skip the `--recurse-submodules` flag the project will not compile!
+
 ## Install a local development build
 
 **Warning!** _You must only use this to set up an environment for local testing!_ Much of the components are insecure,
@@ -62,12 +67,40 @@ services:
     phantazm_server: &server
         environment:
             PHANTAZM_CONF_REPO_URL: "https://[your-github-username]:[your-github-access-token]@[repository]"
-    phantazm_server_debug:
-        <<: *server 
+    phantazm_server_debug: *server
 ```
 
 An example `PHANTAZM_CONF_REPO_URL` would
 be `https://steanky:[token-redacted]@github.com/PhantazmNetwork/Configuration`.
+
+### Additional setup (Linux users only)
+
+Many Linux users will not need to go through with this additional setup. To determine if it is necessary for you, run
+the `id` command. This will output some text like the following:
+
+```
+uid=1000(steank) gid=1000(steank)
+```
+
+Make note of your current user name (the one that owns all the project files; in this example it is `steank`) and
+its `uid` and `gid`. _If `uid` and `gid` are both 1000, you do not need to do anything else._ However, if one differs,
+you will need to add some additional configuration to `docker-compose.override.yml`:
+
+```yml
+services:
+    phantazm_server: &server
+        environment:
+            PHANTAZM_CONF_REPO_URL: "https://[your-github-username]:[your-github-access-token]@[repository]"
+        build: &build
+            args:
+                DOCKER_UID: 1001 # Your User ID goes here
+                DOCKER_GID: 1001 # Your Group ID goes here
+    phantazm_server_debug: *server
+    phantazm_proxy:
+        build: *build
+```
+
+Set `DOCKER_UID` to your `uid` and `DOCKER_GID` to your `gid`.
 
 ### Joining the local development server
 
