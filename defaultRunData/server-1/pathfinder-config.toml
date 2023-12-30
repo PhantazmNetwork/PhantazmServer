@@ -1,7 +1,0 @@
-threads = 16
-asyncMode = false
-corePoolSize = 16
-maximumPoolSize = 16
-minimumRunnable = 16
-keepAliveTime = 2
-keepAliveTimeUnit = "MINUTES"

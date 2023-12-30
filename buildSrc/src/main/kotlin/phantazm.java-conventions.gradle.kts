@@ -1,5 +1,4 @@
 import org.phantazm.gradle.task.CopyLibs
-import org.phantazm.gradle.task.SetupServer
 
 plugins {
     java
@@ -86,4 +85,3 @@ tasks.getByName<Javadoc>("javadoc") {
 }
 
 tasks.register<CopyLibs>("copyLibs")
-tasks.register<SetupServer>("setupServer")

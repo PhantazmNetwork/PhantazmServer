@@ -9,103 +9,133 @@ This repository contains:
 1. The code for our minigames
 2. Supporting libraries such as `phantazm-commons`
 3. Advanced utilities for creating games, such as `phantazm-zombies-mapeditor`
+4. Build files, setup scripts, and some essential configuration files
 
-If you want to join our Discord, please join https://discord.gg/Rb6NkK4EQ8.
+If you want to interact with the community, please join our [Discord server](https://discord.gg/Rb6NkK4EQ8)!
 
 ## Table of Contents
 
 - [Background](#background)
-- [Install](#install)
-- [Usage](#usage)
+- [Install a local development build](#install-a-local-development-build)
+- [Joining the local development server](#joining-the-local-development-server)
+- [Configuration](#configuration)
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)
 - [License](#license)
 
 ## Background
 
-This project started out of a perceived lack of PvE-focused Minecraft servers. We believe that this is an area of untapped potential in the space.
+This project started out of a perceived lack of PvE-focused Minecraft servers. We believe that this is an area of
+untapped potential in the space.
 
-## Install
+## Downloading
 
-To build Phantazm binaries from source, run the following commands: \
-`git clone --recurse-submodules https://github.com/PhantazmNetwork/PhantazmServer.git` \
-`cd PhantazmServer` \
-`./gradlew build`
+Run `git clone --recurse-submodules https://github.com/PhantazmNetwork/PhantazmServer` to download the source code. If
+you skip the `--recurse-submodules` flag the project will not compile!
 
-If you're going to be making changes to the code, run the `setupServer` task: \
-`./gradlew setupServer`
+## Install a local development build
 
-This will automatically set up a locally-hosted server and Velocity proxy you can use to test your changes. Files are contained in `./run/server-1` and `./run/velocity`, for server and proxy respectively, relative to the project directory.
+**Warning!** _You must only use this to set up an environment for local testing!_ Much of the components are insecure,
+including the database and Minecraft server itself, due to using **default credentials**.
 
-Generally, you'll want to build from the `master` branch, unless you're testing a specific feature. The `patch` branch is used to stage minor fixes and is regularly merged.
+Local development builds may be started with [Docker Compose](https://docs.docker.com/compose/), which is a tool for
+orchestrating multiple virtual containers. If you are on
+Windows, [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) should be all you need to install
+beforehand. If you are on Linux, you can also set up Docker Desktop (although it may be more complicated depending on
+your distribution). If you do **not** go with Docker Desktop, make sure you have installed
+both [Docker Engine](https://docs.docker.com/engine/) and Docker Compose.
 
-## Usage
+If you are a Windows user, it is additionally very important to ensure that CRLF line endings won't cause Docker to have
+issues building the project. Open up Git Bash and run the command `git config --global core.autocrlf false` — or
+manually update the config file — to prevent issues from arising.
 
-You should use the latest Java 17 build to run Phantazm. The Minestom server by itself runs on 1.19.3. When connecting through the proxy, clients can use any Minecraft version at or later than 1.7.
+Phantazm currently makes use of three separate Docker containers — a database, Velocity proxy, and the Minestom server.
+All three may be launched at once by running `docker compose up` in the project root. However, it is preferable to
+instead use the IntelliJ run configuration `Launch Phantazm`, as it will appropriately manage the lifecycle of the
+containers as well as provide convenient terminal access.
 
-### For development
+By default, launching this way will attempt to download the Minecraft world files we use on our official server. If you
+are not developing for our network, you can disable this by adding a file named `.override.env` in the root directory of
+the project, and adding the line `PHANTAZM_AUTO_DL_WORLDS='false'`.
 
-The proxy and server use BungeeCord with BungeeGuard handshakes to communicate by default. This requires the use of a shared secret (string). This string is used to authenticate the proxy and ensure that no players can connect directly to the underlying server.
+In addition to the files included in this repository, to properly run Phantazm you will need access to a Git repository
+containing valid configuration files, as these define most aspects of gameplay and are essential. Whether you are
+developing for our network or not, you must specify a configuration repository. The first time you
+run `docker compose up` (or `Launch Phantazm`), the setup script will prompt you to enter a URL, which will be appended
+automatically to
+your `.override.env` file. An example of such a URL is below:
 
-When running locally-hosted development builds, you can launch the server in "unsafe" mode (by specifying the `unsafe` program argument). This will disable the check that would normally prevent the server from running while using the default secret. This allows you to fire up Phantazm instances for local testing without needing to configure a unique shared secret first.
+```
+https://steanky:[token-redacted]@github.com/PhantazmNetwork/Configuration
+```
 
-When launching Phantazm through IntelliJ (such as by using the `Run server` or `Run server + Velocity` run configurations), `unsafe` mode is **enabled**, so you don't have to do anything extra.
+If you need to re-generate the files in `./run` for any reason, you can simply delete it and it will be recreated the
+next time you launch a development build. This can help if you are running into errors related to the development
+environment setup.
 
-**Warning**: Make sure your locally-hosted development server & proxy are not visible from the Internet if you're launching in unsafe mode! Check your system (or gateway) firewall.
+### Additional setup (Linux users only)
 
-When debugging things, it's sometimes very useful to use breakpoints to analyze state and execute code line-by-line. Doing this on a Minecraft server works, but is tricky with a vanilla client due to the read timeout delay. As such, it is recommended to use a mod, like [this one](https://www.curseforge.com/minecraft/mc-mods/timeoutout-fabric), to increase this value to whatever you want. This will prevent your client from disconnecting itself due to a nonresponsive server.
+Many Linux users will not need to go through with this additional setup. To determine if it is necessary for you, run
+the `id` command. This will output some text like the following:
 
-### For production
+```
+uid=1000(steank) gid=1000(steank)
+```
 
-If the `unsafe` argument is not specified, the server *will refuse to run* with the default secret, for security reasons. You'll need to configure your own secret.
+Make note of your current user name (the one that owns all the project files; in this example it is `steank`) and
+its `uid` and `gid`. _If `uid` and `gid` are both 1000, you do not need to do anything else._ However, if one differs,
+you will need to add some additional configuration to `.override.env`:
 
-First, come up with an appropriate string. You can use a password manager, or a generation tool like `apg` or `pwgen`. If your server is accessible from the Internet, make sure it's suitably complex. Keep in mind that your secret isn't something you need to actually *remember*, and thus there's no real drawback to making it as long as you want.
+```
+# This example assumes your UID and GID are 1001
+PHANTAZM_UID='1001'
+PHANTAZM_GID='1001'
+```
 
-Next, set the `proxySecret` field in `./run/server-1/server-config.toml`, and the `forwarding-secret` field in `./run/velocity/velocity.toml`, to the same string (your secret).
+In other words, set `PHANTAZM_UID` to your `uid` and `PHANTAZM_GID` to your `gid`.
 
-**Warning**: The secret is stored, in plaintext, in both the server and proxy configuration files. This is, regrettably, something we can't do much about. Make sure access to your backend servers is properly secured.
+### Joining the local development server
 
-### Running
+Once you've set up your development environment and run `Launch Phantazm`, you should have a running proxy, server,
+and database. You can connect to the server (through the proxy) by joining `localhost` on a vanilla 1.19.4 Minecraft
+client.
 
-The proxy will (by default) bind to `0.0.0.0:25565` and the server to `0.0.0.0:25567`, so you can connect through the proxy by adding the `localhost` server address in your Minecraft client.
+### Debugging
 
-If you're using IntelliJ, you can launch this testing server using the `Run server` run configuration (the server will use unsafe mode), or the server and proxy at once using the `Run server + Velocity` configuration.
-
-You can also run the server from the command line as follows: \
-`./gradlew setupServer copyJar` \
-`cd ./run/server-1` \
-`java -jar server.jar` 
-
-And the proxy: \
-`cd ./run/velocity` \
-`java -jar velocity.jar`
-
-This setup will generate the required binaries to run the server. Dependency artifacts are stored in the `./libs` folder in a hierarchical structure according to their group name. 
+Up until now, the examples have shown the project being run without debugging enabled. However, there is an alternate
+Docker profile you can enable that will allow you to connect to the Minecraft server with a JVM debugger. Just
+run `Launch Phantazm (debug)`. Then, you can connect the debugger to `localhost:5005`,
+or run the `Debug Phantazm` configuration in IntelliJ, and set breakpoints as usual.
 
 ### Configuration
 
-After running, Phantazm will generate two files, named `lobbies-config.toml` and `server-config.toml`, in the same directory as the `server.jar` file. You can use these to set up basic server parameters, such as the IP address and port to bind to. 
-
-Details and tutorials for how to configure more complicated aspects of Phantazm are included in the [wiki](https://github.com/PhantazmNetwork/PhantazmServer/wiki). **These are currently out-of-date, pending a more stable codebase.**
+Details and tutorials for how to configure more complicated aspects of Phantazm are included in
+the [wiki](https://github.com/PhantazmNetwork/PhantazmServer/wiki). **These are currently out-of-date, pending a more
+stable codebase.**
 
 ## Maintainers
 
-[Steank](https://github.com/Steanky) 
+[Steank](https://github.com/Steanky)
 
 ## Contributing
 
-See the [contributions document](https://github.com/PhantazmNetwork/.github/blob/main/CONTRIBUTING.md) for more detailed information. Pull requests are welcome!
+See the [contributions document](https://github.com/PhantazmNetwork/.github/blob/main/CONTRIBUTING.md) for more detailed
+information. Pull requests are welcome!
 
-If editing the README, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme) specification.
-
+If editing the README, please conform to the [standard-readme](https://github.com/RichardLitt/standard-readme)
+specification.
 
 Phantazm follows the [Contributor Covenant](http://contributor-covenant.org/version/1/3/0/) Code of Conduct.
 
 ### Reporting bugs
-If you have a bug to report, head on over to the `Issues` tab and create a new issue. Make sure you follow the guidelines, and provide plenty of information.
+
+If you have a bug to report, head on over to the `Issues` tab and create a new issue. Make sure you follow the
+guidelines, and provide plenty of information.
 
 ### Making suggestions
-If you have an idea for a new feature, or change to an existing one, you can make an issue for that too. However, it's recommended that you first join our Discord and get feedback from the community first.
+
+If you have an idea for a new feature, or change to an existing one, you can make an issue for that too. However, it's
+recommended that you first join our Discord and get feedback from the community first.
 
 ## License
 
