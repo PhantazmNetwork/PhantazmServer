@@ -1,5 +1,6 @@
 package org.phantazm.stats.zombies;
 
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.*;
@@ -115,6 +116,11 @@ public class BasicLeaderbordDatabase implements LeaderboardDatabase {
         }
 
         return condition == null ? falseCondition() : condition;
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> initTables(@NotNull IntSet teamSizes, @NotNull Set<String> validModifierKeys) {
+        return null;
     }
 
     @Override

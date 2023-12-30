@@ -73,6 +73,7 @@ services:
     build:
       context: '.'
       target: 'mariadb'
+    restart: 'always'
     networks:
       - 'standard'
     env_file:
@@ -86,7 +87,11 @@ services:
       MARIADB_PASSWORD: secret
       MARIADB_ROOT_PASSWORD: secret
       MARIADB_DATABASE: phantazm_db
+    volumes:
+      - 'db:/var/lib/mysql'
 networks:
   standard:
     name: phantazm-standard
     external: false
+volumes:
+  db:

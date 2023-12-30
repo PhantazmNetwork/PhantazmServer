@@ -10,12 +10,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -36,10 +34,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             builder.append("    p%1$s UUID NOT NULL,\n".formatted(i + 1));
         }
 
-        builder.append("""
-                CONSTRAINT `unique_uuids`
-                    unique (
-            """);
+        builder.append("    CONSTRAINT `unique_uuids`\n        unique (");
 
         for (int i = 0; i < teamSize; i++) {
             builder.append("p%1$s".formatted(i + 1));
@@ -57,7 +52,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
         return (c >= 'a' && c <= 'z') ? (char) (c - 32) : c;
     }
 
-    private static CharSequence simpleFilter(String input) {
+    private static String simpleFilter(String input) {
         StringBuilder builder = new StringBuilder(input.length());
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
@@ -68,10 +63,10 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             builder.append(toUpperAscii(c));
         }
 
-        return builder;
+        return builder.toString();
     }
 
-    private static CharSequence mainTable(int teamSize, String modifierKey) {
+    private static String mainTable(int teamSize, String modifierKey) {
         return """
             CREATE TABLE IF NOT EXISTS zombies_lb_%1$s_%2$s (
                 id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -79,7 +74,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                 time_taken BIGINT NOT NULL,
                 time_end BIGINT NOT NULL,
                 map_key VARCHAR(64) NOT NULL,
-                CONSTRAINT `fk_team_id`
+                CONSTRAINT `fk_team_id_%1$s_%2$s`
                     FOREIGN KEY (team_id) REFERENCES zombies_lb_%1$s_teams (team_id)
                     ON DELETE CASCADE
                     ON UPDATE CASCADE
@@ -87,7 +82,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             """.formatted(teamSize, simpleFilter(modifierKey));
     }
 
-    private static CharSequence teamsTable(int teamSize) {
+    private static String teamsTable(int teamSize) {
         return """
             CREATE TABLE IF NOT EXISTS zombies_lb_%1$s_teams (
                 team_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -96,38 +91,100 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             """.formatted(teamSize, generatePlayerColumns(teamSize));
     }
 
-    @Override
-    public void initTables(@NotNull IntSet teamSizes, @NotNull Set<String> validModifierKeys) throws SQLException {
-        try (Connection connection = dataSource.getConnection();
-             Statement statement = connection.createStatement()) {
-            IntIterator iterator = teamSizes.intIterator();
-            StringBuilder query = new StringBuilder();
-            while (iterator.hasNext()) {
-                int teamSize = iterator.nextInt();
-                for (String string : validModifierKeys) {
-                    query.append(mainTable(teamSize, string));
-                }
+    private static String gameTableName(int teamSize, String modifierKey) {
+        return "zombies_lb_" + teamSize + "_" + modifierKey;
+    }
 
-                query.append(teamsTable(teamSize));
-            }
+    private static String teamTableName(int teamSize) {
+        return "zombies_lb_" + teamSize + "_teams";
+    }
 
-            connection.setAutoCommit(false);
-
-            try {
-                statement.execute(query.toString());
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-            } finally {
-                connection.setAutoCommit(true);
+    private static String teamMatches(String teamsTable, List<UUID> uuids) {
+        StringBuilder builder = new StringBuilder();
+        int i = 0;
+        for (UUID uuid : uuids) {
+            builder.append("%1$s.p%2$s = '%3$s'".formatted(teamsTable, i + 1, uuid));
+            if (i < uuids.size() - 1) {
+                builder.append(" AND ");
             }
         }
+
+        return builder.toString();
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> initTables(@NotNull IntSet teamSizes,
+        @NotNull Set<String> validModifierKeys) {
+        return CompletableFuture.runAsync(() -> {
+            try (Connection connection = dataSource.getConnection();
+                 Statement statement = connection.createStatement()) {
+                IntIterator iterator = teamSizes.intIterator();
+
+                List<String> statements = new ArrayList<>();
+                while (iterator.hasNext()) {
+                    int teamSize = iterator.nextInt();
+                    statements.add(teamsTable(teamSize));
+
+                    for (String string : validModifierKeys) {
+                        statements.add(mainTable(teamSize, string));
+                    }
+                }
+
+                connection.setAutoCommit(false);
+
+                try {
+                    for (String state : statements) {
+                        statement.execute(state);
+                    }
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    throw e;
+                } finally {
+                    connection.setAutoCommit(true);
+                }
+            } catch (SQLException e) {
+                LOGGER.warn("Exception in initTables", e);
+            }
+        }, executor);
     }
 
     @Override
     public @NotNull CompletableFuture<Long> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
         @NotNull String modifierKey) {
-        return null;
+        if (team.isEmpty()) {
+            return FutureUtils.completedFuture(-1L);
+        }
+
+        List<UUID> key = new ArrayList<>(team);
+        Collections.sort(key);
+
+        int teamSize = team.size();
+        String gameTable = gameTableName(teamSize, simpleFilter(modifierKey));
+        String teamTable = teamTableName(teamSize);
+
+        return CompletableFuture.supplyAsync(() -> {
+            try (Connection connection = dataSource.getConnection();
+                 Statement statement = connection.createStatement()) {
+                String query = """
+                    SELECT time_taken FROM %1$s INNER JOIN %2$s ON %1$s.team_id = %2$s.team_id
+                    WHERE %3$s AND %1$s.map_key = '%4$s'
+                    ORDER BY time_taken ASC
+                    LIMIT 1
+                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key), map.asString());
+
+                ResultSet result = statement.executeQuery(query);
+                if (!result.next()) {
+                    return -1L;
+                }
+
+                return result.getLong(1);
+            } catch (SQLException e) {
+                LOGGER.warn("Exception in fetchBestTime", e);
+            }
+
+            return -1L;
+        }, executor);
     }
 
     @Override

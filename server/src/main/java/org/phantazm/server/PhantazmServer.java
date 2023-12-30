@@ -36,7 +36,8 @@ import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
-import org.phantazm.stats.zombies.BasicLeaderbordDatabase;
+import org.phantazm.stats.zombies.JDBCBasicLeaderboardDatabase;
+import org.phantazm.stats.zombies.LeaderboardDatabase;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -260,6 +261,10 @@ public final class PhantazmServer {
 
         CompletableFuture<?> databaseDependents = databaseFeatures.whenCompleteAsync((ignored, error) -> {
             GeneralStatsFeature.initialize(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
+            LeaderboardDatabase database = new JDBCBasicLeaderboardDatabase(databaseFeatures.defaultExecutor(),
+                HikariFeature.getDataSource());
+
+            database.fetchBestTime(Set.of(UUID.randomUUID()), Key.key("vegetals"), "0");
         });
 
         CompletableFuture<?> game = databaseFeatures.whenCompleteAsync((ignored, error) -> {
@@ -303,11 +308,6 @@ public final class PhantazmServer {
         });
 
         CompletableFuture.allOf(independentFeatures, databaseFeatures, databaseDependents, game).join();
-
-        BasicLeaderbordDatabase lb = new BasicLeaderbordDatabase(databaseFeatures.defaultExecutor(),
-            HikariFeature.getDataSource());
-        lb.submitGame(Set.of(UUID.randomUUID()), "0", Key.key("test"), 0, 0);
-        System.out.println("T");
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig,
