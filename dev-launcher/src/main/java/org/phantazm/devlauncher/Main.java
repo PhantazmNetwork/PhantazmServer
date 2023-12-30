@@ -1,6 +1,9 @@
 package org.phantazm.devlauncher;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 /**
  * Builds to ./dev-launcher.jar. Necessary due to IntelliJ's poor support for running Docker containers, the need to
@@ -84,7 +87,8 @@ public class Main {
             }
 
             Process process = (proc = new ProcessBuilder().command(command)
-                .redirectOutput(ProcessBuilder.Redirect.INHERIT).redirectError(ProcessBuilder.Redirect.INHERIT).start());
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectError(ProcessBuilder.Redirect.INHERIT).start());
 
             if (isAttach) {
                 currentProcess = process;
@@ -128,6 +132,9 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        Files.newOutputStream(Path.of(".override.env"), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+            .close();
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             synchronized (lock) {
                 Process process = currentProcess;
