@@ -1,15 +1,13 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Launch Phantazm" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker">
-    <deployment type="docker-compose.yml">
-      <settings>
-        <option name="buildKitEnabledForCompose" value="true" />
-        <option name="envFilePath" value="" />
-        <option name="removeOrphansOnComposeDown" value="false" />
-        <option name="sourceFilePath" value="docker-compose.yml" />
-        <option name="upAbortOnContainerExit" value="true" />
-        <option name="upDetach" value="false" />
-      </settings>
-    </deployment>
+  <configuration default="false" name="Launch Phantazm" type="JarApplication">
+    <option name="JAR_PATH" value="$PROJECT_DIR$/dev-launcher.jar" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <envs>
+      <env name="DOCKER_COMPOSE_UP_CMD" value="docker compose up -d" />
+      <env name="DOCKER_ATTACH_CMD" value="docker attach phantazm-server-1" />
+      <env name="DOCKER_COMPOSE_DOWN_CMD" value="docker compose down" />
+    </envs>
     <method v="2" />
   </configuration>
 </component>

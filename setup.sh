@@ -12,13 +12,21 @@ log_info() {
   printf "\033[32;1m[INFO]\033[0m %s\n" "$1"
 }
 
-log_info "Starting setup script..."
-
 # This script file is expected to be run through a Docker container only.
 if [ "${PHANTAZM_IS_DOCKER_CONTAINER}" != "true" ]; then
   log_error "This script file can only be executed in Phantazm's development container!"
   exit 1
 fi
+
+# We wait to receive some input from stdin.
+# That way, we don't send anything to stdout before we've had a process attach to this container.
+read -r input
+if [ "${input}" != "start" ]; then
+  log_error "Invalid input; expected 'start', got '${input}'"
+  exit 1
+fi
+
+log_info "Starting setup script..."
 
 require() {
   name="$1"
@@ -86,19 +94,23 @@ if [ ! -d "./run/server-1" ]; then
     log_info "Cloning into configuration repository."
 
     # Clone the configuration repository, if applicable
-    # (environment variable must be supplied via docker-compose.override.yml)
+    # (environment variable must be supplied via a .override.env file)
     if ! git clone -q "${PHANTAZM_CONF_REPO_URL}" ./run/server-1; then
-      log_error "Failed to clone from the configuration repository provided through PHANTAZM_CONF_REPO_URL."
-      log_error "Check that your docker-compose.override.yml file is configured correctly."
+      log_error "Failed to clone from the configuration repository provided through PHANTAZM_CONF_REPO_URL. Check that \
+your .override.env file is configured correctly. See README.md in the root project for more details."
       exit 1
     fi
   else
-    log_warning "No configuration repository has been provided!"
-    log_warning "Phantazm maps will not work correctly, and the server may encounter launch errors."
+    log_warning "No configuration repository has been provided! Phantazm maps will not work correctly, and the server \
+may encounter launch errors. To provide a repository, create a file named .override.env in the root project directory. \
+Then, set the PHANTAZM_CONF_REPO_URL environment variable to point at a Git repository containing valid configuration \
+data. See README.md in the root project for more details."
   fi
 
   if ! cp -a "./defaultRunData/server-1/." "./run/server-1"; then
-    log_warning "Failed to copy some necessary files. The server may encounter launch errors."
+    log_warning "Failed to copy machine-specific run configs. The server may encounter launch errors."
+  else
+    log_info "Copied default machine-specific run configs."
   fi
 fi
 

@@ -38,7 +38,8 @@ sequenceOf(
         "zombies-mapdata",
         "zombies-mapeditor",
         "snbt-builder",
-        "loader"
+        "loader",
+        "dev-launcher"
 ).forEach {
     if (!toSkip.contains(it)) {
         include(":phantazm-$it")
