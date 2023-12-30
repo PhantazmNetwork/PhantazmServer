@@ -50,24 +50,23 @@ issues building the project. Open up Git Bash and run the command `git config --
 manually update the config file — to prevent issues from arising.
 
 Phantazm currently makes use of three separate Docker containers — a database, Velocity proxy, and the Minestom server.
-All three may be launched at once by running `docker compose up` in the project root. You can also use the provided
-IntelliJ run configuration `Launch Phantazm`, which does the same thing.
+All three may be launched at once by running `docker compose up` in the project root. However, it is preferable to
+instead use the IntelliJ run configuration `Launch Phantazm`, as it will appropriately manage the lifecycle of the
+containers as well as provide convenient terminal access.
 
 By default, launching this way will attempt to download the Minecraft world files we use on our official server. If you
-are not developing for our network, you can disable this by editing `docker-compose.yml`.
+are not developing for our network, you can disable this by adding a file named `.override.env` in the root directory of
+the project, and adding the line `PHANTAZM_AUTO_DL_WORLDS='false'`.
 
 In addition to the files included in this repository, to properly run Phantazm you will need access to a Git repository
 containing valid configuration files, as these define most aspects of gameplay and are essential. Whether you are
-developing for our network or not, you must add a specify to the configuration repository. You must do this by including
-a file named `.override.env` in the project root (it will be ignored by Git). The file should
-look something like this:
+developing for our network or not, you must specify a configuration repository. The first time you
+run `docker compose up`, the setup script will prompt you to enter a URL, which will be appended automatically to
+your `.override.env` file. An example of such a URL is below:
 
-```env
-PHANTAZM_CONF_REPO_URL='https://[your-github-username]:[your-github-access-token]@[repository]'
 ```
-
-An example `PHANTAZM_CONF_REPO_URL` would
-be `https://steanky:[token-redacted]@github.com/PhantazmNetwork/Configuration`.
+https://steanky:[token-redacted]@github.com/PhantazmNetwork/Configuration
+```
 
 ### Additional setup (Linux users only)
 
@@ -82,7 +81,7 @@ Make note of your current user name (the one that owns all the project files; in
 its `uid` and `gid`. _If `uid` and `gid` are both 1000, you do not need to do anything else._ However, if one differs,
 you will need to add some additional configuration to `.override.env`:
 
-```env
+```
 # This example assumes your UID and GID are 1001
 PHANTAZM_UID='1001'
 PHANTAZM_GID='1001'
@@ -92,7 +91,7 @@ In other words, set `PHANTAZM_UID` to your `uid` and `PHANTAZM_GID` to your `gid
 
 ### Joining the local development server
 
-Once you've set up your development environment and run `docker compose up`, you should have a running proxy, server,
+Once you've set up your development environment and run `Launch Phantazm`, you should have a running proxy, server,
 and database. You can connect to the server (through the proxy) by joining `localhost` on a vanilla 1.19.4 Minecraft
 client.
 
@@ -100,8 +99,7 @@ client.
 
 Up until now, the examples have shown the project being run without debugging enabled. However, there is an alternate
 Docker profile you can enable that will allow you to connect to the Minecraft server with a JVM debugger. Just
-run `docker compose --profile debug up`,
-or use the IntelliJ run configuration `Launch Phantazm (debug)`. Then, you can connect the debugger to `localhost:5005`,
+run `Launch Phantazm (debug)`. Then, you can connect the debugger to `localhost:5005`,
 or run the `Debug Phantazm` configuration in IntelliJ, and set breakpoints as usual.
 
 ### Configuration

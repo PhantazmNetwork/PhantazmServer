@@ -34,7 +34,7 @@ require() {
   eval "result=\$$name"
   if [ -z "${result}" ]; then
     log_error "Missing required environment variable ${name}!"
-    exit 1
+    false
   fi
 
   echo "${result}"
@@ -52,13 +52,20 @@ gdrive_dl() {
 
   if ! curl -L -s -o "${gd_filename}" "https://drive.google.com/uc?export=download&id=${gd_fileid}"; then
     log_error "Failed to download map to ${gd_filename}, it will not be joinable in-game!"
-    return 1
+    false
   fi
 }
 
 clean_temp() {
   if [ -d "./tmp" ]; then
     rm -rf "./tmp"
+  fi
+}
+
+clone_repository() {
+  if ! git clone -q "$1" ./run/server-1; then
+    log_error "Failed to clone from configuration repository $1"
+    false
   fi
 }
 
@@ -91,20 +98,42 @@ if [ ! -d "./run/server-1" ]; then
 
   mkdir -p "./run/server-1"
   if [ -n "${PHANTAZM_CONF_REPO_URL}" ]; then
-    log_info "Cloning into configuration repository."
-
-    # Clone the configuration repository, if applicable
-    # (environment variable must be supplied via a .override.env file)
-    if ! git clone -q "${PHANTAZM_CONF_REPO_URL}" ./run/server-1; then
-      log_error "Failed to clone from the configuration repository provided through PHANTAZM_CONF_REPO_URL. Check that \
-your .override.env file is configured correctly. See README.md in the root project for more details."
+    log_info "Cloning into configuration repository as defined by PHANTAZM_CONF_REPO_URL."
+    if ! clone_repository "${PHANTAZM_CONF_REPO_URL}"; then
+      log_error "Check that your .override.env file is configured correctly!"
       exit 1
     fi
   else
-    log_warning "No configuration repository has been provided! Phantazm maps will not work correctly, and the server \
-may encounter launch errors. To provide a repository, create a file named .override.env in the root project directory. \
-Then, set the PHANTAZM_CONF_REPO_URL environment variable to point at a Git repository containing valid configuration \
-data. See README.md in the root project for more details."
+    printf "You have not provided a configuration repository!\nIf this is your first time launching Phantazm, you will \
+have to provide one. It looks like this:\n\nhttps://[git-username]:[git-password-or-access-token]@[repository-url]\n\n\
+For example, if you are connecting the GitHub repository PhantazmNetwork/Configuration and your\nusername is steanky, \
+your configuration repository would look like this:\n\n\
+https://steanky:[access-token-redacted]@github.com/PhantazmNetwork/Configuration\n\nYou can also define the repository \
+by setting the PHANTAZM_CONF_REPO_URL environment variable in\n.override.env.\n\n"
+
+    # Keep asking for the repository URL until we clone successfully.
+    while true ; do
+      printf "Enter your configuration repository URL on the line below, then hit ENTER. Alternatively,\ntype cancel \
+to quit.\n"
+
+      read -r repository_url
+      if [ "${repository_url}" = "cancel" ]; then
+        log_info "Quitting..."
+        exit 0
+      fi
+
+      if clone_repository "${repository_url}"; then
+        if ! echo "PHANTAZM_CONF_REPO_URL='${repository_url}'" >> ".override.env"; then
+          log_error "Cloned the repository successfully, but failed to update .override.env. To ensure that the next \
+build succeeds, please add the line PHANTAZM_CONF_REPO_URL='[your-repository-url]' to .override.env. If such a file \
+does not exist in the root directory of the project, create it."
+          exit 1
+        fi
+
+        log_info "Successfully cloned repository and updated .override.env!"
+        break
+      fi
+    done
   fi
 
   if ! cp -a "./defaultRunData/server-1/." "./run/server-1"; then
