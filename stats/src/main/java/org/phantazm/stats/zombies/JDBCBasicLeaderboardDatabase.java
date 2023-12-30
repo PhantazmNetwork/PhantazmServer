@@ -107,6 +107,8 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             if (i < uuids.size() - 1) {
                 builder.append(" AND ");
             }
+
+            i++;
         }
 
         return builder.toString();
@@ -133,8 +135,8 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                 connection.setAutoCommit(false);
 
                 try {
-                    for (String state : statements) {
-                        statement.execute(state);
+                    for (String sql : statements) {
+                        statement.execute(sql);
                     }
                     connection.commit();
                 } catch (SQLException e) {
@@ -167,8 +169,10 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             try (Connection connection = dataSource.getConnection();
                  Statement statement = connection.createStatement()) {
                 String query = """
-                    SELECT time_taken FROM %1$s INNER JOIN %2$s ON %1$s.team_id = %2$s.team_id
-                    WHERE %3$s AND %1$s.map_key = '%4$s'
+                    SELECT time_taken FROM %1$s
+                    INNER JOIN %2$s
+                    ON %1$s.team_id = %2$s.team_id
+                    WHERE %1$s.map_key = '%4$s' AND %3$s
                     ORDER BY time_taken ASC
                     LIMIT 1
                     """.formatted(gameTable, teamTable, teamMatches(teamTable, key), map.asString());
