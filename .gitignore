@@ -8,3 +8,4 @@ local.settings.gradle.kts
 docker-compose.override.yml
 /tmp
 .override.env
+setup_log.txt

@@ -1,15 +1,25 @@
 #!/bin/sh
 
+log_file="$(pwd)/setup_log.txt"
+/dev/null > "${log_file}"
+
 log_error() {
   printf "\033[31;1m[ERROR]\033[0m %s\n" "$1"
+  echo "[ERROR] $1" >> "${log_file}"
 }
 
 log_warning() {
   printf "\033[33;1m[WARNING]\033[0m %s\n" "$1"
+  echo "[WARNING] $1" >> "${log_file}"
 }
 
 log_info() {
   printf "\033[32;1m[INFO]\033[0m %s\n" "$1"
+  echo "[INFO] $1" >> "${log_file}"
+}
+
+log_trace() {
+  echo "[TRACE] $1" >> "${log_file}"
 }
 
 # This script file is expected to be run through a Docker container only.
@@ -18,9 +28,16 @@ if [ "${PHANTAZM_IS_DOCKER_CONTAINER}" != "true" ]; then
   exit 1
 fi
 
+log_trace "Waiting for some input from stdin..."
+
 # We wait to receive some input from stdin.
 # That way, we don't send anything to stdout before we've had a process attach to this container.
 read -r input
+code="$?"
+
+log_trace "Got string from 'read': ${input}"
+log_trace "'read' operation exit code ${code}"
+
 if [ "${input}" != "start" ]; then
   log_error "Invalid input; expected 'start', got '${input}'"
   exit 1
@@ -58,6 +75,7 @@ gdrive_dl() {
 
 clean_temp() {
   if [ -d "./tmp" ]; then
+    log_trace "./tmp existed; removing it"
     rm -rf "./tmp"
   fi
 }
@@ -141,6 +159,8 @@ does not exist in the root directory of the project, create it."
   else
     log_info "Copied default machine-specific run configs."
   fi
+else
+  log_trace "Skipping first-time setup because ./run/server-1 already exists."
 fi
 
 # Automatically download worlds
@@ -188,3 +208,5 @@ if ! eval "${start_command}"; then
   log_error "Command used: ${start_command}"
   exit 1
 fi
+
+log_trace "Server shut down normally. Exiting startup script."

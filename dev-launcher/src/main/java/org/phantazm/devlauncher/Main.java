@@ -109,9 +109,11 @@ public class Main {
     }
 
     private static void asyncTransferStandardInputTo(BufferedWriter writer) {
+        Console console = System.console();
         Thread thread = new Thread(() -> {
             try (writer) {
-                BufferedReader inputReader = new BufferedReader(new InputStreamReader(System.in));
+                BufferedReader inputReader = new BufferedReader(console == null ? new InputStreamReader(System.in) :
+                    console.reader());
                 while (true) {
                     String line = inputReader.readLine();
                     if (line == null) {
