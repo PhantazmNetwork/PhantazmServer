@@ -61,12 +61,17 @@ the project, and adding the line `PHANTAZM_AUTO_DL_WORLDS='false'`.
 In addition to the files included in this repository, to properly run Phantazm you will need access to a Git repository
 containing valid configuration files, as these define most aspects of gameplay and are essential. Whether you are
 developing for our network or not, you must specify a configuration repository. The first time you
-run `docker compose up`, the setup script will prompt you to enter a URL, which will be appended automatically to
+run `docker compose up` (or `Launch Phantazm`), the setup script will prompt you to enter a URL, which will be appended
+automatically to
 your `.override.env` file. An example of such a URL is below:
 
 ```
 https://steanky:[token-redacted]@github.com/PhantazmNetwork/Configuration
 ```
+
+If you need to re-generate the files in `./run` for any reason, you can simply delete it and it will be recreated the
+next time you launch a development build. This can help if you are running into errors related to the development
+environment setup.
 
 ### Additional setup (Linux users only)
 
