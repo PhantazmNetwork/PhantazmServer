@@ -38,7 +38,9 @@ code="$?"
 log_trace "Got string from 'read': ${input}"
 log_trace "'read' operation exit code ${code}"
 
-if [ "${input}" != "start" ]; then
+# Use case here instead of equality comparison because thanks to WINDOWS,
+# $input can end up equaling start\r
+if ! case "${input}" in start*) true;; esac; then
   log_error "Invalid input; expected 'start', got '${input}'"
   exit 1
 fi
