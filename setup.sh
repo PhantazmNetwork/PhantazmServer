@@ -38,9 +38,7 @@ code="$?"
 log_trace "Got string from 'read': ${input}"
 log_trace "'read' operation exit code ${code}"
 
-# Use case here instead of equality comparison because thanks to WINDOWS,
-# $input can end up equaling start\r
-if ! case "${input}" in start*) true;; esac; then
+if ! [ "${input}" = "start" ]; then
   log_error "Invalid input; expected 'start', got '${input}'"
   exit 1
 fi
@@ -188,6 +186,8 @@ if [ "${PHANTAZM_AUTO_DL_WORLDS}" = "true" ]; then
 
   clean_temp
 fi
+
+log_info "Starting Gradle build..."
 
 # Now that we've constructed everything else, build the project, copy the libraries, and run the server
 # If the Gradle build fails, or we can't change directory, exit immediately

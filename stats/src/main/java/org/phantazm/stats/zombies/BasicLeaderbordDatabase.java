@@ -124,35 +124,14 @@ public class BasicLeaderbordDatabase implements LeaderboardDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<Long> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
+    public @NotNull CompletableFuture<Optional<Long>> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
         @NotNull String modifierKey) {
-        if (team.isEmpty()) {
-            return NEGATIVE_ONE;
-        }
+        return null;
+    }
 
-        try (Connection connection = dataSource.getConnection()) {
-            DSLContext context = using(connection);
-
-            int teamSize = team.size();
-            MainTable<?> main = mainTable(teamSize, modifierKey);
-            TeamsTable<?> teams = teamsTable(teamSize);
-
-            Record4<Long, Long, String, Long> result =
-                context.select(main.TEAM_ID, main.TIME_TAKEN, main.MAP_KEY, teams.TEAM_ID)
-                    .from(main)
-                    .join(teams)
-                    .on(main.TEAM_ID.eq(teams.TEAM_ID))
-                    .where(sameTeam(teams, team).and(main.MAP_KEY.eq(map.toString())))
-                    .orderBy(main.TIME_TAKEN.asc())
-                    .fetchOne();
-
-            if (result != null) {
-                return CompletableFuture.completedFuture(result.value2());
-            }
-        } catch (SQLException ignored) {
-        }
-
-        return NEGATIVE_ONE;
+    @Override
+    public @NotNull CompletableFuture<List<LeaderboardEntry>> fetchTimeHistory(@NotNull Set<java.util.UUID> team, @NotNull Key map, @NotNull String modifierKey) {
+        return null;
     }
 
     @Override
@@ -198,7 +177,7 @@ public class BasicLeaderbordDatabase implements LeaderboardDatabase {
                     teamMembers.add((java.util.UUID) record.get(i));
                 }
 
-                entryList.add(new LeaderboardEntry(teamMembers, (long) Objects.requireNonNull(record.get(1))));
+                entryList.add(new LeaderboardEntry(teamMembers, (long) Objects.requireNonNull(record.get(1)), 0));
             }
 
             return CompletableFuture.completedFuture(entryList);

@@ -10,7 +10,6 @@ import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.event.Event;
@@ -38,6 +37,7 @@ import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.stats.zombies.JDBCBasicLeaderboardDatabase;
 import org.phantazm.stats.zombies.LeaderboardDatabase;
+import org.phantazm.stats.zombies.Leaderboards;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -263,8 +262,9 @@ public final class PhantazmServer {
             GeneralStatsFeature.initialize(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
             LeaderboardDatabase database = new JDBCBasicLeaderboardDatabase(databaseFeatures.defaultExecutor(),
                 HikariFeature.getDataSource());
+            database.initTables(zombiesConfig.teamSizes(), zombiesConfig.trackedModifiers());
 
-            database.fetchBestTime(Set.of(UUID.randomUUID()), Key.key("vegetals"), "0");
+            Leaderboards.init(database);
         });
 
         CompletableFuture<?> game = databaseFeatures.whenCompleteAsync((ignored, error) -> {
