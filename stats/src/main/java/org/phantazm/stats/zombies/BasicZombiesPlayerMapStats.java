@@ -7,35 +7,21 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
-
     private final UUID playerUUID;
-
     private final Key mapKey;
 
     private int gamesPlayed;
-
     private int wins;
-
     private int bestRound;
-
     private int roundsSurvived;
-
     private int kills;
-
     private long coinsGained;
-
     private long coinsSpent;
-
     private int knocks;
-
     private int deaths;
-
     private int revives;
-
     private int shots;
-
     private int regularHits;
-
     private int headshotHits;
 
     public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey, int gamesPlayed, int wins,

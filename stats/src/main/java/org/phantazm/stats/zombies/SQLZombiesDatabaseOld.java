@@ -31,9 +31,9 @@ import java.util.function.Consumer;
 
 import static org.jooq.impl.DSL.*;
 
-public class SQLZombiesDatabase implements ZombiesDatabase {
+public class SQLZombiesDatabaseOld implements ZombiesDatabaseOld {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SQLZombiesDatabase.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SQLZombiesDatabaseOld.class);
 
     private final Cache<Pair<UUID, Key>, ZombiesPlayerMapStats> mapStatsCache = Caffeine.newBuilder()
         .expireAfterWrite(Duration.ofMinutes(10))
@@ -51,7 +51,7 @@ public class SQLZombiesDatabase implements ZombiesDatabase {
 
     private final DataSource dataSource;
 
-    public SQLZombiesDatabase(@NotNull Executor executor, @NotNull DataSource dataSource) {
+    public SQLZombiesDatabaseOld(@NotNull Executor executor, @NotNull DataSource dataSource) {
         this.executor = Objects.requireNonNull(executor);
         this.dataSource = Objects.requireNonNull(dataSource);
     }

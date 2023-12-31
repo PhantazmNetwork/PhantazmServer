@@ -18,7 +18,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.stats.zombies.BestTime;
-import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.zombies.ZombiesDatabaseOld;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,31 +29,19 @@ import java.util.concurrent.Executor;
 @Model("zombies.leaderboard.best_time")
 @Cache(false)
 public class BestTimeLeaderboard {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(BestTimeLeaderboard.class);
 
     private final Data data;
-
-    private final ZombiesDatabase database;
-
+    private final ZombiesDatabaseOld database;
     private final UUID viewer;
-
     private final Hologram hologram;
-
     private final double gap;
-
     private final Entity armorStand;
-
     private final MapSettingsInfo settings;
-
     private final PlayerViewProvider viewProvider;
-
     private final MiniMessage miniMessage;
-
     private final Executor executor;
-
     private final TickFormatter tickFormatter;
-
     private final Object sync = new Object();
 
     private final Int2ObjectMap<List<Component>> pages = new Int2ObjectOpenHashMap<>();
@@ -65,7 +53,7 @@ public class BestTimeLeaderboard {
     private int tabIndex = -1;
 
     @FactoryMethod
-    public BestTimeLeaderboard(@NotNull Data data, @NotNull ZombiesDatabase database, @NotNull UUID viewer,
+    public BestTimeLeaderboard(@NotNull Data data, @NotNull ZombiesDatabaseOld database, @NotNull UUID viewer,
         @NotNull Hologram hologram, double gap, @NotNull Entity armorStand, @NotNull MapSettingsInfo settings,
         @NotNull PlayerViewProvider viewProvider, @NotNull MiniMessage miniMessage, @NotNull Executor executor,
         @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
@@ -358,7 +346,7 @@ public class BestTimeLeaderboard {
     @Depend
     public static class Module implements DependencyModule {
 
-        private final ZombiesDatabase database;
+        private final ZombiesDatabaseOld database;
 
         private final Hologram hologram;
 
@@ -376,7 +364,7 @@ public class BestTimeLeaderboard {
 
         private final Executor executor;
 
-        public Module(@NotNull ZombiesDatabase database, @NotNull UUID viewer, @NotNull Hologram hologram, double gap,
+        public Module(@NotNull ZombiesDatabaseOld database, @NotNull UUID viewer, @NotNull Hologram hologram, double gap,
             @NotNull Entity armorStand, @NotNull MapSettingsInfo settings, @NotNull PlayerViewProvider viewProvider,
             @NotNull MiniMessage miniMessage, @NotNull Executor executor) {
             this.database = Objects.requireNonNull(database);
@@ -390,7 +378,7 @@ public class BestTimeLeaderboard {
             this.executor = Objects.requireNonNull(executor);
         }
 
-        public @NotNull ZombiesDatabase getDatabase() {
+        public @NotNull ZombiesDatabaseOld getDatabase() {
             return database;
         }
 

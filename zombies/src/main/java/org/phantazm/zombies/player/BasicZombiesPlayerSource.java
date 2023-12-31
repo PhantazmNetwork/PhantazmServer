@@ -42,7 +42,7 @@ import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.mob2.MobSpawner;
 import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
-import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.zombies.ZombiesDatabaseOld;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.coin.BasicPlayerCoins;
 import org.phantazm.zombies.coin.BasicTransactionModifierSource;
@@ -79,7 +79,7 @@ import java.util.function.Supplier;
 public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicZombiesPlayerSource.class);
 
-    private final ZombiesDatabase database;
+    private final ZombiesDatabaseOld database;
 
     private final Executor executor;
 
@@ -91,7 +91,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
     private final KeyParser keyParser;
 
-    public BasicZombiesPlayerSource(@NotNull ZombiesDatabase database, @NotNull Executor executor,
+    public BasicZombiesPlayerSource(@NotNull ZombiesDatabaseOld database, @NotNull Executor executor,
         @NotNull PlayerViewProvider viewProvider,
         @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
         @NotNull ContextManager contextManager, @NotNull KeyParser keyParser) {

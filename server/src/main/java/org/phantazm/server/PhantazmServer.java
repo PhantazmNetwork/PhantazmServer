@@ -37,7 +37,7 @@ import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.stats.zombies.JDBCBasicLeaderboardDatabase;
 import org.phantazm.stats.zombies.LeaderboardDatabase;
-import org.phantazm.stats.zombies.Leaderboards;
+import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -253,21 +253,18 @@ public final class PhantazmServer {
             });
         });
 
-        CompletableFuture<?> databaseFeatures = CompletableFuture.runAsync(() -> {
+        CompletableFuture<?> game = CompletableFuture.runAsync(() -> {
             ExecutorFeature.initialize();
             HikariFeature.initialize();
-        });
 
-        CompletableFuture<?> databaseDependents = databaseFeatures.whenCompleteAsync((ignored, error) -> {
             GeneralStatsFeature.initialize(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
-            LeaderboardDatabase database = new JDBCBasicLeaderboardDatabase(databaseFeatures.defaultExecutor(),
-                HikariFeature.getDataSource());
-            database.initTables(zombiesConfig.teamSizes(), zombiesConfig.trackedModifiers());
 
-            Leaderboards.init(database);
-        });
+            LeaderboardDatabase database = new JDBCBasicLeaderboardDatabase(ExecutorFeature.getExecutor(),
+                HikariFeature.getDataSource(), zombiesConfig.teamSizes(), zombiesConfig.trackedModifiers());
+            database.initTables().join();
 
-        CompletableFuture<?> game = databaseFeatures.whenCompleteAsync((ignored, error) -> {
+            ZombiesDatabase.init(database);
+
             MappingProcessorSource mappingProcessorSource = EthyleneFeature.getMappingProcessorSource();
             ElementFeature.initialize(mappingProcessorSource, keyParser);
 
@@ -280,8 +277,8 @@ public final class PhantazmServer {
                 contextManager);
             ChatFeature.initialize(chatConfig, PartyFeature.getPartyHolder().uuidToGuild(), RoleFeature.roleStore());
 
-            LobbyFeature.initialize(contextManager, RoleFeature.roleStore(),
-                ExecutorFeature.getExecutor(), mappingProcessorSource, yamlCodec);
+            LobbyFeature.initialize(contextManager, RoleFeature.roleStore(), ExecutorFeature.getExecutor(),
+                mappingProcessorSource, yamlCodec);
 
             ProximaFeature.initialize(pathfinderConfig);
             MobFeature.initialize(yamlCodec, mappingProcessorSource, contextManager, ProximaFeature.getPathfinder(),
@@ -307,7 +304,7 @@ public final class PhantazmServer {
             CommandFeature.initialize(viewProvider);
         });
 
-        CompletableFuture.allOf(independentFeatures, databaseFeatures, databaseDependents, game).join();
+        CompletableFuture.allOf(independentFeatures, game).join();
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig,

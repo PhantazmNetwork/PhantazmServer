@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 public interface ZombiesPlayerMapStats {
-
     @NotNull UUID getPlayerUUID();
 
     @NotNull Key getMapKey();
@@ -62,5 +61,4 @@ public interface ZombiesPlayerMapStats {
     int getHeadshotHits();
 
     void setHeadshotHits(int headshots);
-
 }

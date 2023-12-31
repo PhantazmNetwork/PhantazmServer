@@ -37,7 +37,8 @@ import org.phantazm.core.time.AnalogTickFormatter;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
-import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.zombies.LeaderboardDatabase;
+import org.phantazm.stats.zombies.ZombiesDatabaseOld;
 import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
@@ -68,7 +69,8 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
     private final EventNode<Event> rootNode;
     private final ContextManager contextManager;
     private final KeyParser keyParser;
-    private final ZombiesDatabase database;
+    private final ZombiesDatabaseOld database;
+    private final LeaderboardDatabase leaderboardDatabase;
 
     private final MapObjects.Source mapObjectSource;
     private final ZombiesPlayer.Source zombiesPlayerSource;
@@ -81,7 +83,10 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
     private final SongLoader songLoader;
 
     public ZombiesSceneCreator(int sceneCap,
-        @NotNull MapInfo mapInfo, @NotNull InstanceLoader instanceLoader, @NotNull KeyParser keyParser, @NotNull ContextManager contextManager, @NotNull SongLoader songLoader, @NotNull ZombiesDatabase database, @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
+        @NotNull MapInfo mapInfo, @NotNull InstanceLoader instanceLoader, @NotNull KeyParser keyParser,
+        @NotNull ContextManager contextManager, @NotNull SongLoader songLoader, @NotNull ZombiesDatabaseOld database,
+        @NotNull LeaderboardDatabase leaderboardDatabase,
+        @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
         @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
         @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
         @NotNull PowerupHandler.Source powerupHandlerSource,
@@ -95,6 +100,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         this.contextManager = Objects.requireNonNull(contextManager);
         this.keyParser = Objects.requireNonNull(keyParser);
         this.database = Objects.requireNonNull(database);
+        this.leaderboardDatabase = Objects.requireNonNull(leaderboardDatabase);
 
         MapSettingsInfo settingsInfo = mapInfo.settings();
 
@@ -341,7 +347,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
             Wrapper.of(settings.endTicks()), ticksSinceStart,
             (player, hasWon) -> {
                 return newSidebarUpdaterCreator(sidebarModule, ElementPath.of(hasWon ? "win" : "lose")).apply(player);
-            }, roundHandler, database, sceneSupplier);
+            }, roundHandler, database, leaderboardDatabase, sceneSupplier);
         return new StageTransition(idle, countdown, inGame, end);
     }
 

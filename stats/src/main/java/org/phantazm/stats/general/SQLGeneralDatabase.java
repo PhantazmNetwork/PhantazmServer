@@ -3,7 +3,7 @@ package org.phantazm.stats.general;
 import org.jetbrains.annotations.NotNull;
 import org.jooq.DSLContext;
 import org.jooq.impl.SQLDataType;
-import org.phantazm.stats.zombies.SQLZombiesDatabase;
+import org.phantazm.stats.zombies.SQLZombiesDatabaseOld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,7 @@ import static org.jooq.impl.DSL.*;
 
 public class SQLGeneralDatabase implements GeneralDatabase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SQLZombiesDatabase.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SQLZombiesDatabaseOld.class);
 
     private final Executor executor;
 

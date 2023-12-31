@@ -1,24 +1,34 @@
 package org.phantazm.stats.zombies;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.*;
 
-public interface ZombiesDatabase {
+public final class ZombiesDatabase {
+    private static final Object LOCK = new Object();
 
-    @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats);
+    private static LeaderboardDatabase database;
 
-    @NotNull CompletableFuture<Void> synchronizeBestTime(@NotNull UUID playerUUID, @NotNull Key mapKey, int playerCount, @NotNull String category, long time);
+    private static <T> T requireDefined(T input) {
+        if (input == null) {
+            throw new IllegalStateException("Database has not been defined!");
+        }
 
-    @NotNull CompletableFuture<ZombiesPlayerMapStats> getMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey);
+        return input;
+    }
 
-    @NotNull CompletableFuture<Int2ObjectMap<List<BestTime>>> getMapBestTimes(@NotNull Key mapKey, int minPlayerCount, int maxPlayerCount, @NotNull String category, int maxLength);
+    public static void init(@NotNull LeaderboardDatabase database) {
+        Objects.requireNonNull(database);
+        synchronized (LOCK) {
+            if (ZombiesDatabase.database != null) {
+                throw new IllegalStateException("Database has already been defined");
+            }
 
-    @NotNull CompletableFuture<Int2ObjectMap<BestTime>> getMapPlayerBestTimes(@NotNull UUID playerUUID, @NotNull Key mapKey, int minPlayerCount, int maxPlayerCount, @NotNull String category);
+            ZombiesDatabase.database = database;
+        }
+    }
 
-
+    public static @NotNull LeaderboardDatabase leaderboards() {
+        return requireDefined(database);
+    }
 }

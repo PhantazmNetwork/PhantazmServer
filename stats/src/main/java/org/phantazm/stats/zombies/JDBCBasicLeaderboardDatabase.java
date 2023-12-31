@@ -23,10 +23,15 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
 
     private final Executor executor;
     private final DataSource dataSource;
+    private final IntSet teamSizes;
+    private final Set<String> validModifierKeys;
 
-    public JDBCBasicLeaderboardDatabase(@NotNull Executor executor, @NotNull DataSource dataSource) {
+    public JDBCBasicLeaderboardDatabase(@NotNull Executor executor, @NotNull DataSource dataSource,
+        @NotNull IntSet teamSizes, @NotNull Set<String> validModifierKeys) {
         this.executor = Objects.requireNonNull(executor);
         this.dataSource = Objects.requireNonNull(dataSource);
+        this.teamSizes = Objects.requireNonNull(teamSizes);
+        this.validModifierKeys = Objects.requireNonNull(validModifierKeys);
     }
 
     private static CharSequence generatePlayerColumns(int teamSize) {
@@ -45,26 +50,35 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
         return builder;
     }
 
-    private static boolean isValidChar(char c) {
-        return c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
+    private static boolean isValidModifierChar(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
     }
 
     private static char toUpperAscii(char c) {
         return (c >= 'a' && c <= 'z') ? (char) (c - 32) : c;
     }
 
-    private static String simpleFilter(String input) {
+    private static String filterModifier(String input) {
+        if (input == null) {
+            return "0";
+        }
+
         StringBuilder builder = new StringBuilder(input.length());
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
-            if (!isValidChar(c)) {
+            if (!isValidModifierChar(c)) {
                 continue;
             }
 
             builder.append(toUpperAscii(c));
         }
 
-        return builder.toString();
+        int i = 0;
+        while (i < builder.length() && builder.charAt(i) == '0') {
+            i++;
+        }
+
+        return builder.isEmpty() ? "0" : builder.substring(i);
     }
 
     private static String mainTable(int teamSize, String modifierKey) {
@@ -80,7 +94,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                     ON DELETE CASCADE
                     ON UPDATE CASCADE
             );
-            """.formatted(teamSize, simpleFilter(modifierKey));
+            """.formatted(teamSize, modifierKey);
     }
 
     private static String teamsTable(int teamSize) {
@@ -101,7 +115,6 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     }
 
     private static String teamFields(int teamSize) {
-        //rough capacity calculation that is always correct for team sizes less than 10
         StringBuilder builder = new StringBuilder(teamSize * 2 + (teamSize - 1) * 2);
 
         for (int i = 0; i < teamSize; i++) {
@@ -149,8 +162,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> initTables(@NotNull IntSet teamSizes,
-        @NotNull Set<String> validModifierKeys) {
+    public @NotNull CompletableFuture<Void> initTables() {
         return CompletableFuture.runAsync(() -> {
             try (Connection connection = dataSource.getConnection();
                  Statement statement = connection.createStatement()) {
@@ -162,7 +174,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                     statements.add(teamsTable(teamSize));
 
                     for (String string : validModifierKeys) {
-                        statements.add(mainTable(teamSize, string));
+                        statements.add(mainTable(teamSize, filterModifier(string)));
                     }
                 }
 
@@ -172,6 +184,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                     for (String sql : statements) {
                         statement.execute(sql);
                     }
+
                     connection.commit();
                 } catch (SQLException e) {
                     connection.rollback();
@@ -188,35 +201,33 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     @Override
     public @NotNull CompletableFuture<Optional<Long>> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
         @NotNull String modifierKey) {
-        if (team.isEmpty()) {
+        int teamSize = team.size();
+        String filteredModifierKey = filterModifier(modifierKey);
+        if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
             return FutureUtils.completedFuture(Optional.empty());
         }
 
-        List<UUID> key = new ArrayList<>(team);
-        Collections.sort(key);
-
-        int teamSize = team.size();
-        String gameTable = gameTableName(teamSize, simpleFilter(modifierKey));
-        String teamTable = teamTableName(teamSize);
-
         return CompletableFuture.supplyAsync(() -> {
+            List<UUID> key = key(team);
+
+            String gameTable = gameTableName(teamSize, filteredModifierKey);
+            String teamTable = teamTableName(teamSize);
+
             try (Connection connection = dataSource.getConnection();
                  Statement statement = connection.createStatement()) {
-                String query = """
+                ResultSet result = statement.executeQuery("""
                     SELECT time_taken FROM %1$s
                     INNER JOIN %2$s
                     ON %1$s.team_id = %2$s.team_id
                     WHERE %1$s.map_key = '%4$s' AND %3$s
                     ORDER BY time_taken ASC
                     LIMIT 1
-                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key), map.asString());
-
-                ResultSet result = statement.executeQuery(query);
+                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key), map.asString()));
                 if (!result.next()) {
                     return Optional.empty();
                 }
 
-                return Optional.ofNullable(result.getObject(1, Long.class));
+                return Optional.of(result.getLong(1));
             } catch (SQLException e) {
                 LOGGER.warn("Exception in fetchBestTime", e);
             }
@@ -226,19 +237,20 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<List<LeaderboardEntry>> fetchTimeHistory(@NotNull Set<UUID> team, @NotNull Key map, @NotNull String modifierKey) {
-        if (team.isEmpty()) {
+    public @NotNull CompletableFuture<List<LeaderboardEntry>> fetchTimeHistory(@NotNull Set<UUID> team,
+        @NotNull Key map, @NotNull String modifierKey) {
+        int teamSize = team.size();
+        String filteredModifierKey = filterModifier(modifierKey);
+        if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
             return FutureUtils.completedFuture(List.of());
         }
 
-        List<UUID> key = new ArrayList<>(team);
-        Collections.sort(key);
-
-        int teamSize = team.size();
-        String gameTable = gameTableName(teamSize, simpleFilter(modifierKey));
-        String teamTable = teamTableName(teamSize);
-
         return CompletableFuture.supplyAsync(() -> {
+            List<UUID> key = key(team);
+
+            String gameTable = gameTableName(teamSize, filteredModifierKey);
+            String teamTable = teamTableName(teamSize);
+
             try (Connection connection = dataSource.getConnection();
                  Statement statement = connection.createStatement()) {
                 ResultSet result = statement.executeQuery("""
@@ -270,14 +282,16 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<List<LeaderboardEntry>> fetchEntries(int teamSize, @NotNull String modifierKey,
+    public @NotNull CompletableFuture<List<LeaderboardEntry>> fetchTimes(int teamSize, @NotNull String modifierKey,
         @NotNull Key map, int start, int entries) {
-        if (entries <= 0 || teamSize <= 0) {
-            return CompletableFuture.completedFuture(List.of());
+        String filteredModifierKey = filterModifier(modifierKey);
+        if (entries <= 0 || teamSize <= 0 || !validModifierKeys.contains(filteredModifierKey) ||
+            !teamSizes.contains(teamSize)) {
+            return FutureUtils.completedFuture(List.of());
         }
 
         return CompletableFuture.supplyAsync(() -> {
-            String gameTable = gameTableName(teamSize, simpleFilter(modifierKey));
+            String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
 
             String teamFields = teamFields(teamSize);
@@ -287,16 +301,13 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                 ResultSet result = statement.executeQuery("""
                     SELECT time_taken, time_end, %6$s FROM (SELECT time_taken, time_end, %6$s,
                       DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken ASC, %1$s.id ASC) AS pos
-                                        
                     FROM %1$s
                     INNER JOIN %2$s
                     ON %1$s.team_id = %2$s.team_id
                     WHERE %1$s.map_key = '%3$s') AS dummy_table
                     WHERE pos = 1
-                                        
                     LIMIT %5$s OFFSET %4$s
-                    """
-                    .formatted(gameTable, teamTable, map.asString(), start, entries, teamFields));
+                    """.formatted(gameTable, teamTable, map.asString(), start, entries, teamFields));
                 if (!result.next()) {
                     return List.of();
                 }
@@ -327,9 +338,14 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     @Override
     public @NotNull CompletableFuture<Void> submitGame(@NotNull Set<UUID> team, @NotNull String modifierKey,
         @NotNull Key map, long timeTaken, long timeEnd) {
+        int teamSize = team.size();
+        String filteredModifierKey = filterModifier(modifierKey);
+        if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
+            return FutureUtils.nullCompletedFuture();
+        }
+
         return CompletableFuture.runAsync(() -> {
-            int teamSize = team.size();
-            String gameTable = gameTableName(teamSize, simpleFilter(modifierKey));
+            String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
 
             List<UUID> key = key(team);
@@ -367,7 +383,6 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                         WHERE id IN
                         (SELECT id FROM (SELECT id, DENSE_RANK() over
                             (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken ASC, id ASC) AS output
-                                                
                         FROM %1$s
                         INNER JOIN %2$s
                         ON %1$s.team_id = %2$s.team_id
