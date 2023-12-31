@@ -1,13 +1,18 @@
 package org.phantazm.core.player;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.minestom.server.utils.mojang.MojangUtils;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FutureUtils;
+import org.phantazm.stats.Databases;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +32,7 @@ public class MojangIdentitySource implements IdentitySource {
     private static final String ID_KEY = "id";
 
     private final Executor executor;
+    private final Cache<UUID, String> usernameCache;
 
     /**
      * Creates a new instance of this class using the provided {@link Executor} to (typically asynchronously) execute
@@ -36,11 +42,23 @@ public class MojangIdentitySource implements IdentitySource {
      */
     public MojangIdentitySource(@NotNull Executor executor) {
         this.executor = Objects.requireNonNull(executor);
+        this.usernameCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(10))
+            .maximumSize(1024).build();
     }
 
     @Override
     public @NotNull CompletableFuture<Optional<String>> getName(@NotNull UUID uuid) {
-        return CompletableFuture.supplyAsync(() -> {
+        String username = usernameCache.getIfPresent(uuid);
+        if (username != null) {
+            return FutureUtils.completedFuture(Optional.of(username));
+        }
+
+        return Databases.usernames().cachedUsername(uuid).thenApply(stringOptional -> {
+            if (stringOptional.isPresent()) {
+                usernameCache.put(uuid, stringOptional.get());
+                return stringOptional;
+            }
+
             JsonObject response = null;
             try {
                 response = MojangUtils.fromUuid(uuid.toString());
@@ -48,20 +66,26 @@ public class MojangIdentitySource implements IdentitySource {
                 LOGGER.error("RuntimeException thrown during name resolution of UUID {}: {}", uuid, exception);
             }
 
-            if (response != null) {
-                JsonElement nameElement = response.get(NAME_KEY);
-                if (nameElement != null && nameElement.isJsonPrimitive()) {
-                    JsonPrimitive primitive = nameElement.getAsJsonPrimitive();
-                    if (primitive.isString()) {
-                        return Optional.of(primitive.getAsString());
-                    }
-                }
-
-                LOGGER.error("Unexpected response when resolving UUID {}: {}", uuid, response);
+            if (response == null) {
+                return Optional.empty();
             }
 
+
+            JsonElement nameElement = response.get(NAME_KEY);
+            if (nameElement != null && nameElement.isJsonPrimitive()) {
+                JsonPrimitive primitive = nameElement.getAsJsonPrimitive();
+                if (primitive.isString()) {
+                    String name = primitive.getAsString();
+                    Databases.usernames().submitUsername(uuid, name);
+                    usernameCache.put(uuid, name);
+
+                    return Optional.of(name);
+                }
+            }
+
+            LOGGER.error("Unexpected response when resolving UUID {}: {}", uuid, response);
             return Optional.empty();
-        }, executor);
+        });
     }
 
     @Override

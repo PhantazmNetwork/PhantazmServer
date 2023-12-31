@@ -1,6 +1,7 @@
 package org.phantazm.stats.zombies;
 
 import it.unimi.dsi.fastutil.ints.IntIterator;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -30,8 +31,34 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
         @NotNull IntSet teamSizes, @NotNull Set<String> validModifierKeys) {
         this.executor = Objects.requireNonNull(executor);
         this.dataSource = Objects.requireNonNull(dataSource);
-        this.teamSizes = Objects.requireNonNull(teamSizes);
-        this.validModifierKeys = Objects.requireNonNull(validModifierKeys);
+        this.teamSizes = filterSizes(teamSizes);
+        this.validModifierKeys = filterModifierKeys(validModifierKeys);
+    }
+
+    private static IntSet filterSizes(IntSet input) {
+        Objects.requireNonNull(input);
+
+        IntIterator iterator = input.intIterator();
+        IntSet set = new IntOpenHashSet(input.size());
+        while (iterator.hasNext()) {
+            int i = iterator.nextInt();
+            if (i >= 0) {
+                set.add(i);
+            }
+        }
+
+        return set;
+    }
+
+    private static Set<String> filterModifierKeys(Set<String> input) {
+        Objects.requireNonNull(input);
+
+        Set<String> keys = new HashSet<>(input.size());
+        for (String modifierKey : input) {
+            keys.add(filterModifierKey(modifierKey));
+        }
+
+        return keys;
     }
 
     private static CharSequence generatePlayerColumns(int teamSize) {
@@ -58,7 +85,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
         return (c >= 'a' && c <= 'z') ? (char) (c - 32) : c;
     }
 
-    private static String filterModifier(String input) {
+    private static String filterModifierKey(String input) {
         if (input == null) {
             return "0";
         }
@@ -78,7 +105,8 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             i++;
         }
 
-        return builder.isEmpty() ? "0" : builder.substring(i);
+        String substring = builder.substring(i);
+        return substring.isEmpty() ? "0" : substring;
     }
 
     private static String mainTable(int teamSize, String modifierKey) {
@@ -174,7 +202,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                     statements.add(teamsTable(teamSize));
 
                     for (String string : validModifierKeys) {
-                        statements.add(mainTable(teamSize, filterModifier(string)));
+                        statements.add(mainTable(teamSize, string));
                     }
                 }
 
@@ -201,8 +229,10 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     @Override
     public @NotNull CompletableFuture<Optional<Long>> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
         @NotNull String modifierKey) {
+        Objects.requireNonNull(map);
+
         int teamSize = team.size();
-        String filteredModifierKey = filterModifier(modifierKey);
+        String filteredModifierKey = filterModifierKey(modifierKey);
         if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
             return FutureUtils.completedFuture(Optional.empty());
         }
@@ -239,8 +269,10 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     @Override
     public @NotNull CompletableFuture<List<LeaderboardEntry>> fetchTimeHistory(@NotNull Set<UUID> team,
         @NotNull Key map, @NotNull String modifierKey) {
+        Objects.requireNonNull(map);
+
         int teamSize = team.size();
-        String filteredModifierKey = filterModifier(modifierKey);
+        String filteredModifierKey = filterModifierKey(modifierKey);
         if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
             return FutureUtils.completedFuture(List.of());
         }
@@ -282,9 +314,11 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<List<LeaderboardEntry>> fetchTimes(int teamSize, @NotNull String modifierKey,
+    public @NotNull CompletableFuture<List<LeaderboardEntry>> fetchBestTimes(int teamSize, @NotNull String modifierKey,
         @NotNull Key map, int start, int entries) {
-        String filteredModifierKey = filterModifier(modifierKey);
+        Objects.requireNonNull(map);
+
+        String filteredModifierKey = filterModifierKey(modifierKey);
         if (entries <= 0 || teamSize <= 0 || !validModifierKeys.contains(filteredModifierKey) ||
             !teamSizes.contains(teamSize)) {
             return FutureUtils.completedFuture(List.of());
@@ -338,8 +372,10 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     @Override
     public @NotNull CompletableFuture<Void> submitGame(@NotNull Set<UUID> team, @NotNull String modifierKey,
         @NotNull Key map, long timeTaken, long timeEnd) {
+        Objects.requireNonNull(map);
+
         int teamSize = team.size();
-        String filteredModifierKey = filterModifier(modifierKey);
+        String filteredModifierKey = filterModifierKey(modifierKey);
         if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
             return FutureUtils.nullCompletedFuture();
         }
@@ -361,7 +397,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                 connection.setAutoCommit(false);
 
                 try {
-                    statement.execute("SELECT GET_LOCK('phantazm.zombies.submit_game', 10)");
+                    statement.execute("SELECT GET_LOCK('phantazm.zombies.submit_game', 60)");
 
                     statement.execute("""
                         INSERT INTO %1$s (%2$s)

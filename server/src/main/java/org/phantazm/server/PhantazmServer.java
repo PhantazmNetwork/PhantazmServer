@@ -35,9 +35,11 @@ import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
+import org.phantazm.stats.general.JDBCUsernameDatabase;
+import org.phantazm.stats.general.UsernameDatabase;
 import org.phantazm.stats.zombies.JDBCBasicLeaderboardDatabase;
 import org.phantazm.stats.zombies.LeaderboardDatabase;
-import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.Databases;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -259,11 +261,16 @@ public final class PhantazmServer {
 
             GeneralStatsFeature.initialize(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
 
-            LeaderboardDatabase database = new JDBCBasicLeaderboardDatabase(ExecutorFeature.getExecutor(),
+            LeaderboardDatabase leaderboardDatabase = new JDBCBasicLeaderboardDatabase(ExecutorFeature.getExecutor(),
                 HikariFeature.getDataSource(), zombiesConfig.teamSizes(), zombiesConfig.trackedModifiers());
-            database.initTables().join();
 
-            ZombiesDatabase.init(database);
+            UsernameDatabase usernameDatabase = new JDBCUsernameDatabase(ExecutorFeature.getExecutor(),
+                HikariFeature.getDataSource(), Duration.ofHours(1));
+
+            CompletableFuture.allOf(leaderboardDatabase.initTables(), usernameDatabase.initTables()).join();
+
+            Databases.init(leaderboardDatabase);
+            Databases.init(usernameDatabase);
 
             MappingProcessorSource mappingProcessorSource = EthyleneFeature.getMappingProcessorSource();
             ElementFeature.initialize(mappingProcessorSource, keyParser);

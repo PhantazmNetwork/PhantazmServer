@@ -38,7 +38,7 @@ import org.phantazm.mob2.MobCreator;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.stats.zombies.SQLZombiesDatabaseOld;
-import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.Databases;
 import org.phantazm.stats.zombies.ZombiesDatabaseOld;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
@@ -150,7 +150,7 @@ public final class ZombiesFeature {
             ZombiesSceneCreator provider =
                 new ZombiesSceneCreator(zombiesConfig.maximumScenes(),
                     entry.getValue(), instanceLoader, keyParser, contextManager, songLoader, database,
-                    ZombiesDatabase.leaderboards(), instanceSpaceFunction, globalEventNode,
+                    Databases.leaderboards(), instanceSpaceFunction, globalEventNode,
                     ZombiesFeature.mobSpawnerSource(), clientBlockHandlerSource,
                     ZombiesFeature.powerupHandlerSource(),
                     new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,

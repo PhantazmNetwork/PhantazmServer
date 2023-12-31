@@ -26,7 +26,7 @@ public interface LeaderboardDatabase {
     @NotNull CompletableFuture<List<LeaderboardEntry>> fetchTimeHistory(@NotNull Set<UUID> team, @NotNull Key map,
         @NotNull String modifierKey);
 
-    @NotNull CompletableFuture<List<LeaderboardEntry>> fetchTimes(int teamSize, @NotNull String modifierKey,
+    @NotNull CompletableFuture<List<LeaderboardEntry>> fetchBestTimes(int teamSize, @NotNull String modifierKey,
         @NotNull Key map, int start, int entries);
 
     @NotNull CompletableFuture<Void> submitGame(@NotNull Set<UUID> team, @NotNull String modifierKey, @NotNull Key map,
