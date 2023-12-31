@@ -1,5 +1,4 @@
 import org.phantazm.gradle.task.CopyLibs
-import org.phantazm.gradle.task.SetupServer
 
 plugins {
     id("phantazm.minestom-library-conventions")
@@ -59,8 +58,4 @@ tasks.register<Copy>("copyJar") {
     dependsOn(tasks.jar)
     from(tasks.jar)
     into("$rootDir/run/server-1/")
-}
-
-tasks.getByName<SetupServer>("setupServer") {
-    dataFolder = rootProject.rootDir.resolve("defaultRunData")
 }

@@ -38,12 +38,14 @@ sequenceOf(
         "zombies-mapdata",
         "zombies-mapeditor",
         "snbt-builder",
-        "loader"
+        "loader",
+        "dev-launcher"
 ).forEach {
     if (!toSkip.contains(it)) {
         include(":phantazm-$it")
         project(":phantazm-$it").projectDir = file(it)
+        println("Building module $it")
     } else {
-        println("Skipping project module $it")
+        println("Ignoring module $it")
     }
 }
