@@ -38,6 +38,9 @@ you skip the `--recurse-submodules` flag the project will not compile!
 **Warning!** _You must only use this to set up an environment for local testing!_ Much of the components are insecure,
 including the database and Minecraft server itself, due to using **default credentials**.
 
+For Windows users, it's recommended to read [this page](https://github.com/PhantazmNetwork/PhantazmServer/wiki/Docker-%E2%80%90-Common-Issues-on-Windows)
+ahead of time to familiarize yourself with common errors and how to avoid them.
+
 Local development builds may be started with [Docker Compose](https://docs.docker.com/compose/), which is a tool for
 orchestrating multiple virtual containers. If you are on
 Windows, [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) should be all you need to install
