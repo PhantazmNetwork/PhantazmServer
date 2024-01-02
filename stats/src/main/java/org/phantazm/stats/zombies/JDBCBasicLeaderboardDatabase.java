@@ -5,19 +5,19 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.phantazm.commons.FutureUtils;
+import org.phantazm.stats.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
+@SuppressWarnings("SqlSourceToSinkFlow")
 public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     private static final Logger LOGGER = LoggerFactory.getLogger(JDBCBasicLeaderboardDatabase.class);
     private static final int RECORD_HISTORY_SIZE = 100;
@@ -156,17 +156,40 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
         return builder.toString();
     }
 
-    private static String teamMatches(String teamsTable, List<UUID> uuids) {
-        StringBuilder builder = new StringBuilder();
-        int i = 0;
-        for (UUID uuid : uuids) {
-            builder.append("%1$s.p%2$s = '%3$s'".formatted(teamsTable, i + 1, uuid));
-            if (i < uuids.size() - 1) {
-                builder.append(" AND ");
-            }
-
-            i++;
+    @VisibleForTesting
+    protected static String teamMatches(String teamsTable, int teamSize, String... prefixes) {
+        int prefixLengthSum = 0;
+        for (String prefix : prefixes) {
+            prefixLengthSum += prefix.length();
         }
+
+        int allParameters = prefixLengthSum + teamSize;
+        StringBuilder builder = new StringBuilder(7 + prefixLengthSum
+            + teamSize * (teamsTable.length() + 3)
+            + 2 * (allParameters + 2 * (allParameters - 1)));
+
+        builder.append('(');
+        for (String prefix : prefixes) {
+            builder.append(prefix);
+            builder.append(", ");
+        }
+
+        for (int i = 0; i < teamSize; i++) {
+            builder.append("%1$s.p%2$s".formatted(teamsTable, i + 1));
+
+            if (i < teamSize - 1) {
+                builder.append(", ");
+            }
+        }
+        builder.append(") = (");
+        for (int i = 0; i < teamSize + prefixes.length; i++) {
+            builder.append('?');
+            if (i < teamSize + prefixes.length - 1) {
+                builder.append(", ");
+            }
+        }
+
+        builder.append(')');
 
         return builder.toString();
     }
@@ -177,23 +200,17 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
         return key;
     }
 
-    private static String teamValues(@NotNull Collection<UUID> uuids) {
-        int size = uuids.size();
-        StringBuilder builder = new StringBuilder(36 * size + (size - 1) * 2 + size * 2);
-        for (UUID uuid : uuids) {
-            builder.append('\'');
-            builder.append(uuid);
-            builder.append('\'');
+    private static void setUuidParameters(int offset, @NotNull List<UUID> uuids,
+        @NotNull PreparedStatement statement) throws SQLException {
+        for (int i = 0; i < uuids.size(); i++) {
+            statement.setString(i + 1 + offset, uuids.get(i).toString());
         }
-
-        return builder.toString();
     }
 
     @Override
     public @NotNull CompletableFuture<Void> initTables() {
         return CompletableFuture.runAsync(() -> {
-            try (Connection connection = dataSource.getConnection();
-                 Statement statement = connection.createStatement()) {
+            Utils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
                 IntIterator iterator = teamSizes.intIterator();
 
                 List<String> statements = new ArrayList<>();
@@ -220,9 +237,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                 } finally {
                     connection.setAutoCommit(true);
                 }
-            } catch (SQLException e) {
-                LOGGER.warn("Exception in initTables", e);
-            }
+            });
         }, executor);
     }
 
@@ -243,26 +258,24 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
 
-            try (Connection connection = dataSource.getConnection();
-                 Statement statement = connection.createStatement()) {
-                ResultSet result = statement.executeQuery("""
-                    SELECT time_taken FROM %1$s
-                    INNER JOIN %2$s
-                    ON %1$s.team_id = %2$s.team_id
-                    WHERE %1$s.map_key = '%4$s' AND %3$s
-                    ORDER BY time_taken ASC
-                    LIMIT 1
-                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key), map.asString()));
+            return Utils.runPreparedSql(LOGGER, "fetchBestTime", Optional.empty(), dataSource, """
+                SELECT time_taken FROM %1$s
+                INNER JOIN %2$s
+                ON %1$s.team_id = %2$s.team_id
+                WHERE %3$s
+                ORDER BY time_taken ASC
+                LIMIT 1
+                """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")), ((connection, preparedStatement) -> {
+                preparedStatement.setString(1, map.asString());
+                setUuidParameters(1, key, preparedStatement);
+
+                ResultSet result = preparedStatement.executeQuery();
                 if (!result.next()) {
                     return Optional.empty();
                 }
 
                 return Optional.of(result.getLong(1));
-            } catch (SQLException e) {
-                LOGGER.warn("Exception in fetchBestTime", e);
-            }
-
-            return Optional.empty();
+            }));
         }, executor);
     }
 
@@ -283,17 +296,19 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
 
-            try (Connection connection = dataSource.getConnection();
-                 Statement statement = connection.createStatement()) {
-                ResultSet result = statement.executeQuery("""
-                    SELECT time_taken, time_end FROM %1$s
-                    INNER JOIN %2$s
-                    ON %1$s.team_id = %2$s.team_id
-                    WHERE %1$s.map_key = '%4$s' AND %3$s
-                    ORDER BY time_taken ASC, id ASC
-                    LIMIT %5$s
-                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key), map.asString(),
-                    RECORD_HISTORY_SIZE));
+            return Utils.runPreparedSql(LOGGER, "fetchTimeHistory", List.of(), dataSource, """
+                SELECT time_taken, time_end FROM %1$s
+                INNER JOIN %2$s
+                ON %1$s.team_id = %2$s.team_id
+                WHERE %3$s
+                ORDER BY time_taken ASC, id ASC
+                LIMIT ?
+                """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")), (connection, preparedStatement) -> {
+                preparedStatement.setString(1, map.asString());
+                setUuidParameters(1, key, preparedStatement);
+                preparedStatement.setInt(2 + key.size(), RECORD_HISTORY_SIZE);
+
+                ResultSet result = preparedStatement.executeQuery();
                 if (!result.next()) {
                     return List.of();
                 }
@@ -305,11 +320,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                 while (result.next());
 
                 return entries;
-            } catch (SQLException e) {
-                LOGGER.warn("Exception in fetchTimeHistory", e);
-            }
-
-            return List.of();
+            });
         }, executor);
     }
 
@@ -330,18 +341,21 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
 
             String teamFields = teamFields(teamSize);
 
-            try (Connection connection = dataSource.getConnection();
-                 Statement statement = connection.createStatement()) {
-                ResultSet result = statement.executeQuery("""
-                    SELECT time_taken, time_end, %6$s FROM (SELECT time_taken, time_end, %6$s,
-                      DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken ASC, %1$s.id ASC) AS pos
+            return Utils.runPreparedSql(LOGGER, "fetchBestTimes", List.of(), dataSource, """
+                SELECT time_taken, time_end, %3$s FROM (SELECT time_taken, time_end, %3$s,
+                  DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken ASC, %1$s.id ASC) AS pos
                     FROM %1$s
                     INNER JOIN %2$s
                     ON %1$s.team_id = %2$s.team_id
-                    WHERE %1$s.map_key = '%3$s') AS dummy_table
+                    WHERE %1$s.map_key = ?) AS dummy_table
                     WHERE pos = 1
-                    LIMIT %5$s OFFSET %4$s
-                    """.formatted(gameTable, teamTable, map.asString(), start, entries, teamFields));
+                    LIMIT ? OFFSET ?
+                """.formatted(gameTable, teamTable, teamFields), (connection, preparedStatement) -> {
+                preparedStatement.setString(1, map.asString());
+                preparedStatement.setInt(2, entries);
+                preparedStatement.setInt(3, start);
+
+                ResultSet result = preparedStatement.executeQuery();
                 if (!result.next()) {
                     return List.of();
                 }
@@ -361,11 +375,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                 while (result.next());
 
                 return entryList;
-            } catch (SQLException e) {
-                LOGGER.warn("Exception in fetchEntries", e);
-            }
-
-            return List.of();
+            });
         }, executor);
     }
 
@@ -380,53 +390,63 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             return FutureUtils.nullCompletedFuture();
         }
 
+
         return CompletableFuture.runAsync(() -> {
             String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
 
             List<UUID> key = key(team);
 
-            String teamMatches = teamMatches(teamTable, key);
-            String teamValues = teamValues(key);
-
-            try (Connection connection = dataSource.getConnection();
-                 Statement statement = connection.createStatement()) {
-
+            Utils.runSql(LOGGER, "submitGame", dataSource, (connection) -> {
                 int oldIsolation = connection.getTransactionIsolation();
                 connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
                 connection.setAutoCommit(false);
 
-                try {
+                try (Statement statement = connection.createStatement();
+                     PreparedStatement first = connection.prepareStatement("""
+                         INSERT INTO %1$s (%2$s)
+                         SELECT (%2$s) FROM DUAL
+                         WHERE NOT EXISTS
+                         (SELECT %2$s FROM %1$s
+                             WHERE %3$s)
+                         """.formatted(teamTable, teamFields(key.size()), teamMatches(teamTable, key.size())));
+                     PreparedStatement second = connection.prepareStatement("""
+                         INSERT INTO %1$s (team_id, time_taken, time_end, map_key)
+                         VALUES ((SELECT team_id FROM %2$s WHERE %3$s), ?, ?, ?)
+                         """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size())));
+                     PreparedStatement third = connection.prepareStatement("""
+                         DELETE FROM %1$s
+                         WHERE id IN
+                         (SELECT id FROM (SELECT id, DENSE_RANK() over
+                             (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken ASC, id ASC) AS output
+                         FROM %1$s
+                         INNER JOIN %2$s
+                         ON %1$s.team_id = %2$s.team_id
+                         WHERE %3$s) AS dummy_table
+                         WHERE output > ?)
+                         """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")))) {
+
+                    setUuidParameters(0, key, first);
+
+                    setUuidParameters(0, key, second);
+                    second.setLong(1 + key.size(), timeTaken);
+                    second.setLong(2 + key.size(), timeEnd);
+                    second.setString(3 + key.size(), map.asString());
+
+                    third.setString(1, map.asString());
+                    setUuidParameters(1, key, third);
+                    third.setInt(2 + key.size(), RECORD_HISTORY_SIZE);
+
                     statement.execute("SELECT GET_LOCK('phantazm.zombies.submit_game', 60)");
 
-                    statement.execute("""
-                        INSERT INTO %1$s (%2$s)
-                        SELECT (%3$s) FROM DUAL
-                        WHERE NOT EXISTS
-                            (SELECT * FROM %1$s
-                            WHERE (%2$s) = (%3$s))
-                        """.formatted(teamTable, teamFields(teamSize), teamValues));
-
-                    statement.execute("""
-                        INSERT INTO %1$s (team_id, time_taken, time_end, map_key)
-                        VALUES ((SELECT team_id FROM %2$s WHERE %4$s), %5$s, %6$s, '%7$s')
-                        """.formatted(gameTable, teamTable, map.asString(), teamMatches, timeTaken, timeEnd, map));
+                    first.execute();
+                    second.execute();
 
                     connection.commit();
 
-                    statement.execute("""
-                        DELETE FROM %1$s
-                        WHERE id IN
-                        (SELECT id FROM (SELECT id, DENSE_RANK() over
-                            (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken ASC, id ASC) AS output
-                        FROM %1$s
-                        INNER JOIN %2$s
-                        ON %1$s.team_id = %2$s.team_id
-                        WHERE map_key = '%4$s' AND %3$s) AS dummy_table
-                        WHERE output > %5$s)
-                        """.formatted(gameTable, teamTable, teamMatches, map.asString(), RECORD_HISTORY_SIZE));
-
+                    third.execute();
                     statement.execute("SELECT RELEASE_LOCK('phantazm.zombies.submit_game')");
+
                     connection.commit();
                 } catch (SQLException e) {
                     connection.rollback();
@@ -435,9 +455,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
                     connection.setAutoCommit(true);
                     connection.setTransactionIsolation(oldIsolation);
                 }
-            } catch (SQLException e) {
-                LOGGER.warn("Exception in submitGame", e);
-            }
+            });
         }, executor);
     }
 }

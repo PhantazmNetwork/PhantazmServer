@@ -265,7 +265,7 @@ public final class PhantazmServer {
                 HikariFeature.getDataSource(), zombiesConfig.teamSizes(), zombiesConfig.trackedModifiers());
 
             UsernameDatabase usernameDatabase = new JDBCUsernameDatabase(ExecutorFeature.getExecutor(),
-                HikariFeature.getDataSource(), Duration.ofHours(1));
+                HikariFeature.getDataSource(), Duration.ofDays(30));
 
             CompletableFuture.allOf(leaderboardDatabase.initTables(), usernameDatabase.initTables()).join();
 

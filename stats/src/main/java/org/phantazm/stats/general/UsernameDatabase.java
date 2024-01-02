@@ -11,5 +11,7 @@ public interface UsernameDatabase {
 
     @NotNull CompletableFuture<Optional<String>> cachedUsername(@NotNull UUID uuid);
 
+    @NotNull CompletableFuture<Optional<UUID>> cachedUUID(@NotNull String username);
+
     @NotNull CompletableFuture<Void> submitUsername(@NotNull UUID uuid, @NotNull String username);
 }

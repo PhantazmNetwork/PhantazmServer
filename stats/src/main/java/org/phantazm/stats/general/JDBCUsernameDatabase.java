@@ -1,10 +1,15 @@
 package org.phantazm.stats.general;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FutureUtils;
+import org.phantazm.stats.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.Duration;
 import java.util.Objects;
@@ -20,10 +25,16 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
     private final DataSource dataSource;
     private final Duration expireTime;
 
+    private final Cache<UUID, String> uuidToUsername;
+    private final Cache<String, UUID> usernameToUuid;
+
     public JDBCUsernameDatabase(@NotNull Executor executor, @NotNull DataSource dataSource, @NotNull Duration expireTime) {
         this.executor = Objects.requireNonNull(executor);
         this.dataSource = Objects.requireNonNull(dataSource);
         this.expireTime = expireTime;
+
+        this.uuidToUsername = Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(10)).build();
+        this.usernameToUuid = Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(10)).build();
     }
 
     private static boolean isValidChar(char c) {
@@ -56,49 +67,96 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
                         last_updated BIGINT NOT NULL
                     );
                     """);
+
+                try (PreparedStatement preparedStatement = connection.prepareStatement("""
+                    CREATE OR REPLACE EVENT clean_expired_entries
+                    ON SCHEDULE EVERY 12 HOUR
+                    DO DELETE FROM phantazm_db.username_cache
+                    WHERE (SELECT ROUND(UNIX_TIMESTAMP(CURTIME(4)))) - last_updated > ?
+                    """)) {
+                    preparedStatement.setLong(1, expireTime.toSeconds());
+                    preparedStatement.execute();
+                }
             });
         }, executor);
     }
 
-    @SuppressWarnings("SqlSourceToSinkFlow")
     @Override
     public @NotNull CompletableFuture<Optional<String>> cachedUsername(@NotNull UUID uuid) {
+        String username = uuidToUsername.getIfPresent(uuid);
+        if (username != null) {
+            return FutureUtils.completedFuture(Optional.of(username));
+        }
+
         return CompletableFuture.supplyAsync(() -> {
-            return Utils.runSql(LOGGER, "cachedUsername", dataSource, (connection, statement) -> {
-                String uuidString = uuid.toString();
-                ResultSet result = statement.executeQuery("""
-                    SELECT username, last_updated FROM username_cache
-                    WHERE uuid = '%1s'
-                    """.formatted(uuidString));
+            String uuidString = uuid.toString();
+
+            return Utils.runPreparedSql(LOGGER, "cachedUsername", dataSource, """
+                SELECT username, last_updated FROM phantazm_db.username_cache
+                WHERE uuid = ?
+                """, (connection, statement) -> {
+
+                statement.setString(1, uuidString);
+                ResultSet result = statement.executeQuery();
+
                 if (!result.next()) {
                     return Optional.empty();
                 }
 
-                long elapsed = System.currentTimeMillis() - result.getLong(2);
-                if (elapsed > expireTime.toMillis()) {
-                    statement.execute("""
-                        REMOVE FROM username_cache
-                        WHERE uuid = '%1s';
-                        """.formatted(uuidString));
-                    return Optional.empty();
-                }
-
-                return Optional.of(result.getString(1));
+                String name = result.getString(1);
+                usernameToUuid.put(name, uuid);
+                uuidToUsername.put(uuid, name);
+                return Optional.of(name);
             });
         }, executor);
     }
 
-    @SuppressWarnings("SqlSourceToSinkFlow")
+    @Override
+    public @NotNull CompletableFuture<Optional<UUID>> cachedUUID(@NotNull String username) {
+        String filteredName = filterUsername(username);
+        UUID uuid = usernameToUuid.getIfPresent(filteredName);
+        if (uuid != null) {
+            return FutureUtils.completedFuture(Optional.of(uuid));
+        }
+
+        return CompletableFuture.supplyAsync(() -> {
+            return Utils.runPreparedSql(LOGGER, "cachedUUID", dataSource, """
+                SELECT uuid, last_updated FROM phantazm_db.username_cache
+                WHERE username = ?
+                ORDER BY last_updated DESC
+                LIMIT 1
+                """, (connection, statement) -> {
+                statement.setString(1, filteredName);
+
+                ResultSet result = statement.executeQuery();
+                if (!result.next()) {
+                    return Optional.empty();
+                }
+
+                UUID newUuid = UUID.fromString(result.getString(1));
+                usernameToUuid.put(filteredName, newUuid);
+                uuidToUsername.put(newUuid, filteredName);
+                return Optional.of(newUuid);
+            });
+        }, executor);
+    }
+
     @Override
     public @NotNull CompletableFuture<Void> submitUsername(@NotNull UUID uuid, @NotNull String username) {
-        String filteredUsername = filterUsername(username);
-
         return CompletableFuture.runAsync(() -> {
-            Utils.runSql(LOGGER, "submitUsername", dataSource, (connection, statement) -> {
-                statement.execute("""
-                    REPLACE INTO username_cache (username, last_updated)
-                    VALUES (%1s, %2s)
-                    """.formatted(uuid, filteredUsername));
+            uuidToUsername.put(uuid, username);
+            usernameToUuid.put(username, uuid);
+
+            String filteredUsername = filterUsername(username);
+            Utils.runPreparedSql(LOGGER, "submitUsername", dataSource, """
+                REPLACE INTO phantazm_db.username_cache (uuid, username, last_updated)
+                VALUES (?, ?, UNIX_TIMESTAMP())
+                """, (connection, statement) -> {
+
+                statement.setString(1, uuid.toString());
+                statement.setString(2, filteredUsername);
+
+                statement.executeUpdate();
             });
         }, executor);
     }
