@@ -1,4 +1,4 @@
-package org.phantazm.server.role;
+package org.phantazm.core.role;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -17,15 +17,19 @@ public sealed interface Role permits Role.RoleImpl {
     Role NONE = new RoleImpl("none", player -> {
         return Optional.ofNullable(player.getDisplayName()).orElseGet(player::getName);
     }, ignored -> {
-    }, Integer.MIN_VALUE, Set.of());
+    }, Component::text, Integer.MIN_VALUE, Set.of());
 
     static @NotNull Role of(@NotNull String identifier,
         @NotNull Function<? super Player, ? extends Component> chatStyleFunction,
-        @NotNull Consumer<? super Player> displayNameStyler, int priority, @NotNull Set<Permission> permissions) {
+        @NotNull Consumer<? super Player> displayNameStyler,
+        @NotNull Function<? super String, ? extends Component> rawNameStyleFunction,
+        int priority, @NotNull Set<Permission> permissions) {
         Objects.requireNonNull(identifier);
         Objects.requireNonNull(chatStyleFunction);
+        Objects.requireNonNull(rawNameStyleFunction);
         Objects.requireNonNull(displayNameStyler);
-        return new RoleImpl(identifier, chatStyleFunction, displayNameStyler, priority, Set.copyOf(permissions));
+        return new RoleImpl(identifier, chatStyleFunction, displayNameStyler, rawNameStyleFunction, priority,
+            Set.copyOf(permissions));
     }
 
     @NotNull
@@ -33,6 +37,8 @@ public sealed interface Role permits Role.RoleImpl {
 
     @Nullable
     Component styleChatName(@NotNull Player player);
+
+    @NotNull Component styleRawName(@NotNull String name);
 
     void styleDisplayName(@NotNull Player player);
 
@@ -46,14 +52,17 @@ public sealed interface Role permits Role.RoleImpl {
         private final String identifier;
         private final Function<? super Player, ? extends Component> chatStyleFunction;
         private final Consumer<? super Player> displayNameStyler;
+        private final Function<? super String, ? extends Component> rawNameStyleFunction;
         private final int priority;
         private final Set<Permission> permissions;
 
         private RoleImpl(String identifier, Function<? super Player, ? extends Component> chatStyleFunction,
-            Consumer<? super Player> displayNameStyler, int priority, Set<Permission> permissions) {
+            Consumer<? super Player> displayNameStyler, Function<? super String, ? extends Component> rawNameStyleFunction,
+            int priority, Set<Permission> permissions) {
             this.identifier = identifier;
             this.chatStyleFunction = chatStyleFunction;
             this.displayNameStyler = displayNameStyler;
+            this.rawNameStyleFunction = rawNameStyleFunction;
             this.priority = priority;
             this.permissions = permissions;
         }
@@ -66,6 +75,11 @@ public sealed interface Role permits Role.RoleImpl {
         @Override
         public @Nullable Component styleChatName(@NotNull Player player) {
             return chatStyleFunction.apply(player);
+        }
+
+        @Override
+        public @NotNull Component styleRawName(@NotNull String name) {
+            return rawNameStyleFunction.apply(name);
         }
 
         @Override

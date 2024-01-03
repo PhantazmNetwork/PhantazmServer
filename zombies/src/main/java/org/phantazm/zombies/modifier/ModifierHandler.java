@@ -177,6 +177,20 @@ public final class ModifierHandler {
         return result.get();
     }
 
+    public @NotNull String descriptor(@NotNull Set<Key> names) {
+        List<ModifierComponent> componentList = new ArrayList<>(names.size());
+        for (Key name : names) {
+            ModifierComponent component = components.get(name);
+            if (component == null) {
+                throw new IllegalArgumentException("Unknown modifier name " + name);
+            }
+
+            componentList.add(component);
+        }
+
+        return ModifierUtils.modifierDescriptor(componentList);
+    }
+
     public ModifierHandler.@NotNull ModifierResult setFromDescriptor(@NotNull PlayerView playerView,
         @NotNull String descriptor) {
         List<ModifierComponent> components = ModifierUtils.fromDescriptor(ordinalMap, descriptor);

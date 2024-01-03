@@ -11,7 +11,7 @@ import org.phantazm.server.config.server.ShutdownConfig;
 import org.phantazm.server.config.server.ZombiesGamereportConfig;
 import org.phantazm.server.permission.DatabasePermissionHandler;
 import org.phantazm.server.permission.PermissionHandler;
-import org.phantazm.server.role.RoleStore;
+import org.phantazm.core.role.RoleStore;
 import org.phantazm.server.validator.LoginValidator;
 
 import javax.sql.DataSource;

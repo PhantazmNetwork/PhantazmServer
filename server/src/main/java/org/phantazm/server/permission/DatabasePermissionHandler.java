@@ -12,8 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jooq.Record;
 import org.jooq.Result;
-import org.phantazm.server.role.Role;
-import org.phantazm.server.role.RoleStore;
+import org.phantazm.core.role.Role;
+import org.phantazm.core.role.RoleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

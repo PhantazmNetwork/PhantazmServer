@@ -1,4 +1,4 @@
-package org.phantazm.server.role;
+package org.phantazm.core.role;
 
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
@@ -28,7 +28,7 @@ public class BasicRoleCreator implements RoleCreator {
 
     @Override
     public @NotNull Role get() {
-        return Role.of(data.identifier, this::styleChat, this::styleDisplayName, data.priority,
+        return Role.of(data.identifier, this::styleChat, this::styleDisplayName, this::styleName, data.priority,
             data.permissions.stream().map(Permission::new).collect(Collectors.toUnmodifiableSet()));
     }
 
@@ -42,8 +42,16 @@ public class BasicRoleCreator implements RoleCreator {
             return;
         }
 
-        TagResolver name = Placeholder.unparsed("name", player.getUsername());
-        player.setDisplayName(MiniMessage.miniMessage().deserialize(data.displayNameFormat, name));
+        TagResolver nameTag = Placeholder.unparsed("name", player.getUsername());
+        player.setDisplayName(MiniMessage.miniMessage().deserialize(data.displayNameFormat, nameTag));
+    }
+
+    private Component styleName(String name) {
+        if (data.displayNameFormat == null) {
+            return Component.text(name);
+        }
+
+        return MiniMessage.miniMessage().deserialize(data.displayNameFormat, Placeholder.unparsed("name", name));
     }
 
     @DataObject

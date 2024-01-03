@@ -56,7 +56,12 @@ public class BasicPaginatedHologram implements PaginatedHologram {
 
     @Override
     public void setInstance(@NotNull Instance instance) {
+        Objects.requireNonNull(instance);
         synchronized (sync) {
+            if (this.instance == instance) {
+                return;
+            }
+
             this.instance = instance;
             for (ViewableHologram viewableHologram : pages) {
                 viewableHologram.setInstance(instance, location);
@@ -66,7 +71,12 @@ public class BasicPaginatedHologram implements PaginatedHologram {
 
     @Override
     public void setLocation(@NotNull Point location) {
+        Objects.requireNonNull(location);
         synchronized (sync) {
+            if (this.location.equals(location)) {
+                return;
+            }
+
             for (ViewableHologram viewableHologram : this.pages) {
                 viewableHologram.setLocation(location);
             }

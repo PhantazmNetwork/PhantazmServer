@@ -1,4 +1,4 @@
-package org.phantazm.server.role;
+package org.phantazm.core.role;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -55,7 +55,7 @@ public class BasicRoleStore implements RoleStore {
         Set<Role> currentRoles = roleCache.getIfPresent(uuid);
         if (currentRoles != null) {
             //avoid async call if we can
-            return CompletableFuture.completedFuture(getStylingRole0(currentRoles));
+            return FutureUtils.completedFuture(getStylingRole0(currentRoles));
         }
 
         return CompletableFuture.supplyAsync(() -> {
@@ -70,7 +70,7 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public @NotNull CompletableFuture<Boolean> giveRole(@NotNull UUID uuid, @NotNull String identifier) {
-        if (identifier.equals(RoleStore.DEFAULT) || identifier.equals(Role.NONE.identifier())) {
+        if (identifier.equals(DEFAULT) || identifier.equals(Role.NONE.identifier())) {
             return FutureUtils.falseCompletedFuture();
         }
 
@@ -101,7 +101,7 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public @NotNull CompletableFuture<Boolean> removeRole(@NotNull UUID uuid, @NotNull String identifier) {
-        if (identifier.equals(RoleStore.DEFAULT) || identifier.equals(Role.NONE.identifier())) {
+        if (identifier.equals(DEFAULT) || identifier.equals(Role.NONE.identifier())) {
             return FutureUtils.falseCompletedFuture();
         }
 
@@ -150,7 +150,7 @@ public class BasicRoleStore implements RoleStore {
     }
 
     private Role getStylingRole0(Set<Role> roles) {
-        Role stylingRole = roleMap.getOrDefault(RoleStore.DEFAULT, Role.NONE);
+        Role stylingRole = roleMap.getOrDefault(DEFAULT, Role.NONE);
         int highestPriority = Integer.MIN_VALUE;
         for (Role role : roles) {
             if (role.priority() >= highestPriority) {
@@ -163,7 +163,7 @@ public class BasicRoleStore implements RoleStore {
     }
 
     private Set<Role> loadRoles(UUID key) {
-        Role defaultRole = roleMap.get(RoleStore.DEFAULT);
+        Role defaultRole = roleMap.get(DEFAULT);
 
         try (Connection connection = dataSource.getConnection()) {
             Result<Record> result =
