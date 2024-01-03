@@ -49,4 +49,10 @@ public class ViewableHologram extends InstanceHologram {
         entity.updateViewableRule(canRender);
         return entity;
     }
+
+    public void updateViewableRules() {
+        for (Entity armorStand : super.armorStands) {
+            armorStand.updateViewableRule();
+        }
+    }
 }

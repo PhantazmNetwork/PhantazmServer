@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Performs database queries pertaining to leaderboard times.
  */
-public interface LeaderboardDatabase {
+public interface ZombiesLeaderboardDatabase {
     record LeaderboardEntry(@NotNull Set<@NotNull UUID> team,
         long timeTaken,
         long timeEnd) {

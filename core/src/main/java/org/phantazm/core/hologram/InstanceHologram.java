@@ -21,7 +21,7 @@ import java.util.Objects;
 public class InstanceHologram extends AbstractList<Component> implements Hologram {
     public static final double MESSAGE_HEIGHT = 0.25;
 
-    private final ArrayList<Entity> armorStands;
+    protected final ArrayList<Entity> armorStands;
     private final ArrayList<Component> components;
     private final double gap;
     private final Object sync;

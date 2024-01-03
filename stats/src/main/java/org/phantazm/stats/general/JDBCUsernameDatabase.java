@@ -144,10 +144,11 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
     @Override
     public @NotNull CompletableFuture<Void> submitUsername(@NotNull UUID uuid, @NotNull String username) {
         return CompletableFuture.runAsync(() -> {
-            uuidToUsername.put(uuid, username);
-            usernameToUuid.put(username, uuid);
-
             String filteredUsername = filterUsername(username);
+
+            uuidToUsername.put(uuid, filteredUsername);
+            usernameToUuid.put(filteredUsername, uuid);
+
             Utils.runPreparedSql(LOGGER, "submitUsername", dataSource, """
                 REPLACE INTO phantazm_db.username_cache (uuid, username, last_updated)
                 VALUES (?, ?, UNIX_TIMESTAMP())

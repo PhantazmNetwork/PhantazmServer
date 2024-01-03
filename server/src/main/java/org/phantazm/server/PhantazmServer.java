@@ -37,8 +37,8 @@ import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.stats.general.JDBCUsernameDatabase;
 import org.phantazm.stats.general.UsernameDatabase;
-import org.phantazm.stats.zombies.JDBCBasicLeaderboardDatabase;
-import org.phantazm.stats.zombies.LeaderboardDatabase;
+import org.phantazm.stats.zombies.JDBCZombiesLeaderboardDatabase;
+import org.phantazm.stats.zombies.ZombiesLeaderboardDatabase;
 import org.phantazm.stats.Databases;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
@@ -261,7 +261,7 @@ public final class PhantazmServer {
 
             GeneralStatsFeature.initialize(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
 
-            LeaderboardDatabase leaderboardDatabase = new JDBCBasicLeaderboardDatabase(ExecutorFeature.getExecutor(),
+            ZombiesLeaderboardDatabase leaderboardDatabase = new JDBCZombiesLeaderboardDatabase(ExecutorFeature.getExecutor(),
                 HikariFeature.getDataSource(), zombiesConfig.teamSizes(), zombiesConfig.trackedModifiers());
 
             UsernameDatabase usernameDatabase = new JDBCUsernameDatabase(ExecutorFeature.getExecutor(),

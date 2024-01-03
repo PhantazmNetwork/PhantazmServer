@@ -18,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.packet.MinestomPacketUtils;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.messaging.packet.server.RoundStartPacket;
-import org.phantazm.stats.zombies.LeaderboardDatabase;
+import org.phantazm.stats.zombies.ZombiesLeaderboardDatabase;
 import org.phantazm.stats.zombies.ZombiesDatabaseOld;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
@@ -62,7 +62,7 @@ public class EndStage implements Stage {
     private final BiFunction<? super ZombiesPlayer, Boolean, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final RoundHandler roundHandler;
     private final ZombiesDatabaseOld database;
-    private final LeaderboardDatabase leaderboardDatabase;
+    private final ZombiesLeaderboardDatabase leaderboardDatabase;
     private final Supplier<ZombiesScene> sceneSupplier;
 
     private final Map<UUID, SidebarUpdater> sidebarUpdaters;
@@ -75,7 +75,7 @@ public class EndStage implements Stage {
         @NotNull Wrapper<Long> remainingTicks, @NotNull Wrapper<Long> ticksSinceStart,
         @NotNull BiFunction<? super ZombiesPlayer, Boolean, ? extends SidebarUpdater> sidebarUpdaterCreator,
         @NotNull RoundHandler roundHandler, @NotNull ZombiesDatabaseOld database,
-        @NotNull LeaderboardDatabase leaderboardDatabase, @NotNull Supplier<ZombiesScene> sceneSupplier) {
+        @NotNull ZombiesLeaderboardDatabase leaderboardDatabase, @NotNull Supplier<ZombiesScene> sceneSupplier) {
         this.instance = Objects.requireNonNull(instance);
         this.settings = Objects.requireNonNull(settings);
         this.webhook = Objects.requireNonNull(webhook);

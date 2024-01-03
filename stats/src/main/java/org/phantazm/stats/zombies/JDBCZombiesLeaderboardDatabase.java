@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.VisibleForTesting;
 import org.phantazm.commons.FutureUtils;
 import org.phantazm.stats.Utils;
 import org.slf4j.Logger;
@@ -18,8 +17,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 @SuppressWarnings("SqlSourceToSinkFlow")
-public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCBasicLeaderboardDatabase.class);
+public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCZombiesLeaderboardDatabase.class);
     private static final int RECORD_HISTORY_SIZE = 100;
 
     private final Executor executor;
@@ -27,7 +26,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
     private final IntSet teamSizes;
     private final Set<String> validModifierKeys;
 
-    public JDBCBasicLeaderboardDatabase(@NotNull Executor executor, @NotNull DataSource dataSource,
+    public JDBCZombiesLeaderboardDatabase(@NotNull Executor executor, @NotNull DataSource dataSource,
         @NotNull IntSet teamSizes, @NotNull Set<String> validModifierKeys) {
         this.executor = Objects.requireNonNull(executor);
         this.dataSource = Objects.requireNonNull(dataSource);
@@ -146,7 +145,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
         StringBuilder builder = new StringBuilder(teamSize * 2 + (teamSize - 1) * 2);
 
         for (int i = 0; i < teamSize; i++) {
-            builder.append("p");
+            builder.append('p');
             builder.append(i + 1);
             if (i < teamSize - 1) {
                 builder.append(", ");
@@ -156,8 +155,7 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
         return builder.toString();
     }
 
-    @VisibleForTesting
-    protected static String teamMatches(String teamsTable, int teamSize, String... prefixes) {
+    private static String teamMatches(String teamsTable, int teamSize, String... prefixes) {
         int prefixLengthSum = 0;
         for (String prefix : prefixes) {
             prefixLengthSum += prefix.length();
@@ -259,23 +257,24 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             String teamTable = teamTableName(teamSize);
 
             return Utils.runPreparedSql(LOGGER, "fetchBestTime", Optional.empty(), dataSource, """
-                SELECT time_taken FROM %1$s
-                INNER JOIN %2$s
-                ON %1$s.team_id = %2$s.team_id
-                WHERE %3$s
-                ORDER BY time_taken ASC
-                LIMIT 1
-                """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")), ((connection, preparedStatement) -> {
-                preparedStatement.setString(1, map.asString());
-                setUuidParameters(1, key, preparedStatement);
+                    SELECT time_taken FROM %1$s
+                    INNER JOIN %2$s
+                    ON %1$s.team_id = %2$s.team_id
+                    WHERE %3$s
+                    ORDER BY time_taken ASC
+                    LIMIT 1
+                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")),
+                ((connection, preparedStatement) -> {
+                    preparedStatement.setString(1, map.asString());
+                    setUuidParameters(1, key, preparedStatement);
 
-                ResultSet result = preparedStatement.executeQuery();
-                if (!result.next()) {
-                    return Optional.empty();
-                }
+                    ResultSet result = preparedStatement.executeQuery();
+                    if (!result.next()) {
+                        return Optional.empty();
+                    }
 
-                return Optional.of(result.getLong(1));
-            }));
+                    return Optional.of(result.getLong(1));
+                }));
         }, executor);
     }
 
@@ -297,30 +296,31 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             String teamTable = teamTableName(teamSize);
 
             return Utils.runPreparedSql(LOGGER, "fetchTimeHistory", List.of(), dataSource, """
-                SELECT time_taken, time_end FROM %1$s
-                INNER JOIN %2$s
-                ON %1$s.team_id = %2$s.team_id
-                WHERE %3$s
-                ORDER BY time_taken ASC, id ASC
-                LIMIT ?
-                """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")), (connection, preparedStatement) -> {
-                preparedStatement.setString(1, map.asString());
-                setUuidParameters(1, key, preparedStatement);
-                preparedStatement.setInt(2 + key.size(), RECORD_HISTORY_SIZE);
+                    SELECT time_taken, time_end FROM %1$s
+                    INNER JOIN %2$s
+                    ON %1$s.team_id = %2$s.team_id
+                    WHERE %3$s
+                    ORDER BY time_taken ASC, id ASC
+                    LIMIT ?
+                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")),
+                (connection, preparedStatement) -> {
+                    preparedStatement.setString(1, map.asString());
+                    setUuidParameters(1, key, preparedStatement);
+                    preparedStatement.setInt(2 + key.size(), RECORD_HISTORY_SIZE);
 
-                ResultSet result = preparedStatement.executeQuery();
-                if (!result.next()) {
-                    return List.of();
-                }
+                    ResultSet result = preparedStatement.executeQuery();
+                    if (!result.next()) {
+                        return List.of();
+                    }
 
-                List<LeaderboardEntry> entries = new ArrayList<>();
-                do {
-                    entries.add(new LeaderboardEntry(team, result.getLong(1), result.getLong(2)));
-                }
-                while (result.next());
+                    List<LeaderboardEntry> entries = new ArrayList<>();
+                    do {
+                        entries.add(new LeaderboardEntry(team, result.getLong(1), result.getLong(2)));
+                    }
+                    while (result.next());
 
-                return entries;
-            });
+                    return Collections.unmodifiableList(entries);
+                });
         }, executor);
     }
 
@@ -342,40 +342,41 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
             String teamFields = teamFields(teamSize);
 
             return Utils.runPreparedSql(LOGGER, "fetchBestTimes", List.of(), dataSource, """
-                SELECT time_taken, time_end, %3$s FROM (SELECT time_taken, time_end, %3$s,
-                  DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken ASC, %1$s.id ASC) AS pos
-                    FROM %1$s
-                    INNER JOIN %2$s
-                    ON %1$s.team_id = %2$s.team_id
-                    WHERE %1$s.map_key = ?) AS dummy_table
-                    WHERE pos = 1
-                    LIMIT ? OFFSET ?
-                """.formatted(gameTable, teamTable, teamFields), (connection, preparedStatement) -> {
-                preparedStatement.setString(1, map.asString());
-                preparedStatement.setInt(2, entries);
-                preparedStatement.setInt(3, start);
+                    SELECT time_taken, time_end, %3$s FROM (SELECT time_taken, time_end, %3$s,
+                      DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken ASC, %1$s.id ASC) AS pos
+                        FROM %1$s
+                        INNER JOIN %2$s
+                        ON %1$s.team_id = %2$s.team_id
+                        WHERE %1$s.map_key = ?) AS dummy_table
+                        WHERE pos = 1
+                        LIMIT ? OFFSET ?
+                    """.formatted(gameTable, teamTable, teamFields),
+                (connection, preparedStatement) -> {
+                    preparedStatement.setString(1, map.asString());
+                    preparedStatement.setInt(2, entries);
+                    preparedStatement.setInt(3, start);
 
-                ResultSet result = preparedStatement.executeQuery();
-                if (!result.next()) {
-                    return List.of();
-                }
-
-                List<LeaderboardEntry> entryList = new ArrayList<>(entries);
-                do {
-                    long timeTaken = result.getLong(1);
-                    long timeEnd = result.getLong(2);
-
-                    Set<UUID> uuids = new HashSet<>(teamSize);
-                    for (int i = 0; i < teamSize; i++) {
-                        uuids.add(UUID.fromString(result.getString(i + 3)));
+                    ResultSet result = preparedStatement.executeQuery();
+                    if (!result.next()) {
+                        return List.of();
                     }
 
-                    entryList.add(new LeaderboardEntry(uuids, timeTaken, timeEnd));
-                }
-                while (result.next());
+                    List<LeaderboardEntry> entryList = new ArrayList<>(entries);
+                    do {
+                        long timeTaken = result.getLong(1);
+                        long timeEnd = result.getLong(2);
 
-                return entryList;
-            });
+                        Set<UUID> uuids = new HashSet<>(teamSize);
+                        for (int i = 0; i < teamSize; i++) {
+                            uuids.add(UUID.fromString(result.getString(i + 3)));
+                        }
+
+                        entryList.add(new LeaderboardEntry(uuids, timeTaken, timeEnd));
+                    }
+                    while (result.next());
+
+                    return Collections.unmodifiableList(entryList);
+                });
         }, executor);
     }
 
@@ -389,7 +390,6 @@ public class JDBCBasicLeaderboardDatabase implements LeaderboardDatabase {
         if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
             return FutureUtils.nullCompletedFuture();
         }
-
 
         return CompletableFuture.runAsync(() -> {
             String gameTable = gameTableName(teamSize, filteredModifierKey);

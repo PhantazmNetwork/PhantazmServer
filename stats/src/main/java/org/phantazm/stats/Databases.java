@@ -2,14 +2,14 @@ package org.phantazm.stats;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.stats.general.UsernameDatabase;
-import org.phantazm.stats.zombies.LeaderboardDatabase;
+import org.phantazm.stats.zombies.ZombiesLeaderboardDatabase;
 
 import java.util.*;
 
 public final class Databases {
     private static final Object LOCK = new Object();
 
-    private static LeaderboardDatabase leaderboardDatabase;
+    private static ZombiesLeaderboardDatabase leaderboardDatabase;
     private static UsernameDatabase usernameDatabase;
 
     private static <T> T requireDefined(T input) {
@@ -26,7 +26,7 @@ public final class Databases {
         }
     }
 
-    public static void init(@NotNull LeaderboardDatabase leaderboardDatabase) {
+    public static void init(@NotNull ZombiesLeaderboardDatabase leaderboardDatabase) {
         Objects.requireNonNull(leaderboardDatabase);
         synchronized (LOCK) {
             requireUndefined(Databases.leaderboardDatabase);
@@ -41,7 +41,7 @@ public final class Databases {
         }
     }
 
-    public static @NotNull LeaderboardDatabase leaderboards() {
+    public static @NotNull ZombiesLeaderboardDatabase leaderboards() {
         return requireDefined(leaderboardDatabase);
     }
 
