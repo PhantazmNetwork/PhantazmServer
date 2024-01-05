@@ -36,7 +36,7 @@ services:
     <<: *server
     environment:
       <<: *shared_environment
-      PHANTAZM_SERVER_JVM_ARGS: '-Dfile.encoding=UTF-8 -Dminestom.packet-queue-size=-1 -Dminestom.keep-alive-kick=-1 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:${PHANTAZM_DEBUG_PORT_CONTAINER} -jar'
+      PHANTAZM_SERVER_JVM_ARGS: '-Dfile.encoding=UTF-8 -Dminestom.packet-queue-size=-1 -Dminestom.keep-alive-kick=-1 -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:${PHANTAZM_DEBUG_PORT_CONTAINER} -jar'
     profiles:
       - 'debug'
     ports:

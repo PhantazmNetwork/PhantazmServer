@@ -8,12 +8,8 @@ import com.github.steanky.ethylene.mapper.signature.ScalarSignature;
 import com.github.steanky.ethylene.mapper.signature.Signature;
 import com.github.steanky.ethylene.mapper.signature.SignatureParameter;
 import com.github.steanky.ethylene.mapper.type.Token;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.Object2FloatMap;
-import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.objects.*;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
@@ -56,9 +52,13 @@ public final class EthyleneFeature {
             .withScalarSignature(entityType()).withScalarSignature(material())
             .withScalarSignature(potionEffect())
             .withScalarSignature(path())
+            .withTypeImplementation(IntArrayList.class, IntList.class)
             .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
             .withTypeImplementation(Object2FloatOpenHashMap.class, Object2FloatMap.class)
             .withTypeImplementation(IntOpenHashSet.class, IntSet.class)
+            .withTypeImplementation(ObjectLinkedOpenHashSet.class, ObjectSortedSet.class)
+            .withTypeImplementation(Int2IntOpenHashMap.class, Int2IntMap.class)
+            .withTypeImplementation(Int2ObjectOpenHashMap.class, Int2ObjectMap.class)
             .withStandardSignatures()
             .withStandardTypeImplementations().ignoringLengths().build();
 

@@ -1,6 +1,5 @@
 package org.phantazm.core.hologram;
 
-import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
@@ -85,12 +84,15 @@ public class BasicPaginatedHologram implements PaginatedHologram {
 
     public void updatePage(int index, @NotNull Consumer<? super ViewableHologram> pageModifier) {
         synchronized (sync) {
-            pageModifier.accept(pages.get(index));
+            ViewableHologram page = pages.get(index);
+            pageModifier.accept(page);
+            page.updateViewableRules();
         }
     }
 
     @Override
-    public void addPage(@NotNull List<Component> contents, double gap, Hologram.Alignment alignment) {
+    public void addPage(@NotNull List<PageLine> contents, double gap, Hologram.@NotNull Alignment alignment,
+        @NotNull ViewableHologram.LineFormatter lineFormatter) {
         Instance instance;
         ViewableHologram viewableHologram;
         synchronized (sync) {
@@ -99,8 +101,15 @@ public class BasicPaginatedHologram implements PaginatedHologram {
             int pageIndex = this.pages.size();
             viewableHologram = new ViewableHologram(location, gap, alignment, player -> {
                 return player.getTag(pageTag) == pageIndex;
-            });
-            viewableHologram.addAll(contents);
+            }, lineFormatter);
+
+            for (PageLine line : contents) {
+                if (line.isComponent()) {
+                    viewableHologram.add(line.component());
+                } else {
+                    viewableHologram.addFormatted(line.format());
+                }
+            }
 
             this.pages.add(viewableHologram);
             viewableHologram.setInstance(instance);
@@ -133,6 +142,18 @@ public class BasicPaginatedHologram implements PaginatedHologram {
             int newPage = taggable.tagHandler().updateAndGetTag(pageTag, oldValue -> Math.max(0, oldValue - 1));
             int oldPage = Math.min(pageSize - 1, newPage + 1);
             return updatePageOnTransition(oldPage, newPage);
+        }
+    }
+
+    @Override
+    public boolean setPage(@NotNull Taggable taggable, int page) {
+        synchronized (sync) {
+            if (page >= pages.size() || page < 0) {
+                return false;
+            }
+
+            int oldPage = taggable.tagHandler().getAndUpdateTag(pageTag, ignored -> page);
+            return updatePageOnTransition(oldPage, page);
         }
     }
 

@@ -18,7 +18,14 @@ public interface ZombiesLeaderboardDatabase {
         long timeEnd) {
     }
 
+    record RankingEntry(int rank,
+        long timeTaken) {
+    }
+
     @NotNull CompletableFuture<Void> initTables();
+
+    @NotNull CompletableFuture<Optional<RankingEntry>> fetchBestRanking(@NotNull UUID player, int teamSize, @NotNull Key map,
+        @NotNull String modifierKey);
 
     @NotNull CompletableFuture<Optional<Long>> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
         @NotNull String modifierKey);

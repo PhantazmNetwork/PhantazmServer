@@ -346,6 +346,7 @@ public final class SceneManager {
 
     private void handleDisconnect(@NotNull PlayerView playerView) {
         PlayerViewImpl view = (PlayerViewImpl) playerView;
+        view.tagHandler().clearTags();
 
         Lock lock = view.joinLock();
         lock.lock();
@@ -944,6 +945,17 @@ public final class SceneManager {
     }
 
     /**
+     * Equivalent to {@link SceneManager#currentScene(PlayerView)}, but accepts a {@link Player} rather than a
+     * {@link PlayerView}.
+     *
+     * @param player the player to check
+     * @return an Optional containing the current scene
+     */
+    public @NotNull Optional<Scene> currentScene(@NotNull Player player) {
+        return currentScene(PlayerViewProvider.Global.instance().fromPlayer(player));
+    }
+
+    /**
      * Works the same as {@link SceneManager#currentScene(PlayerView)}, but will additionally be empty if the player's
      * current scene is not the same as the provided type. Otherwise, the returned optional will contain a scene that
      * has been cast to the type.
@@ -955,6 +967,44 @@ public final class SceneManager {
      */
     public @NotNull <T extends Scene> Optional<T> currentScene(@NotNull PlayerView playerView, @NotNull Class<T> type) {
         return ((PlayerViewImpl) playerView).currentScene().filter(scene -> scene.getClass().equals(type)).map(type::cast);
+    }
+
+    /**
+     * Equivalent to {@link SceneManager#currentScene(PlayerView, Class)}, but accepts a {@link Player} rather than a
+     * {@link PlayerView}.
+     *
+     * @param player the player to check
+     * @param type   the type of scene
+     * @param <T>    the type of scene to check for
+     * @return an Optional containing the current scene, cast to the target type
+     */
+    public @NotNull <T extends Scene> Optional<T> currentScene(@NotNull Player player, @NotNull Class<T> type) {
+        return currentScene(PlayerViewProvider.Global.instance().fromPlayer(player), type);
+    }
+
+    /**
+     * Tests if the player is in the given scene. Should generally be much faster than running
+     * {@link Scene#hasPlayer(Player)} as it does not have to run {@link Set#contains(Object)} or acquire any locks.
+     *
+     * @param player the player to test
+     * @param scene  the scene to test
+     * @return true if the player is in the given scene; false otherwise
+     */
+    public boolean inScene(@NotNull PlayerView player, @NotNull Scene scene) {
+        PlayerViewImpl view = (PlayerViewImpl) player;
+        return view.currentSceneNullable() == scene;
+    }
+
+    /**
+     * Equivalent to {@link SceneManager#inScene(PlayerView, Scene)}, but accepts a {@link Player} rather than a
+     * {@link PlayerView}.
+     *
+     * @param player the player to test
+     * @param scene  the scene to test
+     * @return true if the player is in the given scene; false otherwise
+     */
+    public boolean inScene(@NotNull Player player, @NotNull Scene scene) {
+        return inScene(PlayerViewProvider.Global.instance().fromPlayer(player), scene);
     }
 
     /**
@@ -983,6 +1033,18 @@ public final class SceneManager {
         } finally {
             lock.unlock();
         }
+    }
+
+    /**
+     * Equivalent to {@link SceneManager#synchronizeWithCurrentScene(PlayerView, BiConsumer)}, but accepts a
+     * {@link Player} rather than a {@link PlayerView}.
+     *
+     * @param player   the player to synchronize on
+     * @param consumer the consumer to run with both the player and current scene passed as arguments
+     */
+    public void synchronizeWithCurrentScene(@NotNull Player player,
+        @NotNull BiConsumer<? super @NotNull PlayerView, ? super @NotNull Scene> consumer) {
+        synchronizeWithCurrentScene(PlayerViewProvider.Global.instance().fromPlayer(player), consumer);
     }
 
     /**
@@ -1144,6 +1206,10 @@ public final class SceneManager {
         scene.getAcquirable().sync(self -> {
             Set<Player> left = PlayerView.getMany(self.leave(views), HashSet::new);
             if (!left.isEmpty()) {
+                for (Player player : left) {
+                    player.clearTags();
+                }
+
                 leaveActions.add(() -> self.getAcquirable().sync(self2 -> self2.postLeave(left)));
             }
         });

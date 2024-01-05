@@ -153,9 +153,7 @@ public final class ZombiesFeature {
                     Databases.leaderboards(), instanceSpaceFunction, globalEventNode,
                     ZombiesFeature.mobSpawnerSource(), clientBlockHandlerSource,
                     ZombiesFeature.powerupHandlerSource(),
-                    new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,
-                        EquipmentFeature::createEquipmentCreator, contextManager,
-                        keyParser),
+                    new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator),
                     corpseCreatorSource, endlessSource);
             providers.put(entry.getKey(), provider);
         }

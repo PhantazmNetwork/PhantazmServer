@@ -1,14 +1,14 @@
 package org.phantazm.core.scene2;
 
+import net.minestom.server.entity.Player;
+import net.minestom.server.tag.TagHandler;
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.core.player.PlayerView;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Simplest abstract implementation of {@link Scene}. Maintains shutdown state, as well as optionally shutting down the
@@ -22,6 +22,10 @@ import java.util.UUID;
  * Subclasses that override {@link SceneAbstract#joinable()} should call {@code super.joinable()} and, if false, also
  * return {@code false} themselves. Likewise, implementations must call {@link SceneAbstract#tick(long)} in order for
  * the timeout functionality to work as intended.
+ * <p>
+ * {@link SceneAbstract#playerTags(UUID)} can be called in order to retrieve a TagHandler instance whose lifetime is the
+ * same as this scene; i.e. it will not be cleared until this scene is shut down. This is useful to store persistent
+ * game-related data on players.
  */
 public abstract class SceneAbstract implements Scene, IdentifiableScene, JoinToggleableScene {
     private final Acquirable<Scene> acquirable = Acquirable.of(this);
@@ -31,6 +35,7 @@ public abstract class SceneAbstract implements Scene, IdentifiableScene, JoinTog
 
     protected final Set<PlayerView> scenePlayers;
     private final Set<PlayerView> scenePlayersView;
+    private final Map<UUID, TagHandler> tagHandlers;
 
     private int timeoutTicks;
     private boolean shutdown;
@@ -49,6 +54,7 @@ public abstract class SceneAbstract implements Scene, IdentifiableScene, JoinTog
 
         this.scenePlayers = new HashSet<>();
         this.scenePlayersView = Collections.unmodifiableSet(this.scenePlayers);
+        this.tagHandlers = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -124,5 +130,20 @@ public abstract class SceneAbstract implements Scene, IdentifiableScene, JoinTog
     @Override
     public final boolean equals(Object obj) {
         return super.equals(obj);
+    }
+
+    @Override
+    public final @NotNull TagHandler playerTags(@NotNull UUID playerUuid) {
+        return tagHandlers.computeIfAbsent(playerUuid, ignored -> TagHandler.newHandler());
+    }
+
+    @Override
+    public final @NotNull TagHandler playerTags(@NotNull Player player) {
+        return tagHandlers.computeIfAbsent(player.getUuid(), ignored -> TagHandler.newHandler());
+    }
+
+    @Override
+    public final @NotNull TagHandler playerTags(@NotNull PlayerView playerView) {
+        return tagHandlers.computeIfAbsent(playerView.getUUID(), ignored -> TagHandler.newHandler());
     }
 }

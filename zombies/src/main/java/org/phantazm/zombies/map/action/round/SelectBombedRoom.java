@@ -27,6 +27,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.VecUtils;
@@ -159,7 +160,7 @@ public class SelectBombedRoom implements Action<Round> {
                 }
 
                 if (clearBombTag) {
-                    player.removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
+                    sceneSupplier.get().playerTags(player).removeTag(Tags.LAST_ENTER_BOMBED_ROOM);
                 }
             }
 
@@ -259,9 +260,10 @@ public class SelectBombedRoom implements Action<Round> {
                             player.sendMessage(data.inAreaMessage);
                         }
 
-                        long lastEnterBombedRoom = player.getTag(Tags.LAST_ENTER_BOMBED_ROOM);
+                        TagHandler tags = sceneSupplier.get().playerTags(player);
+                        long lastEnterBombedRoom = tags.getTag(Tags.LAST_ENTER_BOMBED_ROOM);
                         if (lastEnterBombedRoom == -1) {
-                            player.setTag(Tags.LAST_ENTER_BOMBED_ROOM, lastEnterBombedRoom =
+                            tags.setTag(Tags.LAST_ENTER_BOMBED_ROOM, lastEnterBombedRoom =
                                 MinecraftServer.currentTick());
                         }
 

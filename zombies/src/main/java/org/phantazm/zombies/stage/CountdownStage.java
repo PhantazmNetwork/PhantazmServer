@@ -99,7 +99,6 @@ public class CountdownStage implements Stage {
             }
         });
 
-        zombiesPlayer.module().getLeaderboard().startIfNotActive();
         int count = zombiesPlayers.size(), maxPlayers = settings.maxPlayers();
         TagResolver countPlaceholder = Placeholder.component("count", Component.text(count));
         TagResolver maxPlayersPlaceholder = Placeholder.component("max_players", Component.text(maxPlayers));
@@ -118,8 +117,6 @@ public class CountdownStage implements Stage {
         if (updater != null) {
             updater.end();
         }
-
-        zombiesPlayer.module().getLeaderboard().endIfActive();
     }
 
     @Override

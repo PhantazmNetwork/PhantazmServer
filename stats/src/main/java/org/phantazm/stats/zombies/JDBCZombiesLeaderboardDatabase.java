@@ -16,7 +16,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-@SuppressWarnings("SqlSourceToSinkFlow")
 public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabase {
     private static final Logger LOGGER = LoggerFactory.getLogger(JDBCZombiesLeaderboardDatabase.class);
     private static final int RECORD_HISTORY_SIZE = 100;
@@ -240,6 +239,57 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
     }
 
     @Override
+    public @NotNull CompletableFuture<Optional<RankingEntry>> fetchBestRanking(@NotNull UUID player, int teamSize,
+        @NotNull Key map, @NotNull String modifierKey) {
+        Objects.requireNonNull(map);
+
+        String filteredModifierKey = filterModifierKey(modifierKey);
+        if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
+            return FutureUtils.completedFuture(Optional.empty());
+        }
+
+        return CompletableFuture.supplyAsync(() -> {
+            String gameTable = gameTableName(teamSize, filteredModifierKey);
+            String teamTable = teamTableName(teamSize);
+            String teamFields = teamFields(teamSize);
+
+            return Utils.runPreparedSql(LOGGER, "fetchBestRanking", Optional.empty(), dataSource, """
+                SELECT time_taken, row_num
+                FROM
+                    (
+                    SELECT time_taken, id, %3$s, ROW_NUMBER() OVER (ORDER BY time_taken, id) AS row_num
+                    FROM
+                        (
+                        SELECT id, time_taken, %3$s
+                        FROM
+                            (
+                            SELECT id, time_taken, %3$s, DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken, %1$s.id) AS pos
+                            FROM %1$s
+                            INNER JOIN %2$s
+                            ON %1$s.team_id = %2$s.team_id
+                            WHERE %1$s.map_key = ?
+                            ) AS dummy_table
+                        WHERE pos = 1
+                        ) AS dummy_table_2
+                    ) AS dummy_table_3
+                WHERE ? IN (%3$s)
+                ORDER BY time_taken, id
+                LIMIT 1
+                """.formatted(gameTable, teamTable, teamFields), (connection, preparedStatement) -> {
+                preparedStatement.setString(1, map.asString());
+                preparedStatement.setString(2, player.toString());
+
+                ResultSet result = preparedStatement.executeQuery();
+                if (!result.next()) {
+                    return Optional.empty();
+                }
+
+                return Optional.of(new RankingEntry(result.getInt(2), result.getLong(1)));
+            });
+        }, executor);
+    }
+
+    @Override
     public @NotNull CompletableFuture<Optional<Long>> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
         @NotNull String modifierKey) {
         Objects.requireNonNull(map);
@@ -261,7 +311,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                     INNER JOIN %2$s
                     ON %1$s.team_id = %2$s.team_id
                     WHERE %3$s
-                    ORDER BY time_taken ASC
+                    ORDER BY time_taken
                     LIMIT 1
                     """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")),
                 ((connection, preparedStatement) -> {
@@ -300,7 +350,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                     INNER JOIN %2$s
                     ON %1$s.team_id = %2$s.team_id
                     WHERE %3$s
-                    ORDER BY time_taken ASC, id ASC
+                    ORDER BY time_taken, id
                     LIMIT ?
                     """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")),
                 (connection, preparedStatement) -> {
@@ -343,7 +393,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
 
             return Utils.runPreparedSql(LOGGER, "fetchBestTimes", List.of(), dataSource, """
                     SELECT time_taken, time_end, %3$s FROM (SELECT time_taken, time_end, %3$s,
-                      DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken ASC, %1$s.id ASC) AS pos
+                      DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken, %1$s.id) AS pos
                         FROM %1$s
                         INNER JOIN %2$s
                         ON %1$s.team_id = %2$s.team_id
@@ -402,31 +452,38 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                 connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
                 connection.setAutoCommit(false);
 
+                String firstQuery = """
+                    INSERT INTO %1$s (%2$s)
+                    SELECT (?) FROM DUAL
+                    WHERE NOT EXISTS
+                    (SELECT (%2$s) FROM %1$s
+                        WHERE %3$s)
+                    """.formatted(teamTable, teamFields(key.size()), teamMatches(teamTable, key.size()));
+
+                String secondQuery = """
+                    INSERT INTO %1$s (team_id, time_taken, time_end, map_key)
+                    VALUES ((SELECT team_id FROM %2$s WHERE %3$s), ?, ?, ?)
+                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size()));
+
+                String thirdQuery = """
+                    DELETE FROM %1$s
+                    WHERE id IN
+                    (SELECT id FROM (SELECT id, DENSE_RANK() over
+                        (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken, id) AS output
+                    FROM %1$s
+                    INNER JOIN %2$s
+                    ON %1$s.team_id = %2$s.team_id
+                    WHERE %3$s) AS dummy_table
+                    WHERE output > ?)
+                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key"));
+
                 try (Statement statement = connection.createStatement();
-                     PreparedStatement first = connection.prepareStatement("""
-                         INSERT INTO %1$s (%2$s)
-                         SELECT (%2$s) FROM DUAL
-                         WHERE NOT EXISTS
-                         (SELECT %2$s FROM %1$s
-                             WHERE %3$s)
-                         """.formatted(teamTable, teamFields(key.size()), teamMatches(teamTable, key.size())));
-                     PreparedStatement second = connection.prepareStatement("""
-                         INSERT INTO %1$s (team_id, time_taken, time_end, map_key)
-                         VALUES ((SELECT team_id FROM %2$s WHERE %3$s), ?, ?, ?)
-                         """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size())));
-                     PreparedStatement third = connection.prepareStatement("""
-                         DELETE FROM %1$s
-                         WHERE id IN
-                         (SELECT id FROM (SELECT id, DENSE_RANK() over
-                             (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken ASC, id ASC) AS output
-                         FROM %1$s
-                         INNER JOIN %2$s
-                         ON %1$s.team_id = %2$s.team_id
-                         WHERE %3$s) AS dummy_table
-                         WHERE output > ?)
-                         """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")))) {
+                     PreparedStatement first = connection.prepareStatement(firstQuery);
+                     PreparedStatement second = connection.prepareStatement(secondQuery);
+                     PreparedStatement third = connection.prepareStatement(thirdQuery)) {
 
                     setUuidParameters(0, key, first);
+                    setUuidParameters(key.size(), key, first);
 
                     setUuidParameters(0, key, second);
                     second.setLong(1 + key.size(), timeTaken);

@@ -3,6 +3,7 @@ package org.phantazm.core.scene2;
 import net.minestom.server.Tickable;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.entity.Player;
+import net.minestom.server.tag.TagHandler;
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -237,4 +238,38 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
         return Optional.empty();
     }
 
+    /**
+     * Gets a {@link TagHandler} for a certain player present in this scene. This should not be cleared until the scene
+     * is shut down.
+     * <p>
+     * This method must be thread-safe.
+     *
+     * @param player the UUID of the player
+     * @return the {@link TagHandler} for this player
+     */
+    @NotNull TagHandler playerTags(@NotNull UUID player);
+
+    /**
+     * Works equivalently to {@link Scene#playerTags(UUID)}, but accepts a player rather than a {@link UUID}. The
+     * default implementation delegates to {@link Scene#playerTags(UUID)}. Implementations are encouraged to override
+     * this method for increased performance.
+     *
+     * @param player the player to retrieve tags for
+     * @return the {@link TagHandler} for this player
+     */
+    default @NotNull TagHandler playerTags(@NotNull Player player) {
+        return playerTags(player.getUuid());
+    }
+
+    /**
+     * Works equivalently to {@link Scene#playerTags(UUID)}, but accepts a {@link PlayerView} rather than a
+     * {@link UUID}. The default implementation delegates to {@link Scene#playerTags(UUID)}. Implementations are
+     * encouraged to override this method for increased performance.
+     *
+     * @param playerView the player to retrieve tags for
+     * @return the {@link TagHandler} for this player
+     */
+    default @NotNull TagHandler playerTags(@NotNull PlayerView playerView) {
+        return playerTags(playerView.getUUID());
+    }
 }
