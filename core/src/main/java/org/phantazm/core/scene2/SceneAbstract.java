@@ -1,6 +1,5 @@
 package org.phantazm.core.scene2;
 
-import net.minestom.server.entity.Player;
 import net.minestom.server.tag.TagHandler;
 import net.minestom.server.thread.Acquirable;
 import org.jetbrains.annotations.NotNull;
@@ -135,15 +134,5 @@ public abstract class SceneAbstract implements Scene, IdentifiableScene, JoinTog
     @Override
     public final @NotNull TagHandler playerTags(@NotNull UUID playerUuid) {
         return tagHandlers.computeIfAbsent(playerUuid, ignored -> TagHandler.newHandler());
-    }
-
-    @Override
-    public final @NotNull TagHandler playerTags(@NotNull Player player) {
-        return tagHandlers.computeIfAbsent(player.getUuid(), ignored -> TagHandler.newHandler());
-    }
-
-    @Override
-    public final @NotNull TagHandler playerTags(@NotNull PlayerView playerView) {
-        return tagHandlers.computeIfAbsent(playerView.getUUID(), ignored -> TagHandler.newHandler());
     }
 }

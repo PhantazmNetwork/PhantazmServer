@@ -251,8 +251,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
 
     /**
      * Works equivalently to {@link Scene#playerTags(UUID)}, but accepts a player rather than a {@link UUID}. The
-     * default implementation delegates to {@link Scene#playerTags(UUID)}. Implementations are encouraged to override
-     * this method for increased performance.
+     * default implementation delegates to {@link Scene#playerTags(UUID)}.
      *
      * @param player the player to retrieve tags for
      * @return the {@link TagHandler} for this player
@@ -263,8 +262,7 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
 
     /**
      * Works equivalently to {@link Scene#playerTags(UUID)}, but accepts a {@link PlayerView} rather than a
-     * {@link UUID}. The default implementation delegates to {@link Scene#playerTags(UUID)}. Implementations are
-     * encouraged to override this method for increased performance.
+     * {@link UUID}. The default implementation delegates to {@link Scene#playerTags(UUID)}.
      *
      * @param playerView the player to retrieve tags for
      * @return the {@link TagHandler} for this player
