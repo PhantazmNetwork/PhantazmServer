@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.leaderboard.Leaderboard;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
@@ -28,17 +29,20 @@ public class IdleStage implements Stage {
 
     private final long revertTicks;
 
+    private final Leaderboard bestTimeLeaderboard;
+
     private long emptyTicks;
 
     public IdleStage(@NotNull Instance instance, @NotNull MapSettingsInfo settings,
         @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
         @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
-        long revertTicks) {
+        long revertTicks, @NotNull Leaderboard bestTimeLeaderboard) {
         this.instance = Objects.requireNonNull(instance);
         this.settings = Objects.requireNonNull(settings);
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator);
         this.revertTicks = revertTicks;
+        this.bestTimeLeaderboard = Objects.requireNonNull(bestTimeLeaderboard);
     }
 
     @Override
@@ -80,6 +84,7 @@ public class IdleStage implements Stage {
 
     @Override
     public void start() {
+        bestTimeLeaderboard.show();
         emptyTicks = 0L;
     }
 

@@ -21,6 +21,8 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.event.scene.SceneCreationEvent;
 import org.phantazm.core.event.scene.SceneJoinEvent;
 import org.phantazm.core.event.scene.SceneShutdownEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -44,6 +46,8 @@ import java.util.function.IntFunction;
  * Unless otherwise indicated, all methods declared on this class are completely thread-safe.
  */
 public final class SceneManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SceneManager.class);
+
     /**
      * A container class which holds the global SceneManager and provides access to its initialization through
      * {@link Global#init(Executor, Set, PlayerViewProvider, int)}.
@@ -885,6 +889,11 @@ public final class SceneManager {
         return result.whenComplete((joinResult, error) -> {
             EventDispatcher.call(new SceneJoinEvent((joinResult == null || error != null) ?
                 JoinResult.INTERNAL_ERROR : joinResult, players));
+
+            if (error != null) {
+                LOGGER.warn("Error while joining player(s) {}: {}",
+                    Arrays.deepToString(players.toArray()), error);
+            }
         });
     }
 

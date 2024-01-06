@@ -106,7 +106,7 @@ public class MainGui extends SimplePanelGui {
             session.addMap(
                 new MapInfo(new MapSettingsInfo(mapKey, session.getFirstSelection()), PlayerCoinsInfo.DEFAULT,
                     new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), LeaderboardInfo.DEFAULT,
+                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new LinkedConfigNode(),
                     new LinkedConfigNode(0), new LinkedConfigNode(), new LinkedConfigNode(),
                     WebhookInfo.DEFAULT));
             session.setCurrent(mapKey);

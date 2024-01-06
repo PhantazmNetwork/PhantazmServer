@@ -29,6 +29,7 @@ import org.phantazm.core.VecUtils;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
+import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.sound.SongLoader;
@@ -56,6 +57,7 @@ import org.phantazm.zombies.powerup.FileSystemPowerupDataLoader;
 import org.phantazm.zombies.powerup.PowerupData;
 import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.scene2.ZombiesJoiner;
+import org.phantazm.zombies.scene2.ZombiesLeaderboardContext;
 import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.scene2.ZombiesSceneCreator;
 import org.slf4j.Logger;
@@ -66,6 +68,8 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -147,14 +151,15 @@ public final class ZombiesFeature {
             Endless.Source endlessSource = dependencyProvider -> contextManager
                 .makeContext(entry.getValue().endless()).provide(dependencyProvider);
 
-            ZombiesSceneCreator provider =
-                new ZombiesSceneCreator(zombiesConfig.maximumScenes(),
-                    entry.getValue(), instanceLoader, keyParser, contextManager, songLoader, database,
-                    Databases.leaderboards(), instanceSpaceFunction, globalEventNode,
-                    ZombiesFeature.mobSpawnerSource(), clientBlockHandlerSource,
-                    ZombiesFeature.powerupHandlerSource(),
-                    new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator),
-                    corpseCreatorSource, endlessSource);
+            ZombiesLeaderboardContext leaderboardContext =
+                new ZombiesLeaderboardContext(Executors.newFixedThreadPool(4), Databases.leaderboards(),
+                    contextManager.makeContext(entry.getValue().leaderboard()).provide());
+
+            ZombiesSceneCreator provider = new ZombiesSceneCreator(zombiesConfig.maximumScenes(), entry.getValue(),
+                instanceLoader, keyParser, contextManager, songLoader, database,
+                instanceSpaceFunction, globalEventNode, ZombiesFeature.mobSpawnerSource(), clientBlockHandlerSource,
+                ZombiesFeature.powerupHandlerSource(), new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator),
+                corpseCreatorSource, endlessSource, leaderboardContext, RoleFeature.roleStore(), IdentitySource.MOJANG);
             providers.put(entry.getKey(), provider);
         }
 

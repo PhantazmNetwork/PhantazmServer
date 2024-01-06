@@ -263,11 +263,11 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                         SELECT id, time_taken, %3$s
                         FROM
                             (
-                            SELECT id, time_taken, %3$s, DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken, %1$s.id) AS pos
+                            SELECT id, time_taken, %3$s, DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY time_taken, id) AS pos
                             FROM %1$s
                             INNER JOIN %2$s
                             ON %1$s.team_id = %2$s.team_id
-                            WHERE %1$s.map_key = ?
+                            WHERE map_key = ?
                             ) AS dummy_table
                         WHERE pos = 1
                         ) AS dummy_table_2
@@ -452,18 +452,19 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                 connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
                 connection.setAutoCommit(false);
 
+                String teamMatches = teamMatches(teamTable, key.size());
                 String firstQuery = """
                     INSERT INTO %1$s (%2$s)
                     SELECT (?) FROM DUAL
                     WHERE NOT EXISTS
                     (SELECT (%2$s) FROM %1$s
                         WHERE %3$s)
-                    """.formatted(teamTable, teamFields(key.size()), teamMatches(teamTable, key.size()));
+                    """.formatted(teamTable, teamFields(key.size()), teamMatches);
 
                 String secondQuery = """
                     INSERT INTO %1$s (team_id, time_taken, time_end, map_key)
                     VALUES ((SELECT team_id FROM %2$s WHERE %3$s), ?, ?, ?)
-                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size()));
+                    """.formatted(gameTable, teamTable, teamMatches);
 
                 String thirdQuery = """
                     DELETE FROM %1$s

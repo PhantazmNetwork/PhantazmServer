@@ -1,12 +1,14 @@
 package org.phantazm.core.hologram;
 
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.Taggable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -32,7 +34,7 @@ public class BasicPaginatedHologram implements PaginatedHologram {
     }
 
     private boolean updatePageOnTransition(int oldPage, int newPage) {
-        if (newPage != oldPage) {
+        if (newPage == oldPage) {
             return false;
         }
 
@@ -86,13 +88,19 @@ public class BasicPaginatedHologram implements PaginatedHologram {
         synchronized (sync) {
             ViewableHologram page = pages.get(index);
             pageModifier.accept(page);
-            page.updateViewableRules();
         }
     }
 
     @Override
-    public void addPage(@NotNull List<PageLine> contents, double gap, Hologram.@NotNull Alignment alignment,
-        @NotNull ViewableHologram.LineFormatter lineFormatter) {
+    public void reformatPage(int pageIndex, int lineIndex, @NotNull Player player) {
+        synchronized (sync) {
+            pages.get(pageIndex).reformatFor(lineIndex, player);
+        }
+    }
+
+    @Override
+    public void addPage(@NotNull Collection<? extends Hologram.Line> contents, double gap,
+        Hologram.@NotNull Alignment alignment) {
         Instance instance;
         ViewableHologram viewableHologram;
         synchronized (sync) {
@@ -101,15 +109,9 @@ public class BasicPaginatedHologram implements PaginatedHologram {
             int pageIndex = this.pages.size();
             viewableHologram = new ViewableHologram(location, gap, alignment, player -> {
                 return player.getTag(pageTag) == pageIndex;
-            }, lineFormatter);
+            });
 
-            for (PageLine line : contents) {
-                if (line.isComponent()) {
-                    viewableHologram.add(line.component());
-                } else {
-                    viewableHologram.addFormatted(line.format());
-                }
-            }
+            viewableHologram.addLines(contents);
 
             this.pages.add(viewableHologram);
             viewableHologram.setInstance(instance);

@@ -52,6 +52,7 @@ public final class EthyleneFeature {
             .withScalarSignature(entityType()).withScalarSignature(material())
             .withScalarSignature(potionEffect())
             .withScalarSignature(path())
+            .withTypeImplementation(Int2ObjectLinkedOpenHashMap.class, Int2ObjectSortedMap.class)
             .withTypeImplementation(IntArrayList.class, IntList.class)
             .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
             .withTypeImplementation(Object2FloatOpenHashMap.class, Object2FloatMap.class)

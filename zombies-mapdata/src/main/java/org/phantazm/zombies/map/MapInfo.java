@@ -21,7 +21,7 @@ public record MapInfo(
     @NotNull List<RoundInfo> rounds,
     @NotNull List<SpawnruleInfo> spawnrules,
     @NotNull List<SpawnpointInfo> spawnpoints,
-    @NotNull LeaderboardInfo leaderboard,
+    @NotNull ConfigNode leaderboard,
     @NotNull ConfigNode scoreboard,
     @NotNull ConfigNode corpse,
     @NotNull ConfigNode endless,
@@ -42,7 +42,7 @@ public record MapInfo(
     public MapInfo(@NotNull MapSettingsInfo settings, @NotNull PlayerCoinsInfo playerCoins,
         @NotNull List<RoomInfo> rooms, @NotNull List<DoorInfo> doors, @NotNull List<ShopInfo> shops,
         @NotNull List<WindowInfo> windows, @NotNull List<RoundInfo> rounds, @NotNull List<SpawnruleInfo> spawnrules,
-        @NotNull List<SpawnpointInfo> spawnpoints, @NotNull LeaderboardInfo leaderboard,
+        @NotNull List<SpawnpointInfo> spawnpoints, @NotNull ConfigNode leaderboard,
         @NotNull ConfigNode scoreboard, @NotNull ConfigNode corpse, @NotNull ConfigNode endless,
         @NotNull WebhookInfo webhook) {
         this.settings = Objects.requireNonNull(settings);

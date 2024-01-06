@@ -1,33 +1,36 @@
 package org.phantazm.core.leaderboard;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.vector.Vec3D;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.tag.Taggable;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.DualComponent;
 import org.phantazm.commons.FutureUtils;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.MonoComponent;
+import org.phantazm.core.RayUtils;
 import org.phantazm.core.TagUtils;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.hologram.BasicPaginatedHologram;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.PaginatedHologram;
-import org.phantazm.core.hologram.ViewableHologram;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.role.RoleStore;
 import org.phantazm.core.time.TickFormatter;
@@ -39,13 +42,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Function;
 
-@Model("zombies.leaderboard.best_time_2")
-@Cache(false)
-public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTimeLeaderboard.Args, ZombiesBestTimeLeaderboard.Impl> {
+@Model("zombies.leaderboard.best_time")
+@Cache
+public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
+    public static final InjectionStore.Key<Args> ARGS_KEY = InjectionStore.key(Args.class);
+
     private final Data data;
     private final TickFormatter tickFormatter;
 
     public record Args(
+        @NotNull Point worldOrigin,
         @NotNull Executor executor,
         @NotNull Instance instance,
         @NotNull ZombiesLeaderboardDatabase database,
@@ -61,8 +67,9 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
     }
 
     @Override
-    public @NotNull ZombiesBestTimeLeaderboard.Impl apply(@NotNull InjectionStore injectionStore, @NotNull Args args) {
-        return new Impl(data, args.executor, args.instance, args.database, args.roleStore, args.identitySource,
+    public @NotNull Leaderboard apply(@NotNull InjectionStore injectionStore) {
+        Args args = injectionStore.get(ARGS_KEY);
+        return new Impl(data, args.worldOrigin, args.executor, args.instance, args.database, args.roleStore, args.identitySource,
             args.descriptorFunction, tickFormatter);
     }
 
@@ -70,7 +77,11 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
         @NotNull Component name) {
     }
 
-    public static class Impl implements Leaderboard {
+    private record PageKey(int teamSize,
+        @NotNull ZombiesBestTimeLeaderboard.Modifier modifier) {
+    }
+
+    private static class Impl implements Leaderboard {
         private static final long REFRESH_RATE = Duration.ofMinutes(1).toMillis();
 
         private final Object sync = new Object();
@@ -78,6 +89,7 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
         private final Tag<Integer> modifierRankingIndex = Tag.Integer(TagUtils.uniqueTagName()).defaultValue(0);
 
         private final Data data;
+        private final Point worldOrigin;
         private final Executor executor;
         private final Instance instance;
         private final ZombiesLeaderboardDatabase database;
@@ -94,9 +106,11 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
         private Entity interactionPoint;
         private boolean shown;
 
-        private Impl(Data data, Executor executor, Instance instance, ZombiesLeaderboardDatabase database,
-            RoleStore roleStore, IdentitySource identitySource, Function<? super Set<Key>, ? extends String> descriptorFunction, TickFormatter tickFormatter) {
+        private Impl(Data data, Point worldOrigin, Executor executor, Instance instance, ZombiesLeaderboardDatabase database,
+            RoleStore roleStore, IdentitySource identitySource,
+            Function<? super Set<Key>, ? extends String> descriptorFunction, TickFormatter tickFormatter) {
             this.data = data;
+            this.worldOrigin = worldOrigin;
             this.executor = executor;
             this.instance = instance;
             this.database = database;
@@ -104,13 +118,15 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
             this.identitySource = identitySource;
             this.tickFormatter = tickFormatter;
             this.descriptorFunction = descriptorFunction;
-            this.hologram = new BasicPaginatedHologram(VecUtils.toVec(data.location),
+            this.hologram = new BasicPaginatedHologram(VecUtils.toVec(data.location).add(worldOrigin),
                 Tag.Integer(TagUtils.uniqueTagName()).defaultValue(0));
             this.pageMap = new Object2IntOpenHashMap<>();
             this.pageMap.defaultReturnValue(-1);
             this.pageRenderTimes = new Int2LongOpenHashMap();
 
             data.teamSizeToEntryCountMappings.defaultReturnValue(12);
+
+            hologram.setInstance(instance);
             initPageMap();
         }
 
@@ -150,16 +166,9 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
 
                 removeArmorStand();
 
-                Point spawnPoint = VecUtils.toPoint(data.location.add(data.armorStandOffset));
-                Entity armorStand = new Entity(EntityType.ARMOR_STAND) {
-                    @Override
-                    public void interact(@NotNull Player player, @NotNull Point position) {
-                        super.interact(player, position);
-                        ZombiesBestTimeLeaderboard.Impl.this.interact(player, position.sub(spawnPoint), this);
-                    }
-                };
-                armorStand.setNoGravity(true);
-                armorStand.setInvisible(true);
+                Point spawnPoint = VecUtils.toVec(data.location).add(worldOrigin)
+                    .add(VecUtils.toPoint(data.armorStandOffset));
+                Entity armorStand = makeInteractionEntity();
                 armorStand.setInstance(instance, spawnPoint);
 
                 this.interactionPoint = armorStand;
@@ -167,6 +176,30 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
                 //always render the first page
                 renderTimesForPage(new PageKey(data.teamSizes.getInt(0), data.modifiers.get(0)));
             }
+        }
+
+        private Entity makeInteractionEntity() {
+            Entity armorStand = new Entity(EntityType.ARMOR_STAND) {
+                @Override
+                public void interact(@NotNull Player player, @NotNull Point position) {
+                    super.interact(player, position);
+                    Impl.this.interact(player, position.add(getPosition()), this);
+                }
+
+                @Override
+                public void attacked(@NotNull Player player) {
+                    Optional<Vec> hitOptional = RayUtils.rayTrace(this.getBoundingBox(), getPosition(),
+                        player.getPosition().add(0, player.getEyeHeight(), 0));
+                    if (hitOptional.isEmpty()) {
+                        return;
+                    }
+
+                    Impl.this.interact(player, hitOptional.get(), this);
+                }
+            };
+
+            armorStand.setNoGravity(true);
+            return armorStand;
         }
 
         @Override
@@ -188,21 +221,24 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
             }
         }
 
-        private void interact(@NotNull Taggable taggable, @NotNull Point relativePosition, @NotNull Entity armorStand) {
-            double midpoint = data.location.y() + (armorStand.getBoundingBox().height() / 2);
+        private void interact(@NotNull Player player, @NotNull Point relativePosition, @NotNull Entity armorStand) {
+            double midpoint = armorStand.getPosition().y() + (armorStand.getBoundingBox().height() / 2);
             int sizeIndex;
             int modifierIndex;
 
-            if (relativePosition.y() < midpoint) {
-                sizeIndex = taggable.tagHandler().getTag(teamSizeIndex);
+            //modifiers are below team sizes
+            boolean updateModifier = relativePosition.y() < midpoint;
 
-                modifierIndex = taggable.tagHandler().updateAndGetTag(modifierRankingIndex, oldValue ->
+            if (updateModifier) {
+                sizeIndex = player.tagHandler().getTag(teamSizeIndex);
+
+                modifierIndex = player.tagHandler().updateAndGetTag(modifierRankingIndex, oldValue ->
                     (oldValue + 1) % data.modifiers.size());
             } else {
-                sizeIndex = taggable.tagHandler().updateAndGetTag(teamSizeIndex, oldValue ->
+                sizeIndex = player.tagHandler().updateAndGetTag(teamSizeIndex, oldValue ->
                     (oldValue + 1) % data.teamSizes.size());
 
-                modifierIndex = taggable.tagHandler().getTag(modifierRankingIndex);
+                modifierIndex = player.tagHandler().getTag(modifierRankingIndex);
             }
 
             int teamSize = data.teamSizes.getInt(sizeIndex);
@@ -218,11 +254,22 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
                 return;
             }
 
-            hologram.setPage(taggable, targetPage);
+            hologram.setPage(player, targetPage);
+            player.playSound(data.clickSound);
         }
 
-        private record PageKey(int teamSize,
-            @NotNull ZombiesBestTimeLeaderboard.Modifier modifier) {
+        private Component constructTeamLineFor(int teamSize) {
+            List<Component> formattedLines = new ArrayList<>(data.teamSizeToNameMappings.size());
+            for (Int2ObjectMap.Entry<String> entry : data.teamSizeToNameMappings.int2ObjectEntrySet()) {
+                int teamSizeKey = entry.getIntKey();
+                TagResolver teamSizeNameTag = Placeholder.parsed("team_size_name", entry.getValue());
+
+                formattedLines.add(teamSizeKey == teamSize ?
+                    MiniMessage.miniMessage().deserialize(data.activeTeamSizeNameFormat, teamSizeNameTag) :
+                    MiniMessage.miniMessage().deserialize(data.inactiveTeamSizeNameFormat, teamSizeNameTag));
+            }
+
+            return Component.join(JoinConfiguration.separator(Component.space()), formattedLines);
         }
 
         private void initPages() {
@@ -230,37 +277,32 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
             while (teamSizeIterator.hasNext()) {
                 int teamSize = teamSizeIterator.nextInt();
 
-                Component teamSizeName = data.teamSizeToNameMappings.get(teamSize);
+                String teamSizeName = data.teamSizeToNameMappings.get(teamSize);
                 if (teamSizeName == null) {
-                    teamSizeName = Component.text(teamSize);
+                    teamSizeName = Integer.toString(teamSize);
                 }
+
+                TagResolver teamSizeNameTag = Placeholder.parsed("team_size_name", teamSizeName);
+
+                Component teamSizeLine = constructTeamLineFor(teamSize);
 
                 for (Modifier modifier : data.modifiers) {
                     TagResolver modifierNameTag = Placeholder.component("modifier_name", modifier.name);
-                    TagResolver teamSizeNameTag = Placeholder.component("team_size_name", teamSizeName);
 
-                    List<PaginatedHologram.PageLine> pageContents = new ArrayList<>(data.headerFormats.size() + data.footerFormats.size() + 1);
+                    List<Hologram.Line> pageContents = new ArrayList<>(data.headerFormats.size() + data.footerFormats.size() + 3);
                     for (String format : data.headerFormats) {
-                        pageContents.add(PaginatedHologram
+                        pageContents.add(Hologram
                             .line(MiniMessage.miniMessage().deserialize(format, modifierNameTag, teamSizeNameTag)));
                     }
 
                     for (String format : data.footerFormats) {
-                        pageContents.add(PaginatedHologram
+                        pageContents.add(Hologram
                             .line(MiniMessage.miniMessage().deserialize(format, modifierNameTag, teamSizeNameTag)));
                     }
 
-                    pageContents.add(PaginatedHologram.line(data.viewingPlayerFormat));
-
                     String descriptor = descriptorFunction.apply(modifier.modifiers);
-                    hologram.addPage(pageContents, 0, Hologram.Alignment.LOWER, new ViewableHologram.LineFormatter() {
-                        @Override
-                        public @NotNull Component initialValue() {
-                            return data.loading;
-                        }
-
-                        @Override
-                        public CompletableFuture<Component> apply(String string, Player player) {
+                    pageContents.add(Hologram.line(data.viewingPlayerFormat, Hologram.formatter(data.loading,
+                        (string, player) -> {
                             return database.fetchBestRanking(player.getUuid(), teamSize, data.map, descriptor)
                                 .thenComposeAsync(rankingOptional ->
                                     roleStore.getStylingRole(player.getUuid()).thenApplyAsync(role -> {
@@ -281,8 +323,23 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
 
                                         return MiniMessage.miniMessage().deserialize(string, nameTag, rankTag, timeTag);
                                     }, executor), executor);
-                        }
-                    });
+                        })));
+
+                    pageContents.add(Hologram.line(teamSizeLine));
+
+                    List<Component> formattedLines = new ArrayList<>(data.teamSizeToNameMappings.size());
+                    for (Modifier mod : data.modifiers) {
+                        TagResolver modifierTag = Placeholder.component("modifier_name", mod.name);
+
+                        formattedLines.add(mod == modifier ?
+                            MiniMessage.miniMessage().deserialize(data.activeModifierNameFormat, modifierTag) :
+                            MiniMessage.miniMessage().deserialize(data.inactiveModifierNameFormat, modifierTag));
+                    }
+
+                    pageContents.add(Hologram.line(Component.join(JoinConfiguration.separator(Component.space()),
+                        formattedLines)));
+
+                    hologram.addPage(pageContents, 0.05, Hologram.Alignment.LOWER);
                 }
             }
         }
@@ -347,7 +404,7 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
                 CompletableFuture.allOf(entryFutures).thenRunAsync(() -> {
                     hologram.updatePage(page, hologram -> {
                         int insertStart = data.headerFormats.size();
-                        int insertEnd = hologram.size() - data.footerFormats.size();
+                        int insertEnd = hologram.size() - data.footerFormats.size() - 3;
                         if (insertEnd >= insertStart) {
                             hologram.subList(insertStart, insertEnd).clear();
                         }
@@ -366,7 +423,7 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
         @NotNull Key map,
         @NotNull IntList teamSizes,
         @NotNull List<Modifier> modifiers,
-        @NotNull Int2ObjectMap<Component> teamSizeToNameMappings,
+        @NotNull Int2ObjectSortedMap<String> teamSizeToNameMappings,
         @NotNull Int2IntMap teamSizeToEntryCountMappings,
         @NotNull List<String> headerFormats,
         @NotNull List<String> footerFormats,
@@ -374,6 +431,17 @@ public class ZombiesBestTimeLeaderboard implements DualComponent<ZombiesBestTime
         @NotNull Component loading,
         @NotNull String scoreFormat,
         @NotNull Component unknownRank,
-        @NotNull Component unknownTime) {
+        @NotNull Component unknownTime,
+        @NotNull Sound clickSound,
+        @NotNull String inactiveTeamSizeNameFormat,
+        @NotNull String activeTeamSizeNameFormat,
+        @NotNull String inactiveModifierNameFormat,
+        @NotNull String activeModifierNameFormat) {
+        @Default("armorStandOffset")
+        public static @NotNull ConfigElement armorStandOffsetDefault() {
+            return ConfigElement.of("{x=0, y=0.5, z=0}");
+        }
+
+
     }
 }

@@ -74,7 +74,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
     public @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
         @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers,
         @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
-        @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
+        @NotNull Instance instance, @NotNull PlayerView playerView,
         @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
         @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
         @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,

@@ -129,8 +129,7 @@ public class FileSystemMapLoader extends FilesystemLoader<MapInfo> {
 
         String leaderboardPath =
             "leaderboard" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());
-        LeaderboardInfo leaderboard = Configuration.read(mapDirectory.resolve(leaderboardPath), codec,
-            mappingProcessorSource.processorFor(Token.ofClass(LeaderboardInfo.class)));
+        ConfigNode leaderboard = Configuration.read(mapDirectory.resolve(leaderboardPath), codec).asNode();
 
         String webhookPath =
             "webhook" + (codec.getPreferredExtensions().isEmpty() ? "" : "." + codec.getPreferredExtension());

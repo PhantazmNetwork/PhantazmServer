@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -22,10 +23,12 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     protected final ArrayList<Entity> armorStands;
     private final double gap;
-    private final Object sync;
+    protected final Object sync;
+
     private Alignment alignment;
-    private Instance instance;
     private Point location;
+
+    private Instance instance;
 
     /**
      * Creates a new instance of this class, whose holograms will be rendered at the given location, using the given
@@ -36,12 +39,12 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      * @param alignment the alignment method
      */
     public InstanceHologram(@NotNull Point location, double gap, @NotNull Alignment alignment) {
+        this.armorStands = new ArrayList<>();
+        this.gap = gap;
+        this.sync = new Object();
+
         this.alignment = Objects.requireNonNull(alignment);
         this.location = Objects.requireNonNull(location);
-        armorStands = new ArrayList<>();
-        this.gap = gap;
-
-        this.sync = new Object();
     }
 
     /**
@@ -63,6 +66,13 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
                 this.alignment = alignment;
                 updateArmorStands();
             }
+        }
+    }
+
+    @Override
+    public void reformatFor(int index, @NotNull Player player) {
+        synchronized (sync) {
+            reformat(armorStands.get(index), player);
         }
     }
 
@@ -131,41 +141,20 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     }
 
     @Override
-    public void addFormatted(int index, @NotNull String formatString) {
+    public void addLines(@NotNull Collection<? extends Line> lines) {
         synchronized (sync) {
-            armorStands.add(index, constructFormattedEntity(formatString));
+            armorStands.addAll(Containers.mappedView(pageLine -> pageLine.isComponent() ?
+                constructEntity(pageLine.component()) :
+                constructFormattedEntity(pageLine.format(), pageLine.lineFormatter()), lines));
             updateArmorStands();
         }
     }
 
     @Override
-    public void addAllFormatted(int index, @NotNull Collection<? extends String> formatStrings) {
+    public void addLine(@NotNull Hologram.Line line) {
         synchronized (sync) {
-            armorStands.addAll(index, Containers.mappedView(this::constructFormattedEntity, formatStrings));
-            updateArmorStands();
-        }
-    }
-
-    @Override
-    public void addFormatted(@NotNull String formatString) {
-        synchronized (sync) {
-            armorStands.add(constructFormattedEntity(formatString));
-            updateArmorStands();
-        }
-    }
-
-    @Override
-    public void addAllFormatted(@NotNull Collection<? extends String> formatStrings) {
-        synchronized (sync) {
-            armorStands.addAll(Containers.mappedView(this::constructFormattedEntity, formatStrings));
-            updateArmorStands();
-        }
-    }
-
-    @Override
-    public void setFormatted(int index, @NotNull String formatString) {
-        synchronized (sync) {
-            armorStands.set(index, constructFormattedEntity(formatString));
+            armorStands.add(line.isComponent() ? constructEntity(line.component()) :
+                constructFormattedEntity(line.format(), line.lineFormatter()));
             updateArmorStands();
         }
     }
@@ -263,6 +252,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
         meta.setCustomNameVisible(true);
         meta.setInvisible(true);
         meta.setCustomName(display);
+        stand.setHasPhysics(false);
         return stand;
     }
 
@@ -281,15 +271,29 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     /**
      * Works identically to {@link InstanceHologram#constructEntity(Component)}, but its custom name is created by the
-     * given {@link MiniMessage} format string. Called to create entities for the {@link Hologram#addFormatted(String)}
-     * method (and derivatives).
+     * given {@link MiniMessage} format string. Called to create entities for the {@link Hologram#addLine(Line)} method
+     * (and derivatives).
      * <p>
-     * Implementations may override this method to provide custom formatting for holograms.
+     * Implementations may override this method to provide custom formatting for holograms. The default implementation
+     * does not make use of the line formatter at all.
      *
      * @param formatString the format string from which to create the custom name
      * @return the entity to be used for the hologram
      */
-    protected @NotNull Entity constructFormattedEntity(@NotNull String formatString) {
+    protected @NotNull Entity constructFormattedEntity(@NotNull String formatString,
+        @NotNull ViewableHologram.LineFormatter lineFormatter) {
         return makeArmorStand(MiniMessage.miniMessage().deserialize(formatString));
+    }
+
+    /**
+     * Reformats a specific armor stand, causing its {@link Hologram.LineFormatter} function to be re-computed (if it
+     * exists). The default implementation is a no-op. Subclasses that override
+     * {@link InstanceHologram#constructFormattedEntity(String, LineFormatter)} should also override this method.
+     *
+     * @param entity the entity to reformat
+     * @param player the player we are reformatting for
+     */
+    protected void reformat(@NotNull Entity entity, @NotNull Player player) {
+
     }
 }
