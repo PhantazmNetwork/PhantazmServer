@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FutureUtils;
 import org.phantazm.stats.Utils;
@@ -147,6 +148,18 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             builder.append('p');
             builder.append(i + 1);
             if (i < teamSize - 1) {
+                builder.append(", ");
+            }
+        }
+
+        return builder.toString();
+    }
+
+    private static String parameters(int size) {
+        StringBuilder builder = new StringBuilder(size + 2 * (size - 1));
+        for (int i = 0; i < size; i++) {
+            builder.append('?');
+            if (i < size - 1) {
                 builder.append(", ");
             }
         }
@@ -391,16 +404,20 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
 
             String teamFields = teamFields(teamSize);
 
-            return Utils.runPreparedSql(LOGGER, "fetchBestTimes", List.of(), dataSource, """
-                    SELECT time_taken, time_end, %3$s FROM (SELECT time_taken, time_end, %3$s,
-                      DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken, %1$s.id) AS pos
-                        FROM %1$s
-                        INNER JOIN %2$s
-                        ON %1$s.team_id = %2$s.team_id
-                        WHERE %1$s.map_key = ?) AS dummy_table
-                        WHERE pos = 1
-                        LIMIT ? OFFSET ?
-                    """.formatted(gameTable, teamTable, teamFields),
+            @Language("sql")
+            String query = """
+                SELECT id, time_taken, time_end, %3$s FROM (SELECT id, time_taken, time_end, %3$s,
+                  DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken, %1$s.id) AS pos
+                    FROM %1$s
+                    INNER JOIN %2$s
+                    ON %1$s.team_id = %2$s.team_id
+                    WHERE %1$s.map_key = ?) AS dummy_table
+                    WHERE pos = 1
+                    ORDER BY time_taken, id
+                    LIMIT ? OFFSET ?
+                """.formatted(gameTable, teamTable, teamFields);
+
+            return Utils.runPreparedSql(LOGGER, "fetchBestTimes", List.of(), dataSource, query,
                 (connection, preparedStatement) -> {
                     preparedStatement.setString(1, map.asString());
                     preparedStatement.setInt(2, entries);
@@ -413,12 +430,12 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
 
                     List<LeaderboardEntry> entryList = new ArrayList<>(entries);
                     do {
-                        long timeTaken = result.getLong(1);
-                        long timeEnd = result.getLong(2);
+                        long timeTaken = result.getLong(2);
+                        long timeEnd = result.getLong(3);
 
                         Set<UUID> uuids = new HashSet<>(teamSize);
                         for (int i = 0; i < teamSize; i++) {
-                            uuids.add(UUID.fromString(result.getString(i + 3)));
+                            uuids.add(UUID.fromString(result.getString(i + 4)));
                         }
 
                         entryList.add(new LeaderboardEntry(uuids, timeTaken, timeEnd));
@@ -455,11 +472,10 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                 String teamMatches = teamMatches(teamTable, key.size());
                 String firstQuery = """
                     INSERT INTO %1$s (%2$s)
-                    SELECT (?) FROM DUAL
+                    SELECT %4$s FROM DUAL
                     WHERE NOT EXISTS
-                    (SELECT (%2$s) FROM %1$s
-                        WHERE %3$s)
-                    """.formatted(teamTable, teamFields(key.size()), teamMatches);
+                    (SELECT 1 FROM %1$s WHERE %3$s)
+                    """.formatted(teamTable, teamFields(key.size()), teamMatches, parameters(teamSize));
 
                 String secondQuery = """
                     INSERT INTO %1$s (team_id, time_taken, time_end, map_key)

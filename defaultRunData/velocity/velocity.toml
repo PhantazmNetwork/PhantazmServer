@@ -72,10 +72,10 @@ read-timeout = 86400000
 tcp-fast-open = false
 # How much compression should be done (from 0-9). The default is -1, which uses the
 # default level of 6.
-compression-level = -1
+compression-level = 9
 # How large a Minecraft packet has to be before we compress it. Setting this to zero will
 # compress all packets, and setting it to -1 will disable compression entirely.
-compression-threshold = -1
+compression-threshold = 0
 # How fast (in milliseconds) are clients allowed to connect after the last connection? By
 # default, this is three seconds. Disable this by setting this to 0.
 login-ratelimit = 3000

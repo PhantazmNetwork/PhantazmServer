@@ -372,7 +372,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                     ZombiesLeaderboardDatabase.LeaderboardEntry entry = entries.get(i);
 
                     TagResolver rankTag = Placeholder.unparsed("rank", Integer.toString(start + 1 + i));
-                    TagResolver timeTag = Placeholder.unparsed("text", tickFormatter.format(entry.timeTaken()));
+                    TagResolver timeTag = Placeholder.unparsed("time", tickFormatter.format(entry.timeTaken()));
 
                     CompletableFuture<Component>[] names = new CompletableFuture[entry.team().size()];
 
