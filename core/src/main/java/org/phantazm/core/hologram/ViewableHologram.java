@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 /**
  * A subclass of {@link InstanceHologram} which additionally may be set up to only render for players who satisfy a
  * certain predicate. A {@link LineFormatter} may be provided to (optionally asynchronously) format lines passed to
- * {@link Hologram#addLine(Line)} and derivatives.
+ * {@link Hologram#add(Object)} and derivatives.
  */
 public class ViewableHologram extends InstanceHologram {
     private final Predicate<? super Player> canRender;
@@ -114,9 +114,9 @@ public class ViewableHologram extends InstanceHologram {
      * @param alignment the alignment method
      * @param canRender the predicate used to determine if this hologram should be visible
      */
-    public ViewableHologram(@NotNull Point location, double gap, @NotNull Alignment alignment,
+    public ViewableHologram(@NotNull Point location, @NotNull Alignment alignment,
         @NotNull Predicate<? super Player> canRender) {
-        super(location, gap, alignment);
+        super(location, alignment);
         this.canRender = Objects.requireNonNull(canRender);
     }
 
@@ -128,8 +128,8 @@ public class ViewableHologram extends InstanceHologram {
      * @param gap       the distance between separate hologram messages
      * @param canRender the predicate used to determine if this hologram should be visible
      */
-    public ViewableHologram(@NotNull Point location, double gap, @NotNull Predicate<? super Player> canRender) {
-        this(location, gap, Alignment.UPPER, canRender);
+    public ViewableHologram(@NotNull Point location, @NotNull Predicate<? super Player> canRender) {
+        this(location, Alignment.UPPER, canRender);
     }
 
     @Override
@@ -161,13 +161,6 @@ public class ViewableHologram extends InstanceHologram {
         }
 
         formattingEntity.reformat(player);
-    }
-
-    public void update(@NotNull BiConsumer<? super Integer, ? super ViewableHologram> consumer) {
-        synchronized (sync) {
-            int size = super.armorStands.size();
-            consumer.accept(size, this);
-        }
     }
 
     private static SendablePacket initialMetadataPacket(@NotNull Entity armorstand, @NotNull Component initialName) {
@@ -205,8 +198,8 @@ public class ViewableHologram extends InstanceHologram {
 
     public void updateViewableRules() {
         synchronized (super.sync) {
-            for (Entity armorStand : super.armorStands) {
-                armorStand.updateViewableRule();
+            for (Entry entry : super.entries) {
+                entry.entity().updateViewableRule();
             }
         }
     }

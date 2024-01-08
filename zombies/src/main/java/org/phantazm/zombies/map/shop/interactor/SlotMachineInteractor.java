@@ -87,7 +87,7 @@ public class SlotMachineInteractor implements ShopInteractor {
     @Override
     public void initialize(@NotNull Shop shop) {
         this.shop = shop;
-        this.hologram = new InstanceHologram(shop.center().add(0, data.hologramOffset, 0), 0);
+        this.hologram = new InstanceHologram(shop.center().add(0, data.hologramOffset, 0));
         this.hologram.setInstance(shop.instance());
 
         ShopInteractor.initialize(rollStartInteractors, shop);

@@ -16,13 +16,20 @@ import java.util.function.BiFunction;
  * Represents some floating text that renders in an {@link Instance}. The hologram's lines change in accordance to the
  * {@link Component} list this object represents.
  */
-public interface Hologram extends List<Component> {
+public interface Hologram extends List<Hologram.Line> {
+    /**
+     * A function that can asynchronously format a string into a {@link Component}, given a {@link Player}.
+     */
+    interface FormatFunction extends BiFunction<@NotNull String, @NotNull Player, @NotNull CompletableFuture<Component>> {
+
+    }
+
     /**
      * A function that accepts a {@link String} and {@link Player} and returns a {@link CompletableFuture} that computes
      * a (possibly new) Component that will be shown only to that specific player.
      * <p>
      * Instances of this interface can be obtained by calling {@link Hologram#formatter(BiFunction)} or
-     * {@link Hologram#formatter(Component, BiFunction)}, or by subclassing directly.
+     * {@link Hologram#formatter(Component, FormatFunction)}, or by subclassing directly.
      */
     interface LineFormatter extends BiFunction<@NotNull String, @NotNull Player, @NotNull CompletableFuture<Component>> {
         /**
@@ -44,7 +51,8 @@ public interface Hologram extends List<Component> {
      */
     record Line(String format,
         Component component,
-        Hologram.LineFormatter lineFormatter) {
+        Hologram.LineFormatter lineFormatter,
+        double gap) {
         public Line {
             if (format == null) {
                 Objects.requireNonNull(component);
@@ -56,6 +64,14 @@ public interface Hologram extends List<Component> {
                 Objects.requireNonNull(lineFormatter);
             } else {
                 throw new IllegalArgumentException("Cannot define both a format string and component");
+            }
+
+            if (!Double.isFinite(gap)) {
+                throw new IllegalArgumentException("Gap must be finite");
+            }
+
+            if (gap < 0) {
+                throw new IllegalArgumentException("Gap must be >= 0");
             }
         }
 
@@ -87,7 +103,12 @@ public interface Hologram extends List<Component> {
      * @return a new line
      */
     static @NotNull Hologram.Line line(@NotNull String format, @NotNull Hologram.LineFormatter lineFormatter) {
-        return new Line(format, null, lineFormatter);
+        return new Line(format, null, lineFormatter, 0);
+    }
+
+    static @NotNull Hologram.Line line(@NotNull String format, @NotNull Hologram.LineFormatter lineFormatter,
+        double gap) {
+        return new Line(format, null, lineFormatter, gap);
     }
 
     /**
@@ -98,7 +119,11 @@ public interface Hologram extends List<Component> {
      * @return a new line
      */
     static @NotNull Hologram.Line line(@NotNull Component component) {
-        return new Line(null, component, null);
+        return new Line(null, component, null, 0);
+    }
+
+    static @NotNull Hologram.Line line(@NotNull Component component, double gap) {
+        return new Line(null, component, null, gap);
     }
 
     static @NotNull LineFormatter formatter(
@@ -117,8 +142,7 @@ public interface Hologram extends List<Component> {
         };
     }
 
-    static @NotNull LineFormatter formatter(@NotNull Component initialValue,
-        @NotNull BiFunction<? super String, ? super Player, ? extends CompletableFuture<Component>> function) {
+    static @NotNull LineFormatter formatter(@NotNull Component initialValue, @NotNull FormatFunction function) {
         Objects.requireNonNull(initialValue);
         Objects.requireNonNull(function);
         return new LineFormatter() {
@@ -133,24 +157,6 @@ public interface Hologram extends List<Component> {
             }
         };
     }
-
-    /**
-     * Adds a number of lines to this hologram, which may or may not specify formatting.
-     * <p>
-     * Generally, it is preferable to use this method instead of calling {@link Hologram#addLine(Line)} in a loop.
-     * Implementations of this class will typically rebuild the hologram entities after every line added, but need only
-     * do so once when this method is used.
-     *
-     * @param lines the lines to add
-     */
-    void addLines(@NotNull Collection<? extends Line> lines);
-
-    /**
-     * Adds a single line to this hologram, which may or may not specify formatting.
-     *
-     * @param line the line to add
-     */
-    void addLine(@NotNull Hologram.Line line);
 
     /**
      * Updates the alignment of the hologram.
@@ -197,9 +203,32 @@ public interface Hologram extends List<Component> {
      */
     void trimToSize();
 
+    void addComponent(@NotNull Component component, double gap);
+
+    void addFormat(@NotNull String formatString, @NotNull LineFormatter lineFormatter, double gap);
+
+    boolean addAllComponents(@NotNull Collection<? extends Component> components, double gap);
+
+    boolean addAllFormats(@NotNull Collection<? extends String> formatStrings, @NotNull LineFormatter lineFormatter,
+        double gap);
+
+    /**
+     * Ways that holograms may be aligned.
+     */
     enum Alignment {
+        /**
+         * Hologram lines will extend below the hologram location.
+         */
         UPPER,
+
+        /**
+         * Hologram lines will be centered on the hologram location.
+         */
         CENTERED,
+
+        /**
+         * Hologram lines will extend above the hologram location.
+         */
         LOWER
     }
 }

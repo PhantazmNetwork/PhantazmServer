@@ -21,7 +21,7 @@ public class StaticHologramDisplay extends HologramDisplayBase {
 
     @FactoryMethod
     public StaticHologramDisplay(@NotNull Data data) {
-        super(new InstanceHologram(Vec.ZERO, 0, Hologram.Alignment.LOWER));
+        super(new InstanceHologram(Vec.ZERO, Hologram.Alignment.LOWER));
         this.data = Objects.requireNonNull(data);
     }
 
@@ -30,7 +30,7 @@ public class StaticHologramDisplay extends HologramDisplayBase {
         hologram.setInstance(shop.instance(), shop.center().add(VecUtils.toPoint(data.info.position())));
         hologram.clear();
 
-        hologram.addAll(data.info.text());
+        hologram.add(data.info.text(), 0);
     }
 
     @DataObject

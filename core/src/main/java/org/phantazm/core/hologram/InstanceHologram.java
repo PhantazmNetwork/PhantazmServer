@@ -18,17 +18,20 @@ import java.util.*;
  * Instance-wide Hologram implementation. This object retains a strong reference to its instance, and therefore should
  * not be stored for longer than the lifetime of the instance.
  */
-public class InstanceHologram extends AbstractList<Component> implements Hologram, RandomAccess {
+public class InstanceHologram extends AbstractList<Hologram.Line> implements Hologram, RandomAccess {
     public static final double MESSAGE_HEIGHT = 0.25;
 
-    protected final ArrayList<Entity> armorStands;
-    private final double gap;
+    protected final ArrayList<Entry> entries;
     protected final Object sync;
 
     private Alignment alignment;
     private Point location;
 
     private Instance instance;
+
+    protected record Entry(@NotNull Hologram.Line line,
+        @NotNull Entity entity) {
+    }
 
     /**
      * Creates a new instance of this class, whose holograms will be rendered at the given location, using the given
@@ -38,9 +41,8 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      * @param gap       the distance between separate hologram messages
      * @param alignment the alignment method
      */
-    public InstanceHologram(@NotNull Point location, double gap, @NotNull Alignment alignment) {
-        this.armorStands = new ArrayList<>();
-        this.gap = gap;
+    public InstanceHologram(@NotNull Point location, @NotNull Alignment alignment) {
+        this.entries = new ArrayList<>();
         this.sync = new Object();
 
         this.alignment = Objects.requireNonNull(alignment);
@@ -54,8 +56,8 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      * @param location the location to render holograms
      * @param gap      the distance between separate hologram messages
      */
-    public InstanceHologram(@NotNull Point location, double gap) {
-        this(location, gap, Alignment.UPPER);
+    public InstanceHologram(@NotNull Point location) {
+        this(location, Alignment.UPPER);
     }
 
     @Override
@@ -72,7 +74,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     @Override
     public void reformatFor(int index, @NotNull Player player) {
         synchronized (sync) {
-            reformat(armorStands.get(index), player);
+            reformat(entries.get(index).entity, player);
         }
     }
 
@@ -119,102 +121,83 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     @Override
     public void trimToSize() {
         synchronized (sync) {
-            armorStands.trimToSize();
+            entries.trimToSize();
         }
     }
 
     @Override
-    public @NotNull Component get(int index) {
+    public boolean addAllComponents(@NotNull Collection<? extends Component> components, double gap) {
         synchronized (sync) {
-            return Objects.requireNonNull(armorStands.get(index).getCustomName());
+            return entries.addAll(Containers.mappedView(component ->
+                entryFromLine(Hologram.line(component, gap)), components));
         }
     }
 
     @Override
-    public @NotNull Component set(int index, @NotNull Component element) {
+    public boolean addAllFormats(@NotNull Collection<? extends String> formatStrings,
+        @NotNull LineFormatter lineFormatter, double gap) {
         synchronized (sync) {
-            Entity armorStand = armorStands.get(index);
-            Component oldName = Objects.requireNonNull(armorStand.getCustomName());
-            armorStand.setCustomName(element);
-            return oldName;
+            return entries.addAll(Containers.mappedView(format ->
+                entryFromLine(Hologram.line(format, lineFormatter, gap)), formatStrings));
         }
     }
 
     @Override
-    public void addLines(@NotNull Collection<? extends Line> lines) {
+    public @NotNull Line get(int index) {
         synchronized (sync) {
-            armorStands.addAll(Containers.mappedView(pageLine -> pageLine.isComponent() ?
-                constructEntity(pageLine.component()) :
-                constructFormattedEntity(pageLine.format(), pageLine.lineFormatter()), lines));
+            return Objects.requireNonNull(entries.get(index).line);
+        }
+    }
+
+    @Override
+    public @NotNull Line set(int index, @NotNull Line line) {
+        synchronized (sync) {
+            return entries.set(index, entryFromLine(line)).line;
+        }
+    }
+
+    @Override
+    public boolean addAll(@NotNull Collection<? extends Line> lines) {
+        synchronized (sync) {
+            boolean result = entries.addAll(Containers.mappedView(this::entryFromLine, lines));
+            updateArmorStands();
+            return result;
+        }
+    }
+
+    @Override
+    public void add(int index, @NotNull Line line) {
+        synchronized (sync) {
+            entries.add(index, entryFromLine(line));
             updateArmorStands();
         }
     }
 
     @Override
-    public void addLine(@NotNull Hologram.Line line) {
+    public @NotNull Line remove(int index) {
         synchronized (sync) {
-            armorStands.add(line.isComponent() ? constructEntity(line.component()) :
-                constructFormattedEntity(line.format(), line.lineFormatter()));
-            updateArmorStands();
-        }
-    }
-
-    @Override
-    public void add(int index, @NotNull Component component) {
-        synchronized (sync) {
-            armorStands.add(constructEntity(component));
-            updateArmorStands();
-        }
-    }
-
-    @Override
-    public boolean addAll(int index, @NotNull Collection<? extends Component> c) {
-        boolean changed;
-        synchronized (sync) {
-            changed = armorStands.addAll(index, c.stream().map(this::constructEntity).toList());
-            updateArmorStands();
-        }
-
-        return changed;
-    }
-
-    @Override
-    public boolean addAll(@NotNull Collection<? extends Component> c) {
-        boolean changed;
-        synchronized (sync) {
-            changed = armorStands.addAll(c.stream().map(this::constructEntity).toList());
-            updateArmorStands();
-        }
-
-        return changed;
-    }
-
-    @Override
-    public @NotNull Component remove(int index) {
-        synchronized (sync) {
-            Entity armorStand = armorStands.remove(index);
-            Component component = Objects.requireNonNull(armorStand.getCustomName());
-            armorStand.remove();
+            Entry removedEntry = entries.remove(index);
+            removedEntry.entity.remove();
 
             updateArmorStands();
-            return component;
+            return removedEntry.line;
         }
     }
 
     @Override
     public void clear() {
         synchronized (sync) {
-            for (Entity entity : armorStands) {
-                entity.remove();
+            for (Entry entry : entries) {
+                entry.entity.remove();
             }
-            armorStands.clear();
+            entries.clear();
         }
     }
 
     @Override
     public int size() {
         synchronized (sync) {
-            return armorStands.size();
+            return entries.size();
         }
     }
 
@@ -223,17 +206,30 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
             return;
         }
 
-        int armorStandCount = armorStands.size();
-        double totalHeight = gap * (armorStandCount - 1) + armorStandCount * MESSAGE_HEIGHT;
-        double topEdgeHeight = location.y() + totalHeight / 2;
+        int armorStandCount = entries.size();
+        if (armorStandCount == 0) {
+            return;
+        }
+
+        double[] offsets = new double[armorStandCount];
+        offsets[0] = 0;
+
+        double gapSum = 0;
+        for (int i = 0; i < armorStandCount - 1; i++) {
+            gapSum += entries.get(i).line.gap();
+            offsets[i + 1] = (i + 1) * MESSAGE_HEIGHT + gapSum;
+        }
+
+        double totalHeight = MESSAGE_HEIGHT * armorStandCount + gapSum;
+        double topEdgeHeight = switch (alignment) {
+            case UPPER -> location.y();
+            case CENTERED -> location.y() + totalHeight / 2;
+            case LOWER -> location.y() + totalHeight;
+        };
 
         for (int i = 0; i < armorStandCount; i++) {
-            Entity armorStand = armorStands.get(i);
-            Pos pos = new Pos(location.x(), topEdgeHeight - (i * (gap + MESSAGE_HEIGHT)), location.z());
-            switch (alignment) {
-                case CENTERED -> pos = pos.add(0, totalHeight / 2, 0);
-                case LOWER -> pos = pos.add(0, totalHeight, 0);
-            }
+            Entity armorStand = entries.get(i).entity;
+            Pos pos = new Pos(location.x(), topEdgeHeight - offsets[i], location.z());
 
             if (armorStand.getInstance() == instance) {
                 armorStand.teleport(pos).join();
@@ -256,6 +252,11 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
         return stand;
     }
 
+    private Entry entryFromLine(Line line) {
+        return new Entry(line, line.isComponent() ? constructEntity(line.component()) :
+            constructFormattedEntity(line.format(), line.lineFormatter()));
+    }
+
     /**
      * Constructs the entity used for each message in this hologram. This method may be overridden to modify the
      * entity's characteristics. The default implementation creates a marker armor stand with no gravity, a visible
@@ -271,8 +272,7 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
 
     /**
      * Works identically to {@link InstanceHologram#constructEntity(Component)}, but its custom name is created by the
-     * given {@link MiniMessage} format string. Called to create entities for the {@link Hologram#addLine(Line)} method
-     * (and derivatives).
+     * given {@link MiniMessage} format string. Called to create entities that require custom formatting.
      * <p>
      * Implementations may override this method to provide custom formatting for holograms. The default implementation
      * does not make use of the line formatter at all.
