@@ -35,6 +35,11 @@ log_trace "Waiting for some input from stdin..."
 read -r input
 code="$?"
 
+current_user="$(whoami)"
+current_uid="$(id -u "${current_user}")"
+current_gid="$(id -g "${current_user}")"
+log_info "Running as user '$current_user' with UID=$current_uid and GID=$current_gid"
+
 log_trace "Got string from 'read': ${input}"
 log_trace "'read' operation exit code ${code}"
 
