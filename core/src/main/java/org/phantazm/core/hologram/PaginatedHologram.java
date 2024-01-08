@@ -25,7 +25,7 @@ public interface PaginatedHologram {
 
     boolean setPage(@NotNull Taggable taggable, int page);
 
-    void addPage(@NotNull Collection<? extends Hologram.Line> contents, double gap, Hologram.@NotNull Alignment alignment);
+    void addPage(@NotNull Collection<? extends Hologram.Line> contents, Hologram.@NotNull Alignment alignment);
 
     void updatePage(int index, @NotNull Consumer<? super @NotNull ViewableHologram> pageModifier);
 

@@ -68,7 +68,7 @@ public class CorpseCreator {
             }
         });
 
-        Hologram hologram = new InstanceHologram(deathLocation.add(0, data.hologramHeightOffset, 0), data.hologramGap);
+        Hologram hologram = new InstanceHologram(deathLocation.add(0, data.hologramHeightOffset, 0));
 
         hologram.setInstance(instance);
         corpseEntity.setInstance(instance, deathLocation.add(0, data.corpseHeightOffset, 0));
@@ -206,7 +206,7 @@ public class CorpseCreator {
         @Override
         public void start() {
             for (CorpseLine corpseLine : idleLines) {
-                hologram.add(corpseLine.update(this, System.currentTimeMillis()));
+                hologram.addComponent(corpseLine.update(this, System.currentTimeMillis()));
             }
 
             this.currentLines = idleLines;
@@ -228,17 +228,17 @@ public class CorpseCreator {
             List<CorpseLine> newLines = reviveHandler.isReviving() ? revivingLines : idleLines;
             if (newLines != currentLines) {
                 hologram.clear();
-                hologram.addAll(newLines.stream().map(line -> line.update(this, time)).toList());
+                hologram.addAllComponents(newLines.stream().map(line -> line.update(this, time)).toList());
                 this.currentLines = newLines;
                 return;
             }
 
             for (int i = 0; i < CorpseCreator.this.idleLines.size(); i++) {
                 Component newLine = currentLines.get(i).update(this, time);
-                Component oldLine = hologram.get(i);
+                Component oldLine = hologram.get(i).component();
 
                 if (!newLine.equals(oldLine)) {
-                    hologram.set(i, newLine);
+                    hologram.set(i, Hologram.line(newLine));
                 }
             }
         }

@@ -30,7 +30,7 @@ public class StaticHologramDisplay extends HologramDisplayBase {
         hologram.setInstance(shop.instance(), shop.center().add(VecUtils.toPoint(data.info.position())));
         hologram.clear();
 
-        hologram.add(data.info.text(), 0);
+        hologram.addAllComponents(data.info.text());
     }
 
     @DataObject

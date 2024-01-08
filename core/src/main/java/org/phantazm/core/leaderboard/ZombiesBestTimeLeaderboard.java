@@ -106,8 +106,8 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
         private Entity interactionPoint;
         private boolean shown;
 
-        private Impl(Data data, Point worldOrigin, Executor executor, Instance instance, ZombiesLeaderboardDatabase database,
-            RoleStore roleStore, IdentitySource identitySource,
+        private Impl(Data data, Point worldOrigin, Executor executor, Instance instance,
+            ZombiesLeaderboardDatabase database, RoleStore roleStore, IdentitySource identitySource,
             Function<? super Set<Key>, ? extends String> descriptorFunction, TickFormatter tickFormatter) {
             this.data = data;
             this.worldOrigin = worldOrigin;
@@ -339,7 +339,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                     pageContents.add(Hologram.line(Component.join(JoinConfiguration.separator(Component.space()),
                         formattedLines)));
 
-                    hologram.addPage(pageContents, 0.05, Hologram.Alignment.LOWER);
+                    hologram.addPage(pageContents, Hologram.Alignment.LOWER);
                 }
             }
         }
@@ -374,13 +374,17 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                     TagResolver rankTag = Placeholder.unparsed("rank", Integer.toString(start + 1 + i));
                     TagResolver timeTag = Placeholder.unparsed("time", tickFormatter.format(entry.timeTaken()));
 
-                    CompletableFuture<Component>[] names = new CompletableFuture[entry.team().size()];
+                    int thisTeamSize = entry.team().size();
+                    int[] nameLengths = new int[thisTeamSize];
+                    CompletableFuture<Component>[] names = new CompletableFuture[thisTeamSize];
 
                     int j = 0;
                     for (UUID member : entry.team()) {
-                        names[j++] = identitySource.getName(member).thenApplyAsync(nameOptional -> {
+                        int thisJ = j++;
+                        names[thisJ] = identitySource.getName(member).thenApplyAsync(nameOptional -> {
                             return nameOptional.orElse("Unknown User");
                         }, executor).thenComposeAsync(name -> roleStore.getStylingRole(member).thenApplyAsync(role -> {
+                            nameLengths[thisJ] = name.length();
                             return role.styleRawName(name);
                         }, executor), executor);
                     }
@@ -409,7 +413,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                             hologram.subList(insertStart, insertEnd).clear();
                         }
 
-                        hologram.addAll(insertStart, List.of(timeEntries));
+                        hologram.addAllComponents(insertStart, List.of(timeEntries), 0);
                     });
                 }, executor);
             }, executor);
@@ -441,7 +445,5 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
         public static @NotNull ConfigElement armorStandOffsetDefault() {
             return ConfigElement.of("{x=0, y=0.5, z=0}");
         }
-
-
     }
 }

@@ -13,6 +13,7 @@ import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.Upgradable;
 import org.phantazm.core.equipment.UpgradePath;
+import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.ViewableHologram;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.map.shop.Shop;
@@ -51,7 +52,7 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
         private long updateTicks;
 
         private Display(@NotNull Data data, @NotNull ZombiesPlayer zombiesPlayer, @NotNull UpgradePath upgradePath) {
-            super(new ViewableHologram(Vec.ZERO, 0, player -> player.getUuid().equals(zombiesPlayer.getUUID())));
+            super(new ViewableHologram(Vec.ZERO, player -> player.getUuid().equals(zombiesPlayer.getUUID())));
             this.data = Objects.requireNonNull(data);
             this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
             this.upgradePath = Objects.requireNonNull(upgradePath);
@@ -99,9 +100,9 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
                 TagResolver costPlaceholder = Placeholder.component("cost", Component.text(costOptional.get()));
                 Component text = MiniMessage.miniMessage().deserialize(data.format, costPlaceholder);
                 if (hologram.isEmpty()) {
-                    hologram.add(text);
+                    hologram.addComponent(text);
                 } else {
-                    hologram.set(0, text);
+                    hologram.set(0, Hologram.line(text));
                 }
             }
         }

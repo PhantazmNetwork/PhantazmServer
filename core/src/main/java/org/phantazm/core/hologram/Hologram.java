@@ -102,11 +102,11 @@ public interface Hologram extends List<Hologram.Line> {
      * @param lineFormatter the formatter to use
      * @return a new line
      */
-    static @NotNull Hologram.Line line(@NotNull String format, @NotNull Hologram.LineFormatter lineFormatter) {
+    static @NotNull Line line(@NotNull String format, @NotNull Hologram.LineFormatter lineFormatter) {
         return new Line(format, null, lineFormatter, 0);
     }
 
-    static @NotNull Hologram.Line line(@NotNull String format, @NotNull Hologram.LineFormatter lineFormatter,
+    static @NotNull Line line(@NotNull String format, @NotNull Hologram.LineFormatter lineFormatter,
         double gap) {
         return new Line(format, null, lineFormatter, gap);
     }
@@ -118,11 +118,11 @@ public interface Hologram extends List<Hologram.Line> {
      * @param component the non-formatted component that makes up the line
      * @return a new line
      */
-    static @NotNull Hologram.Line line(@NotNull Component component) {
+    static @NotNull Line line(@NotNull Component component) {
         return new Line(null, component, null, 0);
     }
 
-    static @NotNull Hologram.Line line(@NotNull Component component, double gap) {
+    static @NotNull Line line(@NotNull Component component, double gap) {
         return new Line(null, component, null, gap);
     }
 
@@ -205,12 +205,37 @@ public interface Hologram extends List<Hologram.Line> {
 
     void addComponent(@NotNull Component component, double gap);
 
+    default void addComponent(@NotNull Component component) {
+        addComponent(component, 0);
+    }
+
     void addFormat(@NotNull String formatString, @NotNull LineFormatter lineFormatter, double gap);
+
+    default void addFormat(@NotNull String formatString, @NotNull LineFormatter lineFormatter) {
+        addFormat(formatString, lineFormatter, 0);
+    }
+
+    boolean addAllComponents(int index, @NotNull Collection<? extends Component> components, double gap);
+
+    default boolean addAllComponents(int index, @NotNull Collection<? extends Component> components) {
+        return addAllComponents(index, components, 0);
+    }
 
     boolean addAllComponents(@NotNull Collection<? extends Component> components, double gap);
 
+    default boolean addAllComponents(@NotNull Collection<? extends Component> components) {
+        return addAllComponents(components, 0);
+    }
+
     boolean addAllFormats(@NotNull Collection<? extends String> formatStrings, @NotNull LineFormatter lineFormatter,
         double gap);
+
+    default boolean addAllFormats(@NotNull Collection<? extends String> formatStrings,
+        @NotNull LineFormatter lineFormatter) {
+        return addAllFormats(formatStrings, lineFormatter, 0);
+    }
+
+    @NotNull Component getComponent(int index);
 
     /**
      * Ways that holograms may be aligned.

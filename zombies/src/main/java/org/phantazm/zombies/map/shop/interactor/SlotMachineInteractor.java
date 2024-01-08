@@ -310,15 +310,15 @@ public class SlotMachineInteractor implements ShopInteractor {
 
         for (int i = 0; i < newComponents.size(); i++) {
             Component newComponent = newComponents.get(i);
-            Component oldComponent = i < hologram.size() ? hologram.get(i) : null;
+            Component oldComponent = i < hologram.size() ? hologram.getComponent(i) : null;
 
             if (!newComponent.equals(oldComponent)) {
                 if (oldComponent == null) {
-                    hologram.add(newComponent);
+                    hologram.addComponent(newComponent);
                     continue;
                 }
 
-                hologram.set(i, newComponent);
+                hologram.set(i, Hologram.line(newComponent));
             }
         }
     }

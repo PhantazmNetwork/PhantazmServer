@@ -29,7 +29,7 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
 
     private Instance instance;
 
-    protected record Entry(@NotNull Hologram.Line line,
+    protected record Entry(@NotNull Line line,
         @NotNull Entity entity) {
     }
 
@@ -38,7 +38,6 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
      * alignment.
      *
      * @param location  the location of the instance
-     * @param gap       the distance between separate hologram messages
      * @param alignment the alignment method
      */
     public InstanceHologram(@NotNull Point location, @NotNull Alignment alignment) {
@@ -54,7 +53,6 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
      * alignment {@link Alignment#UPPER}.
      *
      * @param location the location to render holograms
-     * @param gap      the distance between separate hologram messages
      */
     public InstanceHologram(@NotNull Point location) {
         this(location, Alignment.UPPER);
@@ -126,6 +124,28 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
     }
 
     @Override
+    public void addComponent(@NotNull Component component, double gap) {
+        synchronized (sync) {
+            entries.add(entryFromLine(Hologram.line(component, gap)));
+        }
+    }
+
+    @Override
+    public void addFormat(@NotNull String formatString, @NotNull LineFormatter lineFormatter, double gap) {
+        synchronized (sync) {
+            entries.add(entryFromLine(Hologram.line(formatString, lineFormatter, gap)));
+        }
+    }
+
+    @Override
+    public boolean addAllComponents(int index, @NotNull Collection<? extends Component> components, double gap) {
+        synchronized (sync) {
+            return entries.addAll(index, Containers.mappedView(component ->
+                entryFromLine(Hologram.line(component, gap)), components));
+        }
+    }
+
+    @Override
     public boolean addAllComponents(@NotNull Collection<? extends Component> components, double gap) {
         synchronized (sync) {
             return entries.addAll(Containers.mappedView(component ->
@@ -143,6 +163,13 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
     }
 
     @Override
+    public @NotNull Component getComponent(int index) {
+        synchronized (sync) {
+            return Objects.requireNonNull(entries.get(index).entity.getCustomName());
+        }
+    }
+
+    @Override
     public @NotNull Line get(int index) {
         synchronized (sync) {
             return Objects.requireNonNull(entries.get(index).line);
@@ -152,7 +179,9 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
     @Override
     public @NotNull Line set(int index, @NotNull Line line) {
         synchronized (sync) {
-            return entries.set(index, entryFromLine(line)).line;
+            Entry old = entries.set(index, entryFromLine(line));
+            old.entity.remove();
+            return old.line;
         }
     }
 

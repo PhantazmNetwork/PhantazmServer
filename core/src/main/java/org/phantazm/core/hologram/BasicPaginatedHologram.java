@@ -99,19 +99,18 @@ public class BasicPaginatedHologram implements PaginatedHologram {
     }
 
     @Override
-    public void addPage(@NotNull Collection<? extends Hologram.Line> contents, double gap,
-        Hologram.@NotNull Alignment alignment) {
+    public void addPage(@NotNull Collection<? extends Hologram.Line> contents, Hologram.@NotNull Alignment alignment) {
         Instance instance;
         ViewableHologram viewableHologram;
         synchronized (sync) {
             instance = this.instance;
 
             int pageIndex = this.pages.size();
-            viewableHologram = new ViewableHologram(location, gap, alignment, player -> {
+            viewableHologram = new ViewableHologram(location, alignment, player -> {
                 return player.getTag(pageTag) == pageIndex;
             });
 
-            viewableHologram.addLines(contents);
+            viewableHologram.addAll(contents);
 
             this.pages.add(viewableHologram);
             viewableHologram.setInstance(instance);
