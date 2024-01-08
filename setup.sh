@@ -1,7 +1,7 @@
 #!/bin/sh
 
 log_file="$(pwd)/setup_log.txt"
-/dev/null > "${log_file}"
+echo "" > "${log_file}"
 
 log_error() {
   printf "\033[31;1m[ERROR]\033[0m %s\n" "$1"
