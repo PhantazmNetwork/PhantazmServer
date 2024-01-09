@@ -207,6 +207,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                 }
             };
 
+            armorStand.setInvisible(true);
             armorStand.setNoGravity(true);
             return armorStand;
         }
@@ -516,7 +517,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
         double leaderboardEntryGap) {
         @Default("armorStandOffset")
         public static @NotNull ConfigElement armorStandOffsetDefault() {
-            return ConfigElement.of("{x=0, y=0.5, z=0}");
+            return ConfigElement.of("{x=0, y=-0.20, z=0}");
         }
 
         @Default("widthBeforeLineBreak")
