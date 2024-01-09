@@ -8,7 +8,6 @@ import com.github.steanky.vector.Vec3D;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrays;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -37,17 +36,19 @@ import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.role.RoleStore;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.stats.zombies.ZombiesLeaderboardDatabase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 @Model("zombies.leaderboard.best_time")
 @Cache
 public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesBestTimeLeaderboard.class);
     public static final InjectionStore.Key<Args> ARGS_KEY = InjectionStore.key(Args.class);
 
     private final Data data;
@@ -254,7 +255,11 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
 
             PageKey key = new PageKey(teamSize, modifier);
             synchronized (sync) {
-                renderTimesForPage(key);
+                renderTimesForPage(key).whenCompleteAsync((ignored, throwable) -> {
+                    if (throwable != null) {
+                        LOGGER.warn("Error when rendering leaderboard times", throwable);
+                    }
+                }, executor);
             }
 
             int targetPage = pageMap.getInt(key);
@@ -413,9 +418,6 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                             hologram.subList(insertStart, insertEnd).clear();
                         }
 
-                        ObjectArrays.shuffle(timeEntries, ThreadLocalRandom.current());
-
-
                         List<List<Component>> rowsToAdd = new ArrayList<>(2);
                         List<Component> rowBuffer = new ArrayList<>(2);
 
@@ -447,7 +449,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                             rowsToAdd.add(rowBuffer);
 
                             for (int j = 0; j < rowsToAdd.size(); j++) {
-                                List<Component> row = rowsToAdd.get(i);
+                                List<Component> row = rowsToAdd.get(j);
 
                                 TagResolver namesTag = Placeholder.component("names",
                                     Component.join(JoinConfiguration.commas(true), row));
@@ -466,7 +468,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                             rowBuffer.clear();
                         }
 
-                        hologram.addAll(linesToAdd);
+                        hologram.addAll(insertStart, linesToAdd);
                     });
                 }, executor);
             }, executor);

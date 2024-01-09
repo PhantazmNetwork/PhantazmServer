@@ -264,6 +264,25 @@ public final class PhantazmServer {
             ZombiesLeaderboardDatabase leaderboardDatabase = new JDBCZombiesLeaderboardDatabase(ExecutorFeature.getExecutor(),
                 HikariFeature.getDataSource(), zombiesConfig.teamSizes(), zombiesConfig.trackedModifiers());
 
+            /*
+            for (int i = 0; i < 50; i++) {
+                leaderboardDatabase.submitGame(Set.of(UUID.randomUUID()), "0",
+                    Key.key("phantazm:fallen_grounds"),
+                    ThreadLocalRandom.current().nextLong(0, 20000), 69420);
+
+                leaderboardDatabase.submitGame(Set.of(UUID.randomUUID(), UUID.randomUUID()), "0",
+                    Key.key("phantazm:fallen_grounds"),
+                    ThreadLocalRandom.current().nextLong(0, 20000), 69420);
+
+                leaderboardDatabase.submitGame(Set.of(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()), "0",
+                    Key.key("phantazm:fallen_grounds"),
+                    ThreadLocalRandom.current().nextLong(0, 20000), 69420);
+
+                leaderboardDatabase.submitGame(Set.of(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()), "0",
+                    Key.key("phantazm:fallen_grounds"),
+                    ThreadLocalRandom.current().nextLong(0, 20000), 69420);
+            }*/
+
             UsernameDatabase usernameDatabase = new JDBCUsernameDatabase(ExecutorFeature.getExecutor(),
                 HikariFeature.getDataSource(), Duration.ofDays(30));
 
