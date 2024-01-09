@@ -2,11 +2,13 @@ package org.phantazm.core.leaderboard;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.vector.Vec3D;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrays;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -40,6 +42,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 @Model("zombies.leaderboard.best_time")
@@ -79,6 +82,11 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
 
     private record PageKey(int teamSize,
         @NotNull ZombiesBestTimeLeaderboard.Modifier modifier) {
+    }
+
+    private record TimeEntry(int[] nameLengths,
+        List<Component> names,
+        long timeTaken) {
     }
 
     private static class Impl implements Leaderboard {
@@ -366,13 +374,10 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
             int count = data.teamSizeToEntryCountMappings.get(teamSize);
             int start = 0;
             return database.fetchBestTimes(teamSize, descriptor, data.map, start, count).thenAcceptAsync(entries -> {
-                Component[] timeEntries = new Component[entries.size()];
+                TimeEntry[] timeEntries = new TimeEntry[entries.size()];
                 CompletableFuture<?>[] entryFutures = new CompletableFuture[entries.size()];
                 for (int i = 0; i < entries.size(); i++) {
                     ZombiesLeaderboardDatabase.LeaderboardEntry entry = entries.get(i);
-
-                    TagResolver rankTag = Placeholder.unparsed("rank", Integer.toString(start + 1 + i));
-                    TagResolver timeTag = Placeholder.unparsed("time", tickFormatter.format(entry.timeTaken()));
 
                     int thisTeamSize = entry.team().size();
                     int[] nameLengths = new int[thisTeamSize];
@@ -396,12 +401,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                             finishedNames.add(Objects.requireNonNull(name.getNow(null)));
                         }
 
-                        Component joinedNames = Component.join(JoinConfiguration.commas(true), finishedNames);
-
-                        TagResolver namesTag = Placeholder.component("names", joinedNames);
-
-                        timeEntries[entryIndex] = MiniMessage.miniMessage().deserialize(data.scoreFormat, rankTag,
-                            timeTag, namesTag);
+                        timeEntries[entryIndex] = new TimeEntry(nameLengths, finishedNames, entry.timeTaken());
                     }, executor);
                 }
 
@@ -413,10 +413,75 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                             hologram.subList(insertStart, insertEnd).clear();
                         }
 
-                        hologram.addAllComponents(insertStart, List.of(timeEntries), 0);
+                        ObjectArrays.shuffle(timeEntries, ThreadLocalRandom.current());
+
+
+                        List<List<Component>> rowsToAdd = new ArrayList<>(2);
+                        List<Component> rowBuffer = new ArrayList<>(2);
+
+                        List<Hologram.Line> linesToAdd = new ArrayList<>(timeEntries.length);
+
+                        for (int i = 0; i < timeEntries.length; i++) {
+                            TimeEntry entry = timeEntries[i];
+                            TagResolver rankTag = Placeholder.unparsed("rank", Integer.toString(start + 1 + i));
+                            TagResolver timeTag = Placeholder.unparsed("time", tickFormatter.format(entry.timeTaken()));
+
+                            int lengthThisRow = 0;
+
+                            for (int j = 0; j < entry.names.size(); j++) {
+                                Component name = entry.names.get(j);
+                                int thisNameLength = entry.nameLengths[j];
+                                if (rowBuffer.isEmpty() || lengthThisRow + thisNameLength < data.widthBeforeLineBreak) {
+                                    rowBuffer.add(name);
+                                } else {
+                                    lengthThisRow = 0;
+                                    rowsToAdd.add(rowBuffer);
+                                    rowBuffer.clear();
+                                    rowBuffer.add(name);
+                                }
+
+                                lengthThisRow += thisNameLength;
+                            }
+
+                            //there is always at least one name in the buffer
+                            rowsToAdd.add(rowBuffer);
+
+                            for (int j = 0; j < rowsToAdd.size(); j++) {
+                                List<Component> row = rowsToAdd.get(i);
+
+                                TagResolver namesTag = Placeholder.component("names",
+                                    Component.join(JoinConfiguration.commas(true), row));
+
+                                double gap = j < rowsToAdd.size() - 1 ? data.lineBreakGap : data.leaderboardEntryGap;
+
+                                String formatString = selectFormat(rowsToAdd.size(), j);
+
+                                Component formatted = MiniMessage.miniMessage().deserialize(formatString, rankTag,
+                                    timeTag, namesTag);
+
+                                linesToAdd.add(Hologram.line(formatted, gap));
+                            }
+
+                            rowsToAdd.clear();
+                            rowBuffer.clear();
+                        }
+
+                        hologram.addAll(linesToAdd);
                     });
                 }, executor);
             }, executor);
+        }
+
+        private String selectFormat(int size, int j) {
+            if (size == 1) {
+                return data.singleLineFormat;
+            } else if (j == 0) {
+                return data.firstLineFormat;
+            } else if (j == size - 1) {
+                return data.lastLineFormat;
+            } else {
+                return data.middleLineFormat;
+            }
         }
     }
 
@@ -433,17 +498,38 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
         @NotNull List<String> footerFormats,
         @NotNull String viewingPlayerFormat,
         @NotNull Component loading,
-        @NotNull String scoreFormat,
+        @NotNull String singleLineFormat,
+        @NotNull String firstLineFormat,
+        @NotNull String middleLineFormat,
+        @NotNull String lastLineFormat,
         @NotNull Component unknownRank,
         @NotNull Component unknownTime,
         @NotNull Sound clickSound,
         @NotNull String inactiveTeamSizeNameFormat,
         @NotNull String activeTeamSizeNameFormat,
         @NotNull String inactiveModifierNameFormat,
-        @NotNull String activeModifierNameFormat) {
+        @NotNull String activeModifierNameFormat,
+        int widthBeforeLineBreak,
+        double lineBreakGap,
+        double leaderboardEntryGap) {
         @Default("armorStandOffset")
         public static @NotNull ConfigElement armorStandOffsetDefault() {
             return ConfigElement.of("{x=0, y=0.5, z=0}");
+        }
+
+        @Default("widthBeforeLineBreak")
+        public static @NotNull ConfigElement widthBeforeLineBreakDefault() {
+            return ConfigPrimitive.of(32);
+        }
+
+        @Default("lineBreakGap")
+        public static @NotNull ConfigElement lineBreakGapDefault() {
+            return ConfigPrimitive.of(0D);
+        }
+
+        @Default("leaderboardEntryGap")
+        public static @NotNull ConfigElement leaderboardEntryGapDefault() {
+            return ConfigPrimitive.of(0.1D);
         }
     }
 }
