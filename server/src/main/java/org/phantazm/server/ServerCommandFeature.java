@@ -9,7 +9,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.server.command.server.*;
 import org.phantazm.server.config.server.ShutdownConfig;
 import org.phantazm.server.config.server.ZombiesGamereportConfig;
-import org.phantazm.server.permission.DatabasePermissionHandler;
+import org.phantazm.server.permission.JDBCPermissionHandler;
 import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.core.role.RoleStore;
 import org.phantazm.server.validator.LoginValidator;
@@ -29,7 +29,8 @@ public final class ServerCommandFeature {
         @NotNull Executor executor, @NotNull ShutdownConfig shutdownConfig,
         @NotNull ZombiesGamereportConfig zombiesGamereportConfig, @NotNull PlayerViewProvider playerViewProvider,
         @NotNull RoleStore roleStore) {
-        ServerCommandFeature.permissionHandler = new DatabasePermissionHandler(dataSource, executor, roleStore);
+        ServerCommandFeature.permissionHandler = new JDBCPermissionHandler(dataSource, executor, roleStore);
+        ServerCommandFeature.permissionHandler.initTables();
 
         CommandManager manager = MinecraftServer.getCommandManager();
         manager.register(new StopCommand());

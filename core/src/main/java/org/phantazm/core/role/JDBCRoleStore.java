@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 
-public class BasicRoleStore implements RoleStore {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicRoleStore.class);
+public class JDBCRoleStore implements RoleStore {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCRoleStore.class);
 
     private final DataSource dataSource;
     private final Executor executor;
@@ -29,7 +29,7 @@ public class BasicRoleStore implements RoleStore {
 
     private final Map<String, Role> roleMap;
 
-    public BasicRoleStore(@NotNull DataSource dataSource, @NotNull Executor executor) {
+    public JDBCRoleStore(@NotNull DataSource dataSource, @NotNull Executor executor) {
         this.dataSource = Objects.requireNonNull(dataSource);
         this.executor = Objects.requireNonNull(executor);
         this.roleCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
@@ -132,7 +132,7 @@ public class BasicRoleStore implements RoleStore {
 
             Utils.runPreparedSql(LOGGER, "removeRole", dataSource, """
                 DELETE FROM player_roles
-                WHERE (player_uuid, identifier) = (?, ?)
+                WHERE (player_uuid, player_role) = (?, ?)
                 """, (connection, statement) -> {
                 statement.setString(1, uuid.toString());
                 statement.setString(2, identifier);

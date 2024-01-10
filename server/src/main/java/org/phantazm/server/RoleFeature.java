@@ -7,7 +7,7 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.Configuration;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FileUtils;
-import org.phantazm.core.role.BasicRoleStore;
+import org.phantazm.core.role.JDBCRoleStore;
 import org.phantazm.core.role.RoleCreator;
 import org.phantazm.core.role.RoleStore;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ public final class RoleFeature {
 
     static void initialize(@NotNull DataSource dataSource, @NotNull Executor executor, @NotNull ConfigCodec codec,
         @NotNull ContextManager contextManager) {
-        roleStore = new BasicRoleStore(dataSource, executor);
+        roleStore = new JDBCRoleStore(dataSource, executor);
         roleStore.initTables();
 
         try {
