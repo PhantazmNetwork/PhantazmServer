@@ -164,8 +164,6 @@ public class JDBCLoginValidator implements LoginValidator {
         Objects.requireNonNull(reason);
 
         long banDate = Instant.now().getEpochSecond();
-
-
         executor.execute(() -> {
             String banReason = MiniMessage.miniMessage().serialize(reason);
 
@@ -182,10 +180,11 @@ public class JDBCLoginValidator implements LoginValidator {
 
                 statement.setString(1, uuidString);
                 statement.setString(2, banReasonOrNull);
+
                 statement.setLong(3, banDate);
                 statement.setLong(4, unbanDate);
-
                 statement.setString(5, banReasonOrNull);
+
                 statement.setLong(6, banDate);
                 statement.setLong(7, unbanDate);
 
@@ -200,9 +199,12 @@ public class JDBCLoginValidator implements LoginValidator {
                     """);
                 secondStatement.setString(1, uuidString);
                 secondStatement.setLong(2, banDate);
+                secondStatement.setLong(3, banDate);
 
                 secondStatement.execute();
             });
+
+            banCache.put(uuid, new LoginEntry(false, banReason.isEmpty() ? null : reason, banDate, unbanDate));
         });
     }
 
@@ -242,8 +244,6 @@ public class JDBCLoginValidator implements LoginValidator {
     public void addWhitelist(@NotNull UUID uuid) {
         Objects.requireNonNull(uuid);
 
-        whitelistCache.put(uuid, true);
-
         executor.execute(() -> {
             DatabaseUtils.runPreparedSql(LOGGER, "addWhitelist", dataSource, """
                 INSERT INTO player_whitelist (player_uuid)
@@ -256,6 +256,8 @@ public class JDBCLoginValidator implements LoginValidator {
                 statement.setString(2, uuidString);
                 statement.execute();
             });
+
+            whitelistCache.put(uuid, true);
         });
     }
 
