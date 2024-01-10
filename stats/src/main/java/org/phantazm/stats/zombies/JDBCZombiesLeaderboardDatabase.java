@@ -7,7 +7,7 @@ import net.kyori.adventure.key.Key;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FutureUtils;
-import org.phantazm.stats.Utils;
+import org.phantazm.stats.DatabaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -220,7 +220,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
     @Override
     public @NotNull CompletableFuture<Void> initTables() {
         return CompletableFuture.runAsync(() -> {
-            Utils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
+            DatabaseUtils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
                 IntIterator iterator = teamSizes.intIterator();
 
                 List<String> statements = new ArrayList<>();
@@ -266,7 +266,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             String teamTable = teamTableName(teamSize);
             String teamFields = teamFields(teamSize);
 
-            return Utils.runPreparedSql(LOGGER, "fetchBestRanking", Optional.empty(), dataSource, """
+            return DatabaseUtils.runPreparedSql(LOGGER, "fetchBestRanking", Optional::empty, dataSource, """
                 SELECT time_taken, row_num
                 FROM
                     (
@@ -320,7 +320,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
 
-            return Utils.runPreparedSql(LOGGER, "fetchBestTime", Optional.empty(), dataSource, """
+            return DatabaseUtils.runPreparedSql(LOGGER, "fetchBestTime", Optional::empty, dataSource, """
                     SELECT time_taken FROM %1$s
                     INNER JOIN %2$s
                     ON %1$s.team_id = %2$s.team_id
@@ -360,7 +360,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
 
-            return Utils.runPreparedSql(LOGGER, "fetchTimeHistory", List.of(), dataSource, """
+            return DatabaseUtils.runPreparedSql(LOGGER, "fetchTimeHistory", List::of, dataSource, """
                     SELECT time_taken, time_end FROM %1$s
                     INNER JOIN %2$s
                     ON %1$s.team_id = %2$s.team_id
@@ -420,7 +420,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                     LIMIT ? OFFSET ?
                 """.formatted(gameTable, teamTable, teamFields);
 
-            return Utils.runPreparedSql(LOGGER, "fetchBestTimes", List.of(), dataSource, query,
+            return DatabaseUtils.runPreparedSql(LOGGER, "fetchBestTimes", List::of, dataSource, query,
                 (connection, preparedStatement) -> {
                     preparedStatement.setString(1, map.asString());
                     preparedStatement.setInt(2, entries);
@@ -468,7 +468,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
 
             List<UUID> key = key(team);
 
-            Utils.runSql(LOGGER, "submitGame", dataSource, (connection) -> {
+            DatabaseUtils.runSql(LOGGER, "submitGame", dataSource, (connection) -> {
                 int oldIsolation = connection.getTransactionIsolation();
                 connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
                 connection.setAutoCommit(false);

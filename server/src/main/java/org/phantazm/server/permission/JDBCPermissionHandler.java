@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.role.Role;
 import org.phantazm.core.role.RoleStore;
-import org.phantazm.stats.Utils;
+import org.phantazm.stats.DatabaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +44,7 @@ public class JDBCPermissionHandler implements PermissionHandler {
 
     @Override
     public void initTables() {
-        Utils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
+        DatabaseUtils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
             statement.execute("""
                 CREATE TABLE IF NOT EXISTS permission_groups (
                     permission_group VARCHAR(64) NOT NULL,
@@ -87,7 +87,7 @@ public class JDBCPermissionHandler implements PermissionHandler {
 
         executor.execute(() -> {
             String permissionName = permission.getPermissionName();
-            Utils.runPreparedSql(LOGGER, "addGroupPermission", dataSource, """
+            DatabaseUtils.runPreparedSql(LOGGER, "addGroupPermission", dataSource, """
                 INSERT INTO permission_groups (permission_group, permission)
                 VALUES(?, ?)
                 ON DUPLICATE KEY UPDATE permission=?
@@ -109,7 +109,7 @@ public class JDBCPermissionHandler implements PermissionHandler {
 
         executor.execute(() -> {
             String permissionName = permission.getPermissionName();
-            Utils.runPreparedSql(LOGGER, "removeGroupPermission", dataSource, """
+            DatabaseUtils.runPreparedSql(LOGGER, "removeGroupPermission", dataSource, """
                 DELETE FROM permission_groups
                 WHERE (permission_group, permission) = (?, ?)
                 """, (connection, statement) -> {
@@ -132,7 +132,7 @@ public class JDBCPermissionHandler implements PermissionHandler {
         playerPermissionGroupCache.get(uuid, ignored -> new CopyOnWriteArraySet<>()).add(group);
 
         executor.execute(() -> {
-            Utils.runPreparedSql(LOGGER, "addToGroup", dataSource, """
+            DatabaseUtils.runPreparedSql(LOGGER, "addToGroup", dataSource, """
                 INSERT INTO player_permission_groups (player_uuid, player_group)
                 VALUES(?, ?)
                 ON DUPLICATE KEY UPDATE player_group=?
@@ -157,7 +157,7 @@ public class JDBCPermissionHandler implements PermissionHandler {
         playerPermissionGroupCache.get(uuid, ignored -> new CopyOnWriteArraySet<>()).remove(group);
 
         executor.execute(() -> {
-            Utils.runPreparedSql(LOGGER, "removeFromGroup", dataSource, """
+            DatabaseUtils.runPreparedSql(LOGGER, "removeFromGroup", dataSource, """
                 DELETE FROM player_permission_groups
                 WHERE (player_uuid, player_group) = (?, ?)
                 """, (connection, statement) -> {
@@ -184,7 +184,7 @@ public class JDBCPermissionHandler implements PermissionHandler {
     }
 
     private Set<String> readPermissionGroups(UUID uuid) {
-        return Utils.runPreparedSql(LOGGER, "readPermissionGroups", new CopyOnWriteArraySet<>(), dataSource, """
+        return DatabaseUtils.runPreparedSql(LOGGER, "readPermissionGroups", CopyOnWriteArraySet::new, dataSource, """
             SELECT player_group FROM player_permission_groups
             WHERE player_uuid=?
             """, (connection, statement) -> {
@@ -236,7 +236,7 @@ public class JDBCPermissionHandler implements PermissionHandler {
 
     private void applyGroup(String group, CommandSender commandSender) {
         Set<Permission> permissions = groupPermissionCache.get(group, key -> {
-            return Utils.runPreparedSql(LOGGER, "applyGroup", new CopyOnWriteArraySet<>(), dataSource, """
+            return DatabaseUtils.runPreparedSql(LOGGER, "applyGroup", CopyOnWriteArraySet::new, dataSource, """
                 SELECT permission FROM permission_groups
                 WHERE permission_group=?
                 """, (connection, statement) -> {

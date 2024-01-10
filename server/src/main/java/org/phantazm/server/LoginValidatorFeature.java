@@ -1,7 +1,7 @@
 package org.phantazm.server;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.server.validator.DatabaseLoginValidator;
+import org.phantazm.server.validator.JDBCLoginValidator;
 import org.phantazm.server.validator.LoginValidator;
 
 import javax.sql.DataSource;
@@ -15,7 +15,8 @@ public final class LoginValidatorFeature {
     }
 
     static void initialize(@NotNull DataSource dataSource, @NotNull Executor executor) {
-        LoginValidatorFeature.loginValidator = new DatabaseLoginValidator(dataSource, executor);
+        LoginValidatorFeature.loginValidator = new JDBCLoginValidator(dataSource, executor);
+        LoginValidatorFeature.loginValidator.initTables();
     }
 
     public static @NotNull LoginValidator loginValidator() {

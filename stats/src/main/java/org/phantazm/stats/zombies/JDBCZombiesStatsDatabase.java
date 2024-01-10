@@ -2,7 +2,7 @@ package org.phantazm.stats.zombies;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.stats.Utils;
+import org.phantazm.stats.DatabaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,7 @@ public class JDBCZombiesStatsDatabase implements ZombiesStatsDatabase {
     @Override
     public @NotNull CompletableFuture<Void> initTables() {
         return CompletableFuture.runAsync(() -> {
-            Utils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
+            DatabaseUtils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
                 statement.execute("""
                     CREATE TABLE IF NOT EXISTS zombies_player_map_stats (
                         player_uuid UUID NOT NULL,
@@ -57,7 +57,7 @@ public class JDBCZombiesStatsDatabase implements ZombiesStatsDatabase {
     @Override
     public @NotNull CompletableFuture<Void> synchronizeZombiesPlayerMapStats(@NotNull ZombiesPlayerMapStats stats) {
         return CompletableFuture.runAsync(() -> {
-            Utils.runPreparedSql(LOGGER, "synchronizeZombiesPlayerMapStats", dataSource, """
+            DatabaseUtils.runPreparedSql(LOGGER, "synchronizeZombiesPlayerMapStats", dataSource, """
                 INSERT INTO zombies_player_map_stats (player_uuid, map_key, games_played, wins, best_round,
                 rounds_survived, kills, coins_gained, coins_spent, knocks, deaths, revives, shots, regular_hits,
                 headshot_hits)
@@ -116,8 +116,8 @@ public class JDBCZombiesStatsDatabase implements ZombiesStatsDatabase {
     public @NotNull CompletableFuture<ZombiesPlayerMapStats> getMapStats(@NotNull UUID playerUUID,
         @NotNull Key mapKey) {
         return CompletableFuture.supplyAsync(() -> {
-            return Utils.runPreparedSql(LOGGER, "getMapStats",
-                BasicZombiesPlayerMapStats.createBasicStats(playerUUID, mapKey), dataSource, """
+            return DatabaseUtils.runPreparedSql(LOGGER, "getMapStats",
+                () -> BasicZombiesPlayerMapStats.createBasicStats(playerUUID, mapKey), dataSource, """
                     SELECT games_played, wins, best_round, rounds_survived, kills, coins_gained, coins_spent, knocks,
                     deaths, revives, shots, regular_hits, headshot_hits FROM zombies_player_map_stats
                     WHERE (player_uuid, map_key) = (?, ?)

@@ -55,8 +55,6 @@ hikariCP = { module = "com.zaxxer:HikariCP", version = "5.0.1" }
 
 jetbrains-annotations = { module = "org.jetbrains:annotations", version = "23.0.0" }
 
-jOOQ = { module = "org.jooq:jooq", version = "3.18.4" }
-
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
 

@@ -4,7 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FutureUtils;
-import org.phantazm.stats.Utils;
+import org.phantazm.stats.DatabaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
     @Override
     public @NotNull CompletableFuture<Void> initTables() {
         return CompletableFuture.runAsync(() -> {
-            Utils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
+            DatabaseUtils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
                 statement.execute("""
                     CREATE TABLE IF NOT EXISTS username_cache (
                         uuid UUID NOT NULL PRIMARY KEY,
@@ -91,7 +91,7 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
         return CompletableFuture.supplyAsync(() -> {
             String uuidString = uuid.toString();
 
-            return Utils.runPreparedSql(LOGGER, "cachedUsername", dataSource, """
+            return DatabaseUtils.runPreparedSql(LOGGER, "cachedUsername", dataSource, """
                 SELECT username, last_updated FROM phantazm_db.username_cache
                 WHERE uuid = ?
                 """, (connection, statement) -> {
@@ -120,7 +120,7 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
         }
 
         return CompletableFuture.supplyAsync(() -> {
-            return Utils.runPreparedSql(LOGGER, "cachedUUID", dataSource, """
+            return DatabaseUtils.runPreparedSql(LOGGER, "cachedUUID", dataSource, """
                 SELECT uuid, last_updated FROM phantazm_db.username_cache
                 WHERE username = ?
                 ORDER BY last_updated DESC
@@ -149,7 +149,7 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
             uuidToUsername.put(uuid, filteredUsername);
             usernameToUuid.put(filteredUsername, uuid);
 
-            Utils.runPreparedSql(LOGGER, "submitUsername", dataSource, """
+            DatabaseUtils.runPreparedSql(LOGGER, "submitUsername", dataSource, """
                 REPLACE INTO phantazm_db.username_cache (uuid, username, last_updated)
                 VALUES (?, ?, UNIX_TIMESTAMP())
                 """, (connection, statement) -> {

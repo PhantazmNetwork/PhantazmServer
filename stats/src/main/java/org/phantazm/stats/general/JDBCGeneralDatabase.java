@@ -1,7 +1,7 @@
 package org.phantazm.stats.general;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.stats.Utils;
+import org.phantazm.stats.DatabaseUtils;
 import org.phantazm.stats.zombies.JDBCZombiesStatsDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ public class JDBCGeneralDatabase implements GeneralDatabase {
     @Override
     public @NotNull CompletableFuture<Void> initTables() {
         return CompletableFuture.runAsync(() -> {
-            Utils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
+            DatabaseUtils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
                 statement.execute("""
                     CREATE TABLE IF NOT EXISTS player_stats (
                         player_uuid UUID NOT NULL PRIMARY KEY,
@@ -44,7 +44,7 @@ public class JDBCGeneralDatabase implements GeneralDatabase {
     @Override
     public @NotNull CompletableFuture<Void> handleJoin(@NotNull UUID playerUUID, @NotNull ZonedDateTime time) {
         return CompletableFuture.runAsync(() -> {
-            Utils.runPreparedSql(LOGGER, "handleJoin", dataSource, """
+            DatabaseUtils.runPreparedSql(LOGGER, "handleJoin", dataSource, """
                 INSERT INTO player_stats (player_uuid, first_join, last_join)
                 VALUES(?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP())
                 ON DUPLICATE KEY UPDATE last_join=UNIX_TIMESTAMP()

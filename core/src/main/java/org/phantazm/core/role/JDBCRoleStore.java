@@ -7,7 +7,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.FutureUtils;
-import org.phantazm.stats.Utils;
+import org.phantazm.stats.DatabaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ public class JDBCRoleStore implements RoleStore {
     @Override
     public @NotNull CompletableFuture<Void> initTables() {
         return CompletableFuture.runAsync(() -> {
-            Utils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
+            DatabaseUtils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
                 statement.execute("""
                     CREATE TABLE IF NOT EXISTS player_roles (
                         player_uuid UUID NOT NULL,
@@ -95,7 +95,7 @@ public class JDBCRoleStore implements RoleStore {
             Set<Role> roles = this.roleCache.get(uuid, this::loadRoles);
             boolean added = roles.add(role);
 
-            Utils.runPreparedSql(LOGGER, "giveRole", dataSource, """
+            DatabaseUtils.runPreparedSql(LOGGER, "giveRole", dataSource, """
                 INSERT INTO player_roles (player_uuid, player_role) VALUES (?, ?)
                 ON DUPLICATE KEY UPDATE player_uuid=?, player_role=?
                 """, (connection, statement) -> {
@@ -132,7 +132,7 @@ public class JDBCRoleStore implements RoleStore {
             Set<Role> roles = this.roleCache.get(uuid, this::loadRoles);
             boolean removed = roles.remove(role);
 
-            Utils.runPreparedSql(LOGGER, "removeRole", dataSource, """
+            DatabaseUtils.runPreparedSql(LOGGER, "removeRole", dataSource, """
                 DELETE FROM player_roles
                 WHERE (player_uuid, player_role) = (?, ?)
                 """, (connection, statement) -> {
@@ -187,7 +187,7 @@ public class JDBCRoleStore implements RoleStore {
     private Set<Role> loadRoles(UUID key) {
         Role defaultRole = roleMap.get(DEFAULT);
 
-        Set<String> roles = Utils.runPreparedSql(LOGGER, "loadRoles", new CopyOnWriteArraySet<>(),
+        Set<String> roles = DatabaseUtils.runPreparedSql(LOGGER, "loadRoles", CopyOnWriteArraySet::new,
             dataSource, """
                 SELECT player_role FROM player_roles
                 WHERE player_uuid = ?
