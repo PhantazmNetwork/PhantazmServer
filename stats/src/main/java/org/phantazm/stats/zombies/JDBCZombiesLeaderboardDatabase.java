@@ -66,7 +66,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             builder.append("    p%1$s UUID NOT NULL,\n".formatted(i + 1));
         }
 
-        builder.append("    CONSTRAINT `unique_uuids`\n        unique (");
+        builder.append("    CONSTRAINT unique_uuids\n        unique (");
 
         for (int i = 0; i < teamSize; i++) {
             builder.append("p%1$s".formatted(i + 1));
@@ -116,7 +116,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                 time_taken BIGINT NOT NULL,
                 time_end BIGINT NOT NULL,
                 map_key VARCHAR(64) NOT NULL,
-                CONSTRAINT `fk_team_id_%1$s_%2$s`
+                CONSTRAINT fk_team_id_%1$s_%2$s
                     FOREIGN KEY (team_id) REFERENCES zombies_lb_%1$s_teams (team_id)
                     ON DELETE CASCADE
                     ON UPDATE CASCADE
@@ -291,6 +291,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                 """.formatted(gameTable, teamTable, teamFields), (connection, preparedStatement) -> {
                 preparedStatement.setString(1, map.asString());
                 preparedStatement.setString(2, player.toString());
+                preparedStatement.setFetchSize(1);
 
                 ResultSet result = preparedStatement.executeQuery();
                 if (!result.next()) {
@@ -332,6 +333,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                     setUuidParameters(1, key, preparedStatement);
 
                     ResultSet result = preparedStatement.executeQuery();
+                    result.setFetchSize(1);
                     if (!result.next()) {
                         return Optional.empty();
                     }
@@ -370,6 +372,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                     preparedStatement.setString(1, map.asString());
                     setUuidParameters(1, key, preparedStatement);
                     preparedStatement.setInt(2 + key.size(), RECORD_HISTORY_SIZE);
+                    preparedStatement.setFetchSize(RECORD_HISTORY_SIZE);
 
                     ResultSet result = preparedStatement.executeQuery();
                     if (!result.next()) {
@@ -422,6 +425,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                     preparedStatement.setString(1, map.asString());
                     preparedStatement.setInt(2, entries);
                     preparedStatement.setInt(3, start);
+                    preparedStatement.setFetchSize(entries);
 
                     ResultSet result = preparedStatement.executeQuery();
                     if (!result.next()) {

@@ -4,7 +4,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.stats.general.GeneralDatabase;
-import org.phantazm.stats.general.SQLGeneralDatabase;
+import org.phantazm.stats.general.JDBCGeneralDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,8 @@ public final class GeneralStatsFeature {
     }
 
     static void initialize(@NotNull Executor executor, @NotNull DataSource dataSource) {
-        generalDatabase = new SQLGeneralDatabase(executor, dataSource);
+        generalDatabase = new JDBCGeneralDatabase(executor, dataSource);
+        generalDatabase.initTables();
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, GeneralStatsFeature::onPlayerSpawn);
     }
