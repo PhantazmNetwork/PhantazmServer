@@ -42,7 +42,7 @@ import org.phantazm.core.time.AnalogTickFormatter;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
-import org.phantazm.stats.zombies.ZombiesDatabaseOld;
+import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
@@ -74,7 +74,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
     private final EventNode<Event> rootNode;
     private final ContextManager contextManager;
     private final KeyParser keyParser;
-    private final ZombiesDatabaseOld database;
+    private final ZombiesStatsDatabase database;
 
     private final MapObjects.Source mapObjectSource;
     private final ZombiesPlayer.Source zombiesPlayerSource;
@@ -92,7 +92,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
 
     public ZombiesSceneCreator(int sceneCap,
         @NotNull MapInfo mapInfo, @NotNull InstanceLoader instanceLoader, @NotNull KeyParser keyParser,
-        @NotNull ContextManager contextManager, @NotNull SongLoader songLoader, @NotNull ZombiesDatabaseOld database,
+        @NotNull ContextManager contextManager, @NotNull SongLoader songLoader, @NotNull ZombiesStatsDatabase database,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
         @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
         @NotNull ClientBlockHandlerSource clientBlockHandlerSource,

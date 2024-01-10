@@ -38,17 +38,19 @@ public class JDBCRoleStore implements RoleStore {
     }
 
     @Override
-    public void initTables() {
-        Utils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
-            statement.execute("""
-                CREATE TABLE IF NOT EXISTS player_roles (
-                    player_uuid UUID NOT NULL,
-                    player_role VARCHAR(64) NOT NULL,
-                    CONSTRAINT unique_role
-                        unique(player_uuid, player_role)
-                );
-                """);
-        });
+    public @NotNull CompletableFuture<Void> initTables() {
+        return CompletableFuture.runAsync(() -> {
+            Utils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
+                statement.execute("""
+                    CREATE TABLE IF NOT EXISTS player_roles (
+                        player_uuid UUID NOT NULL,
+                        player_role VARCHAR(64) NOT NULL,
+                        CONSTRAINT unique_role
+                            unique(player_uuid, player_role)
+                    );
+                    """);
+            });
+        }, executor);
     }
 
     @Override

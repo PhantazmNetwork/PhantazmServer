@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 public interface RoleStore {
     String DEFAULT = "default";
 
-    void initTables();
+    @NotNull CompletableFuture<Void> initTables();
 
     void register(@NotNull Role role);
 

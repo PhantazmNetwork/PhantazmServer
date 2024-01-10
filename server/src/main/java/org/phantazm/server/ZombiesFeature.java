@@ -38,9 +38,9 @@ import org.phantazm.loader.ObjectExtractor;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
-import org.phantazm.stats.zombies.SQLZombiesDatabaseOld;
+import org.phantazm.stats.zombies.JDBCZombiesStatsDatabase;
 import org.phantazm.stats.Databases;
-import org.phantazm.stats.zombies.ZombiesDatabaseOld;
+import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.corpse.CorpseCreator;
@@ -68,7 +68,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -86,12 +85,11 @@ public final class ZombiesFeature {
     private static PowerupHandler.Source powerupHandlerSource;
 
     private static MobSpawnerSource mobSpawnerSource;
-    private static ZombiesDatabaseOld database;
+    private static ZombiesStatsDatabase database;
 
     static void initialize(@NotNull ContextManager contextManager,
         @NotNull KeyParser keyParser,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
-        @NotNull PlayerViewProvider viewProvider,
         @NotNull Map<? super UUID, ? extends Party> parties,
         @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
         @NotNull MappingProcessorSource mappingProcessorSource, @NotNull Supplier<? extends Map<Key, MobCreator>> mobCreatorMap,
@@ -139,7 +137,8 @@ public final class ZombiesFeature {
 
         Map<Key, SceneCreator<ZombiesScene>> providers = new HashMap<>(maps.size());
 
-        database = new SQLZombiesDatabaseOld(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
+        database = new JDBCZombiesStatsDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
+        database.initTables();
 
         EventNode<Event> globalEventNode = MinecraftServer.getGlobalEventHandler();
         ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource();
@@ -234,7 +233,7 @@ public final class ZombiesFeature {
         return FeatureUtils.check(mobSpawnerSource);
     }
 
-    public static @NotNull ZombiesDatabaseOld getDatabase() {
+    public static @NotNull ZombiesStatsDatabase getDatabase() {
         return FeatureUtils.check(database);
     }
 

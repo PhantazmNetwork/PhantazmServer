@@ -50,15 +50,15 @@ public interface ZombiesPlayerMapStats {
 
     void setRevives(int revives);
 
-    int getShots();
+    long getShots();
 
-    void setShots(int shots);
+    void setShots(long shots);
 
-    int getRegularHits();
+    long getRegularHits();
 
-    void setRegularHits(int regularShots);
+    void setRegularHits(long regularShots);
 
-    int getHeadshotHits();
+    long getHeadshotHits();
 
-    void setHeadshotHits(int headshots);
+    void setHeadshotHits(long headshots);
 }

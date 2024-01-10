@@ -20,13 +20,13 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     private int knocks;
     private int deaths;
     private int revives;
-    private int shots;
-    private int regularHits;
-    private int headshotHits;
+    private long shots;
+    private long regularHits;
+    private long headshotHits;
 
     public BasicZombiesPlayerMapStats(@NotNull UUID playerUUID, @NotNull Key mapKey, int gamesPlayed, int wins,
-        int bestRound, int roundsSurvived, int kills, int knocks, long coinsGained,
-        long coinsSpent, int deaths, int revives, int shots, int regularHits, int headshotHits) {
+        int bestRound, int roundsSurvived, int kills, long coinsGained, long coinsSpent, int knocks, int deaths,
+        int revives, long shots, long regularHits, long headshotHits) {
         this.playerUUID = Objects.requireNonNull(playerUUID);
         this.mapKey = Objects.requireNonNull(mapKey);
         this.gamesPlayed = gamesPlayed;
@@ -159,32 +159,32 @@ public class BasicZombiesPlayerMapStats implements ZombiesPlayerMapStats {
     }
 
     @Override
-    public int getShots() {
+    public long getShots() {
         return shots;
     }
 
     @Override
-    public void setShots(int shots) {
+    public void setShots(long shots) {
         this.shots = shots;
     }
 
     @Override
-    public int getRegularHits() {
+    public long getRegularHits() {
         return regularHits;
     }
 
     @Override
-    public void setRegularHits(int regularShots) {
+    public void setRegularHits(long regularShots) {
         this.regularHits = regularShots;
     }
 
     @Override
-    public int getHeadshotHits() {
+    public long getHeadshotHits() {
         return headshotHits;
     }
 
     @Override
-    public void setHeadshotHits(int headshots) {
+    public void setHeadshotHits(long headshots) {
         this.headshotHits = headshots;
     }
 }

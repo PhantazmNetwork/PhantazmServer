@@ -23,7 +23,7 @@ import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.tick.TickTaskScheduler;
-import org.phantazm.stats.zombies.ZombiesDatabaseOld;
+import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
@@ -51,7 +51,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
     private final MapSettingsInfo mapSettingsInfo;
     private final StageTransition stageTransition;
     private final Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator;
-    private final ZombiesDatabaseOld database;
+    private final ZombiesStatsDatabase database;
     private final EventNode<Event> sceneNode;
     private final TickTaskScheduler tickTaskScheduler;
     private final Scheduler scheduler;
@@ -74,7 +74,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
         @NotNull StageTransition stageTransition,
         @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
-        @NotNull ZombiesDatabaseOld database,
+        @NotNull ZombiesStatsDatabase database,
         @NotNull EventNode<Event> sceneNode,
         @NotNull TickTaskScheduler tickTaskScheduler) {
         super(instance, -1);

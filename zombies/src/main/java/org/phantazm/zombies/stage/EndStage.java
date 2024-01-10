@@ -19,7 +19,7 @@ import org.phantazm.core.packet.MinestomPacketUtils;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.messaging.packet.server.RoundStartPacket;
 import org.phantazm.stats.zombies.ZombiesLeaderboardDatabase;
-import org.phantazm.stats.zombies.ZombiesDatabaseOld;
+import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.WebhookInfo;
@@ -61,7 +61,7 @@ public class EndStage implements Stage {
 
     private final BiFunction<? super ZombiesPlayer, Boolean, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final RoundHandler roundHandler;
-    private final ZombiesDatabaseOld database;
+    private final ZombiesStatsDatabase database;
     private final ZombiesLeaderboardDatabase leaderboardDatabase;
     private final Supplier<ZombiesScene> sceneSupplier;
 
@@ -74,7 +74,7 @@ public class EndStage implements Stage {
         @NotNull TickFormatter tickFormatter, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
         @NotNull Wrapper<Long> remainingTicks, @NotNull Wrapper<Long> ticksSinceStart,
         @NotNull BiFunction<? super ZombiesPlayer, Boolean, ? extends SidebarUpdater> sidebarUpdaterCreator,
-        @NotNull RoundHandler roundHandler, @NotNull ZombiesDatabaseOld database,
+        @NotNull RoundHandler roundHandler, @NotNull ZombiesStatsDatabase database,
         @NotNull ZombiesLeaderboardDatabase leaderboardDatabase, @NotNull Supplier<ZombiesScene> sceneSupplier) {
         this.instance = Objects.requireNonNull(instance);
         this.settings = Objects.requireNonNull(settings);
@@ -162,6 +162,10 @@ public class EndStage implements Stage {
                 Point deathLocation = zombiesPlayer.getPlayer().map(Player::getPosition).orElse(null);
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD,
                     DeadPlayerStateContext.killed(deathLocation, null, null));
+            }
+
+            if (isLegit && settings.trackStats()) {
+                database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
             }
         }
 

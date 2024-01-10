@@ -2,7 +2,7 @@ package org.phantazm.stats.general;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.stats.Utils;
-import org.phantazm.stats.zombies.SQLZombiesDatabaseOld;
+import org.phantazm.stats.zombies.JDBCZombiesStatsDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,7 @@ import java.util.concurrent.Executor;
 
 public class JDBCGeneralDatabase implements GeneralDatabase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SQLZombiesDatabaseOld.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCZombiesStatsDatabase.class);
 
     private final Executor executor;
 
@@ -27,16 +27,18 @@ public class JDBCGeneralDatabase implements GeneralDatabase {
     }
 
     @Override
-    public void initTables() {
-        Utils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
-            statement.execute("""
-                CREATE TABLE IF NOT EXISTS player_stats (
-                    player_uuid UUID NOT NULL PRIMARY KEY,
-                    first_join BIGINT NOT NULL,
-                    last_join BIGINT NOT NULL
-                );
-                """);
-        });
+    public @NotNull CompletableFuture<Void> initTables() {
+        return CompletableFuture.runAsync(() -> {
+            Utils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
+                statement.execute("""
+                    CREATE TABLE IF NOT EXISTS player_stats (
+                        player_uuid UUID NOT NULL PRIMARY KEY,
+                        first_join BIGINT NOT NULL,
+                        last_join BIGINT NOT NULL
+                    );
+                    """);
+            });
+        }, executor);
     }
 
     @Override
