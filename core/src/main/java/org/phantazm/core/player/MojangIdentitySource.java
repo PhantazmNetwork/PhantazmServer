@@ -1,7 +1,5 @@
 package org.phantazm.core.player;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -52,7 +50,6 @@ public class MojangIdentitySource implements IdentitySource {
             if (response == null) {
                 return Optional.empty();
             }
-
 
             JsonElement nameElement = response.get(NAME_KEY);
             if (nameElement != null && nameElement.isJsonPrimitive()) {

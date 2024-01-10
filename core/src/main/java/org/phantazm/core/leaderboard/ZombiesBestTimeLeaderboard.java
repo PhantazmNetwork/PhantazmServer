@@ -306,12 +306,14 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                     List<Hologram.Line> pageContents = new ArrayList<>(data.headerFormats.size() + data.footerFormats.size() + 3);
                     for (String format : data.headerFormats) {
                         pageContents.add(Hologram
-                            .line(MiniMessage.miniMessage().deserialize(format, modifierNameTag, teamSizeNameTag)));
+                            .line(MiniMessage.miniMessage().deserialize(format, modifierNameTag, teamSizeNameTag),
+                                data.gap));
                     }
 
                     for (String format : data.footerFormats) {
                         pageContents.add(Hologram
-                            .line(MiniMessage.miniMessage().deserialize(format, modifierNameTag, teamSizeNameTag)));
+                            .line(MiniMessage.miniMessage().deserialize(format, modifierNameTag, teamSizeNameTag),
+                                data.gap));
                     }
 
                     String descriptor = descriptorFunction.apply(modifier.modifiers);
@@ -337,9 +339,9 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
 
                                         return MiniMessage.miniMessage().deserialize(string, nameTag, rankTag, timeTag);
                                     }, executor), executor);
-                        })));
+                        }), data.gap));
 
-                    pageContents.add(Hologram.line(teamSizeLine));
+                    pageContents.add(Hologram.line(teamSizeLine, data.gap));
 
                     List<Component> formattedLines = new ArrayList<>(data.teamSizeToNameMappings.size());
                     for (Modifier mod : data.modifiers) {
@@ -351,7 +353,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                     }
 
                     pageContents.add(Hologram.line(Component.join(JoinConfiguration.separator(Component.space()),
-                        formattedLines)));
+                        formattedLines), data.gap));
 
                     hologram.addPage(pageContents, Hologram.Alignment.LOWER);
                 }
@@ -438,7 +440,8 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                                     rowBuffer.add(name);
                                 } else {
                                     lengthThisRow = 0;
-                                    rowsToAdd.add(rowBuffer);
+                                    rowsToAdd.add(List.copyOf(rowBuffer));
+
                                     rowBuffer.clear();
                                     rowBuffer.add(name);
                                 }
@@ -514,7 +517,8 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
         @NotNull String activeModifierNameFormat,
         int widthBeforeLineBreak,
         double lineBreakGap,
-        double leaderboardEntryGap) {
+        double leaderboardEntryGap,
+        double gap) {
         @Default("armorStandOffset")
         public static @NotNull ConfigElement armorStandOffsetDefault() {
             return ConfigElement.of("{x=0, y=-0.20, z=0}");
@@ -533,6 +537,11 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
         @Default("leaderboardEntryGap")
         public static @NotNull ConfigElement leaderboardEntryGapDefault() {
             return ConfigPrimitive.of(0.1D);
+        }
+
+        @Default("gap")
+        public static @NotNull ConfigElement gapDefault() {
+            return ConfigPrimitive.of(0.05D);
         }
     }
 }

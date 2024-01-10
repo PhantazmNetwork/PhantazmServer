@@ -11,6 +11,8 @@ import java.util.concurrent.CompletableFuture;
 public interface RoleStore {
     String DEFAULT = "default";
 
+    void initTables();
+
     void register(@NotNull Role role);
 
     @NotNull CompletableFuture<Role> getStylingRole(@NotNull UUID uuid);

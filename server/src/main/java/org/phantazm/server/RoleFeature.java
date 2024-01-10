@@ -32,6 +32,7 @@ public final class RoleFeature {
     static void initialize(@NotNull DataSource dataSource, @NotNull Executor executor, @NotNull ConfigCodec codec,
         @NotNull ContextManager contextManager) {
         roleStore = new BasicRoleStore(dataSource, executor);
+        roleStore.initTables();
 
         try {
             FileUtils.createDirectories(ROLE_FOLDER);
