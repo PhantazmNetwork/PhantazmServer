@@ -368,7 +368,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
             Wrapper.of(settings.endTicks()), ticksSinceStart,
             (player, hasWon) -> {
                 return newSidebarUpdaterCreator(sidebarModule, ElementPath.of(hasWon ? "win" : "lose")).apply(player);
-            }, roundHandler, database, leaderboardContext.database(), sceneSupplier);
+            }, roundHandler, leaderboardContext.database(), sceneSupplier);
 
         return new StageTransition(idle, countdown, inGame, end);
     }

@@ -61,7 +61,6 @@ public class EndStage implements Stage {
 
     private final BiFunction<? super ZombiesPlayer, Boolean, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final RoundHandler roundHandler;
-    private final ZombiesStatsDatabase database;
     private final ZombiesLeaderboardDatabase leaderboardDatabase;
     private final Supplier<ZombiesScene> sceneSupplier;
 
@@ -74,8 +73,8 @@ public class EndStage implements Stage {
         @NotNull TickFormatter tickFormatter, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
         @NotNull Wrapper<Long> remainingTicks, @NotNull Wrapper<Long> ticksSinceStart,
         @NotNull BiFunction<? super ZombiesPlayer, Boolean, ? extends SidebarUpdater> sidebarUpdaterCreator,
-        @NotNull RoundHandler roundHandler, @NotNull ZombiesStatsDatabase database,
-        @NotNull ZombiesLeaderboardDatabase leaderboardDatabase, @NotNull Supplier<ZombiesScene> sceneSupplier) {
+        @NotNull RoundHandler roundHandler, @NotNull ZombiesLeaderboardDatabase leaderboardDatabase,
+        @NotNull Supplier<ZombiesScene> sceneSupplier) {
         this.instance = Objects.requireNonNull(instance);
         this.settings = Objects.requireNonNull(settings);
         this.webhook = Objects.requireNonNull(webhook);
@@ -85,7 +84,6 @@ public class EndStage implements Stage {
         this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart);
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator);
         this.roundHandler = Objects.requireNonNull(roundHandler);
-        this.database = Objects.requireNonNull(database);
         this.leaderboardDatabase = Objects.requireNonNull(leaderboardDatabase);
         this.sceneSupplier = Objects.requireNonNull(sceneSupplier);
 
@@ -162,10 +160,6 @@ public class EndStage implements Stage {
                 Point deathLocation = zombiesPlayer.getPlayer().map(Player::getPosition).orElse(null);
                 zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD,
                     DeadPlayerStateContext.killed(deathLocation, null, null));
-            }
-
-            if (isLegit && settings.trackStats()) {
-                database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
             }
         }
 

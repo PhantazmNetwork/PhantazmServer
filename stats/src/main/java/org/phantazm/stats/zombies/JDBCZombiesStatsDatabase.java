@@ -65,7 +65,7 @@ public class JDBCZombiesStatsDatabase implements ZombiesStatsDatabase {
                 ON DUPLICATE KEY UPDATE
                     games_played=games_played+?,
                     wins=wins+?,
-                    best_round=MAX(best_round, 0),
+                    best_round=GREATEST(best_round, 0),
                     rounds_survived=rounds_survived+?,
                     kills=kills+?,
                     coins_gained=coins_gained+?,
@@ -79,6 +79,7 @@ public class JDBCZombiesStatsDatabase implements ZombiesStatsDatabase {
                 """, (connection, statement) -> {
                 statement.setString(1, stats.getPlayerUUID().toString());
                 statement.setString(2, stats.getMapKey().asString());
+
                 statement.setInt(3, stats.getGamesPlayed());
                 statement.setInt(4, stats.getWins());
                 statement.setInt(5, stats.getBestRound());
