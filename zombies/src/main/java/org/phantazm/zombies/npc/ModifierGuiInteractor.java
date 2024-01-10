@@ -25,6 +25,7 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.commons.MonoComponent;
+import org.phantazm.core.TagUtils;
 import org.phantazm.core.gui.BasicSlotDistributor;
 import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.npc.interactor.NPCInteractor;
@@ -77,8 +78,8 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
     }
 
     private static class Impl implements NPCInteractor {
-        private static final Tag<String> MODIFIER_TAG = Tag.String("modifier");
-        private static final Tag<String> ACTION_TAG = Tag.String("action");
+        private static final Tag<String> MODIFIER_TAG = Tag.String(TagUtils.uniqueTagName());
+        private static final Tag<String> ACTION_TAG = Tag.String(TagUtils.uniqueTagName());
 
         private static final String PREVIOUS_ACTION = "previous";
         private static final String NEXT_ACTION = "next";

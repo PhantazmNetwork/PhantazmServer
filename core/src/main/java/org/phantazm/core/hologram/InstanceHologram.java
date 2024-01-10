@@ -1,50 +1,51 @@
 package org.phantazm.core.hologram;
 
+import com.github.steanky.toolkit.collection.Containers;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Instance-wide Hologram implementation. This object retains a strong reference to its instance, and therefore should
  * not be stored for longer than the lifetime of the instance.
  */
-public class InstanceHologram extends AbstractList<Component> implements Hologram {
+public class InstanceHologram extends AbstractList<Hologram.Line> implements Hologram, RandomAccess {
     public static final double MESSAGE_HEIGHT = 0.25;
 
-    private final ArrayList<Entity> armorStands;
-    private final ArrayList<Component> components;
-    private final double gap;
-    private final Object sync;
+    protected final ArrayList<Entry> entries;
+    protected final Object sync;
+
     private Alignment alignment;
-    private Instance instance;
     private Point location;
+
+    private Instance instance;
+
+    protected record Entry(@NotNull Line line,
+        @NotNull Entity entity) {
+    }
 
     /**
      * Creates a new instance of this class, whose holograms will be rendered at the given location, using the given
      * alignment.
      *
      * @param location  the location of the instance
-     * @param gap       the distance between separate hologram messages
      * @param alignment the alignment method
      */
-    public InstanceHologram(@NotNull Point location, double gap, @NotNull Alignment alignment) {
+    public InstanceHologram(@NotNull Point location, @NotNull Alignment alignment) {
+        this.entries = new ArrayList<>();
+        this.sync = new Object();
+
         this.alignment = Objects.requireNonNull(alignment);
         this.location = Objects.requireNonNull(location);
-        armorStands = new ArrayList<>();
-        components = new ArrayList<>();
-        this.gap = gap;
-
-        this.sync = new Object();
     }
 
     /**
@@ -52,10 +53,9 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      * alignment {@link Alignment#UPPER}.
      *
      * @param location the location to render holograms
-     * @param gap      the distance between separate hologram messages
      */
-    public InstanceHologram(@NotNull Point location, double gap) {
-        this(location, gap, Alignment.UPPER);
+    public InstanceHologram(@NotNull Point location) {
+        this(location, Alignment.UPPER);
     }
 
     @Override
@@ -66,6 +66,13 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
                 this.alignment = alignment;
                 updateArmorStands();
             }
+        }
+    }
+
+    @Override
+    public void reformatFor(int index, @NotNull Player player) {
+        synchronized (sync) {
+            reformat(entries.get(index).entity, player);
         }
     }
 
@@ -112,83 +119,124 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
     @Override
     public void trimToSize() {
         synchronized (sync) {
-            armorStands.trimToSize();
-            components.trimToSize();
+            entries.trimToSize();
         }
     }
 
     @Override
-    public @NotNull Component get(int index) {
+    public void addComponent(@NotNull Component component, double gap) {
         synchronized (sync) {
-            return components.get(index);
-        }
-    }
-
-    @Override
-    public @NotNull Component set(int index, @NotNull Component element) {
-        synchronized (sync) {
-            armorStands.get(index).setCustomName(element);
-            return components.set(index, Objects.requireNonNull(element));
-        }
-    }
-
-    public void add(int index, @NotNull Component component) {
-        synchronized (sync) {
-            components.add(index, Objects.requireNonNull(component));
-            armorStands.add(constructEntity(component));
+            entries.add(entryFromLine(Hologram.line(component, gap)));
             updateArmorStands();
         }
     }
 
     @Override
-    public boolean addAll(int index, @NotNull Collection<? extends Component> c) {
-        boolean changed;
+    public void addFormat(@NotNull String formatString, @NotNull LineFormatter lineFormatter, double gap) {
         synchronized (sync) {
-            changed = components.addAll(index, c);
-            armorStands.addAll(index, c.stream().map(this::constructEntity).toList());
+            entries.add(entryFromLine(Hologram.line(formatString, lineFormatter, gap)));
             updateArmorStands();
         }
-
-        return changed;
     }
 
     @Override
-    public boolean addAll(@NotNull Collection<? extends Component> c) {
-        boolean changed;
+    public boolean addAllComponents(int index, @NotNull Collection<? extends Component> components, double gap) {
         synchronized (sync) {
-            changed = components.addAll(c);
-            armorStands.addAll(c.stream().map(this::constructEntity).toList());
+            boolean result = entries.addAll(index, Containers.mappedView(component ->
+                entryFromLine(Hologram.line(component, gap)), components));
             updateArmorStands();
+            return result;
         }
-
-        return changed;
     }
 
     @Override
-    public @NotNull Component remove(int index) {
+    public boolean addAllComponents(@NotNull Collection<? extends Component> components, double gap) {
         synchronized (sync) {
-            armorStands.remove(index).remove();
-            Component component = components.remove(index);
+            boolean result = entries.addAll(Containers.mappedView(component ->
+                entryFromLine(Hologram.line(component, gap)), components));
             updateArmorStands();
-            return component;
+            return result;
+        }
+    }
+
+    @Override
+    public boolean addAllFormats(@NotNull Collection<? extends String> formatStrings,
+        @NotNull LineFormatter lineFormatter, double gap) {
+        synchronized (sync) {
+            boolean result = entries.addAll(Containers.mappedView(format ->
+                entryFromLine(Hologram.line(format, lineFormatter, gap)), formatStrings));
+            updateArmorStands();
+            return result;
+        }
+    }
+
+    @Override
+    public @NotNull Component getComponent(int index) {
+        synchronized (sync) {
+            return Objects.requireNonNull(entries.get(index).entity.getCustomName());
+        }
+    }
+
+    @Override
+    public @NotNull Line get(int index) {
+        synchronized (sync) {
+            return Objects.requireNonNull(entries.get(index).line);
+        }
+    }
+
+    @Override
+    public @NotNull Line set(int index, @NotNull Line line) {
+        synchronized (sync) {
+            Entry old = entries.set(index, entryFromLine(line));
+            old.entity.remove();
+            updateArmorStands();
+            return old.line;
+        }
+    }
+
+    @Override
+    public boolean addAll(@NotNull Collection<? extends Line> lines) {
+        synchronized (sync) {
+            boolean result = entries.addAll(Containers.mappedView(this::entryFromLine, lines));
+            updateArmorStands();
+            return result;
+        }
+    }
+
+    @Override
+    public void add(int index, @NotNull Line line) {
+        synchronized (sync) {
+            entries.add(index, entryFromLine(line));
+            updateArmorStands();
+        }
+    }
+
+    @Override
+    public @NotNull Line remove(int index) {
+        synchronized (sync) {
+            Entry removedEntry = entries.remove(index);
+            removedEntry.entity.remove();
+
+            updateArmorStands();
+            return removedEntry.line;
         }
     }
 
     @Override
     public void clear() {
         synchronized (sync) {
-            for (Entity entity : armorStands) {
-                entity.remove();
+            for (Entry entry : entries) {
+                entry.entity.remove();
             }
-            armorStands.clear();
-            components.clear();
+            entries.clear();
+            updateArmorStands();
         }
     }
 
     @Override
     public int size() {
         synchronized (sync) {
-            return components.size();
+            return entries.size();
         }
     }
 
@@ -197,17 +245,30 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
             return;
         }
 
-        int armorStandCount = armorStands.size();
-        double totalHeight = gap * (armorStandCount - 1) + armorStandCount * MESSAGE_HEIGHT;
-        double topEdgeHeight = location.y() + totalHeight / 2;
+        int armorStandCount = entries.size();
+        if (armorStandCount == 0) {
+            return;
+        }
+
+        double[] offsets = new double[armorStandCount];
+        offsets[0] = 0;
+
+        double gapSum = 0;
+        for (int i = 0; i < armorStandCount - 1; i++) {
+            gapSum += entries.get(i).line.gap();
+            offsets[i + 1] = (i + 1) * MESSAGE_HEIGHT + gapSum;
+        }
+
+        double totalHeight = MESSAGE_HEIGHT * armorStandCount + gapSum;
+        double topEdgeHeight = switch (alignment) {
+            case UPPER -> location.y();
+            case CENTERED -> location.y() + totalHeight / 2;
+            case LOWER -> location.y() + totalHeight;
+        };
 
         for (int i = 0; i < armorStandCount; i++) {
-            Entity armorStand = armorStands.get(i);
-            Pos pos = new Pos(location.x(), topEdgeHeight - (i * (gap + MESSAGE_HEIGHT)), location.z());
-            switch (alignment) {
-                case CENTERED -> pos = pos.add(0, totalHeight / 2, 0);
-                case LOWER -> pos = pos.add(0, totalHeight, 0);
-            }
+            Entity armorStand = entries.get(i).entity;
+            Pos pos = new Pos(location.x(), topEdgeHeight - offsets[i], location.z());
 
             if (armorStand.getInstance() == instance) {
                 armorStand.teleport(pos).join();
@@ -215,6 +276,24 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
                 armorStand.setInstance(instance, pos).join();
             }
         }
+    }
+
+    private Entity makeArmorStand(Component display) {
+        Entity stand = new Entity(EntityType.ARMOR_STAND);
+
+        ArmorStandMeta meta = (ArmorStandMeta) stand.getEntityMeta();
+        meta.setMarker(true);
+        meta.setHasNoGravity(true);
+        meta.setCustomNameVisible(true);
+        meta.setInvisible(true);
+        meta.setCustomName(display);
+        stand.setHasPhysics(false);
+        return stand;
+    }
+
+    private Entry entryFromLine(Line line) {
+        return new Entry(line, line.isComponent() ? constructEntity(line.component()) :
+            constructFormattedEntity(line.format(), line.lineFormatter()));
     }
 
     /**
@@ -227,13 +306,33 @@ public class InstanceHologram extends AbstractList<Component> implements Hologra
      * @return the entity to be used for the hologram
      */
     protected @NotNull Entity constructEntity(@NotNull Component display) {
-        Entity stand = new Entity(EntityType.ARMOR_STAND);
-        ArmorStandMeta meta = (ArmorStandMeta) stand.getEntityMeta();
-        meta.setMarker(true);
-        meta.setHasNoGravity(true);
-        meta.setCustomNameVisible(true);
-        meta.setInvisible(true);
-        meta.setCustomName(display);
-        return stand;
+        return makeArmorStand(display);
+    }
+
+    /**
+     * Works identically to {@link InstanceHologram#constructEntity(Component)}, but its custom name is created by the
+     * given {@link MiniMessage} format string. Called to create entities that require custom formatting.
+     * <p>
+     * Implementations may override this method to provide custom formatting for holograms. The default implementation
+     * does not make use of the line formatter at all.
+     *
+     * @param formatString the format string from which to create the custom name
+     * @return the entity to be used for the hologram
+     */
+    protected @NotNull Entity constructFormattedEntity(@NotNull String formatString,
+        @NotNull ViewableHologram.LineFormatter lineFormatter) {
+        return makeArmorStand(MiniMessage.miniMessage().deserialize(formatString));
+    }
+
+    /**
+     * Reformats a specific armor stand, causing its {@link Hologram.LineFormatter} function to be re-computed (if it
+     * exists). The default implementation is a no-op. Subclasses that override
+     * {@link InstanceHologram#constructFormattedEntity(String, LineFormatter)} should also override this method.
+     *
+     * @param entity the entity to reformat
+     * @param player the player we are reformatting for
+     */
+    protected void reformat(@NotNull Entity entity, @NotNull Player player) {
+
     }
 }

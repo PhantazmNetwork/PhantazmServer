@@ -2,36 +2,28 @@ package org.phantazm.server.permission;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.steanky.toolkit.function.ThrowingRunnable;
-import com.github.steanky.toolkit.function.ThrowingSupplier;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.phantazm.server.role.Role;
-import org.phantazm.server.role.RoleStore;
+import org.phantazm.core.role.Role;
+import org.phantazm.core.role.RoleStore;
+import org.phantazm.stats.DatabaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
-import static org.jooq.impl.DSL.*;
-
-public class DatabasePermissionHandler implements PermissionHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatabasePermissionHandler.class);
+public class JDBCPermissionHandler implements PermissionHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCPermissionHandler.class);
 
     private final Cache<UUID, Set<String>> playerPermissionGroupCache;
     private final Cache<String, Set<Permission>> groupPermissionCache;
@@ -39,7 +31,7 @@ public class DatabasePermissionHandler implements PermissionHandler {
     private final Executor executor;
     private final RoleStore roleStore;
 
-    public DatabasePermissionHandler(@NotNull DataSource dataSource, @NotNull Executor executor,
+    public JDBCPermissionHandler(@NotNull DataSource dataSource, @NotNull Executor executor,
         @NotNull RoleStore roleStore) {
         this.playerPermissionGroupCache =
             Caffeine.newBuilder().softValues().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
@@ -50,59 +42,30 @@ public class DatabasePermissionHandler implements PermissionHandler {
         this.roleStore = Objects.requireNonNull(roleStore);
     }
 
-    private static void write(ThrowingRunnable<SQLException> supplier) {
-        try {
-            supplier.run();
-        } catch (SQLException e) {
-            LOGGER.warn("Exception when writing to permission database", e);
-        }
-    }
-
-    private static <T> T read(ThrowingSupplier<? extends Result<Record>, ? extends SQLException> reader,
-        Function<? super Result<Record>, ? extends T> mapper, Supplier<? extends T> defaultValue) {
-        try {
-            return mapper.apply(reader.get());
-        } catch (SQLException e) {
-            LOGGER.warn("Exception when querying permission database", e);
-        }
-
-        return defaultValue.get();
-    }
-
-    private static Set<String> groupsFromResult(Result<Record> result) {
-        if (result == null) {
-            return new CopyOnWriteArraySet<>();
-        }
-
-        List<String> temp = new ArrayList<>(result.size());
-        for (Record record : result) {
-            String group = (String) record.get("player_group");
-            if (group == null) {
-                continue;
-            }
-
-            temp.add(group);
-        }
-
-        return new CopyOnWriteArraySet<>(temp);
-    }
-
-    private static Set<Permission> permissionsFromResult(Result<Record> result) {
-        if (result == null) {
-            return new CopyOnWriteArraySet<>();
-        }
-
-        List<Permission> temp = new ArrayList<>(result.size());
-        for (Record record : result) {
-            String permission = (String) record.get("permission");
-            if (permission == null) {
-                continue;
-            }
-
-            temp.add(new Permission(permission));
-        }
-
-        return new CopyOnWriteArraySet<>(temp);
+    @Override
+    public void initTables() {
+        DatabaseUtils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
+            statement.execute("""
+                CREATE TABLE IF NOT EXISTS permission_groups (
+                    permission_group VARCHAR(64) NOT NULL,
+                    permission VARCHAR(64) NOT NULL,
+                    
+                    PRIMARY KEY (permission_group, permission)
+                );
+                """);
+            statement.execute("""
+                CREATE TABLE IF NOT EXISTS player_permission_groups (
+                    player_uuid UUID NOT NULL,
+                    player_group VARCHAR(64) NOT NULL,
+                    
+                    PRIMARY KEY (player_uuid, player_group),
+                    CONSTRAINT fk_player_group
+                        FOREIGN KEY (player_group) REFERENCES permission_groups (permission_group)
+                        ON DELETE CASCADE
+                        ON UPDATE CASCADE
+                );
+                """);
+        });
     }
 
     @Override
@@ -123,13 +86,17 @@ public class DatabasePermissionHandler implements PermissionHandler {
         groupPermissionCache.get(group, ignored -> new CopyOnWriteArraySet<>()).add(permission);
 
         executor.execute(() -> {
-            write(() -> {
-                String permissionName = permission.getPermissionName();
-                try (Connection connection = dataSource.getConnection()) {
-                    using(connection).insertInto(table("permission_groups"), field("permission_group"),
-                            field("permission")).values(group, permissionName).onDuplicateKeyUpdate()
-                        .set(field("permission"), permissionName).execute();
-                }
+            String permissionName = permission.getPermissionName();
+            DatabaseUtils.runPreparedSql(LOGGER, "addGroupPermission", dataSource, """
+                INSERT INTO permission_groups (permission_group, permission)
+                VALUES(?, ?)
+                ON DUPLICATE KEY UPDATE permission=?
+                """, (connection, statement) -> {
+                statement.setString(1, group);
+                statement.setString(2, permissionName);
+                statement.setString(3, permissionName);
+
+                statement.execute();
             });
 
             applyAll0();
@@ -141,13 +108,15 @@ public class DatabasePermissionHandler implements PermissionHandler {
         groupPermissionCache.get(group, ignored -> new CopyOnWriteArraySet<>()).remove(permission);
 
         executor.execute(() -> {
-            write(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    using(connection).deleteFrom(table("permission_groups")).where(field("permission_group").eq(group)
-                            .and(field("permission").eq(
-                                permission.getPermissionName())))
-                        .execute();
-                }
+            String permissionName = permission.getPermissionName();
+            DatabaseUtils.runPreparedSql(LOGGER, "removeGroupPermission", dataSource, """
+                DELETE FROM permission_groups
+                WHERE (permission_group, permission) = (?, ?)
+                """, (connection, statement) -> {
+                statement.setString(1, group);
+                statement.setString(2, permissionName);
+
+                statement.execute();
             });
 
             applyAll0();
@@ -163,12 +132,16 @@ public class DatabasePermissionHandler implements PermissionHandler {
         playerPermissionGroupCache.get(uuid, ignored -> new CopyOnWriteArraySet<>()).add(group);
 
         executor.execute(() -> {
-            write(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    using(connection).insertInto(table("player_permission_groups"), field("player_uuid"),
-                            field("player_group")).values(uuid, group).onDuplicateKeyUpdate()
-                        .set(field("player_group"), group).execute();
-                }
+            DatabaseUtils.runPreparedSql(LOGGER, "addToGroup", dataSource, """
+                INSERT INTO player_permission_groups (player_uuid, player_group)
+                VALUES(?, ?)
+                ON DUPLICATE KEY UPDATE player_group=?
+                """, (connection, statement) -> {
+                statement.setString(1, uuid.toString());
+                statement.setString(2, group);
+                statement.setString(3, group);
+
+                statement.execute();
             });
 
             applyOptionalPlayer(uuid);
@@ -184,11 +157,14 @@ public class DatabasePermissionHandler implements PermissionHandler {
         playerPermissionGroupCache.get(uuid, ignored -> new CopyOnWriteArraySet<>()).remove(group);
 
         executor.execute(() -> {
-            write(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    using(connection).deleteFrom(table("player_permission_groups"))
-                        .where(field("player_uuid").eq(uuid).and(field("player_group").eq(group))).execute();
-                }
+            DatabaseUtils.runPreparedSql(LOGGER, "removeFromGroup", dataSource, """
+                DELETE FROM player_permission_groups
+                WHERE (player_uuid, player_group) = (?, ?)
+                """, (connection, statement) -> {
+                statement.setString(1, uuid.toString());
+                statement.setString(2, group);
+
+                statement.execute();
             });
 
             applyOptionalPlayer(uuid);
@@ -208,12 +184,26 @@ public class DatabasePermissionHandler implements PermissionHandler {
     }
 
     private Set<String> readPermissionGroups(UUID uuid) {
-        return read(() -> {
-            try (Connection connection = dataSource.getConnection()) {
-                return using(connection).selectFrom(table("player_permission_groups"))
-                    .where(field("player_uuid").eq(uuid)).fetch();
+        return DatabaseUtils.runPreparedSql(LOGGER, "readPermissionGroups", CopyOnWriteArraySet::new, dataSource, """
+            SELECT player_group FROM player_permission_groups
+            WHERE player_uuid=?
+            """, (connection, statement) -> {
+            statement.setString(1, uuid.toString());
+
+            ResultSet result = statement.executeQuery();
+
+            if (!result.next()) {
+                return new CopyOnWriteArraySet<>();
             }
-        }, DatabasePermissionHandler::groupsFromResult, CopyOnWriteArraySet::new);
+
+            List<String> temp = new ArrayList<>(5);
+            do {
+                temp.add(result.getString(1));
+            }
+            while (result.next());
+
+            return new CopyOnWriteArraySet<>(temp);
+        });
     }
 
     private void applyPermissions0(UUID uuid, CommandSender sender) {
@@ -246,12 +236,25 @@ public class DatabasePermissionHandler implements PermissionHandler {
 
     private void applyGroup(String group, CommandSender commandSender) {
         Set<Permission> permissions = groupPermissionCache.get(group, key -> {
-            return read(() -> {
-                try (Connection connection = dataSource.getConnection()) {
-                    return using(connection).selectFrom(table("permission_groups"))
-                        .where(field("permission_group").eq(key)).fetch();
+            return DatabaseUtils.runPreparedSql(LOGGER, "applyGroup", CopyOnWriteArraySet::new, dataSource, """
+                SELECT permission FROM permission_groups
+                WHERE permission_group=?
+                """, (connection, statement) -> {
+                statement.setString(1, group);
+                ResultSet result = statement.executeQuery();
+
+                if (!result.next()) {
+                    return new CopyOnWriteArraySet<>();
                 }
-            }, DatabasePermissionHandler::permissionsFromResult, CopyOnWriteArraySet::new);
+
+                List<Permission> temp = new ArrayList<>(5);
+                do {
+                    temp.add(new Permission(result.getString(1)));
+                }
+                while (result.next());
+
+                return new CopyOnWriteArraySet<>(temp);
+            });
         });
 
         commandSender.addPermissions(permissions);

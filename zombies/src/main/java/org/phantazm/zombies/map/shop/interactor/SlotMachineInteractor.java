@@ -87,7 +87,7 @@ public class SlotMachineInteractor implements ShopInteractor {
     @Override
     public void initialize(@NotNull Shop shop) {
         this.shop = shop;
-        this.hologram = new InstanceHologram(shop.center().add(0, data.hologramOffset, 0), 0);
+        this.hologram = new InstanceHologram(shop.center().add(0, data.hologramOffset, 0));
         this.hologram.setInstance(shop.instance());
 
         ShopInteractor.initialize(rollStartInteractors, shop);
@@ -310,15 +310,15 @@ public class SlotMachineInteractor implements ShopInteractor {
 
         for (int i = 0; i < newComponents.size(); i++) {
             Component newComponent = newComponents.get(i);
-            Component oldComponent = i < hologram.size() ? hologram.get(i) : null;
+            Component oldComponent = i < hologram.size() ? hologram.getComponent(i) : null;
 
             if (!newComponent.equals(oldComponent)) {
                 if (oldComponent == null) {
-                    hologram.add(newComponent);
+                    hologram.addComponent(newComponent);
                     continue;
                 }
 
-                hologram.set(i, newComponent);
+                hologram.set(i, Hologram.line(newComponent));
             }
         }
     }

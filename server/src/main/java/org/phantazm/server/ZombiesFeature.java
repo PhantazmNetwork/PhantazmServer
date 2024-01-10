@@ -29,6 +29,7 @@ import org.phantazm.core.VecUtils;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
+import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.sound.SongLoader;
@@ -37,8 +38,9 @@ import org.phantazm.loader.ObjectExtractor;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
-import org.phantazm.stats.zombies.SQLZombiesDatabase;
-import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.zombies.JDBCZombiesStatsDatabase;
+import org.phantazm.stats.Databases;
+import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.corpse.CorpseCreator;
@@ -55,6 +57,7 @@ import org.phantazm.zombies.powerup.FileSystemPowerupDataLoader;
 import org.phantazm.zombies.powerup.PowerupData;
 import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.scene2.ZombiesJoiner;
+import org.phantazm.zombies.scene2.ZombiesLeaderboardContext;
 import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.scene2.ZombiesSceneCreator;
 import org.slf4j.Logger;
@@ -65,6 +68,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -81,12 +85,11 @@ public final class ZombiesFeature {
     private static PowerupHandler.Source powerupHandlerSource;
 
     private static MobSpawnerSource mobSpawnerSource;
-    private static ZombiesDatabase database;
+    private static ZombiesStatsDatabase database;
 
     static void initialize(@NotNull ContextManager contextManager,
         @NotNull KeyParser keyParser,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
-        @NotNull PlayerViewProvider viewProvider,
         @NotNull Map<? super UUID, ? extends Party> parties,
         @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
         @NotNull MappingProcessorSource mappingProcessorSource, @NotNull Supplier<? extends Map<Key, MobCreator>> mobCreatorMap,
@@ -134,7 +137,8 @@ public final class ZombiesFeature {
 
         Map<Key, SceneCreator<ZombiesScene>> providers = new HashMap<>(maps.size());
 
-        database = new SQLZombiesDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
+        database = new JDBCZombiesStatsDatabase(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
+        database.initTables();
 
         EventNode<Event> globalEventNode = MinecraftServer.getGlobalEventHandler();
         ClientBlockHandlerSource clientBlockHandlerSource = new BasicClientBlockHandlerSource();
@@ -146,15 +150,15 @@ public final class ZombiesFeature {
             Endless.Source endlessSource = dependencyProvider -> contextManager
                 .makeContext(entry.getValue().endless()).provide(dependencyProvider);
 
-            ZombiesSceneCreator provider =
-                new ZombiesSceneCreator(zombiesConfig.maximumScenes(),
-                    entry.getValue(), instanceLoader, keyParser, contextManager, songLoader, database, instanceSpaceFunction, globalEventNode,
-                    ZombiesFeature.mobSpawnerSource(), clientBlockHandlerSource,
-                    ZombiesFeature.powerupHandlerSource(),
-                    new BasicZombiesPlayerSource(database, ExecutorFeature.getExecutor(), viewProvider,
-                        EquipmentFeature::createEquipmentCreator, contextManager,
-                        keyParser),
-                    corpseCreatorSource, endlessSource);
+            ZombiesLeaderboardContext leaderboardContext =
+                new ZombiesLeaderboardContext(Executors.newFixedThreadPool(4), Databases.leaderboards(),
+                    contextManager.makeContext(entry.getValue().leaderboard()).provide());
+
+            ZombiesSceneCreator provider = new ZombiesSceneCreator(zombiesConfig.maximumScenes(), entry.getValue(),
+                instanceLoader, keyParser, contextManager, songLoader, database,
+                instanceSpaceFunction, globalEventNode, ZombiesFeature.mobSpawnerSource(), clientBlockHandlerSource,
+                ZombiesFeature.powerupHandlerSource(), new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator),
+                corpseCreatorSource, endlessSource, leaderboardContext, RoleFeature.roleStore(), IdentitySource.MOJANG);
             providers.put(entry.getKey(), provider);
         }
 
@@ -229,7 +233,7 @@ public final class ZombiesFeature {
         return FeatureUtils.check(mobSpawnerSource);
     }
 
-    public static @NotNull ZombiesDatabase getDatabase() {
+    public static @NotNull ZombiesStatsDatabase getDatabase() {
         return FeatureUtils.check(database);
     }
 

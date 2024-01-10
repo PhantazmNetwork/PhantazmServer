@@ -5,42 +5,41 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.minestom.server.utils.mojang.MojangUtils;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.stats.Databases;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
 /**
  * An {@link IdentitySource} that calls Mojang's API servers to resolve names and UUIDs. Will log any errors that occur
- * during resolution using its own dedicated {@link Logger}. Not part of the public API.
+ * during resolution using its own dedicated {@link Logger}.
+ * <p>
+ * Username requests may be cached by either {@link Databases#usernames()} and/or {@link MojangUtils}.
  *
- * @apiNote Currently, this utilizes {@link MojangUtils} utility methods and does not perform any caching of its own,
- * aside from that utilized by MojangUtils itself.
+ * @apiNote Not part of the public API.
  */
 public class MojangIdentitySource implements IdentitySource {
     private static final Logger LOGGER = LoggerFactory.getLogger(MojangIdentitySource.class);
     private static final String NAME_KEY = "name";
     private static final String ID_KEY = "id";
 
-    private final Executor executor;
-
     /**
-     * Creates a new instance of this class using the provided {@link Executor} to (typically asynchronously) execute
-     * name or UUID resolution requests to the Mojang API.
-     *
-     * @param executor the executor used to run requests
+     * Creates a new instance of this class.
      */
-    public MojangIdentitySource(@NotNull Executor executor) {
-        this.executor = Objects.requireNonNull(executor);
+    public MojangIdentitySource() {
+
     }
 
     @Override
     public @NotNull CompletableFuture<Optional<String>> getName(@NotNull UUID uuid) {
-        return CompletableFuture.supplyAsync(() -> {
+        return Databases.usernames().cachedUsername(uuid).thenApply(stringOptional -> {
+            if (stringOptional.isPresent()) {
+                return stringOptional;
+            }
+
             JsonObject response = null;
             try {
                 response = MojangUtils.fromUuid(uuid.toString());
@@ -48,25 +47,33 @@ public class MojangIdentitySource implements IdentitySource {
                 LOGGER.error("RuntimeException thrown during name resolution of UUID {}: {}", uuid, exception);
             }
 
-            if (response != null) {
-                JsonElement nameElement = response.get(NAME_KEY);
-                if (nameElement != null && nameElement.isJsonPrimitive()) {
-                    JsonPrimitive primitive = nameElement.getAsJsonPrimitive();
-                    if (primitive.isString()) {
-                        return Optional.of(primitive.getAsString());
-                    }
-                }
-
-                LOGGER.error("Unexpected response when resolving UUID {}: {}", uuid, response);
+            if (response == null) {
+                return Optional.empty();
             }
 
+            JsonElement nameElement = response.get(NAME_KEY);
+            if (nameElement != null && nameElement.isJsonPrimitive()) {
+                JsonPrimitive primitive = nameElement.getAsJsonPrimitive();
+                if (primitive.isString()) {
+                    String name = primitive.getAsString();
+                    Databases.usernames().submitUsername(uuid, name);
+
+                    return Optional.of(name);
+                }
+            }
+
+            LOGGER.error("Unexpected response when resolving UUID {}: {}", uuid, response);
             return Optional.empty();
-        }, executor);
+        });
     }
 
     @Override
     public @NotNull CompletableFuture<Optional<UUID>> getUUID(@NotNull String name) {
-        return CompletableFuture.supplyAsync(() -> {
+        return Databases.usernames().cachedUUID(name).thenApply(optionalUuid -> {
+            if (optionalUuid.isPresent()) {
+                return optionalUuid;
+            }
+
             JsonObject response = null;
             try {
                 response = MojangUtils.fromUsername(name);
@@ -88,6 +95,6 @@ public class MojangIdentitySource implements IdentitySource {
             }
 
             return Optional.empty();
-        }, executor);
+        });
     }
 }

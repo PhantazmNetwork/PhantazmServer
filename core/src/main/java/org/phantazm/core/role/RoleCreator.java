@@ -1,4 +1,4 @@
-package org.phantazm.server.role;
+package org.phantazm.core.role;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -22,6 +22,8 @@ public interface PermissionHandler {
         applyPermissions(player);
     }
 
+    void initTables();
+
     void applyPermissions(@NotNull Player target);
 
     void reload();

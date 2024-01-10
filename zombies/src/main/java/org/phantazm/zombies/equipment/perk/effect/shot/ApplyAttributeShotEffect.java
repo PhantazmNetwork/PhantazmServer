@@ -12,16 +12,16 @@ import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.TagUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.Deque;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -35,6 +35,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
     private static final Map<Data, String> NAMES = new ConcurrentHashMap<>();
 
     private final Data data;
+    private final ZombiesScene scene;
     private final UUID attributeUUID;
     private final String attributeName;
 
@@ -44,14 +45,15 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
     private final Tag<Long> applyTicksTag;
 
     @FactoryMethod
-    public ApplyAttributeShotEffect(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data);
+    public ApplyAttributeShotEffect(@NotNull Data data, @NotNull ZombiesScene scene) {
+        this.data = data;
+        this.scene = scene;
         this.attributeUUID = UUID.randomUUID();
         this.attributeName = this.attributeUUID.toString();
 
         this.attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
 
-        String name = NAMES.computeIfAbsent(data, ignored -> UUID.randomUUID().toString());
+        String name = NAMES.computeIfAbsent(data, ignored -> TagUtils.uniqueTagName());
         this.entities = new ConcurrentLinkedDeque<>();
         this.applyTicksTag = Tag.Long(name).defaultValue(-1L);
     }
@@ -71,8 +73,8 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
             return;
         }
 
-        long tag = livingEntity.getTag(applyTicksTag);
-        livingEntity.setTag(applyTicksTag, ++tag);
+        TagHandler tags = TagUtils.sceneLocalTags(entity, scene);
+        long tag = tags.getAndUpdateTag(applyTicksTag, oldValue -> oldValue + 1);
 
         if (tag == 0) {
             livingEntity.getAttribute(attribute).addModifier(
@@ -87,17 +89,17 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
     }
 
     private boolean process(LivingEntity livingEntity) {
-        if (livingEntity.isRemoved() || livingEntity.isDead() || livingEntity.getTag(applyTicksTag) >= data.duration) {
+        if (livingEntity.isRemoved() || livingEntity.isDead()) {
             removeAttribute(livingEntity);
             return true;
         }
 
-        return false;
+        return TagUtils.sceneLocalTags(livingEntity, scene).getTag(applyTicksTag) >= data.duration;
     }
 
     private void removeAttribute(LivingEntity entity) {
         entity.getAttribute(attribute).removeModifier(attributeUUID);
-        entity.removeTag(applyTicksTag);
+        TagUtils.removeSceneLocalTag(entity, scene, applyTicksTag);
     }
 
     @DataObject

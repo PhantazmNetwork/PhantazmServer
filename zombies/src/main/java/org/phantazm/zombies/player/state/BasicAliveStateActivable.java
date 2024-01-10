@@ -116,8 +116,10 @@ public class BasicAliveStateActivable implements Activable {
             int playerHealTicks = (int) player.getAttributeValue(Attributes.HEAL_TICKS);
             if (playerHealTicks >= 0) {
                 if (healTicks >= playerHealTicks) {
-                    player.setHealth(player.getHealth() + 1F);
-                    healTicks = 0;
+                    if (player.getHealth() < player.getMaxHealth()) {
+                        player.setHealth(player.getHealth() + 1F);
+                        healTicks = 0;
+                    }
                 }
             }
 

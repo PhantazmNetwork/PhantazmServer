@@ -23,7 +23,7 @@ import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.scene2.lobby.Lobby;
 import org.phantazm.core.scene2.lobby.LobbyCreator;
 import org.phantazm.server.config.lobby.LobbyConfig;
-import org.phantazm.server.role.RoleStore;
+import org.phantazm.core.role.RoleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

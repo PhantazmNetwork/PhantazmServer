@@ -100,8 +100,8 @@ public class Door extends BoundedBase {
     private void initHolograms(List<HologramInfo> hologramInfo) {
         for (HologramInfo info : hologramInfo) {
             Vec3D offset = info.position();
-            Hologram hologram = new InstanceHologram(center.add(VecUtils.toPoint(offset)), 0.1);
-            hologram.addAll(info.text());
+            Hologram hologram = new InstanceHologram(center.add(VecUtils.toPoint(offset)));
+            hologram.addAllComponents(info.text(), 0.1);
             hologram.setInstance(instance);
             holograms.add(hologram);
         }

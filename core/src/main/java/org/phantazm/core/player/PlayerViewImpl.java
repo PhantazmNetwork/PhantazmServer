@@ -246,6 +246,10 @@ public final class PlayerViewImpl implements PlayerView {
         return Optional.ofNullable(currentSceneReference.get());
     }
 
+    public @Nullable Scene currentSceneNullable() {
+        return currentSceneReference.get();
+    }
+
     /**
      * Updates the player's current scene. This should only be called by a thread that's able to acquire the monitor
      * from {@link PlayerViewImpl#joinLock()}.

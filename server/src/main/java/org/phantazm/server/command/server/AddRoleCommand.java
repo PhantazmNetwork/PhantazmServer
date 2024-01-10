@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.server.permission.PermissionHandler;
-import org.phantazm.server.role.RoleStore;
+import org.phantazm.core.role.RoleStore;
 
 public class AddRoleCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.add_role");

@@ -1,4 +1,4 @@
-package org.phantazm.server.role;
+package org.phantazm.core.role;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -6,15 +6,13 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.jooq.Record;
-import org.jooq.Result;
 import org.phantazm.commons.FutureUtils;
+import org.phantazm.stats.DatabaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -22,10 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 
-import static org.jooq.impl.DSL.*;
-
-public class BasicRoleStore implements RoleStore {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicRoleStore.class);
+public class JDBCRoleStore implements RoleStore {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCRoleStore.class);
 
     private final DataSource dataSource;
     private final Executor executor;
@@ -33,12 +29,28 @@ public class BasicRoleStore implements RoleStore {
 
     private final Map<String, Role> roleMap;
 
-    public BasicRoleStore(@NotNull DataSource dataSource, @NotNull Executor executor) {
+    public JDBCRoleStore(@NotNull DataSource dataSource, @NotNull Executor executor) {
         this.dataSource = Objects.requireNonNull(dataSource);
         this.executor = Objects.requireNonNull(executor);
         this.roleCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
 
         this.roleMap = new ConcurrentHashMap<>();
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Void> initTables() {
+        return CompletableFuture.runAsync(() -> {
+            DatabaseUtils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
+                statement.execute("""
+                    CREATE TABLE IF NOT EXISTS player_roles (
+                        player_uuid UUID NOT NULL,
+                        player_role VARCHAR(64) NOT NULL,
+                        CONSTRAINT unique_role
+                            unique(player_uuid, player_role)
+                    );
+                    """);
+            });
+        }, executor);
     }
 
     @Override
@@ -55,7 +67,7 @@ public class BasicRoleStore implements RoleStore {
         Set<Role> currentRoles = roleCache.getIfPresent(uuid);
         if (currentRoles != null) {
             //avoid async call if we can
-            return CompletableFuture.completedFuture(getStylingRole0(currentRoles));
+            return FutureUtils.completedFuture(getStylingRole0(currentRoles));
         }
 
         return CompletableFuture.supplyAsync(() -> {
@@ -70,7 +82,7 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public @NotNull CompletableFuture<Boolean> giveRole(@NotNull UUID uuid, @NotNull String identifier) {
-        if (identifier.equals(RoleStore.DEFAULT) || identifier.equals(Role.NONE.identifier())) {
+        if (identifier.equals(DEFAULT) || identifier.equals(Role.NONE.identifier())) {
             return FutureUtils.falseCompletedFuture();
         }
 
@@ -83,13 +95,19 @@ public class BasicRoleStore implements RoleStore {
             Set<Role> roles = this.roleCache.get(uuid, this::loadRoles);
             boolean added = roles.add(role);
 
-            try (Connection connection = dataSource.getConnection()) {
-                using(connection).insertInto(table("player_roles"), field("player_uuid"), field("player_role"))
-                    .values(uuid, identifier).onDuplicateKeyUpdate().set(field("player_uuid"), uuid)
-                    .set(field("player_role"), identifier).execute();
-            } catch (SQLException e) {
-                LOGGER.warn("SQLException when writing role update to database", e);
-            }
+            DatabaseUtils.runPreparedSql(LOGGER, "giveRole", dataSource, """
+                INSERT INTO player_roles (player_uuid, player_role) VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE player_uuid=?, player_role=?
+                """, (connection, statement) -> {
+                String uuidString = uuid.toString();
+                statement.setString(1, uuidString);
+                statement.setString(2, identifier);
+
+                statement.setString(3, uuidString);
+                statement.setString(4, identifier);
+
+                statement.execute();
+            });
 
             if (added) {
                 styleIfPresent(uuid, roles);
@@ -101,7 +119,7 @@ public class BasicRoleStore implements RoleStore {
 
     @Override
     public @NotNull CompletableFuture<Boolean> removeRole(@NotNull UUID uuid, @NotNull String identifier) {
-        if (identifier.equals(RoleStore.DEFAULT) || identifier.equals(Role.NONE.identifier())) {
+        if (identifier.equals(DEFAULT) || identifier.equals(Role.NONE.identifier())) {
             return FutureUtils.falseCompletedFuture();
         }
 
@@ -113,12 +131,16 @@ public class BasicRoleStore implements RoleStore {
         return CompletableFuture.supplyAsync(() -> {
             Set<Role> roles = this.roleCache.get(uuid, this::loadRoles);
             boolean removed = roles.remove(role);
-            try (Connection connection = dataSource.getConnection()) {
-                using(connection).deleteFrom(table("player_roles"))
-                    .where(field("player_uuid").eq(uuid).and(field("player_role").eq(identifier))).execute();
-            } catch (SQLException e) {
-                LOGGER.warn("SQLException when deleting player role from database", e);
-            }
+
+            DatabaseUtils.runPreparedSql(LOGGER, "removeRole", dataSource, """
+                DELETE FROM player_roles
+                WHERE (player_uuid, player_role) = (?, ?)
+                """, (connection, statement) -> {
+                statement.setString(1, uuid.toString());
+                statement.setString(2, identifier);
+
+                statement.execute();
+            });
 
             if (removed) {
                 styleIfPresent(uuid, roles);
@@ -150,7 +172,7 @@ public class BasicRoleStore implements RoleStore {
     }
 
     private Role getStylingRole0(Set<Role> roles) {
-        Role stylingRole = roleMap.getOrDefault(RoleStore.DEFAULT, Role.NONE);
+        Role stylingRole = roleMap.getOrDefault(DEFAULT, Role.NONE);
         int highestPriority = Integer.MIN_VALUE;
         for (Role role : roles) {
             if (role.priority() >= highestPriority) {
@@ -163,36 +185,44 @@ public class BasicRoleStore implements RoleStore {
     }
 
     private Set<Role> loadRoles(UUID key) {
-        Role defaultRole = roleMap.get(RoleStore.DEFAULT);
+        Role defaultRole = roleMap.get(DEFAULT);
 
-        try (Connection connection = dataSource.getConnection()) {
-            Result<Record> result =
-                using(connection).selectFrom(table("player_roles")).where(field("player_uuid").eq(key)).fetch();
+        Set<String> roles = DatabaseUtils.runPreparedSql(LOGGER, "loadRoles", CopyOnWriteArraySet::new,
+            dataSource, """
+                SELECT player_role FROM player_roles
+                WHERE player_uuid = ?
+                """, (connection, statement) -> {
+                statement.setString(1, key.toString());
 
-            Set<Role> roleSet = new HashSet<>(result.size() + (defaultRole == null ? 0 : 1));
-            for (Record record : result) {
-                String playerRole = (String) record.get("player_role");
-                if (playerRole == null) {
-                    continue;
+                ResultSet result = statement.executeQuery();
+
+                if (!result.next()) {
+                    return Set.of();
                 }
 
-                Role role = roleMap.get(playerRole);
-                if (role == null) {
-                    continue;
+                Set<String> playerRoles = new HashSet<>();
+                do {
+                    playerRoles.add(result.getString(1));
                 }
+                while (result.next());
 
-                roleSet.add(role);
+                return playerRoles;
+            });
+
+        Set<Role> roleSet = new HashSet<>(roles.size());
+        for (String roleName : roles) {
+            Role role = roleMap.get(roleName);
+            if (role == null) {
+                continue;
             }
 
-            if (defaultRole != null) {
-                roleSet.add(defaultRole);
-            }
-
-            return new CopyOnWriteArraySet<>(roleSet);
-        } catch (Exception e) {
-            LOGGER.warn("Exception when fetching player roles", e);
+            roleSet.add(role);
         }
 
-        return defaultRole == null ? new CopyOnWriteArraySet<>() : new CopyOnWriteArraySet<>(List.of(defaultRole));
+        if (roleSet.isEmpty()) {
+            return defaultRole == null ? new CopyOnWriteArraySet<>() : new CopyOnWriteArraySet<>(List.of(defaultRole));
+        }
+
+        return new CopyOnWriteArraySet<>(roleSet);
     }
 }

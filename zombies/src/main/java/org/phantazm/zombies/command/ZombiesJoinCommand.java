@@ -22,7 +22,7 @@ import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneManager;
-import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.modifier.ModifierHandler;
 import org.phantazm.zombies.scene2.ZombiesJoiner;
@@ -35,7 +35,7 @@ public class ZombiesJoinCommand extends Command {
 
     public ZombiesJoinCommand(@NotNull ZombiesJoiner zombiesJoiner, @NotNull Map<? super UUID, ? extends Party> partyMap,
         @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, long ratelimit,
-        @NotNull ZombiesDatabase zombiesDatabase) {
+        @NotNull ZombiesStatsDatabase zombiesDatabase) {
         super("join");
 
         Argument<String> mapKeyArgument = ArgumentType.Word("map-key");
@@ -173,7 +173,7 @@ public class ZombiesJoinCommand extends Command {
     }
 
     @SuppressWarnings("unchecked")
-    private CompletableFuture<Boolean> hasAtLeastOneWin(ZombiesDatabase zombiesDatabase, Key targetMap,
+    private CompletableFuture<Boolean> hasAtLeastOneWin(ZombiesStatsDatabase zombiesDatabase, Key targetMap,
         Collection<PlayerView> playerViews, Set<Key> modifiers) {
         //TODO: add to map config, or get rid of since it's not usually necessary
         if (modifiers.isEmpty() && targetMap.equals(Key.key(Namespaces.PHANTAZM, "gau_infernal"))) {

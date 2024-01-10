@@ -18,7 +18,7 @@ import org.phantazm.core.chat.command.ChatChannelSendCommand;
 import org.phantazm.core.chat.command.ChatCommand;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyChatChannel;
-import org.phantazm.server.role.RoleStore;
+import org.phantazm.core.role.RoleStore;
 
 import java.util.HashMap;
 import java.util.Map;

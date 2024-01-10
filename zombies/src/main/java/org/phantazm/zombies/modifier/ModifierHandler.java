@@ -12,6 +12,7 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.TagUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -38,7 +39,7 @@ public final class ModifierHandler {
     private static final ModifierResult INVALID = new ModifierResult(ModifierStatus.INVALID_MODIFIER, null);
     private static final ModifierResult NO_PERMISSIONS = new ModifierResult(ModifierStatus.NO_PERMISSIONS, null);
 
-    private static final Tag<List<String>> MODIFIERS_TAG = Tag.String("zombies_modifiers").list();
+    private static final Tag<List<String>> MODIFIERS_TAG = Tag.String(TagUtils.uniqueTagName()).list();
 
     private final Map<Key, ModifierComponent> components;
     private final Int2ObjectMap<ModifierComponent> ordinalMap;
@@ -175,6 +176,20 @@ public final class ModifierHandler {
         });
 
         return result.get();
+    }
+
+    public @NotNull String descriptor(@NotNull Set<Key> names) {
+        List<ModifierComponent> componentList = new ArrayList<>(names.size());
+        for (Key name : names) {
+            ModifierComponent component = components.get(name);
+            if (component == null) {
+                throw new IllegalArgumentException("Unknown modifier name " + name);
+            }
+
+            componentList.add(component);
+        }
+
+        return ModifierUtils.modifierDescriptor(componentList);
     }
 
     public ModifierHandler.@NotNull ModifierResult setFromDescriptor(@NotNull PlayerView playerView,

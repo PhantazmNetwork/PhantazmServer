@@ -72,6 +72,8 @@ public class Main {
 
     private static volatile Process currentProcess;
     private static volatile boolean shuttingDown;
+    private static volatile BufferedWriter serverProcessWriter;
+    private static volatile boolean lastWasStop;
 
     private static Process proc(String env, boolean isAttach) throws IOException {
         if (shuttingDown) {
@@ -96,9 +98,10 @@ public class Main {
                 OutputStream outputStream = process.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
 
+                serverProcessWriter = writer;
+
                 // this indicates to the server process to start
-                writer.write("start");
-                writer.newLine();
+                writer.write("start\n");
                 writer.flush();
 
                 asyncTransferStandardInputTo(writer);
@@ -121,8 +124,10 @@ public class Main {
                     }
 
                     writer.write(line);
-                    writer.newLine();
+                    writer.write('\n');
                     writer.flush();
+
+                    lastWasStop = line.equals("stop");
                 }
             } catch (IOException e) {
                 System.err.println("[ERROR] An exception occurred when trying to connect to the server process " +
@@ -146,6 +151,15 @@ public class Main {
                 }
 
                 System.out.println("[INFO] Shutting down!");
+                BufferedWriter writer = serverProcessWriter;
+                if (writer != null && !lastWasStop) {
+                    try {
+                        writer.write("stop\n");
+                        writer.flush();
+                    } catch (IOException e) {
+                        System.err.println("[ERROR] Errored while trying to send stop command to server process!");
+                    }
+                }
 
                 try {
                     new ProcessBuilder().command(System.getenv("DOCKER_COMPOSE_DOWN_CMD").split(" "))

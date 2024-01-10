@@ -1,4 +1,4 @@
-package org.phantazm.server.role;
+package org.phantazm.core.role;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -10,6 +10,8 @@ import java.util.concurrent.CompletableFuture;
 
 public interface RoleStore {
     String DEFAULT = "default";
+
+    @NotNull CompletableFuture<Void> initTables();
 
     void register(@NotNull Role role);
 

@@ -1,21 +1,12 @@
 package org.phantazm.zombies.player;
 
-import com.github.steanky.element.core.context.ContextManager;
-import com.github.steanky.element.core.dependency.DependencyModule;
-import com.github.steanky.element.core.dependency.ModuleDependencyProvider;
-import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.entity.EntityAttackEvent;
-import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.ScoreboardObjectivePacket;
@@ -30,19 +21,14 @@ import org.phantazm.core.tick.Activable;
 import org.phantazm.core.tick.BasicTickTaskScheduler;
 import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.commons.flag.Flaggable;
-import org.phantazm.core.VecUtils;
 import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;
-import org.phantazm.core.hologram.Hologram;
-import org.phantazm.core.hologram.ViewableHologram;
 import org.phantazm.core.inventory.*;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.mob2.MobSpawner;
 import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
-import org.phantazm.stats.zombies.ZombiesDatabase;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.coin.BasicPlayerCoins;
 import org.phantazm.zombies.coin.BasicTransactionModifierSource;
@@ -53,7 +39,6 @@ import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.equipment.gun.ZombiesEquipmentModule;
 import org.phantazm.zombies.kill.BasicPlayerKills;
 import org.phantazm.zombies.kill.PlayerKills;
-import org.phantazm.zombies.leaderboard.BestTimeLeaderboard;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.action_bar.ZombiesPlayerActionBar;
@@ -71,7 +56,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.StringReader;
 import java.util.*;
-import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -79,28 +63,10 @@ import java.util.function.Supplier;
 public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicZombiesPlayerSource.class);
 
-    private final ZombiesDatabase database;
-
-    private final Executor executor;
-
-    private final PlayerViewProvider viewProvider;
-
     private final Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction;
 
-    private final ContextManager contextManager;
-
-    private final KeyParser keyParser;
-
-    public BasicZombiesPlayerSource(@NotNull ZombiesDatabase database, @NotNull Executor executor,
-        @NotNull PlayerViewProvider viewProvider,
-        @NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction,
-        @NotNull ContextManager contextManager, @NotNull KeyParser keyParser) {
-        this.database = Objects.requireNonNull(database);
-        this.executor = Objects.requireNonNull(executor);
-        this.viewProvider = Objects.requireNonNull(viewProvider);
+    public BasicZombiesPlayerSource(@NotNull Function<ZombiesEquipmentModule, EquipmentCreator> equipmentCreatorFunction) {
         this.equipmentCreatorFunction = Objects.requireNonNull(equipmentCreatorFunction);
-        this.contextManager = Objects.requireNonNull(contextManager);
-        this.keyParser = Objects.requireNonNull(keyParser);
     }
 
     @SuppressWarnings("unchecked")
@@ -108,7 +74,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
     public @NotNull ZombiesPlayer createPlayer(@NotNull ZombiesScene scene,
         @NotNull Map<PlayerView, ZombiesPlayer> zombiesPlayers,
         @NotNull MapSettingsInfo mapSettingsInfo, @NotNull PlayerCoinsInfo playerCoinsInfo,
-        @NotNull LeaderboardInfo leaderboardInfo, @NotNull Instance instance, @NotNull PlayerView playerView,
+        @NotNull Instance instance, @NotNull PlayerView playerView,
         @NotNull TransactionModifierSource mapTransactionModifierSource, @NotNull Flaggable flaggable,
         @NotNull EventNode<Event> eventNode, @NotNull Random random, @NotNull MapObjects mapObjects,
         @NotNull MobSpawner mobSpawner, @NotNull CorpseCreator corpseCreator,
@@ -241,37 +207,10 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         PlayerStateSwitcher stateSwitcher = new PlayerStateSwitcher();
 
-        Point location = VecUtils.toPoint(mapSettingsInfo.origin()).add(VecUtils.toPoint(leaderboardInfo.location()));
-        Hologram hologram = new ViewableHologram(location, leaderboardInfo.gap(),
-            viewer -> viewer.getUuid().equals(playerView.getUUID()));
-        hologram.setInstance(instance);
-        Entity armorStand = new Entity(EntityType.ARMOR_STAND);
-        armorStand.setNoGravity(true);
-        armorStand.setInvisible(true);
-        armorStand.updateViewableRule(player -> player.getUuid().equals(playerView.getUUID()));
-        armorStand.setInstance(instance);
-        DependencyModule leaderboardModule =
-            new BestTimeLeaderboard.Module(database, playerView.getUUID(), hologram, leaderboardInfo.gap(),
-                armorStand, mapSettingsInfo, viewProvider, MiniMessage.miniMessage(), executor);
-        BestTimeLeaderboard leaderboard = contextManager.makeContext(leaderboardInfo.data())
-            .provide(new ModuleDependencyProvider(keyParser, leaderboardModule));
-        eventNode.addListener(PlayerEntityInteractEvent.class, event -> {
-            if (event.getPlayer().getUuid().equals(playerView.getUUID()) && event.getTarget() == armorStand) {
-                playerView.getPlayer().ifPresent(player -> player.playSound(leaderboardInfo.clickSound(), armorStand));
-                leaderboard.cycle();
-            }
-        });
-        eventNode.addListener(EntityAttackEvent.class, event -> {
-            if (event.getEntity().getUuid().equals(playerView.getUUID()) && event.getTarget() == armorStand) {
-                playerView.getPlayer().ifPresent(player -> player.playSound(leaderboardInfo.clickSound(), armorStand));
-                leaderboard.cycle();
-            }
-        });
-
         ZombiesPlayerModule module =
             new ZombiesPlayerModule(playerView, meta, coins, kills, equipmentHandler, equipmentCreator, actionBar,
                 accessRegistry, stateSwitcher, stateFunctions, sidebar, tabList, mapTransactionModifierSource,
-                playerTransactionModifierSource, flaggable, stats, leaderboard);
+                playerTransactionModifierSource, flaggable, stats);
 
         ZombiesPlayer zombiesPlayer = new BasicZombiesPlayer(scene, module, taskScheduler);
         zombiesPlayerWrapper.set(zombiesPlayer);

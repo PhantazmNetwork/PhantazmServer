@@ -8,6 +8,7 @@ import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.TagUtils;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.inventory.InventoryObject;
@@ -34,7 +35,7 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
         float punchKnockback, @NotNull Supplier<ZombiesScene> scene) {
         super(instance, zombiesPlayers, scene);
         this.punchDamage = punchDamage;
-        this.lastPunchTicksTag = Tag.Integer("last_punch").defaultValue(0);
+        this.lastPunchTicksTag = Tag.Integer(TagUtils.uniqueTagName()).defaultValue(0);
         this.punchCooldown = punchCooldown;
         this.punchKnockback = punchKnockback;
     }

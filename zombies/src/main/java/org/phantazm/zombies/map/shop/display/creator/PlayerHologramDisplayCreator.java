@@ -34,7 +34,7 @@ public class PlayerHologramDisplayCreator implements PlayerDisplayCreator {
         private final Data data;
 
         private Display(Data data, ZombiesPlayer zombiesPlayer) {
-            super(new ViewableHologram(Vec.ZERO, 0, Hologram.Alignment.LOWER,
+            super(new ViewableHologram(Vec.ZERO, Hologram.Alignment.LOWER,
                 player -> player.getUuid().equals(zombiesPlayer.getUUID())));
 
             this.data = data;
@@ -45,7 +45,7 @@ public class PlayerHologramDisplayCreator implements PlayerDisplayCreator {
             hologram.setInstance(shop.instance(), shop.center().add(VecUtils.toPoint(data.info.position())));
             hologram.clear();
 
-            hologram.addAll(data.info.text());
+            hologram.addAllComponents(data.info.text());
         }
     }
 

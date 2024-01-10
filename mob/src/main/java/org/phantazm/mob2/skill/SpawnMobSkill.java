@@ -14,19 +14,16 @@ import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.TagUtils;
 import org.phantazm.mob2.*;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Model("mob.skill.spawn_mob")
 @Cache
 public class SpawnMobSkill implements SkillComponent {
-    private static final String NAME_PREFIX = "spawn_mob_";
-    private static final AtomicInteger NAME_COUNTER = new AtomicInteger();
-
     private final Data data;
     private final SelectorComponent selector;
     private final SpawnCallbackComponent callback;
@@ -38,8 +35,7 @@ public class SpawnMobSkill implements SkillComponent {
         this.data = Objects.requireNonNull(data);
         this.selector = Objects.requireNonNull(selector);
         this.callback = Objects.requireNonNull(callback);
-        this.nameCounterTag = Tag.Integer(NAME_PREFIX + NAME_COUNTER.getAndIncrement())
-            .defaultValue(0);
+        this.nameCounterTag = Tag.Integer(TagUtils.uniqueTagName()).defaultValue(0);
     }
 
     @Override

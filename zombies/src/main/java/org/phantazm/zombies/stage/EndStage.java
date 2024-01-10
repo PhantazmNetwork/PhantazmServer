@@ -18,12 +18,14 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.packet.MinestomPacketUtils;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.messaging.packet.server.RoundStartPacket;
-import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.zombies.ZombiesLeaderboardDatabase;
+import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.WebhookInfo;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.modifier.ModifierComponent;
+import org.phantazm.zombies.modifier.ModifierUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
@@ -59,7 +61,7 @@ public class EndStage implements Stage {
 
     private final BiFunction<? super ZombiesPlayer, Boolean, ? extends SidebarUpdater> sidebarUpdaterCreator;
     private final RoundHandler roundHandler;
-    private final ZombiesDatabase database;
+    private final ZombiesLeaderboardDatabase leaderboardDatabase;
     private final Supplier<ZombiesScene> sceneSupplier;
 
     private final Map<UUID, SidebarUpdater> sidebarUpdaters;
@@ -71,7 +73,8 @@ public class EndStage implements Stage {
         @NotNull TickFormatter tickFormatter, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
         @NotNull Wrapper<Long> remainingTicks, @NotNull Wrapper<Long> ticksSinceStart,
         @NotNull BiFunction<? super ZombiesPlayer, Boolean, ? extends SidebarUpdater> sidebarUpdaterCreator,
-        @NotNull RoundHandler roundHandler, @NotNull ZombiesDatabase database, @NotNull Supplier<ZombiesScene> sceneSupplier) {
+        @NotNull RoundHandler roundHandler, @NotNull ZombiesLeaderboardDatabase leaderboardDatabase,
+        @NotNull Supplier<ZombiesScene> sceneSupplier) {
         this.instance = Objects.requireNonNull(instance);
         this.settings = Objects.requireNonNull(settings);
         this.webhook = Objects.requireNonNull(webhook);
@@ -81,7 +84,7 @@ public class EndStage implements Stage {
         this.ticksSinceStart = Objects.requireNonNull(ticksSinceStart);
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator);
         this.roundHandler = Objects.requireNonNull(roundHandler);
-        this.database = Objects.requireNonNull(database);
+        this.leaderboardDatabase = Objects.requireNonNull(leaderboardDatabase);
         this.sceneSupplier = Objects.requireNonNull(sceneSupplier);
 
         this.sidebarUpdaters = new HashMap<>();
@@ -171,15 +174,17 @@ public class EndStage implements Stage {
             instance.sendTitlePart(TitlePart.SUBTITLE,
                 MINI_MESSAGE.deserialize(settings.winSubtitleFormat(), roundPlaceholder));
 
+            if (isLegit && settings.trackStats()) {
+                leaderboardDatabase.submitGame(zombiesPlayers.stream()
+                        .map(player -> player.module().getPlayerView().getUUID()).collect(Collectors.toSet()),
+                    ModifierUtils.modifierDescriptor(scene.activeModifiers()), scene.mapSettingsInfo().id(),
+                    ticksSinceStart.get(), Instant.now().toEpochMilli());
+            }
+
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
                 if (isLegit && settings.trackStats()) {
                     ZombiesPlayerMapStats stats = zombiesPlayer.module().getStats();
                     stats.setWins(stats.getWins() + 1);
-
-                    if (!scene.isModified()) {
-                        database.synchronizeBestTime(zombiesPlayer.getUUID(), settings.id(), zombiesPlayers.size(), "",
-                            ticksSinceStart.get());
-                    }
                 }
 
                 zombiesPlayer.getPlayer().ifPresent(player -> {
