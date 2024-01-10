@@ -41,8 +41,7 @@ public class JDBCGeneralDatabase implements GeneralDatabase {
 
     @Override
     public @NotNull CompletableFuture<Void> handleJoin(@NotNull UUID playerUUID, @NotNull ZonedDateTime time) {
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        executor.execute(() -> {
+        return CompletableFuture.runAsync(() -> {
             Utils.runPreparedSql(LOGGER, "handleJoin", dataSource, """
                 INSERT INTO player_stats (player_uuid, first_join, last_join)
                 VALUES(?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP())
@@ -51,10 +50,6 @@ public class JDBCGeneralDatabase implements GeneralDatabase {
                 statement.setString(1, playerUUID.toString());
                 statement.execute();
             });
-
-            future.complete(null);
-        });
-
-        return future;
+        }, executor);
     }
 }
