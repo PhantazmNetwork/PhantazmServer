@@ -127,6 +127,7 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
     public void addComponent(@NotNull Component component, double gap) {
         synchronized (sync) {
             entries.add(entryFromLine(Hologram.line(component, gap)));
+            updateArmorStands();
         }
     }
 
@@ -134,22 +135,27 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
     public void addFormat(@NotNull String formatString, @NotNull LineFormatter lineFormatter, double gap) {
         synchronized (sync) {
             entries.add(entryFromLine(Hologram.line(formatString, lineFormatter, gap)));
+            updateArmorStands();
         }
     }
 
     @Override
     public boolean addAllComponents(int index, @NotNull Collection<? extends Component> components, double gap) {
         synchronized (sync) {
-            return entries.addAll(index, Containers.mappedView(component ->
+            boolean result = entries.addAll(index, Containers.mappedView(component ->
                 entryFromLine(Hologram.line(component, gap)), components));
+            updateArmorStands();
+            return result;
         }
     }
 
     @Override
     public boolean addAllComponents(@NotNull Collection<? extends Component> components, double gap) {
         synchronized (sync) {
-            return entries.addAll(Containers.mappedView(component ->
+            boolean result = entries.addAll(Containers.mappedView(component ->
                 entryFromLine(Hologram.line(component, gap)), components));
+            updateArmorStands();
+            return result;
         }
     }
 
@@ -157,8 +163,10 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
     public boolean addAllFormats(@NotNull Collection<? extends String> formatStrings,
         @NotNull LineFormatter lineFormatter, double gap) {
         synchronized (sync) {
-            return entries.addAll(Containers.mappedView(format ->
+            boolean result = entries.addAll(Containers.mappedView(format ->
                 entryFromLine(Hologram.line(format, lineFormatter, gap)), formatStrings));
+            updateArmorStands();
+            return result;
         }
     }
 
@@ -181,6 +189,7 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
         synchronized (sync) {
             Entry old = entries.set(index, entryFromLine(line));
             old.entity.remove();
+            updateArmorStands();
             return old.line;
         }
     }
@@ -220,6 +229,7 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
                 entry.entity.remove();
             }
             entries.clear();
+            updateArmorStands();
         }
     }
 
