@@ -41,11 +41,12 @@ public class ExecutorFeature {
                     LOGGER.warn("Database tasks failed to cancel.");
                 }
             }
+            LOGGER.info("Executor shut down successfully.");
         } catch (InterruptedException e) {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Error during executor shutdown", e);
         }
     }
 

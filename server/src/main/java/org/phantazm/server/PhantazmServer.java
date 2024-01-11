@@ -167,9 +167,12 @@ public final class PhantazmServer {
             return;
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        Thread shutdownHook = new Thread(() -> {
             shutdown("interrupt");
-        }));
+        });
+        shutdownHook.setName("Phantazm-Shutdown-Hook");
+
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
 
         MinecraftServer.setBrandName(BRAND_NAME);
 

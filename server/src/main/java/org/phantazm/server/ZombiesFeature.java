@@ -30,7 +30,6 @@ import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.player.IdentitySource;
-import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.loader.DataSource;
@@ -68,7 +67,6 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -151,7 +149,7 @@ public final class ZombiesFeature {
                 .makeContext(entry.getValue().endless()).provide(dependencyProvider);
 
             ZombiesLeaderboardContext leaderboardContext =
-                new ZombiesLeaderboardContext(Executors.newFixedThreadPool(4), Databases.leaderboards(),
+                new ZombiesLeaderboardContext(ExecutorFeature.getExecutor(), Databases.leaderboards(),
                     contextManager.makeContext(entry.getValue().leaderboard()).provide());
 
             ZombiesSceneCreator provider = new ZombiesSceneCreator(zombiesConfig.maximumScenes(), entry.getValue(),
