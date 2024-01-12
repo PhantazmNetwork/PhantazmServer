@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -80,12 +79,7 @@ public final class MobFeature {
                     pathfinder, instanceSettingsFunction, equipmentMap, attributeMap)));
             }));
 
-        try {
-            loader.load();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
+        loader.loadUnchecked();
         LOGGER.info("Loaded {} mob file(s)", loader.data().size());
 
         MobFeature.loader = loader;

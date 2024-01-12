@@ -33,8 +33,9 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
         this.dataSource = Objects.requireNonNull(dataSource);
         this.expireTime = expireTime;
 
-        this.uuidToUsername = Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(10)).build();
-        this.usernameToUuid = Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(10)).build();
+        Caffeine<Object, Object> builder = Caffeine.newBuilder().expireAfterWrite(Duration.ofMinutes(10));
+        this.uuidToUsername = builder.build();
+        this.usernameToUuid = builder.build();
     }
 
     private static boolean isValidChar(char c) {

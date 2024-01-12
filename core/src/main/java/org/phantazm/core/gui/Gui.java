@@ -17,7 +17,7 @@ import java.util.function.BooleanSupplier;
  * Extension of {@link Inventory} designed to ease the creation of graphical user interfaces. May or may not be
  * "dynamic". Dynamic GUIs support animations and tick all of their constituent {@link GuiItem}s.
  */
-@SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter", "unchecked"})
+@SuppressWarnings({"unchecked"})
 public class Gui extends Inventory implements Tickable {
     private final Int2ObjectMap.Entry<GuiItem>[] EMPTY_INT_2_OBJECT_MAP_ENTRY_ARRAY = new Int2ObjectMap.Entry[0];
 

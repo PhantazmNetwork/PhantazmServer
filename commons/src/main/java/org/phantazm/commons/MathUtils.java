@@ -16,10 +16,6 @@ public final class MathUtils {
         return Math.abs(a - b) < epsilon;
     }
 
-    public static long randomInterval(long min, long max) {
-        return (long) (Math.random() * (min - max)) + min;
-    }
-
     public static int randomInterval(int min, int max) {
         return (int) (Math.random() * (min - max)) + min;
     }

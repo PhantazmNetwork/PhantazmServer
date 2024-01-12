@@ -152,12 +152,12 @@ public final class LobbyFeature {
                             lobbyConfig.maxPlayers(), lobbyConfig.timeout(), InjectionStore.of()))) != null) {
                         throw new RuntimeException("Duplicate lobby named " + lobbyConfig.name());
                     }
-
-                    preloadFutures.add(CompletableFuture.runAsync(() -> {
-                        instanceLoader.preload(lobbyConfig.lobbyPaths(), lobbyConfig.instanceConfig().spawnPoint(),
-                            lobbyConfig.instanceConfig().chunkLoadDistance());
-                    }, executor));
                 }
+
+                preloadFutures.add(CompletableFuture.runAsync(() -> {
+                    instanceLoader.preload(lobbyConfig.lobbyPaths(), lobbyConfig.instanceConfig().spawnPoint(),
+                        lobbyConfig.instanceConfig().chunkLoadDistance());
+                }, executor));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -6,14 +6,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
 public class LoaderException extends IOException {
     private final DataLocation location;
     private final ConfigElement element;
     private final ElementPath elementPath;
 
-    private LoaderException(String message, Throwable cause, DataLocation location, ConfigElement element, ElementPath elementPath) {
+    private LoaderException(String message, Throwable cause, DataLocation location, ConfigElement element,
+        ElementPath elementPath) {
         super(message, cause);
         this.location = location;
         this.element = element;

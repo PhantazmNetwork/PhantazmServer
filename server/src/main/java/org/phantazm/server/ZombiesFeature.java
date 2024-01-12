@@ -175,11 +175,7 @@ public final class ZombiesFeature {
                 return List.of(ObjectExtractor.entry(modifierData.key(), new ModifierSource(modifierData, modifierComponent)));
             }));
 
-        try {
-            componentLoader.load();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        componentLoader.loadUnchecked();
 
         LOGGER.info("Loaded {} modifiers", componentLoader.data().size());
         ModifierHandler.Global.init(componentLoader.data(), InjectionStore.of());

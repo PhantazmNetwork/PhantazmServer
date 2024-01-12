@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -14,6 +15,14 @@ public interface Loader<T> {
     @NotNull @Unmodifiable Map<Key, T> data();
 
     void load() throws IOException;
+
+    default void loadUnchecked() {
+        try {
+            load();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 
     static <T, V extends ConfigElement> @NotNull Loader<T> loader(
         @NotNull Supplier<? extends @NotNull DataSource> dataSourceSupplier,
@@ -48,41 +57,40 @@ public interface Loader<T> {
         public void load() throws IOException {
             Map<Key, T> map = new HashMap<>();
 
-            try (ExceptionHandler<IOException> handler = new ExceptionHandler<>(IOException.class)) {
-                try (DataSource dataSource = dataSourceSupplier.get()) {
-                    while (dataSource.hasNext()) {
-                        ConfigElement element = dataSource.next();
-                        DataLocation location = dataSource.lastLocation();
+            try (ExceptionHandler<IOException> handler = new ExceptionHandler<>(IOException.class);
+                 DataSource dataSource = dataSourceSupplier.get()) {
+                while (dataSource.hasNext()) {
+                    ConfigElement element = dataSource.next();
+                    DataLocation location = dataSource.lastLocation();
 
-                        handler.run(() -> {
-                            Collection<ObjectExtractor.Entry<T>> entries;
+                    handler.run(() -> {
+                        Collection<ObjectExtractor.Entry<T>> entries;
 
-                            try {
-                                entries = extract(location, extractor, element);
-                            } catch (Exception exception) {
-                                if (exception instanceof LoaderException loaderException) {
-                                    throw loaderException;
-                                }
+                        try {
+                            entries = extract(location, extractor, element);
+                        } catch (Exception exception) {
+                            if (exception instanceof LoaderException loaderException) {
+                                throw loaderException;
+                            }
 
+                            throw LoaderException.builder()
+                                .withElement(element)
+                                .withMessage("exception when loading data from configuration")
+                                .withDataLocation(location)
+                                .withCause(exception)
+                                .build();
+                        }
+
+                        for (ObjectExtractor.Entry<T> entry : entries) {
+                            if (map.putIfAbsent(entry.identifier(), entry.object()) != null) {
                                 throw LoaderException.builder()
                                     .withElement(element)
-                                    .withMessage("exception when loading data from configuration")
+                                    .withMessage("duplicate key " + entry.identifier())
                                     .withDataLocation(location)
-                                    .withCause(exception)
                                     .build();
                             }
-
-                            for (ObjectExtractor.Entry<T> entry : entries) {
-                                if (map.putIfAbsent(entry.identifier(), entry.object()) != null) {
-                                    throw LoaderException.builder()
-                                        .withElement(element)
-                                        .withMessage("duplicate key " + entry.identifier())
-                                        .withDataLocation(location)
-                                        .build();
-                                }
-                            }
-                        });
-                    }
+                        }
+                    });
                 }
             }
 
@@ -90,8 +98,7 @@ public interface Loader<T> {
         }
 
         private static <T, V extends ConfigElement> Collection<ObjectExtractor.Entry<T>> extract(
-            DataLocation dataLocation,
-            ObjectExtractor<T, V> extractor, ConfigElement element) throws IOException {
+            DataLocation dataLocation, ObjectExtractor<T, V> extractor, ConfigElement element) throws IOException {
             Class<V> type = extractor.allowedType();
             if (!type.isAssignableFrom(element.getClass())) {
                 throw LoaderException.builder()

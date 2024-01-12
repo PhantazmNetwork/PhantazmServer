@@ -159,13 +159,13 @@ public class SpawnMobSkill implements SkillComponent {
             }
         }
 
-        private void setup(Mob self) {
-            self.setOwner(super.self.getUuid());
+        private void setup(Mob child) {
+            child.setOwner(super.self.getUuid());
             if (data.unlimitedSpawns()) {
                 return;
             }
 
-            self.addSkill(new Skill() {
+            child.addSkill(new Skill() {
                 @Override
                 public void end() {
                     ownerTags.updateTag(spawnCountTag, value -> value - 1);
