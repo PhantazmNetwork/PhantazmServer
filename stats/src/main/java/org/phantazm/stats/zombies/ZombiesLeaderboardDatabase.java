@@ -3,10 +3,7 @@ package org.phantazm.stats.zombies;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -27,7 +24,7 @@ public interface ZombiesLeaderboardDatabase {
     @NotNull CompletableFuture<Optional<RankingEntry>> fetchBestRanking(@NotNull UUID player, int teamSize, @NotNull Key map,
         @NotNull String modifierKey);
 
-    @NotNull CompletableFuture<Optional<Long>> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
+    @NotNull CompletableFuture<OptionalLong> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
         @NotNull String modifierKey);
 
     @NotNull CompletableFuture<List<LeaderboardEntry>> fetchTimeHistory(@NotNull Set<UUID> team, @NotNull Key map,

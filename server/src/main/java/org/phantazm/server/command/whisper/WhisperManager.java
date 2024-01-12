@@ -22,8 +22,8 @@ public class WhisperManager {
     private static final Tag<UUID> LAST_MESSAGED_TAG = Tag.UUID(TagUtils.uniqueTagName());
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
-    private final ConsoleSender consoleSender;
     private final ConnectionManager connectionManager;
+    private final ConsoleSender consoleSender;
     private final WhisperConfig whisperConfig;
 
     private record TagEntry(TagHandler handler,
@@ -52,12 +52,12 @@ public class WhisperManager {
                 messagePlaceholder);
         sender.sendMessage(toSender);
 
-        TagEntry senderTags = resolveTagEntry(sender);
-        TagEntry targetTags = resolveTagEntry(target);
+        TagEntry senderEntry = resolveTagEntry(sender);
+        TagEntry targetEntry = resolveTagEntry(target);
 
-        if (senderTags != null && targetTags != null) {
-            senderTags.handler.setTag(LAST_MESSAGED_TAG, targetTags.self);
-            targetTags.handler.setTag(LAST_MESSAGED_TAG, senderTags.self);
+        if (senderEntry != null && targetEntry != null) {
+            senderEntry.handler.setTag(LAST_MESSAGED_TAG, targetEntry.self);
+            targetEntry.handler.setTag(LAST_MESSAGED_TAG, senderEntry.self);
         }
     }
 

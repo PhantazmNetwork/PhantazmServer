@@ -236,25 +236,26 @@ public class JDBCPermissionHandler implements PermissionHandler {
 
     private void applyGroup(String group, CommandSender commandSender) {
         Set<Permission> permissions = groupPermissionCache.get(group, key -> {
-            return DatabaseUtils.runPreparedSql(LOGGER, "applyGroup", CopyOnWriteArraySet::new, dataSource, """
-                SELECT permission FROM permission_groups
-                WHERE permission_group=?
-                """, (connection, statement) -> {
-                statement.setString(1, group);
-                ResultSet result = statement.executeQuery();
+            return DatabaseUtils.runPreparedSql(LOGGER, "applyGroup", CopyOnWriteArraySet::new, dataSource,
+                """
+                    SELECT permission FROM permission_groups
+                    WHERE permission_group=?
+                    """, (connection, statement) -> {
+                    statement.setString(1, group);
+                    ResultSet result = statement.executeQuery();
 
-                if (!result.next()) {
-                    return new CopyOnWriteArraySet<>();
-                }
+                    if (!result.next()) {
+                        return new CopyOnWriteArraySet<>();
+                    }
 
-                List<Permission> temp = new ArrayList<>(5);
-                do {
-                    temp.add(new Permission(result.getString(1)));
-                }
-                while (result.next());
+                    List<Permission> temp = new ArrayList<>(5);
+                    do {
+                        temp.add(new Permission(result.getString(1)));
+                    }
+                    while (result.next());
 
-                return new CopyOnWriteArraySet<>(temp);
-            });
+                    return new CopyOnWriteArraySet<>(temp);
+                });
         });
 
         commandSender.addPermissions(permissions);

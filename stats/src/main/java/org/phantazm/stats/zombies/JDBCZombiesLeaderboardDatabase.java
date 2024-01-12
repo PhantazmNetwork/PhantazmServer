@@ -1,5 +1,7 @@
 package org.phantazm.stats.zombies;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -26,12 +29,48 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
     private final IntSet teamSizes;
     private final Set<String> validModifierKeys;
 
+    private final Cache<BestTimesKey, List<LeaderboardEntry>> bestTimesCache;
+    private final Cache<TimeHistoryKey, List<LeaderboardEntry>> timeHistoryCache;
+    private final Cache<BestTimeKey, OptionalLong> bestTimeCache;
+    private final Cache<BestRankingKey, Optional<RankingEntry>> bestRankingCache;
+
+    private record BestTimesKey(int teamSize,
+        @NotNull String modifierKey,
+        @NotNull Key map,
+        int start,
+        int entries) {
+    }
+
+    private record TimeHistoryKey(@NotNull Set<UUID> team,
+        @NotNull Key map,
+        @NotNull String modifierKey) {
+    }
+
+    private record BestTimeKey(@NotNull Set<UUID> team,
+        @NotNull Key map,
+        @NotNull String modifierKey) {
+    }
+
+    private record BestRankingKey(@NotNull UUID player,
+        int teamSize,
+        @NotNull Key map,
+        @NotNull String modifierKey) {
+    }
+
     public JDBCZombiesLeaderboardDatabase(@NotNull Executor executor, @NotNull DataSource dataSource,
         @NotNull IntSet teamSizes, @NotNull Set<String> validModifierKeys) {
         this.executor = Objects.requireNonNull(executor);
         this.dataSource = Objects.requireNonNull(dataSource);
         this.teamSizes = filterSizes(teamSizes);
         this.validModifierKeys = filterModifierKeys(validModifierKeys);
+
+        Caffeine<Object, Object> builder = Caffeine.newBuilder().maximumSize(1024)
+            .expireAfterWrite(Duration.ofMinutes(10));
+
+        this.bestTimesCache = builder.build();
+        this.timeHistoryCache = builder.build();
+        this.bestTimeCache = builder.build();
+        this.bestRankingCache = builder.build();
     }
 
     private static IntSet filterSizes(IntSet input) {
@@ -251,6 +290,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
         }, executor);
     }
 
+    @SuppressWarnings("OptionalAssignedToNull")
     @Override
     public @NotNull CompletableFuture<Optional<RankingEntry>> fetchBestRanking(@NotNull UUID player, int teamSize,
         @NotNull Key map, @NotNull String modifierKey) {
@@ -261,57 +301,72 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             return FutureUtils.completedFuture(Optional.empty());
         }
 
+        BestRankingKey bestRankingKey = new BestRankingKey(player, teamSize, map, modifierKey);
+        Optional<RankingEntry> cachedRankingEntry = bestRankingCache.getIfPresent(bestRankingKey);
+        if (cachedRankingEntry != null) {
+            return FutureUtils.completedFuture(cachedRankingEntry);
+        }
+
         return CompletableFuture.supplyAsync(() -> {
             String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
             String teamFields = teamFields(teamSize);
 
-            return DatabaseUtils.runPreparedSql(LOGGER, "fetchBestRanking", Optional::empty, dataSource, """
-                SELECT time_taken, row_num
-                FROM
-                    (
-                    SELECT time_taken, id, %3$s, ROW_NUMBER() OVER (ORDER BY time_taken, id) AS row_num
+            return bestRankingCache.get(bestRankingKey, ignored -> {
+                return DatabaseUtils.runPreparedSql(LOGGER, "fetchBestRanking", Optional::empty, dataSource, """
+                    SELECT time_taken, row_num
                     FROM
                         (
-                        SELECT id, time_taken, %3$s
+                        SELECT time_taken, id, %3$s, ROW_NUMBER() OVER (ORDER BY time_taken, id) AS row_num
                         FROM
                             (
-                            SELECT id, time_taken, %3$s, DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY time_taken, id) AS pos
-                            FROM %1$s
-                            INNER JOIN %2$s
-                            ON %1$s.team_id = %2$s.team_id
-                            WHERE map_key = ?
-                            ) AS dummy_table
-                        WHERE pos = 1
-                        ) AS dummy_table_2
-                    ) AS dummy_table_3
-                WHERE ? IN (%3$s)
-                ORDER BY time_taken, id
-                LIMIT 1
-                """.formatted(gameTable, teamTable, teamFields), (connection, preparedStatement) -> {
-                preparedStatement.setString(1, map.asString());
-                preparedStatement.setString(2, player.toString());
-                preparedStatement.setFetchSize(1);
+                            SELECT id, time_taken, %3$s
+                            FROM
+                                (
+                                SELECT id, time_taken, %3$s, DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY time_taken, id) AS pos
+                                FROM %1$s
+                                INNER JOIN %2$s
+                                ON %1$s.team_id = %2$s.team_id
+                                WHERE map_key = ?
+                                ) AS dummy_table
+                            WHERE pos = 1
+                            ) AS dummy_table_2
+                        ) AS dummy_table_3
+                    WHERE ? IN (%3$s)
+                    ORDER BY time_taken, id
+                    LIMIT 1
+                    """.formatted(gameTable, teamTable, teamFields), (connection, preparedStatement) -> {
+                    preparedStatement.setString(1, map.asString());
+                    preparedStatement.setString(2, player.toString());
+                    preparedStatement.setFetchSize(1);
 
-                ResultSet result = preparedStatement.executeQuery();
-                if (!result.next()) {
-                    return Optional.empty();
-                }
+                    ResultSet result = preparedStatement.executeQuery();
+                    if (!result.next()) {
+                        return Optional.empty();
+                    }
 
-                return Optional.of(new RankingEntry(result.getInt(2), result.getLong(1)));
+                    return Optional.of(new RankingEntry(result.getInt(2), result.getLong(1)));
+                });
             });
         }, executor);
     }
 
+    @SuppressWarnings("OptionalAssignedToNull")
     @Override
-    public @NotNull CompletableFuture<Optional<Long>> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
+    public @NotNull CompletableFuture<OptionalLong> fetchBestTime(@NotNull Set<UUID> team, @NotNull Key map,
         @NotNull String modifierKey) {
         Objects.requireNonNull(map);
 
         int teamSize = team.size();
         String filteredModifierKey = filterModifierKey(modifierKey);
         if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
-            return FutureUtils.completedFuture(Optional.empty());
+            return FutureUtils.completedFuture(OptionalLong.empty());
+        }
+
+        BestTimeKey bestTimeKey = new BestTimeKey(team, map, modifierKey);
+        OptionalLong bestTimeCached = bestTimeCache.getIfPresent(bestTimeKey);
+        if (bestTimeCached != null) {
+            return FutureUtils.completedFuture(bestTimeCached);
         }
 
         return CompletableFuture.supplyAsync(() -> {
@@ -320,26 +375,29 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
 
-            return DatabaseUtils.runPreparedSql(LOGGER, "fetchBestTime", Optional::empty, dataSource, """
-                    SELECT time_taken FROM %1$s
-                    INNER JOIN %2$s
-                    ON %1$s.team_id = %2$s.team_id
-                    WHERE %3$s
-                    ORDER BY time_taken
-                    LIMIT 1
-                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")),
-                ((connection, preparedStatement) -> {
-                    preparedStatement.setString(1, map.asString());
-                    setUuidParameters(1, key, preparedStatement);
+            return bestTimeCache.get(bestTimeKey, ignored -> {
+                return DatabaseUtils.runPreparedSql(LOGGER, "fetchBestTime", OptionalLong::empty, dataSource,
+                    """
+                        SELECT time_taken FROM %1$s
+                        INNER JOIN %2$s
+                        ON %1$s.team_id = %2$s.team_id
+                        WHERE %3$s
+                        ORDER BY time_taken
+                        LIMIT 1
+                        """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")),
+                    ((connection, preparedStatement) -> {
+                        preparedStatement.setString(1, map.asString());
+                        setUuidParameters(1, key, preparedStatement);
 
-                    ResultSet result = preparedStatement.executeQuery();
-                    result.setFetchSize(1);
-                    if (!result.next()) {
-                        return Optional.empty();
-                    }
+                        ResultSet result = preparedStatement.executeQuery();
+                        result.setFetchSize(1);
+                        if (!result.next()) {
+                            return OptionalLong.empty();
+                        }
 
-                    return Optional.of(result.getLong(1));
-                }));
+                        return OptionalLong.of(result.getLong(1));
+                    }));
+            });
         }, executor);
     }
 
@@ -354,39 +412,47 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             return FutureUtils.completedFuture(List.of());
         }
 
+        TimeHistoryKey timeHistoryKey = new TimeHistoryKey(team, map, modifierKey);
+        List<LeaderboardEntry> cachedHistory = timeHistoryCache.getIfPresent(timeHistoryKey);
+        if (cachedHistory != null) {
+            return FutureUtils.completedFuture(cachedHistory);
+        }
+
         return CompletableFuture.supplyAsync(() -> {
             List<UUID> key = key(team);
 
             String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
 
-            return DatabaseUtils.runPreparedSql(LOGGER, "fetchTimeHistory", List::of, dataSource, """
-                    SELECT time_taken, time_end FROM %1$s
-                    INNER JOIN %2$s
-                    ON %1$s.team_id = %2$s.team_id
-                    WHERE %3$s
-                    ORDER BY time_taken, id
-                    LIMIT ?
-                    """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")),
-                (connection, preparedStatement) -> {
-                    preparedStatement.setString(1, map.asString());
-                    setUuidParameters(1, key, preparedStatement);
-                    preparedStatement.setInt(2 + key.size(), RECORD_HISTORY_SIZE);
-                    preparedStatement.setFetchSize(RECORD_HISTORY_SIZE);
+            return timeHistoryCache.get(timeHistoryKey, ignored -> {
+                return DatabaseUtils.runPreparedSql(LOGGER, "fetchTimeHistory", List::of, dataSource, """
+                        SELECT time_taken, time_end FROM %1$s
+                        INNER JOIN %2$s
+                        ON %1$s.team_id = %2$s.team_id
+                        WHERE %3$s
+                        ORDER BY time_taken, id
+                        LIMIT ?
+                        """.formatted(gameTable, teamTable, teamMatches(teamTable, key.size(), "map_key")),
+                    (connection, preparedStatement) -> {
+                        preparedStatement.setString(1, map.asString());
+                        setUuidParameters(1, key, preparedStatement);
+                        preparedStatement.setInt(2 + key.size(), RECORD_HISTORY_SIZE);
+                        preparedStatement.setFetchSize(RECORD_HISTORY_SIZE);
 
-                    ResultSet result = preparedStatement.executeQuery();
-                    if (!result.next()) {
-                        return List.of();
-                    }
+                        ResultSet result = preparedStatement.executeQuery();
+                        if (!result.next()) {
+                            return List.of();
+                        }
 
-                    List<LeaderboardEntry> entries = new ArrayList<>();
-                    do {
-                        entries.add(new LeaderboardEntry(team, result.getLong(1), result.getLong(2)));
-                    }
-                    while (result.next());
+                        List<LeaderboardEntry> entries = new ArrayList<>();
+                        do {
+                            entries.add(new LeaderboardEntry(team, result.getLong(1), result.getLong(2)));
+                        }
+                        while (result.next());
 
-                    return Collections.unmodifiableList(entries);
-                });
+                        return Collections.unmodifiableList(entries);
+                    });
+            });
         }, executor);
     }
 
@@ -399,6 +465,12 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
         if (entries <= 0 || teamSize <= 0 || !validModifierKeys.contains(filteredModifierKey) ||
             !teamSizes.contains(teamSize)) {
             return FutureUtils.completedFuture(List.of());
+        }
+
+        BestTimesKey bestTimesKey = new BestTimesKey(teamSize, modifierKey, map, start, entries);
+        List<LeaderboardEntry> cachedEntry = bestTimesCache.getIfPresent(bestTimesKey);
+        if (cachedEntry != null) {
+            return FutureUtils.completedFuture(cachedEntry);
         }
 
         return CompletableFuture.supplyAsync(() -> {
@@ -420,34 +492,37 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                     LIMIT ? OFFSET ?
                 """.formatted(gameTable, teamTable, teamFields);
 
-            return DatabaseUtils.runPreparedSql(LOGGER, "fetchBestTimes", List::of, dataSource, query,
-                (connection, preparedStatement) -> {
-                    preparedStatement.setString(1, map.asString());
-                    preparedStatement.setInt(2, entries);
-                    preparedStatement.setInt(3, start);
-                    preparedStatement.setFetchSize(entries);
+            return bestTimesCache.get(bestTimesKey, ignored -> {
+                return DatabaseUtils.runPreparedSql(LOGGER, "fetchBestTimes", List::of, dataSource, query,
+                    (connection, preparedStatement) -> {
+                        preparedStatement.setString(1, map.asString());
+                        preparedStatement.setInt(2, entries);
+                        preparedStatement.setInt(3, start);
+                        preparedStatement.setFetchSize(entries);
 
-                    ResultSet result = preparedStatement.executeQuery();
-                    if (!result.next()) {
-                        return List.of();
-                    }
-
-                    List<LeaderboardEntry> entryList = new ArrayList<>(entries);
-                    do {
-                        long timeTaken = result.getLong(2);
-                        long timeEnd = result.getLong(3);
-
-                        Set<UUID> uuids = new HashSet<>(teamSize);
-                        for (int i = 0; i < teamSize; i++) {
-                            uuids.add(UUID.fromString(result.getString(i + 4)));
+                        ResultSet result = preparedStatement.executeQuery();
+                        if (!result.next()) {
+                            return List.of();
                         }
 
-                        entryList.add(new LeaderboardEntry(uuids, timeTaken, timeEnd));
-                    }
-                    while (result.next());
+                        ArrayList<LeaderboardEntry> entryList = new ArrayList<>(entries);
+                        do {
+                            long timeTaken = result.getLong(2);
+                            long timeEnd = result.getLong(3);
 
-                    return Collections.unmodifiableList(entryList);
-                });
+                            Set<UUID> uuids = new HashSet<>(teamSize);
+                            for (int i = 0; i < teamSize; i++) {
+                                uuids.add(UUID.fromString(result.getString(i + 4)));
+                            }
+
+                            entryList.add(new LeaderboardEntry(uuids, timeTaken, timeEnd));
+                        }
+                        while (result.next());
+
+                        entryList.trimToSize();
+                        return Collections.unmodifiableList(entryList);
+                    });
+            });
         }, executor);
     }
 
