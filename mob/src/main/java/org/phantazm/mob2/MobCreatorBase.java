@@ -97,7 +97,7 @@ public class MobCreatorBase implements MobCreator {
             }
         }
 
-        mob.setHealth(mob.getAttributeValue(Attribute.MAX_HEALTH));
+        mob.heal();
     }
 
     protected void setMeta(@NotNull Mob mob) {

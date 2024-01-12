@@ -53,7 +53,7 @@ public class BasicQuitStateActivable implements Activable {
             sidebar.removeViewer(player);
             tabList.removeViewer(player);
             belowNameTag.removeViewer(player);
-            player.setHealth(player.getMaxHealth());
+            player.heal();
             player.resetTitle();
             player.sendActionBar(Component.empty());
             player.stopSound(SoundStop.all());
