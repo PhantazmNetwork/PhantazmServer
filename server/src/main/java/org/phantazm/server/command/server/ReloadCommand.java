@@ -15,7 +15,7 @@ public class ReloadCommand extends PermissionLockedCommand {
     public ReloadCommand() {
         super("reload", PERMISSION);
 
-        addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+        addSyntax((sender, context) -> {
             try {
                 MobFeature.reload();
                 sender.sendMessage("Reloaded configs!");

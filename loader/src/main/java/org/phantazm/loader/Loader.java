@@ -29,7 +29,7 @@ public interface Loader<T> {
 
         private Map<Key, T> data;
 
-        private Impl(Supplier<? extends @NotNull DataSource> dataSourceSupplier, ObjectExtractor<T, V> extractor) {
+        private Impl(Supplier<? extends DataSource> dataSourceSupplier, ObjectExtractor<T, V> extractor) {
             this.dataSourceSupplier = dataSourceSupplier;
             this.extractor = extractor;
         }

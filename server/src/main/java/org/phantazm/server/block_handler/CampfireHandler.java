@@ -9,8 +9,12 @@ import java.util.Collection;
 import java.util.List;
 
 public class CampfireHandler implements BlockHandler {
-
+    public static final CampfireHandler INSTANCE = new CampfireHandler();
     public static final NamespaceID NAMESPACE_ID = NamespaceID.from("minecraft:campfire");
+    private static final Collection<Tag<?>> TAGS = List.of(Tag.ItemStack("Items").list());
+
+    private CampfireHandler() {
+    }
 
     @Override
     public @NotNull NamespaceID getNamespaceId() {
@@ -19,6 +23,6 @@ public class CampfireHandler implements BlockHandler {
 
     @Override
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
-        return List.of(Tag.ItemStack("Items").list());
+        return TAGS;
     }
 }

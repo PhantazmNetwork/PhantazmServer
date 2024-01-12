@@ -12,7 +12,6 @@ public record WhisperConfig(
     @NotNull Component consoleName,
     @NotNull Component defaultName) {
 
-    public static final WhisperConfig DEFAULT =
-        new WhisperConfig("", "", NamedTextColor.WHITE, Component.empty(), Component.empty());
-
+    public static final WhisperConfig DEFAULT = new WhisperConfig("", "",
+        NamedTextColor.WHITE, Component.empty(), Component.empty());
 }
