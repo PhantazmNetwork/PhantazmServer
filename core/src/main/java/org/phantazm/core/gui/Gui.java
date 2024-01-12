@@ -19,7 +19,7 @@ import java.util.function.BooleanSupplier;
  */
 @SuppressWarnings({"unchecked"})
 public class Gui extends Inventory implements Tickable {
-    private final Int2ObjectMap.Entry<GuiItem>[] EMPTY_INT_2_OBJECT_MAP_ENTRY_ARRAY = new Int2ObjectMap.Entry[0];
+    private static final Int2ObjectMap.Entry<GuiItem>[] EMPTY_INT_2_OBJECT_MAP_ENTRY_ARRAY = new Int2ObjectMap.Entry[0];
 
     private final Int2ObjectMap<GuiItem> items;
     private final boolean isDynamic;
