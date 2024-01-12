@@ -24,14 +24,13 @@ public interface PlayerViewProvider {
         private static final Object INITIALIZATION_LOCK = new Object();
         private static PlayerViewProvider instance;
 
-        public static void init(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager,
-            @NotNull Duration duration) {
+        public static void init(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager) {
             synchronized (INITIALIZATION_LOCK) {
                 if (instance != null) {
                     throw new IllegalArgumentException("PlayerViewProvider has already been initialized");
                 }
 
-                BasicPlayerViewProvider provider = new BasicPlayerViewProvider(identitySource, connectionManager, duration);
+                BasicPlayerViewProvider provider = new BasicPlayerViewProvider(identitySource, connectionManager);
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event ->
                     provider.addPlayer(event.getPlayer()));
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, event ->

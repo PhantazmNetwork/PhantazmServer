@@ -210,8 +210,7 @@ public final class PhantazmServer {
             () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
         ConfigCodec tomlCodec = new TomlCodec();
 
-        PlayerViewProvider.Global.init(IdentitySource.MOJANG, MinecraftServer.getConnectionManager(),
-            Duration.ofMinutes(2));
+        PlayerViewProvider.Global.init(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
 
         PlayerViewProvider viewProvider = PlayerViewProvider.Global.instance();
 

@@ -3,7 +3,6 @@ package org.phantazm.server.command.server;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.permission.Permission;
-import org.phantazm.core.command.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.server.MobFeature;
 
