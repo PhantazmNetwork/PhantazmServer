@@ -1,7 +1,6 @@
 package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
-import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.bridge.Configuration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -19,6 +18,9 @@ import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.guild.party.command.PartyCommand;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.time.TickFormatter;
+import org.phantazm.server.context.ConfigContext;
+import org.phantazm.server.context.DataLoadingContext;
+import org.phantazm.server.context.EthyleneContext;
 
 import java.io.IOException;
 import java.util.*;
@@ -34,14 +36,18 @@ public class PartyFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull CommandManager commandManager, @NotNull PlayerViewProvider viewProvider,
-        @NotNull SchedulerManager schedulerManager, @NotNull ContextManager contextManager,
-        @NotNull PartyConfig config, @NotNull ConfigCodec partyCodec) {
-        PartyFeature.config = config;
+    static void initialize(@NotNull ConfigContext configContext, @NotNull EthyleneContext ethyleneContext,
+        @NotNull DataLoadingContext dataLoadingContext) {
+        PartyFeature.config = configContext.partyConfig();
+
+        ContextManager contextManager = dataLoadingContext.contextManager();
+        PlayerViewProvider viewProvider = PlayerViewProvider.Global.instance();
+        CommandManager commandManager = MinecraftServer.getCommandManager();
+        SchedulerManager schedulerManager = MinecraftServer.getSchedulerManager();
 
         TickFormatter tickFormatter;
         try {
-            ConfigElement partyConfigNode = Configuration.read(ConfigFeature.PARTY_CONFIG_PATH, partyCodec);
+            ConfigElement partyConfigNode = Configuration.read(ConfigFeature.PARTY_CONFIG_PATH, ethyleneContext.tomlCodec());
             tickFormatter = contextManager.makeContext(partyConfigNode.getNodeOrThrow("tickFormatter")).provide();
         } catch (IOException e) {
             throw new RuntimeException(e);

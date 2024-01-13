@@ -1,13 +1,10 @@
 package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
-import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.element.core.util.ElementSearcher;
-import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Namespaces;
-
-import java.util.Objects;
+import org.phantazm.server.context.EthyleneContext;
 
 /**
  * Initializes features related to Element.
@@ -17,12 +14,9 @@ public final class ElementFeature {
 
     private static ContextManager contextManager;
 
-    static void initialize(@NotNull MappingProcessorSource mappingProcessorSource, @NotNull KeyParser keyParser) {
-        Objects.requireNonNull(mappingProcessorSource);
-        Objects.requireNonNull(keyParser);
-
-        contextManager = ContextManager.builder(Namespaces.PHANTAZM).withKeyParserFunction((ignored) -> keyParser)
-            .withMappingProcessorSourceSupplier(() -> mappingProcessorSource).build();
+    static void initialize(@NotNull EthyleneContext ethyleneContext) {
+        contextManager = ContextManager.builder(Namespaces.PHANTAZM).withKeyParserFunction((ignored) -> ethyleneContext.keyParser())
+            .withMappingProcessorSourceSupplier(ethyleneContext::mappingProcessorSource).build();
         contextManager.registerElementClasses(ElementSearcher.getElementClassesInPackage(PHANTAZM_PACKAGE));
     }
 

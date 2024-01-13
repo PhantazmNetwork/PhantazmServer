@@ -1,7 +1,6 @@
 package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
-import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
@@ -29,6 +28,7 @@ import org.phantazm.mob2.goal.GoalApplier;
 import org.phantazm.mob2.skill.SkillComponent;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
+import org.phantazm.server.context.*;
 import org.phantazm.zombies.mob2.ZombiesMobCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,15 +54,21 @@ public final class MobFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull ConfigCodec codec, @NotNull MappingProcessorSource processorSource,
-        @NotNull ContextManager contextManager, @NotNull Pathfinder pathfinder,
-        @NotNull Function<? super @NotNull Instance, ? extends InstanceSpawner.InstanceSettings> instanceSettingsFunction) {
+    static void initialize(@NotNull EthyleneContext ethyleneContext,
+        @NotNull DataLoadingContext dataLoadingContext, @NotNull GameContext gameContext) {
+        MappingProcessorSource processorSource = ethyleneContext.mappingProcessorSource();
+        ContextManager contextManager = dataLoadingContext.contextManager();
+        Pathfinder pathfinder = gameContext.pathfinder();
+        Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSettingsFunction =
+            gameContext.instanceSettingsFunction();
+        ConfigCodec codec = ethyleneContext.yamlCodec();
+
         ConfigProcessor<MobData> mobDataProcessor = processorSource.processorFor(Token.ofClass(MobData.class));
 
         Loader<MobCreator> loader = Loader.loader(() ->
                 DataSource.directory(MobFeature.MOBS_PATH, codec, "glob:**.{yml,yaml}"),
             ObjectExtractor.extractor(ConfigNode.class, (location, node) -> {
-                ElementContext context = contextManager.makeContext(node);
+                com.github.steanky.element.core.context.ElementContext context = contextManager.makeContext(node);
                 MobData data = mobDataProcessor.dataFromElement(node);
 
                 Pathfinding.Factory pathfinding = context.provide(PATHFINDING);

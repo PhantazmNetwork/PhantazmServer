@@ -24,6 +24,7 @@ import org.phantazm.core.scene2.lobby.Lobby;
 import org.phantazm.core.scene2.lobby.LobbyCreator;
 import org.phantazm.server.config.lobby.LobbyConfig;
 import org.phantazm.core.role.RoleStore;
+import org.phantazm.server.context.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,8 +83,15 @@ public final class LobbyFeature {
         }
     }
 
-    static void initialize(@NotNull ContextManager contextManager, @NotNull RoleStore roleStore,
-        @NotNull Executor executor, @NotNull MappingProcessorSource mappingProcessorSource, @NotNull ConfigCodec codec) {
+    static void initialize(@NotNull DatabaseContext databaseContext,
+        @NotNull EthyleneContext ethyleneContext, @NotNull DataLoadingContext dataLoadingContext,
+        @NotNull PlayerContext playerContext) {
+        MappingProcessorSource mappingProcessorSource = ethyleneContext.mappingProcessorSource();
+        RoleStore roleStore = playerContext.roles();
+        Executor executor = databaseContext.databaseExecutor();
+        ConfigCodec codec = ethyleneContext.yamlCodec();
+        ContextManager contextManager = dataLoadingContext.contextManager();
+
         try {
             FileUtils.createDirectories(LOBBY_INSTANCES_DIRECTORY);
             FileUtils.createDirectories(LOBBY_CONFIG_DIRECTORY);

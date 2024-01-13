@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -42,7 +41,7 @@ public class JDBCGeneralDatabase implements GeneralDatabase {
     }
 
     @Override
-    public @NotNull CompletableFuture<Void> handleJoin(@NotNull UUID playerUUID, @NotNull ZonedDateTime time) {
+    public @NotNull CompletableFuture<Void> handleJoin(@NotNull UUID playerUUID) {
         return CompletableFuture.runAsync(() -> {
             DatabaseUtils.runPreparedSql(LOGGER, "handleJoin", dataSource, """
                 INSERT INTO player_stats (player_uuid, first_join, last_join)

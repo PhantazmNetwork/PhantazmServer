@@ -37,8 +37,8 @@ import org.phantazm.loader.ObjectExtractor;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
+import org.phantazm.server.context.*;
 import org.phantazm.stats.zombies.JDBCZombiesStatsDatabase;
-import org.phantazm.stats.Databases;
 import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
@@ -85,13 +85,23 @@ public final class ZombiesFeature {
     private static MobSpawnerSource mobSpawnerSource;
     private static ZombiesStatsDatabase database;
 
-    static void initialize(@NotNull ContextManager contextManager,
-        @NotNull KeyParser keyParser,
-        @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
-        @NotNull Map<? super UUID, ? extends Party> parties,
-        @NotNull SongLoader songLoader, @NotNull ZombiesConfig zombiesConfig,
-        @NotNull MappingProcessorSource mappingProcessorSource, @NotNull Supplier<? extends Map<Key, MobCreator>> mobCreatorMap,
-        @NotNull ModifierCommandConfig commandConfig) {
+    static void initialize(@NotNull ConfigContext configContext, @NotNull EthyleneContext ethyleneContext,
+        @NotNull DatabaseAccessContext databaseAccessContext,
+        @NotNull DataLoadingContext dataLoadingContext, @NotNull PlayerContext playerContext,
+        @NotNull GameContext gameContext) {
+
+        MappingProcessorSource mappingProcessorSource = ethyleneContext.mappingProcessorSource();
+        ContextManager contextManager = dataLoadingContext.contextManager();
+        Supplier<? extends Map<Key, MobCreator>> mobCreatorMap = gameContext.mobCreatorSupplier();
+        ZombiesConfig zombiesConfig = configContext.zombiesConfig();
+        SongLoader songLoader = gameContext.songLoader();
+        KeyParser keyParser = ethyleneContext.keyParser();
+        Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSettingsFunction =
+            gameContext.instanceSettingsFunction();
+        Map<? super UUID, ? extends Party> parties = playerContext.parties();
+        ModifierCommandConfig commandConfig = configContext.modifierCommandConfig();
+
+
         try {
             FileUtils.createDirectories(MAPS_FOLDER);
             FileUtils.createDirectories(POWERUPS_FOLDER);
@@ -149,14 +159,15 @@ public final class ZombiesFeature {
                 .makeContext(entry.getValue().endless()).provide(dependencyProvider);
 
             ZombiesLeaderboardContext leaderboardContext =
-                new ZombiesLeaderboardContext(ExecutorFeature.getExecutor(), Databases.leaderboards(),
+                new ZombiesLeaderboardContext(ExecutorFeature.getExecutor(),
+                    databaseAccessContext.zombiesLeaderboardDatabase(),
                     contextManager.makeContext(entry.getValue().leaderboard()).provide());
 
             ZombiesSceneCreator provider = new ZombiesSceneCreator(zombiesConfig.maximumScenes(), entry.getValue(),
                 instanceLoader, keyParser, contextManager, songLoader, database,
-                instanceSpaceFunction, globalEventNode, ZombiesFeature.mobSpawnerSource(), clientBlockHandlerSource,
+                instanceSettingsFunction, globalEventNode, ZombiesFeature.mobSpawnerSource(), clientBlockHandlerSource,
                 ZombiesFeature.powerupHandlerSource(), new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator),
-                corpseCreatorSource, endlessSource, leaderboardContext, RoleFeature.roleStore(), IdentitySource.MOJANG);
+                corpseCreatorSource, endlessSource, leaderboardContext, PermissionFeature.roleStore(), IdentitySource.MOJANG);
             providers.put(entry.getKey(), provider);
         }
 

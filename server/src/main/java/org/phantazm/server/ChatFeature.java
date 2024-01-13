@@ -19,6 +19,8 @@ import org.phantazm.core.chat.command.ChatCommand;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyChatChannel;
 import org.phantazm.core.role.RoleStore;
+import org.phantazm.server.context.ConfigContext;
+import org.phantazm.server.context.PlayerContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,12 +43,12 @@ public final class ChatFeature {
 
     /**
      * Initializes chat features. Should only be called once from {@link PhantazmServer#main(String[])}.
-     *
-     * @param chatConfig Chat settings
-     * @param parties    A map of player {@link UUID}s to {@link Party} instances
      */
-    static void initialize(@NotNull ChatConfig chatConfig, @NotNull Map<? super UUID, ? extends Party> parties,
-        @NotNull RoleStore roleStore) {
+    static void initialize(@NotNull ConfigContext configContext, @NotNull PlayerContext playerContext) {
+        ChatConfig chatConfig = configContext.chatConfig();
+        RoleStore roleStore = playerContext.roles();
+        Map<? super UUID, ? extends Party> parties = playerContext.parties();
+
         Map<String, ChatChannel> channels = new HashMap<>() {
             @Override
             public boolean remove(Object key, Object value) {

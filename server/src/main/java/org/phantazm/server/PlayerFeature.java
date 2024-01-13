@@ -10,6 +10,7 @@ import net.minestom.server.event.player.PlayerPluginMessageEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.server.config.player.PlayerConfig;
+import org.phantazm.server.context.ConfigContext;
 
 public final class PlayerFeature {
 
@@ -17,7 +18,9 @@ public final class PlayerFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull PlayerConfig playerConfig) {
+    static void initialize(@NotNull ConfigContext configContext) {
+        PlayerConfig playerConfig = configContext.playerConfig();
+
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, event -> {
             if (!event.isFirstSpawn()) {
                 return;

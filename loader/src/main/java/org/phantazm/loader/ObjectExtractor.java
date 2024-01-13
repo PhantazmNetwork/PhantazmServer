@@ -3,6 +3,7 @@ package org.phantazm.loader;
 import com.github.steanky.ethylene.core.ConfigElement;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -36,10 +37,17 @@ public interface ObjectExtractor<T, V extends ConfigElement> {
     }
 
     static <T> @NotNull Entry<T> entry(@NotNull Key identifier, @NotNull T object) {
+        Objects.requireNonNull(identifier);
+        Objects.requireNonNull(object);
         return new Entry<>(identifier, object);
     }
 
-    record Entry<T>(@NotNull Key identifier,
+    static <T> @NotNull Entry<T> anonymousEntry(@NotNull T object) {
+        Objects.requireNonNull(object);
+        return new Entry<>(null, object);
+    }
+
+    record Entry<T>(@Nullable Key identifier,
         @NotNull T object) {
     }
 }

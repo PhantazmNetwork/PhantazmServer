@@ -1,15 +1,9 @@
 package org.phantazm.server;
 
-import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.key.BasicKeyParser;
 import com.github.steanky.element.core.key.KeyParser;
-import com.github.steanky.ethylene.codec.toml.TomlCodec;
-import com.github.steanky.ethylene.codec.yaml.YamlCodec;
-import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.mapper.MappingProcessorSource;
-import com.github.steanky.ethylene.mapper.type.Token;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.event.Event;
@@ -35,24 +29,13 @@ import org.phantazm.server.config.lobby.LobbiesConfig;
 import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
-import org.phantazm.stats.general.JDBCUsernameDatabase;
-import org.phantazm.stats.general.UsernameDatabase;
-import org.phantazm.stats.zombies.JDBCZombiesLeaderboardDatabase;
-import org.phantazm.stats.zombies.ZombiesLeaderboardDatabase;
-import org.phantazm.stats.Databases;
-import org.phantazm.zombies.equipment.EquipmentData;
+import org.phantazm.server.context.*;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.scene2.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snakeyaml.engine.v2.api.Dump;
-import org.snakeyaml.engine.v2.api.DumpSettings;
-import org.snakeyaml.engine.v2.api.Load;
-import org.snakeyaml.engine.v2.api.LoadSettings;
-import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -96,7 +79,7 @@ public final class PhantazmServer {
 
         try {
             LOGGER.info("Loading server configuration data.");
-            ConfigFeature.initialize(EthyleneFeature.getMappingProcessorSource());
+            ConfigFeature.initialize(EthyleneFeature.mappingProcessorSource());
             ConfigHandler handler = ConfigFeature.getHandler();
             handler.writeDefaultsAndGet();
 
@@ -155,11 +138,17 @@ public final class PhantazmServer {
             return;
         }
 
+        ConfigContext configContext = new ConfigContext(playerConfig, serverConfig, shutdownConfig, pathfinderConfig,
+            lobbiesConfig, partyConfig, whisperConfig, chatConfig, joinReportConfig, zombiesConfig,
+            modifierCommandConfig);
+
+        EthyleneContext ethyleneContext = new EthyleneContext(keyParser, EthyleneFeature.mappingProcessorSource(),
+            EthyleneFeature.yamlCodec(), EthyleneFeature.tomlCodec());
+
         EventNode<Event> node = MinecraftServer.getGlobalEventHandler();
         try {
             LOGGER.info("Initializing features.");
-            initializeFeatures(keyParser, playerConfig, serverConfig, shutdownConfig, pathfinderConfig, lobbiesConfig,
-                partyConfig, whisperConfig, chatConfig, joinReportConfig, zombiesConfig, modifierCommandConfig);
+            initializeFeatures(configContext, ethyleneContext);
             LOGGER.info("Features initialized successfully.");
         } catch (Exception exception) {
             LOGGER.error("Fatal error during initialization", exception);
@@ -202,43 +191,54 @@ public final class PhantazmServer {
         return false;
     }
 
-    private static void initializeFeatures(KeyParser keyParser, PlayerConfig playerConfig, ServerConfig serverConfig,
-        ShutdownConfig shutdownConfig, PathfinderConfig pathfinderConfig, LobbiesConfig lobbiesConfig,
-        PartyConfig partyConfig, WhisperConfig whisperConfig, ChatConfig chatConfig, JoinReportConfig joinReportConfig,
-        ZombiesConfig zombiesConfig, ModifierCommandConfig modifierCommandConfig) {
-        ConfigCodec yamlCodec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
-            () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
-        ConfigCodec tomlCodec = new TomlCodec();
-
+    private static void initializeFeatures(ConfigContext configContext, EthyleneContext ethyleneContext) {
+        //initialize the global PlayerViewProvider
         PlayerViewProvider.Global.init(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
-
         PlayerViewProvider viewProvider = PlayerViewProvider.Global.instance();
+
+        //initialize Element
+        ElementFeature.initialize(ethyleneContext);
+        DataLoadingContext dataLoadingContext = new DataLoadingContext(ElementFeature.getContextManager());
+
+        //initialize databases
+        ExecutorFeature.initialize();
+        HikariFeature.initialize();
+
+        DatabaseContext databaseContext = new DatabaseContext(ExecutorFeature.getExecutor(),
+            HikariFeature.getDataSource());
+
+        DatabaseFeature.initialize(databaseContext, configContext);
+        DatabaseAccessContext databaseAccessContext = new DatabaseAccessContext(DatabaseFeature.generalDatabase(),
+            DatabaseFeature.zombiesLeaderboardDatabase());
+
 
         CompletableFuture<?> independentFeatures = CompletableFuture.runAsync(() -> {
             DatapackFeature.initialize();
-            WhisperCommandFeature.initialize(whisperConfig);
-            SilenceJooqFeature.initialize();
+            WhisperCommandFeature.initialize(configContext);
             BlockHandlerFeature.initialize();
             LocalizationFeature.initialize();
-            PlayerFeature.initialize(playerConfig);
+            PlayerFeature.initialize(configContext);
+            CommandFeature.initialize(viewProvider);
 
             SceneManager.Global.init(ExecutorFeature.getExecutor(), Set.of(Lobby.class, ZombiesScene.class),
                 viewProvider, Runtime.getRuntime().availableProcessors());
 
             SceneManager manager = SceneManager.Global.instance();
             manager.registerJoinFunction(CoreJoinKeys.MAIN_LOBBY, SceneManager.joinFunction(Lobby.class, players -> {
-                return new JoinLobby(players, LobbyFeature.lobbies().get(lobbiesConfig.mainLobby()).sceneCreator());
+                return new JoinLobby(players, LobbyFeature.lobbies().get(configContext.lobbiesConfig().mainLobby())
+                    .sceneCreator());
             }));
 
             manager.setLoginHook(player -> {
                 return new JoinLobby(Set.of(viewProvider.fromPlayer(player)),
-                    LobbyFeature.lobbies().get(lobbiesConfig.mainLobby()).sceneCreator(), true);
+                    LobbyFeature.lobbies().get(configContext.lobbiesConfig().mainLobby()).sceneCreator(), true);
             });
 
             manager.setDefaultFallback(playerViews -> {
                 return SceneManager.Global.instance().joinScene(CoreJoinKeys.MAIN_LOBBY, playerViews);
             });
 
+            JoinReportConfig joinReportConfig = configContext.joinReportConfig();
             MinecraftServer.getGlobalEventHandler().addListener(SceneJoinEvent.class, event -> {
                 SceneManager.JoinResult<?> result = event.result();
                 if (result.successful()) {
@@ -258,59 +258,33 @@ public final class PhantazmServer {
         });
 
         CompletableFuture<?> game = CompletableFuture.runAsync(() -> {
-            ExecutorFeature.initialize();
-            HikariFeature.initialize();
+            LoginValidatorFeature.initialize(databaseContext);
 
-            GeneralStatsFeature.initialize(ExecutorFeature.getExecutor(), HikariFeature.getDataSource());
+            PartyFeature.initialize(configContext, ethyleneContext, dataLoadingContext);
+            PermissionFeature.initialize(databaseContext, ethyleneContext, dataLoadingContext);
 
-            ZombiesLeaderboardDatabase leaderboardDatabase = new JDBCZombiesLeaderboardDatabase(ExecutorFeature.getExecutor(),
-                HikariFeature.getDataSource(), zombiesConfig.teamSizes(), zombiesConfig.trackedModifiers());
+            PlayerContext playerContext = new PlayerContext(LoginValidatorFeature.loginValidator(),
+                PermissionFeature.permissionHandler(), viewProvider, PermissionFeature.roleStore(),
+                PartyFeature.getPartyHolder().uuidToGuild());
 
-            UsernameDatabase usernameDatabase = new JDBCUsernameDatabase(ExecutorFeature.getExecutor(),
-                HikariFeature.getDataSource(), Duration.ofDays(30));
+            ChatFeature.initialize(configContext, playerContext);
 
-            CompletableFuture.allOf(leaderboardDatabase.initTables(), usernameDatabase.initTables()).join();
+            LobbyFeature.initialize(databaseContext, ethyleneContext, dataLoadingContext, playerContext);
 
-            Databases.init(leaderboardDatabase);
-            Databases.init(usernameDatabase);
+            ProximaFeature.initialize(configContext);
+            SongFeature.initialize(ethyleneContext);
 
-            MappingProcessorSource mappingProcessorSource = EthyleneFeature.getMappingProcessorSource();
-            ElementFeature.initialize(mappingProcessorSource, keyParser);
+            GameContext gameContext = new GameContext(SongFeature.songLoader(), MobFeature::mobCreators,
+                ProximaFeature.getPathfinder(), ProximaFeature.instanceSettingsFunction());
 
-            ContextManager contextManager = ElementFeature.getContextManager();
+            MobFeature.initialize(ethyleneContext, dataLoadingContext, gameContext);
+            EquipmentFeature.initialize(ethyleneContext, dataLoadingContext);
 
-            PartyFeature.initialize(MinecraftServer.getCommandManager(), viewProvider,
-                MinecraftServer.getSchedulerManager(), contextManager, partyConfig, tomlCodec);
+            ZombiesFeature.initialize(configContext, ethyleneContext, databaseAccessContext, dataLoadingContext,
+                playerContext, gameContext);
+            ServerCommandFeature.initialize(configContext, playerContext);
 
-            RoleFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor(), yamlCodec,
-                contextManager);
-            ChatFeature.initialize(chatConfig, PartyFeature.getPartyHolder().uuidToGuild(), RoleFeature.roleStore());
-
-            LobbyFeature.initialize(contextManager, RoleFeature.roleStore(), ExecutorFeature.getExecutor(),
-                mappingProcessorSource, yamlCodec);
-
-            ProximaFeature.initialize(pathfinderConfig);
-            MobFeature.initialize(yamlCodec, mappingProcessorSource, contextManager, ProximaFeature.getPathfinder(),
-                ProximaFeature.instanceSettingsFunction());
-            EquipmentFeature.initialize(keyParser, contextManager, yamlCodec,
-                mappingProcessorSource.processorFor(Token.ofClass(EquipmentData.class)));
-
-            SongFeature.initialize(keyParser);
-
-            ZombiesFeature.initialize(contextManager, keyParser, ProximaFeature.instanceSettingsFunction(),
-                PartyFeature.getPartyHolder().uuidToGuild(), SongFeature.songLoader(),
-                zombiesConfig, mappingProcessorSource, MobFeature::mobCreators, modifierCommandConfig);
-
-            LoginValidatorFeature.initialize(HikariFeature.getDataSource(), ExecutorFeature.getExecutor());
-            ServerCommandFeature.initialize(LoginValidatorFeature.loginValidator(),
-                serverConfig.serverInfo().whitelist(), HikariFeature.getDataSource(),
-                ExecutorFeature.getExecutor(), shutdownConfig, zombiesConfig.gamereportConfig(),
-                viewProvider, RoleFeature.roleStore());
-
-            ValidationFeature.initialize(LoginValidatorFeature.loginValidator(),
-                ServerCommandFeature.permissionHandler());
-
-            CommandFeature.initialize(viewProvider);
+            ValidationFeature.initialize(playerContext);
         });
 
         CompletableFuture.allOf(independentFeatures, game).join();

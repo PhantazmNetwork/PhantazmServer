@@ -22,7 +22,7 @@ public interface PermissionHandler {
         applyPermissions(player);
     }
 
-    void initTables();
+    @NotNull CompletableFuture<Void> initTables();
 
     void applyPermissions(@NotNull Player target);
 

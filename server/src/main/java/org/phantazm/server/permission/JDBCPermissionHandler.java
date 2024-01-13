@@ -43,29 +43,31 @@ public class JDBCPermissionHandler implements PermissionHandler {
     }
 
     @Override
-    public void initTables() {
-        DatabaseUtils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
-            statement.execute("""
-                CREATE TABLE IF NOT EXISTS permission_groups (
-                    permission_group VARCHAR(64) NOT NULL,
-                    permission VARCHAR(64) NOT NULL,
-                    
-                    PRIMARY KEY (permission_group, permission)
-                );
-                """);
-            statement.execute("""
-                CREATE TABLE IF NOT EXISTS player_permission_groups (
-                    player_uuid UUID NOT NULL,
-                    player_group VARCHAR(64) NOT NULL,
-                    
-                    PRIMARY KEY (player_uuid, player_group),
-                    CONSTRAINT fk_player_group
-                        FOREIGN KEY (player_group) REFERENCES permission_groups (permission_group)
-                        ON DELETE CASCADE
-                        ON UPDATE CASCADE
-                );
-                """);
-        });
+    public @NotNull CompletableFuture<Void> initTables() {
+        return CompletableFuture.runAsync(() -> {
+            DatabaseUtils.runSql(LOGGER, "initTables", dataSource, (connection, statement) -> {
+                statement.execute("""
+                    CREATE TABLE IF NOT EXISTS permission_groups (
+                        permission_group VARCHAR(64) NOT NULL,
+                        permission VARCHAR(64) NOT NULL,
+                        
+                        PRIMARY KEY (permission_group, permission)
+                    );
+                    """);
+                statement.execute("""
+                    CREATE TABLE IF NOT EXISTS player_permission_groups (
+                        player_uuid UUID NOT NULL,
+                        player_group VARCHAR(64) NOT NULL,
+                        
+                        PRIMARY KEY (player_uuid, player_group),
+                        CONSTRAINT fk_player_group
+                            FOREIGN KEY (player_group) REFERENCES permission_groups (permission_group)
+                            ON DELETE CASCADE
+                            ON UPDATE CASCADE
+                    );
+                    """);
+            });
+        }, executor);
     }
 
     @Override

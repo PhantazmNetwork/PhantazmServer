@@ -1,9 +1,9 @@
 package org.phantazm.server;
 
-import com.github.steanky.element.core.key.KeyParser;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.sound.NBSSongLoader;
 import org.phantazm.core.sound.SongLoader;
+import org.phantazm.server.context.EthyleneContext;
 
 import java.nio.file.Path;
 
@@ -15,8 +15,8 @@ public class SongFeature {
     private SongFeature() {
     }
 
-    static void initialize(@NotNull KeyParser keyParser) {
-        SongFeature.songLoader = new NBSSongLoader(SONG_PATH, keyParser);
+    static void initialize(@NotNull EthyleneContext ethyleneContext) {
+        SongFeature.songLoader = new NBSSongLoader(SONG_PATH, ethyleneContext.keyParser());
         SongFeature.songLoader.load();
     }
 
