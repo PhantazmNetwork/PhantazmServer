@@ -1,5 +1,5 @@
 plugins {
-    id("phantazm.minestom-library-conventions")
+    id("phantazm.java-library-conventions")
 }
 
 dependencies {
@@ -7,4 +7,5 @@ dependencies {
     implementation(libs.element.core)
     implementation(libs.toolkit.function)
     implementation(libs.toolkit.collection)
+    implementation(libs.adventure.key)
 }

@@ -128,7 +128,7 @@ public interface Loader<T> {
                             if (identifier == null) {
                                 throw LoaderException.builder()
                                     .withElement(element)
-                                    .withMessage("got an anonymous entry for a non-anonymous loader")
+                                    .withMessage("found anonymous entry for non-anonymous loader")
                                     .withDataLocation(location)
                                     .build();
                             }
