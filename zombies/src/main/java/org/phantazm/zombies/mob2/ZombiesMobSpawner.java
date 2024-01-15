@@ -28,8 +28,8 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
         super.buildDependencies(builder);
         ZombiesScene scene = this.scene.get();
 
-        builder.with(Keys.SCENE, scene);
-        builder.with(org.phantazm.mob2.Keys.SCHEDULER, scene.getScheduler());
+        builder.with(InjectionKeys.SCENE, scene);
+        builder.with(org.phantazm.mob2.InjectionKeys.SCHEDULER, scene.getScheduler());
     }
 
     @Override

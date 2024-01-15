@@ -30,6 +30,7 @@ import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.server.context.*;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.scene2.ZombiesScene;
 import org.slf4j.Logger;
@@ -193,7 +194,7 @@ public final class PhantazmServer {
 
     private static boolean isUnsafe(String[] args) {
         for (String arg : args) {
-            if (arg.equals(UNSAFE_ARGUMENT)) {
+            if (arg.equalsIgnoreCase(UNSAFE_ARGUMENT)) {
                 return true;
             }
         }
@@ -202,6 +203,9 @@ public final class PhantazmServer {
     }
 
     private static void initializeFeatures(ConfigContext configContext, EthyleneContext ethyleneContext) {
+        //register all custom attributes
+        Attributes.registerAll();
+
         //initialize the global PlayerViewProvider
         PlayerViewProvider.Global.init(IdentitySource.MOJANG, MinecraftServer.getConnectionManager());
         PlayerViewProvider viewProvider = PlayerViewProvider.Global.instance();
@@ -234,13 +238,13 @@ public final class PhantazmServer {
 
             SceneManager manager = SceneManager.Global.instance();
             manager.registerJoinFunction(CoreJoinKeys.MAIN_LOBBY, SceneManager.joinFunction(Lobby.class, players -> {
-                return new JoinLobby(players, LobbyFeature.lobbies().get(configContext.lobbiesConfig().mainLobby())
+                return new JoinLobby(players, LobbyFeature.lobbies().data().get(configContext.lobbiesConfig().mainLobby())
                     .sceneCreator());
             }));
 
             manager.setLoginHook(player -> {
                 return new JoinLobby(Set.of(viewProvider.fromPlayer(player)),
-                    LobbyFeature.lobbies().get(configContext.lobbiesConfig().mainLobby()).sceneCreator(), true);
+                    LobbyFeature.lobbies().data().get(configContext.lobbiesConfig().mainLobby()).sceneCreator(), true);
             });
 
             manager.setDefaultFallback(playerViews -> {

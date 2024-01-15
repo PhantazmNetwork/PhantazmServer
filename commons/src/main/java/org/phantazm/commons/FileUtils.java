@@ -1,8 +1,10 @@
 package org.phantazm.commons;
 
 import org.jetbrains.annotations.NotNull;
+import relocated.com.github.steanky.toolkit.function.ExceptionHandler;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Objects;
@@ -108,17 +110,24 @@ public final class FileUtils {
     }
 
     /**
-     * Creates any of the absent directories along the given {@link Path}. Will not throw a
-     * {@link FileAlreadyExistsException}.
+     * Attempts to create the directories specified in the path array. Any thrown {@link FileAlreadyExistsException}s
+     * are ignored. Any other kinds of {@link IOException} are rethrown as an {@link UncheckedIOException} after exactly
+     * one attempt is made to create any necessary directories for a given array element.
      *
-     * @param directory the directory or directories to create
-     * @throws IOException if an IO error occurs
+     * @param paths the paths array
      */
-    public static void createDirectories(@NotNull Path directory) throws IOException {
-        try {
-            Files.createDirectories(directory);
-        } catch (FileAlreadyExistsException ignored) {
-            //swallow this exception here (we could have a symlink to a directory)
+    public static void ensureDirectories(@NotNull Path... paths) {
+        try (ExceptionHandler<IOException> handler = new ExceptionHandler<>(IOException.class)) {
+            for (Path path : paths) {
+                handler.run(() -> {
+                    try {
+                        Files.createDirectories(path);
+                    } catch (FileAlreadyExistsException ignored) {
+                    }
+                });
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 

@@ -137,11 +137,7 @@ public class NBSSongLoader implements SongLoader {
     @Override
     public void load() {
         Map<Key, List<SongPlayer.Note>> map = new HashMap<>();
-        try {
-            FileUtils.createDirectories(rootPath);
-        } catch (IOException e) {
-            LOGGER.warn("Error creating song directory");
-        }
+        FileUtils.ensureDirectories(rootPath);
 
         try (Stream<Path> pathStream = Files.list(rootPath)) {
             pathStream.forEach(path -> {

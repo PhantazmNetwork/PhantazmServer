@@ -40,7 +40,7 @@ public class SpawnMobSkill implements SkillComponent {
 
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob, selector.apply(mob, injectionStore), data, injectionStore.get(Keys.MOB_SPAWNER),
+        return new Internal(mob, selector.apply(mob, injectionStore), data, injectionStore.get(InjectionKeys.MOB_SPAWNER),
             callback.apply(mob, injectionStore), nameCounterTag);
     }
 

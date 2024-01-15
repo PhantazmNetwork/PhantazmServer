@@ -64,13 +64,13 @@ public class BasicMobSpawner implements MobSpawner {
 
     /**
      * Builds dependencies. By default, the only dependency added is this MobSpawner, under the key
-     * {@link Keys#MOB_SPAWNER}. This method can be overridden by subclasses to add additional dependencies, which can
-     * be appended to the builder using {@link Builder#with(InjectionStore.Key, Object)}.
+     * {@link InjectionKeys#MOB_SPAWNER}. This method can be overridden by subclasses to add additional dependencies,
+     * which can be appended to the builder using {@link Builder#with(InjectionStore.Key, Object)}.
      *
      * @param builder the builder to which additional dependencies may be added
      */
     protected void buildDependencies(InjectionStore.@NotNull Builder builder) {
-        builder.with(Keys.MOB_SPAWNER, this);
+        builder.with(InjectionKeys.MOB_SPAWNER, this);
     }
 
     /**

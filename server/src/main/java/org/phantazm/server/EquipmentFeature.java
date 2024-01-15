@@ -79,13 +79,7 @@ final class EquipmentFeature {
 
         Path guns = EQUIPMENT_PATH.resolve("guns");
         Path perks = EQUIPMENT_PATH.resolve("perks");
-        try {
-            FileUtils.createDirectories(guns);
-            FileUtils.createDirectories(perks);
-        } catch (IOException e) {
-            LOGGER.warn("Failed to create a necessary equipment directory.", e);
-            return;
-        }
+        FileUtils.ensureDirectories(guns, perks);
 
         List<Path> equipmentDirectories = List.of(guns, perks);
         Map<Key, Pair<EquipmentData, List<ElementContext>>> equipmentLevelMap = new HashMap<>();

@@ -35,7 +35,6 @@ import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.server.context.*;
 import org.phantazm.stats.zombies.ZombiesStatsDatabase;
-import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.endless.Endless;
@@ -56,7 +55,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -98,16 +96,7 @@ public final class ZombiesFeature {
         Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSettingsFunction =
             gameContext.instanceSettingsFunction();
 
-        try {
-            FileUtils.createDirectories(MAPS_FOLDER);
-            FileUtils.createDirectories(POWERUPS_FOLDER);
-            FileUtils.createDirectories(INSTANCES_FOLDER);
-            FileUtils.createDirectories(MODIFIERS_FOLDER);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
-        Attributes.registerAll();
+        FileUtils.ensureDirectories(MAPS_FOLDER, POWERUPS_FOLDER, INSTANCES_FOLDER, MODIFIERS_FOLDER);
 
         InstanceLoader instanceLoader =
             new AnvilFileSystemInstanceLoader(MinecraftServer.getInstanceManager(), INSTANCES_FOLDER,

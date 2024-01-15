@@ -8,7 +8,7 @@ import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob2.Keys;
+import org.phantazm.mob2.InjectionKeys;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Trigger;
 
@@ -28,7 +28,7 @@ public class TimerSkill implements SkillComponent {
 
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, delegate.apply(mob, injectionStore), mob, injectionStore.get(Keys.SCHEDULER));
+        return new Internal(data, delegate.apply(mob, injectionStore), mob, injectionStore.get(InjectionKeys.SCHEDULER));
     }
 
     @DataObject

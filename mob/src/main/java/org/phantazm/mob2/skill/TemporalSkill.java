@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.commons.MathUtils;
-import org.phantazm.mob2.Keys;
+import org.phantazm.mob2.InjectionKeys;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Trigger;
 
@@ -33,7 +33,7 @@ public class TemporalSkill implements SkillComponent {
 
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        Scheduler scheduler = injectionStore.get(Keys.SCHEDULER);
+        Scheduler scheduler = injectionStore.get(InjectionKeys.SCHEDULER);
         return new Internal(data, delegate.apply(mob, injectionStore), mob, scheduler);
     }
 

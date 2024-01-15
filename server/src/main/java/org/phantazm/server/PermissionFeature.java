@@ -42,9 +42,9 @@ public final class PermissionFeature {
 
         CompletableFuture.allOf(roleStore.initTables(), permissionHandler.initTables()).join();
 
-        try {
-            FileUtils.createDirectories(ROLE_FOLDER);
+        FileUtils.ensureDirectories(ROLE_FOLDER);
 
+        try {
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(ROLE_FOLDER, "*.yml")) {
                 for (Path path : stream) {
                     loadFile(path, ethyleneContext.yamlCodec(), dataLoadingContext.contextManager());
