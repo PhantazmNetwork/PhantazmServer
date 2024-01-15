@@ -11,7 +11,6 @@ import net.minestom.server.tag.Tag;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.TagUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -43,40 +42,13 @@ public final class ModifierHandler {
 
     private final Map<Key, ModifierComponent> components;
     private final Int2ObjectMap<ModifierComponent> ordinalMap;
-    private final InjectionStore injectionStore;
 
-    public static class Global {
-        private static ModifierHandler instance;
-        private static final Object GLOBAL_INITIALIZATION_LOCK = new Object();
-
-        public static void init(@NotNull Map<Key, ModifierComponent> components, @NotNull InjectionStore injectionStore) {
-            synchronized (GLOBAL_INITIALIZATION_LOCK) {
-                if (instance != null) {
-                    throw new IllegalStateException("The ModifierHandler has already been initialized");
-                }
-
-                instance = new ModifierHandler(components, injectionStore);
-            }
-        }
-
-        public static @NotNull ModifierHandler instance() {
-            ModifierHandler instance = Global.instance;
-            if (instance == null) {
-                throw new IllegalStateException("The ModifierHandler has not yet been initialized");
-            }
-
-            return instance;
-        }
-    }
-
-    private ModifierHandler(@NotNull Map<Key, ModifierComponent> components, @NotNull InjectionStore injectionStore) {
+    public ModifierHandler(@NotNull Map<Key, ? extends ModifierComponent> components) {
         this.components = Map.copyOf(components);
         this.ordinalMap = new Int2ObjectOpenHashMap<>(components.size());
         for (ModifierComponent component : components.values()) {
             ordinalMap.put(component.ordinal(), component);
         }
-
-        this.injectionStore = Objects.requireNonNull(injectionStore);
     }
 
     private boolean noPermissions(PlayerView playerView, ModifierComponent modifierComponent) {
@@ -110,7 +82,7 @@ public final class ModifierHandler {
                 continue;
             }
 
-            scene.addModifier(component, injectionStore);
+            scene.addModifier(component);
         }
     }
 

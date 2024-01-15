@@ -209,8 +209,7 @@ public final class PhantazmServer {
 
         DatabaseFeature.initialize(databaseContext, configContext);
         DatabaseAccessContext databaseAccessContext = new DatabaseAccessContext(DatabaseFeature.generalDatabase(),
-            DatabaseFeature.zombiesLeaderboardDatabase());
-
+            DatabaseFeature.zombiesLeaderboardDatabase(), DatabaseFeature.zombiesStatsDatabase());
 
         CompletableFuture<?> independentFeatures = CompletableFuture.runAsync(() -> {
             DatapackFeature.initialize();
@@ -269,8 +268,6 @@ public final class PhantazmServer {
 
             ChatFeature.initialize(configContext, playerContext);
 
-            LobbyFeature.initialize(databaseContext, ethyleneContext, dataLoadingContext, playerContext);
-
             ProximaFeature.initialize(configContext);
             SongFeature.initialize(ethyleneContext);
 
@@ -282,8 +279,13 @@ public final class PhantazmServer {
 
             ZombiesFeature.initialize(configContext, ethyleneContext, databaseAccessContext, dataLoadingContext,
                 playerContext, gameContext);
-            ServerCommandFeature.initialize(configContext, playerContext);
 
+            ZombiesContext zombiesContext = new ZombiesContext(ZombiesFeature.modifierHandlerLoader());
+
+            LobbyFeature.initialize(databaseContext, ethyleneContext, dataLoadingContext, playerContext,
+                zombiesContext);
+
+            ServerCommandFeature.initialize(configContext, playerContext);
             ValidationFeature.initialize(playerContext);
         });
 

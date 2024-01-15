@@ -5,6 +5,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -45,6 +46,8 @@ public record MapInfo(
         @NotNull List<SpawnpointInfo> spawnpoints, @NotNull ConfigNode leaderboard,
         @NotNull ConfigNode scoreboard, @NotNull ConfigNode corpse, @NotNull ConfigNode endless,
         @NotNull WebhookInfo webhook) {
+        rounds.sort(Comparator.comparingInt(RoundInfo::round));
+        
         this.settings = Objects.requireNonNull(settings);
         this.playerCoins = Objects.requireNonNull(playerCoins);
         this.rooms = Objects.requireNonNull(rooms);

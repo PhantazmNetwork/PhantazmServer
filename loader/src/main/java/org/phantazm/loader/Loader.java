@@ -2,16 +2,22 @@ package org.phantazm.loader;
 
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.toolkit.function.ExceptionHandler;
+import com.github.steanky.toolkit.function.ThrowingFunction;
+import com.github.steanky.toolkit.function.ThrowingSupplier;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.*;
-import java.util.function.Supplier;
 
 public interface Loader<T> {
+    interface ThrowingConsumer<T, E extends Exception> {
+        void accept(T t) throws E;
+    }
+
     @NotNull @Unmodifiable Collection<T> anonymousData();
 
     @NotNull @Unmodifiable Map<Key, T> data();
@@ -26,8 +32,109 @@ public interface Loader<T> {
         }
     }
 
+    default T first() {
+        return anonymousData().iterator().next();
+    }
+
+    default @NotNull <V> Loader<V> mergingMap(
+        @NotNull ThrowingFunction<? super Map<Key, T>, ? extends V, ? extends IOException> mergeFunction) {
+        return mergingMap(mergeFunction, null);
+    }
+
+    default @NotNull <V> Loader<V> mergingMap(
+        @NotNull ThrowingFunction<? super Map<Key, T>, ? extends V, ? extends IOException> mergeFunction, @Nullable String stage) {
+        return new AbstractLoader<>() {
+            @Override
+            public void load() throws IOException {
+                Loader.this.load();
+                Map<Key, T> data = Loader.this.data();
+
+                try {
+                    super.anonymousData = List.of(mergeFunction.apply(data));
+                } catch (IOException e) {
+                    if (e instanceof LoaderException loaderException) {
+                        throw loaderException.toBuilder().withStage(stage).build();
+                    }
+
+                    throw LoaderException.builder().withStage(stage).withCause(e).build();
+                }
+            }
+        };
+    }
+
+    default @NotNull <V> Loader<V> transforming(
+        @NotNull ThrowingFunction<? super T, ? extends V, ? extends IOException> transformationFunction) {
+        return transforming(transformationFunction, null);
+    }
+
+    default @NotNull <V> Loader<V> transforming(
+        @NotNull ThrowingFunction<? super T, ? extends V, ? extends IOException> transformationFunction,
+        @Nullable String stage) {
+        Objects.requireNonNull(transformationFunction);
+
+        return new AbstractLoader<>() {
+            @SuppressWarnings("unchecked")
+            @Override
+            public void load() throws IOException {
+                Loader.this.load();
+
+                Map<Key, T> data = Loader.this.data();
+
+                try {
+                    Map.Entry<Key, V>[] entries = new Map.Entry[data.size()];
+                    int i = 0;
+                    for (Map.Entry<Key, T> entry : data.entrySet()) {
+                        entries[i++] = Map.entry(entry.getKey(), transformationFunction.apply(entry.getValue()));
+                    }
+
+                    this.data = Map.ofEntries(entries);
+                } catch (IOException e) {
+                    if (e instanceof LoaderException loaderException) {
+                        throw loaderException.toBuilder().withStage(stage).build();
+                    }
+
+                    throw LoaderException.builder().withStage(stage).withCause(e).build();
+                }
+            }
+        };
+    }
+
+    default @NotNull Loader<T> accepting(@NotNull ThrowingConsumer<? super Collection<T>, ? extends IOException> consumer) {
+        return accepting(consumer, null);
+    }
+
+    default @NotNull Loader<T> accepting(@NotNull ThrowingConsumer<? super Collection<T>, ? extends IOException> consumer,
+        @Nullable String stage) {
+        return new Loader<>() {
+            @Override
+            public @NotNull @Unmodifiable Collection<T> anonymousData() {
+                return Loader.this.anonymousData();
+            }
+
+            @Override
+            public @NotNull @Unmodifiable Map<Key, T> data() {
+                return Loader.this.data();
+            }
+
+            @Override
+            public void load() throws IOException {
+                Loader.this.load();
+
+                try {
+                    consumer.accept(Loader.this.anonymousData());
+                } catch (IOException e) {
+                    if (e instanceof LoaderException loaderException) {
+                        throw loaderException.toBuilder().withStage(stage).build();
+                    }
+
+                    throw LoaderException.builder().withStage(stage).withCause(e).build();
+                }
+            }
+        };
+    }
+
     static <T, V extends ConfigElement> @NotNull Loader<T> loader(
-        @NotNull Supplier<? extends @NotNull DataSource> dataSourceSupplier,
+        @NotNull ThrowingSupplier<? extends @NotNull DataSource, ? extends IOException> dataSourceSupplier,
         @NotNull ObjectExtractor<T, V> extractor) {
         Objects.requireNonNull(dataSourceSupplier);
         Objects.requireNonNull(extractor);
@@ -35,29 +142,29 @@ public interface Loader<T> {
     }
 
     static <T, V extends ConfigElement> @NotNull Loader<T> anonymousLoader(
-        @NotNull Supplier<? extends @NotNull DataSource> dataSourceSupplier,
+        @NotNull ThrowingSupplier<? extends DataSource, ? extends IOException> dataSourceSupplier,
         @NotNull ObjectExtractor<T, V> extractor) {
         Objects.requireNonNull(dataSourceSupplier);
         Objects.requireNonNull(extractor);
         return new Impl<>(dataSourceSupplier, extractor, true);
     }
 
-    class Impl<T, V extends ConfigElement> implements Loader<T> {
-        private final Supplier<? extends DataSource> dataSourceSupplier;
-        private final ObjectExtractor<T, V> extractor;
-        private final boolean anonymous;
+    abstract class AbstractLoader<T> implements Loader<T> {
+        protected Map<Key, T> data;
+        protected Collection<T> anonymousData;
 
-        private Map<Key, T> data;
-        private Collection<T> anonymousData;
+        @Override
+        public @NotNull @Unmodifiable Collection<T> anonymousData() {
+            Collection<T> data = this.anonymousData;
+            if (data == null) {
+                throw new IllegalStateException("anonymous data has not been loaded yet");
+            }
 
-        private Impl(Supplier<? extends DataSource> dataSourceSupplier, ObjectExtractor<T, V> extractor,
-            boolean anonymous) {
-            this.dataSourceSupplier = dataSourceSupplier;
-            this.extractor = extractor;
-            this.anonymous = anonymous;
+            return data;
         }
 
-        private Map<Key, T> requireData() {
+        @Override
+        public @NotNull @Unmodifiable Map<Key, T> data() {
             Map<Key, T> data = this.data;
             if (data == null) {
                 if (anonymousData != null) {
@@ -69,24 +176,18 @@ public interface Loader<T> {
 
             return data;
         }
+    }
 
-        private Collection<T> requireAnonymousData() {
-            Collection<T> data = this.anonymousData;
-            if (data == null) {
-                throw new IllegalStateException("anonymous data has not been loaded yet");
-            }
+    class Impl<T, V extends ConfigElement> extends AbstractLoader<T> {
+        private final ThrowingSupplier<? extends DataSource, ? extends IOException> dataSourceSupplier;
+        private final ObjectExtractor<T, V> extractor;
+        private final boolean anonymous;
 
-            return data;
-        }
-
-        @Override
-        public @NotNull @Unmodifiable Collection<T> anonymousData() {
-            return requireAnonymousData();
-        }
-
-        @Override
-        public @NotNull @Unmodifiable Map<Key, T> data() {
-            return requireData();
+        private Impl(ThrowingSupplier<? extends DataSource, ? extends IOException> dataSourceSupplier, ObjectExtractor<T, V> extractor,
+            boolean anonymous) {
+            this.dataSourceSupplier = dataSourceSupplier;
+            this.extractor = extractor;
+            this.anonymous = anonymous;
         }
 
         @Override

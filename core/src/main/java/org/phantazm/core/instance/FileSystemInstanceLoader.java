@@ -73,6 +73,11 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
     }
 
     @Override
+    public void clearPreloadedInstances() {
+        instanceSources.clear();
+    }
+
+    @Override
     public void preload(@UnmodifiableView @NotNull List<String> subPaths, @NotNull Point spawnPoint,
         int chunkViewDistance) {
         Path path = rootPath;

@@ -343,13 +343,12 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         return sceneNode;
     }
 
-    public void addModifier(@NotNull ModifierComponent modifier, @NotNull InjectionStore injectionStore) {
+    public void addModifier(@NotNull ModifierComponent modifier) {
         Objects.requireNonNull(modifier);
-        Objects.requireNonNull(injectionStore);
 
         this.activeModifiers.add(modifier);
 
-        Modifier actualModifier = modifier.apply(injectionStore, this);
+        Modifier actualModifier = modifier.apply(InjectionStore.of(), this);
         actualModifier.apply();
 
         if (actualModifier.needsTicking()) {

@@ -11,13 +11,25 @@ public class LoaderException extends IOException {
     private final DataLocation location;
     private final ConfigElement element;
     private final ElementPath elementPath;
+    private final String stage;
 
     private LoaderException(String message, Throwable cause, DataLocation location, ConfigElement element,
-        ElementPath elementPath) {
+        ElementPath elementPath, String stage) {
         super(message, cause);
         this.location = location;
         this.element = element;
         this.elementPath = elementPath;
+        this.stage = stage;
+    }
+
+    public @NotNull Builder toBuilder() {
+        return builder()
+            .withMessage(getMessage())
+            .withCause(getCause())
+            .withDataLocation(location)
+            .withElement(element)
+            .withElementPath(elementPath)
+            .withStage(stage);
     }
 
     @Override
@@ -27,6 +39,12 @@ public class LoaderException extends IOException {
 
         StringBuilder builder = new StringBuilder();
         builder.append(detail);
+
+        if (stage != null) {
+            builder.append(sep);
+            builder.append("stage: ");
+            builder.append(stage);
+        }
 
         if (location != null) {
             builder.append(sep);
@@ -58,13 +76,14 @@ public class LoaderException extends IOException {
         private ConfigElement element;
         private ElementPath elementPath;
         private String message;
+        private String stage;
         private Throwable cause;
 
         private Builder() {
         }
 
         public @NotNull LoaderException build() {
-            return new LoaderException(message, cause, location, element, elementPath);
+            return new LoaderException(message, cause, location, element, elementPath, stage);
         }
 
         public @NotNull Builder withDataLocation(@Nullable DataLocation location) {
@@ -79,6 +98,11 @@ public class LoaderException extends IOException {
 
         public @NotNull Builder withElementPath(@Nullable ElementPath path) {
             this.elementPath = path;
+            return this;
+        }
+
+        public @NotNull Builder withStage(@Nullable String stage) {
+            this.stage = stage;
             return this;
         }
 

@@ -79,6 +79,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
     private final MapObjects.Source mapObjectSource;
     private final ZombiesPlayer.Source zombiesPlayerSource;
     private final PowerupHandler.Source powerupHandlerSource;
+    private final ModifierHandler modifierHandler;
     private final ShopHandler.Source shopHandlerSource;
     private final WindowHandler.Source windowHandlerSource;
     private final DoorHandler.Source doorHandlerSource;
@@ -96,7 +97,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
         @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
         @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
-        @NotNull PowerupHandler.Source powerupHandlerSource,
+        @NotNull PowerupHandler.Source powerupHandlerSource, @NotNull ModifierHandler modifierHandler,
         @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource,
         @NotNull Endless.Source endlessSource, @NotNull ZombiesLeaderboardContext leaderboardContext, @NotNull RoleStore roleStore,
         @NotNull IdentitySource identitySource) {
@@ -115,6 +116,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
             clientBlockHandlerSource, keyParser);
         this.zombiesPlayerSource = Objects.requireNonNull(zombiesPlayerSource);
         this.powerupHandlerSource = Objects.requireNonNull(powerupHandlerSource);
+        this.modifierHandler = Objects.requireNonNull(modifierHandler);
         this.shopHandlerSource = new BasicShopHandlerSource();
         this.windowHandlerSource =
             new BasicWindowHandlerSource(settingsInfo.windowRepairRadius(), settingsInfo.windowRepairTicks(),
@@ -129,6 +131,10 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         this.roleStore = Objects.requireNonNull(roleStore);
         this.identitySource = Objects.requireNonNull(identitySource);
         this.songLoader = Objects.requireNonNull(songLoader);
+    }
+
+    public @NotNull MapInfo mapInfo() {
+        return mapInfo;
     }
 
     @Override
@@ -184,8 +190,8 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
 
         InjectionStore store = InjectionStore.of(ZombiesBestTimeLeaderboard.ARGS_KEY,
             new ZombiesBestTimeLeaderboard.Args(VecUtils.toPoint(mapInfo.settings().origin()).add(0.5, 0, 0.5),
-                leaderboardContext.executor(), instance, leaderboardContext.database(),
-                roleStore, ModifierHandler.Global.instance()::descriptor, identitySource));
+                leaderboardContext.executor(), instance, leaderboardContext.database(), roleStore,
+                modifierHandler::descriptor, identitySource));
 
         Leaderboard bestTimeLeaderboard = leaderboardContext.bestTimeLeaderboard().apply(store);
 

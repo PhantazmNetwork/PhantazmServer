@@ -59,11 +59,42 @@ public interface DataSource extends Closeable {
     }
 
     static @NotNull NamedSource namedSingle(@NotNull DataSource dataSource, @NotNull String name) {
+        Objects.requireNonNull(dataSource);
+        Objects.requireNonNull(name);
         return new NamedSource(dataSource, name, SourceType.SINGLE);
     }
 
     static @NotNull NamedSource namedList(@NotNull DataSource dataSource, @NotNull String name) {
+        Objects.requireNonNull(dataSource);
+        Objects.requireNonNull(name);
         return new NamedSource(dataSource, name, SourceType.LIST);
+    }
+
+    static @NotNull NamedSource namedList(@NotNull Path root, @NotNull ConfigCodec codec, @NotNull String name) {
+        Objects.requireNonNull(root);
+        Objects.requireNonNull(codec);
+        Objects.requireNonNull(name);
+        return new NamedSource(new Directory(root.resolve(name), Integer.MAX_VALUE, codec, null,
+            false), name, SourceType.LIST);
+    }
+
+    static @NotNull NamedSource namedList(@NotNull Path root, @NotNull ConfigCodec codec, @NotNull String fileName,
+        @NotNull String configName) {
+        Objects.requireNonNull(root);
+        Objects.requireNonNull(codec);
+        Objects.requireNonNull(fileName);
+        Objects.requireNonNull(configName);
+        return new NamedSource(new Directory(root.resolve(fileName), Integer.MAX_VALUE, codec, null,
+            false), configName, SourceType.LIST);
+    }
+
+    static @NotNull NamedSource namedSingle(@NotNull Path root, @NotNull ConfigCodec codec, @NotNull String fileName,
+        @NotNull String configName) {
+        Objects.requireNonNull(root);
+        Objects.requireNonNull(codec);
+        Objects.requireNonNull(fileName);
+        Objects.requireNonNull(configName);
+        return new NamedSource(new SingleFile(root.resolve(fileName), codec), configName, SourceType.SINGLE);
     }
 
     static @NotNull DataSource singleFile(@NotNull Path file, @NotNull ConfigCodec codec) {
@@ -248,13 +279,19 @@ public interface DataSource extends Closeable {
             return newIterator;
         }
 
-        private void updateCurrentSource(DataSource newSource) throws IOException {
+        private DataSource updateCurrentSource(DataSource newSource) throws IOException {
             DataSource oldSource = currentSource;
+            if (oldSource == newSource) {
+                return newSource;
+            }
+
             currentSource = newSource;
 
             if (oldSource != null) {
                 oldSource.close();
             }
+
+            return newSource;
         }
 
         private void advanceSourceUntilHasNext() throws IOException {
@@ -265,8 +302,8 @@ public interface DataSource extends Closeable {
                     return;
                 }
 
-                current = Objects.requireNonNull(function.apply(Objects.requireNonNull(iterator.next(),
-                    "iterator return value")), "DataSourceFunction return value");
+                current = updateCurrentSource(Objects.requireNonNull(function.apply(Objects.requireNonNull(iterator.next(),
+                    "iterator return value")), "DataSourceFunction return value"));
             }
 
             updateCurrentSource(current);

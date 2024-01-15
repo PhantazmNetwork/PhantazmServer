@@ -11,7 +11,9 @@ import org.phantazm.stats.general.JDBCGeneralDatabase;
 import org.phantazm.stats.general.JDBCUsernameDatabase;
 import org.phantazm.stats.general.UsernameDatabase;
 import org.phantazm.stats.zombies.JDBCZombiesLeaderboardDatabase;
+import org.phantazm.stats.zombies.JDBCZombiesStatsDatabase;
 import org.phantazm.stats.zombies.ZombiesLeaderboardDatabase;
+import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,7 @@ public class DatabaseFeature {
     private static UsernameDatabase usernameDatabase;
     private static GeneralDatabase generalDatabase;
     private static ZombiesLeaderboardDatabase zombiesLeaderboardDatabase;
+    private static ZombiesStatsDatabase zombiesStatsDatabase;
 
     private DatabaseFeature() {
         throw new UnsupportedOperationException();
@@ -39,9 +42,10 @@ public class DatabaseFeature {
         generalDatabase = new JDBCGeneralDatabase(databaseContext.databaseExecutor(), dataSource);
         zombiesLeaderboardDatabase = new JDBCZombiesLeaderboardDatabase(executor, dataSource,
             configContext.zombiesConfig().teamSizes(), configContext.zombiesConfig().trackedModifiers());
+        zombiesStatsDatabase = new JDBCZombiesStatsDatabase(executor, dataSource);
 
         CompletableFuture.allOf(usernameDatabase.initTables(), generalDatabase.initTables(),
-            zombiesLeaderboardDatabase.initTables()).join();
+            zombiesLeaderboardDatabase.initTables(), zombiesStatsDatabase.initTables()).join();
 
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, DatabaseFeature::onPlayerSpawn);
 
@@ -71,5 +75,9 @@ public class DatabaseFeature {
 
     public static @NotNull ZombiesLeaderboardDatabase zombiesLeaderboardDatabase() {
         return FeatureUtils.check(zombiesLeaderboardDatabase);
+    }
+
+    public static @NotNull ZombiesStatsDatabase zombiesStatsDatabase() {
+        return FeatureUtils.check(zombiesStatsDatabase);
     }
 }

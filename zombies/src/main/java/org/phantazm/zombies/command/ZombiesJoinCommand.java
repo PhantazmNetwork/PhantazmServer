@@ -22,10 +22,12 @@ import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneManager;
+import org.phantazm.loader.Loader;
 import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.map.MapInfo;
 import org.phantazm.zombies.modifier.ModifierHandler;
 import org.phantazm.zombies.scene2.ZombiesJoiner;
+import org.phantazm.zombies.scene2.ZombiesSceneCreator;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -34,7 +36,8 @@ public class ZombiesJoinCommand extends Command {
     public static final Permission BYPASS_SANDBOX_RESTRICTION = new Permission("zombies.playtest.bypass_sandbox");
 
     public ZombiesJoinCommand(@NotNull ZombiesJoiner zombiesJoiner, @NotNull Map<? super UUID, ? extends Party> partyMap,
-        @NotNull KeyParser keyParser, @NotNull Map<Key, MapInfo> maps, long ratelimit,
+        @NotNull KeyParser keyParser, @NotNull Loader<ZombiesSceneCreator> zombiesSceneLoader,
+        @NotNull Loader<ModifierHandler> modifierHandlerLoader, long ratelimit,
         @NotNull ZombiesStatsDatabase zombiesDatabase) {
         super("join");
 
@@ -44,13 +47,13 @@ public class ZombiesJoinCommand extends Command {
 
         Objects.requireNonNull(partyMap);
         Objects.requireNonNull(keyParser);
-        Objects.requireNonNull(maps);
+        Objects.requireNonNull(zombiesSceneLoader);
 
         Object2LongMap<UUID> lastUsageTimes = new Object2LongOpenHashMap<>();
         mapKeyArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            for (Map.Entry<Key, MapInfo> entry : maps.entrySet()) {
+            for (Map.Entry<Key, ZombiesSceneCreator> entry : zombiesSceneLoader.data().entrySet()) {
                 suggestion.addEntry(
-                    new SuggestionEntry(entry.getKey().asString(), entry.getValue().settings().displayName()));
+                    new SuggestionEntry(entry.getKey().asString(), entry.getValue().mapInfo().settings().displayName()));
             }
         });
 
@@ -104,7 +107,9 @@ public class ZombiesJoinCommand extends Command {
             }
 
             Key targetMap = keyParser.parseKey(mapKeyString);
-            if (!maps.containsKey(targetMap)) {
+            ZombiesSceneCreator creator = zombiesSceneLoader.data().get(targetMap);
+
+            if (creator == null) {
                 sender.sendMessage(Component.text("Invalid map!", NamedTextColor.RED));
                 return;
             }
@@ -122,8 +127,8 @@ public class ZombiesJoinCommand extends Command {
                 }
             }
 
-            Set<Key> modifiers = ModifierHandler.Global.instance().getModifiers(joinerView);
-            MapInfo mapInfo = maps.get(targetMap);
+            Set<Key> modifiers = modifierHandlerLoader.first().getModifiers(joinerView);
+            MapInfo mapInfo = creator.mapInfo();
 
             for (Key modifier : modifiers) {
                 if (mapInfo.settings().disallowedModifiers().contains(modifier)) {

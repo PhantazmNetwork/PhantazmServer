@@ -25,6 +25,7 @@ import org.phantazm.core.scene2.lobby.LobbyCreator;
 import org.phantazm.server.config.lobby.LobbyConfig;
 import org.phantazm.core.role.RoleStore;
 import org.phantazm.server.context.*;
+import org.phantazm.zombies.npc.InjectionKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +86,7 @@ public final class LobbyFeature {
 
     static void initialize(@NotNull DatabaseContext databaseContext,
         @NotNull EthyleneContext ethyleneContext, @NotNull DataLoadingContext dataLoadingContext,
-        @NotNull PlayerContext playerContext) {
+        @NotNull PlayerContext playerContext, @NotNull ZombiesContext zombiesContext) {
         MappingProcessorSource mappingProcessorSource = ethyleneContext.mappingProcessorSource();
         RoleStore roleStore = playerContext.roles();
         Executor executor = databaseContext.databaseExecutor();
@@ -117,6 +118,9 @@ public final class LobbyFeature {
 
         Map<Key, LobbyEntry> map = new HashMap<>();
         PathMatcher npcFileMatcher = FileSystems.getDefault().getPathMatcher("glob:**/*.{yml,yaml}");
+
+        InjectionStore lobbyStore = InjectionStore.of(InjectionKeys.MODIFIER_LOADER_KEY,
+            new InjectionKeys.ModifierHandlerLoader(zombiesContext.modifierHandlerLoader()));
 
         List<CompletableFuture<?>> preloadFutures = new ArrayList<>();
         try (Stream<Path> lobbyFolderStream = Files.list(LOBBY_CONFIG_DIRECTORY)) {
@@ -157,7 +161,7 @@ public final class LobbyFeature {
                         new LobbyEntry(lobbyConfig, new LobbyCreator(instanceLoader, lobbyConfig.lobbyPaths(),
                             lobbyConfig.instanceConfig(), lobbyConfig.lobbyJoinFormat(), List.copyOf(components),
                             lobbyConfig.defaultItems(), displayNameStyler, lobbyConfig.maxLobbies(),
-                            lobbyConfig.maxPlayers(), lobbyConfig.timeout(), InjectionStore.of()))) != null) {
+                            lobbyConfig.maxPlayers(), lobbyConfig.timeout(), lobbyStore))) != null) {
                         throw new RuntimeException("Duplicate lobby named " + lobbyConfig.name());
                     }
                 }

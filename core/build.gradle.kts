@@ -6,6 +6,8 @@ dependencies {
     api(projects.phantazmCommons)
     api(projects.phantazmMessaging)
     api(projects.phantazmStats)
+    implementation(projects.phantazmLoader)
+
     api(libs.ethylene.core)
     api(libs.ethylene.mapper)
     api(libs.commons.lang3)
