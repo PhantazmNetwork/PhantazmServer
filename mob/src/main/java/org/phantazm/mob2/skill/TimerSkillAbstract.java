@@ -94,7 +94,7 @@ public abstract class TimerSkillAbstract implements Skill {
 
     private boolean tick0() {
         if (ticksSinceLastActivation == interval) {
-            if (repeat > -1 && ++uses >= repeat) {
+            if (repeat > -1 && ++uses > repeat) {
                 reset(false);
                 return true;
             } else {
