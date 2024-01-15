@@ -34,8 +34,35 @@ import java.nio.file.StandardOpenOption;
  *     if it did so erroneously (with a non-zero exit code), to prevent the containers from unnecessarily staying up.
  *     IntelliJ would not do this.</li>
  * </ul>
+ * <p>
+ * The resulting jar file can be run from the command line using {@code java -jar dev-launcher.jar} to launch in normal
+ * mode, or {@code java -jar dev-launcher.jar -d} to launch in debug mode.
  */
 public class Main {
+    private static final String[] DOCKER_COMPOSE_UP_NODEBUG = new String[]{
+        "docker", "compose", "up", "-d"
+    };
+
+    private static final String[] DOCKER_COMPOSE_UP_DEBUG = new String[]{
+        "docker", "compose", "--profile", "debug", "up", "-d"
+    };
+
+    private static final String[] DOCKER_ATTACH_NODEBUG = new String[]{
+        "docker", "attach", "phantazm-server-1"
+    };
+
+    private static final String[] DOCKER_ATTACH_DEBUG = new String[]{
+        "docker", "attach", "phantazm-server_debug-1"
+    };
+
+    private static final String[] DOCKER_COMPOSE_DOWN_NODEBUG = new String[]{
+        "docker", "compose", "down"
+    };
+
+    private static final String[] DOCKER_COMPOSE_DOWN_DEBUG = new String[]{
+        "docker", "compose", "--profile", "debug", "down"
+    };
+
     private static final Process DUMMY_PROCESS = new Process() {
         @Override
         public OutputStream getOutputStream() {
@@ -75,12 +102,10 @@ public class Main {
     private static volatile BufferedWriter serverProcessWriter;
     private static volatile boolean lastWasStop;
 
-    private static Process proc(String env, boolean isAttach) throws IOException {
+    private static Process proc(String[] cmd, boolean isAttach) throws IOException {
         if (shuttingDown) {
             return DUMMY_PROCESS;
         }
-
-        String[] command = System.getenv(env).split(" ");
 
         Process proc;
         synchronized (lock) {
@@ -88,7 +113,7 @@ public class Main {
                 return DUMMY_PROCESS;
             }
 
-            Process process = (proc = new ProcessBuilder().command(command)
+            Process process = (proc = new ProcessBuilder().command(cmd)
                 .redirectOutput(ProcessBuilder.Redirect.INHERIT)
                 .redirectError(ProcessBuilder.Redirect.INHERIT).start());
 
@@ -138,9 +163,25 @@ public class Main {
         thread.start();
     }
 
+    private static boolean isDebug(String[] args) {
+        for (String arg : args) {
+            if (arg.equalsIgnoreCase("-d")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
         Files.newOutputStream(Path.of(".override.env"), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
             .close();
+
+        boolean debug = isDebug(args);
+
+        String[] upCommand = debug ? DOCKER_COMPOSE_UP_DEBUG : DOCKER_COMPOSE_UP_NODEBUG;
+        String[] attachCommand = debug ? DOCKER_ATTACH_DEBUG : DOCKER_ATTACH_NODEBUG;
+        String[] downCommand = debug ? DOCKER_COMPOSE_DOWN_DEBUG : DOCKER_COMPOSE_DOWN_NODEBUG;
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             synchronized (lock) {
@@ -162,7 +203,7 @@ public class Main {
                 }
 
                 try {
-                    new ProcessBuilder().command(System.getenv("DOCKER_COMPOSE_DOWN_CMD").split(" "))
+                    new ProcessBuilder().command(downCommand)
                         .inheritIO().start();
                 } catch (IOException ignored) {
                 }
@@ -172,12 +213,12 @@ public class Main {
         }));
 
         int code;
-        if ((code = proc("DOCKER_COMPOSE_UP_CMD", false).waitFor()) != 0) {
+        if ((code = proc(upCommand, false).waitFor()) != 0) {
             System.err.println("[ERROR] Docker Compose returned a non-zero exit code (" + code + ")");
             return;
         }
 
-        if ((code = proc("DOCKER_ATTACH_CMD", true).waitFor()) != 0) {
+        if ((code = proc(attachCommand, true).waitFor()) != 0) {
             System.err.println("[ERROR] Server process returned a non-zero exit code (" + code + ")");
         }
     }

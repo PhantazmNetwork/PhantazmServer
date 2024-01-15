@@ -1,6 +1,5 @@
 package org.phantazm.zombies.mapeditor.client;
 
-import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Namespaces;
@@ -11,16 +10,7 @@ import java.util.function.Predicate;
  * Contains shared {@code Predicate<String> instances}, used for verifying text input.
  */
 public final class TextPredicates {
-    private static final Predicate<String> validKeyPredicate = string -> {
-        try {
-            //TODO: when adventure 4.13 is released, use their supplied key validation methods
-            //noinspection PatternValidation
-            Key.key(Namespaces.PHANTAZM, string);
-            return true;
-        } catch (InvalidKeyException ignored) {
-            return false;
-        }
-    };
+    private static final Predicate<String> validKeyPredicate = Key::parseableValue;
 
     private TextPredicates() {
         throw new UnsupportedOperationException();

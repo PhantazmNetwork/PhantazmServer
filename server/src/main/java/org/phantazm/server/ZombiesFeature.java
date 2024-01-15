@@ -162,7 +162,7 @@ public final class ZombiesFeature {
                     contextManager, songLoader, database, instanceSettingsFunction, globalEventNode,
                     mobSpawnerSource, clientBlockHandlerSource, powerupHandlerSource, modifierHandler,
                     new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator), corpseCreatorSource,
-                    endlessSource, leaderboardContext, PermissionFeature.roleStore(), IdentitySource.MOJANG);
+                    endlessSource, leaderboardContext, playerContext.roles(), IdentitySource.MOJANG);
             }, "creator");
 
         powerupLoader = Loader.loader(() -> {
