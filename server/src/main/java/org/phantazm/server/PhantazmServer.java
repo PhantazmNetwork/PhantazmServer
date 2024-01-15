@@ -59,6 +59,16 @@ public final class PhantazmServer {
      *             - Thamid123
      */
     public static void main(String[] args) {
+        LOGGER.info("""
+                        
+             _  ___    _    ____  _____ ____ \s
+            | |/ _ \\  / \\  |  _ \\| ____|  _ \\\s
+            | | | | |/ _ \\ | | | |  _| | |_) |
+            | | |_| / ___ \\| |_| | |___|  _ <\s
+            |_|\\___/_/   \\_\\____/|_____|_| \\_\\
+                        
+            When you get rid of jOOQ™ but still want to see ascii art in your terminal...
+            """);
         MinecraftServer minecraftServer = MinecraftServer.init();
 
         PlayerConfig playerConfig;
