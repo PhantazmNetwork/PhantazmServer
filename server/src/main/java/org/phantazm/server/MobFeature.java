@@ -81,13 +81,13 @@ public final class MobFeature {
                 List<GoalApplier> goals = data.goals().isEmpty() ? List.of() : context
                     .provideCollection(GOALS);
 
-                return List.of(ObjectExtractor.entry(data.key(), new ZombiesMobCreator(data, pathfinding, skills, goals,
+                return List.of(ObjectExtractor.entry(data.key(), (MobCreator) new ZombiesMobCreator(data, pathfinding, skills, goals,
                     pathfinder, instanceSettingsFunction, equipmentMap, attributeMap)));
-            }));
+            })).accepting(mobs -> {
+            LOGGER.info("Loaded {} mob file(s)", mobs.size());
+        });
 
         loader.loadUnchecked();
-        LOGGER.info("Loaded {} mob file(s)", loader.data().size());
-
         MobFeature.loader = loader;
     }
 

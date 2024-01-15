@@ -5,6 +5,7 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.path.ElementPath;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.ElementUtils;
 import org.phantazm.zombies.powerup.action.component.PowerupActionComponent;
 import org.phantazm.zombies.powerup.effect.NoPowerupEffect;
@@ -86,5 +87,10 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
     @Override
     public @NotNull PowerupHandler make(@NotNull Supplier<? extends @NotNull ZombiesScene> scene) {
         return new BasicPowerupHandler(scene, powerups);
+    }
+
+    @Override
+    public @NotNull @Unmodifiable Map<Key, PowerupComponents> powerups() {
+        return powerups;
     }
 }

@@ -5,10 +5,12 @@ import net.minestom.server.Tickable;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -46,5 +48,7 @@ public interface PowerupHandler extends Tickable {
     interface Source {
         @NotNull
         PowerupHandler make(@NotNull Supplier<? extends @NotNull ZombiesScene> scene);
+
+        @NotNull @Unmodifiable Map<Key, PowerupComponents> powerups();
     }
 }

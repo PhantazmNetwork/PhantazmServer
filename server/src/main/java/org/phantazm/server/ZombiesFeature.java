@@ -52,6 +52,8 @@ import org.phantazm.zombies.scene2.ZombiesJoiner;
 import org.phantazm.zombies.scene2.ZombiesLeaderboardContext;
 import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.scene2.ZombiesSceneCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -62,6 +64,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class ZombiesFeature {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesFeature.class);
+
     public static final Path MAPS_FOLDER = Path.of("./zombies/maps");
     public static final Path POWERUPS_FOLDER = Path.of("./zombies/powerups");
     public static final Path INSTANCES_FOLDER = Path.of("./zombies/instances");
@@ -121,6 +125,30 @@ public final class ZombiesFeature {
         ConfigProcessor<ModifierData> mapDataConfigProcessor = mappingProcessorSource
             .processorFor(Token.ofClass(ModifierData.class));
 
+        powerupLoader = Loader.loader(() -> {
+            return DataSource.directory(POWERUPS_FOLDER, codec, "glob:**.{yml,yaml}");
+        }, ObjectExtractor.extractor(ConfigNode.class, (location, node) -> {
+            PowerupData powerupData = powerupDataProcessor.dataFromElement(node);
+            return List.of(ObjectExtractor.entry(powerupData.id(), powerupData));
+        })).accepting(powerups -> {
+            LOGGER.info("Loaded {} powerups", powerups.size());
+        }).mergingMap(powerupDataMap -> {
+            return new BasicPowerupHandlerSource(powerupDataMap, contextManager);
+        });
+
+        modifierHandlerLoader = Loader.loader(() -> {
+            return DataSource.directory(MODIFIERS_FOLDER, codec, "glob:**.{yml,yaml}");
+        }, ObjectExtractor.extractor(ConfigNode.class, (location, node) -> {
+            ModifierData modifierData = mapDataConfigProcessor.dataFromElement(node);
+
+            ElementContext context = contextManager.makeContext(modifierData.modifier());
+            DualComponent<ZombiesScene, Modifier> modifierComponent = context.provide(DependencyProvider.EMPTY);
+
+            return List.of(ObjectExtractor.entry(modifierData.key(), new ModifierSource(modifierData, modifierComponent)));
+        })).accepting(modifierSources -> {
+            LOGGER.info("Loaded {} modifiers", modifierSources.size());
+        }).mergingMap(ModifierHandler::new);
+
         sceneCreatorLoader = MapLoader.mapInfoLoader(MAPS_FOLDER, codec, mapInfoConfigProcessor)
             .accepting(maps -> {
                 Set<PreloadedMap> instancePaths = new HashSet<>(maps.size());
@@ -163,30 +191,11 @@ public final class ZombiesFeature {
                     mobSpawnerSource, clientBlockHandlerSource, powerupHandlerSource, modifierHandler,
                     new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator), corpseCreatorSource,
                     endlessSource, leaderboardContext, playerContext.roles(), IdentitySource.MOJANG);
-            }, "creator");
+            }, "creator")
+            .accepting(maps -> {
+                LOGGER.info("Loaded {} maps", maps.size());
+            }).dependingOn(powerupLoader, modifierHandlerLoader);
 
-        powerupLoader = Loader.loader(() -> {
-            return DataSource.directory(POWERUPS_FOLDER, codec, "glob:**.{yml,yaml}");
-        }, ObjectExtractor.extractor(ConfigNode.class, (location, node) -> {
-            PowerupData powerupData = powerupDataProcessor.dataFromElement(node);
-            return List.of(ObjectExtractor.entry(powerupData.id(), powerupData));
-        })).mergingMap(powerupDataMap -> {
-            return new BasicPowerupHandlerSource(powerupDataMap, contextManager);
-        });
-
-        modifierHandlerLoader = Loader.loader(() -> {
-            return DataSource.directory(MODIFIERS_FOLDER, codec, "glob:**.{yml,yaml}");
-        }, ObjectExtractor.extractor(ConfigNode.class, (location, node) -> {
-            ModifierData modifierData = mapDataConfigProcessor.dataFromElement(node);
-
-            ElementContext context = contextManager.makeContext(modifierData.modifier());
-            DualComponent<ZombiesScene, Modifier> modifierComponent = context.provide(DependencyProvider.EMPTY);
-
-            return List.of(ObjectExtractor.entry(modifierData.key(), new ModifierSource(modifierData, modifierComponent)));
-        })).mergingMap(ModifierHandler::new);
-
-        powerupLoader.loadUnchecked();
-        modifierHandlerLoader.loadUnchecked();
         sceneCreatorLoader.loadUnchecked();
 
         ZombiesJoiner joiner = new ZombiesJoiner(sceneCreatorLoader, modifierHandlerLoader);
@@ -203,5 +212,9 @@ public final class ZombiesFeature {
 
     public static @NotNull Loader<ModifierHandler> modifierHandlerLoader() {
         return FeatureUtils.check(modifierHandlerLoader);
+    }
+
+    public static void reload() throws IOException {
+        FeatureUtils.check(sceneCreatorLoader).load();
     }
 }

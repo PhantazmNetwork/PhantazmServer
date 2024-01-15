@@ -36,6 +36,37 @@ public interface Loader<T> {
         return anonymousData().iterator().next();
     }
 
+    default @NotNull Loader<T> dependingOn(@NotNull Loader<?> @NotNull ... otherLoaders) {
+        Loader<?>[] loaders = Arrays.copyOf(otherLoaders, otherLoaders.length);
+        for (Loader<?> loader : loaders) {
+            Objects.requireNonNull(loader);
+            if (loader == this) {
+                throw new IllegalArgumentException("loader cannot depend on itself");
+            }
+        }
+
+        return new Loader<>() {
+            @Override
+            public @NotNull @Unmodifiable Collection<T> anonymousData() {
+                return Loader.this.anonymousData();
+            }
+
+            @Override
+            public @NotNull @Unmodifiable Map<Key, T> data() {
+                return Loader.this.data();
+            }
+
+            @Override
+            public void load() throws IOException {
+                for (Loader<?> loader : loaders) {
+                    loader.load();
+                }
+
+                Loader.this.load();
+            }
+        };
+    }
+
     default @NotNull <V> Loader<V> mergingMap(
         @NotNull ThrowingFunction<? super Map<Key, T>, ? extends V, ? extends IOException> mergeFunction) {
         return mergingMap(mergeFunction, null);
@@ -87,7 +118,9 @@ public interface Loader<T> {
                         entries[i++] = Map.entry(entry.getKey(), transformationFunction.apply(entry.getValue()));
                     }
 
-                    this.data = Map.ofEntries(entries);
+                    Map<Key, V> newData = Map.ofEntries(entries);
+                    this.data = newData;
+                    this.anonymousData = newData.values();
                 } catch (IOException e) {
                     if (e instanceof LoaderException loaderException) {
                         throw loaderException.toBuilder().withStage(stage).build();
