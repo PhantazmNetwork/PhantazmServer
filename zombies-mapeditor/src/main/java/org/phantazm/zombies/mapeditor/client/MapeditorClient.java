@@ -35,8 +35,10 @@ import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.commons.Signatures;
+import org.phantazm.loader.Loader;
 import org.phantazm.messaging.packet.player.MapDataVersionQueryPacket;
-import org.phantazm.zombies.map.FileSystemMapLoader;
+import org.phantazm.zombies.map.MapInfo;
+import org.phantazm.zombies.map.MapLoader;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.mapeditor.client.packet.FabricPacketUtils;
 import org.phantazm.zombies.mapeditor.client.packet.MapDataVersionResponsePacketWrapper;
@@ -72,40 +74,43 @@ public class MapeditorClient implements ClientModInitializer {
         RenderEvents.HUD.register(renderer::hudRender);
 
         KeyParser keyParser = new BasicKeyParser(Namespaces.PHANTAZM);
-        EditorSession editorSession = new BasicEditorSession(renderer,
-                new FileSystemMapLoader(defaultMapDirectory, codec, Signatures.core(MappingProcessorSource.builder())
-                        .withScalarSignature(ScalarSignature.of(Token.ofClass(Key.class),
-                                element -> keyParser.parseKey(element.asString()),
-                                key -> key == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(key.asString())))
-                        .withStandardSignatures().withStandardTypeImplementations().ignoringLengths().build()),
-                defaultMapDirectory);
+
+        MappingProcessorSource mappingProcessorSource = Signatures.core(MappingProcessorSource.builder())
+            .withScalarSignature(ScalarSignature.of(Token.ofClass(Key.class),
+                element -> keyParser.parseKey(element.asString()),
+                key -> key == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(key.asString())))
+            .withStandardSignatures().withStandardTypeImplementations().ignoringLengths().build();
+
+        Loader<MapInfo> mapInfoLoader = MapLoader.mapInfoLoader(defaultMapDirectory, codec, mappingProcessorSource
+            .processorFor(Token.ofClass(MapInfo.class)));
+
+        EditorSession editorSession = new BasicEditorSession(renderer, mapInfoLoader, defaultMapDirectory);
         editorSession.loadMapsFromDisk();
 
         UseBlockCallback.EVENT.register(editorSession::handleBlockUse);
 
         KeyBinding mapeditorBinding = KeyBindingHelper.registerKeyBinding(
-                new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M,
-                        TranslationKeys.CATEGORY_MAPEDITOR_ALL));
+            new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CONFIG, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_M,
+                TranslationKeys.CATEGORY_MAPEDITOR_ALL));
         KeyBinding newObject = KeyBindingHelper.registerKeyBinding(
-                new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N,
-                        TranslationKeys.CATEGORY_MAPEDITOR_ALL));
+            new KeyBinding(TranslationKeys.KEY_MAPEDITOR_CREATE, InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_N,
+                TranslationKeys.CATEGORY_MAPEDITOR_ALL));
 
         ClientPlayConnectionEvents.JOIN.register(((handler, sender, client) -> {
             FabricPacketUtils.sendPacket(sender, new MapDataVersionQueryPacket());
         }));
         ClientPlayNetworking.registerGlobalReceiver(MapDataVersionResponsePacketWrapper.TYPE,
-                (packet, player, responseSender) -> {
-                    Text message;
-                    if (packet.packet().version() == MapSettingsInfo.MAP_DATA_VERSION) {
-                        message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_SYNCED)
-                                .formatted(Formatting.GREEN);
-                    }
-                    else {
-                        message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED)
-                                .formatted(Formatting.RED);
-                    }
-                    player.sendMessage(message);
-                });
+            (packet, player, responseSender) -> {
+                Text message;
+                if (packet.packet().version() == MapSettingsInfo.MAP_DATA_VERSION) {
+                    message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_SYNCED)
+                        .formatted(Formatting.GREEN);
+                } else {
+                    message = Text.translatable(TranslationKeys.CHAT_MAPEDITOR_MAPDATA_VERSION_SYNC_NOT_SYNCED)
+                        .formatted(Formatting.RED);
+                }
+                player.sendMessage(message);
+            });
         ClientTickEvents.END_CLIENT_TICK.register(new ClientTickEvents.EndTick() {
             private BlockHitResult lastBlockLook;
 
@@ -118,7 +123,7 @@ public class MapeditorClient implements ClientModInitializer {
 
                 HitResult hitResult = client.crosshairTarget;
                 if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
-                    BlockHitResult blockHitResult = (BlockHitResult)hitResult;
+                    BlockHitResult blockHitResult = (BlockHitResult) hitResult;
                     if (lastBlockLook == null || !lastBlockLook.getBlockPos().equals(blockHitResult.getBlockPos())) {
                         editorSession.handleBlockLookChange(blockHitResult);
                         lastBlockLook = blockHitResult;
@@ -132,17 +137,16 @@ public class MapeditorClient implements ClientModInitializer {
 
                 if (mapeditorBinding.wasPressed()) {
                     MinecraftClient.getInstance().setScreen(new CottonClientScreen(new MainGui(editorSession)));
-                }
-                else if (newObject.wasPressed()) {
+                } else if (newObject.wasPressed()) {
                     if (!editorSession.hasMap()) {
                         player.sendMessage(Text.translatable(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_ACTIVE_MAP),
-                                true);
+                            true);
                         return;
                     }
 
                     if (!editorSession.hasSelection()) {
                         player.sendMessage(Text.translatable(TranslationKeys.GUI_MAPEDITOR_FEEDBACK_NO_SELECTION),
-                                true);
+                            true);
                         return;
                     }
 
@@ -290,7 +294,7 @@ public class MapeditorClient implements ClientModInitializer {
         }
 
         private static <TObject extends Keyed> boolean tryUpdateInPlace(TObject newObject, TObject[] baked,
-                Map<Key, TObject> map) {
+            Map<Key, TObject> map) {
             Key newKey = newObject.key();
             TObject oldObject = map.get(newKey);
             if (oldObject != null) {

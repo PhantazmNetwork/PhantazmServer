@@ -16,8 +16,8 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-import org.phantazm.commons.FileUtils;
 import org.phantazm.commons.Namespaces;
+import org.phantazm.loader.Loader;
 import org.phantazm.zombies.map.*;
 import org.phantazm.zombies.mapeditor.client.render.ObjectRenderer;
 import org.phantazm.zombies.mapeditor.client.render.RenderUtils;
@@ -290,6 +290,8 @@ public class BasicEditorSession implements EditorSession {
 
     @Override
     public void saveMapsToDisk() {
+        //TODO: add ability to save data stored in the new Loader(?)
+        /*
         Set<String> savedMaps = new HashSet<>(maps.values().size());
         for (MapInfo map : maps.values()) {
             try {
@@ -314,7 +316,7 @@ public class BasicEditorSession implements EditorSession {
             });
         } catch (IOException e) {
             LOGGER.warn("IOException when deleting maps", e);
-        }
+        }*/
     }
 
     @Override
@@ -415,23 +417,8 @@ public class BasicEditorSession implements EditorSession {
     }
 
     private Map<Key, MapInfo> loadMaps() throws IOException {
-        Map<Key, MapInfo> newMaps = new HashMap<>();
-        FileUtils.createDirectories(mapFolder);
-        FileUtils.forEachFileMatching(mapFolder, (path, attr) -> attr.isDirectory() && !path.equals(mapFolder),
-            mapFolder -> {
-                LOGGER.info("Trying to load map from " + mapFolder);
-                String name = mapFolder.getFileName().toString();
-
-                try {
-                    MapInfo map = loader.load(name);
-                    newMaps.put(map.settings().id(), map);
-                    LOGGER.info("Successfully loaded map " + name);
-                } catch (IOException e) {
-                    LOGGER.warn("IOException when loading map " + name, e);
-                }
-            });
-
-        return newMaps;
+        loader.load();
+        return loader.data();
     }
 
     private void refreshMap() {

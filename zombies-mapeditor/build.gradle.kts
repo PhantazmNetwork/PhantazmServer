@@ -46,6 +46,7 @@ dependencies {
     modImplementation(libs.renderer)
 
     implementation(projects.phantazmCommons)
+    implementation(projects.phantazmLoader)
     implementation(projects.phantazmMessaging)
     implementation(projects.phantazmZombiesMapdata)
     implementation(libs.element.core)
