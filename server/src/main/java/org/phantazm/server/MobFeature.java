@@ -13,12 +13,10 @@ import com.github.steanky.ethylene.mapper.type.Token;
 import com.github.steanky.proxima.path.Pathfinder;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.loader.DataSource;
 import org.phantazm.loader.Loader;
 import org.phantazm.loader.ObjectExtractor;
@@ -48,7 +46,7 @@ public final class MobFeature {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MobFeature.class);
 
-    private static Loader<MobCreator> loader;
+    private static Loader<MobCreator> mobCreatorLoader;
 
     private MobFeature() {
         throw new UnsupportedOperationException();
@@ -65,7 +63,7 @@ public final class MobFeature {
 
         ConfigProcessor<MobData> mobDataProcessor = processorSource.processorFor(Token.ofClass(MobData.class));
 
-        Loader<MobCreator> loader = Loader.loader(() ->
+        mobCreatorLoader = Loader.loader(() ->
                 DataSource.directory(MobFeature.MOBS_PATH, codec, "glob:**.{yml,yaml}"),
             ObjectExtractor.extractor(ConfigNode.class, (location, node) -> {
                 com.github.steanky.element.core.context.ElementContext context = contextManager.makeContext(node);
@@ -76,10 +74,8 @@ public final class MobFeature {
                 Map<EquipmentSlot, ItemStack> equipmentMap = equipmentMap(data.equipment(), processorSource);
                 Object2FloatMap<String> attributeMap = attributeMap(data.attributes());
 
-                List<SkillComponent> skills = data.skills().isEmpty() ? List.of() : context
-                    .provideCollection(SKILLS);
-                List<GoalApplier> goals = data.goals().isEmpty() ? List.of() : context
-                    .provideCollection(GOALS);
+                List<SkillComponent> skills = data.skills().isEmpty() ? List.of() : context.provideCollection(SKILLS);
+                List<GoalApplier> goals = data.goals().isEmpty() ? List.of() : context.provideCollection(GOALS);
 
                 return List.of(ObjectExtractor.entry(data.key(), (MobCreator) new ZombiesMobCreator(data, pathfinding, skills, goals,
                     pathfinder, instanceSettingsFunction, equipmentMap, attributeMap)));
@@ -87,8 +83,7 @@ public final class MobFeature {
             LOGGER.info("Loaded {} mob file(s)", mobs.size());
         });
 
-        loader.loadUnchecked();
-        MobFeature.loader = loader;
+        mobCreatorLoader.loadUnchecked();
     }
 
     @SuppressWarnings("unchecked")
@@ -119,11 +114,11 @@ public final class MobFeature {
     }
 
     @SuppressWarnings("unused")
-    public static @NotNull @Unmodifiable Map<Key, MobCreator> mobCreators() {
-        return FeatureUtils.check(loader).data();
+    public static @NotNull Loader<MobCreator> mobCreators() {
+        return FeatureUtils.check(mobCreatorLoader);
     }
 
     public static void reload() throws IOException {
-        FeatureUtils.check(loader).load();
+        FeatureUtils.check(mobCreatorLoader).load();
     }
 }

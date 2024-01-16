@@ -1,5 +1,6 @@
 package org.phantazm.mob2;
 
+import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Point;
@@ -41,6 +42,9 @@ public class Mob extends ProximaEntity {
     private final CachedPacket cachedUpdateTeamPacket;
     private final CachedPacket cachedRemoveTeamPacket;
 
+    private final Object healthWriteSync;
+    private volatile List<FloatConsumer> healthUpdateListeners;
+
     private Reference<Entity> lastHitEntity;
     private Reference<Player> lastInteractingPlayer;
 
@@ -80,6 +84,8 @@ public class Mob extends ProximaEntity {
         this.triggeredSkills = new EnumMap<>(Trigger.class);
         this.data = Objects.requireNonNull(data);
 
+        this.healthWriteSync = new Object();
+
         this.lastHitEntity = ReferenceUtils.nullReference();
         this.lastInteractingPlayer = ReferenceUtils.nullReference();
 
@@ -102,6 +108,21 @@ public class Mob extends ProximaEntity {
     public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
         @NotNull MobData data) {
         this(entityType, uuid, pathfinding, data, true);
+    }
+
+    public void addHealthListener(@NotNull FloatConsumer floatConsumer) {
+        synchronized (healthWriteSync) {
+            List<FloatConsumer> healthUpdateListeners;
+            if (this.healthUpdateListeners == null) {
+                healthUpdateListeners = new ArrayList<>(1);
+            } else {
+                healthUpdateListeners = new ArrayList<>(this.healthUpdateListeners.size() + 1);
+                healthUpdateListeners.addAll(this.healthUpdateListeners);
+            }
+
+            healthUpdateListeners.add(floatConsumer);
+            this.healthUpdateListeners = List.copyOf(healthUpdateListeners);
+        }
     }
 
     /**
@@ -283,6 +304,25 @@ public class Mob extends ProximaEntity {
         }
 
         return result;
+    }
+
+    @Override
+    public void setHealth(float health) {
+        float oldHealth = getHealth();
+        super.setHealth(health);
+
+        if (oldHealth == health) {
+            return;
+        }
+
+        List<FloatConsumer> healthUpdateListeners = this.healthUpdateListeners;
+        if (healthUpdateListeners == null) {
+            return;
+        }
+
+        for (FloatConsumer consumer : healthUpdateListeners) {
+            consumer.accept(health);
+        }
     }
 
     @Override
