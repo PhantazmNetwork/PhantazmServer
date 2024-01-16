@@ -75,14 +75,14 @@ public class Mob extends ProximaEntity {
         }
     }
 
-    protected Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
-        @NotNull MobData data, boolean register) {
+    protected Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @Nullable Pathfinding pathfinding,
+        @Nullable MobData data, boolean register) {
         super(entityType, uuid, pathfinding, false);
         this.allSkills = new ArrayList<>();
         this.tickableSkills = new ArrayList<>();
         this.useOnTick = new ArrayList<>();
         this.triggeredSkills = new EnumMap<>(Trigger.class);
-        this.data = Objects.requireNonNull(data);
+        this.data = data;
 
         this.healthWriteSync = new Object();
 
@@ -105,9 +105,13 @@ public class Mob extends ProximaEntity {
         if (register) super.register();
     }
 
-    public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
-        @NotNull MobData data) {
+    public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @Nullable Pathfinding pathfinding,
+        @Nullable MobData data) {
         this(entityType, uuid, pathfinding, data, true);
+    }
+
+    public Mob(@NotNull EntityType entityType, @NotNull UUID uuid) {
+        this(entityType, uuid, null, null);
     }
 
     public void addHealthListener(@NotNull FloatConsumer floatConsumer) {
@@ -234,7 +238,7 @@ public class Mob extends ProximaEntity {
     }
 
     public @NotNull MobData data() {
-        return data;
+        return Objects.requireNonNull(data);
     }
 
     public @NotNull Optional<Entity> lastHitEntity() {
@@ -470,11 +474,14 @@ public class Mob extends ProximaEntity {
     }
 
     public @NotNull Component name() {
-        MobMeta meta = data.meta();
-        if (meta != null) {
-            Component component = meta.customName();
-            if (component != null) {
-                return component;
+        MobData mobData = this.data;
+        if (mobData != null) {
+            MobMeta meta = mobData.meta();
+            if (meta != null) {
+                Component component = meta.customName();
+                if (component != null) {
+                    return component;
+                }
             }
         }
 

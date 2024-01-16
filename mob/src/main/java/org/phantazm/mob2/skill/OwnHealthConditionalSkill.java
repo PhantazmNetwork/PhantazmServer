@@ -40,7 +40,8 @@ public class OwnHealthConditionalSkill implements SkillComponent {
     public record Data(@NotNull TriggerCondition triggerCondition,
         @NotNull AmountType amountType,
         double amount,
-        boolean triggersAutomatically) {
+        boolean triggersAutomatically,
+        @NotNull @ChildPath("delegate") String delegate) {
         @Default("amountType")
         public static @NotNull ConfigElement defaultAmountType() {
             return ConfigPrimitive.of("PERCENTAGE");
