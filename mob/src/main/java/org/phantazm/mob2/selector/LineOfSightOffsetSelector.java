@@ -53,7 +53,7 @@ public class LineOfSightOffsetSelector implements SelectorComponent {
 
             Vec offsetVector = lookVector.apply((x, y, z) -> {
                 if (data.ignorePitch) {
-                    return new Vec(x, 0, y);
+                    return new Vec(x, 0, z);
                 }
 
                 if (data.ignoreYaw) {
