@@ -111,6 +111,7 @@ public class Mob extends ProximaEntity {
     }
 
     public void addHealthListener(@NotNull FloatConsumer floatConsumer) {
+        Objects.requireNonNull(floatConsumer);
         synchronized (healthWriteSync) {
             List<FloatConsumer> healthUpdateListeners;
             if (this.healthUpdateListeners == null) {
