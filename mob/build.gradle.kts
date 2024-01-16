@@ -6,4 +6,5 @@ dependencies {
     api(projects.phantazmProximaMinestom)
     api(projects.phantazmCore)
     api(projects.phantazmCommons)
+    implementation(projects.phantazmLoader)
 }

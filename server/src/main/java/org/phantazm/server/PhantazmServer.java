@@ -285,7 +285,7 @@ public final class PhantazmServer {
             ProximaFeature.initialize(configContext);
             SongFeature.initialize(ethyleneContext);
 
-            GameContext gameContext = new GameContext(SongFeature.songLoader(), MobFeature::mobCreators,
+            GameContext gameContext = new GameContext(SongFeature.songLoader(), MobFeature::mobLoader,
                 ProximaFeature.getPathfinder(), ProximaFeature.instanceSettingsFunction());
 
             MobFeature.initialize(ethyleneContext, dataLoadingContext, gameContext);

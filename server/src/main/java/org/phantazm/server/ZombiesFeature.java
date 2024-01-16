@@ -9,7 +9,6 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.Event;
@@ -59,7 +58,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public final class ZombiesFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZombiesFeature.class);
@@ -91,7 +89,7 @@ public final class ZombiesFeature {
 
         Map<? super UUID, ? extends Party> parties = playerContext.parties();
 
-        Supplier<? extends Map<Key, MobCreator>> mobCreatorMap = gameContext.mobCreatorSupplier();
+        Loader<MobCreator> mobCreatorLoader = gameContext.mobCreatorLoaderSupplier().get();
         SongLoader songLoader = gameContext.songLoader();
         Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSettingsFunction =
             gameContext.instanceSettingsFunction();
@@ -165,7 +163,7 @@ public final class ZombiesFeature {
                 Endless.Source endlessSource = mapDependencyProvider -> contextManager
                     .makeContext(mapInfo.endless()).provide(mapDependencyProvider);
 
-                MobSpawnerSource mobSpawnerSource = new BasicMobSpawnerSource(mobCreatorMap);
+                MobSpawnerSource mobSpawnerSource = new BasicMobSpawnerSource(mobCreatorLoader);
 
                 ZombiesLeaderboardContext leaderboardContext =
                     new ZombiesLeaderboardContext(ExecutorFeature.getExecutor(),

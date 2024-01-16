@@ -114,7 +114,7 @@ public final class MobFeature {
     }
 
     @SuppressWarnings("unused")
-    public static @NotNull Loader<MobCreator> mobCreators() {
+    public static @NotNull Loader<MobCreator> mobLoader() {
         return FeatureUtils.check(mobCreatorLoader);
     }
 
