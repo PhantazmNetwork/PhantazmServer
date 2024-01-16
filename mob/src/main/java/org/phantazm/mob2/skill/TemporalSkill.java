@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.timer.ExecutionType;
@@ -33,8 +34,8 @@ public class TemporalSkill implements SkillComponent {
 
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        Scheduler scheduler = injectionStore.get(InjectionKeys.SCHEDULER);
-        return new Internal(data, delegate.apply(mob, injectionStore), mob, scheduler);
+        return new Internal(data, delegate.apply(mob, injectionStore), mob, injectionStore
+            .getOrDefault(InjectionKeys.SCHEDULER, MinecraftServer::getSchedulerManager));
     }
 
     @DataObject

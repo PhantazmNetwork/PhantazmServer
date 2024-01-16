@@ -1,6 +1,7 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
@@ -38,7 +39,7 @@ public class LingeringSkill implements SkillComponent {
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         return new Internal(data, mob, selector.apply(mob, injectionStore), targetSkills, injectionStore,
-            injectionStore.get(InjectionKeys.SCHEDULER));
+            injectionStore.getOrDefault(InjectionKeys.SCHEDULER, MinecraftServer::getSchedulerManager));
     }
 
     @DataObject
