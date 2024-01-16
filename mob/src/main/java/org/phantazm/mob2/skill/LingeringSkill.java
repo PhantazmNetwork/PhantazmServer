@@ -80,12 +80,10 @@ public class LingeringSkill implements SkillComponent {
                 armorStandMeta.setHasNoGravity(true);
                 mob.setHasPhysics(false);
 
-                List<Skill> skills = new ArrayList<>(targetSkills.size());
                 for (SkillComponent skillComponent : targetSkills) {
-                    skills.add(skillComponent.apply(mob, injectionStore));
+                    mob.addSkill(skillComponent.apply(mob, injectionStore));
                 }
 
-                mob.addSkills(skills);
                 mob.setInstance(instance, point);
 
                 if (spawnedMobs != null) {
