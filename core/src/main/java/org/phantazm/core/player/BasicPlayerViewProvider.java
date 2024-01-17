@@ -4,13 +4,14 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A {@link PlayerViewProvider} based off of a {@link ConnectionManager}, which will be the ConnectionManager instance
@@ -24,6 +25,10 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     private final IdentitySource identitySource;
     private final ConnectionManager connectionManager;
 
+    //only used to ensure PlayerViewImpl instances aren't GC'd
+    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+    private final Map<UUID, PlayerViewImpl> strongReferences;
+
     private final Cache<UUID, PlayerViewImpl> uuidToView;
 
     /**
@@ -35,6 +40,7 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     public BasicPlayerViewProvider(@NotNull IdentitySource identitySource, @NotNull ConnectionManager connectionManager) {
         this.identitySource = Objects.requireNonNull(identitySource);
         this.connectionManager = Objects.requireNonNull(connectionManager);
+        this.strongReferences = new ConcurrentHashMap<>();
         this.uuidToView = Caffeine.newBuilder().weakValues().build();
     }
 
@@ -71,29 +77,22 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     @Override
     public @NotNull PlayerView fromPlayer(@NotNull Player player) {
         Objects.requireNonNull(player);
-        return uuidToView.get(player.getUuid(), key ->
-            new PlayerViewImpl(identitySource, connectionManager, player));
+        return uuidToView.get(player.getUuid(), key -> new PlayerViewImpl(identitySource, connectionManager, key));
     }
 
-    /**
-     * Adds a strong reference to a {@link PlayerViewImpl} associated with the given {@link Player}. If there is already
-     * a weakly or strongly referenced PlayerViewImpl associated with this player's UUID, that instance is used.
-     * Otherwise, a new instance is created and cached.
-     *
-     * @param player the player to add
-     */
-    @ApiStatus.Internal
-    void addPlayer(@NotNull Player player) {
-        uuidToView.get(player.getUuid(), key -> new PlayerViewImpl(identitySource, connectionManager, player));
+    @Override
+    public void handleJoin(@NotNull Player player) {
+        Objects.requireNonNull(player);
+        uuidToView.get(player.getUuid(), key -> {
+            PlayerViewImpl newPlayer = new PlayerViewImpl(identitySource, connectionManager, player);
+            strongReferences.put(key, newPlayer);
+            return newPlayer;
+        });
     }
 
-    /**
-     * Removes a strong reference to an associated {@link PlayerViewImpl}.
-     *
-     * @param player the player to remove an association with
-     */
-    @ApiStatus.Internal
-    void removePlayer(@NotNull Player player) {
-        uuidToView.invalidate(player.getUuid());
+    @Override
+    public void handleDisconnect(@NotNull UUID uuid) {
+        Objects.requireNonNull(uuid);
+        strongReferences.remove(uuid);
     }
 }

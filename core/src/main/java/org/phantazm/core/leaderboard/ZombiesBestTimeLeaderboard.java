@@ -395,7 +395,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                     for (UUID member : entry.team()) {
                         int thisJ = j++;
                         names[thisJ] = identitySource.getName(member).thenApplyAsync(nameOptional -> {
-                            return nameOptional.orElse("Unknown User");
+                            return nameOptional.orElse("?");
                         }, executor).thenComposeAsync(name -> roleStore.getStylingRole(member).thenApplyAsync(role -> {
                             nameLengths[thisJ] = name.length();
                             return role.styleRawName(name);

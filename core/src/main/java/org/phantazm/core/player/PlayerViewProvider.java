@@ -1,13 +1,9 @@
 package org.phantazm.core.player;
 
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -30,13 +26,7 @@ public interface PlayerViewProvider {
                     throw new IllegalArgumentException("PlayerViewProvider has already been initialized");
                 }
 
-                BasicPlayerViewProvider provider = new BasicPlayerViewProvider(identitySource, connectionManager);
-                MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event ->
-                    provider.addPlayer(event.getPlayer()));
-                MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, event ->
-                    provider.removePlayer(event.getPlayer()));
-
-                Global.instance = provider;
+                Global.instance = new BasicPlayerViewProvider(identitySource, connectionManager);
             }
         }
 
@@ -96,4 +86,8 @@ public interface PlayerViewProvider {
      * @return a PlayerView instance for the given Player
      */
     @NotNull PlayerView fromPlayer(@NotNull Player player);
+
+    void handleJoin(@NotNull Player player);
+
+    void handleDisconnect(@NotNull UUID uuid);
 }

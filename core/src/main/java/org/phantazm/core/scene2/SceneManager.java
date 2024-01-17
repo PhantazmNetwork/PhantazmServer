@@ -76,11 +76,12 @@ public final class SceneManager {
                     throw new IllegalStateException("The global SceneManager has already been initialized");
                 }
 
-                SceneManager manager = new SceneManager(executor, sceneTypes, numThreads);
+                SceneManager manager = new SceneManager(executor, sceneTypes, numThreads, viewProvider);
 
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, disconnectEvent -> {
                     manager.handleDisconnect(viewProvider.fromPlayer(disconnectEvent.getPlayer()));
                 });
+
                 MinecraftServer.getGlobalEventHandler().addListener(PlayerTablistRemoveEvent.class,
                     manager::handlePostDisconnect);
 
@@ -319,15 +320,18 @@ public final class SceneManager {
     private final Map<Class<? extends Scene>, SceneEntry> mappedScenes;
     private final ThreadDispatcher<Scene> threadDispatcher;
     private final Map<Key<?>, JoinFunction<?>> functionMap;
+    private final PlayerViewProvider viewProvider;
 
     private volatile Function<? super Player, ? extends LoginJoin<? extends InstanceScene>> requestMapper;
     private volatile Function<? super Set<PlayerView>, ? extends CompletableFuture<?>> globalFallback;
 
-    private SceneManager(Executor executor, Set<Class<? extends Scene>> sceneTypes, int numThreads) {
+    private SceneManager(Executor executor, Set<Class<? extends Scene>> sceneTypes, int numThreads,
+        PlayerViewProvider viewProvider) {
         this.executor = Objects.requireNonNull(executor);
         this.mappedScenes = buildSceneMap(Set.copyOf(sceneTypes));
         this.threadDispatcher = ThreadDispatcher.of(ThreadProvider.counter(), numThreads);
         this.functionMap = new ConcurrentHashMap<>();
+        this.viewProvider = viewProvider;
     }
 
     @SuppressWarnings("unchecked")
@@ -350,7 +354,6 @@ public final class SceneManager {
 
     private void handleDisconnect(@NotNull PlayerView playerView) {
         PlayerViewImpl view = (PlayerViewImpl) playerView;
-        view.tagHandler().clearTags();
 
         Lock lock = view.joinLock();
         lock.lock();
@@ -375,6 +378,9 @@ public final class SceneManager {
         } finally {
             lock.unlock();
         }
+
+        viewProvider.handleDisconnect(playerView.getUUID());
+        view.tagHandler().clearTags();
     }
 
     private void handlePostDisconnect(PlayerTablistRemoveEvent event) {
@@ -461,6 +467,7 @@ public final class SceneManager {
 
     private void handleLogin(@NotNull PlayerLoginEvent loginEvent) {
         Player player = loginEvent.getPlayer();
+        viewProvider.handleJoin(player);
 
         Function<? super Player, ? extends LoginJoin<? extends InstanceScene>> mapper = this.requestMapper;
         if (mapper == null) {

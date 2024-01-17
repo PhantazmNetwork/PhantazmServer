@@ -37,7 +37,7 @@ public class LineOfSightOffsetSelector implements SelectorComponent {
     public record Data(double distance,
         boolean ignorePitch,
         boolean ignoreYaw,
-        @NotNull @ChildPath("delegate") SelectorComponent delegate) {
+        @NotNull @ChildPath("delegate") String delegate) {
         @Default("ignorePitch")
         public static @NotNull ConfigElement defaultIgnorePitch() {
             return ConfigPrimitive.FALSE;
