@@ -2,8 +2,15 @@ package org.phantazm.server;
 
 import com.github.steanky.element.core.key.BasicKeyParser;
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.ethylene.codec.json.JsonCodec;
+import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigHandler;
+import com.github.steanky.ethylene.core.bridge.Configuration;
+import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.event.Event;
@@ -30,6 +37,9 @@ import org.phantazm.server.config.player.PlayerConfig;
 import org.phantazm.server.config.server.*;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.server.context.*;
+import org.phantazm.stats.general.GeneralDatabase;
+import org.phantazm.stats.zombies.BasicZombiesPlayerMapStats;
+import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -37,8 +47,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -301,9 +313,107 @@ public final class PhantazmServer {
 
             ServerCommandFeature.initialize(configContext, playerContext);
             ValidationFeature.initialize(playerContext);
+
+            syncDb(databaseAccessContext);
         });
 
         CompletableFuture.allOf(independentFeatures, game).join();
+    }
+
+    private static void syncDb(DatabaseAccessContext databaseAccessContext) {
+        Path bestTime = Path.of("./zombies_player_map_best_time.json");
+        Path mapStats = Path.of("./zombies_player_map_stats.json");
+        Path playerStats = Path.of("./phantazm_player_stats.json");
+
+        if (!Files.exists(bestTime) || !Files.exists(mapStats) || !Files.exists(playerStats)) {
+            return;
+        }
+
+        try {
+            {
+                ConfigList list = Configuration.read(bestTime, new JsonCodec()).asList();
+
+                Map<Key, Int2ObjectMap<Int2ObjectMap<List<ConfigElement>>>> partitioned = new HashMap<>();
+                for (ConfigElement element : list) {
+                    Key key = Key.key(element.getElement("map_key").asString());
+                    int playerCount = element.getElement("player_count").asNumber().intValue();
+
+                    partitioned.computeIfAbsent(key, i -> new Int2ObjectOpenHashMap<>())
+                        .computeIfAbsent(playerCount, i -> new Int2ObjectOpenHashMap<>())
+                        .computeIfAbsent(element.getNumberOrThrow("best_time").intValue(), i -> new ArrayList<>())
+                        .add(element);
+                }
+
+                UUID[] dummyUuids = new UUID[]{
+                    new UUID(0, 0),
+                    new UUID(0, 1),
+                    new UUID(0, 2),
+                    new UUID(0, 3)
+                };
+
+                long currentTime = Instant.now().getEpochSecond();
+
+                for (var mapEntry : partitioned.entrySet()) {
+                    Key key = mapEntry.getKey();
+
+                    for (var teamSizeEntry : mapEntry.getValue().int2ObjectEntrySet()) {
+                        int teamSize = teamSizeEntry.getIntKey();
+                        for (var timeEntry : teamSizeEntry.getValue().int2ObjectEntrySet()) {
+                            int time = timeEntry.getIntKey();
+                            List<ConfigElement> teamInfo = timeEntry.getValue();
+                            List<UUID> uuids = new ArrayList<>(teamInfo.size());
+                            for (ConfigElement element : teamInfo) {
+                                uuids.add(UUID.fromString(element.getStringOrThrow("player_uuid")));
+                            }
+
+                            int i = 0;
+                            while (uuids.size() < teamSize) {
+                                uuids.add(dummyUuids[i++]);
+                            }
+
+                            var db = databaseAccessContext.zombiesLeaderboardDatabase();
+                            db.submitGame(new HashSet<>(uuids), "0", key, time, currentTime).join();
+                        }
+                    }
+                }
+            }
+
+            {
+                ConfigList list = Configuration.read(mapStats, new JsonCodec()).asList();
+                ZombiesStatsDatabase zombiesStatsDatabase = databaseAccessContext.zombiesStatsDatabase();
+                for (ConfigElement entry : list) {
+                    zombiesStatsDatabase.synchronizeZombiesPlayerMapStats(new BasicZombiesPlayerMapStats(
+                        UUID.fromString(entry.getStringOrThrow("player_uuid")),
+                        Key.key(entry.getStringOrThrow("map_key")),
+                        entry.getNumberOrThrow("games_played").intValue(),
+                        entry.getNumberOrThrow("wins").intValue(),
+                        entry.getNumberOrThrow("best_round").intValue(),
+                        entry.getNumberOrThrow("rounds_survived").intValue(),
+                        entry.getNumberOrThrow("kills").intValue(),
+                        entry.getNumberOrThrow("coins_gained").longValue(),
+                        entry.getNumberOrThrow("coins_spent").longValue(),
+                        entry.getNumberOrThrow("knocks").intValue(),
+                        entry.getNumberOrThrow("deaths").intValue(),
+                        entry.getNumberOrThrow("revives").intValue(),
+                        entry.getNumberOrThrow("shots").longValue(),
+                        entry.getNumberOrThrow("regular_hits").longValue(),
+                        entry.getNumberOrThrow("headshot_hits").longValue()
+                    )).join();
+                }
+            }
+
+            {
+                ConfigList list = Configuration.read(playerStats, new JsonCodec()).asList();
+                GeneralDatabase generalDatabase = databaseAccessContext.generalDatabase();
+                for (ConfigElement element : list) {
+                    UUID uuid = UUID.fromString(element.getStringOrThrow("player_uuid"));
+                    long firstJoin = Long.parseLong(element.getStringOrThrow("first_join"));
+                    long lastJoin = Long.parseLong(element.getStringOrThrow("last_join"));
+                    generalDatabase.updateJoin(uuid, firstJoin, lastJoin).join();
+                }
+            }
+        } catch (IOException e) {
+        }
     }
 
     private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig,

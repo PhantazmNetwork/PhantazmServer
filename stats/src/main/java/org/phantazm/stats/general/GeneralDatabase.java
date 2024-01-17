@@ -10,4 +10,5 @@ public interface GeneralDatabase {
 
     @NotNull CompletableFuture<Void> handleJoin(@NotNull UUID playerUUID);
 
+    @NotNull CompletableFuture<Void> updateJoin(@NotNull UUID playerUUID, long firstJoin, long lastJoin);
 }

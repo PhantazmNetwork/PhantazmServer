@@ -53,4 +53,26 @@ public class JDBCGeneralDatabase implements GeneralDatabase {
             });
         }, executor);
     }
+
+    @Override
+    public @NotNull CompletableFuture<Void> updateJoin(@NotNull UUID playerUUID, long firstJoin, long lastJoin) {
+        return CompletableFuture.runAsync(() -> {
+            DatabaseUtils.runPreparedSql(LOGGER, "handleJoin", dataSource, """
+                INSERT INTO player_stats (player_uuid, first_join, last_join)
+                VALUES(?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                first_join=?,
+                last_join=?
+                """, (connection, statement) -> {
+                statement.setString(1, playerUUID.toString());
+                statement.setLong(2, firstJoin);
+                statement.setLong(3, lastJoin);
+
+                statement.setLong(4, firstJoin);
+                statement.setLong(5, lastJoin);
+
+                statement.execute();
+            });
+        }, executor);
+    }
 }
