@@ -357,20 +357,22 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
         @NotNull String modifierKey) {
         Objects.requireNonNull(map);
 
-        int teamSize = team.size();
+        Set<UUID> teamCopy = Set.copyOf(team);
+
+        int teamSize = teamCopy.size();
         String filteredModifierKey = filterModifierKey(modifierKey);
         if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
             return FutureUtils.completedFuture(OptionalLong.empty());
         }
 
-        BestTimeKey bestTimeKey = new BestTimeKey(team, map, modifierKey);
+        BestTimeKey bestTimeKey = new BestTimeKey(teamCopy, map, modifierKey);
         OptionalLong bestTimeCached = bestTimeCache.getIfPresent(bestTimeKey);
         if (bestTimeCached != null) {
             return FutureUtils.completedFuture(bestTimeCached);
         }
 
         return CompletableFuture.supplyAsync(() -> {
-            List<UUID> key = key(team);
+            List<UUID> key = key(teamCopy);
 
             String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
@@ -406,20 +408,22 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
         @NotNull Key map, @NotNull String modifierKey) {
         Objects.requireNonNull(map);
 
-        int teamSize = team.size();
+        Set<UUID> teamCopy = Set.copyOf(team);
+
+        int teamSize = teamCopy.size();
         String filteredModifierKey = filterModifierKey(modifierKey);
         if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
             return FutureUtils.completedFuture(List.of());
         }
 
-        TimeHistoryKey timeHistoryKey = new TimeHistoryKey(team, map, modifierKey);
+        TimeHistoryKey timeHistoryKey = new TimeHistoryKey(teamCopy, map, modifierKey);
         List<LeaderboardEntry> cachedHistory = timeHistoryCache.getIfPresent(timeHistoryKey);
         if (cachedHistory != null) {
             return FutureUtils.completedFuture(cachedHistory);
         }
 
         return CompletableFuture.supplyAsync(() -> {
-            List<UUID> key = key(team);
+            List<UUID> key = key(teamCopy);
 
             String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
@@ -446,7 +450,8 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
 
                         List<LeaderboardEntry> entries = new ArrayList<>();
                         do {
-                            entries.add(new LeaderboardEntry(team, result.getLong(1), result.getLong(2)));
+                            entries.add(new LeaderboardEntry(teamCopy, result.getLong(1), result
+                                .getLong(2)));
                         }
                         while (result.next());
 
@@ -531,7 +536,9 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
         @NotNull Key map, long timeTaken, long timeEnd) {
         Objects.requireNonNull(map);
 
-        int teamSize = team.size();
+        Set<UUID> teamCopy = Set.copyOf(team);
+
+        int teamSize = teamCopy.size();
         String filteredModifierKey = filterModifierKey(modifierKey);
         if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
             return FutureUtils.nullCompletedFuture();
@@ -541,7 +548,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             String gameTable = gameTableName(teamSize, filteredModifierKey);
             String teamTable = teamTableName(teamSize);
 
-            List<UUID> key = key(team);
+            List<UUID> key = key(teamCopy);
 
             DatabaseUtils.runSql(LOGGER, "submitGame", dataSource, (connection) -> {
                 int oldIsolation = connection.getTransactionIsolation();
