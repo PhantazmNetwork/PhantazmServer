@@ -1,12 +1,10 @@
 package org.phantazm.mob2.selector;
 
-import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
@@ -14,25 +12,32 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 @Model("mob.selector.line_of_sight_offset")
 @Cache
 public class LineOfSightOffsetSelector implements SelectorComponent {
     private final Data data;
+    private final SelectorComponent delegate;
 
     @FactoryMethod
-    public LineOfSightOffsetSelector(@NotNull Data data) {
+    public LineOfSightOffsetSelector(@NotNull Data data, @NotNull @Child("delegate") SelectorComponent delegate) {
         this.data = data;
+        this.delegate = delegate;
     }
 
     @Override
     public @NotNull Selector apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob, data);
+        return new Internal(data, delegate.apply(mob, injectionStore));
     }
 
     @DataObject
     public record Data(double distance,
         boolean ignorePitch,
-        boolean ignoreYaw) {
+        boolean ignoreYaw,
+        @NotNull @ChildPath("delegate") SelectorComponent delegate) {
         @Default("ignorePitch")
         public static @NotNull ConfigElement defaultIgnorePitch() {
             return ConfigPrimitive.FALSE;
@@ -44,26 +49,36 @@ public class LineOfSightOffsetSelector implements SelectorComponent {
         }
     }
 
-    private record Internal(Mob self,
-        Data data) implements Selector {
+    private record Internal(Data data,
+        Selector delegate) implements Selector {
         @Override
         public @NotNull Target select() {
-            Pos eyePos = self.getPosition().add(new Vec(0, self.getEyeHeight(), 0));
-            Vec lookVector = eyePos.direction();
+            Target delegateTarget = delegate.select();
+            Collection<Target.TargetEntry> entries = delegateTarget.entries();
+            if (entries.isEmpty()) {
+                return Target.NONE;
+            }
 
-            Vec offsetVector = lookVector.apply((x, y, z) -> {
-                if (data.ignorePitch) {
-                    return new Vec(x, 0, z);
+            List<Point> positions = new ArrayList<>(entries.size());
+            for (Target.TargetEntry entry : entries) {
+                Point startPos = entry.point();
+                if (entry.isEntity()) {
+                    startPos = startPos.add(0, entry.entityOptional().orElseThrow().getEyeHeight(), 0);
                 }
 
-                if (data.ignoreYaw) {
-                    return new Vec(0, y, 0);
+                Vec lookVector = (startPos instanceof Pos pos) ? pos.direction() : Vec.ZERO;
+                if (data.ignorePitch && data.ignoreYaw) {
+                    lookVector = Vec.ZERO;
+                } else if (data.ignoreYaw) {
+                    lookVector = new Vec(0, lookVector.y(), 0);
+                } else if (data.ignorePitch) {
+                    lookVector = lookVector.withY(0);
                 }
 
-                return new Vec(x, y, z);
-            }).mul(data.distance);
+                positions.add(startPos.add(lookVector.mul(data.distance)));
+            }
 
-            return Target.points(eyePos.add(offsetVector));
+            return Target.points(positions);
         }
     }
 }

@@ -7,10 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -18,8 +15,50 @@ import java.util.function.Consumer;
  */
 public sealed interface Target
     permits Target.NoTarget, Target.SinglePointTarget, Target.MultiPointTarget, Target.SingleEntityTarget,
-    Target.MultiEntityTarget {
+    Target.MultiEntityTarget, Target.EntryListTarget {
     Target NONE = new NoTarget();
+
+    record TargetEntry(@Nullable Point point,
+        @Nullable Entity entity) {
+        public TargetEntry {
+            if (point == null) {
+                Objects.requireNonNull(entity);
+            }
+
+            if (entity == null) {
+                Objects.requireNonNull(point);
+            }
+
+            if (point != null && entity != null) {
+                throw new IllegalArgumentException("can't define both a point and an entity");
+            }
+        }
+
+        @SuppressWarnings("DataFlowIssue")
+        public @NotNull Point point() {
+            return point != null ? point : entity.getPosition();
+        }
+
+        public @NotNull Optional<Entity> entityOptional() {
+            return Optional.ofNullable(entity);
+        }
+
+        public boolean isEntity() {
+            return entity != null;
+        }
+
+        public boolean isPoint() {
+            return point != null;
+        }
+    }
+
+    static @NotNull TargetEntry entry(@NotNull Entity entity) {
+        return new TargetEntry(null, entity);
+    }
+
+    static @NotNull TargetEntry entry(@NotNull Point point) {
+        return new TargetEntry(point, null);
+    }
 
     static @NotNull Target ofNullable(@Nullable Entity entity) {
         if (entity == null) {
@@ -107,6 +146,28 @@ public sealed interface Target
         return new MultiPointTarget(copy);
     }
 
+    static @NotNull Target entries(@NotNull TargetEntry entry) {
+        Objects.requireNonNull(entry);
+        return new EntryListTarget(List.of(entry));
+    }
+
+    static @NotNull Target entries(@NotNull TargetEntry... entries) {
+        if (entries.length == 0) {
+            return Target.NONE;
+        }
+
+        return new EntryListTarget(List.of(entries));
+    }
+
+    static @NotNull Target entries(@NotNull Collection<? extends @NotNull TargetEntry> entries) {
+        List<TargetEntry> copy = List.copyOf(entries);
+        if (copy.isEmpty()) {
+            return Target.NONE;
+        }
+
+        return new EntryListTarget(copy);
+    }
+
     @NotNull
     Optional<? extends Point> location();
 
@@ -117,6 +178,8 @@ public sealed interface Target
     @NotNull
     @Unmodifiable
     Collection<? extends @NotNull Entity> targets();
+
+    @NotNull @Unmodifiable Collection<TargetEntry> entries();
 
     @NotNull
     Optional<? extends Entity> target();
@@ -149,6 +212,56 @@ public sealed interface Target
         return Optional.empty();
     }
 
+    final class EntryListTarget implements Target {
+        private final List<TargetEntry> entries;
+
+        private EntryListTarget(@NotNull List<TargetEntry> entries) {
+            this.entries = entries;
+        }
+
+        @Override
+        public @NotNull Optional<? extends Point> location() {
+            return Optional.of(entries.get(0).point());
+        }
+
+        @Override
+        public @NotNull @Unmodifiable Collection<? extends @NotNull Point> locations() {
+            return Containers.mappedView(TargetEntry::point, entries);
+        }
+
+        @Override
+        public @NotNull @Unmodifiable Collection<? extends @NotNull Entity> targets() {
+            List<Entity> targets = new ArrayList<>(entries.size());
+            for (TargetEntry targetEntry : entries) {
+                Entity entity = targetEntry.entity;
+                if (entity == null) {
+                    continue;
+                }
+
+                targets.add(entity);
+            }
+
+            return List.copyOf(targets);
+        }
+
+        @Override
+        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
+            return entries;
+        }
+
+        @Override
+        public @NotNull Optional<? extends Entity> target() {
+            for (TargetEntry entry : entries) {
+                Entity entity = entry.entity;
+                if (entity != null) {
+                    return Optional.of(entity);
+                }
+            }
+
+            return Optional.empty();
+        }
+    }
+
     final class NoTarget implements Target {
         private NoTarget() {
         }
@@ -167,6 +280,11 @@ public sealed interface Target
         @Override
         public @NotNull
         @Unmodifiable Collection<? extends @NotNull Entity> targets() {
+            return List.of();
+        }
+
+        @Override
+        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
             return List.of();
         }
 
@@ -201,6 +319,11 @@ public sealed interface Target
         }
 
         @Override
+        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
+            return List.of(new TargetEntry(point, null));
+        }
+
+        @Override
         public @NotNull Optional<? extends Entity> target() {
             return Optional.empty();
         }
@@ -215,10 +338,6 @@ public sealed interface Target
 
         @Override
         public @NotNull Optional<? extends Point> location() {
-            if (points.isEmpty()) {
-                return Optional.empty();
-            }
-
             return Optional.of(points.get(0));
         }
 
@@ -232,6 +351,11 @@ public sealed interface Target
         public @NotNull
         @Unmodifiable Collection<? extends @NotNull Entity> targets() {
             return List.of();
+        }
+
+        @Override
+        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
+            return Containers.mappedView(point -> new TargetEntry(point, null), points);
         }
 
         @Override
@@ -265,6 +389,11 @@ public sealed interface Target
         }
 
         @Override
+        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
+            return List.of(new TargetEntry(null, entity));
+        }
+
+        @Override
         public @NotNull Optional<? extends Entity> target() {
             return Optional.of(entity);
         }
@@ -279,20 +408,12 @@ public sealed interface Target
 
         @Override
         public @NotNull Optional<? extends Point> location() {
-            if (entities.isEmpty()) {
-                return Optional.empty();
-            }
-
             return Optional.of(entities.get(0).getPosition());
         }
 
         @Override
         public @NotNull
         @Unmodifiable Collection<? extends @NotNull Point> locations() {
-            if (entities.isEmpty()) {
-                return List.of();
-            }
-
             Point[] points = new Point[entities.size()];
             for (int i = 0; i < points.length; i++) {
                 points[i] = entities.get(i).getPosition();
@@ -308,11 +429,12 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull Optional<? extends Entity> target() {
-            if (entities.isEmpty()) {
-                return Optional.empty();
-            }
+        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
+            return Containers.mappedView(entity -> new TargetEntry(null, entity), entities);
+        }
 
+        @Override
+        public @NotNull Optional<? extends Entity> target() {
             return Optional.of(entities.get(0));
         }
     }
