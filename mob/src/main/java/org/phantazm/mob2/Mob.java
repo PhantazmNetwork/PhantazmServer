@@ -1,6 +1,8 @@
 package org.phantazm.mob2;
 
+import com.github.steanky.ethylene.core.collection.ConfigNode;
 import it.unimi.dsi.fastutil.floats.FloatConsumer;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Point;
@@ -14,6 +16,7 @@ import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.commons.ReferenceUtils;
 import org.phantazm.mob2.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
@@ -26,6 +29,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Mob extends ProximaEntity {
+    public static Key NONE_MOB_KEY = Key.key(Namespaces.PHANTAZM, "none");
+
     private static final AtomicLong MOB_COUNTER = new AtomicLong();
     private static final String TEAM_PREFIX = "m-";
 
@@ -82,7 +87,8 @@ public class Mob extends ProximaEntity {
         this.tickableSkills = new ArrayList<>();
         this.useOnTick = new ArrayList<>();
         this.triggeredSkills = new EnumMap<>(Trigger.class);
-        this.data = data;
+        this.data = data == null ? new MobData(NONE_MOB_KEY, entityType, ConfigNode.of(), false,
+            ConfigNode.of(), ConfigNode.of(), null, List.of(), List.of(), ConfigNode.of()) : data;
 
         this.healthWriteSync = new Object();
 
@@ -238,7 +244,7 @@ public class Mob extends ProximaEntity {
     }
 
     public @NotNull MobData data() {
-        return Objects.requireNonNull(data);
+        return data;
     }
 
     public @NotNull Optional<Entity> lastHitEntity() {
