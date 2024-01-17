@@ -455,7 +455,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                         }
                         while (result.next());
 
-                        return Collections.unmodifiableList(entries);
+                        return List.copyOf(entries);
                     });
             });
         }, executor);
@@ -510,7 +510,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                             return List.of();
                         }
 
-                        ArrayList<LeaderboardEntry> entryList = new ArrayList<>(entries);
+                        List<LeaderboardEntry> entryList = new ArrayList<>(entries);
                         do {
                             long timeTaken = result.getLong(2);
                             long timeEnd = result.getLong(3);
@@ -524,8 +524,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
                         }
                         while (result.next());
 
-                        entryList.trimToSize();
-                        return Collections.unmodifiableList(entryList);
+                        return List.copyOf(entryList);
                     });
             });
         }, executor);
