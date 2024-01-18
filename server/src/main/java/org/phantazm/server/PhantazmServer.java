@@ -326,6 +326,7 @@ public final class PhantazmServer {
         Path playerStats = Path.of("./phantazm_player_stats.json");
 
         if (!Files.exists(bestTime) || !Files.exists(mapStats) || !Files.exists(playerStats)) {
+            System.out.println("Missing file, database transfer not active");
             return;
         }
 
@@ -412,7 +413,10 @@ public final class PhantazmServer {
                     generalDatabase.updateJoin(uuid, firstJoin, lastJoin).join();
                 }
             }
-        } catch (IOException ignored) {
+
+            System.out.println("Database transfer completed successfully");
+        } catch (IOException e) {
+            System.out.println("Error during database transfer: " + e);
         }
     }
 
