@@ -148,6 +148,8 @@ public class CountdownStage implements Stage {
 
     @Override
     public void start() {
+        bestTimeLeaderboard.show(instance);
+
         ticksRemaining.set(initialTicks);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (zombiesPlayer.hasQuit()) {

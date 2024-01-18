@@ -355,8 +355,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         MapSettingsInfo settings = mapInfo.settings();
 
         Stage idle = new IdleStage(instance, settings, zombiesPlayers,
-            newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")), settings.idleRevertTicks(),
-            bestTimeLeaderboard);
+            newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")), settings.idleRevertTicks());
 
         LongList countdownAlertTicks = new LongArrayList(settings.countdownAlertTicks());
 
