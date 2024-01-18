@@ -21,6 +21,7 @@ import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.event.scene.SceneCreationEvent;
 import org.phantazm.core.event.scene.SceneJoinEvent;
 import org.phantazm.core.event.scene.SceneShutdownEvent;
+import org.phantazm.stats.Databases;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -484,6 +485,7 @@ public final class SceneManager {
 
         joinRequestMap.put(player.getUuid(), LoginEntry.of(loginJoin, result));
         loginEvent.setSpawningInstance(result.scene().instance());
+        Databases.usernames().submitUsername(player.getUuid(), player.getUsername());
     }
 
     private void handleTablist(@NotNull PlayerTablistShowEvent tablistEvent) {

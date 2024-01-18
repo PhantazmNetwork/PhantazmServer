@@ -290,7 +290,7 @@ public final class PhantazmServer {
 
             PlayerContext playerContext = new PlayerContext(LoginValidatorFeature.loginValidator(),
                 PermissionFeature.permissionHandler(), viewProvider, PermissionFeature.roleStore(),
-                PartyFeature.getPartyHolder().uuidToGuild());
+                PartyFeature.getPartyHolder().uuidToGuild(), IdentitySource.MOJANG);
 
             ChatFeature.initialize(configContext, playerContext);
 
@@ -308,8 +308,8 @@ public final class PhantazmServer {
 
             ZombiesContext zombiesContext = new ZombiesContext(ZombiesFeature.modifierHandlerLoader());
 
-            LobbyFeature.initialize(databaseContext, ethyleneContext, dataLoadingContext, playerContext,
-                zombiesContext);
+            LobbyFeature.initialize(databaseContext, ethyleneContext, dataLoadingContext, databaseAccessContext,
+                playerContext, zombiesContext);
 
             ServerCommandFeature.initialize(configContext, playerContext);
             ValidationFeature.initialize(playerContext);
@@ -412,7 +412,7 @@ public final class PhantazmServer {
                     generalDatabase.updateJoin(uuid, firstJoin, lastJoin).join();
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
     }
 

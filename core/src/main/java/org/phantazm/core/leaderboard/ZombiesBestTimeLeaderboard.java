@@ -57,7 +57,6 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
     public record Args(
         @NotNull Point worldOrigin,
         @NotNull Executor executor,
-        @NotNull Instance instance,
         @NotNull ZombiesLeaderboardDatabase database,
         @NotNull RoleStore roleStore,
         @NotNull Function<? super @NotNull Set<Key>, ? extends @NotNull String> descriptorFunction,
@@ -73,7 +72,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
     @Override
     public @NotNull Leaderboard apply(@NotNull InjectionStore injectionStore) {
         Args args = injectionStore.get(ARGS_KEY);
-        return new Impl(data, args.worldOrigin, args.executor, args.instance, args.database, args.roleStore, args.identitySource,
+        return new Impl(data, args.worldOrigin, args.executor, args.database, args.roleStore, args.identitySource,
             args.descriptorFunction, tickFormatter);
     }
 
@@ -100,7 +99,6 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
         private final Data data;
         private final Point worldOrigin;
         private final Executor executor;
-        private final Instance instance;
         private final ZombiesLeaderboardDatabase database;
         private final RoleStore roleStore;
         private final IdentitySource identitySource;
@@ -115,13 +113,12 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
         private Entity interactionPoint;
         private boolean shown;
 
-        private Impl(Data data, Point worldOrigin, Executor executor, Instance instance,
-            ZombiesLeaderboardDatabase database, RoleStore roleStore, IdentitySource identitySource,
+        private Impl(Data data, Point worldOrigin, Executor executor, ZombiesLeaderboardDatabase database,
+            RoleStore roleStore, IdentitySource identitySource,
             Function<? super Set<Key>, ? extends String> descriptorFunction, TickFormatter tickFormatter) {
             this.data = data;
             this.worldOrigin = worldOrigin;
             this.executor = executor;
-            this.instance = instance;
             this.database = database;
             this.roleStore = roleStore;
             this.identitySource = identitySource;
@@ -135,7 +132,6 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
 
             data.teamSizeToEntryCountMappings.defaultReturnValue(12);
 
-            hologram.setInstance(instance);
             initPageMap();
         }
 
@@ -160,7 +156,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
         }
 
         @Override
-        public void show() {
+        public void show(@NotNull Instance instance) {
             if (data.teamSizes.isEmpty() || data.modifiers.isEmpty() || shown) {
                 return;
             }
@@ -169,6 +165,8 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
                 if (shown) {
                     return;
                 }
+
+                hologram.setInstance(instance);
 
                 shown = true;
                 initPages();
@@ -184,6 +182,25 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
 
                 //always render the first page
                 renderTimesForPage(new PageKey(data.teamSizes.getInt(0), data.modifiers.get(0)));
+            }
+        }
+
+        @Override
+        public void hide() {
+            if (data.teamSizes.isEmpty() || data.modifiers.isEmpty() || !shown) {
+                return;
+            }
+
+            synchronized (sync) {
+                if (!shown) {
+                    return;
+                }
+
+                shown = false;
+                removeArmorStand();
+
+                hologram.destroy();
+                pageRenderTimes.clear();
             }
         }
 
@@ -210,25 +227,6 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
             armorStand.setInvisible(true);
             armorStand.setNoGravity(true);
             return armorStand;
-        }
-
-        @Override
-        public void hide() {
-            if (data.teamSizes.isEmpty() || data.modifiers.isEmpty() || !shown) {
-                return;
-            }
-
-            synchronized (sync) {
-                if (!shown) {
-                    return;
-                }
-
-                shown = false;
-                removeArmorStand();
-
-                hologram.clear();
-                pageRenderTimes.clear();
-            }
         }
 
         private void interact(@NotNull Player player, @NotNull Point relativePosition, @NotNull Entity armorStand) {

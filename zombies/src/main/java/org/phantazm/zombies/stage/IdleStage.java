@@ -84,7 +84,7 @@ public class IdleStage implements Stage {
 
     @Override
     public void start() {
-        bestTimeLeaderboard.show();
+        bestTimeLeaderboard.show(instance);
         emptyTicks = 0L;
     }
 

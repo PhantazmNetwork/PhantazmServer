@@ -113,7 +113,10 @@ public class BasicPaginatedHologram implements PaginatedHologram {
             viewableHologram.addAll(contents);
 
             this.pages.add(viewableHologram);
-            viewableHologram.setInstance(instance);
+
+            if (instance != null) {
+                viewableHologram.setInstance(instance);
+            }
         }
     }
 
@@ -176,6 +179,18 @@ public class BasicPaginatedHologram implements PaginatedHologram {
             }
 
             pages.clear();
+        }
+    }
+
+    @Override
+    public void destroy() {
+        synchronized (sync) {
+            for (ViewableHologram hologram : pages) {
+                hologram.destroy();
+            }
+
+            pages.clear();
+            this.instance = null;
         }
     }
 }

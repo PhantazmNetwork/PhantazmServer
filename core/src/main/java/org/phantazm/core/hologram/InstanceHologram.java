@@ -178,6 +178,14 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
     }
 
     @Override
+    public void destroy() {
+        synchronized (sync) {
+            clear0();
+            this.instance = null;
+        }
+    }
+
+    @Override
     public @NotNull Line get(int index) {
         synchronized (sync) {
             return Objects.requireNonNull(entries.get(index).line);
@@ -222,14 +230,18 @@ public class InstanceHologram extends AbstractList<Hologram.Line> implements Hol
         }
     }
 
+    private void clear0() {
+        for (Entry entry : entries) {
+            entry.entity.remove();
+        }
+        entries.clear();
+        updateArmorStands();
+    }
+
     @Override
     public void clear() {
         synchronized (sync) {
-            for (Entry entry : entries) {
-                entry.entity.remove();
-            }
-            entries.clear();
-            updateArmorStands();
+            clear0();
         }
     }
 

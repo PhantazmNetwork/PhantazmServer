@@ -190,7 +190,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
 
         InjectionStore store = InjectionStore.of(ZombiesBestTimeLeaderboard.ARGS_KEY,
             new ZombiesBestTimeLeaderboard.Args(VecUtils.toPoint(mapInfo.settings().origin()).add(0.5, 0, 0.5),
-                leaderboardContext.executor(), instance, leaderboardContext.database(), roleStore,
+                leaderboardContext.executor(), leaderboardContext.database(), roleStore,
                 modifierHandler::descriptor, identitySource));
 
         Leaderboard bestTimeLeaderboard = leaderboardContext.bestTimeLeaderboard().apply(store);

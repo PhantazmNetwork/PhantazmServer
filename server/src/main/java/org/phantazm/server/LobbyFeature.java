@@ -8,6 +8,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.DynamicChunk;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +17,7 @@ import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.FileUtils;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
+import org.phantazm.core.leaderboard.ZombiesBestTimeLeaderboard;
 import org.phantazm.core.npc.NPC;
 import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.scene2.lobby.Lobby;
@@ -81,6 +83,7 @@ public final class LobbyFeature {
 
     static void initialize(@NotNull DatabaseContext databaseContext,
         @NotNull EthyleneContext ethyleneContext, @NotNull DataLoadingContext dataLoadingContext,
+        @NotNull DatabaseAccessContext databaseAccessContext,
         @NotNull PlayerContext playerContext, @NotNull ZombiesContext zombiesContext) {
         MappingProcessorSource mappingProcessorSource = ethyleneContext.mappingProcessorSource();
         RoleStore roleStore = playerContext.roles();
@@ -106,8 +109,13 @@ public final class LobbyFeature {
             });
         });
 
+        ZombiesBestTimeLeaderboard.Args args = new ZombiesBestTimeLeaderboard.Args(Vec.ZERO,
+            databaseContext.databaseExecutor(), databaseAccessContext.zombiesLeaderboardDatabase(), roleStore,
+            names -> zombiesContext.modifierHandlerLoader().first().descriptor(names), playerContext.identitySource());
+
         InjectionStore lobbyStore = InjectionStore.of(InjectionKeys.MODIFIER_LOADER_KEY,
-            new InjectionKeys.ModifierHandlerLoader(zombiesContext.modifierHandlerLoader()));
+            new InjectionKeys.ModifierHandlerLoader(zombiesContext.modifierHandlerLoader()),
+            ZombiesBestTimeLeaderboard.ARGS_KEY, args);
 
         lobbyLoader = Loader.loader(() -> {
             return composite(path -> {

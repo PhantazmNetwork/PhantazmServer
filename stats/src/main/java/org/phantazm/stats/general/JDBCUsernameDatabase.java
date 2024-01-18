@@ -73,7 +73,7 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
                     CREATE OR REPLACE EVENT clean_expired_entries
                     ON SCHEDULE EVERY 12 HOUR
                     DO DELETE FROM phantazm_db.username_cache
-                    WHERE (SELECT ROUND(UNIX_TIMESTAMP(CURTIME(4)))) - last_updated > ?
+                    WHERE (SELECT UNIX_TIMESTAMP()) - last_updated > ?
                     """)) {
                     preparedStatement.setLong(1, expireTime.toSeconds());
                     preparedStatement.execute();

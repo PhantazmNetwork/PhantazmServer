@@ -15,7 +15,6 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 /**
@@ -110,7 +109,6 @@ public class ViewableHologram extends InstanceHologram {
      * alignment, and only to players who satisfy the given predicate.
      *
      * @param location  the location of the instance
-     * @param gap       the distance between separate hologram messages
      * @param alignment the alignment method
      * @param canRender the predicate used to determine if this hologram should be visible
      */
@@ -125,7 +123,6 @@ public class ViewableHologram extends InstanceHologram {
      * alignment {@link Alignment#UPPER}, and only to players who satisfy the given predicate.
      *
      * @param location  the location to render holograms
-     * @param gap       the distance between separate hologram messages
      * @param canRender the predicate used to determine if this hologram should be visible
      */
     public ViewableHologram(@NotNull Point location, @NotNull Predicate<? super Player> canRender) {

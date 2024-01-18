@@ -2,6 +2,7 @@ package org.phantazm.server.context;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.party.Party;
+import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.role.RoleStore;
 import org.phantazm.server.permission.PermissionHandler;
@@ -14,5 +15,6 @@ public record PlayerContext(@NotNull LoginValidator loginValiator,
     @NotNull PermissionHandler permissionHandler,
     @NotNull PlayerViewProvider playerViewProvider,
     @NotNull RoleStore roles,
-    @NotNull Map<? super UUID, ? extends Party> parties) {
+    @NotNull Map<? super UUID, ? extends Party> parties,
+    @NotNull IdentitySource identitySource) {
 }

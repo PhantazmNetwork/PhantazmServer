@@ -237,6 +237,8 @@ public interface Hologram extends List<Hologram.Line> {
 
     @NotNull Component getComponent(int index);
 
+    void destroy();
+
     /**
      * Ways that holograms may be aligned.
      */

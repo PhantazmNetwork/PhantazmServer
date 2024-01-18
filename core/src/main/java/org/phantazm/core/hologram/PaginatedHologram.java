@@ -36,4 +36,6 @@ public interface PaginatedHologram {
     @NotNull Point location();
 
     void clear();
+
+    void destroy();
 }
