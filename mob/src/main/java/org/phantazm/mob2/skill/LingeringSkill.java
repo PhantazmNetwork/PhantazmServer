@@ -19,7 +19,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 @Model("mob.skill.lingering_skill")
 @Cache
@@ -78,7 +77,7 @@ public class LingeringSkill implements SkillComponent {
 
             List<Reference<Mob>> spawnedMobs = data.lifetime < 0 ? null : new ArrayList<>(locations.size());
             for (Point point : locations) {
-                Mob mob = new Mob(EntityType.ARMOR_STAND, UUID.randomUUID());
+                Mob mob = new Mob(EntityType.ARMOR_STAND);
                 ArmorStandMeta armorStandMeta = (ArmorStandMeta) mob.getEntityMeta();
                 armorStandMeta.setMarker(true);
                 armorStandMeta.setInvisible(true);

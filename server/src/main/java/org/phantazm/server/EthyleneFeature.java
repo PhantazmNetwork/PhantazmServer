@@ -93,8 +93,8 @@ public final class EthyleneFeature {
                     if (meta != null) {
                         try {
                             builder.meta((NBTCompound) new SNBTParser(new StringReader(meta)).parse());
-                        } catch (NBTException exception) {
-                            LOGGER.warn("NBTException when deserializing to ItemStack", exception);
+                        } catch (NBTException e) {
+                            throw new RuntimeException(e);
                         }
                     }
 
@@ -159,8 +159,7 @@ public final class EthyleneFeature {
                 return ItemStack.fromItemNBT(
                     (NBTCompound) new SNBTParser(new StringReader(element.asString())).parse());
             } catch (NBTException e) {
-                LOGGER.warn("Error deserializing SNBT", e);
-                return ItemStack.AIR;
+                throw new RuntimeException(e);
             }
         }, itemStack -> itemStack == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(itemStack.toItemNBT().toSNBT()));
     }

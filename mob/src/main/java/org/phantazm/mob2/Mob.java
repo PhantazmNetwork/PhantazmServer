@@ -120,6 +120,10 @@ public class Mob extends ProximaEntity {
         this(entityType, uuid, null, null);
     }
 
+    public Mob(@NotNull EntityType entityType) {
+        this(entityType, UUID.randomUUID(), null, null);
+    }
+
     public void addHealthListener(@NotNull FloatConsumer floatConsumer) {
         Objects.requireNonNull(floatConsumer);
         synchronized (healthWriteSync) {
