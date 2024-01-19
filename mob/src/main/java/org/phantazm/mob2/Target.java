@@ -184,7 +184,7 @@ public sealed interface Target
     @NotNull
     Optional<? extends Entity> target();
 
-    default <T extends Entity> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
+    default <T> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(consumer);
 
@@ -196,7 +196,7 @@ public sealed interface Target
         }
     }
 
-    default <T extends Entity> @NotNull Optional<T> forType(@NotNull Class<T> type) {
+    default <T> @NotNull Optional<T> forType(@NotNull Class<T> type) {
         Objects.requireNonNull(type);
 
         Optional<? extends Entity> target = target();

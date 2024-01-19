@@ -2,7 +2,7 @@ package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.EquipmentSlot;
-import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.inventory.EquipmentHandler;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -45,7 +45,7 @@ public class ChangeEquipmentSkill implements SkillComponent {
 
         @Override
         protected void useOnTarget(@NotNull Target target) {
-            target.forType(LivingEntity.class, entity -> {
+            target.forType(EquipmentHandler.class, entity -> {
                 for (Map.Entry<EquipmentSlot, ItemStack> entry : data.equipment.entrySet()) {
                     entity.setEquipment(entry.getKey(), entry.getValue());
                 }
