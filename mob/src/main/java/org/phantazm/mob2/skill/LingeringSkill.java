@@ -72,6 +72,10 @@ public class LingeringSkill implements SkillComponent {
             }
 
             Collection<? extends Point> locations = target.locations();
+            if (locations.isEmpty()) {
+                return;
+            }
+
             List<Reference<Mob>> spawnedMobs = data.lifetime < 0 ? null : new ArrayList<>(locations.size());
             for (Point point : locations) {
                 Mob mob = new Mob(EntityType.ARMOR_STAND, UUID.randomUUID());
