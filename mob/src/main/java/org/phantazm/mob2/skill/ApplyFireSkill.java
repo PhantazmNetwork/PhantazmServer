@@ -80,7 +80,8 @@ public class ApplyFireSkill implements SkillComponent {
             self.getAcquirable().sync(self -> {
                 for (Entity entity : entities) {
                     entity.getAcquirable().sync(target -> {
-                        if (!target.isRemoved() && entity.getTag(FIRE_ID_TAG) == fireId) {
+                        Integer tag = entity.getTag(FIRE_ID_TAG);
+                        if (!target.isRemoved() && tag != null && tag == fireId) {
                             target.setOnFire(false);
                         }
                     });
