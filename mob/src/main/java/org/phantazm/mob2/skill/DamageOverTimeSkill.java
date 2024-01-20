@@ -61,7 +61,7 @@ public class DamageOverTimeSkill implements SkillComponent {
         int damageTime,
         float damageAmount,
         boolean bypassArmor,
-        boolean exceedLifetime) {
+        boolean exceedMobLifetime) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -72,8 +72,8 @@ public class DamageOverTimeSkill implements SkillComponent {
             return ConfigPrimitive.of(false);
         }
 
-        @Default("exceedLifetime")
-        public static @NotNull ConfigElement defaultExceedLifetime() {
+        @Default("exceedMobLifetime")
+        public static @NotNull ConfigElement defaultExceedMobLifetime() {
             return ConfigPrimitive.of(true);
         }
     }
@@ -143,7 +143,7 @@ public class DamageOverTimeSkill implements SkillComponent {
 
         @Override
         public void end() {
-            if (!data.exceedLifetime) {
+            if (!data.exceedMobLifetime) {
                 return;
             }
 
