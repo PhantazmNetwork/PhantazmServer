@@ -4,8 +4,10 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.Task;
@@ -57,11 +59,17 @@ public class DamageOverTimeSkill implements SkillComponent {
         @Nullable Trigger trigger,
         @NotNull @ChildPath("selector") String selector,
         @NotNull @ChildPath("validator") String validator,
+        @Nullable Sound sound,
         int damageInterval,
         int damageTime,
         float damageAmount,
         boolean bypassArmor,
         boolean exceedMobLifetime) {
+        @Default("sound")
+        public static @NotNull ConfigElement defaultSound() {
+            return ConfigPrimitive.NULL;
+        }
+
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -163,6 +171,9 @@ public class DamageOverTimeSkill implements SkillComponent {
 
         private void damageTarget(LivingEntity target) {
             target.getAcquirable().sync(targetEntity -> {
+                if (data.sound != null && targetEntity instanceof Player player) {
+                    player.playSound(data.sound);
+                }
                 ((LivingEntity) targetEntity).damage(Damage.fromEntity(self, data.damageAmount), data.bypassArmor);
             });
         }

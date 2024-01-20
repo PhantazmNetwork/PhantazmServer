@@ -59,6 +59,7 @@ public class BasicQuitStateActivable implements Activable {
             player.stopSound(SoundStop.all());
             player.stateHolder().removeStage(Stages.ZOMBIES_GAME);
             player.setLastDamageSource(null);
+            player.setOnFire(false);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
             TagResolver quitterPlaceholder = Placeholder.component("quitter", displayName);
