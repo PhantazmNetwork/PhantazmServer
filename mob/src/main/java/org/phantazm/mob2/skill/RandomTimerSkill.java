@@ -42,7 +42,7 @@ public class RandomTimerSkill implements SkillComponent {
         int maxInterval,
         boolean requiresActivation,
         boolean resetOnActivation,
-        boolean endImmediately) {
+        boolean exceedMobLifetime) {
         @Default("trigger")
         public static @NotNull ConfigElement defaultTrigger() {
             return ConfigPrimitive.NULL;
@@ -63,9 +63,9 @@ public class RandomTimerSkill implements SkillComponent {
             return ConfigPrimitive.of(false);
         }
 
-        @Default("endImmediately")
-        public static @NotNull ConfigElement defaultEndImmediately() {
-            return ConfigPrimitive.of(true);
+        @Default("exceedMobLifetime")
+        public static @NotNull ConfigElement defaultExceedMobLifetime() {
+            return ConfigPrimitive.of(false);
         }
     }
 
@@ -74,7 +74,7 @@ public class RandomTimerSkill implements SkillComponent {
 
         public Internal(Data data, Skill delegate, Mob self, Scheduler scheduler) {
             super(scheduler, self, delegate, data.requiresActivation, data.resetOnActivation, data.repeat,
-                MathUtils.randomInterval(data.minInterval, data.maxInterval), data.endImmediately);
+                MathUtils.randomInterval(data.minInterval, data.maxInterval), !data.exceedMobLifetime);
             this.data = data;
         }
 

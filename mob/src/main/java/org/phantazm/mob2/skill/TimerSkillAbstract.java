@@ -119,7 +119,8 @@ public abstract class TimerSkillAbstract implements Skill {
             }
 
             //if endImmediately, the timer will stop as soon as end() is called
-            if (endImmediately) {
+            //if the timer is infinite, end immediately and don't schedule a task
+            if (endImmediately || repeat < 0) {
                 reset(false);
                 delegate.end();
                 return;
@@ -130,6 +131,10 @@ public abstract class TimerSkillAbstract implements Skill {
             //pass over responsibility of ticking to the scheduler
             Wrapper<Task> taskWrapper = Wrapper.ofNull();
             Task task = scheduler.scheduleTask(() -> {
+                if (tickDelegate) {
+                    delegate.tick();
+                }
+
                 if (tick0()) {
                     Task thisTask = taskWrapper.get();
                     thisTask.cancel();
@@ -140,7 +145,7 @@ public abstract class TimerSkillAbstract implements Skill {
                         }
                     });
                 }
-            }, TaskSchedule.nextTick(), TaskSchedule.tick(1));
+            }, TaskSchedule.nextTick(), TaskSchedule.nextTick());
             taskWrapper.set(task);
 
             setScheduledTask(task);
