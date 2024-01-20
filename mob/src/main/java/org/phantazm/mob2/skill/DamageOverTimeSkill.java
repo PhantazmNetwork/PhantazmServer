@@ -99,10 +99,6 @@ public class DamageOverTimeSkill implements SkillComponent {
         protected void useOnTarget(@NotNull Target target) {
             self.getAcquirable().sync(ignored -> {
                 target.forType(LivingEntity.class, livingEntity -> {
-                    if (!validator.valid(livingEntity)) {
-                        return;
-                    }
-
                     addDamageTarget(livingEntity, ticks);
                 });
             });
