@@ -19,11 +19,9 @@ val shade: Configuration by configurations.creating {
 dependencies {
     annotationProcessor(libs.velocity.api)
 
-    implementation(libs.velocity.api)
-    implementation(projects.phantazmMessaging)
     implementation(libs.commons)
+    implementation(libs.velocity.api)
 
-    shade(projects.phantazmMessaging)
     shade(libs.commons)
 }
 

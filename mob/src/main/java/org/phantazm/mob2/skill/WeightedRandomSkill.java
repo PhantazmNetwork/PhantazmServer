@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
-import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
@@ -136,7 +135,7 @@ public class WeightedRandomSkill implements SkillComponent {
 
         private static int[] ensureLength(int[] input, int targetLen) {
             if (targetLen == 0) {
-                return ArrayUtils.EMPTY_INT_ARRAY;
+                return new int[0];
             }
 
             if (input == null) {

@@ -3,10 +3,10 @@ plugins {
 }
 
 dependencies {
-    api(libs.adventure.key)
-    api(libs.hikariCP)
-    api(libs.fastutil)
-    implementation(libs.commons)
-    implementation(libs.toolkit.function)
+    implementation(libs.adventure.key)
     implementation(libs.caffeine)
+    implementation(libs.commons)
+    implementation(libs.fastutil)
+    implementation(libs.hikariCP)
+    implementation(libs.toolkit.function)
 }

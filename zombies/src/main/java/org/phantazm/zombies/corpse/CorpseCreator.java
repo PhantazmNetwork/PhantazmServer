@@ -19,7 +19,6 @@ import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
@@ -38,7 +37,6 @@ public class CorpseCreator {
     private static final AtomicLong CORPSE_COUNTER = new AtomicLong();
     private static final String CORPSE_TEAM_PREFIX = "c-";
 
-    private static final String POSSIBLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
     private final Data data;
     private final List<CorpseLine> idleLines;
     private final List<CorpseLine> revivingLines;
@@ -55,7 +53,7 @@ public class CorpseCreator {
         @NotNull Point deathLocation, @NotNull ReviveHandler reviveHandler) {
         PlayerSkin skin = zombiesPlayer.getPlayer().map(Player::getSkin).orElse(null);
 
-        String corpseUsername = RandomStringUtils.random(16, POSSIBLE_CHARACTERS);
+        String corpseUsername = "corpse";
         String teamName = CORPSE_TEAM_PREFIX + Long.toString(CORPSE_COUNTER.getAndIncrement(), 16);
         if (teamName.length() > 16) {
             teamName = teamName.substring(0, 16);

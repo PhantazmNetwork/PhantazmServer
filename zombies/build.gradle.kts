@@ -4,10 +4,20 @@ plugins {
 }
 
 dependencies {
-    api(projects.phantazmCore)
-    api(projects.phantazmMob)
-    api(projects.phantazmStats)
-    api(libs.commons)
+    implementation(projects.phantazmCore)
+    implementation(projects.phantazmMob)
+    implementation(projects.phantazmProximaMinestom)
+    implementation(projects.phantazmStats)
+
+    implementation(libs.adventure.api)
+    implementation(libs.adventure.text.minimessage)
+    implementation(libs.commons)
+    implementation(libs.element.core)
+    implementation(libs.ethylene.core)
+    implementation(libs.ethylene.mapper)
+    implementation(libs.proxima.core)
+    implementation(libs.toolkit.collection)
+    implementation(libs.vector.core)
 }
 
 elementAutodoc {

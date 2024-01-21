@@ -3,16 +3,15 @@ plugins {
 }
 
 dependencies {
-    api(projects.phantazmStats)
+    implementation(projects.phantazmStats)
 
-    api(libs.commons)
-    api(libs.adventure.text.minimessage)
-    api(libs.ethylene.core)
-    api(libs.ethylene.mapper)
-    api(libs.commons.lang3)
-    api(libs.caffeine)
-    api(libs.element.core)
-    api(libs.toolkit.collection)
-    api(libs.toolkit.function)
-    api(libs.vector.core)
+    implementation(libs.adventure.text.minimessage)
+    implementation(libs.caffeine)
+    implementation(libs.commons)
+    implementation(libs.ethylene.core)
+    implementation(libs.ethylene.mapper)
+    implementation(libs.element.core)
+    implementation(libs.toolkit.collection)
+    implementation(libs.toolkit.function)
+    implementation(libs.vector.core)
 }
