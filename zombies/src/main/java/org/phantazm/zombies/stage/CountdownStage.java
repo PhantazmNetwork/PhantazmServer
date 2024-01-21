@@ -10,10 +10,10 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.chat.MessageWithDestination;
 import org.phantazm.core.leaderboard.Leaderboard;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.map.MapSettingsInfo;
-import org.phantazm.zombies.map.chat.MessageWithDestination;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.sidebar.SidebarUpdater;
 

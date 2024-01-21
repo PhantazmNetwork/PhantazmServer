@@ -3,11 +3,12 @@ plugins {
 }
 
 dependencies {
-    api(projects.phantazmCommons)
     api(projects.phantazmMessaging)
     api(projects.phantazmStats)
     implementation(projects.phantazmLoader)
 
+    api(libs.commons)
+    api(libs.adventure.text.minimessage)
     api(libs.ethylene.core)
     api(libs.ethylene.mapper)
     api(libs.commons.lang3)

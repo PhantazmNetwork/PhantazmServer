@@ -3,6 +3,6 @@ plugins {
 }
 
 dependencies {
-    implementation(projects.phantazmCommons)
     api(libs.adventure.key)
+    implementation(libs.commons)
 }

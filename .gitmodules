@@ -4,5 +4,5 @@
 	branch = master
 [submodule "zombies-mapdata"]
 	path = zombies-mapdata
-	url = https://github.com/PhantazmNetwork/PhantazmZombiesData
+	url = https://github.com/PhantazmNetwork/PhantazmShared
     branch = main

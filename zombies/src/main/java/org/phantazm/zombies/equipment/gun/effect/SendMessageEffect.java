@@ -5,9 +5,9 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.TitlePart;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.chat.MessageWithDestination;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.audience.AudienceProvider;
-import org.phantazm.zombies.map.chat.MessageWithDestination;
 
 import java.util.Objects;
 

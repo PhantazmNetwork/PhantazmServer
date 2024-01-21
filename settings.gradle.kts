@@ -7,7 +7,7 @@ if (localSettings.exists()) {
 }
 
 includeBuild("./minestom")
-includeBuild("./zombies-mapdata")
+includeBuild("./commons")
 
 pluginManagement {
     repositories {
@@ -28,16 +28,13 @@ val toSkip = gradle.startParameter.projectProperties.getOrDefault("skipBuild", "
 
 sequenceOf(
         "core",
-        "commons",
         "messaging",
         "mob",
         "proxima-minestom",
         "server",
         "stats",
-        "zombies-timer",
         "velocity",
         "zombies",
-        "zombies-mapeditor",
         "snbt-builder",
         "loader",
         "dev-launcher"

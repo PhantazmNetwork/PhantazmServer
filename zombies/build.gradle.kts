@@ -8,7 +8,7 @@ dependencies {
     api(projects.phantazmMessaging)
     api(projects.phantazmMob)
     api(projects.phantazmStats)
-    api(libs.zombies.mapdata)
+    api(libs.commons)
 
     implementation(projects.phantazmLoader)
 }

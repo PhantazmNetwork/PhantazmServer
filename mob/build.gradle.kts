@@ -5,6 +5,6 @@ plugins {
 dependencies {
     api(projects.phantazmProximaMinestom)
     api(projects.phantazmCore)
-    api(projects.phantazmCommons)
+    api(libs.commons)
     implementation(projects.phantazmLoader)
 }

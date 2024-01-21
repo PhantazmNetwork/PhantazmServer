@@ -20,13 +20,11 @@ dependencies {
     annotationProcessor(libs.velocity.api)
 
     implementation(libs.velocity.api)
-    implementation(projects.phantazmCommons)
     implementation(projects.phantazmMessaging)
-    implementation(libs.zombies.mapdata)
+    implementation(libs.commons)
 
-    shade(projects.phantazmCommons)
     shade(projects.phantazmMessaging)
-    shade(libs.zombies.mapdata)
+    shade(libs.commons)
 }
 
 tasks.shadowJar {

@@ -23,7 +23,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.element.core)
     implementation(libs.ethylene.mapper)
-    implementation(libs.zombies.mapdata)
+    implementation(libs.commons)
 
     implementation(libs.reflections)
 
