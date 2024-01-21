@@ -34,7 +34,7 @@ import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.server.context.*;
 import org.phantazm.stats.zombies.ZombiesStatsDatabase;
-import org.phantazm.zombies.MapLoader;
+import org.phantazm.zombies.map.MapLoader;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.endless.Endless;
