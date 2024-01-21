@@ -1,15 +1,17 @@
 package org.phantazm.snbt;
 
+/*
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.Objects;*/
 
 public class Builder {
     public static void main(String[] args) {
+        /*/
         if (args.length <= 1) {
             System.out.println("Incorrect number of arguments; needs at least 2");
             System.exit(1);
@@ -26,6 +28,6 @@ public class Builder {
                 .lore(lore.stream().map(string -> MiniMessage.miniMessage().deserialize(string)).toList())
                 .build();
 
-        System.out.println(itemStack.toItemNBT().toSNBT());
+        System.out.println(itemStack.toItemNBT().toSNBT());*/
     }
 }

@@ -4,8 +4,10 @@ plugins {
     java
 }
 
-group = "org.phantazm"
-version = "1.0-SNAPSHOT"
+allprojects {
+    this.group = "org.phantazm"
+    this.version = "1.0-SNAPSHOT"
+}
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))

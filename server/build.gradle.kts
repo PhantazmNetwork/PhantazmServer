@@ -40,6 +40,31 @@ dependencies {
 
 tasks.getByName<CopyLibs>("copyLibs") {
     libraryDirectory = File("run/server-1/libs")
+
+    artifacts.set(configurations.getByName("runtimeClasspath").incoming.artifacts.resolvedArtifacts.map {
+        return@map it.mapNotNull {
+            val component = it.id.componentIdentifier
+
+            val groupString: String
+            if (component is ModuleComponentIdentifier) {
+                groupString = component.group
+            } else if (component is ProjectComponentIdentifier) {
+                groupString = "org.phantazm"
+            } else {
+                throw IllegalStateException("Unknown component type ${it.javaClass}")
+            }
+
+            val split = groupString.split('.')
+            var target = libraryDirectory!!
+            split.forEach {
+                target = target.resolve(it)
+            }
+
+            target = target.resolve(it.file.name)
+
+            return@mapNotNull CopyLibs.ArtifactEntry(it.file, target, groupString)
+        }.toSet()
+    })
 }
 
 tasks.jar {
