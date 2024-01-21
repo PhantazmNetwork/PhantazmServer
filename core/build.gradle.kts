@@ -5,7 +5,6 @@ plugins {
 dependencies {
     api(projects.phantazmMessaging)
     api(projects.phantazmStats)
-    implementation(projects.phantazmLoader)
 
     api(libs.commons)
     api(libs.adventure.text.minimessage)

@@ -36,7 +36,6 @@ sequenceOf(
         "velocity",
         "zombies",
         "snbt-builder",
-        "loader",
         "dev-launcher"
 ).forEach {
     if (!toSkip.contains(it)) {

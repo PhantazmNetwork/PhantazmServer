@@ -9,8 +9,6 @@ dependencies {
     api(projects.phantazmMob)
     api(projects.phantazmStats)
     api(libs.commons)
-
-    implementation(projects.phantazmLoader)
 }
 
 elementAutodoc {

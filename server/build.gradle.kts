@@ -12,7 +12,6 @@ dependencies {
     implementation(projects.phantazmCore)
     implementation(projects.phantazmMob)
     implementation(projects.phantazmZombies)
-    implementation(projects.phantazmLoader)
 
     implementation(libs.adventure.text.minimessage)
     implementation(libs.ethylene.toml)
