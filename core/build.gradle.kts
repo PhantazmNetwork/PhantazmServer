@@ -3,7 +3,6 @@ plugins {
 }
 
 dependencies {
-    api(projects.phantazmMessaging)
     api(projects.phantazmStats)
 
     api(libs.commons)

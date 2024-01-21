@@ -28,7 +28,6 @@ val toSkip = gradle.startParameter.projectProperties.getOrDefault("skipBuild", "
 
 sequenceOf(
         "core",
-        "messaging",
         "mob",
         "proxima-minestom",
         "server",

@@ -19,7 +19,6 @@ import org.phantazm.core.packet.MinestomPacketUtils;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.messaging.packet.server.RoundStartPacket;
 import org.phantazm.stats.zombies.ZombiesLeaderboardDatabase;
-import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.stats.zombies.ZombiesPlayerMapStats;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.WebhookInfo;

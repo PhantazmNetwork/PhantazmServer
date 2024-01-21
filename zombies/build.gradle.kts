@@ -5,7 +5,6 @@ plugins {
 
 dependencies {
     api(projects.phantazmCore)
-    api(projects.phantazmMessaging)
     api(projects.phantazmMob)
     api(projects.phantazmStats)
     api(libs.commons)
