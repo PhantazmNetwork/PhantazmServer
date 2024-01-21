@@ -1,8 +1,6 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.timer.Scheduler;
@@ -33,6 +31,15 @@ public class TimerSkill implements SkillComponent {
             injectionStore.getOrDefault(InjectionKeys.SCHEDULER, MinecraftServer::getSchedulerManager));
     }
 
+    @Default("""
+        {
+            trigger=null,
+            repeat=-1,
+            requiresActivation=false,
+            resetOnActivation=true,
+            exceedMobLifetime=false
+        }
+        """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
         @NotNull @ChildPath("delegate") String delegate,
@@ -41,30 +48,6 @@ public class TimerSkill implements SkillComponent {
         boolean requiresActivation,
         boolean resetOnActivation,
         boolean exceedMobLifetime) {
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("repeat")
-        public static @NotNull ConfigElement defaultRepeat() {
-            return ConfigPrimitive.of(-1);
-        }
-
-        @Default("requiresActivation")
-        public static @NotNull ConfigElement defaultRequiresActivation() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("resetOnActivation")
-        public static @NotNull ConfigElement defaultResetOnActivation() {
-            return ConfigPrimitive.of(true);
-        }
-
-        @Default("exceedMobLifetime")
-        public static @NotNull ConfigElement defaultExceedMobLifetime() {
-            return ConfigPrimitive.of(false);
-        }
     }
 
     private static class Internal extends TimerSkillAbstract {

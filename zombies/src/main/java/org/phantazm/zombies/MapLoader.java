@@ -1,4 +1,4 @@
-package org.phantazm.zombies.map;
+package org.phantazm.zombies;
 
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
@@ -6,6 +6,7 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.loader.Loader;
 import org.phantazm.loader.ObjectExtractor;
+import org.phantazm.zombies.map.MapInfo;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

@@ -2,3 +2,7 @@
 	path = minestom
 	url = https://github.com/PhantazmNetwork/Minestom
 	branch = master
+[submodule "zombies-mapdata"]
+	path = zombies-mapdata
+	url = https://github.com/PhantazmNetwork/PhantazmZombiesData
+    branch = main

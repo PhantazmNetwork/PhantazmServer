@@ -22,11 +22,11 @@ dependencies {
     implementation(libs.velocity.api)
     implementation(projects.phantazmCommons)
     implementation(projects.phantazmMessaging)
-    implementation(projects.phantazmZombiesMapdata)
+    implementation(libs.zombies.mapdata)
 
     shade(projects.phantazmCommons)
     shade(projects.phantazmMessaging)
-    shade(projects.phantazmZombiesMapdata)
+    shade(libs.zombies.mapdata)
 }
 
 tasks.shadowJar {

@@ -11,7 +11,6 @@ repositories {
 dependencies {
     implementation(projects.phantazmCore)
     implementation(projects.phantazmMob)
-    implementation(projects.phantazmZombiesMapdata)
     implementation(projects.phantazmZombies)
     implementation(projects.phantazmLoader)
 
@@ -24,6 +23,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.element.core)
     implementation(libs.ethylene.mapper)
+    implementation(libs.zombies.mapdata)
 
     implementation(libs.reflections)
 

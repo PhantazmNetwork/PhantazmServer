@@ -1,4 +1,4 @@
-package org.phantazm.commons.chat;
+package org.phantazm.zombies.map.chat;
 
 public enum ChatDestination {
     TITLE,

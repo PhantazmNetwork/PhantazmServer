@@ -7,6 +7,8 @@ if (localSettings.exists()) {
 }
 
 includeBuild("./minestom")
+includeBuild("./zombies-mapdata")
+
 pluginManagement {
     repositories {
         //necessary for phantazm-zombies-mapeditor module which contains a Fabric mod
@@ -35,7 +37,6 @@ sequenceOf(
         "zombies-timer",
         "velocity",
         "zombies",
-        "zombies-mapdata",
         "zombies-mapeditor",
         "snbt-builder",
         "loader",

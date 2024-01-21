@@ -10,7 +10,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.chat.MessageWithDestination;
+import org.phantazm.zombies.map.chat.MessageWithDestination;
 
 import java.util.*;
 

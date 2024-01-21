@@ -48,7 +48,6 @@ dependencies {
     implementation(projects.phantazmCommons)
     implementation(projects.phantazmLoader)
     implementation(projects.phantazmMessaging)
-    implementation(projects.phantazmZombiesMapdata)
     implementation(libs.element.core)
     implementation(libs.ethylene.yaml)
     implementation(libs.yaml)
@@ -58,7 +57,6 @@ dependencies {
 
     include(projects.phantazmCommons)
     include(projects.phantazmMessaging)
-    include(projects.phantazmZombiesMapdata)
     include(libs.adventure.api)
     include(libs.adventure.key)
     include(libs.adventure.text.minimessage)
