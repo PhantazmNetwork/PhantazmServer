@@ -4,8 +4,10 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.setProperty
 import java.io.File
 import java.io.Serializable
 import javax.inject.Inject
@@ -32,15 +34,17 @@ abstract class CopyLibs : DefaultTask() {
     data class ArtifactEntry(val inputFile: File, val outputFile: File, val group: String) : Serializable
 
     @get:Internal
-    abstract val artifacts: SetProperty<ArtifactEntry>
+    val artifacts: SetProperty<ArtifactEntry> = objectFactory.setProperty()
 
-    val artifactInputs: Provider<in FileCollection>
-        @InputFiles get() = (artifacts.map {
-            return@map objectFactory.fileCollection().from(it.map { it.inputFile })
-        })
+    val artifactInputs: Provider<FileCollection>
+        @InputFiles get() = artifacts.map {
+            objectFactory.fileCollection().from(it.map { entry -> entry.inputFile })
+        }
 
-    val artifactOutputs: FileCollection
-        @OutputFiles get() = objectFactory.fileTree().from(libraryDirectory!!)
+    val artifactOutputs: Provider<FileCollection>
+        @OutputFiles get() = artifacts.map {
+            objectFactory.fileCollection().from(it.map { entry -> entry.outputFile })
+        }
 
     @TaskAction
     fun copyLibs() {

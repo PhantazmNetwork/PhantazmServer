@@ -1,4 +1,5 @@
 import org.phantazm.gradle.task.CopyLibs
+import org.phantazm.gradle.task.InsertManifest
 
 plugins {
     id("phantazm.minestom-library-conventions")
@@ -38,7 +39,7 @@ dependencies {
     runtimeOnly(libs.sqlite)
 }
 
-tasks.getByName<CopyLibs>("copyLibs") {
+val copyLibs = tasks.getByName<CopyLibs>("copyLibs") {
     libraryDirectory = File("run/server-1/libs")
 
     artifacts.set(configurations.getByName("runtimeClasspath").incoming.artifacts.resolvedArtifacts.map {
@@ -68,26 +69,24 @@ tasks.getByName<CopyLibs>("copyLibs") {
 }
 
 tasks.jar {
-    val copyLibsTask = tasks.getByName<CopyLibs>("copyLibs")
-    dependsOn(copyLibsTask)
-
     archiveBaseName.set("server")
     archiveVersion.set("")
     archiveClassifier.set("")
-
-    manifest {
-        attributes(
-                "Class-Path" to copyLibsTask.outputs.files.joinToString(" ") {
-                    "libs/${it.relativeTo(copyLibsTask.libraryDirectory!!).toPath().joinToString("/")}"
-                },
-                "Main-Class" to "org.phantazm.server.PhantazmServer",
-                "Multi-Release" to true
-        )
-    }
 }
 
-tasks.register<Copy>("copyJar") {
-    dependsOn(tasks.jar)
+val copyJar = tasks.register<Copy>("copyJar") {
     from(tasks.jar)
     into("$rootDir/run/server-1/")
+
+    finalizedBy("insertManifest")
+}
+
+val insertManifest = tasks.getByName<InsertManifest>("insertManifest") {
+    dependsOn(copyLibs)
+    dependsOn(copyJar)
+
+    this.attributes = mapOf("Main-Class" to "org.phantazm.server.PhantazmServer", "Multi-Release" to true)
+    this.rootFolder = "libs"
+    this.libraryDirectory = copyLibs.libraryDirectory!!
+    this.jarFile = File("./run/server-1/server.jar")
 }

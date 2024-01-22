@@ -1,4 +1,6 @@
 import org.phantazm.gradle.task.CopyLibs
+import org.phantazm.gradle.task.InsertManifest
+
 
 plugins {
     java
@@ -87,3 +89,4 @@ tasks.getByName<Javadoc>("javadoc") {
 }
 
 tasks.register<CopyLibs>("copyLibs")
+tasks.register<InsertManifest>("insertManifest")
