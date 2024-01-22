@@ -298,7 +298,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
 
         String filteredModifierKey = filterModifierKey(modifierKey);
         if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
-            return FutureUtils.completedFuture(Optional.empty());
+            return FutureUtils.emptyOptionalCompletedFuture();
         }
 
         BestRankingKey bestRankingKey = new BestRankingKey(player, teamSize, map, modifierKey);
@@ -413,7 +413,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
         int teamSize = teamCopy.size();
         String filteredModifierKey = filterModifierKey(modifierKey);
         if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
-            return FutureUtils.completedFuture(List.of());
+            return FutureUtils.emptyUnmodifiableListCompletedFuture();
         }
 
         TimeHistoryKey timeHistoryKey = new TimeHistoryKey(teamCopy, map, modifierKey);
@@ -469,7 +469,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
         String filteredModifierKey = filterModifierKey(modifierKey);
         if (entries <= 0 || teamSize <= 0 || !validModifierKeys.contains(filteredModifierKey) ||
             !teamSizes.contains(teamSize)) {
-            return FutureUtils.completedFuture(List.of());
+            return FutureUtils.emptyUnmodifiableListCompletedFuture();
         }
 
         BestTimesKey bestTimesKey = new BestTimesKey(teamSize, modifierKey, map, start, entries);

@@ -16,7 +16,7 @@ public interface IdentitySource {
     /**
      * A standard IdentitySource implementation that uses Mojang's API servers to resolve names and UUIDs.
      */
-    IdentitySource MOJANG = new MojangIdentitySource();
+    IdentitySource MOJANG = MojangIdentitySource.INSTANCE;
 
     /**
      * Optionally resolves the given UUID to a username, typically asynchronously. If the UUID is invalid or does not

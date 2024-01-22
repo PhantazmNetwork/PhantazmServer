@@ -1,7 +1,6 @@
 import org.phantazm.gradle.task.CopyLibs
 import org.phantazm.gradle.task.InsertManifest
 
-
 plugins {
     java
 }

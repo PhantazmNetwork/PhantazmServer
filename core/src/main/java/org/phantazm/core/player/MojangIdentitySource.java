@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import net.minestom.server.utils.mojang.MojangUtils;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FutureUtils;
 import org.phantazm.stats.Databases;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,19 +23,23 @@ import java.util.concurrent.CompletableFuture;
  * @apiNote Not part of the public API.
  */
 public class MojangIdentitySource implements IdentitySource {
+    public static final MojangIdentitySource INSTANCE = new MojangIdentitySource();
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MojangIdentitySource.class);
     private static final String NAME_KEY = "name";
     private static final String ID_KEY = "id";
 
-    /**
-     * Creates a new instance of this class.
-     */
-    public MojangIdentitySource() {
+    private MojangIdentitySource() {
 
     }
 
     @Override
     public @NotNull CompletableFuture<Optional<String>> getName(@NotNull UUID uuid) {
+        //check the version and variant first, mojang UUIDs use version 4 variant 2
+        if (uuid.version() != 4 || uuid.variant() != 2) {
+            return FutureUtils.emptyOptionalCompletedFuture();
+        }
+
         return Databases.usernames().cachedUsername(uuid).thenApply(stringOptional -> {
             if (stringOptional.isPresent()) {
                 return stringOptional;
@@ -44,7 +49,7 @@ public class MojangIdentitySource implements IdentitySource {
             try {
                 response = MojangUtils.fromUuid(uuid.toString());
             } catch (RuntimeException exception) {
-                LOGGER.error("RuntimeException thrown during name resolution of UUID {}: {}", uuid, exception);
+                LOGGER.error("RuntimeException thrown during name resolution of UUID {}", uuid, exception);
             }
 
             if (response == null) {
@@ -78,7 +83,7 @@ public class MojangIdentitySource implements IdentitySource {
             try {
                 response = MojangUtils.fromUsername(name);
             } catch (RuntimeException exception) {
-                LOGGER.error("RuntimeException thrown during UUID resolution of name {}: {}", name, exception);
+                LOGGER.error("RuntimeException thrown during UUID resolution of name {}", name, exception);
             }
 
             if (response != null) {
