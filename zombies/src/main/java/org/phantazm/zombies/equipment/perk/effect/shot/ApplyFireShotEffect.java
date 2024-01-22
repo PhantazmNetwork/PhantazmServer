@@ -81,7 +81,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             }
 
             TagHandler tags = TagUtils.sceneLocalTags(entity, scene);
-            long lastDamageTicks = tags.getAndUpdateTag(this.lastDamageTicksTag, oldValue -> oldValue + 1);
+            long lastDamageTicks = tags.updateAndGetTag(this.lastDamageTicksTag, oldValue -> oldValue + 1);
 
             if (lastDamageTicks >= data.damageInterval) {
                 doDamage(entity, target.damager);
