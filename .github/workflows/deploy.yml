@@ -17,7 +17,7 @@ jobs:
           cache: 'gradle'
           distribution: 'adopt'
       - name: Build & copy jar
-        run: ./gradlew -PskipBuild=zombies-mapeditor,zombies-timer,dev-launcher :phantazm-server:copyJar
+        run: ./gradlew -PskipBuild=dev-launcher,snbt-builder,velocity :phantazm-server:copyJar
       - name: Zip server files
         run: |
           cd ./run/server-1

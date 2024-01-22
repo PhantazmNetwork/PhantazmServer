@@ -11,13 +11,7 @@ includeBuild("./commons")
 
 pluginManagement {
     repositories {
-        //necessary for phantazm-zombies-mapeditor module which contains a Fabric mod
-        maven("https://maven.fabricmc.net/") {
-            name = "Fabric"
-        }
-
         maven("https://dl.cloudsmith.io/public/steanky/element/maven/")
-        mavenCentral()
         gradlePluginPortal()
     }
 }
