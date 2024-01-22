@@ -177,7 +177,7 @@ public class EndStage implements Stage {
                 leaderboardDatabase.submitGame(zombiesPlayers.stream()
                         .map(player -> player.module().getPlayerView().getUUID()).collect(Collectors.toSet()),
                     ModifierUtils.modifierDescriptor(scene.activeModifiers()), scene.mapSettingsInfo().id(),
-                    ticksSinceStart.get(), Instant.now().toEpochMilli());
+                    ticksSinceStart.get(), Instant.now().getEpochSecond());
             }
 
             for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
