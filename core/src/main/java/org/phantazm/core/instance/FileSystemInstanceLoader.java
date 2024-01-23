@@ -10,6 +10,8 @@ import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -25,6 +27,8 @@ import java.util.concurrent.Phaser;
  * Implements an {@link InstanceLoader} using the file system.
  */
 public abstract class FileSystemInstanceLoader implements InstanceLoader {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemInstanceLoader.class);
+
     /**
      * The {@link ChunkSupplier} to be used by instances loaded from this InstanceLoader
      */
@@ -90,8 +94,7 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
         });
     }
 
-    private InstanceContainer createTemplateContainer(Path path, Point spawnPoint,
-        int chunkViewDistance) {
+    private InstanceContainer createTemplateContainer(Path path, Point spawnPoint, int chunkViewDistance) {
         InstanceContainer container =
             new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD, createChunkLoader(path));
         container.enableAutoChunkLoad(false);
@@ -105,7 +108,12 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
         Phaser phaser = new Phaser(1);
         ChunkUtils.forChunksInRange(spawnPoint, chunkViewDistance, (chunkX, chunkZ) -> {
             phaser.register();
-            instance.loadChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> phaser.arriveAndDeregister());
+            instance.loadChunk(chunkX, chunkZ).whenComplete((chunk, throwable) -> {
+                phaser.arriveAndDeregister();
+                if (throwable != null) {
+                    LOGGER.info("Error loading chunk at ({}, {})", chunkX, chunkZ, throwable);
+                }
+            });
         });
         phaser.arriveAndAwaitAdvance();
     }
