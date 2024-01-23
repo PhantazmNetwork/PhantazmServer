@@ -301,7 +301,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             return FutureUtils.emptyOptionalCompletedFuture();
         }
 
-        BestRankingKey bestRankingKey = new BestRankingKey(player, teamSize, map, modifierKey);
+        BestRankingKey bestRankingKey = new BestRankingKey(player, teamSize, map, filteredModifierKey);
         Optional<RankingEntry> cachedRankingEntry = bestRankingCache.getIfPresent(bestRankingKey);
         if (cachedRankingEntry != null) {
             return FutureUtils.completedFuture(cachedRankingEntry);
@@ -362,10 +362,10 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
         int teamSize = teamCopy.size();
         String filteredModifierKey = filterModifierKey(modifierKey);
         if (teamSize == 0 || !validModifierKeys.contains(filteredModifierKey) || !teamSizes.contains(teamSize)) {
-            return FutureUtils.completedFuture(OptionalLong.empty());
+            return FutureUtils.emptyOptionalLongCompletedFuture();
         }
 
-        BestTimeKey bestTimeKey = new BestTimeKey(teamCopy, map, modifierKey);
+        BestTimeKey bestTimeKey = new BestTimeKey(teamCopy, map, filteredModifierKey);
         OptionalLong bestTimeCached = bestTimeCache.getIfPresent(bestTimeKey);
         if (bestTimeCached != null) {
             return FutureUtils.completedFuture(bestTimeCached);
@@ -416,7 +416,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             return FutureUtils.emptyUnmodifiableListCompletedFuture();
         }
 
-        TimeHistoryKey timeHistoryKey = new TimeHistoryKey(teamCopy, map, modifierKey);
+        TimeHistoryKey timeHistoryKey = new TimeHistoryKey(teamCopy, map, filteredModifierKey);
         List<LeaderboardEntry> cachedHistory = timeHistoryCache.getIfPresent(timeHistoryKey);
         if (cachedHistory != null) {
             return FutureUtils.completedFuture(cachedHistory);
@@ -472,7 +472,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
             return FutureUtils.emptyUnmodifiableListCompletedFuture();
         }
 
-        BestTimesKey bestTimesKey = new BestTimesKey(teamSize, modifierKey, map, start, entries);
+        BestTimesKey bestTimesKey = new BestTimesKey(teamSize, filteredModifierKey, map, start, entries);
         List<LeaderboardEntry> cachedEntry = bestTimesCache.getIfPresent(bestTimesKey);
         if (cachedEntry != null) {
             return FutureUtils.completedFuture(cachedEntry);
@@ -486,7 +486,7 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
 
             @Language("sql")
             String query = """
-                SELECT id, time_taken, time_end, %3$s FROM (SELECT id, time_taken, time_end, %3$s,
+                SELECT time_taken, time_end, %3$s FROM (SELECT id, time_taken, time_end, %3$s,
                   DENSE_RANK() OVER (PARTITION BY %1$s.team_id ORDER BY %1$s.time_taken, %1$s.id) AS pos
                     FROM %1$s
                     INNER JOIN %2$s
@@ -512,15 +512,15 @@ public class JDBCZombiesLeaderboardDatabase implements ZombiesLeaderboardDatabas
 
                         List<LeaderboardEntry> entryList = new ArrayList<>(entries);
                         do {
-                            long timeTaken = result.getLong(2);
-                            long timeEnd = result.getLong(3);
+                            long timeTaken = result.getLong(1);
+                            long timeEnd = result.getLong(2);
 
                             Set<UUID> uuids = new HashSet<>(teamSize);
                             for (int i = 0; i < teamSize; i++) {
-                                uuids.add(UUID.fromString(result.getString(i + 4)));
+                                uuids.add(UUID.fromString(result.getString(i + 3)));
                             }
 
-                            entryList.add(new LeaderboardEntry(uuids, timeTaken, timeEnd));
+                            entryList.add(new LeaderboardEntry(Set.copyOf(uuids), timeTaken, timeEnd));
                         }
                         while (result.next());
 
