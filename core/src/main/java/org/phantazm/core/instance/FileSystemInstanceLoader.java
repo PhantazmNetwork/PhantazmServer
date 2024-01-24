@@ -1,12 +1,16 @@
 package org.phantazm.core.instance;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.*;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.chunk.ChunkSupplier;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.jglrxavpok.hephaistos.nbt.*;
 import org.phantazm.commons.FileUtils;
 import org.phantazm.commons.FutureUtils;
 import org.slf4j.Logger;
@@ -52,12 +56,34 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
             }
 
             long chunkKey = ChunkUtils.getChunkIndex(chunkX, chunkZ);
-            Section[] sections = instanceData.chunkData().get(chunkKey);
-            if (sections == null) {
+            InstanceData.ChunkData chunkData = instanceData.chunkData().get(chunkKey);
+            if (chunkData == null) {
                 return FutureUtils.nullCompletedFuture();
             }
 
-            return CompletableFuture.completedFuture(new DynamicChunk(instance, chunkX, chunkZ, sections));
+            Int2ObjectMap<InstanceData.NBTBlock> blockData = chunkData.entries();
+            Int2ObjectMap<Block> blocks = new Int2ObjectOpenHashMap<>(blockData.size());
+            for (Int2ObjectMap.Entry<InstanceData.NBTBlock> entry : blockData.int2ObjectEntrySet()) {
+                int key = entry.getIntKey();
+                InstanceData.NBTBlock nbtData = entry.getValue();
+
+                Block block = Block.fromBlockId(nbtData.id());
+                if (block == null) {
+                    continue;
+                }
+
+                NBT nbt;
+                try (NBTReader nbtReader = NBTReader.fromArray(nbtData.nbt())) {
+                    nbt = nbtReader.readNamed().component2();
+                } catch (IOException | NBTException e) {
+                    continue;
+                }
+
+                blocks.put(key, nbt instanceof NBTCompound compound ? block.withNbt(compound) : block);
+            }
+
+            return CompletableFuture.completedFuture(new DynamicChunk(instance, chunkX, chunkZ, chunkData.sections(),
+                blocks));
         }
 
         @Override
