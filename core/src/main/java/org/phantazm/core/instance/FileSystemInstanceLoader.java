@@ -263,13 +263,16 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
             InstanceData instanceData = (InstanceData) ois.readObject();
 
             InstanceDataChunkLoader loader = new InstanceDataChunkLoader(instanceData);
-            InstanceContainer container = new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD, loader);
-            container.enableAutoChunkLoad(false);
-            container.setChunkSupplier(chunkSupplier);
+            try {
+                InstanceContainer container = new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD, loader);
+                container.enableAutoChunkLoad(false);
+                container.setChunkSupplier(chunkSupplier);
 
-            awaitChunkLoadSync(container, spawnPoint, chunkViewDistance);
-            loader.clean();
-            return container;
+                awaitChunkLoadSync(container, spawnPoint, chunkViewDistance);
+                return container;
+            } finally {
+                loader.clean();
+            }
         }
     }
 
