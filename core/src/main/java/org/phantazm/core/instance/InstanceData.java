@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.Collection;
 
 public record InstanceData(@NotNull Long2ObjectMap<Section[]> chunkData) implements Serializable {
-    public static InstanceData of(Instance instance) {
+    public static @NotNull InstanceData of(@NotNull Instance instance) {
         Collection<Chunk> chunks = instance.getChunks();
 
         Long2ObjectMap<Section[]> data = new Long2ObjectOpenHashMap<>(chunks.size());
