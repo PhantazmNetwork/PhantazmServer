@@ -10,8 +10,13 @@ import java.util.List;
 
 // TODO: Reflect 1.20 changes
 public class SignHandler implements BlockHandler {
-
+    public static final SignHandler INSTANCE = new SignHandler();
     public static final NamespaceID NAMESPACE_ID = NamespaceID.from("minecraft:sign");
+    private static final Collection<Tag<?>> TAGS = List.of(Tag.Boolean("GlowingText"), Tag.String("Color"),
+        Tag.String("Text1"), Tag.String("Text2"), Tag.String("Text3"), Tag.String("Text4"));
+
+    private SignHandler() {
+    }
 
     @Override
     public @NotNull NamespaceID getNamespaceId() {
@@ -20,7 +25,6 @@ public class SignHandler implements BlockHandler {
 
     @Override
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
-        return List.of(Tag.Boolean("GlowingText"), Tag.String("Color"), Tag.String("Text1"), Tag.String("Text2"),
-            Tag.String("Text3"), Tag.String("Text4"));
+        return TAGS;
     }
 }

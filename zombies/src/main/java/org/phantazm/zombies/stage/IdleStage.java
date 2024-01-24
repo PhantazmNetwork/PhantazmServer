@@ -58,7 +58,6 @@ public class IdleStage implements Stage {
 
     @Override
     public void onJoin(@NotNull ZombiesPlayer zombiesPlayer) {
-        zombiesPlayer.module().getLeaderboard().startIfNotActive();
         int count = zombiesPlayers.size(), maxPlayers = settings.maxPlayers();
         TagResolver countPlaceholder = Placeholder.component("count", Component.text(count));
         TagResolver maxPlayersPlaceholder = Placeholder.component("max_players", Component.text(maxPlayers));
@@ -77,8 +76,6 @@ public class IdleStage implements Stage {
         if (updater != null) {
             updater.end();
         }
-
-        zombiesPlayer.module().getLeaderboard().endIfActive();
     }
 
     @Override

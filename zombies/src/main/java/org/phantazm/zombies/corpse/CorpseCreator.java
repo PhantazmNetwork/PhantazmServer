@@ -19,7 +19,6 @@ import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
@@ -38,7 +37,6 @@ public class CorpseCreator {
     private static final AtomicLong CORPSE_COUNTER = new AtomicLong();
     private static final String CORPSE_TEAM_PREFIX = "c-";
 
-    private static final String POSSIBLE_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
     private final Data data;
     private final List<CorpseLine> idleLines;
     private final List<CorpseLine> revivingLines;
@@ -55,7 +53,7 @@ public class CorpseCreator {
         @NotNull Point deathLocation, @NotNull ReviveHandler reviveHandler) {
         PlayerSkin skin = zombiesPlayer.getPlayer().map(Player::getSkin).orElse(null);
 
-        String corpseUsername = RandomStringUtils.random(16, POSSIBLE_CHARACTERS);
+        String corpseUsername = "corpse";
         String teamName = CORPSE_TEAM_PREFIX + Long.toString(CORPSE_COUNTER.getAndIncrement(), 16);
         if (teamName.length() > 16) {
             teamName = teamName.substring(0, 16);
@@ -68,7 +66,7 @@ public class CorpseCreator {
             }
         });
 
-        Hologram hologram = new InstanceHologram(deathLocation.add(0, data.hologramHeightOffset, 0), data.hologramGap);
+        Hologram hologram = new InstanceHologram(deathLocation.add(0, data.hologramHeightOffset, 0));
 
         hologram.setInstance(instance);
         corpseEntity.setInstance(instance, deathLocation.add(0, data.corpseHeightOffset, 0));
@@ -206,7 +204,7 @@ public class CorpseCreator {
         @Override
         public void start() {
             for (CorpseLine corpseLine : idleLines) {
-                hologram.add(corpseLine.update(this, System.currentTimeMillis()));
+                hologram.addComponent(corpseLine.update(this, System.currentTimeMillis()));
             }
 
             this.currentLines = idleLines;
@@ -228,17 +226,17 @@ public class CorpseCreator {
             List<CorpseLine> newLines = reviveHandler.isReviving() ? revivingLines : idleLines;
             if (newLines != currentLines) {
                 hologram.clear();
-                hologram.addAll(newLines.stream().map(line -> line.update(this, time)).toList());
+                hologram.addAllComponents(newLines.stream().map(line -> line.update(this, time)).toList());
                 this.currentLines = newLines;
                 return;
             }
 
             for (int i = 0; i < CorpseCreator.this.idleLines.size(); i++) {
                 Component newLine = currentLines.get(i).update(this, time);
-                Component oldLine = hologram.get(i);
+                Component oldLine = hologram.get(i).component();
 
                 if (!newLine.equals(oldLine)) {
-                    hologram.set(i, newLine);
+                    hologram.set(i, Hologram.line(newLine));
                 }
             }
         }

@@ -25,6 +25,7 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.commons.MonoComponent;
+import org.phantazm.core.TagUtils;
 import org.phantazm.core.gui.BasicSlotDistributor;
 import org.phantazm.core.gui.SlotDistributor;
 import org.phantazm.core.npc.interactor.NPCInteractor;
@@ -50,7 +51,8 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
 
     @Override
     public @NotNull NPCInteractor apply(@NotNull InjectionStore injectionStore) {
-        return new Impl(data);
+        InjectionKeys.ModifierHandlerLoader loader = injectionStore.get(InjectionKeys.MODIFIER_LOADER_KEY);
+        return new Impl(data, loader.modifierHandlerLoader().first());
     }
 
     @DataObject
@@ -77,14 +79,15 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
     }
 
     private static class Impl implements NPCInteractor {
-        private static final Tag<String> MODIFIER_TAG = Tag.String("modifier");
-        private static final Tag<String> ACTION_TAG = Tag.String("action");
+        private static final Tag<String> MODIFIER_TAG = Tag.String(TagUtils.uniqueTagName());
+        private static final Tag<String> ACTION_TAG = Tag.String(TagUtils.uniqueTagName());
 
         private static final String PREVIOUS_ACTION = "previous";
         private static final String NEXT_ACTION = "next";
         private static final String CLEAR_ACTION = "clear";
 
         private final Data data;
+        private final ModifierHandler modifierHandler;
         private final SlotDistributor slotDistributor;
 
         private final List<ModifierComponent> modifiers;
@@ -93,12 +96,12 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
         private static final int MODIFIERS_PER_PAGE = 9;
         private static final int CHEST_WIDTH = 9;
 
-        private Impl(Data data) {
+        private Impl(Data data, ModifierHandler modifierHandler) {
             this.data = data;
+            this.modifierHandler = modifierHandler;
             this.slotDistributor = new BasicSlotDistributor(data.modifierTogglePadding);
 
-            ModifierHandler handler = ModifierHandler.Global.instance();
-            Map<Key, ModifierComponent> components = handler.componentMap();
+            Map<Key, ModifierComponent> components = modifierHandler.componentMap();
 
             this.modifiers = components.values().stream().sorted(Comparator.comparing(ModifierComponent::ordinal))
                 .toList();
@@ -120,8 +123,6 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
                 Math.min(modifiers.size() - (page * MODIFIERS_PER_PAGE), MODIFIERS_PER_PAGE));
 
             PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer(player);
-            ModifierHandler modifierHandler = ModifierHandler.Global.instance();
-
             ModifierInventory inventory = new ModifierInventory(InventoryType.CHEST_6_ROW, computeTitle(playerView), playerView, page);
             inventory.addInventoryCondition((player1, slot, clickType, inventoryConditionResult) -> {
                 if (clickType != ClickType.LEFT_CLICK) {
@@ -155,7 +156,6 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
         }
 
         private Component computeTitle(PlayerView playerView) {
-            ModifierHandler modifierHandler = ModifierHandler.Global.instance();
             int modifierCount = modifierHandler.enabledModifierCount(playerView);
             return MiniMessage.miniMessage().deserialize(data.titleFormat,
                 Placeholder.unparsed("modifier_count", Integer.toString(modifierCount)));
@@ -179,7 +179,6 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
 
                 ItemStack stack = getItemStack(slot);
 
-                ModifierHandler modifierHandler = ModifierHandler.Global.instance();
                 @Subst(Constants.NAMESPACE_OR_KEY) String modifier = stack.getTag(MODIFIER_TAG);
                 if (modifier != null) {
                     Key key = Key.key(modifier);

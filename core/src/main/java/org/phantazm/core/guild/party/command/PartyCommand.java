@@ -39,6 +39,7 @@ public class PartyCommand {
         command.addSubcommand(
             PartySpyCommand.spyCommand(config, miniMessage, connectionManager, partyHolder, viewProvider));
         command.addSubcommand(PartyAllInviteCommand.allInviteCommand(config, partyHolder));
+        command.addSubcommand(PartyWarpCommand.warpCommand(config, partyHolder, viewProvider));
 
         return command;
     }

@@ -53,13 +53,13 @@ public class BasicQuitStateActivable implements Activable {
             sidebar.removeViewer(player);
             tabList.removeViewer(player);
             belowNameTag.removeViewer(player);
-            player.setHealth(player.getMaxHealth());
+            player.heal();
             player.resetTitle();
             player.sendActionBar(Component.empty());
             player.stopSound(SoundStop.all());
             player.stateHolder().removeStage(Stages.ZOMBIES_GAME);
             player.setLastDamageSource(null);
-            player.tagHandler().clearTags();
+            player.setOnFire(false);
         });
         playerView.getDisplayName().thenAccept(displayName -> {
             TagResolver quitterPlaceholder = Placeholder.component("quitter", displayName);

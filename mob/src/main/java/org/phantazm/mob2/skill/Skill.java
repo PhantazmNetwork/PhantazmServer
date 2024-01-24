@@ -87,7 +87,7 @@ public interface Skill {
     /**
      * Ends this skill, performing any necessary cleanup actions. This method will be called if a skill is removed from
      * an entity, using the {@link Mob#removeSkill(Skill)} method, or if the mob is removed from the instance using
-     * {@link Mob#remove()}.
+     * {@link Mob#remove()}. It may also be called by other skills, such as {@link TemporalSkill}.
      * <p>
      * <b>Thread Behavior</b>: This method safely supports being called by threads other than the owning entity's
      * current tick thread. It does not support concurrent access.

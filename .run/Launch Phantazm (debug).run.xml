@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Launch Phantazm (debug)" type="JarApplication" singleton="false">
+    <option name="JAR_PATH" value="$PROJECT_DIR$/dev-launcher.jar" />
+    <option name="PROGRAM_PARAMETERS" value="-d" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2" />
+  </configuration>
+</component>

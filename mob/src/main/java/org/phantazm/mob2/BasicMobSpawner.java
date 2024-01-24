@@ -7,18 +7,20 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.phantazm.commons.InjectionStore.Builder;
+import org.phantazm.loader.Loader;
 
 public class BasicMobSpawner implements MobSpawner {
-    private final Map<Key, MobCreator> mobCreators;
+    private final Map<Key, MobCreator> mobCreatorMap;
     private final InjectionStore.Builder builder;
 
     private volatile InjectionStore injectionStore;
 
-    public BasicMobSpawner(@NotNull Map<Key, MobCreator> mobCreators) {
-        this.mobCreators = Map.copyOf(mobCreators);
+    public BasicMobSpawner(@NotNull Loader<MobCreator> mobCreatorLoader) {
+        this.mobCreatorMap = Objects.requireNonNull(mobCreatorLoader).data();
         this.builder = InjectionStore.builder();
     }
 
@@ -30,7 +32,7 @@ public class BasicMobSpawner implements MobSpawner {
             throw new IllegalStateException("this spawner has not yet been initialized");
         }
 
-        MobCreator creator = mobCreators.get(identifier);
+        MobCreator creator = mobCreatorMap.get(identifier);
         if (creator == null) {
             throw new IllegalArgumentException("missing mob identifier " + identifier);
         }
@@ -52,7 +54,7 @@ public class BasicMobSpawner implements MobSpawner {
 
     @Override
     public boolean canSpawn(@NotNull Key identifier) {
-        return mobCreators.containsKey(identifier);
+        return mobCreatorMap.containsKey(identifier);
     }
 
     @Override
@@ -64,13 +66,13 @@ public class BasicMobSpawner implements MobSpawner {
 
     /**
      * Builds dependencies. By default, the only dependency added is this MobSpawner, under the key
-     * {@link Keys#MOB_SPAWNER}. This method can be overridden by subclasses to add additional dependencies, which can
-     * be appended to the builder using {@link Builder#with(InjectionStore.Key, Object)}.
+     * {@link InjectionKeys#MOB_SPAWNER}. This method can be overridden by subclasses to add additional dependencies,
+     * which can be appended to the builder using {@link Builder#with(InjectionStore.Key, Object)}.
      *
      * @param builder the builder to which additional dependencies may be added
      */
     protected void buildDependencies(InjectionStore.@NotNull Builder builder) {
-        builder.with(Keys.MOB_SPAWNER, this);
+        builder.with(InjectionKeys.MOB_SPAWNER, this);
     }
 
     /**

@@ -20,7 +20,7 @@ public class AddToRoundCallback implements SpawnCallbackComponent {
 
     @Override
     public @NotNull SpawnCallback apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(injectionStore.get(Keys.SCENE));
+        return new Internal(injectionStore.get(InjectionKeys.SCENE));
     }
 
     private record Internal(ZombiesScene scene) implements SpawnCallback {

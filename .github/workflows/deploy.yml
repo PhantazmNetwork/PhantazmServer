@@ -3,51 +3,49 @@ name: Deploy to Remote
 on: workflow_dispatch
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-            -   uses: actions/checkout@v3
-                with:
-                    submodules: 'recursive'
-            -   name: Set up JDK 17
-                uses: actions/setup-java@v3
-                with:
-                    java-version: '17'
-                    cache: 'gradle'
-                    distribution: 'adopt'
-            -   name: Set up server
-                run: ./gradlew -PskipBuild=zombies-mapeditor,zombies-timer :phantazm-server:setupServer
-            -   name: Build & copy jar
-                run: ./gradlew -PskipBuild=zombies-mapeditor,zombies-timer :phantazm-server:copyJar
-            -   name: Zip server files
-                run: |
-                    cd ./run/server-1
-                    tar -czf /tmp/server.tar.gz server.jar libs
-            -   name: Set up SSH
-                run: |
-                    mkdir -p ~/.ssh/
-                    echo "$SSH_KEY" > ~/.ssh/deploy
-                    chmod 600 ~/.ssh/deploy
-                    cat >> ~/.ssh/config <<END
-                    Host phantazm
-                      HostName $SSH_HOST
-                      User $SSH_USER
-                      IdentityFile ~/.ssh/deploy
-                      StrictHostKeyChecking no
-                    END
-                env:
-                    SSH_KEY: ${{ secrets.SSH_KEY }}
-                    SSH_HOST: ${{ secrets.SSH_HOST }}
-                    SSH_USER: ${{ secrets.SSH_USER }}
-            -   name: Copy server files to remote
-                run: |
-                    scp /tmp/server.tar.gz phantazm:/home/prod/archive/server.tar.gz
-            -   name: Restart server
-                uses: appleboy/ssh-action@master
-                with:
-                    key: ${{ secrets.SSH_KEY }}
-                    host: ${{ secrets.SSH_HOST }}
-                    username: ${{ secrets.SSH_USER }}
-                    script: |
-                        /home/prod/archive/sync.sh
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          cache: 'gradle'
+          distribution: 'adopt'
+      - name: Build & copy jar
+        run: ./gradlew -PskipBuild=dev-launcher,snbt-builder,velocity :phantazm-server:copyJar
+      - name: Zip server files
+        run: |
+          cd ./run/server-1
+          tar -czf /tmp/server.tar.gz server.jar libs
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          cat >> ~/.ssh/config <<END
+          Host phantazm
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/deploy
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+      - name: Copy server files to remote
+        run: |
+          scp /tmp/server.tar.gz phantazm:/home/prod/archive/server.tar.gz
+      - name: Restart server
+        uses: appleboy/ssh-action@master
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          script: |
+            /home/prod/archive/sync.sh

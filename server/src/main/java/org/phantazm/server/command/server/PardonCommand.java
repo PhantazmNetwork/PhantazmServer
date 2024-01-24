@@ -20,7 +20,7 @@ public class PardonCommand extends PermissionLockedCommand {
 
         addSyntax((sender, context) -> {
             String name = context.get(PLAYER_ARGUMENT);
-            identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
+            identitySource.getUUID(name).thenAccept((uuidOptional) -> {
                 uuidOptional.ifPresent(uuid -> {
                     if (loginValidator.isBanned(uuid)) {
                         loginValidator.pardon(uuid);

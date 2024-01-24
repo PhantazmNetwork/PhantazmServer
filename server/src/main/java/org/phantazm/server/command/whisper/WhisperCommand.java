@@ -1,8 +1,6 @@
 package org.phantazm.server.command.whisper;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -10,6 +8,7 @@ import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.command.CommandUtils;
 
 import java.util.Objects;
 
@@ -38,19 +37,7 @@ public class WhisperCommand {
         });
         Argument<String[]> message = ArgumentType.StringArray("message");
 
-        command.addConditionalSyntax((sender, commandString) -> {
-            if (commandString == null) {
-                return sender instanceof Player || sender instanceof ConsoleSender;
-            }
-
-            if (!(sender instanceof Player || sender instanceof ConsoleSender)) {
-                sender.sendMessage(Component.text("You have to be a player or the console to use that command!",
-                    NamedTextColor.RED));
-                return false;
-            }
-
-            return true;
-        }, (sender, context) -> {
+        command.addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             String name = context.get(target);
             Player targetPlayer = connectionManager.getPlayer(name);
 

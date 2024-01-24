@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
+import org.phantazm.loader.Loader;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.modifier.ModifierComponent;
 import org.phantazm.zombies.modifier.ModifierHandler;
@@ -34,15 +35,17 @@ public class ModifierCommand extends Command {
         TOGGLE
     }
 
-    public ModifierCommand(@NotNull KeyParser keyParser, @NotNull ModifierCommandConfig config) {
+    public ModifierCommand(@NotNull KeyParser keyParser, @NotNull ModifierCommandConfig config,
+        @NotNull Loader<ModifierHandler> modifierHandlerLoader) {
         super("modifier");
 
         Argument<Actions> modifierAction = ArgumentType.Enum("action", Actions.class)
             .setFormat(ArgumentEnum.Format.LOWER_CASED);
 
-        ModifierHandler modifierHandler = ModifierHandler.Global.instance();
         Argument<String> modifierArgument = ArgumentType.Word("target")
             .setSuggestionCallback((sender, context, suggestion) -> {
+                ModifierHandler modifierHandler = modifierHandlerLoader.first();
+
                 for (Key key : modifierHandler.componentMap().keySet()) {
                     String name = key.asString();
                     suggestion.addEntry(new SuggestionEntry(name, Component.text(name)));
@@ -50,6 +53,7 @@ public class ModifierCommand extends Command {
             });
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+            ModifierHandler modifierHandler = modifierHandlerLoader.first();
             PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer((Player) sender);
 
             Actions actions = context.get(modifierAction);
@@ -86,17 +90,18 @@ public class ModifierCommand extends Command {
             }
         }, modifierAction, modifierArgument);
 
-        addSubcommand(new ListModifiers(modifierHandler, config));
-        addSubcommand(new ClearModifiers(modifierHandler, config));
-        addSubcommand(new LoadModifiers(modifierHandler, config));
+        addSubcommand(new ListModifiers(modifierHandlerLoader, config));
+        addSubcommand(new ClearModifiers(modifierHandlerLoader, config));
+        addSubcommand(new LoadModifiers(modifierHandlerLoader, config));
     }
 
     private static class ListModifiers extends Command {
 
-        private ListModifiers(ModifierHandler modifierHandler, ModifierCommandConfig config) {
+        private ListModifiers(Loader<ModifierHandler> modifierHandlerLoader, ModifierCommandConfig config) {
             super("list");
 
             addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+                ModifierHandler modifierHandler = modifierHandlerLoader.first();
                 PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer((Player) sender);
                 Set<Key> modifiers = modifierHandler.getModifiers(playerView);
                 Map<Key, ModifierComponent> map = modifierHandler.componentMap();
@@ -120,10 +125,11 @@ public class ModifierCommand extends Command {
     }
 
     private static class ClearModifiers extends Command {
-        private ClearModifiers(ModifierHandler modifierHandler, ModifierCommandConfig config) {
+        private ClearModifiers(Loader<ModifierHandler> modifierHandlerLoader, ModifierCommandConfig config) {
             super("clear");
 
             addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+                ModifierHandler modifierHandler = modifierHandlerLoader.first();
                 PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer((Player) sender);
 
                 Set<Key> modifiers;
@@ -141,11 +147,12 @@ public class ModifierCommand extends Command {
     }
 
     private static class LoadModifiers extends Command {
-        private LoadModifiers(ModifierHandler modifierHandler, ModifierCommandConfig config) {
+        private LoadModifiers(Loader<ModifierHandler> modifierHandlerLoader, ModifierCommandConfig config) {
             super("load");
 
             Argument<String> descriptorArgument = ArgumentType.Word("descriptor");
             addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+                ModifierHandler modifierHandler = modifierHandlerLoader.first();
                 PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer((Player) sender);
                 String descriptor = context.get(descriptorArgument);
                 if (descriptor.length() > 64) {

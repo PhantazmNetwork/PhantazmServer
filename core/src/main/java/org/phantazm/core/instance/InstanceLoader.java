@@ -23,4 +23,6 @@ public interface InstanceLoader {
 
     void preload(@UnmodifiableView @NotNull List<String> subPaths, @NotNull Point spawnPos, int chunkViewDistance);
 
+    void clearPreloadedInstances();
+
 }

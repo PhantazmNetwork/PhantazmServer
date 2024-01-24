@@ -19,14 +19,10 @@ val shade: Configuration by configurations.creating {
 dependencies {
     annotationProcessor(libs.velocity.api)
 
+    implementation(libs.commons)
     implementation(libs.velocity.api)
-    implementation(projects.phantazmCommons)
-    implementation(projects.phantazmMessaging)
-    implementation(projects.phantazmZombiesMapdata)
 
-    shade(projects.phantazmCommons)
-    shade(projects.phantazmMessaging)
-    shade(projects.phantazmZombiesMapdata)
+    shade(libs.commons)
 }
 
 tasks.shadowJar {

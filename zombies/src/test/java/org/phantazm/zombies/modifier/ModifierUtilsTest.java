@@ -5,7 +5,6 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.permission.Permission;
-import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.junit.jupiter.api.Test;
@@ -26,6 +25,11 @@ class ModifierUtilsTest {
             componentList.add(new ModifierComponent() {
                 @Override
                 public @NotNull Component displayName() {
+                    return Component.empty();
+                }
+
+                @Override
+                public @NotNull Component abbreviatedDisplayName() {
                     return Component.empty();
                 }
 
@@ -56,7 +60,7 @@ class ModifierUtilsTest {
 
                 @Override
                 public @NotNull Modifier apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesScene scene) {
-                    throw new NotImplementedException();
+                    throw new UnsupportedOperationException();
                 }
 
                 @Override

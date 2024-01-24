@@ -1,5 +1,8 @@
 package org.phantazm.mob2;
 
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import it.unimi.dsi.fastutil.floats.FloatConsumer;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Point;
@@ -13,6 +16,7 @@ import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.Namespaces;
 import org.phantazm.commons.ReferenceUtils;
 import org.phantazm.mob2.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
@@ -25,6 +29,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class Mob extends ProximaEntity {
+    public static Key NONE_MOB_KEY = Key.key(Namespaces.PHANTAZM, "none");
+
     private static final AtomicLong MOB_COUNTER = new AtomicLong();
     private static final String TEAM_PREFIX = "m-";
 
@@ -40,6 +46,9 @@ public class Mob extends ProximaEntity {
     private final CachedPacket cachedCreateTeamPacket;
     private final CachedPacket cachedUpdateTeamPacket;
     private final CachedPacket cachedRemoveTeamPacket;
+
+    private final Object healthWriteSync;
+    private volatile List<FloatConsumer> healthUpdateListeners;
 
     private Reference<Entity> lastHitEntity;
     private Reference<Player> lastInteractingPlayer;
@@ -71,14 +80,17 @@ public class Mob extends ProximaEntity {
         }
     }
 
-    protected Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
-        @NotNull MobData data, boolean register) {
+    protected Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @Nullable Pathfinding pathfinding,
+        @Nullable MobData data, boolean register) {
         super(entityType, uuid, pathfinding, false);
         this.allSkills = new ArrayList<>();
         this.tickableSkills = new ArrayList<>();
         this.useOnTick = new ArrayList<>();
         this.triggeredSkills = new EnumMap<>(Trigger.class);
-        this.data = Objects.requireNonNull(data);
+        this.data = data == null ? new MobData(NONE_MOB_KEY, entityType, ConfigNode.of(), false,
+            ConfigNode.of(), ConfigNode.of(), null, List.of(), List.of(), ConfigNode.of()) : data;
+
+        this.healthWriteSync = new Object();
 
         this.lastHitEntity = ReferenceUtils.nullReference();
         this.lastInteractingPlayer = ReferenceUtils.nullReference();
@@ -99,9 +111,33 @@ public class Mob extends ProximaEntity {
         if (register) super.register();
     }
 
-    public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
-        @NotNull MobData data) {
+    public Mob(@NotNull EntityType entityType, @NotNull UUID uuid, @Nullable Pathfinding pathfinding,
+        @Nullable MobData data) {
         this(entityType, uuid, pathfinding, data, true);
+    }
+
+    public Mob(@NotNull EntityType entityType, @NotNull UUID uuid) {
+        this(entityType, uuid, null, null);
+    }
+
+    public Mob(@NotNull EntityType entityType) {
+        this(entityType, UUID.randomUUID(), null, null);
+    }
+
+    public void addHealthListener(@NotNull FloatConsumer floatConsumer) {
+        Objects.requireNonNull(floatConsumer);
+        synchronized (healthWriteSync) {
+            List<FloatConsumer> healthUpdateListeners;
+            if (this.healthUpdateListeners == null) {
+                healthUpdateListeners = new ArrayList<>(1);
+            } else {
+                healthUpdateListeners = new ArrayList<>(this.healthUpdateListeners.size() + 1);
+                healthUpdateListeners.addAll(this.healthUpdateListeners);
+            }
+
+            healthUpdateListeners.add(floatConsumer);
+            this.healthUpdateListeners = List.copyOf(healthUpdateListeners);
+        }
     }
 
     /**
@@ -286,6 +322,25 @@ public class Mob extends ProximaEntity {
     }
 
     @Override
+    public void setHealth(float health) {
+        float oldHealth = getHealth();
+        super.setHealth(health);
+
+        if (oldHealth == health) {
+            return;
+        }
+
+        List<FloatConsumer> healthUpdateListeners = this.healthUpdateListeners;
+        if (healthUpdateListeners == null) {
+            return;
+        }
+
+        for (FloatConsumer consumer : healthUpdateListeners) {
+            consumer.accept(health);
+        }
+    }
+
+    @Override
     public void interact(@NotNull Player player, @NotNull Point position) {
         super.interact(player, position);
         if (lastInteractingPlayer.get() != player) {
@@ -429,11 +484,14 @@ public class Mob extends ProximaEntity {
     }
 
     public @NotNull Component name() {
-        MobMeta meta = data.meta();
-        if (meta != null) {
-            Component component = meta.customName();
-            if (component != null) {
-                return component;
+        MobData mobData = this.data;
+        if (mobData != null) {
+            MobMeta meta = mobData.meta();
+            if (meta != null) {
+                Component component = meta.customName();
+                if (component != null) {
+                    return component;
+                }
             }
         }
 

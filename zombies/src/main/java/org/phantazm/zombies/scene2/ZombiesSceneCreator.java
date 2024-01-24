@@ -22,6 +22,11 @@ import net.minestom.server.event.player.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.BelowNameTag;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.leaderboard.Leaderboard;
+import org.phantazm.core.leaderboard.ZombiesBestTimeLeaderboard;
+import org.phantazm.core.player.IdentitySource;
+import org.phantazm.core.role.RoleStore;
 import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.tick.BasicTickTaskScheduler;
 import org.phantazm.core.tick.TickTaskScheduler;
@@ -37,7 +42,7 @@ import org.phantazm.core.time.AnalogTickFormatter;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
-import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
@@ -48,6 +53,7 @@ import org.phantazm.zombies.map.objects.BasicMapObjectsSource;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.mob2.MobSpawnerSource;
+import org.phantazm.zombies.modifier.ModifierHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.sidebar.ElementSidebarUpdaterCreator;
@@ -68,25 +74,33 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
     private final EventNode<Event> rootNode;
     private final ContextManager contextManager;
     private final KeyParser keyParser;
-    private final ZombiesDatabase database;
+    private final ZombiesStatsDatabase database;
 
     private final MapObjects.Source mapObjectSource;
     private final ZombiesPlayer.Source zombiesPlayerSource;
     private final PowerupHandler.Source powerupHandlerSource;
+    private final ModifierHandler modifierHandler;
     private final ShopHandler.Source shopHandlerSource;
     private final WindowHandler.Source windowHandlerSource;
     private final DoorHandler.Source doorHandlerSource;
     private final CorpseCreator.Source corpseCreatorSource;
     private final Endless.Source endlessSource;
+    private final ZombiesLeaderboardContext leaderboardContext;
+    private final RoleStore roleStore;
+    private final IdentitySource identitySource;
+
     private final SongLoader songLoader;
 
     public ZombiesSceneCreator(int sceneCap,
-        @NotNull MapInfo mapInfo, @NotNull InstanceLoader instanceLoader, @NotNull KeyParser keyParser, @NotNull ContextManager contextManager, @NotNull SongLoader songLoader, @NotNull ZombiesDatabase database, @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
+        @NotNull MapInfo mapInfo, @NotNull InstanceLoader instanceLoader, @NotNull KeyParser keyParser,
+        @NotNull ContextManager contextManager, @NotNull SongLoader songLoader, @NotNull ZombiesStatsDatabase database,
+        @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSpaceFunction,
         @NotNull EventNode<Event> rootNode, @NotNull MobSpawnerSource mobSpawnerSource,
         @NotNull ClientBlockHandlerSource clientBlockHandlerSource,
-        @NotNull PowerupHandler.Source powerupHandlerSource,
+        @NotNull PowerupHandler.Source powerupHandlerSource, @NotNull ModifierHandler modifierHandler,
         @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource,
-        @NotNull Endless.Source endlessSource) {
+        @NotNull Endless.Source endlessSource, @NotNull ZombiesLeaderboardContext leaderboardContext, @NotNull RoleStore roleStore,
+        @NotNull IdentitySource identitySource) {
         this.sceneCap = sceneCap;
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction);
         this.mapInfo = Objects.requireNonNull(mapInfo);
@@ -102,6 +116,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
             clientBlockHandlerSource, keyParser);
         this.zombiesPlayerSource = Objects.requireNonNull(zombiesPlayerSource);
         this.powerupHandlerSource = Objects.requireNonNull(powerupHandlerSource);
+        this.modifierHandler = Objects.requireNonNull(modifierHandler);
         this.shopHandlerSource = new BasicShopHandlerSource();
         this.windowHandlerSource =
             new BasicWindowHandlerSource(settingsInfo.windowRepairRadius(), settingsInfo.windowRepairTicks(),
@@ -112,7 +127,14 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
 
         this.corpseCreatorSource = Objects.requireNonNull(corpseCreatorSource);
         this.endlessSource = Objects.requireNonNull(endlessSource);
+        this.leaderboardContext = Objects.requireNonNull(leaderboardContext);
+        this.roleStore = Objects.requireNonNull(roleStore);
+        this.identitySource = Objects.requireNonNull(identitySource);
         this.songLoader = Objects.requireNonNull(songLoader);
+    }
+
+    public @NotNull MapInfo mapInfo() {
+        return mapInfo;
     }
 
     @Override
@@ -165,9 +187,18 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         SidebarModule sidebarModule =
             new SidebarModule(zombiesPlayers, zombiesPlayers.values(), roundHandler, ticksSinceStart,
                 settings.maxPlayers());
+
+        InjectionStore store = InjectionStore.of(ZombiesBestTimeLeaderboard.ARGS_KEY,
+            new ZombiesBestTimeLeaderboard.Args(VecUtils.toPoint(mapInfo.settings().origin()).add(0.5, 0, 0.5),
+                leaderboardContext.executor(), leaderboardContext.database(), roleStore,
+                modifierHandler::descriptor, identitySource));
+
+        Leaderboard bestTimeLeaderboard = leaderboardContext.bestTimeLeaderboard().apply(store);
+
         StageTransition stageTransition =
             createStageTransition(instance, mapObjects.module().random(), zombiesPlayers.values(), spawnPos,
-                roundHandler, ticksSinceStart, sidebarModule, shopHandler, sceneWrapper.unmodifiableView());
+                roundHandler, ticksSinceStart, sidebarModule, shopHandler, sceneWrapper.unmodifiableView(),
+                bestTimeLeaderboard);
         stageTransition.start();
 
         EventNode<Event> childNode =
@@ -180,7 +211,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         BelowNameTag belowNameTag = new BelowNameTag(UUID.randomUUID().toString(), settings.healthDisplay());
         Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator = playerView -> {
             return zombiesPlayerSource.createPlayer(sceneWrapper.get(), zombiesPlayers, settings,
-                mapInfo.playerCoins(), mapInfo.leaderboard(), instance, playerView,
+                mapInfo.playerCoins(), instance, playerView,
                 mapObjects.module().modifierSource(), new BasicFlaggable(), childNode,
                 mapObjects.module().random(), mapObjects, mapObjects.mobSpawner(), corpseCreator,
                 belowNameTag);
@@ -319,7 +350,8 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
     private @NotNull StageTransition createStageTransition(@NotNull Instance instance, @NotNull Random random,
         @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers, @NotNull Pos spawnPos,
         @NotNull RoundHandler roundHandler, @NotNull Wrapper<Long> ticksSinceStart,
-        @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler, @NotNull Supplier<ZombiesScene> sceneSupplier) {
+        @NotNull SidebarModule sidebarModule, @NotNull ShopHandler shopHandler, @NotNull Supplier<ZombiesScene> sceneSupplier,
+        @NotNull Leaderboard bestTimeLeaderboard) {
         MapSettingsInfo settings = mapInfo.settings();
 
         Stage idle = new IdleStage(instance, settings, zombiesPlayers,
@@ -329,7 +361,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
 
         Stage countdown = new CountdownStage(instance, zombiesPlayers, settings, random, settings.countdownTicks(),
             countdownAlertTicks, new PrecisionSecondTickFormatter(new PrecisionSecondTickFormatter.Data(0)),
-            newSidebarUpdaterCreator(sidebarModule, ElementPath.of("countdown")));
+            newSidebarUpdaterCreator(sidebarModule, ElementPath.of("countdown")), bestTimeLeaderboard);
 
         Stage inGame =
             new InGameStage(zombiesPlayers, spawnPos, roundHandler, ticksSinceStart, settings.defaultEquipment(),
@@ -341,7 +373,8 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
             Wrapper.of(settings.endTicks()), ticksSinceStart,
             (player, hasWon) -> {
                 return newSidebarUpdaterCreator(sidebarModule, ElementPath.of(hasWon ? "win" : "lose")).apply(player);
-            }, roundHandler, database, sceneSupplier);
+            }, roundHandler, leaderboardContext.database(), sceneSupplier);
+
         return new StageTransition(idle, countdown, inGame, end);
     }
 

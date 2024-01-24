@@ -7,15 +7,11 @@ if (localSettings.exists()) {
 }
 
 includeBuild("./minestom")
+includeBuild("./commons")
+
 pluginManagement {
     repositories {
-        //necessary for phantazm-zombies-mapeditor module which contains a Fabric mod
-        maven("https://maven.fabricmc.net/") {
-            name = "Fabric"
-        }
-
         maven("https://dl.cloudsmith.io/public/steanky/element/maven/")
-        mavenCentral()
         gradlePluginPortal()
     }
 }
@@ -26,23 +22,20 @@ val toSkip = gradle.startParameter.projectProperties.getOrDefault("skipBuild", "
 
 sequenceOf(
         "core",
-        "commons",
-        "messaging",
         "mob",
         "proxima-minestom",
         "server",
         "stats",
-        "zombies-timer",
         "velocity",
         "zombies",
-        "zombies-mapdata",
-        "zombies-mapeditor",
-        "snbt-builder"
+        "snbt-builder",
+        "dev-launcher"
 ).forEach {
     if (!toSkip.contains(it)) {
         include(":phantazm-$it")
         project(":phantazm-$it").projectDir = file(it)
+        println("Building module $it")
     } else {
-        println("Skipping project module $it")
+        println("Ignoring module $it")
     }
 }

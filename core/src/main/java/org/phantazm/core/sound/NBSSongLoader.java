@@ -3,7 +3,6 @@ package org.phantazm.core.sound;
 import com.github.steanky.element.core.key.Constants;
 import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
-import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -89,7 +88,7 @@ public class NBSSongLoader implements SongLoader {
         if (length < 0) {
             throw new IOException("Invalid string length prefix");
         } else if (length == 0) {
-            return StringUtils.EMPTY;
+            return "";
         }
 
         return StandardCharsets.UTF_8.decode(ByteBuffer.wrap(readExact(stream, length))).toString();
@@ -137,11 +136,7 @@ public class NBSSongLoader implements SongLoader {
     @Override
     public void load() {
         Map<Key, List<SongPlayer.Note>> map = new HashMap<>();
-        try {
-            FileUtils.createDirectories(rootPath);
-        } catch (IOException e) {
-            LOGGER.warn("Error creating song directory");
-        }
+        FileUtils.ensureDirectories(rootPath);
 
         try (Stream<Path> pathStream = Files.list(rootPath)) {
             pathStream.forEach(path -> {

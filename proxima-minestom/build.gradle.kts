@@ -3,6 +3,11 @@ plugins {
 }
 
 dependencies {
-    api(libs.proxima.core)
-    api(projects.phantazmCore)
+    implementation(projects.phantazmCore)
+
+    implementation(libs.commons)
+    implementation(libs.element.core)
+    implementation(libs.ethylene.core)
+    implementation(libs.ethylene.mapper)
+    implementation(libs.proxima.core)
 }

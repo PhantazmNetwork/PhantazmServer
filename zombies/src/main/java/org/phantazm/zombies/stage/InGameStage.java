@@ -128,8 +128,6 @@ public class InGameStage implements Stage {
             for (Key group : equipmentGroups) {
                 equipmentHandler.refreshGroup(group);
             }
-
-            zombiesPlayer.module().getLeaderboard().endIfActive();
         }
 
         shopHandler.initialize();

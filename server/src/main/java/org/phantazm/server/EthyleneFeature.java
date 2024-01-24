@@ -1,6 +1,9 @@
 package org.phantazm.server;
 
 import com.github.steanky.element.core.key.KeyParser;
+import com.github.steanky.ethylene.codec.toml.TomlCodec;
+import com.github.steanky.ethylene.codec.yaml.YamlCodec;
+import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
@@ -8,12 +11,8 @@ import com.github.steanky.ethylene.mapper.signature.ScalarSignature;
 import com.github.steanky.ethylene.mapper.signature.Signature;
 import com.github.steanky.ethylene.mapper.signature.SignatureParameter;
 import com.github.steanky.ethylene.mapper.type.Token;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.Object2FloatMap;
-import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.objects.*;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
@@ -31,6 +30,11 @@ import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.phantazm.commons.Signatures;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.snakeyaml.engine.v2.api.Dump;
+import org.snakeyaml.engine.v2.api.DumpSettings;
+import org.snakeyaml.engine.v2.api.Load;
+import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.common.FlowStyle;
 
 import java.io.StringReader;
 import java.nio.file.Path;
@@ -44,9 +48,14 @@ public final class EthyleneFeature {
 
     private static MappingProcessorSource mappingProcessorSource;
     private static KeyParser keyParser;
+    private static ConfigCodec yamlCodec;
+    private static ConfigCodec tomlCodec;
 
     static void initialize(@NotNull KeyParser keyParser) {
         EthyleneFeature.keyParser = Objects.requireNonNull(keyParser);
+        yamlCodec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
+            () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
+        tomlCodec = new TomlCodec();
 
         mappingProcessorSource = Signatures.core(MappingProcessorSource.builder()).withCustomSignature(basicItemStack())
             .withCustomSignature(pos()).withScalarSignature(key())
@@ -56,9 +65,14 @@ public final class EthyleneFeature {
             .withScalarSignature(entityType()).withScalarSignature(material())
             .withScalarSignature(potionEffect())
             .withScalarSignature(path())
+            .withTypeImplementation(Int2ObjectLinkedOpenHashMap.class, Int2ObjectSortedMap.class)
+            .withTypeImplementation(IntArrayList.class, IntList.class)
             .withTypeImplementation(Object2IntOpenHashMap.class, Object2IntMap.class)
             .withTypeImplementation(Object2FloatOpenHashMap.class, Object2FloatMap.class)
             .withTypeImplementation(IntOpenHashSet.class, IntSet.class)
+            .withTypeImplementation(ObjectLinkedOpenHashSet.class, ObjectSortedSet.class)
+            .withTypeImplementation(Int2IntOpenHashMap.class, Int2IntMap.class)
+            .withTypeImplementation(Int2ObjectOpenHashMap.class, Int2ObjectMap.class)
             .withStandardSignatures()
             .withStandardTypeImplementations().ignoringLengths().build();
 
@@ -79,8 +93,8 @@ public final class EthyleneFeature {
                     if (meta != null) {
                         try {
                             builder.meta((NBTCompound) new SNBTParser(new StringReader(meta)).parse());
-                        } catch (NBTException exception) {
-                            LOGGER.warn("NBTException when deserializing to ItemStack", exception);
+                        } catch (NBTException e) {
+                            throw new RuntimeException(e);
                         }
                     }
 
@@ -145,8 +159,7 @@ public final class EthyleneFeature {
                 return ItemStack.fromItemNBT(
                     (NBTCompound) new SNBTParser(new StringReader(element.asString())).parse());
             } catch (NBTException e) {
-                LOGGER.warn("Error deserializing SNBT", e);
-                return ItemStack.AIR;
+                throw new RuntimeException(e);
             }
         }, itemStack -> itemStack == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(itemStack.toItemNBT().toSNBT()));
     }
@@ -173,7 +186,15 @@ public final class EthyleneFeature {
         }, block -> block == null ? ConfigPrimitive.NULL : ConfigPrimitive.of(block.name()));
     }
 
-    public static @NotNull MappingProcessorSource getMappingProcessorSource() {
+    public static @NotNull MappingProcessorSource mappingProcessorSource() {
         return FeatureUtils.check(mappingProcessorSource);
+    }
+
+    public static @NotNull ConfigCodec yamlCodec() {
+        return FeatureUtils.check(yamlCodec);
+    }
+
+    public static @NotNull ConfigCodec tomlCodec() {
+        return FeatureUtils.check(tomlCodec);
     }
 }

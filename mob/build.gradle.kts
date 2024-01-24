@@ -3,7 +3,14 @@ plugins {
 }
 
 dependencies {
-    api(projects.phantazmProximaMinestom)
-    api(projects.phantazmCore)
-    api(projects.phantazmCommons)
+    implementation(projects.phantazmCore)
+    implementation(projects.phantazmProximaMinestom)
+
+    implementation(libs.adventure.text.minimessage)
+    implementation(libs.commons)
+    implementation(libs.element.core)
+    implementation(libs.ethylene.core)
+    implementation(libs.ethylene.mapper)
+    implementation(libs.proxima.core)
+    implementation(libs.toolkit.collection)
 }

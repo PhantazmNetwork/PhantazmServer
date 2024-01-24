@@ -11,6 +11,7 @@ import com.github.steanky.ethylene.core.bridge.Configuration;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
+import com.github.steanky.ethylene.mapper.type.Token;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -18,6 +19,8 @@ import org.phantazm.commons.FileUtils;
 import org.phantazm.core.ElementUtils;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.EquipmentCreator;
+import org.phantazm.server.context.DataLoadingContext;
+import org.phantazm.server.context.EthyleneContext;
 import org.phantazm.zombies.equipment.EquipmentData;
 import org.phantazm.zombies.equipment.EquipmentTypes;
 import org.phantazm.zombies.equipment.gun.Gun;
@@ -56,9 +59,14 @@ final class EquipmentFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull KeyParser keyParser, @NotNull ContextManager contextManager,
-        @NotNull ConfigCodec codec, @NotNull ConfigProcessor<EquipmentData> gunDataProcessor) {
-        EquipmentFeature.keyParser = Objects.requireNonNull(keyParser);
+    static void initialize(@NotNull EthyleneContext ethyleneContext,
+        @NotNull DataLoadingContext dataLoadingContext) {
+        EquipmentFeature.keyParser = ethyleneContext.keyParser();
+        ConfigCodec codec = ethyleneContext.yamlCodec();
+
+        ConfigProcessor<EquipmentData> gunDataProcessor = ethyleneContext.mappingProcessorSource()
+            .processorFor(Token.ofClass(EquipmentData.class));
+        ContextManager contextManager = dataLoadingContext.contextManager();
 
         String ending;
         if (codec.getPreferredExtensions().isEmpty()) {
@@ -71,13 +79,7 @@ final class EquipmentFeature {
 
         Path guns = EQUIPMENT_PATH.resolve("guns");
         Path perks = EQUIPMENT_PATH.resolve("perks");
-        try {
-            FileUtils.createDirectories(guns);
-            FileUtils.createDirectories(perks);
-        } catch (IOException e) {
-            LOGGER.warn("Failed to create a necessary equipment directory.", e);
-            return;
-        }
+        FileUtils.ensureDirectories(guns, perks);
 
         List<Path> equipmentDirectories = List.of(guns, perks);
         Map<Key, Pair<EquipmentData, List<ElementContext>>> equipmentLevelMap = new HashMap<>();

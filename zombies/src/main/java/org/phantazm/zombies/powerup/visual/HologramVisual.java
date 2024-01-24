@@ -81,7 +81,7 @@ public class HologramVisual implements PowerupVisualComponent {
                 if (elapsed > data.timeUntilBlink && !data.blinkFrames.isEmpty()) {
                     Frame currentFrame = data.blinkFrames.get(0);
                     hologram.clear();
-                    hologram.addAll(currentFrame.components());
+                    hologram.addAllComponents(currentFrame.components());
 
                     this.blinking = true;
                     this.currentFrame = currentFrame;
@@ -100,7 +100,7 @@ public class HologramVisual implements PowerupVisualComponent {
                 this.frameTicks = 0;
 
                 hologram.clear();
-                hologram.addAll(currentFrame.components());
+                hologram.addAllComponents(currentFrame.components());
             }
         }
 
@@ -111,8 +111,8 @@ public class HologramVisual implements PowerupVisualComponent {
                 hologram.clear();
             }
 
-            this.hologram = new InstanceHologram(new Vec(x, y + data.heightOffset, z), 0, Hologram.Alignment.CENTERED);
-            this.hologram.addAll(data.lines);
+            this.hologram = new InstanceHologram(new Vec(x, y + data.heightOffset, z), Hologram.Alignment.CENTERED);
+            this.hologram.addAllComponents(data.lines);
             this.hologram.setInstance(instance);
             this.startTicks = 0;
         }

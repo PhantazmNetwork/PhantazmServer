@@ -13,7 +13,7 @@ import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.validator.Validator;
 import org.phantazm.mob2.validator.ValidatorComponent;
-import org.phantazm.zombies.mob2.Keys;
+import org.phantazm.zombies.mob2.InjectionKeys;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -33,7 +33,7 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
 
     @Override
     public @NotNull Validator apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, injectionStore.get(Keys.SCENE));
+        return new Internal(data, injectionStore.get(InjectionKeys.SCENE));
     }
 
     @DataObject

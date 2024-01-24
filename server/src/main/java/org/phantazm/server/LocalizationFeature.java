@@ -27,10 +27,9 @@ public final class LocalizationFeature {
     static void initialize() {
         TranslationRegistry registry = TranslationRegistry.create(TRANSLATION_REGISTRY_KEY);
         registry.defaultLocale(Locale.US);
+        FileUtils.ensureDirectories(LANG_FOLDER);
 
         try {
-            FileUtils.createDirectories(LANG_FOLDER);
-
             int count = 0;
             try (DirectoryStream<Path> files = Files.newDirectoryStream(LANG_FOLDER, "*.lang")) {
                 for (Path path : files) {

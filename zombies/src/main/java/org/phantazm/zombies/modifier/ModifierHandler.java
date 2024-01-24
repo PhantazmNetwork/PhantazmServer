@@ -11,7 +11,7 @@ import net.minestom.server.tag.Tag;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.TagUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -38,44 +38,17 @@ public final class ModifierHandler {
     private static final ModifierResult INVALID = new ModifierResult(ModifierStatus.INVALID_MODIFIER, null);
     private static final ModifierResult NO_PERMISSIONS = new ModifierResult(ModifierStatus.NO_PERMISSIONS, null);
 
-    private static final Tag<List<String>> MODIFIERS_TAG = Tag.String("zombies_modifiers").list();
+    private static final Tag<List<String>> MODIFIERS_TAG = Tag.String(TagUtils.uniqueTagName()).list();
 
     private final Map<Key, ModifierComponent> components;
     private final Int2ObjectMap<ModifierComponent> ordinalMap;
-    private final InjectionStore injectionStore;
 
-    public static class Global {
-        private static ModifierHandler instance;
-        private static final Object GLOBAL_INITIALIZATION_LOCK = new Object();
-
-        public static void init(@NotNull Map<Key, ModifierComponent> components, @NotNull InjectionStore injectionStore) {
-            synchronized (GLOBAL_INITIALIZATION_LOCK) {
-                if (instance != null) {
-                    throw new IllegalStateException("The ModifierHandler has already been initialized");
-                }
-
-                instance = new ModifierHandler(components, injectionStore);
-            }
-        }
-
-        public static @NotNull ModifierHandler instance() {
-            ModifierHandler instance = Global.instance;
-            if (instance == null) {
-                throw new IllegalStateException("The ModifierHandler has not yet been initialized");
-            }
-
-            return instance;
-        }
-    }
-
-    private ModifierHandler(@NotNull Map<Key, ModifierComponent> components, @NotNull InjectionStore injectionStore) {
+    public ModifierHandler(@NotNull Map<Key, ? extends ModifierComponent> components) {
         this.components = Map.copyOf(components);
         this.ordinalMap = new Int2ObjectOpenHashMap<>(components.size());
         for (ModifierComponent component : components.values()) {
             ordinalMap.put(component.ordinal(), component);
         }
-
-        this.injectionStore = Objects.requireNonNull(injectionStore);
     }
 
     private boolean noPermissions(PlayerView playerView, ModifierComponent modifierComponent) {
@@ -109,7 +82,7 @@ public final class ModifierHandler {
                 continue;
             }
 
-            scene.addModifier(component, injectionStore);
+            scene.addModifier(component);
         }
     }
 
@@ -175,6 +148,20 @@ public final class ModifierHandler {
         });
 
         return result.get();
+    }
+
+    public @NotNull String descriptor(@NotNull Set<Key> names) {
+        List<ModifierComponent> componentList = new ArrayList<>(names.size());
+        for (Key name : names) {
+            ModifierComponent component = components.get(name);
+            if (component == null) {
+                throw new IllegalArgumentException("Unknown modifier name " + name);
+            }
+
+            componentList.add(component);
+        }
+
+        return ModifierUtils.modifierDescriptor(componentList);
     }
 
     public ModifierHandler.@NotNull ModifierResult setFromDescriptor(@NotNull PlayerView playerView,

@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ForkJoinPool;
 
 /**
  * A class that resolves names and UUIDs. May need to perform costly I/O operations, so it is encouraged to cache the
@@ -17,7 +16,7 @@ public interface IdentitySource {
     /**
      * A standard IdentitySource implementation that uses Mojang's API servers to resolve names and UUIDs.
      */
-    IdentitySource MOJANG = new MojangIdentitySource(ForkJoinPool.commonPool());
+    IdentitySource MOJANG = MojangIdentitySource.INSTANCE;
 
     /**
      * Optionally resolves the given UUID to a username, typically asynchronously. If the UUID is invalid or does not

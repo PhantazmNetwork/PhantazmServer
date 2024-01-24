@@ -10,8 +10,12 @@ import java.util.List;
 
 // TODO: Reflect 1.20 changes
 public class SkullHandler implements BlockHandler {
-
+    public static final SkullHandler INSTANCE = new SkullHandler();
     public static final NamespaceID NAMESPACE_ID = NamespaceID.from("minecraft:skull");
+    private static final Collection<Tag<?>> TAGS = List.of(Tag.String("ExtraType"), Tag.NBT("SkullOwner"));
+
+    private SkullHandler() {
+    }
 
     @Override
     public @NotNull NamespaceID getNamespaceId() {
@@ -20,6 +24,6 @@ public class SkullHandler implements BlockHandler {
 
     @Override
     public @NotNull Collection<Tag<?>> getBlockEntityTags() {
-        return List.of(Tag.String("ExtraType"), Tag.NBT("SkullOwner"));
+        return TAGS;
     }
 }

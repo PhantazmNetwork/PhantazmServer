@@ -47,7 +47,7 @@ public class ShootProjectileSkill implements SkillComponent {
     @Override
     public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
         return new Internal(data, mob, targetSelector.apply(mob, injectionStore), hitValidator.apply(mob,
-            injectionStore), callback.apply(mob, injectionStore), injectionStore.get(Keys.MOB_SPAWNER));
+            injectionStore), callback.apply(mob, injectionStore), injectionStore.get(InjectionKeys.MOB_SPAWNER));
     }
 
     @DataObject

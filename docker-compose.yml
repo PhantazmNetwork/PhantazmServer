@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  server: &server
+    build:
+      context: '.'
+      target: 'server_base'
+      args: &build_args
+        uid: '${PHANTAZM_UID}'
+        gid: '${PHANTAZM_GID}'
+    networks:
+      - 'standard'
+    env_file:
+      - '.override.env'
+    environment: &shared_environment
+      # Pass in many of our environment variables
+      PHANTAZM_AUTO_DL_WORLDS: '${PHANTAZM_AUTO_DL_WORLDS}'
+      PHANTAZM_IS_DOCKER_CONTAINER: '${PHANTAZM_IS_DOCKER_CONTAINER}'
+      PHANTAZM_GRADLE_ARGS: '${PHANTAZM_GRADLE_ARGS}'
+      PHANTAZM_SERVER_JVM_ARGS: '${PHANTAZM_SERVER_JVM_ARGS}'
+      PHANTAZM_SERVER_ARGS: '${PHANTAZM_SERVER_ARGS}'
+      PHANTAZM_SERVER_FILE: '${PHANTAZM_SERVER_FILE}'
+    profiles:
+      - 'nodebug'
+    hostname: 'server'
+    user: '${PHANTAZM_UID}:${PHANTAZM_GID}'
+    depends_on:
+      - 'db'
+      - 'proxy'
+    working_dir: '/server'
+    volumes:
+      - './:/server'
+    command: './setup.sh'
+    stdin_open: true
+  server_debug:
+    <<: *server
+    environment:
+      <<: *shared_environment
+      PHANTAZM_SERVER_JVM_ARGS: '-Dfile.encoding=UTF-8 -Dminestom.packet-queue-size=-1 -Dminestom.keep-alive-kick=-1 -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:${PHANTAZM_DEBUG_PORT_CONTAINER} -jar'
+    profiles:
+      - 'debug'
+    ports:
+      - '${PHANTAZM_DEBUG_PORT_HOST}:${PHANTAZM_DEBUG_PORT_CONTAINER}'
+  proxy:
+    build:
+      context: '.'
+      target: 'java_base'
+      args: *build_args
+    networks:
+      - 'standard'
+    env_file:
+      - '.override.env'
+    environment: *shared_environment
+    hostname: 'proxy'
+    user: '${PHANTAZM_UID}:${PHANTAZM_GID}'
+    command: 'sh -c "java \
+    -Xms512M \
+    -Xmx512M \
+    -XX:+UseG1GC \
+    -XX:G1HeapRegionSize=4M \
+    -XX:+UnlockExperimentalVMOptions \
+    -XX:+ParallelRefProcEnabled \
+    -XX:+AlwaysPreTouch \
+    -Dfile.encoding=UTF-8 \
+    -jar \
+    velocity.jar"'
+    working_dir: '/velocity'
+    ports:
+      - '${PHANTAZM_PROXY_PORT_HOST}:${PHANTAZM_PROXY_PORT_CONTAINER}'
+    volumes:
+      - './defaultRunData/velocity:/velocity'
+  db:
+    build:
+      context: '.'
+      target: 'mariadb'
+    restart: 'always'
+    networks:
+      - 'standard'
+    env_file:
+      - '.override.env'
+    hostname: 'db'
+    ports:
+      - '${PHANTAZM_DB_PORT_HOST}:${PHANTAZM_DB_PORT_CONTAINER}'
+    environment:
+      # Include full credentials, this build should only ever be used for local development and debugging!
+      MARIADB_USER: phantazm
+      MARIADB_PASSWORD: secret
+      MARIADB_ROOT_PASSWORD: secret
+      MARIADB_DATABASE: phantazm_db
+    volumes:
+      - 'db:/var/lib/mysql'
+networks:
+  standard:
+    name: phantazm-standard
+    external: false
+volumes:
+  db:

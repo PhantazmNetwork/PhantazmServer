@@ -34,6 +34,8 @@ public class Party extends Guild<PartyMember> implements Tickable {
 
     private final SingleMemberPermission<PartyMember> joinPermission;
 
+    private final SingleMemberPermission<PartyMember> warpPermission;
+
     private final Wrapper<PartyMember> owner;
 
     private final Flaggable flaggable;
@@ -45,7 +47,9 @@ public class Party extends Guild<PartyMember> implements Tickable {
         @NotNull MultipleMemberPermission<PartyMember> kickPermission,
         @NotNull SingleMemberPermission<PartyMember> invitePermission,
         @NotNull SingleMemberPermission<PartyMember> allInvitePermission,
-        @NotNull SingleMemberPermission<PartyMember> joinPermission, @NotNull Wrapper<PartyMember> owner, @NotNull Flaggable flaggable) {
+        @NotNull SingleMemberPermission<PartyMember> joinPermission,
+        @NotNull SingleMemberPermission<PartyMember> warpPermission,
+        @NotNull Wrapper<PartyMember> owner, @NotNull Flaggable flaggable) {
         super(memberManager, memberCreator);
         this.audience = Objects.requireNonNull(audience);
         this.spyAudience = Objects.requireNonNull(spyAudience);
@@ -55,6 +59,7 @@ public class Party extends Guild<PartyMember> implements Tickable {
         this.invitePermission = Objects.requireNonNull(invitePermission);
         this.allInvitePermission = Objects.requireNonNull(allInvitePermission);
         this.joinPermission = Objects.requireNonNull(joinPermission);
+        this.warpPermission = Objects.requireNonNull(warpPermission);
         this.owner = Objects.requireNonNull(owner);
         this.flaggable = Objects.requireNonNull(flaggable);
     }
@@ -89,6 +94,10 @@ public class Party extends Guild<PartyMember> implements Tickable {
 
     public @NotNull SingleMemberPermission<PartyMember> getJoinPermission() {
         return joinPermission;
+    }
+
+    public @NotNull SingleMemberPermission<PartyMember> getWarpPermission() {
+        return warpPermission;
     }
 
     public @NotNull Wrapper<PartyMember> getOwner() {

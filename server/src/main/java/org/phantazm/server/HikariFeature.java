@@ -5,7 +5,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.jetbrains.annotations.NotNull;
 
 public class HikariFeature {
-
     private static HikariDataSource dataSource;
 
     static void initialize() {

@@ -205,9 +205,17 @@ public class Pathfinding {
     }
 
     protected @NotNull Heuristic heuristic() {
-        return (fromX, fromY, fromZ, toX, toY, toZ) -> {
-            float h = Heuristic.DISTANCE_SQUARED.heuristic(fromX, fromY, fromZ, toX, toY, toZ);
-            return penalty.calculate(fromX, fromY, fromZ, h);
+        return new Heuristic() {
+            @Override
+            public float heuristic(int fromX, int fromY, int fromZ, int toX, int toY, int toZ) {
+                float h = Heuristic.OCTILE.heuristic(fromX, fromY, fromZ, toX, toY, toZ);
+                return penalty.calculate(fromX, fromY, fromZ, h);
+            }
+
+            @Override
+            public double scale() {
+                return Heuristic.OCTILE.scale();
+            }
         };
     }
 

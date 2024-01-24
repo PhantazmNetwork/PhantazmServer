@@ -8,8 +8,8 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.proxima.bindings.minestom.InstanceSettingsFunction;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
-import org.phantazm.proxima.bindings.minestom.Spawner;
 import org.phantazm.server.config.server.PathfinderConfig;
+import org.phantazm.server.context.ConfigContext;
 
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
@@ -18,13 +18,14 @@ import java.util.function.Function;
 public final class ProximaFeature {
     private static Pathfinder pathfinder;
     private static Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction;
-    private static Spawner spawner;
 
     private ProximaFeature() {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull PathfinderConfig pathfinderConfig) {
+    static void initialize(@NotNull ConfigContext configContext) {
+        PathfinderConfig pathfinderConfig = configContext.pathfinderConfig();
+
         int threads = pathfinderConfig.threads();
         boolean asyncMode = pathfinderConfig.asyncMode();
         int corePoolSize = pathfinderConfig.corePoolSize();
@@ -38,7 +39,6 @@ public final class ProximaFeature {
 
         pathfinder = new BasicAsyncPathfinder(fjp, BasicPathOperation::new, 1000000);
         settingsFunction = new InstanceSettingsFunction(MinecraftServer.getGlobalEventHandler());
-        spawner = new InstanceSpawner(pathfinder, settingsFunction);
     }
 
     public static @NotNull Pathfinder getPathfinder() {
@@ -47,9 +47,5 @@ public final class ProximaFeature {
 
     public static @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> instanceSettingsFunction() {
         return FeatureUtils.check(settingsFunction);
-    }
-
-    public static @NotNull Spawner getSpawner() {
-        return FeatureUtils.check(spawner);
     }
 }

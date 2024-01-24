@@ -14,9 +14,8 @@ import java.util.function.IntFunction;
  * {@link Player} instance associated with said UUID.
  * <p>
  * This interface extends {@link Taggable}, through which arbitrary data may be associated with this PlayerView. Note
- * that this data is <i>persistent</i> so long as the player is online, or a reference to this PlayerView is maintained.
- * As a matter of convention, the tags should be persistent and not cleared even when the player transfers between
- * scenes or disconnects.
+ * that this data is <i>persistent</i> so long as the player is online. The data will be kept even as the player
+ * transitions between scenes. If the player disconnects, the tags will be cleared.
  *
  * @implSpec Implementations should anticipate many calls to {@code getPlayer}, and are encouraged to perform caching if
  * necessary to improve performance. However, since PlayerView instances are intended for long-term storage in fields

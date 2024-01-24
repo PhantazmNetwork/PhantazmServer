@@ -11,11 +11,11 @@ public final class BlockHandlerFeature {
 
     static void initialize() {
         BlockManager blockManager = MinecraftServer.getBlockManager();
-        blockManager.registerHandler(SignHandler.NAMESPACE_ID, SignHandler::new);
-        blockManager.registerHandler(SkullHandler.NAMESPACE_ID, SkullHandler::new);
-        blockManager.registerHandler(BannerHandler.NAMESPACE_ID, BannerHandler::new);
-        blockManager.registerHandler(EndGatewayHandler.NAMESPACE_ID, EndGatewayHandler::new);
-        blockManager.registerHandler(CampfireHandler.NAMESPACE_ID, CampfireHandler::new);
+        blockManager.registerHandler(SignHandler.NAMESPACE_ID, () -> SignHandler.INSTANCE);
+        blockManager.registerHandler(SkullHandler.NAMESPACE_ID, () -> SkullHandler.INSTANCE);
+        blockManager.registerHandler(BannerHandler.NAMESPACE_ID, () -> BannerHandler.INSTANCE);
+        blockManager.registerHandler(EndGatewayHandler.NAMESPACE_ID, () -> EndGatewayHandler.INSTANCE);
+        blockManager.registerHandler(CampfireHandler.NAMESPACE_ID, () -> CampfireHandler.INSTANCE);
     }
 
 }

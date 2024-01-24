@@ -8,6 +8,7 @@ import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.AgeableMobMeta;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.entity.metadata.animal.tameable.WolfMeta;
+import net.minestom.server.entity.metadata.item.ItemEntityMeta;
 import net.minestom.server.entity.metadata.monster.zombie.ZombieMeta;
 import net.minestom.server.entity.metadata.other.SlimeMeta;
 import net.minestom.server.instance.Instance;
@@ -97,7 +98,7 @@ public class MobCreatorBase implements MobCreator {
             }
         }
 
-        mob.setHealth(mob.getAttributeValue(Attribute.MAX_HEALTH));
+        mob.heal();
     }
 
     protected void setMeta(@NotNull Mob mob) {
@@ -127,6 +128,11 @@ public class MobCreatorBase implements MobCreator {
 
         if (meta instanceof SlimeMeta slimeMeta) {
             slimeMeta.setSize(dataMeta.size());
+        }
+
+        ItemStack itemStack = dataMeta.itemStack();
+        if (itemStack != null && meta instanceof ItemEntityMeta itemMeta) {
+            itemMeta.setItem(itemStack);
         }
     }
 

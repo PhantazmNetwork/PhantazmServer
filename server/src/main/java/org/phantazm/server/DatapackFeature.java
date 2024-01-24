@@ -26,11 +26,7 @@ public class DatapackFeature {
     }
 
     static void initialize() {
-        try {
-            FileUtils.createDirectories(DATAPACK_PATH);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        FileUtils.ensureDirectories(DATAPACK_PATH);
 
         BiomeManager biomeManager = MinecraftServer.getBiomeManager();
         DatapackLoader loader = new DatapackLoader();

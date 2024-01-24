@@ -22,6 +22,8 @@ public interface PermissionHandler {
         applyPermissions(player);
     }
 
+    @NotNull CompletableFuture<Void> initTables();
+
     void applyPermissions(@NotNull Player target);
 
     void reload();

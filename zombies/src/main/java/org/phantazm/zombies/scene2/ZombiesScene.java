@@ -12,6 +12,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.thread.Acquirable;
+import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -22,7 +23,7 @@ import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.tick.TickTaskScheduler;
-import org.phantazm.stats.zombies.ZombiesDatabase;
+import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.ZombiesMap;
@@ -50,9 +51,10 @@ public class ZombiesScene extends InstanceScene implements EventScene {
     private final MapSettingsInfo mapSettingsInfo;
     private final StageTransition stageTransition;
     private final Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator;
-    private final ZombiesDatabase database;
+    private final ZombiesStatsDatabase database;
     private final EventNode<Event> sceneNode;
     private final TickTaskScheduler tickTaskScheduler;
+    private final Scheduler scheduler;
 
     private final Pos spawnPos;
 
@@ -72,7 +74,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
         @NotNull StageTransition stageTransition,
         @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
-        @NotNull ZombiesDatabase database,
+        @NotNull ZombiesStatsDatabase database,
         @NotNull EventNode<Event> sceneNode,
         @NotNull TickTaskScheduler tickTaskScheduler) {
         super(instance, -1);
@@ -86,6 +88,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         this.database = Objects.requireNonNull(database);
         this.sceneNode = Objects.requireNonNull(sceneNode);
         this.tickTaskScheduler = Objects.requireNonNull(tickTaskScheduler);
+        this.scheduler = Scheduler.newScheduler();
 
         Vec3I spawnBlock = mapSettingsInfo.origin().add(mapSettingsInfo.spawn());
         this.spawnPos = new Pos(spawnBlock.x() + 0.5, spawnBlock.y(), spawnBlock.z() + 0.5, mapSettingsInfo.yaw(),
@@ -244,6 +247,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         stageTransition.tick(time);
         map.tick(time);
         tickTaskScheduler.tick(time);
+        scheduler.processTick();
 
         for (ZombiesPlayer zombiesPlayer : managedPlayers.values()) {
             if (zombiesPlayer.hasQuit()) {
@@ -339,13 +343,12 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         return sceneNode;
     }
 
-    public void addModifier(@NotNull ModifierComponent modifier, @NotNull InjectionStore injectionStore) {
+    public void addModifier(@NotNull ModifierComponent modifier) {
         Objects.requireNonNull(modifier);
-        Objects.requireNonNull(injectionStore);
 
         this.activeModifiers.add(modifier);
 
-        Modifier actualModifier = modifier.apply(injectionStore, this);
+        Modifier actualModifier = modifier.apply(InjectionStore.of(), this);
         actualModifier.apply();
 
         if (actualModifier.needsTicking()) {
@@ -365,6 +368,10 @@ public class ZombiesScene extends InstanceScene implements EventScene {
 
     public @Nullable Stage currentStage() {
         return stageTransition.getCurrentStage();
+    }
+
+    public @NotNull Scheduler getScheduler() {
+        return scheduler;
     }
 
     @SuppressWarnings("unchecked")

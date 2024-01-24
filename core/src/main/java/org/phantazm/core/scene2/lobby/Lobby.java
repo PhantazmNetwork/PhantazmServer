@@ -28,8 +28,10 @@ import org.phantazm.commons.FutureUtils;
 import org.phantazm.core.CoreStages;
 import org.phantazm.core.npc.NPCHandler;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.scene2.CoreJoinKeys;
 import org.phantazm.core.scene2.EventScene;
 import org.phantazm.core.scene2.InstanceScene;
+import org.phantazm.core.scene2.SceneManager;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -213,6 +215,11 @@ public class Lobby extends InstanceScene implements EventScene {
         }
 
         return leftPlayers;
+    }
+
+    @Override
+    public @NotNull Optional<SceneManager.Key<?>> getDefaultJoinKey() {
+        return Optional.of(CoreJoinKeys.MAIN_LOBBY);
     }
 
     @Override

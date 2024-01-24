@@ -16,8 +16,10 @@ public record PartyNotificationConfig(@NotNull String joinToPartyFormat,
     @NotNull String transferFormat,
     @NotNull String disbandFormat,
     @NotNull String allInviteEnabledFormat,
-    @NotNull String allInviteDisabledFormat) {
+    @NotNull String allInviteDisabledFormat,
+    @NotNull String warpToPartyFormat,
+    @NotNull String warpToWarperFormat) {
 
-    public static final PartyNotificationConfig DEFAULT = new PartyNotificationConfig("", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+    public static final PartyNotificationConfig DEFAULT = new PartyNotificationConfig("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
 
 }

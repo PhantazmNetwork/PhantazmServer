@@ -5,10 +5,8 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.invite.InvitationNotification;
 import org.phantazm.core.guild.party.PartyMember;
@@ -17,8 +15,6 @@ import org.phantazm.core.time.TickFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -129,12 +125,9 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
                         TagResolver ownerPlaceholder = Placeholder.component("owner", ownerDisplayName.join());
                         TagResolver inviterPlaceholder =
                             Placeholder.component("inviter", inviterDisplayName.join());
-                        TagResolver durationPlaceholder = Formatter.date("duration",
-                            Duration.of(invitationDuration, TimeUnit.SERVER_TICK).addTo(LocalDate.EPOCH));
 
                         Component message = miniMessage.deserialize(config.inviteToInviteeFromOtherFormat(),
-                            ownerUsernamePlaceholder, ownerPlaceholder, inviterPlaceholder,
-                            durationPlaceholder);
+                            ownerUsernamePlaceholder, ownerPlaceholder, inviterPlaceholder);
                         player.sendMessage(message);
                     });
                 });
@@ -258,6 +251,25 @@ public class PartyNotification implements InvitationNotification<PartyMember> {
             TagResolver enablerPlaceholder = Placeholder.component("enabler", displayName);
             Component message = miniMessage.deserialize(enabled ? config.allInviteEnabledFormat() : config.allInviteDisabledFormat(), enablerPlaceholder);
             audience.sendMessage(message);
+        });
+    }
+
+    public void notifyWarp(@NotNull PartyMember warper, int memberCount) {
+        warper.getPlayerView().getDisplayName().whenComplete((displayName, throwable) -> {
+            if (throwable != null) {
+                LOGGER.warn("Exception while sending party warp message", throwable);
+                return;
+            }
+
+            TagResolver warperPlaceholder = Placeholder.component("warper", displayName);
+            Component message = miniMessage.deserialize(config.warpToPartyFormat(), warperPlaceholder);
+            audience.sendMessage(message);
+        });
+
+        warper.getPlayerView().getPlayer().ifPresent(player -> {
+            TagResolver memberCountPlaceholder = Placeholder.component("member_count", Component.text(memberCount));
+            Component message = miniMessage.deserialize(config.warpToWarperFormat(), memberCountPlaceholder);
+            player.sendMessage(message);
         });
     }
 

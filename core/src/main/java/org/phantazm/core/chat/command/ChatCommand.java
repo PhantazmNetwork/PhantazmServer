@@ -9,6 +9,7 @@ import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.chat.ChatChannel;
+import org.phantazm.core.command.CommandUtils;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -50,14 +51,7 @@ public class ChatCommand extends Command {
             }
         });
 
-        addConditionalSyntax((sender, commandString) -> {
-            if (sender instanceof Player) {
-                return true;
-            }
-
-            sender.sendMessage(Component.text("You have to be a player to use that command!", NamedTextColor.RED));
-            return false;
-        }, (sender, context) -> {
+        addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             Player player = (Player) sender;
 
             String channelName = context.get(channelNameArgument);

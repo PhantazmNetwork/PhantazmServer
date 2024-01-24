@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.server.context.PlayerContext;
 import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.server.validator.LoginValidator;
 import org.slf4j.Logger;
@@ -19,7 +20,10 @@ public class ValidationFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull LoginValidator validator, @NotNull PermissionHandler permissionHandler) {
+    static void initialize(@NotNull PlayerContext playerContext) {
+        LoginValidator validator = playerContext.loginValiator();
+        PermissionHandler permissionHandler = playerContext.permissionHandler();
+
         MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerPreLoginEvent.class, event -> {
             try {
                 UUID uuid = event.getPlayerUuid();

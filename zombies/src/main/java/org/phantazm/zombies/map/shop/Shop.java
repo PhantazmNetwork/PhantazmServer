@@ -8,6 +8,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.core.TagUtils;
 import org.phantazm.core.tracker.BoundedBase;
 import org.phantazm.commons.flag.BasicFlaggable;
 import org.phantazm.commons.flag.Flaggable;
@@ -19,7 +20,6 @@ import org.phantazm.zombies.map.shop.predicate.ShopPredicate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 public class Shop extends BoundedBase implements Tickable {
     public static final long SHOP_ACTIVATION_DELAY = 15L;
@@ -51,7 +51,7 @@ public class Shop extends BoundedBase implements Tickable {
         this.failureInteractors = List.copyOf(failureInteractors);
         this.displays = List.copyOf(displays);
 
-        this.lastActivationTag = Tag.Integer(UUID.randomUUID().toString()).defaultValue(-1);
+        this.lastActivationTag = Tag.Integer(TagUtils.uniqueTagName()).defaultValue(-1);
         this.flaggable = new BasicFlaggable();
     }
 

@@ -52,7 +52,7 @@ public class PermissionCommand extends PermissionLockedCommand {
             addSyntax((sender, context) -> {
                 String group = context.get(GROUP_ARGUMENT);
                 String player = context.get(PLAYER_ARGUMENT);
-                identitySource.getUUID(player).whenComplete((uuidOptional, throwable) -> {
+                identitySource.getUUID(player).thenAccept((uuidOptional) -> {
                     if (uuidOptional.isPresent()) {
                         UUID uuid = uuidOptional.get();
                         permissionHandler.addToGroup(uuid, group);
@@ -72,7 +72,7 @@ public class PermissionCommand extends PermissionLockedCommand {
             addSyntax((sender, context) -> {
                 String group = context.get(GROUP_ARGUMENT);
                 String player = context.get(PLAYER_ARGUMENT);
-                identitySource.getUUID(player).whenComplete((uuidOptional, throwable) -> {
+                identitySource.getUUID(player).thenAccept((uuidOptional) -> {
                     if (uuidOptional.isPresent()) {
                         UUID uuid = uuidOptional.get();
                         permissionHandler.removeFromGroup(uuid, group);

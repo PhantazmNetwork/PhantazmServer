@@ -52,12 +52,14 @@ public class ProximaEntity extends LivingEntity {
 
     private int removalAnimationDelay = 1000;
 
-    protected ProximaEntity(@NotNull EntityType entityType, @NotNull UUID uuid, @NotNull Pathfinding pathfinding,
+    protected ProximaEntity(@NotNull EntityType entityType, @NotNull UUID uuid, @Nullable Pathfinding pathfinding,
         boolean register) {
         super(entityType, uuid, false);
-        this.pathfinding = Objects.requireNonNull(pathfinding);
+        this.pathfinding = pathfinding;
         this.goalGroups = new ArrayList<>(5);
-        pathfinding.setSelf(this);
+        if (pathfinding != null) {
+            pathfinding.setSelf(this);
+        }
 
         if (register) super.register();
     }
@@ -67,7 +69,7 @@ public class ProximaEntity extends LivingEntity {
     }
 
     public @NotNull Pathfinding pathfinding() {
-        return pathfinding;
+        return Objects.requireNonNull(pathfinding);
     }
 
     public void setRemovalAnimationDelay(int delay) {
@@ -75,6 +77,10 @@ public class ProximaEntity extends LivingEntity {
     }
 
     private void resetPath() {
+        if (pathfinding == null) {
+            return;
+        }
+
         pathfinding.cancel();
 
         currentPath = null;
@@ -90,6 +96,10 @@ public class ProximaEntity extends LivingEntity {
     }
 
     private void destroyPath() {
+        if (pathfinding == null) {
+            return;
+        }
+
         resetPath();
         this.destination = null;
         pathfinding.target = null;
@@ -99,6 +109,10 @@ public class ProximaEntity extends LivingEntity {
     }
 
     public void setDestination(@Nullable PathTarget destination) {
+        if (pathfinding == null) {
+            return;
+        }
+
         if (destination == null && this.destination != null) {
             destroyPath();
             return;
@@ -114,6 +128,10 @@ public class ProximaEntity extends LivingEntity {
     }
 
     public <T extends Entity> void setDestination(@Nullable T targetEntity) {
+        if (pathfinding == null) {
+            return;
+        }
+
         if (pathfinding.target == targetEntity) {
             return;
         }
@@ -135,6 +153,10 @@ public class ProximaEntity extends LivingEntity {
     }
 
     public @Nullable Entity getTargetEntity() {
+        if (pathfinding == null) {
+            return null;
+        }
+
         return pathfinding.target;
     }
 
@@ -168,6 +190,9 @@ public class ProximaEntity extends LivingEntity {
     @Override
     public void update(long time) {
         super.update(time);
+        if (pathfinding == null) {
+            return;
+        }
 
         navigatorTick(time);
         aiTick(time);
@@ -191,7 +216,7 @@ public class ProximaEntity extends LivingEntity {
     }
 
     protected boolean canNavigate() {
-        return !isDead() && getInstance() != null;
+        return !isDead() && getInstance() != null && pathfinding != null;
     }
 
     protected void navigatorTick(long time) {

@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.server.permission.PermissionHandler;
-import org.phantazm.server.role.RoleStore;
+import org.phantazm.core.role.RoleStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,19 +27,11 @@ public class RemoveRoleCommand extends PermissionLockedCommand {
 
         addSyntax((sender, context) -> {
             String name = context.get(PLAYER_ARGUMENT);
-            identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
+            identitySource.getUUID(name).thenAccept((uuidOptional) -> {
                 uuidOptional.ifPresent(uuid -> {
                     String role = context.get(ROLE);
 
-                    roleStore.removeRole(uuid, role).whenComplete((result, error) -> {
-                        if (error != null) {
-                            sender.sendMessage(
-                                Component.text("An internal error occured while executing " + "this command.")
-                                    .color(NamedTextColor.RED));
-                            LOGGER.warn("An exception occurred while removing a role", error);
-                            return;
-                        }
-
+                    roleStore.removeRole(uuid, role).thenAccept((result) -> {
                         if (result) {
                             sender.sendMessage("Removed role " + role + " from " + uuid + " (" + name + ")");
                             permissionHandler.applyPermissions(uuid);

@@ -8,18 +8,18 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.TagUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.Collection;
-import java.util.Deque;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @Cache(false)
 public class IgniteShotHandler implements ShotHandler {
     private final Data data;
+    private final ZombiesScene scene;
 
     private final Tag<Long> lastFireDamageTicksTag;
     private final Deque<LivingEntity> targets;
@@ -39,11 +40,11 @@ public class IgniteShotHandler implements ShotHandler {
      * @param data The {@link IgniteShotHandler}'s {@link Data}
      */
     @FactoryMethod
-    public IgniteShotHandler(@NotNull Data data) {
-        this.data = Objects.requireNonNull(data);
+    public IgniteShotHandler(@NotNull Data data, @NotNull ZombiesScene scene) {
+        this.data = data;
+        this.scene = scene;
 
-        UUID uuid = UUID.randomUUID();
-        this.lastFireDamageTicksTag = Tag.Long("last_fire_damage_ticks" + uuid).defaultValue(-1L);
+        this.lastFireDamageTicksTag = Tag.Long(TagUtils.uniqueTagName()).defaultValue(-1L);
         this.targets = new ConcurrentLinkedDeque<>();
     }
 
@@ -67,9 +68,10 @@ public class IgniteShotHandler implements ShotHandler {
 
             entity.setFireForDuration(duration);
 
-            long lastFireDamageTicks = entity.getTag(lastFireDamageTicksTag);
+            TagHandler tags = TagUtils.sceneLocalTags(entity, scene);
+            long lastFireDamageTicks = tags.getTag(lastFireDamageTicksTag);
             boolean alreadyActive = lastFireDamageTicks != -1;
-            entity.setTag(lastFireDamageTicksTag, ++lastFireDamageTicks);
+            tags.setTag(lastFireDamageTicksTag, ++lastFireDamageTicks);
 
             if (!alreadyActive) {
                 targets.add(entity);
@@ -85,9 +87,10 @@ public class IgniteShotHandler implements ShotHandler {
                 return true;
             }
 
-            if (target.getTag(this.lastFireDamageTicksTag) >= data.damageInterval) {
+            TagHandler tags = TagUtils.sceneLocalTags(target, scene);
+            if (tags.getTag(this.lastFireDamageTicksTag) >= data.damageInterval) {
                 damage(target);
-                target.setTag(this.lastFireDamageTicksTag, 0L);
+                tags.setTag(this.lastFireDamageTicksTag, 0L);
             }
 
             return false;
@@ -95,7 +98,7 @@ public class IgniteShotHandler implements ShotHandler {
     }
 
     private void remove(LivingEntity target) {
-        target.removeTag(lastFireDamageTicksTag);
+        TagUtils.removeSceneLocalTag(target, scene, lastFireDamageTicksTag);
     }
 
     private void damage(LivingEntity target) {

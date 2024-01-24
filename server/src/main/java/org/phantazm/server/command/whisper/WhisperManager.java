@@ -9,29 +9,32 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.TagUtils;
+import org.phantazm.core.player.PlayerViewProvider;
 
 import java.util.*;
 
 public class WhisperManager {
-
-    private final Map<UUID, UUID> previousConverser = new HashMap<>();
-
-    private final ConsoleSender consoleSender;
+    private static final Tag<UUID> LAST_MESSAGED_TAG = Tag.UUID(TagUtils.uniqueTagName());
+    private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
 
     private final ConnectionManager connectionManager;
-
+    private final ConsoleSender consoleSender;
     private final WhisperConfig whisperConfig;
 
-    private final MiniMessage miniMessage;
+    private record TagEntry(TagHandler handler,
+        UUID self) {
+    }
 
     public WhisperManager(@NotNull ConnectionManager connectionManager, @NotNull ConsoleSender consoleSender,
-        @NotNull WhisperConfig whisperConfig, @NotNull MiniMessage miniMessage) {
+        @NotNull WhisperConfig whisperConfig) {
         this.connectionManager = Objects.requireNonNull(connectionManager);
         this.consoleSender = Objects.requireNonNull(consoleSender);
         this.whisperConfig = Objects.requireNonNull(whisperConfig);
-        this.miniMessage = Objects.requireNonNull(miniMessage);
     }
 
     public void whisper(@NotNull Audience sender, @NotNull Audience target, @NotNull String message) {
@@ -40,31 +43,31 @@ public class WhisperManager {
         TagResolver messagePlaceholder = Placeholder.unparsed("message", message);
 
         Component toTarget =
-            miniMessage.deserialize(whisperConfig.toTargetFormat(), senderPlaceholder, targetPlaceholder,
+            MINI_MESSAGE.deserialize(whisperConfig.toTargetFormat(), senderPlaceholder, targetPlaceholder,
                 messagePlaceholder);
         target.sendMessage(toTarget);
 
         Component toSender =
-            miniMessage.deserialize(whisperConfig.toSenderFormat(), senderPlaceholder, targetPlaceholder,
+            MINI_MESSAGE.deserialize(whisperConfig.toSenderFormat(), senderPlaceholder, targetPlaceholder,
                 messagePlaceholder);
         sender.sendMessage(toSender);
 
-        UUID senderUUID = resolveUUID(sender);
-        UUID targetUUID = resolveUUID(target);
+        TagEntry senderEntry = resolveTagEntry(sender);
+        TagEntry targetEntry = resolveTagEntry(target);
 
-        if (senderUUID != null && targetUUID != null) {
-            previousConverser.put(targetUUID, senderUUID);
-            previousConverser.put(senderUUID, targetUUID);
+        if (senderEntry != null && targetEntry != null) {
+            senderEntry.handler.setTag(LAST_MESSAGED_TAG, targetEntry.self);
+            targetEntry.handler.setTag(LAST_MESSAGED_TAG, senderEntry.self);
         }
     }
 
     public @NotNull Optional<Audience> getLastConverser(@NotNull Audience audience) {
-        UUID audienceUUID = resolveUUID(audience);
-        if (audienceUUID == null) {
+        TagEntry audienceEntry = resolveTagEntry(audience);
+        if (audienceEntry == null) {
             return Optional.empty();
         }
 
-        UUID lastConverserUUID = previousConverser.get(audienceUUID);
+        UUID lastConverserUUID = audienceEntry.handler.getTag(LAST_MESSAGED_TAG);
         if (lastConverserUUID == null) {
             return Optional.empty();
         }
@@ -95,11 +98,11 @@ public class WhisperManager {
             .orElse(whisperConfig.defaultName());
     }
 
-    private @Nullable UUID resolveUUID(Audience audience) {
+    private @Nullable TagEntry resolveTagEntry(Audience audience) {
         if (audience instanceof Player player) {
-            return player.getUuid();
+            return new TagEntry(PlayerViewProvider.Global.instance().fromPlayer(player).tagHandler(), player.getUuid());
         } else if (audience instanceof ConsoleSender) {
-            return consoleSender.identity().uuid();
+            return new TagEntry(consoleSender.tagHandler(), consoleSender.identity().uuid());
         }
 
         return null;

@@ -27,6 +27,8 @@ public interface LoginValidator {
 
     Component NOT_WHITELISTED_MESSAGE = Component.text("You are not whitelisted on this server!");
 
+    @NotNull CompletableFuture<Void> initTables();
+
     @NotNull CompletableFuture<LoginEntry> login(@NotNull UUID uuid);
 
     @NotNull CompletableFuture<BanHistory> history(@NotNull UUID uuid);

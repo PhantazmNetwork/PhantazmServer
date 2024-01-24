@@ -4,6 +4,7 @@ import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +14,8 @@ public record MobMeta(@Nullable Component customName,
     boolean isGlowing,
     int angerTime,
     boolean isBaby,
-    int size) {
+    int size,
+    ItemStack itemStack) {
     @Default("customName")
     public static @NotNull ConfigElement defaultCustomName() {
         return ConfigPrimitive.NULL;
@@ -47,5 +49,10 @@ public record MobMeta(@Nullable Component customName,
     @Default("size")
     public static @NotNull ConfigElement defaultSize() {
         return ConfigPrimitive.of(0);
+    }
+
+    @Default("itemStack")
+    public static @NotNull ConfigElement defaultItemStack() {
+        return ConfigPrimitive.NULL;
     }
 }

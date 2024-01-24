@@ -22,7 +22,7 @@ public class BanHistoryCommand extends PermissionLockedCommand {
 
         addSyntax((sender, context) -> {
             String name = context.get(PLAYER_ARGUMENT);
-            identitySource.getUUID(name).whenComplete((uuidOptional, throwable) -> {
+            identitySource.getUUID(name).thenAccept((uuidOptional) -> {
                 uuidOptional.ifPresent(uuid -> {
                     loginValidator.history(uuid).thenAccept(banHistory -> {
                         if (banHistory.lastBanDate() < 0) {

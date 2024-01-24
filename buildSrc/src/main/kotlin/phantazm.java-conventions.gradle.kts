@@ -1,12 +1,14 @@
 import org.phantazm.gradle.task.CopyLibs
-import org.phantazm.gradle.task.SetupServer
+import org.phantazm.gradle.task.InsertManifest
 
 plugins {
     java
 }
 
-group = "org.phantazm"
-version = "1.0-SNAPSHOT"
+allprojects {
+    this.group = "org.phantazm"
+    this.version = "1.0-SNAPSHOT"
+}
 
 java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(17))
@@ -86,4 +88,4 @@ tasks.getByName<Javadoc>("javadoc") {
 }
 
 tasks.register<CopyLibs>("copyLibs")
-tasks.register<SetupServer>("setupServer")
+tasks.register<InsertManifest>("insertManifest")

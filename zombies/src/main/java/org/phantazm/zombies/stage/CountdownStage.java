@@ -11,6 +11,7 @@ import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.chat.MessageWithDestination;
+import org.phantazm.core.leaderboard.Leaderboard;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -40,12 +41,15 @@ public class CountdownStage implements Stage {
 
     private final Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator;
 
+    private final Leaderboard bestTimeLeaderboard;
+
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     protected CountdownStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
         @NotNull MapSettingsInfo settings, @NotNull Random random, @NotNull Wrapper<Long> ticksRemaining,
         @NotNull LongList alertTicks, @NotNull TickFormatter tickFormatter,
-        @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator) {
+        @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
+        @NotNull Leaderboard bestTimeLeaderboard) {
         this.instance = Objects.requireNonNull(instance);
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
         this.settings = Objects.requireNonNull(settings);
@@ -55,14 +59,17 @@ public class CountdownStage implements Stage {
         this.alertTicks = Objects.requireNonNull(alertTicks);
         this.tickFormatter = Objects.requireNonNull(tickFormatter);
         this.sidebarUpdaterCreator = Objects.requireNonNull(sidebarUpdaterCreator);
+        this.bestTimeLeaderboard = Objects.requireNonNull(bestTimeLeaderboard);
     }
 
     public CountdownStage(@NotNull Instance instance, @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
         @NotNull MapSettingsInfo settings, @NotNull Random random, long countdownTicks,
         @NotNull LongList alertTicks, @NotNull TickFormatter tickFormatter,
-        @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator) {
+        @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> sidebarUpdaterCreator,
+        @NotNull Leaderboard bestTimeLeaderboard) {
         this(instance, zombiesPlayers, settings, random, Wrapper.of(countdownTicks), alertTicks, tickFormatter,
-            sidebarUpdaterCreator);
+            sidebarUpdaterCreator, bestTimeLeaderboard);
+
     }
 
     @Override
@@ -99,7 +106,6 @@ public class CountdownStage implements Stage {
             }
         });
 
-        zombiesPlayer.module().getLeaderboard().startIfNotActive();
         int count = zombiesPlayers.size(), maxPlayers = settings.maxPlayers();
         TagResolver countPlaceholder = Placeholder.component("count", Component.text(count));
         TagResolver maxPlayersPlaceholder = Placeholder.component("max_players", Component.text(maxPlayers));
@@ -118,8 +124,6 @@ public class CountdownStage implements Stage {
         if (updater != null) {
             updater.end();
         }
-
-        zombiesPlayer.module().getLeaderboard().endIfActive();
     }
 
     @Override
@@ -144,6 +148,8 @@ public class CountdownStage implements Stage {
 
     @Override
     public void start() {
+        bestTimeLeaderboard.show(instance);
+
         ticksRemaining.set(initialTicks);
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
             if (zombiesPlayer.hasQuit()) {
@@ -193,6 +199,8 @@ public class CountdownStage implements Stage {
         for (SidebarUpdater sidebarUpdater : sidebarUpdaters.values()) {
             sidebarUpdater.end();
         }
+
+        bestTimeLeaderboard.hide();
     }
 
     @Override
