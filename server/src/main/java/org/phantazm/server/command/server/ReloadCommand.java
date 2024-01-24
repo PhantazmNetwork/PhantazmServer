@@ -7,6 +7,7 @@ import net.minestom.server.command.builder.arguments.ArgumentEnum;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.permission.Permission;
 import org.phantazm.core.command.PermissionLockedCommand;
+import org.phantazm.core.instance.FileSystemInstanceLoader;
 import org.phantazm.server.LobbyFeature;
 import org.phantazm.server.MobFeature;
 import org.phantazm.server.ZombiesFeature;
@@ -20,6 +21,7 @@ public class ReloadCommand extends PermissionLockedCommand {
         ZOMBIES_MAPS,
         MOBS,
         LOBBIES,
+        INSTANCE_CACHE,
         ALL
     }
 
@@ -35,6 +37,7 @@ public class ReloadCommand extends PermissionLockedCommand {
                     case ZOMBIES_MAPS -> ZombiesFeature.reload();
                     case MOBS -> MobFeature.reload();
                     case LOBBIES -> LobbyFeature.reload();
+                    case INSTANCE_CACHE -> FileSystemInstanceLoader.clearCache();
                     case ALL -> {
                         MobFeature.reload();
                         ZombiesFeature.reload();
