@@ -42,9 +42,12 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemInstanceLoader.class);
 
     private static class InstanceDataChunkLoader implements IChunkLoader {
+        private final Executor executor;
+
         private InstanceData instanceData;
 
-        private InstanceDataChunkLoader(InstanceData instanceData) {
+        private InstanceDataChunkLoader(Executor executor, InstanceData instanceData) {
+            this.executor = executor;
             this.instanceData = instanceData;
         }
 
@@ -55,35 +58,42 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
                 return FutureUtils.nullCompletedFuture();
             }
 
-            long chunkKey = ChunkUtils.getChunkIndex(chunkX, chunkZ);
-            InstanceData.ChunkData chunkData = instanceData.chunkData().get(chunkKey);
-            if (chunkData == null) {
-                return FutureUtils.nullCompletedFuture();
-            }
-
-            Int2ObjectMap<InstanceData.NBTBlock> blockData = chunkData.entries();
-            Int2ObjectMap<Block> blocks = new Int2ObjectOpenHashMap<>(blockData.size());
-            for (Int2ObjectMap.Entry<InstanceData.NBTBlock> entry : blockData.int2ObjectEntrySet()) {
-                int key = entry.getIntKey();
-                InstanceData.NBTBlock nbtData = entry.getValue();
-
-                Block block = Block.fromBlockId(nbtData.id());
-                if (block == null) {
-                    continue;
+            return CompletableFuture.supplyAsync(() -> {
+                long chunkKey = ChunkUtils.getChunkIndex(chunkX, chunkZ);
+                InstanceData.ChunkData chunkData = instanceData.chunkData().get(chunkKey);
+                if (chunkData == null) {
+                    return null;
                 }
 
-                NBT nbt;
-                try (NBTReader nbtReader = NBTReader.fromArray(nbtData.nbt())) {
-                    nbt = nbtReader.readNamed().component2();
-                } catch (IOException | NBTException e) {
-                    continue;
+                Int2ObjectMap<InstanceData.NBTBlock> blockData = chunkData.entries();
+
+                Int2ObjectMap<Block> blocks = new Int2ObjectOpenHashMap<>(blockData.size());
+                for (Int2ObjectMap.Entry<InstanceData.NBTBlock> entry : blockData.int2ObjectEntrySet()) {
+                    int key = entry.getIntKey();
+                    InstanceData.NBTBlock nbtData = entry.getValue();
+
+                    Block block = Block.fromBlockId(nbtData.id());
+                    if (block == null) {
+                        continue;
+                    }
+
+                    NBT nbt;
+                    try (NBTReader nbtReader = NBTReader.fromArray(nbtData.nbt())) {
+                        nbt = nbtReader.readNamed().component2();
+                    } catch (IOException | NBTException e) {
+                        continue;
+                    }
+
+                    blocks.put(key, nbt instanceof NBTCompound compound ? block.withNbt(compound) : block);
                 }
 
-                blocks.put(key, nbt instanceof NBTCompound compound ? block.withNbt(compound) : block);
-            }
+                return new DynamicChunk(instance, chunkX, chunkZ, chunkData.sections(), blocks);
+            }, executor);
+        }
 
-            return CompletableFuture.completedFuture(new DynamicChunk(instance, chunkX, chunkZ, chunkData.sections(),
-                blocks));
+        @Override
+        public boolean supportsParallelLoading() {
+            return true;
         }
 
         @Override
@@ -262,7 +272,7 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
                 StandardOpenOption.READ))))) {
             InstanceData instanceData = (InstanceData) ois.readObject();
 
-            InstanceDataChunkLoader loader = new InstanceDataChunkLoader(instanceData);
+            InstanceDataChunkLoader loader = new InstanceDataChunkLoader(executor, instanceData);
             try {
                 InstanceContainer container = new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD, loader);
                 container.enableAutoChunkLoad(false);
