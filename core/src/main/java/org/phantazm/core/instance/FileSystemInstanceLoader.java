@@ -172,7 +172,6 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
         return path;
     }
 
-    // TODO: what if there are distinct spawnPos invocations?
     @Override
     public @NotNull CompletableFuture<Instance> loadInstance(@UnmodifiableView @NotNull List<String> subPaths) {
         Path path = rootRelative(subPaths);
