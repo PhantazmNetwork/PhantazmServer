@@ -25,10 +25,7 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Phaser;
+import java.util.concurrent.*;
 import java.util.stream.Stream;
 import java.util.zip.*;
 
@@ -225,7 +222,8 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
             if (cacheKey != null) {
                 FileUtils.ensureDirectories(CACHE_PATH);
                 cachePath = CACHE_PATH.resolve(cacheKey);
-                if (Files.exists(cachePath)) {
+
+                if (Files.exists(cachePath) && !recalculateCacheFor(finalPath, cachePath)) {
                     try {
                         InstanceContainer instance = loadFromCache(cachePath, spawnPoint, chunkViewDistance);
                         LOGGER.info("Loaded {} from cache", finalPath);
@@ -242,7 +240,7 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
             if (writeCache) {
                 try {
                     FileUtils.ensureDirectories(CACHE_PATH);
-                    writeCache(cachePath, container);
+                    writeCache(cachePath, finalPath, container);
                     LOGGER.info("Wrote {} to cache", finalPath);
                 } catch (IOException e) {
                     LOGGER.warn("Error writing instance to cache", e);
@@ -253,7 +251,7 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
         });
     }
 
-    private void writeCache(Path cacheFile, Instance instance) throws IOException {
+    protected void writeCache(Path cacheFile, Path anvilFolder, Instance instance) throws IOException {
         Deflater deflater = new Deflater(CACHE_COMPRESSION_LEVEL);
         try (ObjectOutputStream oos = new ObjectOutputStream(new DeflaterOutputStream(
             new BufferedOutputStream(Files.newOutputStream(cacheFile, StandardOpenOption.CREATE,
@@ -307,6 +305,20 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
             });
         });
         phaser.arriveAndAwaitAdvance();
+    }
+
+    /**
+     * If the cache file exists, this method is queried to determine if the cache file is up-to-date, or if it should be
+     * regenerated with new data.
+     * <p>
+     * The default implementation always returns {@code false}.
+     *
+     * @param sourcePath non-cache source directory (Anvil folder, or another format)
+     * @param cachePath  cache path
+     * @return true if we should recalculate; false otherwise
+     */
+    protected boolean recalculateCacheFor(@NotNull Path sourcePath, @NotNull Path cachePath) {
+        return false;
     }
 
     /**
