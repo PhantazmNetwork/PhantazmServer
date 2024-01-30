@@ -71,8 +71,12 @@ pluginManager.withPlugin("java") {
     dependencies.addProvider("testRuntimeOnly", libs.findLibrary("junit.jupiter.engine").get())
 }
 
-tasks.withType<JavaCompile> {
+tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+    options.isFork = true
+
+    // disable compiler warnings to keep the terminal clean
+    options.compilerArgs.addAll(listOf("-Xlint:none", "-Xlint:-deprecation", "-Xlint:-unchecked"))
 }
 
 tasks.getByName<Test>("test") {

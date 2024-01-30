@@ -1,5 +1,5 @@
 plugins {
-    id("phantazm.minestom-library-conventions")
+    id("phantazm.java-library-conventions")
 }
 
 tasks.jar {

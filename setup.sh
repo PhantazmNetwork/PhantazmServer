@@ -63,7 +63,6 @@ require() {
 }
 
 # Exit if we're missing any of these environment variables
-gradle_args=$(require "PHANTAZM_GRADLE_ARGS") || exit 1
 server_jvm_args=$(require "PHANTAZM_SERVER_JVM_ARGS") || exit 1
 server_args=$(require "PHANTAZM_SERVER_ARGS") || exit 1
 server_file=$(require "PHANTAZM_SERVER_FILE") || exit 1
@@ -92,6 +91,13 @@ clone_repository() {
   fi
 }
 
+copy_default_machine_specfic_config() {
+  if ! cp -n ./defaultRunData/server-1/* ./run/server-1; then
+    log_error "Failed to copy default machine-specific run configs"
+    false
+  fi
+}
+
 dl_to_if_not_exists() {
   filename="$1"
   fileid="$2"
@@ -116,10 +122,15 @@ dl_to_if_not_exists() {
 mkdir -p "./run"
 
 # First-time setup
-if [ ! -d "./run/server-1" ]; then
+if [ ! -d "./run/server-1/.git" ]; then
   log_info "Doing first-time setup..."
 
   mkdir -p "./run/server-1"
+  mkdir -p "./tmp/build_files"
+
+  # have to make sure directory is empty before we try cloning
+  mv ./run/server-1/* "./tmp/build_files"
+
   if [ -n "${PHANTAZM_CONF_REPO_URL}" ]; then
     log_info "Cloning into configuration repository as defined by PHANTAZM_CONF_REPO_URL."
     if ! clone_repository "${PHANTAZM_CONF_REPO_URL}"; then
@@ -159,14 +170,12 @@ does not exist in the root directory of the project, create it."
     done
   fi
 
-  if ! cp -a "./defaultRunData/server-1/." "./run/server-1"; then
-    log_warning "Failed to copy machine-specific run configs. The server may encounter launch errors."
-  else
-    log_info "Copied default machine-specific run configs."
-  fi
+  mv ./tmp/build_files/* "./run/server-1"
 else
-  log_trace "Skipping first-time setup because ./run/server-1 already exists."
+  log_trace "Skipping first-time setup because ./run/server-1/.git exists."
 fi
+
+copy_default_machine_specfic_config
 
 # Automatically download worlds
 if [ "${PHANTAZM_AUTO_DL_WORLDS}" = "true" ]; then
@@ -190,17 +199,6 @@ if [ "${PHANTAZM_AUTO_DL_WORLDS}" = "true" ]; then
   dl_to_if_not_exists "$gau" "16mxFemqIP9Z0-cgU0rSrloqhINV1z47H" "$zombies_instances" "gau"
 
   clean_temp
-fi
-
-log_info "Starting Gradle build..."
-
-# Now that we've constructed everything else, build the project, copy the libraries, and run the server
-# If the Gradle build fails, or we can't change directory, exit immediately
-gradle_command="./gradlew ${gradle_args}"
-if ! eval "${gradle_command}"; then
-  log_error "Gradle build failed. Its output may contain more information."
-  log_error "Command used: ${gradle_command}"
-  exit 1
 fi
 
 if ! cd "./run/server-1"; then

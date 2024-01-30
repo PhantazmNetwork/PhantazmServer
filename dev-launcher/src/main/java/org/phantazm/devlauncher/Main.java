@@ -4,18 +4,21 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Builds to ./dev-launcher.jar. Necessary due to IntelliJ's poor support for running Docker containers, the need to
  * support both Windows and Linux hosts, and wanting to avoid having developers run commands every time they wish to
- * launch the server.
+ * launch the server. This code starts the Gradle build process and manages the lifecycle of any necessary Docker
+ * containers.
  * <p>
  * Some limitations:
  * <ul>
  *    <li>The Docker container cannot use a pseudo-TTY (--tty or tty: true) because we would not be able to connect to
- *    it in this manner.This could be fixed by using an external PTY library (like pty4j), but this would bloat the size
- *    of the final jar, which is less than ideal as it is checked into VCS. Additionally, pty4j does not play nice with
- *    johnrengelmen's `shadow` plugin.</li>
+ *    it in this manner. This could be fixed by using an external PTY library (like pty4j), but this would bloat the
+ *    size of the final jar, which is less than ideal as it is checked into VCS. Additionally, pty4j does not play nice
+ *    with johnrengelmen's `shadow` plugin.</li>
  *    <li>Because of the above concerns, jline will spit out a warning to the console.</li>
  *    <li>You will only see output from the server, not any other container. You can attach to the proxy and database
  *    specifically through manually running `docker attach [container-name]`.</li>
@@ -37,8 +40,17 @@ import java.nio.file.StandardOpenOption;
  * <p>
  * The resulting jar file can be run from the command line using {@code java -jar dev-launcher.jar} to launch in normal
  * mode, or {@code java -jar dev-launcher.jar -d} to launch in debug mode.
+ * <p>
+ * Two program arguments are recognized by this class: {@code -d} and {@code -g}. {@code -d} launches in debug mode,
+ * {@code -g} signifies that all the following arguments should be passed to the Gradle wrapper as program arguments.
+ * If -g is not specified, the following default arguments are passed to Gradle:
+ * {@code -PskipBuild=snbt-builder,dev-launcher,velocity -w phantazm-server:copyJar}
  */
 public class Main {
+    private static final String[] DEFAULT_GRADLE_ARGS = new String[]{
+        "-PskipBuild=snbt-builder,dev-launcher,velocity", "-w", "phantazm-server:copyJar"
+    };
+
     private static final String[] DOCKER_COMPOSE_UP_NODEBUG = new String[]{
         "docker", "compose", "up", "-d"
     };
@@ -102,7 +114,7 @@ public class Main {
     private static volatile BufferedWriter serverProcessWriter;
     private static volatile boolean lastWasStop;
 
-    private static Process proc(String[] cmd, boolean isAttach) throws IOException {
+    private static Process proc(String[] cmd, boolean isServerProcess) throws IOException {
         if (shuttingDown) {
             return DUMMY_PROCESS;
         }
@@ -117,7 +129,7 @@ public class Main {
                 .redirectOutput(ProcessBuilder.Redirect.INHERIT)
                 .redirectError(ProcessBuilder.Redirect.INHERIT).start());
 
-            if (isAttach) {
+            if (isServerProcess) {
                 currentProcess = process;
 
                 OutputStream outputStream = process.getOutputStream();
@@ -165,6 +177,10 @@ public class Main {
 
     private static boolean isDebug(String[] args) {
         for (String arg : args) {
+            if (arg.equalsIgnoreCase("-g")) {
+                return false;
+            }
+
             if (arg.equalsIgnoreCase("-d")) {
                 return true;
             }
@@ -173,12 +189,42 @@ public class Main {
         return false;
     }
 
+    private static String[] gradlewArgs(String[] args) {
+        boolean argMode = false;
+        List<String> argBuilder = null;
+        int i = 0;
+        for (String arg : args) {
+            if (argMode) {
+                if (argBuilder == null) {
+                    argBuilder = new ArrayList<>(args.length - i);
+                }
+
+                argBuilder.add(arg);
+            } else if (arg.equalsIgnoreCase("-g")) {
+                if (i == args.length - 1) {
+                    argBuilder = new ArrayList<>(0);
+                }
+
+                argMode = true;
+            }
+
+            i++;
+        }
+
+        String[] gradlewArgs = argBuilder == null ? DEFAULT_GRADLE_ARGS : argBuilder.toArray(String[]::new);
+        String[] finalArgs = new String[gradlewArgs.length + 1];
+        finalArgs[0] = Path.of(".", "gradlew").toString();
+        System.arraycopy(gradlewArgs, 0, finalArgs, 1, gradlewArgs.length);
+        return finalArgs;
+    }
+
     public static void main(String[] args) throws IOException, InterruptedException {
         Files.newOutputStream(Path.of(".override.env"), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
             .close();
 
         boolean debug = isDebug(args);
 
+        String[] gradlewArgs = gradlewArgs(args);
         String[] upCommand = debug ? DOCKER_COMPOSE_UP_DEBUG : DOCKER_COMPOSE_UP_NODEBUG;
         String[] attachCommand = debug ? DOCKER_ATTACH_DEBUG : DOCKER_ATTACH_NODEBUG;
         String[] downCommand = debug ? DOCKER_COMPOSE_DOWN_DEBUG : DOCKER_COMPOSE_DOWN_NODEBUG;
@@ -203,8 +249,7 @@ public class Main {
                 }
 
                 try {
-                    new ProcessBuilder().command(downCommand)
-                        .inheritIO().start();
+                    new ProcessBuilder().command(downCommand).inheritIO().start();
                 } catch (IOException ignored) {
                 }
 
@@ -213,6 +258,11 @@ public class Main {
         }));
 
         int code;
+        if ((code = proc(gradlewArgs, false).waitFor()) != 0) {
+            System.err.println("[ERROR] Gradle build returned a non-zero exit code (" + code + ")");
+            return;
+        }
+
         if ((code = proc(upCommand, false).waitFor()) != 0) {
             System.err.println("[ERROR] Docker Compose returned a non-zero exit code (" + code + ")");
             return;

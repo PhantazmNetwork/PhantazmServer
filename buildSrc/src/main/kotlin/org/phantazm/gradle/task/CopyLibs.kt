@@ -30,6 +30,7 @@ abstract class CopyLibs : DefaultTask() {
     val libraryDirectoryPath: String?
         @Optional @Input get() = libraryDirectory?.path
 
+    @Suppress("serial")
     data class ArtifactEntry(val inputFile: File, val outputFile: File, val group: String) : Serializable
 
     @get:Internal
