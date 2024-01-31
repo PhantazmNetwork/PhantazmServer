@@ -124,7 +124,7 @@ public class BasicSpawnDistributor implements SpawnDistributor {
                 }
             }
 
-            if (!spawned && !reportedThisEntry) {
+            if (!spawned && !reportedThisEntry && zombiesScene.isLegit()) {
                 Key mapId = zombiesScene.mapSettingsInfo().id();
 
                 List<CompletableFuture<Pair<Component, Reference<ZombiesPlayer>>>> nameFutures =
