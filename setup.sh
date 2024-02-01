@@ -187,16 +187,13 @@ if [ "${PHANTAZM_AUTO_DL_WORLDS}" = "true" ]; then
   lobby_instances="./run/server-1/lobbies/instances/"
   zombies_instances="./run/server-1/zombies/instances/"
 
-  main_lobby="main_lobby.zip"
-
-  fallen_grounds="fallen_grounds.zip"
-  gau="gau.zip"
-
   # Only download if the world file is not already present
-  dl_to_if_not_exists "$main_lobby" "13xEJ6yBjOASChsEhkWOz3Ppq2WLanSDD" "$lobby_instances" "main"
+  dl_to_if_not_exists "main_lobby.zip" "13xEJ6yBjOASChsEhkWOz3Ppq2WLanSDD" "$lobby_instances" "main"
 
-  dl_to_if_not_exists "$fallen_grounds" "1xWG8JIwvWa0LQtLH-RVvPorY9UhJioCn" "$zombies_instances" "fallen_grounds"
-  dl_to_if_not_exists "$gau" "16mxFemqIP9Z0-cgU0rSrloqhINV1z47H" "$zombies_instances" "gau"
+  dl_to_if_not_exists "fallen_grounds.zip" "1xWG8JIwvWa0LQtLH-RVvPorY9UhJioCn" "$zombies_instances" "fallen_grounds"
+  dl_to_if_not_exists "gau.zip" "16mxFemqIP9Z0-cgU0rSrloqhINV1z47H" "$zombies_instances" "gau"
+
+  dl_to_if_not_exists "map_nt.zip" "1hMdfa6qpwl-1pWVZkSrNOi5GUkFjAigV" "$zombies_instances" "map_nt"
 
   clean_temp
 fi
