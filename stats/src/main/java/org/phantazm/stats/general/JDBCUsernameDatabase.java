@@ -43,18 +43,18 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
     }
 
     private static String filterUsername(String string) {
-        int truncatedLength = Math.min(string.length(), 16);
-        StringBuilder builder = new StringBuilder(truncatedLength);
-        string = string.substring(0, truncatedLength);
+        int len = string.length();
+        if (string.isEmpty() || len > 16) {
+            return null;
+        }
 
-        for (int i = 0; i < string.length(); i++) {
-            char c = string.charAt(i);
-            if (isValidChar(c)) {
-                builder.append(c);
+        for (int i = 0; i < len; i++) {
+            if (!isValidChar(string.charAt(i))) {
+                return null;
             }
         }
 
-        return builder.toString();
+        return string;
     }
 
     @Override
@@ -93,7 +93,7 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
             String uuidString = uuid.toString();
 
             return DatabaseUtils.runPreparedSql(LOGGER, "cachedUsername", dataSource, """
-                SELECT username, last_updated FROM phantazm_db.username_cache
+                SELECT username FROM phantazm_db.username_cache
                 WHERE uuid = ?
                 """, (connection, statement) -> {
 
@@ -115,6 +115,10 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
     @Override
     public @NotNull CompletableFuture<Optional<UUID>> cachedUUID(@NotNull String username) {
         String filteredName = filterUsername(username);
+        if (filteredName == null) {
+            return FutureUtils.emptyOptionalCompletedFuture();
+        }
+
         UUID uuid = usernameToUuid.getIfPresent(filteredName);
         if (uuid != null) {
             return FutureUtils.completedFuture(Optional.of(uuid));
@@ -122,7 +126,7 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
 
         return CompletableFuture.supplyAsync(() -> {
             return DatabaseUtils.runPreparedSql(LOGGER, "cachedUUID", dataSource, """
-                SELECT uuid, last_updated FROM phantazm_db.username_cache
+                SELECT uuid FROM phantazm_db.username_cache
                 WHERE username = ?
                 ORDER BY last_updated DESC
                 LIMIT 1
@@ -144,12 +148,12 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
 
     @Override
     public @NotNull CompletableFuture<Void> submitUsername(@NotNull UUID uuid, @NotNull String username) {
+        String filteredUsername = filterUsername(username);
+        if (filteredUsername == null) {
+            return FutureUtils.nullCompletedFuture();
+        }
+
         return CompletableFuture.runAsync(() -> {
-            String filteredUsername = filterUsername(username);
-
-            uuidToUsername.put(uuid, filteredUsername);
-            usernameToUuid.put(filteredUsername, uuid);
-
             DatabaseUtils.runPreparedSql(LOGGER, "submitUsername", dataSource, """
                 REPLACE INTO phantazm_db.username_cache (uuid, username, last_updated)
                 VALUES (?, ?, UNIX_TIMESTAMP())
@@ -160,6 +164,9 @@ public class JDBCUsernameDatabase implements UsernameDatabase {
 
                 statement.executeUpdate();
             });
+
+            uuidToUsername.put(uuid, filteredUsername);
+            usernameToUuid.put(filteredUsername, uuid);
         }, executor);
     }
 }
