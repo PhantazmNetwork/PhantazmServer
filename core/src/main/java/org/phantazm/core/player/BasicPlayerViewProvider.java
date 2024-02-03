@@ -93,6 +93,9 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     @Override
     public void handleDisconnect(@NotNull UUID uuid) {
         Objects.requireNonNull(uuid);
-        strongReferences.remove(uuid);
+        PlayerViewImpl playerView = strongReferences.remove(uuid);
+        if (playerView != null) {
+            playerView.tagHandler().clearTags();
+        }
     }
 }

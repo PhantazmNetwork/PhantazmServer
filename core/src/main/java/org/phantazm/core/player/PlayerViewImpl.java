@@ -15,6 +15,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -37,7 +38,6 @@ public final class PlayerViewImpl implements PlayerView {
     private final ConnectionManager connectionManager;
     private final UUID uuid;
 
-    private final Lock sceneJoinLock = new ReentrantLock();
     private final Object usernameLock = new Object();
     private final Object usernameRequestLock = new Object();
 
@@ -45,9 +45,9 @@ public final class PlayerViewImpl implements PlayerView {
 
     private final int hashCode;
 
-    private volatile Reference<Scene> currentSceneReference;
-    private volatile Reference<Player> playerReference;
+    private final AtomicReference<Scene> currentSceneReference;
 
+    private volatile Reference<Player> playerReference;
     private volatile CompletableFuture<String> usernameRequest;
     private volatile String username;
 
@@ -64,7 +64,7 @@ public final class PlayerViewImpl implements PlayerView {
         this.connectionManager = Objects.requireNonNull(connectionManager);
         this.uuid = Objects.requireNonNull(uuid);
         this.playerReference = ReferenceUtils.nullReference();
-        this.currentSceneReference = ReferenceUtils.nullReference();
+        this.currentSceneReference = new AtomicReference<>();
 
         this.hashCode = uuid.hashCode();
         this.tags = TagHandler.newHandler();
@@ -84,7 +84,7 @@ public final class PlayerViewImpl implements PlayerView {
         this.uuid = player.getUuid();
         this.playerReference = new WeakReference<>(player);
         this.username = player.getUsername();
-        this.currentSceneReference = ReferenceUtils.nullReference();
+        this.currentSceneReference = new AtomicReference<>();
 
         this.hashCode = uuid.hashCode();
         this.tags = TagHandler.newHandler();
@@ -214,52 +214,21 @@ public final class PlayerViewImpl implements PlayerView {
     }
 
     /**
-     * Returns the {@link Lock} used to synchronize scene join attempts by this player.
-     * <p>
-     * This method is marked internal because it is only useful when called by {@link SceneManager}, and it is easy for
-     * users to corrupt internal state (for example by erroneously locking the player, which would prevent them from
-     * ever being able to join a scene).
-     *
-     * @return the semaphore used to synchronize join attempts
-     */
-    @ApiStatus.Internal
-    public @NotNull Lock joinLock() {
-        return sceneJoinLock;
-    }
-
-    /**
-     * Gets the player's current scene. The optional may be empty if:
+     * Gets an {@link AtomicReference} to the player's current scene. Referent may be null if:
      * <ul>
      *     <li>The player is not part of a scene; such as if they are offline</li>
-     *     <li>The player previously had a scene but the scene was garbage collected</li>
      *     <li>The player is in a transitory period between having left a scene and being added to a new one</li>
      * </ul>
      * <p>
      * This method is marked internal because it should only be called by {@link SceneManager}, as it will perform the
      * correct synchronization. To retrieve the player's current scene, please use
      * {@link SceneManager#currentScene(PlayerView)}.
+     * <b>Note</b>:
      *
      * @return an Optional containing the current scene, or {@code null} if there is none
      */
     @ApiStatus.Internal
-    public @NotNull Optional<Scene> currentScene() {
-        return Optional.ofNullable(currentSceneReference.get());
-    }
-
-    public @Nullable Scene currentSceneNullable() {
-        return currentSceneReference.get();
-    }
-
-    /**
-     * Updates the player's current scene. This should only be called by a thread that's able to acquire the monitor
-     * from {@link PlayerViewImpl#joinLock()}.
-     * <p>
-     * This method is marked internal because its access must be carefully synchronized by {@link SceneManager}.
-     *
-     * @param scene the scene to update to; {@code null} to set no scene
-     */
-    @ApiStatus.Internal
-    public void updateCurrentScene(@Nullable Scene scene) {
-        this.currentSceneReference = scene == null ? ReferenceUtils.nullReference() : new WeakReference<>(scene);
+    public @NotNull AtomicReference<Scene> currentSceneReference() {
+        return currentSceneReference;
     }
 }

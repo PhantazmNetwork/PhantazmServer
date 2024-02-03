@@ -25,9 +25,13 @@ import java.util.function.Function;
  * Exceptions may or may not be handled gracefully by the SceneManager.
  * <p>
  * Players can <i>join</i> scenes using various methods on {@link SceneManager}. SceneManager also manages scene
- * lifetime: creation, ticking, and removal.
+ * lifetime: creation, ticking, and removal. Note that, this interface does not specify any method to actually join
+ * scenes. This is intentional, as concrete implementations often want to provide unique signatures or multiple
+ * different methods of joining (which will be called directly by the corresponding {@link Join} implementation).
+ * Calling any such joining methods should add the joining player(s) to the appropriate bookkeeping data structures, so
+ * that they are included in the result of calling methods like {@link Scene#getPlayers()}
  * <p>
- * Methods on this interface that are annotated with {@link ApiStatus.Internal} should not be called outside of
+ * Methods on this interface that are annotated with {@link ApiStatus.Internal} should not be called outside the
  * SceneManager for any reason.
  * <p>
  * <h2>Thread Safety</h2>
@@ -177,7 +181,6 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      * This method <i>must</i>:
      * <ul>
      *     <li>Ignore players that have never been added to the scene</li>
-     *     <li>Ignore players that are in a different scene</li>
      *     <li>Modify the state of players that <i>are</i> present in this scene such as to remove any and all modifications applied by this scene</li>
      *     <li>Correctly remove players who are offline but considered part of the scene still</li>
      * </ul>
@@ -185,7 +188,6 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      * This method must <i>not</i>:
      * <ul>
      *     <li>Send the players to a new scene</li>
-     *     <li>Attempt to remove players from other scenes</li>
      *     <li>Kick the players</li>
      *     <li>Modify player state for players not in the scene</li>
      * </ul>
@@ -194,6 +196,10 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      * {@link PlayerView#getPlayer()} method will return an empty Optional, as they are not connected to the server. If
      * they were previously present in this scene, this method must correctly update internal state to account for this,
      * and add the appropriate PlayerView to the set returned by this method.
+     * <p>
+     * Furthermore, scenes must use their own internal bookkeeping methods to determine if a player is currently a part
+     * of this scene (i.e. if they should be appropriately removed). Using methods such as
+     * {@link SceneManager#currentScene(PlayerView)} <i>may</i> not return this Scene instance.
      * <p>
      * This method is marked as internal because it should generally only be called by {@link SceneManager}; this method
      * is only used if it can be determined that a player will be accepted by a different scene, or if they are

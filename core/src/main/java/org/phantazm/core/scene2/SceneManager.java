@@ -27,8 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.Lock;
-import java.util.function.BiConsumer;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -356,32 +355,23 @@ public final class SceneManager {
     private void handleDisconnect(@NotNull PlayerView playerView) {
         PlayerViewImpl view = (PlayerViewImpl) playerView;
 
-        Optional<Scene> currentSceneOptional = view.currentScene();
-        if (currentSceneOptional.isEmpty()) {
+        AtomicReference<Scene> currentSceneReference = view.currentSceneReference();
+        if (currentSceneReference.get() == null) {
+            LOGGER.warn("Disconnect event called for {} but player has no set scene!", playerView.getUUID());
             return;
         }
 
-        Scene scene = currentSceneOptional.get();
-        Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
-        try {
-            Scene self = acquired.get();
+        synchronizeWithCurrentScene(view, scene -> {
+            Set<Player> left = unwrapMany(scene.leave(Set.of(view)), HashSet::new);
 
-            Set<Player> left = unwrapMany(self.leave(Set.of(view)), HashSet::new);
-            leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, left));
-        } finally {
-            acquired.unlock();
-        }
+            if (!left.isEmpty()) {
+                leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, left));
+            }
 
-        Lock viewLock = view.joinLock();
-        viewLock.lock();
-        try {
-            view.updateCurrentScene(null);
-        } finally {
-            viewLock.unlock();
-        }
+            currentSceneReference.set(null);
+        });
 
         viewProvider.handleDisconnect(playerView.getUUID());
-        view.tagHandler().clearTags();
     }
 
     private void handlePostDisconnect(PlayerTablistRemoveEvent event) {
@@ -673,6 +663,9 @@ public final class SceneManager {
      * not be sent anywhere. That is the responsibility of {@code shutdownCallback}, a
      * {@link CompletableFuture}-returning function. When its future is complete (exceptionally or otherwise), the scene
      * will be fully shut down by calling {@link Scene#shutdown()}.
+     * <p>
+     * <b>WARNING</b>: Calling this method inside the thread used to tick the scene being removed may result in
+     * deadlocks.
      *
      * @param scene            the scene to remove
      * @param shutdownCallback the callback to run with the set of all players that were previously in {@code scene}
@@ -693,46 +686,34 @@ public final class SceneManager {
 
         Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
 
-        Set<PlayerView> players = null;
-        Set<Player> leftPlayers;
-        boolean playersLocked = false;
+        Set<PlayerView> players;
+        Set<PlayerView> leftPlayers;
 
         try {
-            try {
-                scene.preShutdown();
+            scene.preShutdown();
 
-                players = Set.copyOf(scene.playersView());
-                if (players.isEmpty()) {
-                    //we can shut down immediately if we have no players
-                    scene.shutdown();
-                    EventDispatcher.call(new SceneShutdownEvent(scene));
-                    return;
-                }
-
-                leftPlayers = unwrapMany(scene.leave(players), HashSet::new);
-            } finally {
-                acquired.unlock();
+            players = Set.copyOf(scene.playersView());
+            if (players.isEmpty()) {
+                //we can shut down immediately if we have no players
+                scene.shutdown();
+                EventDispatcher.call(new SceneShutdownEvent(scene));
+                return;
             }
 
-            playersLocked = lockPlayers(players, true);
+            leftPlayers = scene.leave(players);
 
-            //while the players lock is held, set their current scene to null
-            for (PlayerView playerView : players) {
-                PlayerViewImpl playerViewImpl = (PlayerViewImpl) playerView;
-                Optional<Scene> currentScene = playerViewImpl.currentScene();
-                if (currentScene.isPresent() && currentScene.get() == scene) {
-                    playerViewImpl.updateCurrentScene(null);
+            for (PlayerView leftPlayer : leftPlayers) {
+                if (leftPlayer instanceof PlayerViewImpl actualPlayerView) {
+                    actualPlayerView.currentSceneReference().compareAndSet(scene, null);
                 }
             }
         } finally {
-            if (playersLocked) {
-                unlockPlayers(players);
-            }
+            acquired.unlock();
         }
 
         boolean hasLeftPlayers = !leftPlayers.isEmpty();
 
-        Set<Player> finalLeftPlayers = leftPlayers;
+        Set<Player> finalLeftPlayers = unwrapMany(leftPlayers, HashSet::new);
         if (!hasLeftPlayers || shutdownCallback == null) {
             scene.getAcquirable().sync(self -> {
                 if (hasLeftPlayers) {
@@ -860,43 +841,35 @@ public final class SceneManager {
         }
 
         CompletableFuture<JoinResult<T>> result = CompletableFuture.supplyAsync(() -> {
-            if (!lockPlayers(players, false)) {
-                return JoinResult.alreadyJoining();
-            }
+            for (Map.Entry<Class<? extends Scene>, SceneEntry> entry : targetEntries) {
+                SceneEntry sceneEntry = entry.getValue();
 
-            try {
-                for (Map.Entry<Class<? extends Scene>, SceneEntry> entry : targetEntries) {
-                    SceneEntry sceneEntry = entry.getValue();
+                T joinedScene = tryJoinScenes(sceneEntry.scenes, join);
+                if (joinedScene != null) {
+                    return JoinResult.joined(joinedScene);
+                }
 
-                    T joinedScene = tryJoinScenes(sceneEntry.scenes, join);
+                synchronized (sceneEntry.creationLock) {
+                    joinedScene = tryJoinScenes(sceneEntry.scenes, join);
                     if (joinedScene != null) {
                         return JoinResult.joined(joinedScene);
                     }
 
-                    synchronized (sceneEntry.creationLock) {
-                        joinedScene = tryJoinScenes(sceneEntry.scenes, join);
-                        if (joinedScene != null) {
-                            return JoinResult.joined(joinedScene);
-                        }
-
-                        if (!join.canCreateNewScene(this)) {
-                            continue;
-                        }
-
-                        T newScene = createAndJoinNewScene(join, entry.getKey());
-
-                        sceneEntry.scenes.add(newScene);
-                        threadDispatcher.createPartition(newScene);
-
-                        EventDispatcher.call(new SceneCreationEvent(newScene));
-                        return JoinResult.joined(newScene);
+                    if (!join.canCreateNewScene(this)) {
+                        continue;
                     }
-                }
 
-                return JoinResult.cannotProvision();
-            } finally {
-                unlockPlayers(players);
+                    T newScene = createAndJoinNewScene(join, entry.getKey());
+
+                    sceneEntry.scenes.add(newScene);
+                    threadDispatcher.createPartition(newScene);
+
+                    EventDispatcher.call(new SceneCreationEvent(newScene));
+                    return JoinResult.joined(newScene);
+                }
             }
+
+            return JoinResult.cannotProvision();
         }, executor);
 
         return result.whenComplete((joinResult, error) -> {
@@ -904,7 +877,7 @@ public final class SceneManager {
                 JoinResult.INTERNAL_ERROR : joinResult, players));
 
             if (error != null) {
-                LOGGER.warn("Error while joining player(s) {}: {}",
+                LOGGER.warn("Error while joining player(s) {}",
                     Arrays.deepToString(players.toArray()), error);
             }
         });
@@ -921,49 +894,54 @@ public final class SceneManager {
         return null;
     }
 
-    private boolean lockPlayers(Collection<? extends PlayerView> players, boolean force) {
-        if (players.isEmpty()) {
-            return true;
+    /**
+     * Calls {@code consumer} with the player's current scene. While control flow is inside the consumer, the scene is
+     * guaranteed to still report that it has the player.
+     * <b>
+     * This method returns without calling {@code consumer} if the player is offline (in which case they have no
+     * scene).
+     *
+     * @param playerView the player to synchronize on
+     * @param consumer   the callback to execute with the player's current scene.
+     */
+    public void synchronizeWithCurrentScene(@NotNull PlayerView playerView, @NotNull Consumer<? super Scene> consumer) {
+        if (!(playerView instanceof PlayerViewImpl actualPlayerView)) {
+            return;
         }
 
-        List<Lock> acquiredLocks = force ? null : new ArrayList<>(players.size());
-        for (PlayerView playerView : players) {
-            Lock lock = ((PlayerViewImpl) playerView).joinLock();
-            if (force) {
-                lock.lock();
-                continue;
+        while (true) {
+            Scene scene = actualPlayerView.currentSceneReference().get();
+            if (scene == null) {
+                return;
             }
 
-            if (lock.tryLock()) {
-                acquiredLocks.add(lock);
-                continue;
-            }
-
-            for (Lock acquired : acquiredLocks) {
+            Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
+            try {
+                scene = acquired.get();
+                if (scene.hasPlayer(playerView)) {
+                    consumer.accept(scene);
+                    return;
+                }
+            } finally {
                 acquired.unlock();
             }
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private void unlockPlayers(Iterable<? extends PlayerView> players) {
-        for (PlayerView playerView : players) {
-            ((PlayerViewImpl) playerView).joinLock().unlock();
         }
     }
 
     /**
      * Gets an Optional that may contain the current scene the player is in, which will be empty if the player does not
-     * belong to a scene.
+     * belong to a scene. Note that the player is <i>not</i> guaranteed to remain a part of the scene for any length of
+     * time.
      *
      * @param playerView the player to check
      * @return an Optional containing the current scene
      */
     public @NotNull Optional<Scene> currentScene(@NotNull PlayerView playerView) {
-        return ((PlayerViewImpl) playerView).currentScene();
+        if (!(playerView instanceof PlayerViewImpl actualPlayerView)) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(actualPlayerView.currentSceneReference().get());
     }
 
     /**
@@ -988,7 +966,12 @@ public final class SceneManager {
      * @return an Optional containing the current scene, cast to the target type
      */
     public @NotNull <T extends Scene> Optional<T> currentScene(@NotNull PlayerView playerView, @NotNull Class<T> type) {
-        return ((PlayerViewImpl) playerView).currentScene().filter(scene -> scene.getClass().equals(type)).map(type::cast);
+        if (!(playerView instanceof PlayerViewImpl actualPlayerView)) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(actualPlayerView.currentSceneReference().get())
+            .filter(scene -> scene.getClass().equals(type)).map(type::cast);
     }
 
     /**
@@ -1014,7 +997,7 @@ public final class SceneManager {
      */
     public boolean inScene(@NotNull PlayerView player, @NotNull Scene scene) {
         PlayerViewImpl view = (PlayerViewImpl) player;
-        return view.currentSceneNullable() == scene;
+        return view.currentSceneReference() == scene;
     }
 
     /**
@@ -1027,46 +1010,6 @@ public final class SceneManager {
      */
     public boolean inScene(@NotNull Player player, @NotNull Scene scene) {
         return inScene(PlayerViewProvider.Global.instance().fromPlayer(player), scene);
-    }
-
-    /**
-     * Synchronizes the given player with their current scene, such that they are guaranteed to remain a part of that
-     * scene until control flow exits {@code consumer}. If the player does not have a current scene, the consumer will
-     * not be called.
-     * <p>
-     * Note that this method will <i>not</i> acquire the current scene!
-     *
-     * @param playerView the player to synchronize on
-     * @param consumer   the consumer to run with both the player and current scene passed as arguments
-     */
-    public void synchronizeWithCurrentScene(@NotNull PlayerView playerView,
-        @NotNull BiConsumer<? super @NotNull PlayerView, ? super @NotNull Scene> consumer) {
-        PlayerViewImpl view = (PlayerViewImpl) playerView;
-
-        Lock lock = view.joinLock();
-        lock.lock();
-        try {
-            Optional<Scene> scene = view.currentScene();
-            if (scene.isEmpty()) {
-                return;
-            }
-
-            consumer.accept(view, scene.get());
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    /**
-     * Equivalent to {@link SceneManager#synchronizeWithCurrentScene(PlayerView, BiConsumer)}, but accepts a
-     * {@link Player} rather than a {@link PlayerView}.
-     *
-     * @param player   the player to synchronize on
-     * @param consumer the consumer to run with both the player and current scene passed as arguments
-     */
-    public void synchronizeWithCurrentScene(@NotNull Player player,
-        @NotNull BiConsumer<? super @NotNull PlayerView, ? super @NotNull Scene> consumer) {
-        synchronizeWithCurrentScene(PlayerViewProvider.Global.instance().fromPlayer(player), consumer);
     }
 
     /**
@@ -1176,20 +1119,13 @@ public final class SceneManager {
         if (players.size() == 1) {
             PlayerViewImpl onlyPlayer = (PlayerViewImpl) players.iterator().next();
 
-            Optional<Scene> oldSceneOptional = onlyPlayer.currentScene();
-            if (oldSceneOptional.isEmpty()) {
-                onlyPlayer.updateCurrentScene(newScene);
-                return List.of();
-            }
-
-            Scene oldScene = oldSceneOptional.get();
-            if (oldScene == newScene) {
+            Scene oldScene = onlyPlayer.currentSceneReference().getAndSet(newScene);
+            if (oldScene == null || oldScene == newScene) {
                 return List.of();
             }
 
             List<Runnable> leaveActions = new ArrayList<>(1);
             processLeavingPlayer(oldScene, players, leaveActions);
-            onlyPlayer.updateCurrentScene(newScene);
             return leaveActions;
         }
 
@@ -1198,46 +1134,37 @@ public final class SceneManager {
         for (PlayerView playerView : players) {
             PlayerViewImpl view = (PlayerViewImpl) playerView;
 
-            Optional<Scene> currentSceneOptional = view.currentScene();
-            if (currentSceneOptional.isEmpty()) {
-                view.updateCurrentScene(newScene);
+            Scene oldScene = view.currentSceneReference().getAndSet(newScene);
+            if (oldScene == null || oldScene == newScene) {
                 continue;
             }
 
-            Scene currentScene = currentSceneOptional.get();
-            if (currentScene == newScene) {
-                continue;
-            }
-
-            groupedScenes.computeIfAbsent(currentScene, ignored -> new HashSet<>(2)).add(view);
+            groupedScenes.computeIfAbsent(oldScene, ignored -> new HashSet<>(2)).add(view);
         }
 
         for (Map.Entry<Scene, Set<PlayerViewImpl>> entry : groupedScenes.entrySet()) {
-            Set<PlayerViewImpl> value = entry.getValue();
             processLeavingPlayer(entry.getKey(), entry.getValue(), leaveActions);
-
-            for (PlayerViewImpl view : value) {
-                view.updateCurrentScene(newScene);
-            }
         }
 
         return leaveActions;
     }
 
-    private static void processLeavingPlayer(Scene scene, Set<? extends PlayerView> views, List<Runnable> leaveActions) {
-        scene.getAcquirable().sync(self -> {
+    private static void processLeavingPlayer(Scene oldScene, Set<? extends PlayerView> views, List<Runnable> leaveActions) {
+        oldScene.getAcquirable().sync(self -> {
             if (self.playersView().isEmpty()) {
                 return;
             }
 
             Set<Player> left = PlayerView.getMany(self.leave(views), HashSet::new);
-            if (!left.isEmpty()) {
-                for (Player player : left) {
-                    player.clearTags();
-                }
-
-                leaveActions.add(() -> self.getAcquirable().sync(self2 -> self2.postLeave(left)));
+            if (left.isEmpty()) {
+                return;
             }
+
+            for (Player player : left) {
+                player.clearTags();
+            }
+
+            leaveActions.add(() -> self.getAcquirable().sync(self2 -> self2.postLeave(left)));
         });
     }
 
