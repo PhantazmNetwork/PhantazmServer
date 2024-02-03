@@ -356,28 +356,28 @@ public final class SceneManager {
     private void handleDisconnect(@NotNull PlayerView playerView) {
         PlayerViewImpl view = (PlayerViewImpl) playerView;
 
-        Lock lock = view.joinLock();
-        lock.lock();
+        Optional<Scene> currentSceneOptional = view.currentScene();
+        if (currentSceneOptional.isEmpty()) {
+            return;
+        }
+
+        Scene scene = currentSceneOptional.get();
+        Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
         try {
-            Optional<Scene> currentSceneOptional = view.currentScene();
-            if (currentSceneOptional.isEmpty()) {
-                return;
-            }
+            Scene self = acquired.get();
 
-            Scene scene = currentSceneOptional.get();
-            Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
-            try {
-                Scene self = acquired.get();
-
-                Set<Player> left = unwrapMany(self.leave(Set.of(view)), HashSet::new);
-                view.updateCurrentScene(null);
-
-                leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, left));
-            } finally {
-                acquired.unlock();
-            }
+            Set<Player> left = unwrapMany(self.leave(Set.of(view)), HashSet::new);
+            leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, left));
         } finally {
-            lock.unlock();
+            acquired.unlock();
+        }
+
+        Lock viewLock = view.joinLock();
+        viewLock.lock();
+        try {
+            view.updateCurrentScene(null);
+        } finally {
+            viewLock.unlock();
         }
 
         viewProvider.handleDisconnect(playerView.getUUID());
