@@ -16,8 +16,6 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.phantazm.core.scene2.SceneManager;
 
@@ -223,7 +221,6 @@ public final class PlayerViewImpl implements PlayerView {
      * This method is marked internal because it should only be called by {@link SceneManager}, as it will perform the
      * correct synchronization. To retrieve the player's current scene, please use
      * {@link SceneManager#currentScene(PlayerView)}.
-     * <b>Note</b>:
      *
      * @return an Optional containing the current scene, or {@code null} if there is none
      */
