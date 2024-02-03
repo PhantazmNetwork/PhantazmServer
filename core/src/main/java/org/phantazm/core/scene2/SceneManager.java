@@ -709,16 +709,20 @@ public final class SceneManager {
                     return;
                 }
 
-                playersLocked = lockPlayers(players, true);
-
                 leftPlayers = unwrapMany(scene.leave(players), HashSet::new);
             } finally {
                 acquired.unlock();
             }
 
+            playersLocked = lockPlayers(players, true);
+
             //while the players lock is held, set their current scene to null
             for (PlayerView playerView : players) {
-                ((PlayerViewImpl) playerView).updateCurrentScene(null);
+                PlayerViewImpl playerViewImpl = (PlayerViewImpl) playerView;
+                Optional<Scene> currentScene = playerViewImpl.currentScene();
+                if (currentScene.isPresent() && currentScene.get() == scene) {
+                    playerViewImpl.updateCurrentScene(null);
+                }
             }
         } finally {
             if (playersLocked) {
@@ -1222,6 +1226,10 @@ public final class SceneManager {
 
     private static void processLeavingPlayer(Scene scene, Set<? extends PlayerView> views, List<Runnable> leaveActions) {
         scene.getAcquirable().sync(self -> {
+            if (self.playersView().isEmpty()) {
+                return;
+            }
+
             Set<Player> left = PlayerView.getMany(self.leave(views), HashSet::new);
             if (!left.isEmpty()) {
                 for (Player player : left) {
