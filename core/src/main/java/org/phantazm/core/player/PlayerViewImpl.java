@@ -212,11 +212,8 @@ public final class PlayerViewImpl implements PlayerView {
     }
 
     /**
-     * Gets an {@link AtomicReference} to the player's current scene. Referent may be null if:
-     * <ul>
-     *     <li>The player is not part of a scene; such as if they are offline</li>
-     *     <li>The player is in a transitory period between having left a scene and being added to a new one</li>
-     * </ul>
+     * Gets an {@link AtomicReference} to the player's current scene. Referent may be null if the player is not part of
+     * a scene; such as if they are offline
      * <p>
      * This method is marked internal because it should only be called by {@link SceneManager}, as it will perform the
      * correct synchronization. To retrieve the player's current scene, please use
