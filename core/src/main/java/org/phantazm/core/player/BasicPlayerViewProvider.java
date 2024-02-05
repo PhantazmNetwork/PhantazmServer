@@ -83,11 +83,11 @@ public class BasicPlayerViewProvider implements PlayerViewProvider {
     @Override
     public void handleJoin(@NotNull Player player) {
         Objects.requireNonNull(player);
-        uuidToView.get(player.getUuid(), key -> {
-            PlayerViewImpl newPlayer = new PlayerViewImpl(identitySource, connectionManager, player);
-            strongReferences.put(key, newPlayer);
-            return newPlayer;
+        PlayerViewImpl old = uuidToView.get(player.getUuid(), key -> {
+            return new PlayerViewImpl(identitySource, connectionManager, player);
         });
+
+        strongReferences.put(player.getUuid(), old);
     }
 
     @Override
