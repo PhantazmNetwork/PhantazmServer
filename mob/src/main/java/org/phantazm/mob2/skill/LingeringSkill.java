@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Model("mob.skill.lingering_skill")
+@Model("mob.skill.lingering")
 @Cache
 public class LingeringSkill implements SkillComponent {
     private final Data data;
