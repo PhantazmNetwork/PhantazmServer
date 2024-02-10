@@ -28,9 +28,9 @@ public class DustParticleVariantData implements ParticleVariantData {
 
     @Override
     public void write(@NotNull BinaryWriter binaryWriter) {
-        binaryWriter.writeFloat(data.color.red());
-        binaryWriter.writeFloat(data.color.green());
-        binaryWriter.writeFloat(data.color.blue());
+        binaryWriter.writeFloat((float) data.color.red() / 255);
+        binaryWriter.writeFloat((float) data.color.green() / 255);
+        binaryWriter.writeFloat((float) data.color.blue() / 255);
         binaryWriter.writeFloat(data.size);
     }
 
