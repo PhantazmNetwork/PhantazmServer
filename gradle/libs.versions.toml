@@ -3,7 +3,7 @@ metadata.format.version = "1.1"
 [versions]
 adventure = "4.12.0"
 
-ethylene = "0.23.1"
+ethylene = "0.23.2"
 
 hephaistos = "2.5.3"
 
