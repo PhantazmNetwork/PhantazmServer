@@ -170,7 +170,7 @@ public abstract class FileSystemInstanceLoader implements InstanceLoader {
     }
 
     @Override
-    public @NotNull CompletableFuture<Instance> loadInstance(@UnmodifiableView @NotNull List<String> subPaths) {
+    public @NotNull CompletableFuture<Instance> loadInstance(@NotNull List<String> subPaths) {
         Path path = rootRelative(subPaths);
 
         InstanceContainer source = instanceSources.get(path);

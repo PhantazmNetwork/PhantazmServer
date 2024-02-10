@@ -213,7 +213,9 @@ public class Main {
 
         String[] gradlewArgs = argBuilder == null ? DEFAULT_GRADLE_ARGS : argBuilder.toArray(String[]::new);
         String[] finalArgs = new String[gradlewArgs.length + 1];
-        finalArgs[0] = Path.of(".", "gradlew").toString();
+
+        String osName = System.getProperty("os.name");
+        finalArgs[0] = Path.of(".", osName.toLowerCase().startsWith("windows") ? "gradlew.bat" : "gradlew").toString();
         System.arraycopy(gradlewArgs, 0, finalArgs, 1, gradlewArgs.length);
         return finalArgs;
     }
