@@ -6,11 +6,8 @@ import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
-import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
-
-import java.util.Optional;
 
 @Model("mob.skill.condition.health")
 @Cache
@@ -58,9 +55,7 @@ public class HealthCondition implements SkillConditionComponent {
 
         @Override
         public boolean test() {
-            Target target = selector.select();
-            Optional<? extends LivingEntity> entityOptional = target.forType(LivingEntity.class);
-            return entityOptional.filter(this::canTrigger).isPresent();
+            return selector.select().forType(LivingEntity.class).filter(this::canTrigger).isPresent();
         }
 
         private boolean canTrigger(LivingEntity target) {
