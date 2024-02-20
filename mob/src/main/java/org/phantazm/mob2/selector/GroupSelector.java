@@ -15,7 +15,7 @@ public class GroupSelector implements SelectorComponent {
     private final List<SelectorComponent> delegates;
 
     @FactoryMethod
-    public GroupSelector(@NotNull List<SelectorComponent> delegates) {
+    public GroupSelector(@NotNull @Child("delegates") List<SelectorComponent> delegates) {
         this.delegates = delegates;
     }
 

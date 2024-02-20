@@ -1,8 +1,6 @@
 package org.phantazm.mob2.selector;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.doubles.DoubleObjectPair;
 import net.minestom.server.coordinate.Point;
@@ -40,6 +38,14 @@ public class EntitiesInAreaSelector implements SelectorComponent {
         return new Internal(mob, originSelector.apply(mob, injectionStore), validator.apply(mob, injectionStore), data);
     }
 
+    @Default("""
+        {
+          limitSelf=true,
+          target='ENTITIES',
+          range=-1D,
+          limit=-1
+        }
+        """)
     @DataObject
     public record Data(
         @NotNull @ChildPath("origin") String originSelector,
@@ -48,25 +54,6 @@ public class EntitiesInAreaSelector implements SelectorComponent {
         @NotNull TrackerTargetType target,
         double range,
         int limit) {
-        @Default("limitSelf")
-        public static @NotNull ConfigElement limitSelfDefault() {
-            return ConfigPrimitive.of(true);
-        }
-
-        @Default("target")
-        public static @NotNull ConfigElement targetDefault() {
-            return ConfigPrimitive.of("ENTITIES");
-        }
-
-        @Default("range")
-        public static @NotNull ConfigElement rangeDefault() {
-            return ConfigPrimitive.of(-1D);
-        }
-
-        @Default("limit")
-        public static @NotNull ConfigElement limitDefault() {
-            return ConfigPrimitive.of(-1);
-        }
     }
 
     private record Internal(Mob self,

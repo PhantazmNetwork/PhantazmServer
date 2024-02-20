@@ -1,8 +1,6 @@
 package org.phantazm.zombies.endless;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -49,6 +47,15 @@ public class BasicEndless implements Endless {
         SINUSOIDAL
     }
 
+    @Default("""
+        {
+          floor=0,
+          a=1,
+          b=1,
+          c=1,
+          d=1
+        }
+        """)
     public record ScalingValue(@NotNull ScalingMethod kind,
         double ceiling,
         double floor,
@@ -63,31 +70,6 @@ public class BasicEndless implements Endless {
                 case CONSTANT -> a;
                 case SINUSOIDAL -> (Math.sin(Math.PI * (b * x + a)) * c);
             }, floor, ceiling);
-        }
-
-        @Default("floor")
-        public static @NotNull ConfigElement defaultFloor() {
-            return ConfigPrimitive.of(0);
-        }
-
-        @Default("a")
-        public static @NotNull ConfigElement defaultA() {
-            return ConfigPrimitive.of(1);
-        }
-
-        @Default("b")
-        public static @NotNull ConfigElement defaultB() {
-            return ConfigPrimitive.of(1);
-        }
-
-        @Default("c")
-        public static @NotNull ConfigElement defaultC() {
-            return ConfigPrimitive.of(1);
-        }
-
-        @Default("d")
-        public static @NotNull ConfigElement defaultD() {
-            return ConfigPrimitive.of(1);
         }
     }
 
@@ -462,6 +444,13 @@ public class BasicEndless implements Endless {
     }
 
     @DataObject
+    @Default("""
+        {
+          waveBase=3,
+          waveDelayBase=0,
+          waveWeightBase=0
+        }
+        """)
     public record Data(@NotNull ScalingValue healthScaling,
         @NotNull ScalingValue damageScaling,
         @NotNull ScalingValue speedScaling,
@@ -473,19 +462,6 @@ public class BasicEndless implements Endless {
         double waveWeightBase,
         @NotNull List<Introduction> introductions,
         @NotNull @ChildPath("themes") List<String> themes) {
-        @Default("waveBase")
-        public static @NotNull ConfigElement defaultWaveBase() {
-            return ConfigPrimitive.of(3);
-        }
 
-        @Default("waveDelayBase")
-        public static @NotNull ConfigElement defaultWaveDelayBase() {
-            return ConfigPrimitive.of(0);
-        }
-
-        @Default("waveWeightBase")
-        public static @NotNull ConfigElement defaultWaveWeightBase() {
-            return ConfigPrimitive.of(0);
-        }
     }
 }
