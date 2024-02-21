@@ -1,7 +1,6 @@
 package org.phantazm.mob2;
 
 import com.github.steanky.ethylene.core.collection.ConfigNode;
-import it.unimi.dsi.fastutil.floats.FloatConsumer;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -16,6 +15,7 @@ import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.commons.ReferenceUtils;
 import org.phantazm.mob2.skill.Skill;
@@ -39,6 +39,7 @@ public class Mob extends ProximaEntity {
     private final List<Skill> useOnTick;
     private final Map<Trigger, List<Skill>> triggeredSkills;
     private final MobData data;
+    private final ExtensionHolder extensionHolder;
 
     private final String uniqueTeamName;
 
@@ -46,9 +47,6 @@ public class Mob extends ProximaEntity {
     private final CachedPacket cachedCreateTeamPacket;
     private final CachedPacket cachedUpdateTeamPacket;
     private final CachedPacket cachedRemoveTeamPacket;
-
-    private final Object healthWriteSync;
-    private volatile List<FloatConsumer> healthUpdateListeners;
 
     private Reference<Entity> lastHitEntity;
     private Reference<Player> lastInteractingPlayer;
@@ -89,8 +87,7 @@ public class Mob extends ProximaEntity {
         this.triggeredSkills = new EnumMap<>(Trigger.class);
         this.data = data == null ? new MobData(NONE_MOB_KEY, entityType, ConfigNode.of(), false,
             ConfigNode.of(), ConfigNode.of(), null, List.of(), List.of(), ConfigNode.of()) : data;
-
-        this.healthWriteSync = new Object();
+        this.extensionHolder = new ExtensionHolder();
 
         this.lastHitEntity = ReferenceUtils.nullReference();
         this.lastInteractingPlayer = ReferenceUtils.nullReference();
@@ -124,20 +121,13 @@ public class Mob extends ProximaEntity {
         this(entityType, UUID.randomUUID(), null, null);
     }
 
-    public void addHealthListener(@NotNull FloatConsumer floatConsumer) {
-        Objects.requireNonNull(floatConsumer);
-        synchronized (healthWriteSync) {
-            List<FloatConsumer> healthUpdateListeners;
-            if (this.healthUpdateListeners == null) {
-                healthUpdateListeners = new ArrayList<>(1);
-            } else {
-                healthUpdateListeners = new ArrayList<>(this.healthUpdateListeners.size() + 1);
-                healthUpdateListeners.addAll(this.healthUpdateListeners);
-            }
-
-            healthUpdateListeners.add(floatConsumer);
-            this.healthUpdateListeners = List.copyOf(healthUpdateListeners);
-        }
+    /**
+     * Gets the {@link ExtensionHolder} for this mob.
+     *
+     * @return the ExtensionHolder for this mob
+     */
+    public @NotNull ExtensionHolder extensions() {
+        return extensionHolder;
     }
 
     /**
@@ -319,25 +309,6 @@ public class Mob extends ProximaEntity {
         }
 
         return result;
-    }
-
-    @Override
-    public void setHealth(float health) {
-        float oldHealth = getHealth();
-        super.setHealth(health);
-
-        if (oldHealth == health) {
-            return;
-        }
-
-        List<FloatConsumer> healthUpdateListeners = this.healthUpdateListeners;
-        if (healthUpdateListeners == null) {
-            return;
-        }
-
-        for (FloatConsumer consumer : healthUpdateListeners) {
-            consumer.accept(health);
-        }
     }
 
     @Override
