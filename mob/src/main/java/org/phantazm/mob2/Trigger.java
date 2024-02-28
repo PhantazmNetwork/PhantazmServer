@@ -4,7 +4,7 @@ import org.phantazm.mob2.skill.Skill;
 
 /**
  * Represents a predefined set of <i>triggers</i>. Triggers are specific conditions that result in the
- * {@link Skill#use()} method being invoked for any skills dependent on the trigger.
+ * {@link Skill#use(Mob)} method being invoked for any skills dependent on the trigger.
  */
 public enum Trigger {
     /**

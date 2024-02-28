@@ -1,14 +1,12 @@
 package org.phantazm.mob2.selector;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 
@@ -29,31 +27,28 @@ public class LineOfSightOffsetSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, delegate.apply(mob, injectionStore));
+    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
+        return new Internal(data, delegate.apply(holder));
     }
 
+    @Default("""
+        {
+          ignorePitch=false,
+          ignoreYaw=false
+        }
+        """)
     @DataObject
     public record Data(double distance,
         boolean ignorePitch,
         boolean ignoreYaw,
         @NotNull @ChildPath("delegate") String delegate) {
-        @Default("ignorePitch")
-        public static @NotNull ConfigElement defaultIgnorePitch() {
-            return ConfigPrimitive.FALSE;
-        }
-
-        @Default("ignoreYaw")
-        public static @NotNull ConfigElement defaultIgnoreYaw() {
-            return ConfigPrimitive.FALSE;
-        }
     }
 
     private record Internal(Data data,
         Selector delegate) implements Selector {
         @Override
-        public @NotNull Target select() {
-            Target delegateTarget = delegate.select();
+        public @NotNull Target select(@NotNull Mob mob) {
+            Target delegateTarget = delegate.select(mob);
             Collection<Target.TargetEntry> entries = delegateTarget.entries();
             if (entries.isEmpty()) {
                 return Target.NONE;

@@ -1,10 +1,10 @@
-package org.phantazm.mob2.skill;
+package org.phantazm.mob2.condition;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
@@ -27,8 +27,8 @@ public class DistanceCondition implements SkillConditionComponent {
     }
 
     @Override
-    public @NotNull SkillCondition apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, originSelector.apply(mob, injectionStore), targetSelector.apply(mob, injectionStore));
+    public @NotNull SkillCondition apply(@NotNull ExtensionHolder holder) {
+        return new Internal(data, originSelector.apply(holder), targetSelector.apply(holder));
     }
 
     public enum Behavior {
@@ -66,9 +66,9 @@ public class DistanceCondition implements SkillConditionComponent {
         Selector targetSelector) implements SkillCondition {
 
         @Override
-        public boolean test() {
-            Target origin = originSelector.select();
-            Target target = targetSelector.select();
+        public boolean test(@NotNull Mob mob) {
+            Target origin = originSelector.select(mob);
+            Target target = targetSelector.select(mob);
 
             int matchCount = 0;
             for (Point originPoint : origin.locations()) {

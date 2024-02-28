@@ -231,7 +231,6 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
             return null;
         });
 
-        map.objects().mobSpawner().init();
         endless.init();
         return scene;
     }

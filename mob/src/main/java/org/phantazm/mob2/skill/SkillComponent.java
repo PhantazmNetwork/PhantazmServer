@@ -1,11 +1,10 @@
 package org.phantazm.mob2.skill;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob2.Mob;
+import org.phantazm.commons.ExtensionHolder;
 
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
-public interface SkillComponent extends BiFunction<@NotNull Mob, @NotNull InjectionStore, @NotNull Skill> {
+public interface SkillComponent extends Function<@NotNull ExtensionHolder, @NotNull Skill> {
 
 }

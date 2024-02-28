@@ -6,7 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 
 import java.util.Objects;
@@ -22,19 +22,18 @@ public class DistanceValidator implements ValidatorComponent {
     }
 
     @Override
-    public @NotNull Validator apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob, data);
+    public @NotNull Validator apply(@NotNull ExtensionHolder holder) {
+        return new Internal(data);
     }
 
     @DataObject
     public record Data(double distance) {
     }
 
-    private record Internal(Mob self,
-        Data data) implements Validator {
+    private record Internal(Data data) implements Validator {
         @Override
-        public boolean valid(@NotNull Entity entity) {
-            return self.getDistanceSquared(entity) < data.distance * data.distance;
+        public boolean valid(@NotNull Mob mob, @NotNull Entity entity) {
+            return mob.getDistanceSquared(entity) < data.distance * data.distance;
         }
     }
 }

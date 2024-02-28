@@ -1,8 +1,6 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
@@ -14,8 +12,8 @@ import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob2.InjectionKeys;
+import org.phantazm.commons.ExtensionHolder;
+import org.phantazm.mob2.BasicMobSpawner;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.Trigger;
@@ -38,6 +36,12 @@ public class DamageOverTimeSkill implements SkillComponent {
     private final SelectorComponent selector;
     private final ValidatorComponent validator;
 
+    private static class Extension {
+        private int ticks;
+        private Task tickTask;
+        private final Deque<Internal.Entry> targets = new ArrayDeque<>();
+    }
+
     @FactoryMethod
     public DamageOverTimeSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector,
         @NotNull @Child("validator") ValidatorComponent validator) {
@@ -47,13 +51,19 @@ public class DamageOverTimeSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        Scheduler scheduler = injectionStore.getOrDefault(InjectionKeys.SCHEDULER,
-            MinecraftServer::getSchedulerManager);
-        return new Internal(data, mob, selector.apply(mob, injectionStore), validator.apply(mob, injectionStore),
-            scheduler);
+    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
+        return new Internal(data, holder.requestKey(Extension.class), selector.apply(holder),
+            validator.apply(holder));
     }
 
+    @Default("""
+        {
+          sound=null,
+          trigger=null,
+          bypassArmor=false,
+          exceedMobLifetime=true
+        }
+        """)
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
@@ -65,49 +75,27 @@ public class DamageOverTimeSkill implements SkillComponent {
         float damageAmount,
         boolean bypassArmor,
         boolean exceedMobLifetime) {
-        @Default("sound")
-        public static @NotNull ConfigElement defaultSound() {
-            return ConfigPrimitive.NULL;
-        }
 
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("bypassArmor")
-        public static @NotNull ConfigElement defaultBypassArmor() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("exceedMobLifetime")
-        public static @NotNull ConfigElement defaultExceedMobLifetime() {
-            return ConfigPrimitive.of(true);
-        }
     }
 
     private static class Internal extends TargetedSkill {
         private final Data data;
-        private final Deque<Entry> targets;
+        private final ExtensionHolder.Key<Extension> key;
         private final Validator validator;
-        private final Scheduler scheduler;
 
-        private int ticks;
-        private Task tickTask;
-
-        private Internal(Data data, Mob self, Selector selector, Validator validator, Scheduler scheduler) {
-            super(self, selector);
+        private Internal(Data data, ExtensionHolder.Key<Extension> key, Selector selector, Validator validator) {
+            super(selector);
             this.data = data;
-            this.targets = new ArrayDeque<>();
+            this.key = key;
             this.validator = validator;
-            this.scheduler = scheduler;
         }
 
         @Override
-        protected void useOnTarget(@NotNull Target target) {
-            self.getAcquirable().sync(ignored -> {
+        protected void useOnTarget(@NotNull Target target, @NotNull Mob mob) {
+            Extension ext = mob.extensions().get(key);
+            mob.getAcquirable().sync(ignored -> {
                 target.forType(LivingEntity.class, livingEntity -> {
-                    addDamageTarget(livingEntity, ticks);
+                    addDamageTarget(livingEntity, ext);
                 });
             });
         }
@@ -118,27 +106,34 @@ public class DamageOverTimeSkill implements SkillComponent {
         }
 
         @Override
-        public void tick() {
-            Task tickTask = this.tickTask;
-            if (targets.isEmpty() && tickTask != null) {
+        public void init(@NotNull Mob mob) {
+            mob.extensions().set(key, new Extension());
+        }
+
+        @Override
+        public void tick(@NotNull Mob mob) {
+            Extension ext = mob.extensions().get(key);
+            Task tickTask = ext.tickTask;
+
+            if (ext.targets.isEmpty() && tickTask != null) {
                 tickTask.cancel();
-                this.tickTask = null;
+                ext.tickTask = null;
                 return;
             }
 
-            Iterator<Entry> iterator = targets.iterator();
+            Iterator<Entry> iterator = ext.targets.iterator();
             while (iterator.hasNext()) {
                 Entry entry = iterator.next();
                 LivingEntity target = entry.target.get();
 
-                if (target == null || target.isDead() || target.isRemoved() || !validator.valid(target)) {
+                if (target == null || target.isDead() || target.isRemoved() || !validator.valid(mob, target)) {
                     iterator.remove();
                     continue;
                 }
 
-                int sinceStart = ticks - entry.start;
+                int sinceStart = ext.ticks - entry.start;
                 if (sinceStart % data.damageInterval == 0) {
-                    damageTarget(target);
+                    damageTarget(mob, target);
                 }
 
                 if (sinceStart >= data.damageTime) {
@@ -146,21 +141,24 @@ public class DamageOverTimeSkill implements SkillComponent {
                 }
             }
 
-            ticks++;
+            ext.ticks++;
         }
 
         @Override
-        public void end() {
+        public void end(@NotNull Mob mob) {
+            Extension ext = mob.extensions().get(key);
             if (!data.exceedMobLifetime) {
                 return;
             }
 
-            self.getAcquirable().sync(self -> {
-                if (targets.isEmpty() || tickTask != null) {
+            Scheduler scheduler = mob.extensions().getOrDefault(BasicMobSpawner.SCHEDULER_KEY,
+                MinecraftServer::getSchedulerManager);
+            mob.getAcquirable().sync(self -> {
+                if (ext.targets.isEmpty() || ext.tickTask != null) {
                     return;
                 }
 
-                tickTask = scheduler.scheduleTask(this::tick, TaskSchedule.nextTick(), TaskSchedule.nextTick());
+                ext.tickTask = scheduler.scheduleTask(() -> tick(mob), TaskSchedule.nextTick(), TaskSchedule.nextTick());
             });
         }
 
@@ -169,7 +167,7 @@ public class DamageOverTimeSkill implements SkillComponent {
             return true;
         }
 
-        private void damageTarget(LivingEntity target) {
+        private void damageTarget(Mob self, LivingEntity target) {
             target.getAcquirable().sync(targetEntity -> {
                 if (data.sound != null && targetEntity instanceof Player player) {
                     player.playSound(data.sound);
@@ -178,8 +176,8 @@ public class DamageOverTimeSkill implements SkillComponent {
             });
         }
 
-        private void addDamageTarget(LivingEntity livingEntity, int ticks) {
-            targets.add(new Entry(new WeakReference<>(livingEntity), ticks));
+        private void addDamageTarget(LivingEntity livingEntity, Extension ext) {
+            ext.targets.add(new Entry(new WeakReference<>(livingEntity), ext.ticks));
         }
 
         private record Entry(Reference<LivingEntity> target,

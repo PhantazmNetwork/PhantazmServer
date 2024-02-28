@@ -7,7 +7,6 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.goal.GoalCreator;
@@ -16,7 +15,7 @@ import org.phantazm.zombies.event.mob.MobBreakWindowEvent;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.map.ZombiesMap;
-import org.phantazm.zombies.mob2.InjectionKeys;
+import org.phantazm.zombies.mob2.ZombiesMobSpawner;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
@@ -33,8 +32,8 @@ public class BreakNearbyWindowGoal implements GoalCreator {
     }
 
     @Override
-    public @NotNull ProximaGoal create(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        ZombiesScene scene = injectionStore.get(InjectionKeys.SCENE);
+    public @NotNull ProximaGoal create(@NotNull Mob mob) {
+        ZombiesScene scene = mob.extensions().get(ZombiesMobSpawner.SCENE_KEY);
         ZombiesMap map = scene.map();
         return new Goal(data, map.windowHandler().tracker(), map.objects().roomTracker(), mob, scene);
     }

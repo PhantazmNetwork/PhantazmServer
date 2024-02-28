@@ -1,8 +1,6 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
@@ -12,7 +10,7 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEv
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.*;
 import org.phantazm.mob2.goal.CollectionGoalGroup;
 import org.phantazm.mob2.goal.ProjectileMovementGoal;
@@ -45,11 +43,17 @@ public class ShootProjectileSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, mob, targetSelector.apply(mob, injectionStore), hitValidator.apply(mob,
-            injectionStore), callback.apply(mob, injectionStore), injectionStore.get(InjectionKeys.MOB_SPAWNER));
+    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
+        return new Internal(data, targetSelector.apply(holder), hitValidator.apply(holder), callback.apply(holder));
     }
 
+    @Default("""
+        {
+          trigger=null,
+          spread=0.0,
+          gravity=true
+        }
+        """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
         @NotNull @ChildPath("target_selector") String selector,
@@ -59,35 +63,19 @@ public class ShootProjectileSkill implements SkillComponent {
         double power,
         double spread,
         boolean gravity) {
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("spread")
-        public static @NotNull ConfigElement defaultSpread() {
-            return ConfigPrimitive.of(0.0D);
-        }
-
-        @Default("gravity")
-        public static @NotNull ConfigElement defaultGravity() {
-            return ConfigPrimitive.of(true);
-        }
     }
 
     private record Internal(Data data,
-        Mob self,
         Selector targetSelector,
         Validator hitValidator,
-        SpawnCallback callback,
-        MobSpawner spawner) implements Skill {
+        SpawnCallback callback) implements Skill {
 
         private void onCollideWithBlock(ProjectileCollideWithBlockEvent event) {
             ((Mob) event.getEntity()).kill();
         }
 
-        private void onCollideWithEntity(ProjectileCollideWithEntityEvent event) {
-            if (!hitValidator.valid(event.getTarget())) {
+        private void onCollideWithEntity(Mob self, ProjectileCollideWithEntityEvent event) {
+            if (!hitValidator.valid(self, event.getTarget())) {
                 return;
             }
 
@@ -100,14 +88,16 @@ public class ShootProjectileSkill implements SkillComponent {
             projectile.kill();
         }
 
-        private void shootAtPoint(Instance instance, Point target) {
-            spawner.spawn(data.entity, instance, self.getPosition().add(0, self.getEyeHeight(), 0), self -> {
-                self.setOwner(this.self.getUuid());
-                callback.accept(self);
+        private void shootAtPoint(Mob self, Instance instance, Point target) {
+            MobSpawner spawner = self.extensions().get(BasicMobSpawner.SPAWNER_KEY);
+            spawner.spawn(data.entity, instance, self.getPosition().add(0, self.getEyeHeight(), 0), projectile -> {
+                projectile.setOwner(self.getUuid());
+                callback.accept(projectile);
 
-                self.setNoGravity(!data.gravity);
-                self.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(self, self, target,
-                    data.power(), data.spread(), this::onCollideWithBlock, this::onCollideWithEntity))));
+                projectile.setNoGravity(!data.gravity);
+                projectile.addGoalGroup(new CollectionGoalGroup(List.of(new ProjectileMovementGoal(projectile,
+                    projectile, target, data.power(), data.spread(), this::onCollideWithBlock,
+                    event -> onCollideWithEntity(self, event)))));
             });
         }
 
@@ -117,21 +107,21 @@ public class ShootProjectileSkill implements SkillComponent {
         }
 
         @Override
-        public void use() {
-            Instance instance = self.getInstance();
+        public void use(@NotNull Mob mob) {
+            Instance instance = mob.getInstance();
             if (instance == null) {
                 return;
             }
 
-            Target target = targetSelector.select();
+            Target target = targetSelector.select(mob);
             Optional<? extends Entity> targetEntityOptional = target.target();
             if (targetEntityOptional.isPresent()) {
                 Entity targetEntity = targetEntityOptional.get();
-                if (!hitValidator.valid(targetEntity)) {
+                if (!hitValidator.valid(mob, targetEntity)) {
                     return;
                 }
 
-                shootAtPoint(instance, targetEntity.getPosition()
+                shootAtPoint(mob, instance, targetEntity.getPosition()
                     .add(0, targetEntity.getBoundingBox().height() / 2, 0));
                 return;
             }
@@ -141,7 +131,7 @@ public class ShootProjectileSkill implements SkillComponent {
                 return;
             }
 
-            shootAtPoint(instance, targetPointOptional.get());
+            shootAtPoint(mob, instance, targetPointOptional.get());
         }
     }
 }

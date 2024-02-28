@@ -2,7 +2,7 @@ package org.phantazm.mob2.selector;
 
 import com.github.steanky.element.core.annotation.*;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 
@@ -20,10 +20,10 @@ public class GroupSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
         List<Selector> delegates = new ArrayList<>(this.delegates.size());
         for (SelectorComponent selectorComponent : this.delegates) {
-            delegates.add(selectorComponent.apply(mob, injectionStore));
+            delegates.add(selectorComponent.apply(holder));
         }
 
         return new Internal(delegates);
@@ -35,10 +35,10 @@ public class GroupSelector implements SelectorComponent {
 
     private record Internal(List<Selector> delegates) implements Selector {
         @Override
-        public @NotNull Target select() {
+        public @NotNull Target select(@NotNull Mob mob) {
             List<Target.TargetEntry> entries = new ArrayList<>();
             for (Selector delegate : delegates) {
-                entries.addAll(delegate.select().entries());
+                entries.addAll(delegate.select(mob).entries());
             }
 
             return Target.entries(entries);

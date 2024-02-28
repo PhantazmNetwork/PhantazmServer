@@ -4,7 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 
 import java.util.function.Consumer;
 
@@ -12,6 +12,18 @@ import java.util.function.Consumer;
  * Spawns {@link Mob}s in an instance.
  */
 public interface MobSpawner {
+    class Extensions {
+        private static final ExtensionHolder GLOBAL_HOLDER = new ExtensionHolder();
+
+        public static @NotNull ExtensionHolder newHolder() {
+            return GLOBAL_HOLDER.derive();
+        }
+
+        public static <T> ExtensionHolder.@NotNull Key<T> newKey(@NotNull Class<T> type) {
+            return GLOBAL_HOLDER.requestKey(type);
+        }
+    }
+
     /**
      * Spawns a {@link Mob} in the given instance. This method must be thread-safe.
      *
@@ -23,7 +35,8 @@ public interface MobSpawner {
      * @throws IllegalStateException    if this spawner has not been initialized yet
      * @throws IllegalArgumentException if no such mob exists with the given identifier
      */
-    @NotNull Mob spawn(@NotNull Key identifier, @NotNull Instance instance, @NotNull Pos pos,
+    @NotNull
+    Mob spawn(@NotNull Key identifier, @NotNull Instance instance, @NotNull Pos pos,
         @NotNull Consumer<? super @NotNull Mob> setup);
 
     /**
@@ -48,10 +61,4 @@ public interface MobSpawner {
      * @return true if this spawner can spawn the mob; false otherwise
      */
     boolean canSpawn(@NotNull Key identifier);
-
-    /**
-     * Initializes this MobSpawner. This may involve preparing any necessary {@link InjectionStore} entries. It must be
-     * called at least <i>once</i> before the mob spawner is used.
-     */
-    void init();
 }

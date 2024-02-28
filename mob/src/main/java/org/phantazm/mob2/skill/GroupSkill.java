@@ -1,12 +1,10 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Trigger;
 
@@ -29,10 +27,10 @@ public class GroupSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
         Skill[] delegateSkills = new Skill[delegates.size()];
         for (int i = 0; i < delegateSkills.length; i++) {
-            delegateSkills[i] = delegates.get(i).apply(mob, injectionStore);
+            delegateSkills[i] = delegates.get(i).apply(holder);
         }
 
         List<Skill> tickables = new ArrayList<>(delegates.size());
@@ -46,36 +44,37 @@ public class GroupSkill implements SkillComponent {
             tickables.isEmpty() ? EMPTY_SKILL_ARRAY : tickables.toArray(Skill[]::new));
     }
 
+    @Default("""
+        {
+          trigger=null
+        }
+        """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
         @NotNull @ChildPath("delegates") List<String> delegates) {
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
-        }
     }
 
     private record Internal(Trigger trigger,
         Skill[] delegates,
         Skill[] tickables) implements Skill {
         @Override
-        public void init() {
+        public void init(@NotNull Mob mob) {
             for (Skill skill : delegates) {
-                skill.init();
+                skill.init(mob);
             }
         }
 
         @Override
-        public void use() {
+        public void use(@NotNull Mob mob) {
             for (Skill skill : delegates) {
-                skill.use();
+                skill.use(mob);
             }
         }
 
         @Override
-        public void tick() {
+        public void tick(@NotNull Mob mob) {
             for (Skill skill : tickables) {
-                skill.tick();
+                skill.tick(mob);
             }
         }
 
@@ -85,9 +84,9 @@ public class GroupSkill implements SkillComponent {
         }
 
         @Override
-        public void end() {
+        public void end(@NotNull Mob mob) {
             for (Skill skill : delegates) {
-                skill.end();
+                skill.end(mob);
             }
         }
     }

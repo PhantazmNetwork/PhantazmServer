@@ -7,7 +7,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.core.TrackerTargetType;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
@@ -34,15 +34,15 @@ public class EntitiesInAreaSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob, originSelector.apply(mob, injectionStore), validator.apply(mob, injectionStore), data);
+    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
+        return new Internal(originSelector.apply(holder), validator.apply(holder), data);
     }
 
     @Default("""
         {
           limitSelf=true,
           target='ENTITIES',
-          range=-1D,
+          range=-1.0,
           limit=-1
         }
         """)
@@ -56,18 +56,17 @@ public class EntitiesInAreaSelector implements SelectorComponent {
         int limit) {
     }
 
-    private record Internal(Mob self,
-        Selector originSelector,
+    private record Internal(Selector originSelector,
         Validator validator,
         Data data) implements Selector {
         @Override
-        public @NotNull Target select() {
-            Instance instance = self.getInstance();
+        public @NotNull Target select(@NotNull Mob mob) {
+            Instance instance = mob.getInstance();
             if (instance == null || data.limit == 0) {
                 return Target.NONE;
             }
 
-            Target originTarget = originSelector.select();
+            Target originTarget = originSelector.select(mob);
             Optional<? extends Point> optionalOrigin = originTarget.location();
             if (optionalOrigin.isEmpty()) {
                 return Target.NONE;
@@ -78,11 +77,11 @@ public class EntitiesInAreaSelector implements SelectorComponent {
 
             if (data.range < 0) {
                 for (Entity target : instance.getEntityTracker().entities(data.target.target())) {
-                    handleEntity(origin, target, targets);
+                    handleEntity(mob, origin, target, targets);
                 }
             } else {
                 instance.getEntityTracker().nearbyEntities(origin, data.range, data.target.target(),
-                    target -> handleEntity(origin, target, targets));
+                    target -> handleEntity(mob, origin, target, targets));
             }
 
             if (targets.isEmpty()) {
@@ -97,8 +96,8 @@ public class EntitiesInAreaSelector implements SelectorComponent {
             return Target.entities(actualTargets);
         }
 
-        private void handleEntity(Point origin, Entity target, List<DoubleObjectPair<Entity>> targets) {
-            if ((data.limitSelf && target == self) || !validator.valid(target)) {
+        private void handleEntity(Mob mob, Point origin, Entity target, List<DoubleObjectPair<Entity>> targets) {
+            if ((data.limitSelf && target == mob) || !validator.valid(mob, target)) {
                 return;
             }
 

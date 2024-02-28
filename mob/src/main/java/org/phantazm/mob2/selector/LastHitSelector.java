@@ -4,7 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 
@@ -16,14 +16,14 @@ public class LastHitSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob);
+    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
+        return new Internal();
     }
 
-    private record Internal(Mob self) implements Selector {
+    private record Internal() implements Selector {
         @Override
-        public @NotNull Target select() {
-            return self.lastHitEntity().map(Target::entities).orElse(Target.NONE);
+        public @NotNull Target select(@NotNull Mob mob) {
+            return mob.lastHitEntity().map(Target::entities).orElse(Target.NONE);
         }
     }
 }

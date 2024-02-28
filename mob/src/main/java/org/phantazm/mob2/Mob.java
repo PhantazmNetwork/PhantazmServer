@@ -39,7 +39,7 @@ public class Mob extends ProximaEntity {
     private final List<Skill> useOnTick;
     private final Map<Trigger, List<Skill>> triggeredSkills;
     private final MobData data;
-    private final ExtensionHolder extensionHolder;
+    private ExtensionHolder extensionHolder;
 
     private final String uniqueTeamName;
 
@@ -87,7 +87,6 @@ public class Mob extends ProximaEntity {
         this.triggeredSkills = new EnumMap<>(Trigger.class);
         this.data = data == null ? new MobData(NONE_MOB_KEY, entityType, ConfigNode.of(), false,
             ConfigNode.of(), ConfigNode.of(), null, List.of(), List.of(), ConfigNode.of()) : data;
-        this.extensionHolder = new ExtensionHolder();
 
         this.lastHitEntity = ReferenceUtils.nullReference();
         this.lastInteractingPlayer = ReferenceUtils.nullReference();
@@ -122,17 +121,27 @@ public class Mob extends ProximaEntity {
     }
 
     /**
-     * Gets the {@link ExtensionHolder} for this mob.
+     * Gets the {@link ExtensionHolder} for this mob. This instance will be derived from a global ExtensionHolder for
+     * which keys can be generated using {@link MobSpawner.Extensions#newKey(Class)}.
      *
      * @return the ExtensionHolder for this mob
      */
-    public @NotNull ExtensionHolder extensions() {
+    public ExtensionHolder extensions() {
         return extensionHolder;
     }
 
     /**
-     * Adds a skill to this mob. This will call its {@link Skill#init()} method. Ensure that the skill is not assigned
-     * to any other mob.
+     * Sets the extensions used for this mob.
+     *
+     * @param extensions the extensions used for this mob
+     */
+    public void setExtensions(@NotNull ExtensionHolder extensions) {
+        this.extensionHolder = Objects.requireNonNull(extensions);
+    }
+
+    /**
+     * Adds a skill to this mob. This will call its {@link Skill#init(Mob)} method. Ensure that the skill is not
+     * assigned to any other mob.
      * <p>
      * <b>Thread Behavior</b>: It is not safe to call this method by any thread other than the owning's entity's
      * current tick thread, unless proper synchronization is performed.
@@ -171,7 +180,7 @@ public class Mob extends ProximaEntity {
     }
 
     /**
-     * Adds multiple skills to this mob. This will call {@link Skill#init()} for each skill in the collection. Ensure
+     * Adds multiple skills to this mob. This will call {@link Skill#init(Mob)} for each skill in the collection. Ensure
      * that none of the skills are assigned to any other mobs.
      * <p>
      * <b>Thread Behavior</b>: It is not safe to call this method by any thread other than the owning's entity's
@@ -217,7 +226,7 @@ public class Mob extends ProximaEntity {
         allSkills.removeIf(existing -> {
             boolean remove = existing == skill;
             if (remove) {
-                existing.end();
+                existing.end(this);
             }
 
             return remove;
@@ -266,7 +275,7 @@ public class Mob extends ProximaEntity {
     }
 
     private void addSkill0(Skill skill) {
-        skill.init();
+        skill.init(this);
 
         allSkills.add(skill);
         Trigger trigger = skill.trigger();
@@ -296,7 +305,7 @@ public class Mob extends ProximaEntity {
         }
 
         for (Skill skill : skills) {
-            skill.use();
+            skill.use(this);
         }
     }
 
@@ -366,7 +375,7 @@ public class Mob extends ProximaEntity {
         }
 
         for (Skill skill : allSkills) {
-            skill.end();
+            skill.end(this);
         }
         super.remove();
     }
@@ -380,11 +389,11 @@ public class Mob extends ProximaEntity {
         super.update(time);
 
         for (Skill skill : tickableSkills) {
-            skill.tick();
+            skill.tick(this);
         }
 
         for (Skill skill : useOnTick) {
-            skill.use();
+            skill.use(this);
         }
     }
 

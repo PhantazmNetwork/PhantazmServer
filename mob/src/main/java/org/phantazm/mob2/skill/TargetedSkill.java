@@ -11,23 +11,22 @@ import java.util.Objects;
  * An abstract {@link Skill} implementation that is used on a specific {@link Target}.
  */
 public abstract class TargetedSkill implements Skill {
-    protected final Mob self;
     private final Selector selector;
 
-    public TargetedSkill(@NotNull Mob self, @NotNull Selector selector) {
-        this.self = Objects.requireNonNull(self);
+    public TargetedSkill(@NotNull Selector selector) {
         this.selector = Objects.requireNonNull(selector);
     }
 
     @Override
-    public final void use() {
-        useOnTarget(selector.select());
+    public final void use(@NotNull Mob mob) {
+        useOnTarget(selector.select(mob), mob);
     }
 
     /**
-     * Called with the return value of {@link Selector#select()} whenever this skill is used.
+     * Called with the return value of {@link Selector#select(Mob)} whenever this skill is used.
      *
      * @param target the target of this skill
+     * @param mob    the mob that is using the skill
      */
-    protected abstract void useOnTarget(@NotNull Target target);
+    protected abstract void useOnTarget(@NotNull Target target, @NotNull Mob mob);
 }

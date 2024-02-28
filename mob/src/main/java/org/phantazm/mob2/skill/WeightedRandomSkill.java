@@ -1,12 +1,10 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Trigger;
 
@@ -27,31 +25,28 @@ public class WeightedRandomSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
         List<Skill> delegates = new ArrayList<>(this.delegates.size());
         for (SkillComponent component : this.delegates) {
-            delegates.add(component.apply(mob, injectionStore));
+            delegates.add(component.apply(holder));
         }
 
-        return new Impl(data, delegates, random);
+        return new Internal(data, delegates, random);
     }
 
+    @Default("""
+        {
+          trigger=null,
+          weights=null
+        }
+        """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
         @NotNull @ChildPath("delegates") List<String> delegates,
         int[] weights) {
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("weights")
-        public static @NotNull ConfigElement defaultWeights() {
-            return ConfigPrimitive.NULL;
-        }
     }
 
-    private static final class Impl implements Skill {
+    private static final class Internal implements Skill {
         private final Data data;
         private final Random random;
         private final boolean needsTicking;
@@ -65,12 +60,12 @@ public class WeightedRandomSkill implements SkillComponent {
             int weight) implements Comparable<DelegateEntry> {
 
             @Override
-            public int compareTo(@NotNull WeightedRandomSkill.Impl.DelegateEntry o) {
+            public int compareTo(@NotNull WeightedRandomSkill.Internal.DelegateEntry o) {
                 return Integer.compare(this.weight, o.weight);
             }
         }
 
-        private Impl(Data data, List<Skill> delegates, Random random) {
+        private Internal(Data data, List<Skill> delegates, Random random) {
             this.data = data;
             this.random = random;
 
@@ -155,14 +150,14 @@ public class WeightedRandomSkill implements SkillComponent {
         }
 
         @Override
-        public void init() {
+        public void init(@NotNull Mob mob) {
             for (DelegateEntry delegate : delegates) {
-                delegate.delegate.init();
+                delegate.delegate.init(mob);
             }
         }
 
         @Override
-        public void use() {
+        public void use(@NotNull Mob mob) {
             if (delegates.isEmpty()) {
                 return;
             }
@@ -174,18 +169,18 @@ public class WeightedRandomSkill implements SkillComponent {
                 sum += entry.weight;
 
                 if (choice < sum) {
-                    entry.delegate.use();
+                    entry.delegate.use(mob);
                     return;
                 }
             }
 
-            delegates.get(delegates.size() - 1).delegate.use();
+            delegates.get(delegates.size() - 1).delegate.use(mob);
         }
 
         @Override
-        public void tick() {
+        public void tick(@NotNull Mob mob) {
             for (Skill delegate : tickingDelegates) {
-                delegate.tick();
+                delegate.tick(mob);
             }
         }
 
@@ -195,9 +190,9 @@ public class WeightedRandomSkill implements SkillComponent {
         }
 
         @Override
-        public void end() {
+        public void end(@NotNull Mob mob) {
             for (DelegateEntry delegate : delegates) {
-                delegate.delegate.end();
+                delegate.delegate.end(mob);
             }
         }
     }

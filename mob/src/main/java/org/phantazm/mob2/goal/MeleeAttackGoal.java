@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
@@ -13,7 +11,6 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
@@ -30,7 +27,7 @@ public class MeleeAttackGoal implements GoalCreator {
     }
 
     @Override
-    public @NotNull ProximaGoal create(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+    public @NotNull ProximaGoal create(@NotNull Mob mob) {
         return new Goal(data, mob);
     }
 
@@ -103,25 +100,19 @@ public class MeleeAttackGoal implements GoalCreator {
         }
     }
 
+
+    @Default("""
+        {
+          swingHand=true,
+          bypassArmor=false,
+          horizontal=false
+        }
+        """)
     @DataObject
     public record Data(long cooldown,
         double range,
         boolean swingHand,
         boolean bypassArmor,
         boolean horizontal) {
-        @Default("swingHand")
-        public static @NotNull ConfigElement defaultSwingHand() {
-            return ConfigPrimitive.of(true);
-        }
-
-        @Default("bypassArmor")
-        public static @NotNull ConfigElement defaultBypassArmor() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("horizontal")
-        public static @NotNull ConfigElement defaultHorizontal() {
-            return ConfigPrimitive.of(false);
-        }
     }
 }

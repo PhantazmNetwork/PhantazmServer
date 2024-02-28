@@ -4,7 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 
@@ -16,14 +16,14 @@ public class SelfTargetSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new SelfSelector(Target.entities(mob));
+    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
+        return new SelfSelector();
     }
 
-    private record SelfSelector(Target target) implements Selector {
+    private record SelfSelector() implements Selector {
         @Override
-        public @NotNull Target select() {
-            return target;
+        public @NotNull Target select(@NotNull Mob mob) {
+            return Target.entities(mob);
         }
     }
 }

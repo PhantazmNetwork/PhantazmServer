@@ -4,7 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.skill.SpawnCallback;
 import org.phantazm.mob2.skill.SpawnCallbackComponent;
@@ -19,13 +19,14 @@ public class AddToRoundCallback implements SpawnCallbackComponent {
     }
 
     @Override
-    public @NotNull SpawnCallback apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(injectionStore.get(InjectionKeys.SCENE));
+    public @NotNull SpawnCallback apply(@NotNull ExtensionHolder extensionHolder) {
+        return new Internal();
     }
 
-    private record Internal(ZombiesScene scene) implements SpawnCallback {
+    private record Internal() implements SpawnCallback {
         @Override
         public void accept(@NotNull Mob mob) {
+            ZombiesScene scene = mob.extensions().get(ZombiesMobSpawner.SCENE_KEY);
             scene.getAcquirable().sync(self -> {
                 self.map().roundHandler().currentRound().ifPresent(round -> round.addMob(mob));
             });

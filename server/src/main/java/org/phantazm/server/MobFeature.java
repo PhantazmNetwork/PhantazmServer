@@ -13,16 +13,21 @@ import com.github.steanky.ethylene.mapper.type.Token;
 import com.github.steanky.proxima.path.Pathfinder;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.loader.DataSource;
 import org.phantazm.loader.Loader;
 import org.phantazm.loader.ObjectExtractor;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.mob2.MobData;
+import org.phantazm.mob2.MobSpawner;
 import org.phantazm.mob2.goal.GoalApplier;
+import org.phantazm.mob2.skill.Skill;
 import org.phantazm.mob2.skill.SkillComponent;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
@@ -33,6 +38,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -47,6 +54,7 @@ public final class MobFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(MobFeature.class);
 
     private static Loader<MobCreator> mobCreatorLoader;
+    private static Map<Key, ExtensionHolder> extensionMap;
 
     private MobFeature() {
         throw new UnsupportedOperationException();
@@ -63,23 +71,33 @@ public final class MobFeature {
 
         ConfigProcessor<MobData> mobDataProcessor = processorSource.processorFor(Token.ofClass(MobData.class));
 
+        Map<Key, ExtensionHolder> extensionMap = new HashMap<>();
+
         mobCreatorLoader = Loader.loader(() ->
                 DataSource.directory(MobFeature.MOBS_PATH, codec, "glob:**.{yml,yaml}"),
             ObjectExtractor.extractor(ConfigNode.class, (location, node) -> {
                 com.github.steanky.element.core.context.ElementContext context = contextManager.makeContext(node);
                 MobData data = mobDataProcessor.dataFromElement(node);
+                ExtensionHolder extensionHolder = extensionMap.computeIfAbsent(data.key(), ignored ->
+                    MobSpawner.Extensions.newHolder());
 
                 Pathfinding.Factory pathfinding = context.provide(PATHFINDING);
 
                 Map<EquipmentSlot, ItemStack> equipmentMap = equipmentMap(data.equipment(), processorSource);
                 Object2FloatMap<String> attributeMap = attributeMap(data.attributes());
 
-                List<SkillComponent> skills = data.skills().isEmpty() ? List.of() : context.provideCollection(SKILLS);
+                List<SkillComponent> skillComponents = data.skills().isEmpty() ? List.of() : context.provideCollection(SKILLS);
                 List<GoalApplier> goals = data.goals().isEmpty() ? List.of() : context.provideCollection(GOALS);
 
-                return List.of(ObjectExtractor.entry(data.key(), (MobCreator) new ZombiesMobCreator(data, pathfinding, skills, goals,
-                    pathfinder, instanceSettingsFunction, equipmentMap, attributeMap)));
+                List<Skill> skills = new ArrayList<>(skillComponents.size());
+                for (SkillComponent component : skillComponents) {
+                    skills.add(component.apply(extensionHolder));
+                }
+
+                return List.of(ObjectExtractor.entry(data.key(), (MobCreator) new ZombiesMobCreator(data, pathfinding,
+                    skills, goals, pathfinder, instanceSettingsFunction, equipmentMap, attributeMap)));
             })).accepting(mobs -> {
+            MobFeature.extensionMap = Map.copyOf(extensionMap);
             LOGGER.info("Loaded {} mob file(s)", mobs.size());
         });
 
@@ -116,6 +134,10 @@ public final class MobFeature {
     @SuppressWarnings("unused")
     public static @NotNull Loader<MobCreator> mobLoader() {
         return FeatureUtils.check(mobCreatorLoader);
+    }
+
+    public static @NotNull @Unmodifiable Map<Key, ExtensionHolder> extensionMap() {
+        return FeatureUtils.check(extensionMap);
     }
 
     public static void reload() throws IOException {

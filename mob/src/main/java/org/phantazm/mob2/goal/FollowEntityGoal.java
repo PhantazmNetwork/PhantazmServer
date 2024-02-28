@@ -5,7 +5,6 @@ import com.github.steanky.proxima.path.PathTarget;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
@@ -28,8 +27,8 @@ public class FollowEntityGoal implements GoalCreator {
     }
 
     @Override
-    public @NotNull ProximaGoal create(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Goal(data, selector.apply(mob, injectionStore), mob);
+    public @NotNull ProximaGoal create(@NotNull Mob mob) {
+        return new Goal(data, selector.apply(mob.extensions()), mob);
     }
 
     private static class Goal implements ProximaGoal {
@@ -75,7 +74,7 @@ public class FollowEntityGoal implements GoalCreator {
         private void refreshTarget() {
             ticksSinceTargetChosen = 0L;
 
-            Target target = selector.select();
+            Target target = selector.select(self);
 
             Optional<? extends Entity> newTargetOptional = target.target();
             if (newTargetOptional.isPresent()) {

@@ -1,34 +1,40 @@
 package org.phantazm.zombies.mob2;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.loader.Loader;
 import org.phantazm.mob2.BasicMobSpawner;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobCreator;
+import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.event.mob.ZombiesMobSetupEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 
 public class ZombiesMobSpawner extends BasicMobSpawner {
+    public static ExtensionHolder.Key<ZombiesScene> SCENE_KEY = MobSpawner.Extensions.newKey(ZombiesScene.class);
+
     private final Supplier<ZombiesScene> scene;
 
-    public ZombiesMobSpawner(@NotNull Loader<MobCreator> mobCreatorLoader, @NotNull Supplier<ZombiesScene> scene) {
-        super(mobCreatorLoader);
+    public ZombiesMobSpawner(@NotNull Loader<MobCreator> mobCreatorLoader,
+        @NotNull Map<Key, ExtensionHolder> extensionMap, @NotNull Supplier<ZombiesScene> scene) {
+        super(mobCreatorLoader, extensionMap);
         this.scene = Objects.requireNonNull(scene);
     }
 
     @Override
-    public void buildDependencies(InjectionStore.@NotNull Builder builder) {
-        super.buildDependencies(builder);
+    public void buildDependencies(@NotNull ExtensionHolder holder) {
+        super.buildDependencies(holder);
         ZombiesScene scene = this.scene.get();
 
-        builder.with(InjectionKeys.SCENE, scene);
-        builder.with(org.phantazm.mob2.InjectionKeys.SCHEDULER, scene.getScheduler());
+        holder.set(SCENE_KEY, scene);
+        holder.set(SCHEDULER_KEY, scene.getScheduler());
     }
 
     @Override

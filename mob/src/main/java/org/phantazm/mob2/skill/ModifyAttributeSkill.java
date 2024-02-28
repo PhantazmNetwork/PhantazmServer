@@ -1,8 +1,6 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.Pair;
 import net.kyori.adventure.key.Key;
@@ -14,20 +12,27 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.state.CancellableState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Model("mob.skill.attribute_modifying")
 @Cache
 public class ModifyAttributeSkill implements SkillComponent {
     private final Data data;
     private final SelectorComponent selector;
+
+    private static class Extension {
+        private final List<Pair<LivingEntity, CancellableState<Entity>>> affectedEntities = new ArrayList<>();
+    }
 
     @FactoryMethod
     public ModifyAttributeSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector) {
@@ -36,10 +41,16 @@ public class ModifyAttributeSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, mob, selector.apply(mob, injectionStore));
+    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
+        return new Internal(data, holder.requestKey(Extension.class), selector.apply(holder));
     }
 
+    @Default("""
+        {
+          trigger=null,
+          stage=null
+        }
+        """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
         @NotNull @ChildPath("selector") String selector,
@@ -47,35 +58,23 @@ public class ModifyAttributeSkill implements SkillComponent {
         float amount,
         @NotNull AttributeOperation attributeOperation,
         @Nullable Key stage) {
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("stage")
-        public static @NotNull ConfigElement defaultStage() {
-            return ConfigPrimitive.NULL;
-        }
     }
 
     private static final class Internal implements Skill {
         private final Data data;
-        private final Mob self;
+        private final ExtensionHolder.Key<Extension> key;
         private final UUID uuid;
         private final String uuidString;
         private final Attribute attribute;
         private final Selector selector;
 
-        private final List<Pair<LivingEntity, CancellableState<Entity>>> affectedEntities;
-
-        private Internal(Data data, Mob self, Selector selector) {
+        private Internal(Data data, ExtensionHolder.Key<Extension> key, Selector selector) {
             this.data = data;
-            this.self = self;
+            this.key = key;
             this.uuid = UUID.randomUUID();
             this.uuidString = this.uuid.toString();
             this.attribute = Attribute.fromKey(data.attribute);
             this.selector = selector;
-            this.affectedEntities = new ArrayList<>();
         }
 
         private void removeFromEntity(LivingEntity entity, CancellableState<Entity> state) {
@@ -87,7 +86,9 @@ public class ModifyAttributeSkill implements SkillComponent {
             entity.getAttribute(attribute).removeModifier(uuid);
         }
 
-        private void applyToEntity(LivingEntity entity) {
+        private void applyToEntity(Mob self, LivingEntity entity) {
+            Extension ext = self.extensions().get(key);
+
             if (data.stage != null && !(entity instanceof Mob mob && !mob.useStateHolder())) {
                 CancellableState<Entity> state = CancellableState.state(entity, start -> {
                     ((LivingEntity) start).getAttribute(attribute).addModifier(new AttributeModifier(uuid, uuidString,
@@ -97,13 +98,13 @@ public class ModifyAttributeSkill implements SkillComponent {
                 });
 
                 entity.stateHolder().registerState(data.stage, state);
-                affectedEntities.add(Pair.of(entity, state));
+                ext.affectedEntities.add(Pair.of(entity, state));
                 return;
             }
 
             entity.getAttribute(attribute)
                 .addModifier(new AttributeModifier(uuid, uuidString, data.amount, data.attributeOperation));
-            affectedEntities.add(Pair.of(entity, null));
+            ext.affectedEntities.add(Pair.of(entity, null));
         }
 
         @Override
@@ -112,29 +113,37 @@ public class ModifyAttributeSkill implements SkillComponent {
         }
 
         @Override
-        public void use() {
+        public void init(@NotNull Mob mob) {
+            mob.extensions().set(key, new Extension());
+        }
+
+        @Override
+        public void use(@NotNull Mob mob) {
             if (attribute == null) {
                 return;
             }
 
-            Target target = selector.select();
-            self.getAcquirable().sync(ignored -> {
-                target.forType(LivingEntity.class, this::applyToEntity);
+            Target target = selector.select(mob);
+            mob.getAcquirable().sync(ignored -> {
+                target.forType(LivingEntity.class, targetEntity -> {
+                    applyToEntity(mob, targetEntity);
+                });
             });
         }
 
         @Override
-        public void end() {
+        public void end(@NotNull Mob mob) {
             if (attribute == null) {
                 return;
             }
 
-            self.getAcquirable().sync(ignored -> {
-                for (Pair<LivingEntity, CancellableState<Entity>> pair : affectedEntities) {
+            Extension ext = mob.extensions().get(key);
+            mob.getAcquirable().sync(ignored -> {
+                for (Pair<LivingEntity, CancellableState<Entity>> pair : ext.affectedEntities) {
                     removeFromEntity(pair.first(), pair.second());
                 }
 
-                affectedEntities.clear();
+                ext.affectedEntities.clear();
             });
         }
     }

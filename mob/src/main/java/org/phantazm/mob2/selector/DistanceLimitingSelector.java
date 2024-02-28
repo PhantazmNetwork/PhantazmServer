@@ -3,7 +3,7 @@ package org.phantazm.mob2.selector;
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 
@@ -26,8 +26,8 @@ public class DistanceLimitingSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, originSelector.apply(mob, injectionStore), delegate.apply(mob, injectionStore));
+    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
+        return new Internal(data, originSelector.apply(holder), delegate.apply(holder));
     }
 
     public enum Behavior {
@@ -48,18 +48,18 @@ public class DistanceLimitingSelector implements SelectorComponent {
         Selector delegateSelector) implements Selector {
 
         @Override
-        public @NotNull Target select() {
+        public @NotNull Target select(@NotNull Mob mob) {
             if (data.amount <= 0) {
                 return Target.NONE;
             }
 
-            Target origin = originSelector.select();
+            Target origin = originSelector.select(mob);
             Optional<? extends Point> originOptional = origin.location();
             if (originOptional.isEmpty()) {
                 return Target.NONE;
             }
 
-            Target delegate = delegateSelector.select();
+            Target delegate = delegateSelector.select(mob);
             Collection<Target.TargetEntry> entries = delegate.entries();
             if (entries.isEmpty()) {
                 return Target.NONE;

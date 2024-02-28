@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
@@ -16,10 +14,9 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.ParsingException;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.commons.MathUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Trigger;
@@ -37,36 +34,38 @@ public class ShowHealthbarSkill implements SkillComponent {
 
     private final Data data;
 
+    private static class Extension {
+        private int lastAliveBars = -1;
+    }
+
     @FactoryMethod
     public ShowHealthbarSkill(@NotNull Data data) {
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob, data);
+    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
+        return new Internal(data, holder.requestKey(Extension.class));
     }
 
+    @Default("""
+        {
+          trigger=null
+        }
+        """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
         @NotNull String bar,
         int barWidth) {
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
-        }
     }
 
     private static class Internal implements Skill {
-        private final Mob self;
         private final Data data;
+        private final ExtensionHolder.Key<Extension> key;
 
-        private int lastAliveBars;
-
-        private Internal(Mob self, Data data) {
-            this.self = self;
+        private Internal(Data data, ExtensionHolder.Key<Extension> key) {
             this.data = data;
-            this.lastAliveBars = -1;
+            this.key = key;
         }
 
         static @NotNull TextColor resolveColor(@NotNull Context ctx, @NotNull String colorName)
@@ -94,8 +93,8 @@ public class ShowHealthbarSkill implements SkillComponent {
         }
 
         @Override
-        public void tick() {
-            healthbarFor(self).ifPresent(self::setCustomName);
+        public void tick(@NotNull Mob mob) {
+            healthbarFor(mob).ifPresent(mob::setCustomName);
         }
 
         @Override
@@ -104,22 +103,23 @@ public class ShowHealthbarSkill implements SkillComponent {
         }
 
         @Override
-        public void end() {
-            self.setCustomName(null);
+        public void end(@NotNull Mob mob) {
+            mob.setCustomName(null);
         }
 
-        private Optional<Component> healthbarFor(LivingEntity entity) {
+        private Optional<Component> healthbarFor(Mob entity) {
             float maxHealth = entity.getMaxHealth();
             float currentHealth = MathUtils.clamp(entity.getHealth(), 0, maxHealth);
 
             float percentage = maxHealth == 0 ? 0 : currentHealth / maxHealth;
             int aliveBars = Math.round(percentage * data.barWidth);
 
-            if (lastAliveBars == aliveBars) {
+            Extension ext = entity.extensions().get(key);
+            if (ext.lastAliveBars == aliveBars) {
                 return Optional.empty();
             }
 
-            lastAliveBars = aliveBars;
+            ext.lastAliveBars = aliveBars;
 
             TagResolver resolver = TagResolver.resolver("healthbar", ((argumentQueue, context) -> {
                 String barElement = null;

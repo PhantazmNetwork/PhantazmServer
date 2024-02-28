@@ -1,8 +1,6 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Point;
@@ -11,7 +9,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.Trigger;
@@ -37,33 +35,30 @@ public class PlaySoundSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob, targetSelector.apply(mob, injectionStore), data, random);
+    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
+        return new Internal(targetSelector.apply(holder), data, random);
     }
 
+    @Default("""
+        {
+          trigger=null,
+          broadcast=true
+        }
+        """)
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
         @ChildPath("selector") String selector,
         @NotNull Sound sound,
         boolean broadcast) {
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("broadcast")
-        public static @NotNull ConfigElement defaultBroadcast() {
-            return ConfigPrimitive.of(true);
-        }
     }
 
     private static class Internal extends TargetedSkill {
         private final Data data;
         private final Random random;
 
-        private Internal(Mob self, Selector selector, Data data, Random random) {
-            super(self, selector);
+        private Internal(Selector selector, Data data, Random random) {
+            super(selector);
             this.data = data;
             this.random = random;
         }
@@ -73,8 +68,8 @@ public class PlaySoundSkill implements SkillComponent {
         }
 
         @Override
-        protected void useOnTarget(@NotNull Target target) {
-            Instance instance = self.getInstance();
+        protected void useOnTarget(@NotNull Target target, @NotNull Mob mob) {
+            Instance instance = mob.getInstance();
             if (instance == null) {
                 return;
             }

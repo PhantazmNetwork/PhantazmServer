@@ -1,172 +1,197 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.toolkit.collection.Wrapper;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.ExtensionHolder;
+import org.phantazm.mob2.BasicMobSpawner;
 import org.phantazm.mob2.Mob;
 
 import java.util.Objects;
 
 public abstract class TimerSkillAbstract implements Skill {
-    private final Scheduler scheduler;
-    private final Mob self;
+    protected static class Extension {
+        private int interval;
+        private boolean started;
+        private int ticksSinceLastActivation;
+        private int uses;
+
+        private Task scheduledTask;
+
+        private Extension(int interval, boolean started, int ticksSinceLastActivation, int uses) {
+            this.interval = interval;
+            this.started = started;
+            this.ticksSinceLastActivation = ticksSinceLastActivation;
+            this.uses = uses;
+        }
+    }
+
+    private final ExtensionHolder.Key<Extension> key;
+
     private final Skill delegate;
+
+    private final int initialInterval;
+    private final boolean initialStarted;
+    private final int initialTicksSinceLastActivation;
+    private final int initialUses;
+
     private final boolean requiresActivation;
     private final boolean resetOnActivation;
     private final int repeat;
     private final boolean tickDelegate;
     private final boolean endImmediately;
 
-    private int interval;
-    private boolean started;
-    private int ticksSinceLastActivation;
-    private int uses;
-
-    private Task scheduledTask;
-
-    public TimerSkillAbstract(@NotNull Scheduler scheduler, @NotNull Mob self, @NotNull Skill delegate,
-        boolean requiresActivation, boolean resetOnActivation, int repeat, int interval, boolean endImmediately) {
-        this.scheduler = Objects.requireNonNull(scheduler);
-        this.self = Objects.requireNonNull(self);
+    protected TimerSkillAbstract(@NotNull ExtensionHolder.Key<Extension> key,
+        @NotNull Skill delegate, boolean requiresActivation, boolean resetOnActivation, int repeat, int interval,
+        boolean endImmediately) {
+        this.key = key;
         this.delegate = Objects.requireNonNull(delegate);
         this.requiresActivation = requiresActivation;
         this.resetOnActivation = resetOnActivation;
         this.repeat = repeat;
-        this.interval = interval;
+        this.initialInterval = interval;
         this.tickDelegate = delegate.needsTicking();
         this.endImmediately = endImmediately;
 
-        this.started = !requiresActivation;
-        this.ticksSinceLastActivation = 0;
-        this.uses = 0;
+        this.initialStarted = !requiresActivation;
+        this.initialTicksSinceLastActivation = 0;
+        this.initialUses = 0;
     }
 
-    private void reset(boolean started) {
-        this.ticksSinceLastActivation = 0;
-        this.uses = 0;
-        this.started = started;
-    }
-
-    @Override
-    public void init() {
-        delegate.init();
+    private void reset(Extension ext, boolean started) {
+        ext.ticksSinceLastActivation = 0;
+        ext.uses = 0;
+        ext.started = started;
     }
 
     @Override
-    public void use() {
+    public void init(@NotNull Mob mob) {
+        delegate.init(mob);
+        mob.extensions().set(key, new Extension(initialInterval, initialStarted, initialTicksSinceLastActivation,
+            initialUses));
+    }
+
+    @Override
+    public void use(@NotNull Mob mob) {
         if (!resetOnActivation && !requiresActivation) {
             //if we don't reset on activation and don't require activation, use() does nothing
             return;
         }
 
-        self.getAcquirable().sync(ignored -> {
-            if (started && resetOnActivation) {
+        Extension ext = mob.extensions().get(key);
+        mob.getAcquirable().sync(ignored -> {
+            if (ext.started && resetOnActivation) {
                 //case 1: timer is running, we reset on activation
                 //since started is true, we don't have a running task
-                reset(true);
+                reset(ext, true);
                 return;
             }
 
-            if (!started) {
+            if (!ext.started) {
                 //we're starting, so transition back to using the normal tick method
-                cancelTask();
+                cancelTask(ext);
 
                 //case 2: timer is not running, start it
-                started = true;
+                ext.started = true;
             }
         });
     }
 
     @Override
-    public void tick() {
+    public void tick(@NotNull Mob mob) {
         if (tickDelegate) {
-            delegate.tick();
+            delegate.tick(mob);
         }
 
-        if (!started) {
+        Extension ext = mob.extensions().get(key);
+        if (!ext.started) {
             return;
         }
 
-        tick0();
+        tick0(ext, mob);
     }
 
-    private boolean tick0() {
-        if (ticksSinceLastActivation == interval) {
-            if (repeat > -1 && ++uses > repeat) {
-                reset(false);
+    private boolean tick0(Extension ext, Mob mob) {
+        if (ext.ticksSinceLastActivation == ext.interval) {
+            if (repeat > -1 && ++ext.uses > repeat) {
+                reset(ext, false);
                 return true;
             } else {
-                ticksSinceLastActivation = 0;
+                ext.ticksSinceLastActivation = 0;
             }
 
-            interval = computeInterval();
-            delegate.use();
+            ext.interval = computeInterval();
+            delegate.use(mob);
         } else {
-            ticksSinceLastActivation++;
+            ext.ticksSinceLastActivation++;
         }
 
         return false;
     }
 
     @Override
-    public void end() {
-        self.getAcquirable().sync(ignored -> {
-            cancelTask();
-            if (!started) {
+    public void end(@NotNull Mob mob) {
+        Extension ext = mob.extensions().get(key);
+        mob.getAcquirable().sync(ignored -> {
+            cancelTask(ext);
+            if (!ext.started) {
                 return;
             }
 
             //if endImmediately, the timer will stop as soon as end() is called
             //if the timer is infinite, end immediately and don't schedule a task
             if (endImmediately || repeat < 0) {
-                reset(false);
-                delegate.end();
+                reset(ext, false);
+                delegate.end(mob);
                 return;
             }
 
-            this.started = false;
+            ext.started = false;
 
             //pass over responsibility of ticking to the scheduler
             Wrapper<Task> taskWrapper = Wrapper.ofNull();
+            Scheduler scheduler = mob.extensions().getOrDefault(BasicMobSpawner.SCHEDULER_KEY,
+                MinecraftServer::getSchedulerManager);
             Task task = scheduler.scheduleTask(() -> {
                 if (tickDelegate) {
-                    delegate.tick();
+                    delegate.tick(mob);
                 }
 
-                if (tick0()) {
+                if (tick0(ext, mob)) {
                     Task thisTask = taskWrapper.get();
                     thisTask.cancel();
 
-                    self.getAcquirable().sync(self -> {
-                        if (this.scheduledTask == thisTask) {
-                            this.scheduledTask = null;
+                    mob.getAcquirable().sync(self -> {
+                        if (ext.scheduledTask == thisTask) {
+                            ext.scheduledTask = null;
                         }
                     });
                 }
             }, TaskSchedule.nextTick(), TaskSchedule.nextTick());
             taskWrapper.set(task);
 
-            setScheduledTask(task);
+            setScheduledTask(ext, task);
         });
     }
 
-    private void cancelTask() {
-        Task task = this.scheduledTask;
+    private void cancelTask(Extension ext) {
+        Task task = ext.scheduledTask;
         if (task != null) {
             task.cancel();
-            this.scheduledTask = null;
+            ext.scheduledTask = null;
         }
     }
 
-    private void setScheduledTask(Task task) {
-        Task oldTask = this.scheduledTask;
+    private void setScheduledTask(Extension ext, Task task) {
+        Task oldTask = ext.scheduledTask;
         if (oldTask != null) {
             oldTask.cancel();
         }
 
-        this.scheduledTask = task;
+        ext.scheduledTask = task;
     }
 
     @Override

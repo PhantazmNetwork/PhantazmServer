@@ -13,13 +13,12 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobCreatorBase;
 import org.phantazm.mob2.MobData;
 import org.phantazm.mob2.goal.GoalApplier;
-import org.phantazm.mob2.skill.SkillComponent;
+import org.phantazm.mob2.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.phantazm.zombies.ExtraNodeKeys;
@@ -34,7 +33,7 @@ import java.util.function.Function;
 
 public class ZombiesMobCreator extends MobCreatorBase {
     public ZombiesMobCreator(@NotNull MobData data, Pathfinding.@NotNull Factory pathfinding,
-        @NotNull List<SkillComponent> skills, @NotNull List<GoalApplier> goalAppliers,
+        @NotNull List<Skill> skills, @NotNull List<GoalApplier> goalAppliers,
         @NotNull Pathfinder pathfinder,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction,
         @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap) {
@@ -42,15 +41,14 @@ public class ZombiesMobCreator extends MobCreatorBase {
     }
 
     @Override
-    protected void setup(@NotNull Mob mob, @NotNull InjectionStore store) {
-        super.setup(mob, store);
-        setPathfinding(mob, store);
+    protected void setup(@NotNull Mob mob) {
+        super.setup(mob);
+        setPathfinding(mob);
         setTasks(mob);
     }
 
-
-    protected void setPathfinding(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        ZombiesScene scene = injectionStore.get(InjectionKeys.SCENE);
+    protected void setPathfinding(@NotNull Mob mob) {
+        ZombiesScene scene = mob.extensions().get(ZombiesMobSpawner.SCENE_KEY);
         BoundedTracker<Window> windowTracker = scene.map().objects().windowTracker();
 
         mob.pathfinding().setPenalty((x, y, z, h) -> {

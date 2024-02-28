@@ -1,17 +1,11 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.commons.MathUtils;
-import org.phantazm.mob2.InjectionKeys;
-import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Trigger;
 
 import java.util.Objects;
@@ -29,11 +23,19 @@ public class RandomTimerSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, delegate.apply(mob, injectionStore), mob, injectionStore
-            .getOrDefault(InjectionKeys.SCHEDULER, MinecraftServer::getSchedulerManager));
+    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
+        return new Internal(data, holder.requestKey(TimerSkillAbstract.Extension.class), delegate.apply(holder));
     }
 
+    @Default("""
+        {
+          trigger=null,
+          repeat=-1,
+          requiresActivation=false,
+          resetOnActivation=false,
+          exceedMobLifetime=false
+        }
+        """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
         @NotNull @ChildPath("delegate") String delegate,
@@ -43,37 +45,13 @@ public class RandomTimerSkill implements SkillComponent {
         boolean requiresActivation,
         boolean resetOnActivation,
         boolean exceedMobLifetime) {
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("repeat")
-        public static @NotNull ConfigElement repeatDefault() {
-            return ConfigPrimitive.of(-1);
-        }
-
-        @Default("requiresActivation")
-        public static @NotNull ConfigElement requiresActivationDefault() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("resetOnActivation")
-        public static @NotNull ConfigElement resetOnActivationDefault() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("exceedMobLifetime")
-        public static @NotNull ConfigElement defaultExceedMobLifetime() {
-            return ConfigPrimitive.of(false);
-        }
     }
 
     private static class Internal extends TimerSkillAbstract {
         private final Data data;
 
-        public Internal(Data data, Skill delegate, Mob self, Scheduler scheduler) {
-            super(scheduler, self, delegate, data.requiresActivation, data.resetOnActivation, data.repeat,
+        public Internal(Data data, ExtensionHolder.Key<Extension> key, Skill delegate) {
+            super(key, delegate, data.requiresActivation, data.resetOnActivation, data.repeat,
                 MathUtils.randomInterval(data.minInterval, data.maxInterval), !data.exceedMobLifetime);
             this.data = data;
         }

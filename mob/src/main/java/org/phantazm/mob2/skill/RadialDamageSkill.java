@@ -1,14 +1,12 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.Trigger;
@@ -30,10 +28,16 @@ public class RadialDamageSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob, selector.apply(mob, injectionStore), data);
+    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
+        return new Internal(selector.apply(holder), data);
     }
 
+    @Default("""
+        {
+          trigger=null,
+          bypassArmor=false
+        }
+        """)
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
@@ -41,32 +45,23 @@ public class RadialDamageSkill implements SkillComponent {
         float damage,
         boolean bypassArmor,
         double range) {
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("bypassArmor")
-        public static @NotNull ConfigElement defaultBypassArmor() {
-            return ConfigPrimitive.of(false);
-        }
     }
 
     private static class Internal extends TargetedSkill {
         private final Data data;
 
-        private Internal(Mob self, Selector selector, Data data) {
-            super(self, selector);
+        private Internal(Selector selector, Data data) {
+            super(selector);
             this.data = data;
         }
 
         @Override
-        protected void useOnTarget(@NotNull Target target) {
+        protected void useOnTarget(@NotNull Target target, @NotNull Mob mob) {
             target.forType(LivingEntity.class, livingEntity -> {
-                float damage = (float) calculateDamage(self.getDistance(livingEntity));
+                float damage = (float) calculateDamage(mob.getDistance(livingEntity));
 
                 livingEntity.scheduleNextTick(self -> {
-                    ((LivingEntity) self).damage(Damage.fromEntity(this.self, damage), data.bypassArmor);
+                    ((LivingEntity) self).damage(Damage.fromEntity(mob, damage), data.bypassArmor);
                 });
             });
         }

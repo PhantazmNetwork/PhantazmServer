@@ -4,7 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 
@@ -17,14 +17,14 @@ public class PathfindingTargetSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new PathfindingSelector(mob);
+    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
+        return new PathfindingSelector();
     }
 
-    private record PathfindingSelector(Mob self) implements Selector {
+    private record PathfindingSelector() implements Selector {
         @Override
-        public @NotNull Target select() {
-            return Target.ofNullable(self.getTargetEntity());
+        public @NotNull Target select(@NotNull Mob mob) {
+            return Target.ofNullable(mob.getTargetEntity());
         }
     }
 }

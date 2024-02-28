@@ -1,10 +1,10 @@
-package org.phantazm.mob2.skill;
+package org.phantazm.mob2.condition;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
@@ -23,8 +23,8 @@ public class HealthCondition implements SkillConditionComponent {
     }
 
     @Override
-    public @NotNull SkillCondition apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, selector.apply(mob, injectionStore));
+    public @NotNull SkillCondition apply(@NotNull ExtensionHolder holder) {
+        return new Internal(data, selector.apply(holder));
     }
 
     public enum Condition {
@@ -54,8 +54,8 @@ public class HealthCondition implements SkillConditionComponent {
         Selector selector) implements SkillCondition {
 
         @Override
-        public boolean test() {
-            return selector.select().forType(LivingEntity.class).filter(this::canTrigger).isPresent();
+        public boolean test(@NotNull Mob mob) {
+            return selector.select(mob).forType(LivingEntity.class).filter(this::canTrigger).isPresent();
         }
 
         private boolean canTrigger(LivingEntity target) {

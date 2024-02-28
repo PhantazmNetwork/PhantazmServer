@@ -8,12 +8,12 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.validator.Validator;
 import org.phantazm.mob2.validator.ValidatorComponent;
-import org.phantazm.zombies.mob2.InjectionKeys;
+import org.phantazm.zombies.mob2.ZombiesMobSpawner;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -32,8 +32,8 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
     }
 
     @Override
-    public @NotNull Validator apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, injectionStore.get(InjectionKeys.SCENE));
+    public @NotNull Validator apply(@NotNull ExtensionHolder extensionHolder) {
+        return new Internal(data);
     }
 
     @DataObject
@@ -41,15 +41,15 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
         boolean blacklist) {
     }
 
-    private record Internal(Data data,
-        ZombiesScene scene) implements Validator {
+    private record Internal(Data data) implements Validator {
 
         @Override
-        public boolean valid(@NotNull Entity entity) {
+        public boolean valid(@NotNull Mob mob, @NotNull Entity entity) {
             if (!(entity instanceof Player)) {
                 return false;
             }
 
+            ZombiesScene scene = mob.extensions().get(ZombiesMobSpawner.SCENE_KEY);
             ZombiesPlayer player = scene.map().objects().module().playerMap().get(PlayerView.lookup(entity.getUuid()));
             if (player == null) {
                 return false;

@@ -1,8 +1,6 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
@@ -13,7 +11,7 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.core.TagUtils;
 import org.phantazm.mob2.*;
 import org.phantazm.mob2.selector.Selector;
@@ -29,83 +27,17 @@ public class SpawnMobSkill implements SkillComponent {
     private final SpawnCallbackComponent callback;
     private final Tag<Integer> nameCounterTag;
 
-    @FactoryMethod
-    public SpawnMobSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector,
-        @NotNull @Child("callback") SpawnCallbackComponent callback) {
-        this.data = Objects.requireNonNull(data);
-        this.selector = Objects.requireNonNull(selector);
-        this.callback = Objects.requireNonNull(callback);
-        this.nameCounterTag = Tag.Integer(TagUtils.uniqueTagName()).defaultValue(0);
-    }
+    private static class Extension {
+        private final Mob self;
 
-    @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob, selector.apply(mob, injectionStore), data, injectionStore.get(InjectionKeys.MOB_SPAWNER),
-            callback.apply(mob, injectionStore), nameCounterTag);
-    }
-
-    @DataObject
-    public record Data(
-        @Nullable Trigger trigger,
-        @NotNull @ChildPath("selector") String selector,
-        @NotNull @ChildPath("callback") String callback,
-        @NotNull Key identifier,
-        int spawnAmount,
-        int maxSpawn,
-        boolean useLocalCount) {
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
+        private Extension(Mob self) {
+            this.self = self;
         }
 
-        @Default("useLocalCount")
-        public static @NotNull ConfigElement defaultUseLocalCount() {
-            return ConfigPrimitive.of(false);
-        }
-
-        private boolean unlimitedSpawns() {
-            return maxSpawn < 0;
-        }
-    }
-
-    private static class Internal extends TargetedSkill {
-        private final Data data;
-        private final MobSpawner mobSpawner;
-        private final SpawnCallback callback;
-        private final Tag<Integer> spawnCountTag;
-        private final TagHandler ownerTags;
-
-        private Internal(Mob self, Selector selector, Data data, MobSpawner mobSpawner, SpawnCallback callback,
-            Tag<Integer> spawnCountTag) {
-            super(self, selector);
-            this.data = data;
-            this.mobSpawner = mobSpawner;
-            this.callback = callback;
-            this.spawnCountTag = spawnCountTag;
-            this.ownerTags = data.unlimitedSpawns() ? null : (data.useLocalCount ? self : findRootOwner()).tagHandler();
-        }
-
-        @Override
-        protected void useOnTarget(@NotNull Target target) {
-            Instance instance = self.getInstance();
-            if (instance == null) {
-                return;
-            }
-
-            if (data.spawnAmount <= 0 || data.maxSpawn == 0) {
-                return;
-            }
-
-            Collection<? extends Point> points = target.locations();
-            if (points.isEmpty()) {
-                return;
-            }
-
-            spawn(instance, points);
-        }
+        private TagHandler ownerTags;
 
         private Mob findRootOwner() {
-            Mob current = this.self;
+            Mob current = self;
             while (true) {
                 UUID uuid = current.getOwner();
                 if (uuid == null) {
@@ -122,18 +54,103 @@ public class SpawnMobSkill implements SkillComponent {
             return current;
         }
 
-        private void spawn(Instance instance, Collection<? extends Point> points) {
-            if (data.unlimitedSpawns()) {
-                spawnAt(instance, points);
+        private TagHandler ownerTags(boolean unlimitedSpawns, boolean useLocalCount) {
+            if (ownerTags != null) {
+                return ownerTags;
+            }
+
+            return ownerTags = unlimitedSpawns ? null : (useLocalCount ? self : findRootOwner()).tagHandler();
+        }
+    }
+
+    @FactoryMethod
+    public SpawnMobSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector,
+        @NotNull @Child("callback") SpawnCallbackComponent callback) {
+        this.data = Objects.requireNonNull(data);
+        this.selector = Objects.requireNonNull(selector);
+        this.callback = Objects.requireNonNull(callback);
+        this.nameCounterTag = Tag.Integer(TagUtils.uniqueTagName()).defaultValue(0);
+    }
+
+    @Override
+    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
+        return new Internal(selector.apply(holder), data, holder.requestKey(Extension.class), callback.apply(holder),
+            nameCounterTag);
+    }
+
+    @Default("""
+        {
+          trigger=null,
+          useLocalCount=false
+        }
+        """)
+    @DataObject
+    public record Data(
+        @Nullable Trigger trigger,
+        @NotNull @ChildPath("selector") String selector,
+        @NotNull @ChildPath("callback") String callback,
+        @NotNull Key identifier,
+        int spawnAmount,
+        int maxSpawn,
+        boolean useLocalCount) {
+
+        private boolean unlimitedSpawns() {
+            return maxSpawn < 0;
+        }
+    }
+
+    private static class Internal extends TargetedSkill {
+        private final Data data;
+        private final ExtensionHolder.Key<Extension> key;
+        private final SpawnCallback callback;
+        private final Tag<Integer> spawnCountTag;
+
+        private Internal(Selector selector, Data data, ExtensionHolder.Key<Extension> key, SpawnCallback callback,
+            Tag<Integer> spawnCountTag) {
+            super(selector);
+            this.data = data;
+            this.key = key;
+            this.callback = callback;
+            this.spawnCountTag = spawnCountTag;
+        }
+
+        @Override
+        public void init(@NotNull Mob mob) {
+            mob.extensions().set(key, new Extension(mob));
+        }
+
+        @Override
+        protected void useOnTarget(@NotNull Target target, @NotNull Mob mob) {
+            Instance instance = mob.getInstance();
+            if (instance == null) {
                 return;
             }
 
-            if (ownerTags.getTag(spawnCountTag) >= data.maxSpawn) {
+            if (data.spawnAmount <= 0 || data.maxSpawn == 0) {
+                return;
+            }
+
+            Collection<? extends Point> points = target.locations();
+            if (points.isEmpty()) {
+                return;
+            }
+
+            spawn(mob, instance, points);
+        }
+
+        private void spawn(Mob self, Instance instance, Collection<? extends Point> points) {
+            if (data.unlimitedSpawns()) {
+                spawnAt(self, instance, points);
+                return;
+            }
+
+            Extension ext = self.extensions().get(key);
+            if (ext.ownerTags(data.unlimitedSpawns(), data.useLocalCount).getTag(spawnCountTag) >= data.maxSpawn) {
                 return;
             }
 
             List<Point> spawnTargets = new ArrayList<>(points.size() * data.spawnAmount);
-            ownerTags.updateTag(spawnCountTag, currentAmount -> {
+            ext.ownerTags(data.unlimitedSpawns(), data.useLocalCount).updateTag(spawnCountTag, currentAmount -> {
                 if (currentAmount >= data.maxSpawn) {
                     return currentAmount;
                 }
@@ -150,25 +167,29 @@ public class SpawnMobSkill implements SkillComponent {
                 return currentAmount;
             });
 
-            spawnAt(instance, spawnTargets);
+            spawnAt(self, instance, spawnTargets);
         }
 
-        private void spawnAt(Instance instance, Collection<? extends Point> targets) {
+        private void spawnAt(Mob self, Instance instance, Collection<? extends Point> targets) {
+            MobSpawner mobSpawner = self.extensions().get(BasicMobSpawner.SPAWNER_KEY);
             for (Point point : targets) {
-                callback.accept(mobSpawner.spawn(data.identifier, instance, Pos.fromPoint(point), this::setup));
+                callback.accept(mobSpawner.spawn(data.identifier, instance, Pos.fromPoint(point), newMob -> {
+                    setup(self, newMob);
+                }));
             }
         }
 
-        private void setup(Mob child) {
-            child.setOwner(super.self.getUuid());
+        private void setup(Mob self, Mob child) {
+            child.setOwner(self.getUuid());
             if (data.unlimitedSpawns()) {
                 return;
             }
 
             child.addSkill(new Skill() {
                 @Override
-                public void end() {
-                    ownerTags.updateTag(spawnCountTag, value -> value - 1);
+                public void end(@NotNull Mob mob) {
+                    Extension ext = self.extensions().get(key);
+                    ext.ownerTags(data.unlimitedSpawns(), data.useLocalCount).updateTag(spawnCountTag, value -> value - 1);
                 }
             });
         }

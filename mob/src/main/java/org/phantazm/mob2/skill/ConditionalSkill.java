@@ -4,9 +4,11 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Trigger;
+import org.phantazm.mob2.condition.SkillCondition;
+import org.phantazm.mob2.condition.SkillConditionComponent;
 
 @Model("mob.skill.conditional")
 @Cache
@@ -24,8 +26,8 @@ public class ConditionalSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, condition.apply(mob, injectionStore), delegate.apply(mob, injectionStore));
+    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
+        return new Internal(data, condition.apply(holder), delegate.apply(holder));
     }
 
     @Default("""
@@ -60,20 +62,20 @@ public class ConditionalSkill implements SkillComponent {
         }
 
         @Override
-        public void init() {
-            delegate.init();
+        public void init(@NotNull Mob mob) {
+            delegate.init(mob);
         }
 
         @Override
-        public void use() {
-            if (condition.test()) {
-                delegate.use();
+        public void use(@NotNull Mob mob) {
+            if (condition.test(mob)) {
+                delegate.use(mob);
             }
         }
 
         @Override
-        public void tick() {
-            delegate.tick();
+        public void tick(@NotNull Mob mob) {
+            delegate.tick(mob);
         }
 
         @Override
@@ -82,8 +84,8 @@ public class ConditionalSkill implements SkillComponent {
         }
 
         @Override
-        public void end() {
-            delegate.end();
+        public void end(@NotNull Mob mob) {
+            delegate.end(mob);
         }
     }
 }

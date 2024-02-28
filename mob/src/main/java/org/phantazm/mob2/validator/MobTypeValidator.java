@@ -7,7 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 
 import java.util.Set;
@@ -23,7 +23,7 @@ public class MobTypeValidator implements ValidatorComponent {
     }
 
     @Override
-    public @NotNull Validator apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+    public @NotNull Validator apply(@NotNull ExtensionHolder holder) {
         return new Internal(data);
     }
 
@@ -35,12 +35,12 @@ public class MobTypeValidator implements ValidatorComponent {
 
     private record Internal(Data data) implements Validator {
         @Override
-        public boolean valid(@NotNull Entity entity) {
-            if (!(entity instanceof Mob mob)) {
+        public boolean valid(@NotNull Mob mob, @NotNull Entity entity) {
+            if (!(entity instanceof Mob entityAsMob)) {
                 return false;
             }
 
-            return data.blacklist != data.types.contains(mob.data().key());
+            return data.blacklist != data.types.contains(entityAsMob.data().key());
         }
     }
 }
