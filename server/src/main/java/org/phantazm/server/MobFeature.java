@@ -18,7 +18,6 @@ import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.loader.DataSource;
 import org.phantazm.loader.Loader;
@@ -54,7 +53,6 @@ public final class MobFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(MobFeature.class);
 
     private static Loader<MobCreator> mobCreatorLoader;
-    private static Map<Key, ExtensionHolder> extensionMap;
 
     private MobFeature() {
         throw new UnsupportedOperationException();
@@ -94,10 +92,10 @@ public final class MobFeature {
                     skills.add(component.apply(extensionHolder));
                 }
 
-                return List.of(ObjectExtractor.entry(data.key(), (MobCreator) new ZombiesMobCreator(data, pathfinding,
-                    skills, goals, pathfinder, instanceSettingsFunction, equipmentMap, attributeMap)));
+                return List.of(ObjectExtractor.entry(data.key(), (MobCreator) new ZombiesMobCreator(data,
+                    extensionHolder, pathfinding, skills, goals, pathfinder, instanceSettingsFunction, equipmentMap,
+                    attributeMap)));
             })).accepting(mobs -> {
-            MobFeature.extensionMap = Map.copyOf(extensionMap);
             LOGGER.info("Loaded {} mob file(s)", mobs.size());
         });
 
@@ -134,10 +132,6 @@ public final class MobFeature {
     @SuppressWarnings("unused")
     public static @NotNull Loader<MobCreator> mobLoader() {
         return FeatureUtils.check(mobCreatorLoader);
-    }
-
-    public static @NotNull @Unmodifiable Map<Key, ExtensionHolder> extensionMap() {
-        return FeatureUtils.check(extensionMap);
     }
 
     public static void reload() throws IOException {

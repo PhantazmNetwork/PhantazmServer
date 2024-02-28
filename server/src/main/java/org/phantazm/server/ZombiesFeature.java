@@ -163,8 +163,7 @@ public final class ZombiesFeature {
                 Endless.Source endlessSource = mapDependencyProvider -> contextManager
                     .makeContext(mapInfo.endless()).provide(mapDependencyProvider);
 
-                MobSpawnerSource mobSpawnerSource = new BasicMobSpawnerSource(mobCreatorLoader,
-                    gameContext.extensionMapSupplier());
+                MobSpawnerSource mobSpawnerSource = new BasicMobSpawnerSource(mobCreatorLoader);
 
                 ZombiesLeaderboardContext leaderboardContext =
                     new ZombiesLeaderboardContext(ExecutorFeature.getExecutor(),

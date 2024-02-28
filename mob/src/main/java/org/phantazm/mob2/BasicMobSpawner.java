@@ -17,12 +17,9 @@ public class BasicMobSpawner implements MobSpawner {
     public static final ExtensionHolder.Key<Scheduler> SCHEDULER_KEY = MobSpawner.Extensions.newKey(Scheduler.class);
 
     private final Map<Key, MobCreator> mobCreatorMap;
-    private final Map<Key, ExtensionHolder> extensionMap;
 
-    public BasicMobSpawner(@NotNull Loader<MobCreator> mobCreatorLoader,
-        @NotNull Map<Key, ExtensionHolder> extensionMap) {
+    public BasicMobSpawner(@NotNull Loader<MobCreator> mobCreatorLoader) {
         this.mobCreatorMap = Objects.requireNonNull(mobCreatorLoader).data();
-        this.extensionMap = Map.copyOf(extensionMap);
     }
 
     @Override
@@ -33,7 +30,7 @@ public class BasicMobSpawner implements MobSpawner {
             throw new IllegalArgumentException("missing mob identifier " + identifier);
         }
 
-        ExtensionHolder mobHolder = extensionMap.get(identifier).derive();
+        ExtensionHolder mobHolder = creator.typeExtensions().derive();
         buildDependencies(mobHolder);
 
         Mob mob = creator.create(instance, mobHolder);

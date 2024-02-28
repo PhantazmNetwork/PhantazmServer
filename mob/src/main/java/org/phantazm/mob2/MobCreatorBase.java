@@ -33,6 +33,7 @@ public class MobCreatorBase implements MobCreator {
     protected static final Logger LOGGER = LoggerFactory.getLogger(MobCreatorBase.class);
 
     protected final MobData data;
+    private final ExtensionHolder extensionHolder;
 
     private final Pathfinding.Factory pathfinding;
     private final List<Skill> skills;
@@ -44,11 +45,12 @@ public class MobCreatorBase implements MobCreator {
     private final Map<EquipmentSlot, ItemStack> equipmentMap;
     private final Object2FloatMap<String> attributeMap;
 
-    public MobCreatorBase(@NotNull MobData data, Pathfinding.@NotNull Factory pathfinding,
+    public MobCreatorBase(@NotNull MobData data, @NotNull ExtensionHolder extensionHolder, Pathfinding.@NotNull Factory pathfinding,
         @NotNull List<Skill> skills, @NotNull List<GoalApplier> goalAppliers, @NotNull Pathfinder pathfinder,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction,
         @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap) {
         this.data = Objects.requireNonNull(data);
+        this.extensionHolder = Objects.requireNonNull(extensionHolder);
         this.pathfinding = Objects.requireNonNull(pathfinding);
         this.skills = List.copyOf(skills);
         this.goalAppliers = List.copyOf(goalAppliers);
@@ -72,6 +74,11 @@ public class MobCreatorBase implements MobCreator {
 
         setup(mob);
         return mob;
+    }
+
+    @Override
+    public @NotNull ExtensionHolder typeExtensions() {
+        return extensionHolder;
     }
 
     protected void setup(@NotNull Mob mob) {

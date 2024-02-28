@@ -10,4 +10,6 @@ import org.phantazm.commons.ExtensionHolder;
 public interface MobCreator {
     @NotNull
     Mob create(@NotNull Instance instance, @NotNull ExtensionHolder extensionHolder);
+
+    @NotNull ExtensionHolder typeExtensions();
 }

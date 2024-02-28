@@ -13,6 +13,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobCreatorBase;
@@ -32,12 +33,12 @@ import java.util.UUID;
 import java.util.function.Function;
 
 public class ZombiesMobCreator extends MobCreatorBase {
-    public ZombiesMobCreator(@NotNull MobData data, Pathfinding.@NotNull Factory pathfinding,
+    public ZombiesMobCreator(@NotNull MobData data, @NotNull ExtensionHolder extensionHolder, Pathfinding.@NotNull Factory pathfinding,
         @NotNull List<Skill> skills, @NotNull List<GoalApplier> goalAppliers,
         @NotNull Pathfinder pathfinder,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction,
         @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap) {
-        super(data, pathfinding, skills, goalAppliers, pathfinder, settingsFunction, equipmentMap, attributeMap);
+        super(data, extensionHolder, pathfinding, skills, goalAppliers, pathfinder, settingsFunction, equipmentMap, attributeMap);
     }
 
     @Override
