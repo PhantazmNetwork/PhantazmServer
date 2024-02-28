@@ -45,6 +45,7 @@ public class BasicMobSpawner implements MobSpawner {
             postSetup(mob);
         });
 
+        mobHolder.trimToSize();
         return mob;
     }
 
