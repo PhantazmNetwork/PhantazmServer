@@ -93,6 +93,11 @@ public class ShowHealthbarSkill implements SkillComponent {
         }
 
         @Override
+        public void init(@NotNull Mob mob) {
+            mob.extensions().set(key, new Extension());
+        }
+
+        @Override
         public void tick(@NotNull Mob mob) {
             healthbarFor(mob).ifPresent(mob::setCustomName);
         }
