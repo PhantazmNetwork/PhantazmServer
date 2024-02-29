@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,15 +34,20 @@ public class ExecutorFeature {
                 "Shutting down executor. Please allow for one minute before shutdown completes.");
             executorService.shutdown();
             if (!executorService.awaitTermination(1L, TimeUnit.MINUTES)) {
-                executorService.shutdownNow();
+                List<Runnable> runnables = executorService.shutdownNow();
 
                 LOGGER.warn(
                     "Not all tasks completed. Please allow for one minute for tasks to be canceled.");
+                LOGGER.warn("Hung tasks: ");
+                for (Runnable runnable : runnables) {
+                    LOGGER.warn(runnable.getClass().toString());
+                }
+
                 if (!executorService.awaitTermination(1L, TimeUnit.MINUTES)) {
                     LOGGER.warn("Database tasks failed to cancel.");
                 }
             }
-            LOGGER.info("Executor shut down successfully.");
+            LOGGER.info("Executor shut down.");
         } catch (InterruptedException e) {
             executorService.shutdownNow();
             Thread.currentThread().interrupt();
