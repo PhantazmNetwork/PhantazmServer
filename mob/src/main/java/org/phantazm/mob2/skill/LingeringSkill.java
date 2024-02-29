@@ -51,13 +51,11 @@ public class LingeringSkill implements SkillComponent {
 
     private static class Internal extends TargetedSkill {
         private final Data data;
-        private final ExtensionHolder holder;
         private final List<Skill> targetSkills;
 
         private Internal(Data data, ExtensionHolder holder, Selector selector, List<SkillComponent> targetSkills) {
             super(selector);
             this.data = data;
-            this.holder = holder;
 
             List<Skill> skills = new ArrayList<>(targetSkills.size());
             for (SkillComponent skillComponent : targetSkills) {
@@ -88,7 +86,7 @@ public class LingeringSkill implements SkillComponent {
                 armorStandMeta.setInvisible(true);
                 armorStandMeta.setHasNoGravity(true);
                 armorStand.setHasPhysics(false);
-                armorStand.setExtensions(holder.derive());
+                armorStand.setExtensions(mob.extensions().sibling(true));
                 armorStand.addSkills(targetSkills);
 
                 armorStand.setInstance(instance, point);

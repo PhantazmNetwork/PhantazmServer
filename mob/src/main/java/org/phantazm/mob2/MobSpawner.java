@@ -16,7 +16,7 @@ public interface MobSpawner {
         private static final ExtensionHolder GLOBAL_HOLDER = new ExtensionHolder();
 
         public static @NotNull ExtensionHolder newHolder() {
-            return GLOBAL_HOLDER.derive();
+            return GLOBAL_HOLDER.derive(false);
         }
 
         public static <T> ExtensionHolder.@NotNull Key<T> newKey(@NotNull Class<T> type) {

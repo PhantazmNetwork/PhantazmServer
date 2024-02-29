@@ -46,7 +46,7 @@ public class DistanceCondition implements SkillConditionComponent {
 
     @Default("""
         {
-          type='WITHIN',
+          behavior='WITHIN',
           multiPointHandling='ANY_MATCH',
           matchCount=-1
         }

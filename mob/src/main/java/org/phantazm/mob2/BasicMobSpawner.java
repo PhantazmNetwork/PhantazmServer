@@ -30,7 +30,7 @@ public class BasicMobSpawner implements MobSpawner {
             throw new IllegalArgumentException("missing mob identifier " + identifier);
         }
 
-        ExtensionHolder mobHolder = creator.typeExtensions().derive();
+        ExtensionHolder mobHolder = creator.typeExtensions().derive(false);
         buildDependencies(mobHolder);
 
         Mob mob = creator.create(instance, mobHolder);
