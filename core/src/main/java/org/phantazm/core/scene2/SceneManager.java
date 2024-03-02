@@ -329,7 +329,7 @@ public final class SceneManager {
         PlayerViewProvider viewProvider) {
         this.executor = Objects.requireNonNull(executor);
         this.mappedScenes = buildSceneMap(Set.copyOf(sceneTypes));
-        this.threadDispatcher = ThreadDispatcher.of(ThreadProvider.counter(), numThreads);
+        this.threadDispatcher = ThreadDispatcher.of(ThreadProvider.counter(), "phantazm-scene-manager", numThreads);
         this.functionMap = new ConcurrentHashMap<>();
         this.viewProvider = viewProvider;
     }
