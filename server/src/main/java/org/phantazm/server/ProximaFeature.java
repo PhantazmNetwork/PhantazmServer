@@ -12,7 +12,9 @@ import org.phantazm.server.config.server.PathfinderConfig;
 import org.phantazm.server.context.ConfigContext;
 
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public final class ProximaFeature {
@@ -34,7 +36,22 @@ public final class ProximaFeature {
         long keepAliveTime = pathfinderConfig.keepAliveTime();
         TimeUnit keepAliveTimeUnit = pathfinderConfig.keepAliveTimeUnit();
 
-        ForkJoinPool fjp = new ForkJoinPool(threads, ForkJoinPool.defaultForkJoinWorkerThreadFactory, null, asyncMode,
+        ForkJoinPool fjp = new ForkJoinPool(threads, new ForkJoinPool.ForkJoinWorkerThreadFactory() {
+            private final AtomicInteger count = new AtomicInteger();
+
+            private static class ForkJoinWorkerThreadImpl extends ForkJoinWorkerThread {
+                protected ForkJoinWorkerThreadImpl(ForkJoinPool pool) {
+                    super(pool);
+                }
+            }
+
+            @Override
+            public ForkJoinWorkerThread newThread(ForkJoinPool pool) {
+                ForkJoinWorkerThread thread = new ForkJoinWorkerThreadImpl(pool);
+                thread.setName("proxima-worker-" + count.getAndIncrement());
+                return thread;
+            }
+        }, null, asyncMode,
             corePoolSize, maximumPoolSize, minimumRunnable, forkJoinPool -> true, keepAliveTime, keepAliveTimeUnit);
 
         pathfinder = new BasicAsyncPathfinder(fjp, BasicPathOperation::new, 1000000);
