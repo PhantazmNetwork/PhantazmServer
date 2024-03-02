@@ -329,7 +329,7 @@ public final class SceneManager {
         PlayerViewProvider viewProvider) {
         this.executor = Objects.requireNonNull(executor);
         this.mappedScenes = buildSceneMap(Set.copyOf(sceneTypes));
-        this.threadDispatcher = ThreadDispatcher.of(ThreadProvider.counter(), numThreads);
+        this.threadDispatcher = ThreadDispatcher.of(ThreadProvider.counter(), "phantazm-scene-manager", numThreads);
         this.functionMap = new ConcurrentHashMap<>();
         this.viewProvider = viewProvider;
     }
@@ -358,18 +358,17 @@ public final class SceneManager {
         AtomicReference<Scene> currentSceneReference = view.currentSceneReference();
         if (currentSceneReference.get() == null) {
             LOGGER.warn("Disconnect event called for {} but player has no set scene!", playerView.getUUID());
-            return;
+        } else {
+            synchronizeWithCurrentScene(view, scene -> {
+                Set<Player> left = unwrapMany(scene.leave(Set.of(view)), HashSet::new);
+
+                if (!left.isEmpty()) {
+                    leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, left));
+                }
+
+                currentSceneReference.set(null);
+            });
         }
-
-        synchronizeWithCurrentScene(view, scene -> {
-            Set<Player> left = unwrapMany(scene.leave(Set.of(view)), HashSet::new);
-
-            if (!left.isEmpty()) {
-                leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, left));
-            }
-
-            currentSceneReference.set(null);
-        });
 
         viewProvider.handleDisconnect(playerView.getUUID());
     }
