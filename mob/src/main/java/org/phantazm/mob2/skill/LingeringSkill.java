@@ -81,7 +81,7 @@ public class LingeringSkill implements SkillComponent {
             for (Point point : locations) {
                 Mob armorStand = new Mob(EntityType.ARMOR_STAND);
 
-                ArmorStandMeta armorStandMeta = (ArmorStandMeta) mob.getEntityMeta();
+                ArmorStandMeta armorStandMeta = (ArmorStandMeta) armorStand.getEntityMeta();
                 armorStandMeta.setMarker(true);
                 armorStandMeta.setInvisible(true);
                 armorStandMeta.setHasNoGravity(true);
