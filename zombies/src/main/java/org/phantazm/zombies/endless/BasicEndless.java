@@ -4,10 +4,12 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntObjectPair;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeInstance;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.phantazm.commons.MathUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
@@ -29,11 +31,8 @@ import java.util.function.Supplier;
 public class BasicEndless implements Endless {
     //could be substantially raised but will degrade client performance
     //maps can be configured to have lower spawn caps than this, but not higher!
-    private static final int ABSOLUTE_MAX_SPAWN_AMOUNT = 250;
-
-    //arbitrary, but prevents excessive wave counts in case of weird scaling
-    //maps can be configured to have lower wave caps than this, but not higher!
-    private static final int ABSOLUTE_WAVE_COUNT_LIMIT = 32;
+    @VisibleForTesting
+    static final int ABSOLUTE_MAX_SPAWN_AMOUNT = 250;
 
     private static final int ABSOLUTE_WAVE_DELAY_MINIMUM = 1;
     private static final int ABSOLUTE_WAVE_DELAY_MAXIMUM = 200;
@@ -73,77 +72,86 @@ public class BasicEndless implements Endless {
         }
     }
 
+    public record IndexedWeightedMob(@NotNull Key key,
+        @NotNull Key spawnType,
+        int wave,
+        int weight) {
+
+    }
+
     public record WeightedMob(@NotNull Key key,
         @NotNull Key spawnType,
         int weight) {
     }
 
-    public interface Theme {
-        @NotNull List<WeightedMob> mobs();
+    public enum WaveIntroduceMode {
+        INSERT,
+        APPEND,
+        SET
+    }
 
-        @NotNull ScalingValue waveWeight();
+    @Model("zombies.endless.basic.weighted_wave")
+    @Cache(false)
+    public static class WeightedWave {
+        private final Data data;
+        private final List<Action<List<Mob>>> spawnActions;
+
+        @FactoryMethod
+        public WeightedWave(@NotNull Data data, @NotNull @Child("spawn_actions") List<Action<List<Mob>>> spawnActions) {
+            this.data = data;
+            this.spawnActions = spawnActions;
+        }
+
+        @Default("""
+            {
+              introduceMode='APPEND',
+              introduceIndex=-1,
+              spawnActions=[]
+            }
+            """)
+        @DataObject
+        public record Data(@NotNull List<WeightedMob> wave,
+            @NotNull WaveIntroduceMode introduceMode,
+            int introduceIndex,
+            int mobCountWeight,
+            @NotNull @ChildPath("spawn_actions") List<String> spawnActions) {
+        }
+    }
+
+    public interface Theme {
+        @NotNull List<WeightedWave> waves();
 
         @NotNull ScalingValue baseWaveDelayTicks();
 
         @NotNull ScalingValue offsetWaveDelayTicks();
-
-        @NotNull List<Action<List<Mob>>> spawnActions(int wave);
 
         @NotNull List<Action<Round>> startActions();
 
         @NotNull List<Action<Round>> endActions();
     }
 
-    @Model("zombies.endless.basic.wave_actions")
-    @Cache(false)
-    public static class IndicatedWaveActions {
-        private final Data data;
-        private final List<Action<List<Mob>>> spawnActions;
-
-        @FactoryMethod
-        public IndicatedWaveActions(@NotNull Data data,
-            @NotNull @Child("spawn_actions") List<Action<List<Mob>>> spawnActions) {
-            this.data = data;
-            this.spawnActions = spawnActions;
-        }
-
-        @DataObject
-        public record Data(int wave,
-            @NotNull @ChildPath("spawn_actions") List<String> spawnActions) {
-        }
-    }
-
     @Model("zombies.endless.basic.theme")
     @Cache(false)
     public static class BasicTheme implements Theme {
         private final Data data;
-        private final Int2ObjectMap<List<Action<List<Mob>>>> actionMap;
+        private final List<WeightedWave> waves;
         private final List<Action<Round>> startActions;
         private final List<Action<Round>> endActions;
 
         @FactoryMethod
         public BasicTheme(@NotNull Data data,
-            @NotNull @Child("wave_actions") List<IndicatedWaveActions> waveActions,
+            @NotNull @Child("waves") List<WeightedWave> waves,
             @NotNull @Child("start_actions") List<Action<Round>> startActions,
             @NotNull @Child("end_actions") List<Action<Round>> endActions) {
             this.data = data;
-            this.actionMap = new Int2ObjectOpenHashMap<>(waveActions.size());
+            this.waves = waves;
             this.startActions = startActions;
             this.endActions = endActions;
-
-            for (IndicatedWaveActions actions : waveActions) {
-                this.actionMap.put(actions.data.wave, actions.spawnActions);
-            }
         }
 
         @Override
-        public @NotNull List<WeightedMob> mobs() {
-            return data.mobs;
-        }
-
-        @Override
-        public @NotNull ScalingValue waveWeight() {
-            return data.waveWeight;
+        public @NotNull List<WeightedWave> waves() {
+            return waves;
         }
 
         @Override
@@ -157,11 +165,6 @@ public class BasicEndless implements Endless {
         }
 
         @Override
-        public @NotNull List<Action<List<Mob>>> spawnActions(int wave) {
-            return actionMap.getOrDefault(wave, List.of());
-        }
-
-        @Override
         public @NotNull List<Action<Round>> startActions() {
             return startActions;
         }
@@ -172,21 +175,43 @@ public class BasicEndless implements Endless {
         }
 
         @DataObject
-        public record Data(@NotNull List<WeightedMob> mobs,
+        public record Data(
             @NotNull ScalingValue waveWeight,
             @NotNull ScalingValue baseWaveDelayTicks,
             @NotNull ScalingValue offsetWaveDelayTicks,
+            @NotNull @ChildPath("waves") List<String> waves,
             @NotNull @ChildPath("wave_actions") List<String> waveActions,
             @NotNull @ChildPath("start_actions") List<String> startActions,
             @NotNull @ChildPath("end_actions") List<String> endActions) {
         }
     }
 
-    public record Introduction(@NotNull List<WeightedMob> spawns,
-        int startRound,
-        int period,
-        int count) {
+    @Model("zombies.endless.basic.introduction")
+    @Cache(false)
+    public static class Introduction {
+        private final Data data;
+        private final List<WeightedWave> waves;
 
+        @FactoryMethod
+        public Introduction(@NotNull Data data, @NotNull @Child("waves") List<WeightedWave> waves) {
+            this.data = data;
+            this.waves = waves;
+        }
+
+        @Default("""
+            {
+              waves=[],
+              mobs=[],
+              count=-1
+            }
+            """)
+        public record Data(@NotNull @ChildPath("waves") List<String> waves,
+            @NotNull List<IndexedWeightedMob> mobs,
+            int startRound,
+            int period,
+            int count) {
+
+        }
     }
 
     private final Data data;
@@ -196,19 +221,19 @@ public class BasicEndless implements Endless {
 
     @FactoryMethod
     public BasicEndless(@NotNull Data data, @NotNull Supplier<ZombiesScene> zombiesScene,
+        @NotNull @Child("introductions") List<Introduction> introductions,
         @NotNull @Child("themes") List<Theme> themes) {
         this.data = data;
         this.zombiesScene = zombiesScene;
         this.themes = themes;
 
-        this.introductions = new ArrayList<>(data.introductions);
-        this.introductions.sort(Comparator.comparingInt(Introduction::startRound));
+        this.introductions = introductions;
+        this.introductions.sort(Comparator.comparingInt(intro -> intro.data.startRound));
     }
 
     @Override
     public @NotNull Round generateRound(int roundIndex) {
-        ZombiesScene zombiesScene = this.zombiesScene.get();
-        int endlessRound = (roundIndex - zombiesScene.map().roundHandler().roundCount()) + 1;
+        int endlessRound = (roundIndex - this.zombiesScene.get().map().roundHandler().roundCount()) + 1;
         if (endlessRound < 1) {
             throw new IllegalArgumentException("Tried to generate endless round before final round");
         }
@@ -217,200 +242,254 @@ public class BasicEndless implements Endless {
             throw new IllegalArgumentException("No defined themes");
         }
 
-        Theme roundTheme = themes.get((endlessRound - 1) % themes.size());
-        List<WeightedMob> themeMobs = roundTheme.mobs();
-        List<WeightedMob> introducedMobs = introducedMobs(endlessRound);
+        int endlessRoundIndex = endlessRound - 1;
 
-        double weightSum = 0;
-        for (WeightedMob themeMob : themeMobs) {
-            weightSum += themeMob.weight;
-        }
+        int baseMobCount = Math.min((int) Math.rint(data.spawnAmountScaling.scale(endlessRoundIndex,
+            data.spawnAmountBase)), ABSOLUTE_MAX_SPAWN_AMOUNT);
 
-        for (WeightedMob introducedMob : introducedMobs) {
-            weightSum += introducedMob.weight;
-        }
+        List<Introduction> applicableIntroductions = applicableIntroductions(endlessRoundIndex);
+        Theme currentTheme = themes.get(endlessRoundIndex % themes.size());
 
-        double[] spawnPercentages = new double[themeMobs.size() + introducedMobs.size()];
-        int i;
-        for (i = 0; i < themeMobs.size(); i++) {
-            spawnPercentages[i] = themeMobs.get(i).weight / weightSum;
-        }
+        List<WeightedWave> weightedWaves = new ArrayList<>(currentTheme.waves());
 
-        for (int j = 0; j < introducedMobs.size(); j++) {
-            spawnPercentages[i + j] = introducedMobs.get(j).weight / weightSum;
-        }
-
-        int waveCount = Math.min((int) Math.rint(data.waveScaling.scale(endlessRound, data.waveBase)), ABSOLUTE_WAVE_COUNT_LIMIT);
-        List<Wave> waves = new ArrayList<>(waveCount);
-
-        double mobSpawnAmount = Math.min(data.spawnAmountScaling.scale(endlessRound, data.spawnAmountBase), ABSOLUTE_MAX_SPAWN_AMOUNT);
-        int cap = (int) Math.rint(mobSpawnAmount);
-
-        double[] waveWeights = new double[waveCount];
-        for (int j = 0; j < waveCount; j++) {
-            waveWeights[j] = roundTheme.waveWeight().scale(j + 1, data.waveWeightBase);
-        }
-
-        double waveWeightSum = 0;
-        for (double weight : waveWeights) {
-            waveWeightSum += weight;
-        }
-
-        for (int j = 0; j < waveCount; j++) {
-            waveWeights[j] /= waveWeightSum;
-        }
-
-        int[] mergedCounts = new int[spawnPercentages.length];
-
-        int totalMobs = 0;
-        for (int j = 0; j < mergedCounts.length; j++) {
-            int additionalMobs = Math.max((int) Math.rint(spawnPercentages[j] * cap), 1);
-
-            int newTotal = totalMobs + additionalMobs;
-            if (newTotal > cap) {
-                additionalMobs -= newTotal - cap;
-                newTotal = cap;
-            }
-
-            mergedCounts[j] = additionalMobs;
-            totalMobs = newTotal;
-        }
-
-        int[][] allocatedMobs = new int[mergedCounts.length][waveCount];
-        for (int j = 0; j < mergedCounts.length; j++) {
-            int[] waveCounts = allocatedMobs[j];
-
-            int mobCount = mergedCounts[j];
-            int totalSpawned = 0;
-            for (int k = 0; k < waveCount; k++) {
-                int thisSpawn = (int) Math.rint(waveWeights[k] * mobCount);
-                if (totalSpawned + thisSpawn > mobCount) {
-                    thisSpawn -= (totalSpawned + thisSpawn) - mobCount;
-                    waveCounts[k] = thisSpawn;
-                    totalSpawned = mobCount;
-                    break;
+        List<WeightedWave> inserts = null;
+        List<IntObjectPair<WeightedWave>> sets = null;
+        Int2ObjectMap<List<WeightedMob>> introducedMobs = null;
+        for (Introduction introduction : applicableIntroductions) {
+            List<IndexedWeightedMob> introductionMobs = introduction.data.mobs;
+            if (!introductionMobs.isEmpty()) {
+                if (introducedMobs == null) {
+                    introducedMobs = new Int2ObjectOpenHashMap<>();
                 }
 
-                waveCounts[k] = thisSpawn;
-                totalSpawned += thisSpawn;
+                for (IndexedWeightedMob indexedWeightedMob : introductionMobs) {
+                    introducedMobs.computeIfAbsent(indexedWeightedMob.wave, ignored -> new ArrayList<>())
+                        .add(new WeightedMob(indexedWeightedMob.key, indexedWeightedMob.spawnType, indexedWeightedMob.weight));
+                }
             }
 
-            if (totalSpawned == mobCount) {
-                balanceAllocations(waveCounts, waveWeights);
-                continue;
-            }
+            for (WeightedWave introducedWave : introduction.waves) {
+                switch (introducedWave.data.introduceMode) {
+                    case INSERT ->
+                        weightedWaves.add(Math.max(0, Math.min(introducedWave.data.introduceIndex, weightedWaves.size())),
+                            introducedWave);
+                    case APPEND -> {
+                        if (inserts == null) {
+                            inserts = new ArrayList<>(4);
+                        }
 
-            //not all necessary spawns were allocated
-            int unspawnedMobs = mobCount - totalSpawned;
+                        inserts.add(introducedWave);
+                    }
+                    case SET -> {
+                        if (sets == null) {
+                            sets = new ArrayList<>(4);
+                        }
 
-            //assign to the highest weight that's got the fewest number of mobs
-            while (unspawnedMobs != 0) {
-                int highestWeightIndex = -1;
-                double highestWeight = Double.NEGATIVE_INFINITY;
-                for (int k = 0; k < waveCount; k++) {
-                    double preference = waveWeights[k] / waveCounts[k];
-                    if (preference > highestWeight) {
-                        highestWeightIndex = k;
-                        highestWeight = preference;
+                        sets.add(IntObjectPair.of(introducedWave.data.introduceIndex, introducedWave));
                     }
                 }
-
-                //should never happen, but don't break stuff if it does!
-                if (highestWeightIndex == -1) {
-                    break;
-                }
-
-                waveCounts[highestWeightIndex] += 1;
-                unspawnedMobs--;
             }
-
-            balanceAllocations(waveCounts, waveWeights);
         }
 
-        for (int j = 0; j < waveCount; j++) {
-            double baseDelay = roundTheme.baseWaveDelayTicks().scale(endlessRound, data.waveDelayBase);
-            int actualDelay = MathUtils.clamp((int) Math.rint(roundTheme.offsetWaveDelayTicks()
-                .scale(j + 1, baseDelay)), ABSOLUTE_WAVE_DELAY_MINIMUM, ABSOLUTE_WAVE_DELAY_MAXIMUM);
+        if (inserts != null) {
+            weightedWaves.addAll(inserts);
+        }
 
-            List<Action<List<Mob>>> spawnActions = roundTheme.spawnActions(j + 1);
+        if (sets != null) {
+            for (IntObjectPair<WeightedWave> pair : sets) {
+                weightedWaves.set(Math.max(0, Math.min(pair.firstInt(), weightedWaves.size() - 1)), pair.second());
+            }
+        }
 
-            List<SpawnInfo> spawns = new ArrayList<>(mergedCounts.length);
-            for (int k = 0; k < mergedCounts.length; k++) {
-                int count = allocatedMobs[k][j];
-                if (count == 0) {
+        int[] waveWeights = new int[weightedWaves.size()];
+        for (int i = 0; i < waveWeights.length; i++) {
+            waveWeights[i] = weightedWaves.get(i).data.mobCountWeight;
+        }
+
+        int[] waveMobCounts = distributeWeights(waveWeights, baseMobCount);
+
+        List<Wave> waves = new ArrayList<>(weightedWaves.size());
+
+        double baseWaveDelay = currentTheme.baseWaveDelayTicks().scale(endlessRoundIndex, data.waveDelayBase);
+        for (int i = 0; i < weightedWaves.size(); i++) {
+            int waveMobCount = waveMobCounts[i];
+            WeightedWave currentWave = weightedWaves.get(i);
+
+            List<WeightedMob> actualRoundMobs = new ArrayList<>(currentWave.data.wave);
+            List<WeightedMob> introduced = introducedMobs == null ? null : introducedMobs.get(i + 1);
+            if (introduced != null) {
+                actualRoundMobs.addAll(introduced);
+            }
+
+            List<SpawnInfo> spawns = new ArrayList<>(actualRoundMobs.size());
+            int[] mobTypeWeights = new int[actualRoundMobs.size()];
+            for (int j = 0; j < actualRoundMobs.size(); j++) {
+                mobTypeWeights[j] = actualRoundMobs.get(j).weight;
+            }
+
+            int[] mobTypeCounts = distributeWeights(mobTypeWeights, waveMobCount);
+            for (int j = 0; j < actualRoundMobs.size(); j++) {
+                WeightedMob weightedMob = actualRoundMobs.get(j);
+                spawns.add(new SpawnInfo(weightedMob.key, weightedMob.spawnType, mobTypeCounts[j]));
+            }
+
+            long waveDelayTicks = Math.max(ABSOLUTE_WAVE_DELAY_MINIMUM, Math.min(ABSOLUTE_WAVE_DELAY_MAXIMUM,
+                (long) Math.rint(currentTheme.offsetWaveDelayTicks().scale(i, baseWaveDelay))));
+
+            waves.add(new Wave(waveDelayTicks, currentWave.spawnActions, spawns));
+        }
+
+        return new Round(roundIndex + 1, waves, currentTheme.startActions(), currentTheme.endActions(),
+            this.zombiesScene);
+    }
+
+    private static int[] distributeWeights(int[] weights, int count) {
+        double[] normalizedWeights = normalizeWeights(weights);
+        double[] exactCounts = new double[normalizedWeights.length];
+        for (int i = 0; i < exactCounts.length; i++) {
+            exactCounts[i] = normalizedWeights[i] * count;
+        }
+
+        int[] actualCounts = new int[weights.length];
+        balance(actualCounts, exactCounts);
+        return actualCounts;
+    }
+
+    @VisibleForTesting
+    static double[] normalizeWeights(int[] weights) {
+        double weightSum = 0;
+        double[] normalized = new double[weights.length];
+        for (int i = 0; i < weights.length; i++) {
+            int value = Math.max(1, Math.abs(weights[i]));
+            weightSum += value;
+            normalized[i] = value;
+        }
+
+        for (int i = 0; i < weights.length; i++) {
+            normalized[i] /= weightSum;
+        }
+
+        return normalized;
+    }
+
+    @VisibleForTesting
+    static void balance(int[] actualCounts, double[] exactCounts) {
+        assert actualCounts.length == exactCounts.length;
+
+        double overflow;
+        while (true) {
+            overflow = Double.MAX_VALUE;
+            int smallestCurrentDecimalPartIndex = -1;
+            double smallestFloor = -1;
+            for (int i = 0; i < exactCounts.length; i++) {
+                double current = exactCounts[i];
+                double currentFloor = Math.floor(current);
+                double currentDecimalPart = current - currentFloor;
+                if (currentDecimalPart < 0.001) {
                     continue;
                 }
 
-                WeightedMob mob = k < themeMobs.size() ? themeMobs.get(k) : introducedMobs.get(k - themeMobs.size());
-                spawns.add(new SpawnInfo(mob.key, mob.spawnType, count));
-            }
-
-            waves.add(new Wave(actualDelay, spawnActions, spawns));
-        }
-
-        return new Round(roundIndex + 1, waves, roundTheme.startActions(), roundTheme.endActions(), this.zombiesScene);
-    }
-
-    private static void balanceAllocations(int[] waveCounts, double[] waveWeights) {
-        for (int i = 0; i < waveCounts.length; i++) {
-            int thisCount = waveCounts[i];
-            double thisWeight = waveWeights[i];
-
-            for (int k = i + 1; k < waveCounts.length; k++) {
-                int thatCount = waveCounts[k];
-                double thatWeight = waveWeights[k];
-
-                //this has more mobs, but a smaller weight!
-                //this is just an off-by-one due to rounding
-                if (thisWeight < thatWeight && thisCount > thatCount) {
-                    waveCounts[i]--;
-                    waveCounts[k]++;
-                } else if (thisWeight > thatWeight && thisCount < thatCount) {
-                    waveCounts[k]--;
-                    waveCounts[i]++;
+                if (currentDecimalPart < overflow) {
+                    overflow = currentDecimalPart;
+                    smallestCurrentDecimalPartIndex = i;
+                    smallestFloor = currentFloor;
                 }
             }
+
+            if (smallestCurrentDecimalPartIndex == -1) {
+                break;
+            }
+
+            int largestOtherDecimalPartIndex = getLargestDecimalPartIndex(exactCounts, smallestCurrentDecimalPartIndex);
+            if (largestOtherDecimalPartIndex == -1) {
+                break;
+            }
+
+            exactCounts[smallestCurrentDecimalPartIndex] = smallestFloor;
+            exactCounts[largestOtherDecimalPartIndex] += overflow;
+        }
+
+        for (int i = 0; i < exactCounts.length; i++) {
+            actualCounts[i] = (int) Math.floor(exactCounts[i]);
+        }
+
+        if (overflow < 1 && overflow >= 0.5) {
+            double largest = Double.MIN_VALUE;
+            int index = -1;
+            for (int i = 0; i < exactCounts.length; i++) {
+                double current = exactCounts[i];
+                if (current > largest) {
+                    largest = current;
+                    index = i;
+                }
+            }
+
+            if (index != -1) {
+                actualCounts[index]++;
+            }
         }
     }
 
-    private List<WeightedMob> introducedMobs(int endlessRound) {
-        List<WeightedMob> introducedMobs = null;
-        for (Introduction introduction : introductions) {
-            if (introduction.startRound() > endlessRound) {
-                //any future introductions are too high
-                return introducedMobs == null ? List.of() : introducedMobs;
-            }
-
-            int count = introduction.count();
-            if (count == 0) {
-                //should logically never be introduced, but probably a config mistake
+    private static int getLargestDecimalPartIndex(double[] exactCounts, int skipIndex) {
+        double largestOtherDecimalPart = Double.MIN_VALUE;
+        int largestOtherDecimalPartIndex = -1;
+        for (int j = 0; j < exactCounts.length; j++) {
+            if (j == skipIndex) {
                 continue;
             }
 
-            if (introduction.spawns().isEmpty()) {
-                //most likely another config mistake
+            double other = exactCounts[j];
+            double otherDecimalPart = other - Math.floor(other);
+            if (otherDecimalPart < 0.001) {
                 continue;
             }
 
-            int period = introduction.period();
-            int start = introduction.startRound();
-            int sinceStart = endlessRound - start;
-            if (sinceStart == 0 ||
-                ((count < 0 || endlessRound < start + (period * (count - 1) + 1)) && sinceStart % period == 0)) {
-                if (introducedMobs == null) {
-                    introducedMobs = new ArrayList<>();
-                }
-
-                introducedMobs.addAll(introduction.spawns());
+            if (otherDecimalPart > largestOtherDecimalPart) {
+                largestOtherDecimalPart = otherDecimalPart;
+                largestOtherDecimalPartIndex = j;
             }
         }
-
-        return introducedMobs == null ? List.of() : introducedMobs;
+        return largestOtherDecimalPartIndex;
     }
 
     @Override
     public void init() {
         this.zombiesScene.get().addListener(ZombiesMobSetupEvent.class, this::onMobSetup);
+    }
+
+    private List<Introduction> applicableIntroductions(int endlessRound) {
+        List<Introduction> applicableIntroductions = null;
+        for (Introduction introduction : introductions) {
+            if (introduction.data.startRound() > endlessRound) {
+                //any future introductions are too high
+                return applicableIntroductions == null ? List.of() : applicableIntroductions;
+            }
+
+            int count = introduction.data.count();
+            if (count == 0) {
+                //should logically never be introduced, but probably a config mistake
+                continue;
+            }
+
+            if (introduction.waves.isEmpty() && introduction.data.mobs.isEmpty()) {
+                //most likely another config mistake
+                continue;
+            }
+
+            int period = introduction.data.period();
+            int start = introduction.data.startRound();
+            int sinceStart = endlessRound - start;
+            if (sinceStart == 0 ||
+                ((count < 0 || endlessRound < start + (period * (count - 1) + 1)) && sinceStart % period == 0)) {
+                if (applicableIntroductions == null) {
+                    applicableIntroductions = new ArrayList<>();
+                }
+
+                applicableIntroductions.add(introduction);
+            }
+        }
+
+        return applicableIntroductions == null ? List.of() : applicableIntroductions;
     }
 
     private void onMobSetup(@NotNull ZombiesMobSetupEvent event) {
@@ -456,11 +535,10 @@ public class BasicEndless implements Endless {
         @NotNull ScalingValue speedScaling,
         @NotNull ScalingValue spawnAmountScaling,
         double spawnAmountBase,
-        @NotNull ScalingValue waveScaling,
         double waveBase,
         double waveDelayBase,
         double waveWeightBase,
-        @NotNull List<Introduction> introductions,
+        @NotNull @ChildPath("introductions") List<String> introductions,
         @NotNull @ChildPath("themes") List<String> themes) {
 
     }
