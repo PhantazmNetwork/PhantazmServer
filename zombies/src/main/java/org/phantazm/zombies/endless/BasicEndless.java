@@ -315,28 +315,28 @@ public class BasicEndless implements Endless {
             int waveMobCount = waveMobCounts[i];
             WeightedWave currentWave = weightedWaves.get(i);
 
-            List<WeightedMob> actualRoundMobs = new ArrayList<>(currentWave.data.wave);
-            List<WeightedMob> introduced = introducedMobs == null ? null : introducedMobs.get(i + 1);
+            List<WeightedMob> actualWaveMobs = new ArrayList<>(currentWave.data.wave);
+            List<WeightedMob> introduced = introducedMobs == null ? null : introducedMobs.get(i);
             if (introduced != null) {
-                actualRoundMobs.addAll(introduced);
+                actualWaveMobs.addAll(introduced);
             }
 
-            List<SpawnInfo> spawns = new ArrayList<>(actualRoundMobs.size());
-            int[] mobTypeWeights = new int[actualRoundMobs.size()];
-            for (int j = 0; j < actualRoundMobs.size(); j++) {
-                mobTypeWeights[j] = actualRoundMobs.get(j).weight;
+            List<SpawnInfo> waveSpawns = new ArrayList<>(actualWaveMobs.size());
+            int[] mobTypeWeights = new int[actualWaveMobs.size()];
+            for (int j = 0; j < actualWaveMobs.size(); j++) {
+                mobTypeWeights[j] = actualWaveMobs.get(j).weight;
             }
 
             int[] mobTypeCounts = distributeWeights(mobTypeWeights, waveMobCount);
-            for (int j = 0; j < actualRoundMobs.size(); j++) {
-                WeightedMob weightedMob = actualRoundMobs.get(j);
-                spawns.add(new SpawnInfo(weightedMob.key, weightedMob.spawnType, mobTypeCounts[j]));
+            for (int j = 0; j < actualWaveMobs.size(); j++) {
+                WeightedMob weightedMob = actualWaveMobs.get(j);
+                waveSpawns.add(new SpawnInfo(weightedMob.key, weightedMob.spawnType, mobTypeCounts[j]));
             }
 
             long waveDelayTicks = Math.max(ABSOLUTE_WAVE_DELAY_MINIMUM, Math.min(ABSOLUTE_WAVE_DELAY_MAXIMUM,
                 (long) Math.rint(currentTheme.offsetWaveDelayTicks().scale(i, baseWaveDelay))));
 
-            waves.add(new Wave(waveDelayTicks, currentWave.spawnActions, spawns));
+            waves.add(new Wave(waveDelayTicks, currentWave.spawnActions, waveSpawns));
         }
 
         return new Round(roundIndex + 1, waves, currentTheme.startActions(), currentTheme.endActions(),
@@ -522,7 +522,6 @@ public class BasicEndless implements Endless {
         instance.setBaseValue((float) scalingValue.scale(endlessRound, instance.getBaseValue()));
     }
 
-    @DataObject
     @Default("""
         {
           waveBase=3,
@@ -530,6 +529,7 @@ public class BasicEndless implements Endless {
           waveWeightBase=0
         }
         """)
+    @DataObject
     public record Data(@NotNull ScalingValue healthScaling,
         @NotNull ScalingValue damageScaling,
         @NotNull ScalingValue speedScaling,
