@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.Unsafe;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -19,12 +20,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ExecutorFeature {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorFeature.class);
-    private static final Field TARGET_FIELD;
+    private static final long TARGET;
+
+    private static class UnsafeHolder {
+        private static final Unsafe U;
+
+        static {
+            Unsafe unsafe;
+            try {
+                Field field = Unsafe.class.getDeclaredField("theUnsafe");
+                field.setAccessible(true);
+                unsafe = (Unsafe) field.get(null);
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                LOGGER.warn("Could not initialize Unsafe; full thread debugging info will not be available");
+                unsafe = null;
+            }
+            U = unsafe;
+        }
+    }
 
     static {
         try {
-            TARGET_FIELD = Thread.class.getDeclaredField("target");
-            TARGET_FIELD.setAccessible(true);
+            Unsafe u = UnsafeHolder.U;
+            TARGET = u == null ? -1 : u.objectFieldOffset(Thread.class.getDeclaredField("target"));
         } catch (NoSuchFieldException e) {
             throw new ExceptionInInitializerError(e);
         }
@@ -85,10 +103,13 @@ public class ExecutorFeature {
                     dumpText.append("daemon: ").append(daemon).append(System.lineSeparator());
 
                     try {
-                        Runnable value = (Runnable) TARGET_FIELD.get(thread);
-                        dumpText.append("target runnable: ").append(value == null ? "null" : value.getClass())
-                            .append(System.lineSeparator());
-                    } catch (IllegalAccessException ignored) {
+                        Unsafe unsafe = UnsafeHolder.U;
+                        if (unsafe != null) {
+                            Runnable value = (Runnable) unsafe.getObject(thread, TARGET);
+                            dumpText.append("target runnable: ").append(value == null ? "null" : value.getClass())
+                                .append(System.lineSeparator());
+                        }
+                    } catch (Throwable ignored) {
                         dumpText.append("[failed to read target runnable field]");
                     }
 
