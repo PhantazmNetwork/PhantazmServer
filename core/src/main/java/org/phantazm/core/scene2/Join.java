@@ -105,6 +105,8 @@ public interface Join<T extends Scene> {
      * <ul>
      *     <li>Update the player's Viewable rules, as they are cleared by the SceneManager directly after {@link Join#join(Scene)} is called</li>
      * </ul>
+     * This method is free to access the scene directly (without acquiring) as the scene must be acquired by the
+     * SceneManager.
      *
      * @param scene the scene to join
      */
