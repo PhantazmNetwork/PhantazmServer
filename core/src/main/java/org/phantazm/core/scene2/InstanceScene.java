@@ -10,8 +10,11 @@ import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.FutureUtils;
 import org.phantazm.core.player.PlayerView;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 
 /**
  * Further specialization of {@link SceneAbstract} that assumes a single instance devoted to this {@link Scene}. The
@@ -23,6 +26,18 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
 
     private final Set<PlayerView> spectators;
     private final Set<PlayerView> spectatorsView;
+
+    private record ViewPredicate(Reference<InstanceScene> sceneReference) implements Predicate<Player> {
+        @Override
+        public boolean test(Player player) {
+            InstanceScene instance = sceneReference.get();
+            if (instance != null) {
+                return instance.hasSpectator(player);
+            }
+
+            return true;
+        }
+    }
 
     public InstanceScene(@NotNull Instance instance, int timeout) {
         super(timeout);
@@ -69,7 +84,8 @@ public abstract class InstanceScene extends SceneAbstract implements WatchableSc
             }
 
             Player actualPlayer = playerOptional.get();
-            actualPlayer.updateViewableRule(this::hasSpectator);
+
+            actualPlayer.updateViewableRule(new ViewPredicate(new WeakReference<>(this)));
             actualPlayer.setGameMode(GameMode.SPECTATOR);
 
             futures[i++] = joinSpectator(actualPlayer, ghost);

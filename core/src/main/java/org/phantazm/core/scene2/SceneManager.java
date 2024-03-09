@@ -1105,7 +1105,6 @@ public final class SceneManager {
         for (PlayerView playerView : playerViews) {
             playerView.getPlayer().ifPresent(player -> {
                 player.updateViewableRule(null);
-                player.updateViewerRule(null);
             });
         }
     }
