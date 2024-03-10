@@ -176,11 +176,9 @@ public class BasicEndless implements Endless {
 
         @DataObject
         public record Data(
-            @NotNull ScalingValue waveWeight,
             @NotNull ScalingValue baseWaveDelayTicks,
             @NotNull ScalingValue offsetWaveDelayTicks,
             @NotNull @ChildPath("waves") List<String> waves,
-            @NotNull @ChildPath("wave_actions") List<String> waveActions,
             @NotNull @ChildPath("start_actions") List<String> startActions,
             @NotNull @ChildPath("end_actions") List<String> endActions) {
         }
@@ -526,7 +524,6 @@ public class BasicEndless implements Endless {
         {
           waveBase=3,
           waveDelayBase=0,
-          waveWeightBase=0
         }
         """)
     @DataObject
@@ -535,9 +532,7 @@ public class BasicEndless implements Endless {
         @NotNull ScalingValue speedScaling,
         @NotNull ScalingValue spawnAmountScaling,
         double spawnAmountBase,
-        double waveBase,
         double waveDelayBase,
-        double waveWeightBase,
         @NotNull @ChildPath("introductions") List<String> introductions,
         @NotNull @ChildPath("themes") List<String> themes) {
 
