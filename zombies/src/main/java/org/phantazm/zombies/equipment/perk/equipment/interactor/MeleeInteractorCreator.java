@@ -113,7 +113,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
             livingEntity.getAcquirable().sync(ignored -> {
                 boolean isInstaKill;
                 if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
-                    (!hitMob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
+                    (!hitMob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_INSTAKILL, false))) {
                     livingEntity.damage(Damage.fromPlayer(player, livingEntity.getHealth()), true);
                     isInstaKill = true;
                 } else {

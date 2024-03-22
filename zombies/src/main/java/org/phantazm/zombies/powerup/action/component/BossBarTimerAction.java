@@ -13,6 +13,7 @@ import net.minestom.server.entity.state.CancellableState;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.MathUtils;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -20,7 +21,6 @@ import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.scene2.ZombiesScene;
-import org.phantazm.core.player.PlayerView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
     private final TickFormatter tickFormatter;
 
     @FactoryMethod
-    public BossBarTimerAction(@NotNull Data data, @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
+    public BossBarTimerAction(@NotNull Data data, @NotNull @Child("tickFormatter") TickFormatter tickFormatter) {
         this.data = data;
         this.tickFormatter = tickFormatter;
     }
@@ -142,7 +142,6 @@ public class BossBarTimerAction implements PowerupActionComponent {
         long duration,
         @NotNull String format,
         @NotNull BossBar.Color color,
-        @NotNull BossBar.Overlay overlay,
-        @NotNull @ChildPath("tick_formatter") String tickFormatter) {
+        @NotNull BossBar.Overlay overlay) {
     }
 }

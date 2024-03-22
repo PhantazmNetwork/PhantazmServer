@@ -1,6 +1,9 @@
 package org.phantazm.zombies.sidebar.section;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -18,7 +21,7 @@ public class ZombiesPlayersSection implements SidebarSection {
 
     @FactoryMethod
     public ZombiesPlayersSection(@NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
-        @NotNull @Child("creator_path") PlayerUpdaterCreator playerUpdaterCreator) {
+        @NotNull @Child("creator") PlayerUpdaterCreator playerUpdaterCreator) {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
         this.lineUpdaters = new ArrayList<>(zombiesPlayers.size());
         this.playerUpdaterCreator = Objects.requireNonNull(playerUpdaterCreator);
@@ -45,9 +48,5 @@ public class ZombiesPlayersSection implements SidebarSection {
         }
 
         return updates;
-    }
-
-    @DataObject
-    public record Data(@NotNull @ChildPath("creator_path") String creator) {
     }
 }

@@ -50,8 +50,7 @@ public class ApplyFireSkill implements SkillComponent {
         """)
     @DataObject
     public record Data(
-        @Nullable Trigger trigger,
-        @NotNull @ChildPath("selector") String selector) {
+        @Nullable Trigger trigger) {
     }
 
     private static final class Internal extends TargetedSkill {

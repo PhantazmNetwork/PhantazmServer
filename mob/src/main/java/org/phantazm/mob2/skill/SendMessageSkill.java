@@ -40,7 +40,6 @@ public class SendMessageSkill implements SkillComponent {
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        @NotNull @ChildPath("selector") String selector,
         @NotNull Component message) {
     }
 

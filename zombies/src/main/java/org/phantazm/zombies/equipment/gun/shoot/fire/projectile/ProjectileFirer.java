@@ -62,10 +62,10 @@ public class ProjectileFirer implements Firer {
     @FactoryMethod
     public ProjectileFirer(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
         @NotNull UUID shooterUUID,
-        @NotNull @Child("end_selector") ShotEndpointSelector endSelector,
-        @NotNull @Child("target_finder") TargetFinder targetFinder,
-        @NotNull @Child("collision_filter") ProjectileCollisionFilter collisionFilter,
-        @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers, @NotNull MobSpawner spawner) {
+        @NotNull @Child("endSelector") ShotEndpointSelector endSelector,
+        @NotNull @Child("targetFinder") TargetFinder targetFinder,
+        @NotNull @Child("collisionFilter") ProjectileCollisionFilter collisionFilter,
+        @NotNull @Child("shotHandlers") Collection<ShotHandler> shotHandlers, @NotNull MobSpawner spawner) {
         this.data = Objects.requireNonNull(data);
         this.entitySupplier = Objects.requireNonNull(entitySupplier);
         this.shooterUUID = Objects.requireNonNull(shooterUUID);
@@ -190,22 +190,14 @@ public class ProjectileFirer implements Firer {
     /**
      * Data for a {@link ProjectileFirer}.
      *
-     * @param endSelector     A path to the {@link ProjectileFirer}'s {@link ShotEndpointSelector}
-     * @param targetFinder    A path to the {@link ProjectileFirer}'s {@link TargetFinder}
-     * @param collisionFilter A path to the {@link ProjectileFirer}'s {@link ProjectileCollisionFilter}
-     * @param shotHandlers    A {@link Collection} of paths to the {@link ProjectileFirer}'s {@link ShotHandler}s
-     * @param power           The power of the {@link ProjectileFirer}'s projectiles
-     * @param spread          The spread of the {@link ProjectileFirer}'s projectiles
-     * @param hasGravity      Whether the {@link ProjectileFirer}'s projectiles have gravity
-     * @param maxAliveTime    The maximum time, in ticks, that the {@link ProjectileFirer}'s projectiles can live before
-     *                        automatically exploding
+     * @param power        The power of the {@link ProjectileFirer}'s projectiles
+     * @param spread       The spread of the {@link ProjectileFirer}'s projectiles
+     * @param hasGravity   Whether the {@link ProjectileFirer}'s projectiles have gravity
+     * @param maxAliveTime The maximum time, in ticks, that the {@link ProjectileFirer}'s projectiles can live before
+     *                     automatically exploding
      */
     @DataObject
     public record Data(
-        @NotNull @ChildPath("end_selector") String endSelector,
-        @NotNull @ChildPath("target_finder") String targetFinder,
-        @NotNull @ChildPath("collision_filter") String collisionFilter,
-        @NotNull @ChildPath("shot_handlers") Collection<String> shotHandlers,
         @NotNull Key projectileMob,
         double power,
         double spread,

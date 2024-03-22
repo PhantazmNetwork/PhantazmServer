@@ -31,7 +31,7 @@ public class SendMessageEffect implements GunEffect {
      */
     @FactoryMethod
     public SendMessageEffect(@NotNull Data data,
-        @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
+        @NotNull @Child("audienceProvider") AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data);
         this.audienceProvider = Objects.requireNonNull(audienceProvider);
     }
@@ -61,7 +61,6 @@ public class SendMessageEffect implements GunEffect {
      */
     @DataObject
     public record Data(
-        @NotNull @ChildPath("audience_provider") String audienceProvider,
         @NotNull MessageWithDestination message) {
     }
 }

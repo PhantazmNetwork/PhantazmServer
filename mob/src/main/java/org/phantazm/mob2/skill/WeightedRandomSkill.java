@@ -42,7 +42,6 @@ public class WeightedRandomSkill implements SkillComponent {
         """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
-        @NotNull @ChildPath("delegates") List<String> delegates,
         int[] weights) {
     }
 

@@ -1,8 +1,6 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
@@ -19,8 +17,8 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
     private int uses;
 
     @FactoryMethod
-    public CountingInteractor(@NotNull Data data, @NotNull @Child("success") List<ShopInteractor> successInteractors,
-        @NotNull @Child("failure") List<ShopInteractor> failureInteractors) {
+    public CountingInteractor(@NotNull Data data, @NotNull @Child("successInteractors") List<ShopInteractor> successInteractors,
+        @NotNull @Child("failureInteractors") List<ShopInteractor> failureInteractors) {
         super(data);
         this.successInteractors = successInteractors;
         this.failureInteractors = failureInteractors;
@@ -69,15 +67,15 @@ public class CountingInteractor extends InteractorBase<CountingInteractor.Data> 
         ShopInteractor.tick(failureInteractors, time);
     }
 
+    @Default("""
+        {
+          reset=false
+        }
+        """)
     @DataObject
     public record Data(
         int maxUses,
-        boolean reset,
-        @NotNull @ChildPath("success") List<String> successInteractors,
-        @NotNull @ChildPath("failure") List<String> failureInteractors) {
-        @Default("reset")
-        public static @NotNull ConfigElement resetDefault() {
-            return ConfigPrimitive.of(false);
-        }
+        boolean reset) {
+
     }
 }

@@ -41,7 +41,6 @@ public class RadialDamageSkill implements SkillComponent {
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        @NotNull @ChildPath("selector") String selector,
         float damage,
         boolean bypassArmor,
         double range) {

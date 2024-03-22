@@ -42,7 +42,6 @@ public class DamageSkill implements SkillComponent {
         """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
-        @NotNull @ChildPath("selector") String selector,
         float amount,
         float knockback,
         boolean horizontal,

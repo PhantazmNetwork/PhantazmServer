@@ -1,6 +1,9 @@
 package org.phantazm.zombies.map.shop.display;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
@@ -17,8 +20,8 @@ public class ConditionalDisplay implements ShopDisplay {
     private List<ShopDisplay> activeDisplays;
 
     @FactoryMethod
-    public ConditionalDisplay(@NotNull @Child("success_displays") List<ShopDisplay> successDisplays,
-        @NotNull @Child("failure_displays") List<ShopDisplay> failureDisplays) {
+    public ConditionalDisplay(@NotNull @Child("successDisplays") List<ShopDisplay> successDisplays,
+        @NotNull @Child("failureDisplays") List<ShopDisplay> failureDisplays) {
         this.successDisplays = Objects.requireNonNull(successDisplays);
         this.failureDisplays = Objects.requireNonNull(failureDisplays);
     }
@@ -78,11 +81,5 @@ public class ConditionalDisplay implements ShopDisplay {
                 shopDisplay.tick(time);
             }
         }
-    }
-
-    @DataObject
-    public record Data(
-        @NotNull @ChildPath("success_displays") List<String> successDisplays,
-        @NotNull @ChildPath("failure_displays") List<String> failureDisplays) {
     }
 }

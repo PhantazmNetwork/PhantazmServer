@@ -67,8 +67,6 @@ public class DamageOverTimeSkill implements SkillComponent {
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        @NotNull @ChildPath("selector") String selector,
-        @NotNull @ChildPath("validator") String validator,
         @Nullable Sound sound,
         int damageInterval,
         int damageTime,

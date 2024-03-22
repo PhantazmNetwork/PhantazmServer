@@ -2,7 +2,10 @@ package org.phantazm.core.hologram;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.*;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Metadata;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.network.packet.server.LazyPacket;
 import net.minestom.server.network.packet.server.SendablePacket;

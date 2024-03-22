@@ -1,8 +1,6 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
@@ -26,10 +24,10 @@ public class EquipmentStationInteractor implements ShopInteractor {
 
     @FactoryMethod
     public EquipmentStationInteractor(@NotNull Data data,
-        @NotNull @Child("success") List<ShopInteractor> successInteractors,
-        @NotNull @Child("holding") List<ShopInteractor> holdingInteractors,
-        @NotNull @Child("duplicate") List<ShopInteractor> duplicateInteractors,
-        @NotNull @Child("failure") List<ShopInteractor> failureInteractors) {
+        @NotNull @Child("successInteractors") List<ShopInteractor> successInteractors,
+        @NotNull @Child("holdingInteractors") List<ShopInteractor> holdingInteractors,
+        @NotNull @Child("duplicateInteractors") List<ShopInteractor> duplicateInteractors,
+        @NotNull @Child("failureInteractors") List<ShopInteractor> failureInteractors) {
         this.data = data;
         this.successInteractors = successInteractors;
         this.holdingInteractors = holdingInteractors;
@@ -90,30 +88,19 @@ public class EquipmentStationInteractor implements ShopInteractor {
         ShopInteractor.tick(failureInteractors, time);
     }
 
+    @Default("""
+        {
+          allowReplace=true,
+          specificSlot=-1,
+          allowDuplicate=false
+        }
+        """)
     @DataObject
     public record Data(
         @NotNull Key equipmentKey,
         @NotNull Key groupKey,
         boolean allowReplace,
         int specificSlot,
-        boolean allowDuplicate,
-        @NotNull @ChildPath("success") List<String> successInteractors,
-        @NotNull @ChildPath("holding") List<String> holdingInteractors,
-        @NotNull @ChildPath("duplicate") List<String> duplicateInteractors,
-        @NotNull @ChildPath("failure") List<String> failureInteractors) {
-        @Default("allowReplace")
-        public static ConfigElement defaultAllowReplace() {
-            return ConfigPrimitive.of(true);
-        }
-
-        @Default("specificSlot")
-        public static ConfigElement defaultSpecificSlot() {
-            return ConfigPrimitive.of(-1);
-        }
-
-        @Default("allowDuplicate")
-        public static ConfigElement defaultAllowDuplicate() {
-            return ConfigPrimitive.of(false);
-        }
+        boolean allowDuplicate) {
     }
 }

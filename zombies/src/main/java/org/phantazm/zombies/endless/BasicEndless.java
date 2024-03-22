@@ -1,6 +1,8 @@
 package org.phantazm.zombies.endless;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.core.ConfigElement;
+import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -97,7 +99,7 @@ public class BasicEndless implements Endless {
         private final List<Action<List<Mob>>> spawnActions;
 
         @FactoryMethod
-        public WeightedWave(@NotNull Data data, @NotNull @Child("spawn_actions") List<Action<List<Mob>>> spawnActions) {
+        public WeightedWave(@NotNull Data data, @NotNull @Child("spawnActions") List<Action<List<Mob>>> spawnActions) {
             this.data = data;
             this.spawnActions = spawnActions;
         }
@@ -113,21 +115,25 @@ public class BasicEndless implements Endless {
         public record Data(@NotNull List<WeightedMob> wave,
             @NotNull WaveIntroduceMode introduceMode,
             int introduceIndex,
-            int mobCountWeight,
-            @NotNull @ChildPath("spawn_actions") List<String> spawnActions) {
+            int mobCountWeight) {
         }
     }
 
     public interface Theme {
-        @NotNull List<WeightedWave> waves();
+        @NotNull
+        List<WeightedWave> waves();
 
-        @NotNull ScalingValue baseWaveDelayTicks();
+        @NotNull
+        ScalingValue baseWaveDelayTicks();
 
-        @NotNull ScalingValue offsetWaveDelayTicks();
+        @NotNull
+        ScalingValue offsetWaveDelayTicks();
 
-        @NotNull List<Action<Round>> startActions();
+        @NotNull
+        List<Action<Round>> startActions();
 
-        @NotNull List<Action<Round>> endActions();
+        @NotNull
+        List<Action<Round>> endActions();
     }
 
     @Model("zombies.endless.basic.theme")
@@ -141,8 +147,8 @@ public class BasicEndless implements Endless {
         @FactoryMethod
         public BasicTheme(@NotNull Data data,
             @NotNull @Child("waves") List<WeightedWave> waves,
-            @NotNull @Child("start_actions") List<Action<Round>> startActions,
-            @NotNull @Child("end_actions") List<Action<Round>> endActions) {
+            @NotNull @Child("startActions") List<Action<Round>> startActions,
+            @NotNull @Child("endActions") List<Action<Round>> endActions) {
             this.data = data;
             this.waves = waves;
             this.startActions = startActions;
@@ -177,10 +183,7 @@ public class BasicEndless implements Endless {
         @DataObject
         public record Data(
             @NotNull ScalingValue baseWaveDelayTicks,
-            @NotNull ScalingValue offsetWaveDelayTicks,
-            @NotNull @ChildPath("waves") List<String> waves,
-            @NotNull @ChildPath("start_actions") List<String> startActions,
-            @NotNull @ChildPath("end_actions") List<String> endActions) {
+            @NotNull ScalingValue offsetWaveDelayTicks) {
         }
     }
 
@@ -203,8 +206,7 @@ public class BasicEndless implements Endless {
               count=-1
             }
             """)
-        public record Data(@NotNull @ChildPath("waves") List<String> waves,
-            @NotNull List<IndexedWeightedMob> mobs,
+        public record Data(@NotNull List<IndexedWeightedMob> mobs,
             int startRound,
             int period,
             int count) {
@@ -492,7 +494,10 @@ public class BasicEndless implements Endless {
 
     private void onMobSetup(@NotNull ZombiesMobSetupEvent event) {
         Mob mob = event.getEntity();
-        if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.BYPASS_ENDLESS_SCALING)) {
+        ConfigElement bypassesScaling = mob.data().extra().atOrDefault(ExtraNodeKeys.BYPASS_ENDLESS_SCALING,
+            ConfigPrimitive.FALSE);
+
+        if (!bypassesScaling.isBoolean() || bypassesScaling.asBoolean()) {
             return;
         }
 
@@ -532,9 +537,7 @@ public class BasicEndless implements Endless {
         @NotNull ScalingValue speedScaling,
         @NotNull ScalingValue spawnAmountScaling,
         double spawnAmountBase,
-        double waveDelayBase,
-        @NotNull @ChildPath("introductions") List<String> introductions,
-        @NotNull @ChildPath("themes") List<String> themes) {
+        double waveDelayBase) {
 
     }
 }

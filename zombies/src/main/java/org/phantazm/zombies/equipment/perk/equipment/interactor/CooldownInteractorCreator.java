@@ -127,7 +127,6 @@ public class CooldownInteractorCreator implements PerkInteractorCreator {
     public record Data(
         @Description("The cooldown, in ticks") int cooldown,
         @NotNull @Description(
-            "What interaction(s) the cooldown will be applied to") DelegateType[] types,
-        @NotNull @ChildPath("delegate") @Description("The interactor to delegate to") String delegate) {
+            "What interaction(s) the cooldown will be applied to") DelegateType[] types) {
     }
 }

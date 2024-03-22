@@ -51,7 +51,6 @@ public class ParticleTrailShotHandler implements ShotHandler {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("particle") String particle,
-        int trailCount) {
+    public record Data(int trailCount) {
     }
 }

@@ -1,6 +1,9 @@
 package org.phantazm.zombies.powerup.action.component;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;
@@ -23,7 +26,7 @@ public class PreventAmmoDrainAction implements PowerupActionComponent {
 
     @FactoryMethod
     public PreventAmmoDrainAction(
-        @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
+        @NotNull @Child("deactivationPredicate") DeactivationPredicateComponent deactivationPredicate) {
         this.deactivationPredicate = deactivationPredicate;
     }
 
@@ -62,10 +65,5 @@ public class PreventAmmoDrainAction implements PowerupActionComponent {
         public void deactivate(@NotNull ZombiesPlayer player) {
             eventNode.removeListener(listener);
         }
-    }
-
-    @DataObject
-    public record Data(@NotNull @ChildPath("deactivation_predicate") String deactivationPredicate) {
-
     }
 }

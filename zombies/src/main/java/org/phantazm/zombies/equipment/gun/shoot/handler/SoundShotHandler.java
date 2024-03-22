@@ -30,7 +30,7 @@ public class SoundShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public SoundShotHandler(@NotNull Data data,
-        @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
+        @NotNull @Child("audienceProvider") AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data);
         this.audienceProvider = Objects.requireNonNull(audienceProvider);
     }
@@ -65,13 +65,11 @@ public class SoundShotHandler implements ShotHandler {
     /**
      * Data for a {@link SoundShotHandler}.
      *
-     * @param audienceProvider A path to the {@link SoundShotHandler}'s {@link AudienceProvider}
-     * @param sound            The sound to play for regular targets
-     * @param headshotSound    The sound to play for headshots
+     * @param sound         The sound to play for regular targets
+     * @param headshotSound The sound to play for headshots
      */
     @DataObject
     public record Data(
-        @NotNull @ChildPath("audience_provider") String audienceProvider,
         @NotNull Sound sound,
         @NotNull Sound headshotSound,
         boolean atShooter) {

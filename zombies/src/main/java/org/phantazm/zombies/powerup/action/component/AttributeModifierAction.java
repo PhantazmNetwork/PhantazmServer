@@ -8,6 +8,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.state.CancellableState;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -17,7 +18,6 @@ import org.phantazm.zombies.powerup.action.PowerupActionBase;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicateComponent;
 import org.phantazm.zombies.scene2.ZombiesScene;
-import org.phantazm.core.player.PlayerView;
 
 import java.util.*;
 
@@ -29,7 +29,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
 
     @FactoryMethod
     public AttributeModifierAction(@NotNull Data data,
-        @NotNull @Child("predicate") DeactivationPredicateComponent deactivationPredicate) {
+        @NotNull @Child("deactivationPredicate") DeactivationPredicateComponent deactivationPredicate) {
         this.data = data;
         this.deactivationPredicate = deactivationPredicate;
     }
@@ -44,8 +44,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
         @NotNull String attribute,
         double amount,
         @NotNull AttributeOperation attributeOperation,
-        boolean global,
-        @NotNull @ChildPath("predicate") String deactivationPredicate) {
+        boolean global) {
 
     }
 

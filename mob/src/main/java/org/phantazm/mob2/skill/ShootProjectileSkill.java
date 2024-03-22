@@ -33,8 +33,8 @@ public class ShootProjectileSkill implements SkillComponent {
     private final SpawnCallbackComponent callback;
 
     @FactoryMethod
-    public ShootProjectileSkill(@NotNull Data data, @NotNull @Child("target_selector") SelectorComponent targetSelector,
-        @NotNull @Child("hit_validator") ValidatorComponent hitValidator,
+    public ShootProjectileSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent targetSelector,
+        @NotNull @Child("hitValidator") ValidatorComponent hitValidator,
         @NotNull @Child("callback") SpawnCallbackComponent callback) {
         this.data = Objects.requireNonNull(data);
         this.targetSelector = Objects.requireNonNull(targetSelector);
@@ -56,9 +56,6 @@ public class ShootProjectileSkill implements SkillComponent {
         """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
-        @NotNull @ChildPath("target_selector") String selector,
-        @NotNull @ChildPath("hit_validator") String hitValidator,
-        @NotNull @ChildPath("callback") String callback,
         @NotNull Key entity,
         double power,
         double spread,

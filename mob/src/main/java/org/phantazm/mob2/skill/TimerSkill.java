@@ -38,7 +38,6 @@ public class TimerSkill implements SkillComponent {
         """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
-        @NotNull @ChildPath("delegate") String delegate,
         int repeat,
         int interval,
         boolean requiresActivation,

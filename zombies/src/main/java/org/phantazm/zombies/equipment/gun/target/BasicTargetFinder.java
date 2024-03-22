@@ -1,6 +1,9 @@
 package org.phantazm.zombies.equipment.gun.target;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import it.unimi.dsi.fastutil.Pair;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -41,11 +44,11 @@ public class BasicTargetFinder implements TargetFinder {
      * @param targetLimiter      A {@link TargetLimiter} which limits the number of targets found
      */
     @FactoryMethod
-    public BasicTargetFinder(@NotNull @Child("entity_finder") DirectionalEntityFinder entityFinder,
-        @NotNull @Child("target_tester") TargetTester targetTester,
-        @NotNull @Child("intersection_finder") IntersectionFinder intersectionFinder,
-        @NotNull @Child("headshot_tester") HeadshotTester headshotTester,
-        @NotNull @Child("target_limiter") TargetLimiter targetLimiter) {
+    public BasicTargetFinder(@NotNull @Child("entityFinder") DirectionalEntityFinder entityFinder,
+        @NotNull @Child("targetTester") TargetTester targetTester,
+        @NotNull @Child("intersectionFinder") IntersectionFinder intersectionFinder,
+        @NotNull @Child("headshotTester") HeadshotTester headshotTester,
+        @NotNull @Child("targetLimiter") TargetLimiter targetLimiter) {
         this.entityFinder = Objects.requireNonNull(entityFinder);
         this.targetTester = Objects.requireNonNull(targetTester);
         this.intersectionFinder = Objects.requireNonNull(intersectionFinder);
@@ -88,25 +91,4 @@ public class BasicTargetFinder implements TargetFinder {
 
         return new Result(targets, headshots);
     }
-
-    /**
-     * Data for a {@link BasicTargetFinder}.
-     *
-     * @param entityFinder       A path to the {@link BasicTargetFinder}'s {@link DirectionalEntityFinder}
-     * @param targetTester       A path to the {@link BasicTargetFinder}'s {@link TargetTester}
-     * @param intersectionFinder A path to the {@link BasicTargetFinder}'s {@link IntersectionFinder}
-     * @param headshotTester     A path to the {@link BasicTargetFinder}'s {@link HeadshotTester}
-     * @param targetLimiter      A path to the {@link BasicTargetFinder}'s {@link TargetLimiter}
-     */
-    @DataObject
-    public record Data(
-        @NotNull @ChildPath("entity_finder") String entityFinder,
-        @NotNull @ChildPath("target_tester") String targetTester,
-        @NotNull @ChildPath("intersection_finder") String intersectionFinder,
-        @NotNull @ChildPath("headshot_tester") String headshotTester,
-        @NotNull @ChildPath("target_limiter") String targetLimiter) {
-
-
-    }
-
 }

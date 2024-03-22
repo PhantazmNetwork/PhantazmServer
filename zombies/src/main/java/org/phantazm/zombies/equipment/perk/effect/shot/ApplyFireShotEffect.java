@@ -53,7 +53,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             return;
         }
 
-        if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_FIRE)) {
+        if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_FIRE, false)) {
             return;
         }
 

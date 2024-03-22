@@ -38,7 +38,7 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
      */
     @FactoryMethod
     public BasicShotEndpointSelector(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> shooterSupplier,
-        @NotNull @Child("block_iterations") Collection<BlockIteration> blockIteration) {
+        @NotNull @Child("blockIterations") Collection<BlockIteration> blockIteration) {
         this.data = Objects.requireNonNull(data);
         this.entitySupplier = Objects.requireNonNull(shooterSupplier);
         this.blockIterations = List.copyOf(blockIteration);
@@ -105,11 +105,9 @@ public class BasicShotEndpointSelector implements ShotEndpointSelector {
     /**
      * Data for a {@link BasicShotEndpointSelector}.
      *
-     * @param blockIterations Paths to the {@link BasicShotEndpointSelector}'s {@link BlockIteration}
-     * @param maxDistance     The maximum distance of the endpoint from the start
+     * @param maxDistance The maximum distance of the endpoint from the start
      */
     @DataObject
-    public record Data(@NotNull @ChildPath("block_iterations") Collection<String> blockIterations,
-        int maxDistance) {
+    public record Data(int maxDistance) {
     }
 }

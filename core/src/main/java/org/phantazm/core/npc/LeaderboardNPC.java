@@ -1,6 +1,9 @@
 package org.phantazm.core.npc;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -24,10 +27,6 @@ public class LeaderboardNPC implements MonoComponent<NPC> {
     @Override
     public @NotNull NPC apply(@NotNull InjectionStore injectionStore) {
         return new Impl(leaderboard.apply(injectionStore));
-    }
-
-    @DataObject
-    public record Data(@NotNull @ChildPath("leaderboard") String leaderboard) {
     }
 
     private record Impl(Leaderboard leaderboard) implements NPC {

@@ -31,7 +31,7 @@ public class LingeringSkill implements SkillComponent {
 
     @FactoryMethod
     public LingeringSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector,
-        @NotNull @Child("target_skills") List<SkillComponent> targetSkills) {
+        @NotNull @Child("targetSkills") List<SkillComponent> targetSkills) {
         this.data = data;
         this.selector = selector;
         this.targetSkills = targetSkills;
@@ -43,10 +43,7 @@ public class LingeringSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector,
-        @NotNull @ChildPath("target_skills") List<String> targetSkills,
-        int lifetime) {
-
+    public record Data(int lifetime) {
     }
 
     private static class Internal extends TargetedSkill {

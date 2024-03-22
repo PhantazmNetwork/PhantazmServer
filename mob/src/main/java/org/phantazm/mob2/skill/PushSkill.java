@@ -41,7 +41,6 @@ public class PushSkill implements SkillComponent {
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        @NotNull @ChildPath("selector") String selector,
         double power,
         double vertical,
         boolean additive) {

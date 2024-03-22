@@ -87,8 +87,6 @@ public class SpawnMobSkill implements SkillComponent {
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        @NotNull @ChildPath("selector") String selector,
-        @NotNull @ChildPath("callback") String callback,
         @NotNull Key identifier,
         int spawnAmount,
         int maxSpawn,

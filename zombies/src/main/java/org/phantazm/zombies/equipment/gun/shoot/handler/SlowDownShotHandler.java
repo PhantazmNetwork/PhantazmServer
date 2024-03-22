@@ -75,7 +75,7 @@ public class SlowDownShotHandler implements ShotHandler {
                 continue;
             }
 
-            if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
+            if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_SLOW_DOWN, false)) {
                 continue;
             }
 
@@ -93,7 +93,7 @@ public class SlowDownShotHandler implements ShotHandler {
                 continue;
             }
 
-            if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_SLOW_DOWN)) {
+            if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_SLOW_DOWN, false)) {
                 continue;
             }
 

@@ -97,7 +97,7 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
 
                         entity.getAcquirable().sync(self -> {
                             Mob mob = (Mob) self;
-                            if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                            if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_INSTAKILL, false)) {
                                 switch (data.bossDamageType) {
                                     case HEALTH_FACTOR -> mob.damage(Damage.fromPlayer(player, mob
                                         .getMaxHealth() * data.bossDamage), data.bypassArmor);

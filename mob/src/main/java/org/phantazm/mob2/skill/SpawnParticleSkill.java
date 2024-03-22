@@ -48,8 +48,6 @@ public class SpawnParticleSkill implements SkillComponent {
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        @NotNull @ChildPath("selector") String selector,
-        @NotNull @ChildPath("particle") String particle,
         @NotNull Bounds3D bounds) {
     }
 

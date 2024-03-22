@@ -67,10 +67,10 @@ public class ZombiesMobCreator extends MobCreatorBase {
     protected void setTasks(@NotNull Mob mob) {
         ConfigNode extraNode = mob.data().extra();
 
-        int ticksUntilDeath = extraNode.getNumberOrDefault(6000, ExtraNodeKeys.TICKS_UNTIL_DEATH).intValue();
-        int speedupIncrements = extraNode.getNumberOrDefault(5, ExtraNodeKeys.SPEEDUP_INCREMENTS).intValue();
-        int speedupInterval = extraNode.getNumberOrDefault(1200, ExtraNodeKeys.SPEEDUP_INTERVAL).intValue();
-        double speedupAmount = extraNode.getNumberOrDefault(0.1D, ExtraNodeKeys.SPEEDUP_AMOUNT).doubleValue();
+        int ticksUntilDeath = extraNode.getNumberOrDefault(ExtraNodeKeys.TICKS_UNTIL_DEATH, 6000).intValue();
+        int speedupIncrements = extraNode.getNumberOrDefault(ExtraNodeKeys.SPEEDUP_INCREMENTS, 5).intValue();
+        int speedupInterval = extraNode.getNumberOrDefault(ExtraNodeKeys.SPEEDUP_INTERVAL, 1200).intValue();
+        double speedupAmount = extraNode.getNumberOrDefault(ExtraNodeKeys.SPEEDUP_AMOUNT, 0.1D).doubleValue();
 
         if (ticksUntilDeath >= 0) {
             mob.scheduler()

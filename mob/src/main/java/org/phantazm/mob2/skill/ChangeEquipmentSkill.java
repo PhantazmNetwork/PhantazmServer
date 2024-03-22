@@ -31,8 +31,7 @@ public class ChangeEquipmentSkill implements SkillComponent {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector,
-        @NotNull Map<EquipmentSlot, ItemStack> equipment) {
+    public record Data(@NotNull Map<EquipmentSlot, ItemStack> equipment) {
     }
 
     private static class Internal extends TargetedSkill {

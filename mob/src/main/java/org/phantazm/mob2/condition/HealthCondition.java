@@ -44,8 +44,7 @@ public class HealthCondition implements SkillConditionComponent {
         }
         """)
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector,
-        @NotNull HealthCondition.Condition condition,
+    public record Data(@NotNull HealthCondition.Condition condition,
         @NotNull AmountType amountType,
         double amount) {
     }

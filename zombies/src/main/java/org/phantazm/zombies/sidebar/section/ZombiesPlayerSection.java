@@ -1,6 +1,9 @@
 package org.phantazm.zombies.sidebar.section;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
@@ -8,7 +11,10 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.sidebar.lineupdater.SidebarLineUpdater;
 import org.phantazm.zombies.sidebar.lineupdater.creator.PlayerUpdaterCreator;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @Model("zombies.sidebar.section.zombies_player")
 @Cache(false)
@@ -22,7 +28,7 @@ public class ZombiesPlayerSection implements SidebarSection {
 
     @FactoryMethod
     public ZombiesPlayerSection(@NotNull Map<PlayerView, ZombiesPlayer> playerMap,
-        @NotNull PlayerView playerView, @NotNull @Child("line_updater") PlayerUpdaterCreator creator) {
+        @NotNull PlayerView playerView, @NotNull @Child("creatorPath") PlayerUpdaterCreator creator) {
         this.playerMap = Objects.requireNonNull(playerMap);
         this.playerView = Objects.requireNonNull(playerView);
         this.creator = Objects.requireNonNull(creator);
@@ -52,9 +58,5 @@ public class ZombiesPlayerSection implements SidebarSection {
         }
 
         return List.of(lineUpdater.tick(time));
-    }
-
-    @DataObject
-    public record Data(@NotNull @ChildPath("line_updater") String creatorPath) {
     }
 }

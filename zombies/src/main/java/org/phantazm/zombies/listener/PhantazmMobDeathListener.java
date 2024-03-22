@@ -103,7 +103,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
         player.getPlayer().ifPresent(actualPlayer -> {
             player.module().getKills().onKill(mob);
 
-            if (!mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.ANNOUNCE_KILL)) {
+            if (!mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.ANNOUNCE_KILL, false)) {
                 return;
             }
 

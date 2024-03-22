@@ -49,7 +49,6 @@ public class TemporalSkill implements SkillComponent {
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        @NotNull @ChildPath("delegate") String delegate,
         int minDuration,
         int maxDuration,
         boolean endImmediately) {

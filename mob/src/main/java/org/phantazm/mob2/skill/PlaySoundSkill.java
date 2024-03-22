@@ -48,7 +48,6 @@ public class PlaySoundSkill implements SkillComponent {
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        @ChildPath("selector") String selector,
         @NotNull Sound sound,
         boolean broadcast) {
     }

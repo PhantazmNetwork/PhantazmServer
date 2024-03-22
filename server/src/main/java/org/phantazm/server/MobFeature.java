@@ -1,11 +1,11 @@
 package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
-import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigEntry;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.path.ConfigPath;
 import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
@@ -30,7 +30,9 @@ import org.phantazm.mob2.skill.Skill;
 import org.phantazm.mob2.skill.SkillComponent;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
-import org.phantazm.server.context.*;
+import org.phantazm.server.context.DataLoadingContext;
+import org.phantazm.server.context.EthyleneContext;
+import org.phantazm.server.context.GameContext;
 import org.phantazm.zombies.mob2.ZombiesMobCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,9 +48,9 @@ import java.util.function.Function;
 public final class MobFeature {
     public static final Path MOBS_PATH = Path.of("./mobs");
 
-    private static final ElementPath PATHFINDING = ElementPath.of("/pathfinding");
-    private static final ElementPath SKILLS = ElementPath.of("/skills");
-    private static final ElementPath GOALS = ElementPath.of("/goals");
+    private static final ConfigPath PATHFINDING = ConfigPath.of("pathfinding");
+    private static final ConfigPath SKILLS = ConfigPath.of("skills");
+    private static final ConfigPath GOALS = ConfigPath.of("goals");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MobFeature.class);
 

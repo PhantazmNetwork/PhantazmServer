@@ -4,7 +4,9 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public interface TablistLocalJoin<T extends WatchableScene> extends Join<T> {
     enum Type {

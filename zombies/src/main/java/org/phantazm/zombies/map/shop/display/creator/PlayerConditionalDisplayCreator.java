@@ -1,6 +1,9 @@
 package org.phantazm.zombies.map.shop.display.creator;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
@@ -41,13 +44,6 @@ public class PlayerConditionalDisplayCreator implements PlayerDisplayCreator {
         }
 
         return new Display(predicate, success, failure, zombiesPlayer);
-    }
-
-    @DataObject
-    public record Data(
-        @NotNull @ChildPath("predicate") String predicate,
-        @NotNull @ChildPath("success") List<String> success,
-        @NotNull @ChildPath("failure") List<String> failure) {
     }
 
     private static class Display implements ShopDisplay {

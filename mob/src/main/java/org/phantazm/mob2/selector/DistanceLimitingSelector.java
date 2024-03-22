@@ -18,7 +18,7 @@ public class DistanceLimitingSelector implements SelectorComponent {
     private final SelectorComponent delegate;
 
     @FactoryMethod
-    public DistanceLimitingSelector(@NotNull Data data, @NotNull @Child("origin_selector") SelectorComponent originSelector,
+    public DistanceLimitingSelector(@NotNull Data data, @NotNull @Child("originSelector") SelectorComponent originSelector,
         @NotNull @Child("delegate") SelectorComponent delegate) {
         this.data = data;
         this.originSelector = originSelector;
@@ -37,8 +37,7 @@ public class DistanceLimitingSelector implements SelectorComponent {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("origin_selector") String originSelector,
-        @NotNull @ChildPath("delegate") String delegate,
+    public record Data(
         @NotNull Behavior behavior,
         int amount) {
     }

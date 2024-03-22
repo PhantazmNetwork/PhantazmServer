@@ -1,6 +1,9 @@
 package org.phantazm.mob2.validator;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.ExtensionHolder;
@@ -27,10 +30,6 @@ public class AndValidator implements ValidatorComponent {
         }
 
         return new Internal(validators);
-    }
-
-    @DataObject
-    public record Data(@NotNull @ChildPath("validators") List<String> validators) {
     }
 
     private record Internal(List<Validator> validators) implements Validator {

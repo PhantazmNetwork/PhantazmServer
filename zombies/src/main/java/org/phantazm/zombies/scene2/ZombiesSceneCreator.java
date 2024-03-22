@@ -4,7 +4,7 @@ import com.github.steanky.element.core.context.ContextManager;
 import com.github.steanky.element.core.context.ElementContext;
 import com.github.steanky.element.core.dependency.DependencyProvider;
 import com.github.steanky.element.core.key.KeyParser;
-import com.github.steanky.element.core.path.ElementPath;
+import com.github.steanky.ethylene.core.path.ConfigPath;
 import com.github.steanky.proxima.solid.Solid;
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
@@ -23,21 +23,21 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.BelowNameTag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.leaderboard.Leaderboard;
-import org.phantazm.core.leaderboard.ZombiesBestTimeLeaderboard;
-import org.phantazm.core.player.IdentitySource;
-import org.phantazm.core.role.RoleStore;
-import org.phantazm.core.scene2.SceneCreator;
-import org.phantazm.core.tick.BasicTickTaskScheduler;
-import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.commons.flag.BasicFlaggable;
 import org.phantazm.core.ClientBlockHandlerSource;
 import org.phantazm.core.VecUtils;
 import org.phantazm.core.instance.InstanceLoader;
+import org.phantazm.core.leaderboard.Leaderboard;
+import org.phantazm.core.leaderboard.ZombiesBestTimeLeaderboard;
+import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.role.RoleStore;
+import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.sound.BasicSongPlayer;
 import org.phantazm.core.sound.SongLoader;
 import org.phantazm.core.sound.SongPlayer;
+import org.phantazm.core.tick.BasicTickTaskScheduler;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.time.AnalogTickFormatter;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.tracker.BoundedTracker;
@@ -354,31 +354,31 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         MapSettingsInfo settings = mapInfo.settings();
 
         Stage idle = new IdleStage(instance, settings, zombiesPlayers,
-            newSidebarUpdaterCreator(sidebarModule, ElementPath.of("idle")), settings.idleRevertTicks());
+            newSidebarUpdaterCreator(sidebarModule, ConfigPath.of("idle")), settings.idleRevertTicks());
 
         LongList countdownAlertTicks = new LongArrayList(settings.countdownAlertTicks());
 
         Stage countdown = new CountdownStage(instance, zombiesPlayers, settings, random, settings.countdownTicks(),
             countdownAlertTicks, new PrecisionSecondTickFormatter(new PrecisionSecondTickFormatter.Data(0)),
-            newSidebarUpdaterCreator(sidebarModule, ElementPath.of("countdown")), bestTimeLeaderboard);
+            newSidebarUpdaterCreator(sidebarModule, ConfigPath.of("countdown")), bestTimeLeaderboard);
 
         Stage inGame =
             new InGameStage(zombiesPlayers, spawnPos, roundHandler, ticksSinceStart, settings.defaultEquipment(),
                 settings.equipmentGroups().keySet(),
-                newSidebarUpdaterCreator(sidebarModule, ElementPath.of("inGame")), shopHandler);
+                newSidebarUpdaterCreator(sidebarModule, ConfigPath.of("inGame")), shopHandler);
 
         Stage end = new EndStage(instance, settings, mapInfo.webhook(),
             new AnalogTickFormatter(new AnalogTickFormatter.Data(false)), zombiesPlayers,
             Wrapper.of(settings.endTicks()), ticksSinceStart,
             (player, hasWon) -> {
-                return newSidebarUpdaterCreator(sidebarModule, ElementPath.of(hasWon ? "win" : "lose")).apply(player);
+                return newSidebarUpdaterCreator(sidebarModule, ConfigPath.of(hasWon ? "win" : "lose")).apply(player);
             }, roundHandler, leaderboardContext.database(), sceneSupplier);
 
         return new StageTransition(idle, countdown, inGame, end);
     }
 
     private @NotNull Function<? super ZombiesPlayer, ? extends SidebarUpdater> newSidebarUpdaterCreator(
-        @NotNull SidebarModule sidebarModule, @NotNull ElementPath scoreboardSubNode) {
+        @NotNull SidebarModule sidebarModule, @NotNull ConfigPath scoreboardSubNode) {
         ElementContext context = contextManager.makeContext(mapInfo.scoreboard());
         return new ElementSidebarUpdaterCreator(sidebarModule, context, keyParser, scoreboardSubNode);
     }

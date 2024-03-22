@@ -10,10 +10,10 @@ import net.minestom.server.scoreboard.BelowNameTag;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.TabList;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.tick.Activable;
-import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.tick.Activable;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.map.MapSettingsInfo;
 

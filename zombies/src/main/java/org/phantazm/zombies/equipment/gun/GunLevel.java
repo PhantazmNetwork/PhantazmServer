@@ -37,15 +37,15 @@ import java.util.Set;
 public record GunLevel(
     @NotNull Data data,
     @NotNull @Child("stats") GunStats stats,
-    @NotNull @Child("shoot_tester") ShootTester shootTester,
-    @NotNull @Child("reload_tester") ReloadTester reloadTester,
+    @NotNull @Child("shootTester") ShootTester shootTester,
+    @NotNull @Child("reloadTester") ReloadTester reloadTester,
     @NotNull @Child("firer") Firer firer,
-    @NotNull @Child("activate_effects") Collection<GunEffect> activateEffects,
-    @NotNull @Child("shoot_effects") Collection<GunEffect> shootEffects,
-    @NotNull @Child("reload_effects") Collection<GunEffect> reloadEffects,
-    @NotNull @Child("tick_effects") Collection<GunEffect> tickEffects,
-    @NotNull @Child("no_ammo_effects") Collection<GunEffect> noAmmoEffects,
-    @NotNull @Child("gun_stack_mappers") Collection<GunStackMapper> gunStackMappers)
+    @NotNull @Child("activateEffects") Collection<GunEffect> activateEffects,
+    @NotNull @Child("shootEffects") Collection<GunEffect> shootEffects,
+    @NotNull @Child("reloadEffects") Collection<GunEffect> reloadEffects,
+    @NotNull @Child("tickEffects") Collection<GunEffect> tickEffects,
+    @NotNull @Child("noAmmoEffects") Collection<GunEffect> noAmmoEffects,
+    @NotNull @Child("gunStackMappers") Collection<GunStackMapper> gunStackMappers)
     implements UpgradeNode {
 
     /**
@@ -95,16 +95,6 @@ public record GunLevel(
     @DataObject
     public record Data(
         @NotNull Key key,
-        @NotNull @ChildPath("stats") String stats,
-        @NotNull @ChildPath("shoot_tester") String shootTester,
-        @NotNull @ChildPath("reload_tester") String reloadTester,
-        @NotNull @ChildPath("firer") String firer,
-        @NotNull @ChildPath("activate_effects") Collection<String> activateEffects,
-        @NotNull @ChildPath("shoot_effects") Collection<String> shootEffects,
-        @NotNull @ChildPath("reload_effects") Collection<String> reloadEffects,
-        @NotNull @ChildPath("tick_effects") Collection<String> tickEffects,
-        @NotNull @ChildPath("no_ammo_effects") Collection<String> noAmmoEffects,
-        @NotNull @ChildPath("gun_stack_mappers") Collection<String> gunStackMappers,
         @NotNull ItemStack stack,
         @NotNull Set<Key> upgrades) {
     }

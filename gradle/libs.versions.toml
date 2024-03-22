@@ -3,7 +3,7 @@ metadata.format.version = "1.1"
 [versions]
 adventure = "4.12.0"
 
-ethylene = "0.23.2"
+ethylene = "0.26.0"
 
 hephaistos = "2.5.3"
 
@@ -25,7 +25,7 @@ caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version = "3.1.8
 
 commons = { module = "org.phantazm:commons", version = "1.0-SNAPSHOT" }
 
-element-core = { module = "com.github.steanky:element-core", version = "0.16.0" }
+element-core = { module = "com.github.steanky:element-core", version = "0.18.2" }
 
 ethylene-core = { module = "com.github.steanky:ethylene-core", version.ref = "ethylene" }
 ethylene-json = { module = "com.github.steanky:ethylene-json", version.ref = "ethylene" }

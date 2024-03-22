@@ -12,8 +12,8 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.PlayerSkin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 
 import java.util.function.Supplier;

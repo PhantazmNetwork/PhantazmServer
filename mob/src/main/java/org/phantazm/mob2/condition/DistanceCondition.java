@@ -19,8 +19,8 @@ public class DistanceCondition implements SkillConditionComponent {
 
     @FactoryMethod
     public DistanceCondition(@NotNull Data data,
-        @NotNull @Child("origin_selector") SelectorComponent originSelector,
-        @NotNull @Child("target_selector") SelectorComponent targetSelector) {
+        @NotNull @Child("originSelector") SelectorComponent originSelector,
+        @NotNull @Child("targetSelector") SelectorComponent targetSelector) {
         this.data = data;
         this.originSelector = originSelector;
         this.targetSelector = targetSelector;
@@ -52,9 +52,7 @@ public class DistanceCondition implements SkillConditionComponent {
         }
         """)
     @DataObject
-    public record Data(@NotNull @ChildPath("origin_selector") String originSelector,
-        @NotNull @ChildPath("target_selector") String targetSelector,
-        double distance,
+    public record Data(double distance,
         @NotNull DistanceCondition.Behavior behavior,
         @NotNull MultiPointHandling multiPointHandling,
         int matchCount) {

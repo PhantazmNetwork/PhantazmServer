@@ -1,6 +1,9 @@
 package org.phantazm.zombies.map.shop.predicate;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
@@ -16,8 +19,8 @@ public class InteractingPredicate implements ShopPredicate {
     private final List<ShopInteractor> interactors;
 
     @FactoryMethod
-    public InteractingPredicate(@NotNull @Child("delegate") ShopPredicate delegate,
-        @NotNull @Child("interactors") List<ShopInteractor> interactors) {
+    public InteractingPredicate(@NotNull @Child("delegatePath") ShopPredicate delegate,
+        @NotNull @Child("interactorPaths") List<ShopInteractor> interactors) {
         this.delegate = Objects.requireNonNull(delegate);
         this.interactors = List.copyOf(interactors);
     }
@@ -33,11 +36,5 @@ public class InteractingPredicate implements ShopPredicate {
         }
 
         return false;
-    }
-
-    @DataObject
-    public record Data(
-        @NotNull @ChildPath("delegate") String delegatePath,
-        @NotNull @ChildPath("interactors") List<String> interactorPaths) {
     }
 }

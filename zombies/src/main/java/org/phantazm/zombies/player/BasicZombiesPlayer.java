@@ -4,16 +4,18 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.tick.TickTaskScheduler;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.zombies.Attributes;
-import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {

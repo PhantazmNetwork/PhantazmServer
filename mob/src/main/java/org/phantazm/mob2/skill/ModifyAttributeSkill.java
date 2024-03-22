@@ -53,7 +53,6 @@ public class ModifyAttributeSkill implements SkillComponent {
         """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
-        @NotNull @ChildPath("selector") String selector,
         @NotNull String attribute,
         float amount,
         @NotNull AttributeOperation attributeOperation,

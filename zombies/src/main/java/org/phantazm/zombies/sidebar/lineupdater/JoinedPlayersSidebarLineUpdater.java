@@ -9,8 +9,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Collection;
 import java.util.Map;

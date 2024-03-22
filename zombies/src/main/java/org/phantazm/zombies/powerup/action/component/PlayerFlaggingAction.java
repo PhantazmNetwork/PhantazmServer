@@ -19,7 +19,7 @@ public class PlayerFlaggingAction implements PowerupActionComponent {
 
     @FactoryMethod
     public PlayerFlaggingAction(@NotNull Data data,
-        @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
+        @NotNull @Child("deactivationPredicate") DeactivationPredicateComponent deactivationPredicate) {
         this.data = data;
         this.deactivationPredicate = deactivationPredicate;
     }
@@ -30,8 +30,7 @@ public class PlayerFlaggingAction implements PowerupActionComponent {
     }
 
     @DataObject
-    public record Data(@NotNull Key flag,
-        @NotNull @ChildPath("deactivation_predicate") String deactivationPredicate) {
+    public record Data(@NotNull Key flag) {
     }
 
     private static class Action extends PowerupActionBase {

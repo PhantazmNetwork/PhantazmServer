@@ -36,9 +36,7 @@ public class ConditionalSkill implements SkillComponent {
         }
         """)
     @DataObject
-    public record Data(@Nullable Trigger trigger,
-        @NotNull @ChildPath("condition") String condition,
-        @NotNull @ChildPath("delegate") String delegate) {
+    public record Data(@Nullable Trigger trigger) {
     }
 
     private static class Internal implements Skill {

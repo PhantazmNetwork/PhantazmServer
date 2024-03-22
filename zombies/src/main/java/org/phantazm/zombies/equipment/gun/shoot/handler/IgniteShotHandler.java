@@ -19,7 +19,9 @@ import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
@@ -62,7 +64,7 @@ public class IgniteShotHandler implements ShotHandler {
                 return;
             }
 
-            if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_FIRE)) {
+            if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_FIRE, false)) {
                 continue;
             }
 

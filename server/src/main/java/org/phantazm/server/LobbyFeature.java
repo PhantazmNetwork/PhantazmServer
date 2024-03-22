@@ -1,9 +1,9 @@
 package org.phantazm.server;
 
 import com.github.steanky.element.core.context.ContextManager;
-import com.github.steanky.element.core.path.ElementPath;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.path.ConfigPath;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
@@ -12,20 +12,20 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.DynamicChunk;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.FileUtils;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.commons.MonoComponent;
-import org.phantazm.commons.FileUtils;
 import org.phantazm.core.instance.AnvilFileSystemInstanceLoader;
 import org.phantazm.core.instance.InstanceLoader;
 import org.phantazm.core.leaderboard.ZombiesBestTimeLeaderboard;
 import org.phantazm.core.npc.NPC;
+import org.phantazm.core.role.RoleStore;
 import org.phantazm.core.scene2.SceneCreator;
 import org.phantazm.core.scene2.lobby.Lobby;
 import org.phantazm.core.scene2.lobby.LobbyCreator;
 import org.phantazm.loader.Loader;
 import org.phantazm.loader.ObjectExtractor;
 import org.phantazm.server.config.lobby.LobbyConfig;
-import org.phantazm.core.role.RoleStore;
 import org.phantazm.server.context.*;
 import org.phantazm.zombies.npc.InjectionKeys;
 import org.slf4j.Logger;
@@ -123,9 +123,9 @@ public final class LobbyFeature {
                     namedSingle(path, codec, "settings.yml", "settings"));
             }, Files.list(LOBBY_CONFIG_DIRECTORY));
         }, ObjectExtractor.extractor(ConfigNode.class, (location, element) -> {
-            LobbyConfig lobbyConfig = lobbyConfigProcessor.dataFromElement(element.getNodeOrThrow("settings"));
-            List<MonoComponent<NPC>> npcs = contextManager.makeContext(element.getListOrThrow("npcs"))
-                .provideCollection(ElementPath.of("."));
+            LobbyConfig lobbyConfig = lobbyConfigProcessor.dataFromElement(element.atOrThrow("settings"));
+            List<MonoComponent<NPC>> npcs = contextManager.makeContext(element.atOrThrow("npcs").asContainerOrThrow())
+                .provideCollection(ConfigPath.of("."));
 
             return List.of(ObjectExtractor.entry(lobbyConfig.name(), new LobbyEntry(lobbyConfig,
                 new LobbyCreator(instanceLoader, lobbyConfig.lobbyPaths(), lobbyConfig.instanceConfig(),

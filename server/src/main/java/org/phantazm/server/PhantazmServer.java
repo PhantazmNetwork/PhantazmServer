@@ -15,13 +15,13 @@ import net.minestom.server.extras.velocity.VelocityProxy;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.core.chat.ChatConfig;
+import org.phantazm.core.event.scene.SceneJoinEvent;
 import org.phantazm.core.guild.party.PartyConfig;
 import org.phantazm.core.player.IdentitySource;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.CoreJoinKeys;
 import org.phantazm.core.scene2.SceneManager;
-import org.phantazm.core.event.scene.SceneJoinEvent;
 import org.phantazm.core.scene2.lobby.JoinLobby;
 import org.phantazm.core.scene2.lobby.Lobby;
 import org.phantazm.server.command.whisper.WhisperConfig;
@@ -37,7 +37,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 /**

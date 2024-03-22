@@ -1,6 +1,9 @@
 package org.phantazm.zombies.equipment.gun.reload;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.GunStats;
@@ -39,14 +42,5 @@ public class StateReloadTester implements ReloadTester {
     @Override
     public boolean isReloading(@NotNull GunState state) {
         return state.ticksSinceLastReload() < stats.reloadSpeed();
-    }
-
-    /**
-     * Data for a {@link StateReloadTester}.
-     *
-     * @param stats A path to the gun's {@link GunStats}
-     */
-    @DataObject
-    public record Data(@NotNull @ChildPath("stats") String stats) {
     }
 }

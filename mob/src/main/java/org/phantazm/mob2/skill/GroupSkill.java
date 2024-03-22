@@ -50,8 +50,7 @@ public class GroupSkill implements SkillComponent {
         }
         """)
     @DataObject
-    public record Data(@Nullable Trigger trigger,
-        @NotNull @ChildPath("delegates") List<String> delegates) {
+    public record Data(@Nullable Trigger trigger) {
     }
 
     private record Internal(Trigger trigger,

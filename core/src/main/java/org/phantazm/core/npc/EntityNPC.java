@@ -7,8 +7,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.MonoComponent;
 import org.phantazm.core.npc.interactor.NPCInteractor;
 
 import java.util.UUID;
@@ -104,11 +104,6 @@ public class EntityNPC implements MonoComponent<NPC> {
     }
 
     @DataObject
-    public record Data(
-        @NotNull Pos location,
-        @NotNull @ChildPath("entity") String entity,
-        @NotNull @ChildPath("settings") String settings,
-        @NotNull @ChildPath("ticker") String ticker,
-        @NotNull @ChildPath("interactor") String interactor) {
+    public record Data(@NotNull Pos location) {
     }
 }

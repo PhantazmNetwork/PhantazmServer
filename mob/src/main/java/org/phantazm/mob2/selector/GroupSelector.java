@@ -1,6 +1,9 @@
 package org.phantazm.mob2.selector;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
@@ -27,10 +30,6 @@ public class GroupSelector implements SelectorComponent {
         }
 
         return new Internal(delegates);
-    }
-
-    @DataObject
-    public record Data(@NotNull @ChildPath("delegates") List<String> delegates) {
     }
 
     private record Internal(List<Selector> delegates) implements Selector {

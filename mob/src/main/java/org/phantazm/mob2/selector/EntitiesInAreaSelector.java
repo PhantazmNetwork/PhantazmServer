@@ -26,7 +26,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
     private final ValidatorComponent validator;
 
     @FactoryMethod
-    public EntitiesInAreaSelector(@NotNull Data data, @NotNull @Child("origin") SelectorComponent originSelector,
+    public EntitiesInAreaSelector(@NotNull Data data, @NotNull @Child("originSelector") SelectorComponent originSelector,
         @NotNull @Child("validator") ValidatorComponent validator) {
         this.data = data;
         this.originSelector = originSelector;
@@ -48,8 +48,6 @@ public class EntitiesInAreaSelector implements SelectorComponent {
         """)
     @DataObject
     public record Data(
-        @NotNull @ChildPath("origin") String originSelector,
-        @NotNull @ChildPath("validator") String validator,
         boolean limitSelf,
         @NotNull TrackerTargetType target,
         double range,

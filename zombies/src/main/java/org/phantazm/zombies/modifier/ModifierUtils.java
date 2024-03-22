@@ -3,7 +3,10 @@ package org.phantazm.zombies.modifier;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.Collection;
+import java.util.List;
 
 public final class ModifierUtils {
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();

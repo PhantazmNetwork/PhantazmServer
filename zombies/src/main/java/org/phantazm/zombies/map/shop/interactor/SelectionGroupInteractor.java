@@ -28,8 +28,8 @@ public class SelectionGroupInteractor implements ShopInteractor {
 
     @FactoryMethod
     public SelectionGroupInteractor(@NotNull Data data,
-        @NotNull @Child("active_interactors") List<ShopInteractor> activeInteractors,
-        @NotNull @Child("inactive_interactors") List<ShopInteractor> inactiveInteractors,
+        @NotNull @Child("activeInteractors") List<ShopInteractor> activeInteractors,
+        @NotNull @Child("inactiveInteractors") List<ShopInteractor> inactiveInteractors,
         @NotNull InteractorGroupHandler handler, @NotNull Random random) {
         this.data = data;
         this.activeInteractors = activeInteractors;
@@ -117,9 +117,6 @@ public class SelectionGroupInteractor implements ShopInteractor {
     }
 
     @DataObject
-    public record Data(
-        @NotNull Key group,
-        @NotNull @ChildPath("active_interactors") List<String> activeInteractors,
-        @NotNull @ChildPath("inactive_interactors") List<String> inactiveInteractors) {
+    public record Data(@NotNull Key group) {
     }
 }

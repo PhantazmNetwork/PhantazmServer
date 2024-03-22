@@ -1,9 +1,6 @@
 package org.phantazm.zombies.map.action.round;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
-import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.vector.Bounds3I;
 import com.github.steanky.vector.Vec3D;
@@ -31,9 +28,9 @@ import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.VecUtils;
+import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.tick.TickableTask;
-import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Stages;
@@ -355,6 +352,22 @@ public class SelectBombedRoom implements Action<Round> {
         @NotNull AttributeModifier modifier) {
     }
 
+    @Default("""
+        {
+          warningFormatMessage=null,
+          warningMessageHits=10,
+          bombingCompleteFormat=null,
+          damageInterval=4L,
+          bombingDamageName='<red>Bombing',
+          sound=null,
+          soundInterval=3,
+          specificRoom=null,
+          damageDelay=100L,
+          effectDelay=50L,
+          exemptRooms=[],
+          disablingModifiers=[]
+        }
+        """)
     @DataObject
     public record Data(
         @Nullable String warningFormatMessage,
@@ -373,66 +386,6 @@ public class SelectBombedRoom implements Action<Round> {
         @Nullable Key specificRoom,
         @NotNull List<Key> exemptRooms,
         @NotNull List<Modifier> modifiers,
-        @NotNull List<Key> disablingModifiers,
-        @NotNull @ChildPath("particle") String particle) {
-        @Default("warningFormatMessage")
-        public static @NotNull ConfigElement defaultWarningFormatMessage() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("warningMessageHits")
-        public static @NotNull ConfigElement defaultWarningMessageHits() {
-            return ConfigPrimitive.of(10);
-        }
-
-        @Default("bombingCompleteFormat")
-        public static @NotNull ConfigElement defaultBombingCompleteFormat() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("damageInterval")
-        public static @NotNull ConfigElement defaultDamageInterval() {
-            return ConfigPrimitive.of(4L);
-        }
-
-        @Default("bombingDamageName")
-        public static @NotNull ConfigElement defaultBombingDamageName() {
-            return ConfigPrimitive.of("<red>Bombing");
-        }
-
-        @Default("sound")
-        public static @NotNull ConfigElement defaultSound() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("soundInterval")
-        public static @NotNull ConfigElement defaultSoundInterval() {
-            return ConfigPrimitive.of(3);
-        }
-
-        @Default("specificRoom")
-        public static @NotNull ConfigElement defaultSpecificRoom() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("damageDelay")
-        public static @NotNull ConfigElement defaultDamageDelay() {
-            return ConfigPrimitive.of(100L);
-        }
-
-        @Default("effectDelay")
-        public static @NotNull ConfigElement defaultEffectDelay() {
-            return ConfigPrimitive.of(50L);
-        }
-
-        @Default("exemptRooms")
-        public static @NotNull ConfigElement defaultExemptRooms() {
-            return ConfigList.of();
-        }
-
-        @Default("disablingModifiers")
-        public static @NotNull ConfigElement defaultDisablingModifiers() {
-            return ConfigList.of();
-        }
+        @NotNull List<Key> disablingModifiers) {
     }
 }

@@ -2,8 +2,6 @@ package org.phantazm.zombies.corpse;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.element.core.dependency.DependencyProvider;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,10 +18,10 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.tick.Activable;
 import org.phantazm.core.entity.fakeplayer.MinimalFakePlayer;
 import org.phantazm.core.hologram.Hologram;
 import org.phantazm.core.hologram.InstanceHologram;
+import org.phantazm.core.tick.Activable;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.revive.ReviveHandler;
@@ -42,8 +40,8 @@ public class CorpseCreator {
     private final List<CorpseLine> revivingLines;
 
     @FactoryMethod
-    public CorpseCreator(@NotNull Data data, @NotNull @Child("idle_lines") List<CorpseLine> idleLines,
-        @NotNull @Child("reviving_lines") List<CorpseLine> revivingLines) {
+    public CorpseCreator(@NotNull Data data, @NotNull @Child("idleLines") List<CorpseLine> idleLines,
+        @NotNull @Child("revivingLines") List<CorpseLine> revivingLines) {
         this.data = data;
         this.idleLines = List.copyOf(idleLines);
         this.revivingLines = List.copyOf(revivingLines);
@@ -109,27 +107,19 @@ public class CorpseCreator {
         Component update(@NotNull Corpse corpse, long time);
     }
 
+    @Default("""
+        {
+          hologramGap=0.0,
+          hologramHeightOffset=1.0,
+          corpseHeightOffset=0.25
+        }
+        """)
     @DataObject
     public record Data(
         double hologramGap,
         double hologramHeightOffset,
-        double corpseHeightOffset,
-        @NotNull @ChildPath("idle_lines") List<String> idleLines,
-        @NotNull @ChildPath("reviving_lines") List<String> revivingLines) {
-        @Default("hologramGap")
-        public static ConfigElement defaultHologramGap() {
-            return ConfigPrimitive.of(0.0);
-        }
+        double corpseHeightOffset) {
 
-        @Default("hologramHeightOffset")
-        public static ConfigElement defaultHologramHeightOffset() {
-            return ConfigPrimitive.of(1.0);
-        }
-
-        @Default("corpseHeightOffset")
-        public static ConfigElement defaultCorpseHeightOffset() {
-            return ConfigPrimitive.of(0.25);
-        }
     }
 
     @Model("zombies.corpse.line.static")
@@ -160,7 +150,7 @@ public class CorpseCreator {
         private final MiniMessage miniMessage = MiniMessage.miniMessage();
 
         @FactoryMethod
-        public TimeLine(@NotNull Data data, @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
+        public TimeLine(@NotNull Data data, @NotNull @Child("tickFormatter") TickFormatter tickFormatter) {
             this.data = data;
             this.tickFormatter = tickFormatter;
         }
@@ -175,8 +165,7 @@ public class CorpseCreator {
         }
 
         @DataObject
-        public record Data(@NotNull String format,
-            @NotNull @ChildPath("tick_formatter") String tickFormatter) {
+        public record Data(@NotNull String format) {
         }
     }
 

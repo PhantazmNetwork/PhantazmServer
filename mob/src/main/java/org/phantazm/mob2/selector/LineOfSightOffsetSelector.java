@@ -40,8 +40,7 @@ public class LineOfSightOffsetSelector implements SelectorComponent {
     @DataObject
     public record Data(double distance,
         boolean ignorePitch,
-        boolean ignoreYaw,
-        @NotNull @ChildPath("delegate") String delegate) {
+        boolean ignoreYaw) {
     }
 
     private record Internal(Data data,

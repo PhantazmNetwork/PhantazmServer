@@ -66,7 +66,7 @@ public class DragonsWrathInteractor implements ShopInteractor {
                     return;
                 }
 
-                if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_INSTAKILL, false)) {
                     return;
                 }
 

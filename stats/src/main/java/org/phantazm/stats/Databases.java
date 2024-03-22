@@ -3,7 +3,7 @@ package org.phantazm.stats;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.stats.general.UsernameDatabase;
 
-import java.util.*;
+import java.util.Objects;
 
 /**
  * Globally-relevant databases.

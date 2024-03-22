@@ -1,6 +1,9 @@
 package org.phantazm.zombies.equipment.gun.effect;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -34,9 +37,9 @@ public class ReloadActionBarEffect implements GunEffect {
      */
     @FactoryMethod
     public ReloadActionBarEffect(@NotNull @Child("stats") GunStats stats,
-        @NotNull @Child("action_bar_sender") ActionBarSender actionBarSender,
-        @NotNull @Child("reload_tester") ReloadTester reloadTester,
-        @NotNull @Child("reload_action_bar_chooser") ReloadActionBarChooser chooser) {
+        @NotNull @Child("actionBarSender") ActionBarSender actionBarSender,
+        @NotNull @Child("reloadTester") ReloadTester reloadTester,
+        @NotNull @Child("reloadActionBarChooser") ReloadActionBarChooser chooser) {
         this.stats = Objects.requireNonNull(stats);
         this.actionBarSender = Objects.requireNonNull(actionBarSender);
         this.reloadTester = Objects.requireNonNull(reloadTester);
@@ -58,20 +61,5 @@ public class ReloadActionBarEffect implements GunEffect {
             actionBarSender.sendActionBar(Component.empty());
             active = false;
         }
-    }
-
-    /**
-     * Data for an {@link ReloadActionBarEffect}.
-     *
-     * @param stats                  A path to the guns's {@link GunStats}
-     * @param reloadTester           A path to the gun's {@link ReloadTester}
-     * @param reloadActionBarChooser A path to the {@link ReloadActionBarEffect}'s {@link ReloadActionBarChooser}
-     */
-    @DataObject
-    public record Data(
-        @NotNull @ChildPath("stats") String stats,
-        @NotNull @ChildPath("action_bar_sender") String actionBarSender,
-        @NotNull @ChildPath("reload_tester") String reloadTester,
-        @NotNull @ChildPath("reload_action_bar_chooser") String reloadActionBarChooser) {
     }
 }
