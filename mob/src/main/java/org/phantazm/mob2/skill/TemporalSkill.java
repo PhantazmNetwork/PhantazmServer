@@ -74,8 +74,9 @@ public class TemporalSkill implements SkillComponent {
 
         @Override
         public void init(@NotNull Mob mob) {
-            delegate.init(mob);
             mob.extensions().set(key, new Extension());
+
+            delegate.init(mob);
         }
 
         @Override

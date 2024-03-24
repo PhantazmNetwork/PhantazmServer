@@ -69,9 +69,10 @@ public abstract class TimerSkillAbstract implements Skill {
 
     @Override
     public void init(@NotNull Mob mob) {
-        delegate.init(mob);
         mob.extensions().set(key, new Extension(initialInterval, initialStarted, initialTicksSinceLastActivation,
             initialUses));
+
+        delegate.init(mob);
     }
 
     @Override
