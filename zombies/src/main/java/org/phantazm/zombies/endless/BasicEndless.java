@@ -206,6 +206,7 @@ public class BasicEndless implements Endless {
               count=-1
             }
             """)
+        @DataObject
         public record Data(@NotNull List<IndexedWeightedMob> mobs,
             int startRound,
             int period,
