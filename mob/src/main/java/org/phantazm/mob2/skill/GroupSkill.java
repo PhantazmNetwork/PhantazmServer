@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Trigger;
 
@@ -27,10 +26,10 @@ public class GroupSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
+    public @NotNull Skill get() {
         Skill[] delegateSkills = new Skill[delegates.size()];
         for (int i = 0; i < delegateSkills.length; i++) {
-            delegateSkills[i] = delegates.get(i).apply(holder);
+            delegateSkills[i] = delegates.get(i).get();
         }
 
         List<Skill> tickables = new ArrayList<>(delegates.size());

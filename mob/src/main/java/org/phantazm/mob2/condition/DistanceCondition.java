@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
@@ -27,8 +26,8 @@ public class DistanceCondition implements SkillConditionComponent {
     }
 
     @Override
-    public @NotNull SkillCondition apply(@NotNull ExtensionHolder holder) {
-        return new Internal(data, originSelector.apply(holder), targetSelector.apply(holder));
+    public @NotNull SkillCondition get() {
+        return new Internal(data, originSelector.get(), targetSelector.get());
     }
 
     public enum Behavior {

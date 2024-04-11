@@ -9,7 +9,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.Trigger;
@@ -35,8 +34,8 @@ public class PlaySoundSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(targetSelector.apply(holder), data, random);
+    public @NotNull Skill get() {
+        return new Internal(targetSelector.get(), data, random);
     }
 
     @Default("""

@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.condition.SkillCondition;
@@ -26,8 +25,8 @@ public class ConditionalSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(data, condition.apply(holder), delegate.apply(holder));
+    public @NotNull Skill get() {
+        return new Internal(data, condition.get(), delegate.get());
     }
 
     @Default("""

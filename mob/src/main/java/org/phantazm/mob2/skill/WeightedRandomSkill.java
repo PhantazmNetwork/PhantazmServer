@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Trigger;
 
@@ -25,10 +24,10 @@ public class WeightedRandomSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
+    public @NotNull Skill get() {
         List<Skill> delegates = new ArrayList<>(this.delegates.size());
         for (SkillComponent component : this.delegates) {
-            delegates.add(component.apply(holder));
+            delegates.add(component.get());
         }
 
         return new Internal(data, delegates, random);

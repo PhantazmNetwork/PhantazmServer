@@ -28,7 +28,7 @@ public class FollowEntityGoal implements GoalCreator {
 
     @Override
     public @NotNull ProximaGoal create(@NotNull Mob mob) {
-        return new Goal(data, selector.apply(mob.extensions()), mob);
+        return new Goal(data, selector.get(), mob);
     }
 
     private static class Goal implements ProximaGoal {

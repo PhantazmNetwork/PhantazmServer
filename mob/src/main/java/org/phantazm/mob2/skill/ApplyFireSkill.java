@@ -39,8 +39,8 @@ public class ApplyFireSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(selector.apply(holder), holder.requestKey(Extension.class), data);
+    public @NotNull Skill get() {
+        return new Internal(selector.get(), ExtensionHolder.requestKey(Extension.class), data);
     }
 
     @Default("""

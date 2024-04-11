@@ -6,7 +6,6 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 
 import java.util.ArrayList;
@@ -23,10 +22,10 @@ public class OrValidator implements ValidatorComponent {
     }
 
     @Override
-    public @NotNull Validator apply(@NotNull ExtensionHolder holder) {
+    public @NotNull Validator get() {
         List<Validator> validators = new ArrayList<>(this.validators.size());
         for (ValidatorComponent component : this.validators) {
-            validators.add(component.apply(holder));
+            validators.add(component.get());
         }
 
         return new Internal(validators);

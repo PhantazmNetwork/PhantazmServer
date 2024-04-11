@@ -10,7 +10,6 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEv
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.*;
 import org.phantazm.mob2.goal.CollectionGoalGroup;
 import org.phantazm.mob2.goal.ProjectileMovementGoal;
@@ -43,8 +42,8 @@ public class ShootProjectileSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(data, targetSelector.apply(holder), hitValidator.apply(holder), callback.apply(holder));
+    public @NotNull Skill get() {
+        return new Internal(data, targetSelector.get(), hitValidator.get(), callback.get());
     }
 
     @Default("""

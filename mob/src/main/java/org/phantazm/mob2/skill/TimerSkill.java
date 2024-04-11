@@ -22,9 +22,9 @@ public class TimerSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(data, holder.requestKey(TimerSkillAbstract.Extension.class),
-            delegate.apply(holder));
+    public @NotNull Skill get() {
+        return new Internal(data, ExtensionHolder.requestKey(TimerSkillAbstract.Extension.class),
+            delegate.get());
     }
 
     @Default("""

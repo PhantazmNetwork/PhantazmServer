@@ -7,7 +7,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
@@ -36,8 +35,8 @@ public class SpawnParticleSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(selector.apply(holder), data, particle, random);
+    public @NotNull Skill get() {
+        return new Internal(selector.get(), data, particle, random);
     }
 
     @Default("""

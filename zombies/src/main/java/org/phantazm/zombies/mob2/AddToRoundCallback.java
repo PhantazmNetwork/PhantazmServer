@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.skill.SpawnCallback;
 import org.phantazm.mob2.skill.SpawnCallbackComponent;
@@ -19,7 +18,7 @@ public class AddToRoundCallback implements SpawnCallbackComponent {
     }
 
     @Override
-    public @NotNull SpawnCallback apply(@NotNull ExtensionHolder extensionHolder) {
+    public @NotNull SpawnCallback get() {
         return new Internal();
     }
 

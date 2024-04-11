@@ -8,7 +8,6 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.validator.Validator;
@@ -32,7 +31,7 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
     }
 
     @Override
-    public @NotNull Validator apply(@NotNull ExtensionHolder extensionHolder) {
+    public @NotNull Validator get() {
         return new Internal(data);
     }
 

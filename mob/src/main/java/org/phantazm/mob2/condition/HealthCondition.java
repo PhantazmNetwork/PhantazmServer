@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
@@ -23,8 +22,8 @@ public class HealthCondition implements SkillConditionComponent {
     }
 
     @Override
-    public @NotNull SkillCondition apply(@NotNull ExtensionHolder holder) {
-        return new Internal(data, selector.apply(holder));
+    public @NotNull SkillCondition get() {
+        return new Internal(data, selector.get());
     }
 
     public enum Condition {

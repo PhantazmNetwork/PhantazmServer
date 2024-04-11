@@ -5,7 +5,6 @@ import com.github.steanky.element.core.annotation.Child;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 
@@ -23,10 +22,10 @@ public class GroupSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
+    public @NotNull Selector get() {
         List<Selector> delegates = new ArrayList<>(this.delegates.size());
         for (SelectorComponent selectorComponent : this.delegates) {
-            delegates.add(selectorComponent.apply(holder));
+            delegates.add(selectorComponent.get());
         }
 
         return new Internal(delegates);

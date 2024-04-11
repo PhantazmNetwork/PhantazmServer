@@ -6,7 +6,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 
@@ -27,8 +26,8 @@ public class LineOfSightOffsetSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
-        return new Internal(data, delegate.apply(holder));
+    public @NotNull Selector get() {
+        return new Internal(data, delegate.get());
     }
 
     @Default("""

@@ -7,7 +7,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.core.TrackerTargetType;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
@@ -34,8 +33,8 @@ public class EntitiesInAreaSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
-        return new Internal(originSelector.apply(holder), validator.apply(holder), data);
+    public @NotNull Selector get() {
+        return new Internal(originSelector.get(), validator.get(), data);
     }
 
     @Default("""

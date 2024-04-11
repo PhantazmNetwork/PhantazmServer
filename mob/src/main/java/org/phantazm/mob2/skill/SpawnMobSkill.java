@@ -73,8 +73,8 @@ public class SpawnMobSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(selector.apply(holder), data, holder.requestKey(Extension.class), callback.apply(holder),
+    public @NotNull Skill get() {
+        return new Internal(selector.get(), data, ExtensionHolder.requestKey(Extension.class), callback.get(),
             nameCounterTag);
     }
 

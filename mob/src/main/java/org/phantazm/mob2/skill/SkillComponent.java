@@ -1,10 +1,9 @@
 package org.phantazm.mob2.skill;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 
-import java.util.function.Function;
+import java.util.function.Supplier;
 
-public interface SkillComponent extends Function<@NotNull ExtensionHolder, @NotNull Skill> {
+public interface SkillComponent extends Supplier<@NotNull Skill> {
 
 }

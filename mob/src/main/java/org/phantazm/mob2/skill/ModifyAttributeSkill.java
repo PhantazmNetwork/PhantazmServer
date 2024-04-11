@@ -41,8 +41,8 @@ public class ModifyAttributeSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(data, holder.requestKey(Extension.class), selector.apply(holder));
+    public @NotNull Skill get() {
+        return new Internal(data, ExtensionHolder.requestKey(Extension.class), selector.get());
     }
 
     @Default("""

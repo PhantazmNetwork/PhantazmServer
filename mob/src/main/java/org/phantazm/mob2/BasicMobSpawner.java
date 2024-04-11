@@ -13,8 +13,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class BasicMobSpawner implements MobSpawner {
-    public static final ExtensionHolder.Key<MobSpawner> SPAWNER_KEY = MobSpawner.Extensions.newKey(MobSpawner.class);
-    public static final ExtensionHolder.Key<Scheduler> SCHEDULER_KEY = MobSpawner.Extensions.newKey(Scheduler.class);
+    public static final ExtensionHolder.Key<MobSpawner> SPAWNER_KEY = ExtensionHolder.requestKey(MobSpawner.class);
+    public static final ExtensionHolder.Key<Scheduler> SCHEDULER_KEY = ExtensionHolder.requestKey(Scheduler.class);
 
     private final Map<Key, MobCreator> mobCreatorMap;
 
@@ -30,7 +30,7 @@ public class BasicMobSpawner implements MobSpawner {
             throw new IllegalArgumentException("missing mob identifier " + identifier);
         }
 
-        ExtensionHolder mobHolder = creator.typeExtensions().derive(false);
+        ExtensionHolder mobHolder = new ExtensionHolder();
         buildDependencies(mobHolder);
 
         Mob mob = creator.create(instance, mobHolder);
@@ -45,7 +45,6 @@ public class BasicMobSpawner implements MobSpawner {
             postSetup(mob);
         });
 
-        mobHolder.trimToSize();
         return mob;
     }
 

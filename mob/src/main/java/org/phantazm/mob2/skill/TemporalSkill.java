@@ -36,8 +36,8 @@ public class TemporalSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(data, holder.requestKey(Extension.class), delegate.apply(holder));
+    public @NotNull Skill get() {
+        return new Internal(data, ExtensionHolder.requestKey(Extension.class), delegate.get());
     }
 
     @Default("""

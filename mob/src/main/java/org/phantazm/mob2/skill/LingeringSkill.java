@@ -9,7 +9,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.BasicMobSpawner;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
@@ -38,8 +37,8 @@ public class LingeringSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(data, holder, selector.apply(holder), targetSkills);
+    public @NotNull Skill get() {
+        return new Internal(data, selector.get(), targetSkills);
     }
 
     @DataObject
@@ -50,13 +49,13 @@ public class LingeringSkill implements SkillComponent {
         private final Data data;
         private final List<Skill> targetSkills;
 
-        private Internal(Data data, ExtensionHolder holder, Selector selector, List<SkillComponent> targetSkills) {
+        private Internal(Data data, Selector selector, List<SkillComponent> targetSkills) {
             super(selector);
             this.data = data;
 
             List<Skill> skills = new ArrayList<>(targetSkills.size());
             for (SkillComponent skillComponent : targetSkills) {
-                skills.add(skillComponent.apply(holder));
+                skills.add(skillComponent.get());
             }
 
             this.targetSkills = List.copyOf(skills);
@@ -83,7 +82,7 @@ public class LingeringSkill implements SkillComponent {
                 armorStandMeta.setInvisible(true);
                 armorStandMeta.setHasNoGravity(true);
                 armorStand.setHasPhysics(false);
-                armorStand.setExtensions(mob.extensions().sibling(true));
+                armorStand.setExtensions(mob.extensions().copy());
                 armorStand.addSkills(targetSkills);
 
                 armorStand.setInstance(instance, point);

@@ -5,7 +5,6 @@ import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.inventory.EquipmentHandler;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
@@ -26,8 +25,8 @@ public class ChangeEquipmentSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(selector.apply(holder), data);
+    public @NotNull Skill get() {
+        return new Internal(selector.get(), data);
     }
 
     @DataObject

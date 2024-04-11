@@ -5,7 +5,6 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 
 @Model("mob.validator.line_of_sight")
@@ -16,7 +15,7 @@ public class LineOfSightValidator implements ValidatorComponent {
     }
 
     @Override
-    public @NotNull Validator apply(@NotNull ExtensionHolder holder) {
+    public @NotNull Validator get() {
         return new Internal();
     }
 

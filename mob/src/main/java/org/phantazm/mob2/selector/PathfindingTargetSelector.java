@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 
@@ -17,7 +16,7 @@ public class PathfindingTargetSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
+    public @NotNull Selector get() {
         return new PathfindingSelector();
     }
 

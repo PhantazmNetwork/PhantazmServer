@@ -1,9 +1,8 @@
 package org.phantazm.mob2.condition;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 
-import java.util.function.Function;
+import java.util.function.Supplier;
 
-public interface SkillConditionComponent extends Function<@NotNull ExtensionHolder, @NotNull SkillCondition> {
+public interface SkillConditionComponent extends Supplier<@NotNull SkillCondition> {
 }

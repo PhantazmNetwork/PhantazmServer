@@ -3,7 +3,6 @@ package org.phantazm.mob2.selector;
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 
@@ -26,8 +25,8 @@ public class DistanceLimitingSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull ExtensionHolder holder) {
-        return new Internal(data, originSelector.apply(holder), delegate.apply(holder));
+    public @NotNull Selector get() {
+        return new Internal(data, originSelector.get(), delegate.get());
     }
 
     public enum Behavior {

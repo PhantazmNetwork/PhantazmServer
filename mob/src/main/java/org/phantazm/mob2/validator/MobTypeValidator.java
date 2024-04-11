@@ -7,7 +7,6 @@ import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Mob;
 
 import java.util.Set;
@@ -23,7 +22,7 @@ public class MobTypeValidator implements ValidatorComponent {
     }
 
     @Override
-    public @NotNull Validator apply(@NotNull ExtensionHolder holder) {
+    public @NotNull Validator get() {
         return new Internal(data);
     }
 

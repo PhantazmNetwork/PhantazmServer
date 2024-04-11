@@ -1,9 +1,8 @@
 package org.phantazm.mob2.validator;
 
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 
-import java.util.function.Function;
+import java.util.function.Supplier;
 
-public interface ValidatorComponent extends Function<@NotNull ExtensionHolder, @NotNull Validator> {
+public interface ValidatorComponent extends Supplier<@NotNull Validator> {
 }

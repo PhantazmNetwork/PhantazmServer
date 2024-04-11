@@ -51,9 +51,9 @@ public class DamageOverTimeSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull ExtensionHolder holder) {
-        return new Internal(data, holder.requestKey(Extension.class), selector.apply(holder),
-            validator.apply(holder));
+    public @NotNull Skill get() {
+        return new Internal(data, ExtensionHolder.requestKey(Extension.class), selector.get(),
+            validator.get());
     }
 
     @Default("""

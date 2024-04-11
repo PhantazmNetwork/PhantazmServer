@@ -13,18 +13,15 @@ import com.github.steanky.ethylene.mapper.type.Token;
 import com.github.steanky.proxima.path.Pathfinder;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.loader.DataSource;
 import org.phantazm.loader.Loader;
 import org.phantazm.loader.ObjectExtractor;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.mob2.MobData;
-import org.phantazm.mob2.MobSpawner;
 import org.phantazm.mob2.goal.GoalApplier;
 import org.phantazm.mob2.skill.Skill;
 import org.phantazm.mob2.skill.SkillComponent;
@@ -40,7 +37,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -71,15 +67,11 @@ public final class MobFeature {
 
         ConfigProcessor<MobData> mobDataProcessor = processorSource.processorFor(Token.ofClass(MobData.class));
 
-        Map<Key, ExtensionHolder> extensionMap = new HashMap<>();
-
         mobCreatorLoader = Loader.loader(() ->
                 DataSource.directory(MobFeature.MOBS_PATH, codec, "glob:**.{yml,yaml}"),
             ObjectExtractor.extractor(ConfigNode.class, (location, node) -> {
                 com.github.steanky.element.core.context.ElementContext context = contextManager.makeContext(node);
                 MobData data = mobDataProcessor.dataFromElement(node);
-                ExtensionHolder extensionHolder = extensionMap.computeIfAbsent(data.key(), ignored ->
-                    MobSpawner.Extensions.newHolder());
 
                 Pathfinding.Factory pathfinding = context.provide(PATHFINDING);
 
@@ -91,11 +83,11 @@ public final class MobFeature {
 
                 List<Skill> skills = new ArrayList<>(skillComponents.size());
                 for (SkillComponent component : skillComponents) {
-                    skills.add(component.apply(extensionHolder));
+                    skills.add(component.get());
                 }
 
                 return List.of(ObjectExtractor.entry(data.key(), (MobCreator) new ZombiesMobCreator(data,
-                    extensionHolder, pathfinding, skills, goals, pathfinder, instanceSettingsFunction, equipmentMap,
+                    pathfinding, skills, goals, pathfinder, instanceSettingsFunction, equipmentMap,
                     attributeMap)));
             })).accepting(mobs -> {
             LOGGER.info("Loaded {} mob file(s)", mobs.size());

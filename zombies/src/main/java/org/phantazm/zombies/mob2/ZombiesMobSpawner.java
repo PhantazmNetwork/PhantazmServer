@@ -7,7 +7,6 @@ import org.phantazm.loader.Loader;
 import org.phantazm.mob2.BasicMobSpawner;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobCreator;
-import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.Stages;
 import org.phantazm.zombies.event.mob.ZombiesMobSetupEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -16,7 +15,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 public class ZombiesMobSpawner extends BasicMobSpawner {
-    public static ExtensionHolder.Key<ZombiesScene> SCENE_KEY = MobSpawner.Extensions.newKey(ZombiesScene.class);
+    public static ExtensionHolder.Key<ZombiesScene> SCENE_KEY = ExtensionHolder.requestKey(ZombiesScene.class);
 
     private final Supplier<ZombiesScene> scene;
 
