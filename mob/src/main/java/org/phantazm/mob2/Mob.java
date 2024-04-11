@@ -121,8 +121,7 @@ public class Mob extends ProximaEntity {
     }
 
     /**
-     * Gets the {@link ExtensionHolder} for this mob. This instance will be derived from a global ExtensionHolder for
-     * which keys can be generated using {@link MobSpawner.Extensions#newKey(Class)}.
+     * Gets the {@link ExtensionHolder} for this mob.
      *
      * @return the ExtensionHolder for this mob
      */
@@ -140,8 +139,7 @@ public class Mob extends ProximaEntity {
     }
 
     /**
-     * Adds a skill to this mob. This will call its {@link Skill#init(Mob)} method. Ensure that the skill is not
-     * assigned to any other mob.
+     * Adds a skill to this mob. This will call its {@link Skill#init(Mob)} method.
      * <p>
      * <b>Thread Behavior</b>: It is not safe to call this method by any thread other than the owning's entity's
      * current tick thread, unless proper synchronization is performed.
@@ -180,8 +178,7 @@ public class Mob extends ProximaEntity {
     }
 
     /**
-     * Adds multiple skills to this mob. This will call {@link Skill#init(Mob)} for each skill in the collection. Ensure
-     * that none of the skills are assigned to any other mobs.
+     * Adds multiple skills to this mob. This will call {@link Skill#init(Mob)} for each skill in the collection.
      * <p>
      * <b>Thread Behavior</b>: It is not safe to call this method by any thread other than the owning's entity's
      * current tick thread, unless proper synchronization is performed.
