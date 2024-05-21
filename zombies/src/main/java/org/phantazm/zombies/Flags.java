@@ -9,6 +9,7 @@ public class Flags {
     public static final Key BOMBED_ROOM = Key.key(Namespaces.PHANTAZM, "zombies.map.room.flag.bombed");
     public static final Key WALLSHOOTING_ENABLED =
         Key.key(Namespaces.PHANTAZM, "zombies.map.flag.wallshooting_enabled");
+    public static final Key BOMBING_IMMUNE = Key.key(Namespaces.PHANTAZM, "zombies.map.flag.bombing_immune");
 
     private Flags() {
     }

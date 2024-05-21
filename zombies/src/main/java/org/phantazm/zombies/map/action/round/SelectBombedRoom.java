@@ -233,7 +233,8 @@ public class SelectBombedRoom implements Action<Round> {
                 }
 
                 for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                    if (!zombiesPlayer.canDoGenericActions() || zombiesPlayer.flags().hasFlag(Flags.GODMODE)) {
+                    if (!zombiesPlayer.canDoGenericActions() || zombiesPlayer.flags().hasFlag(Flags.GODMODE) ||
+                        zombiesPlayer.flags().hasFlag(Flags.BOMBING_IMMUNE)) {
                         removeStateFor(zombiesPlayer, false);
                         continue;
                     }
