@@ -65,6 +65,10 @@ public class GiveCoinsShotHandler implements ShotHandler {
         if (!shot.regularTargets().isEmpty()) {
             displays.add(Component.text((isInstaKill ? "Insta Kill " : "") + shot.regularTargets().size() + "x"));
             for (GunHit hit : shot.regularTargets()) {
+                if (cannotGiveCoins(hit)) {
+                    continue;
+                }
+
                 change += isInstaKill && vulnerableToInstakill(hit.entity()) ? data.instaKillCoins : data.normalCoins;
             }
         }
@@ -73,11 +77,19 @@ public class GiveCoinsShotHandler implements ShotHandler {
             displays.add(
                 Component.text((isInstaKill ? "Insta Kill " : "Critical Hit ") + shot.headshotTargets().size() + "x"));
             for (GunHit hit : shot.headshotTargets()) {
+                if (cannotGiveCoins(hit)) {
+                    continue;
+                }
+
                 change += isInstaKill && vulnerableToInstakill(hit.entity()) ? data.instaKillCoins : data.headshotCoins;
             }
         }
 
         coins.runTransaction(new Transaction(modifiers, displays, change)).applyIfAffordable(coins);
+    }
+
+    private boolean cannotGiveCoins(GunHit hit) {
+        return playerMap.containsKey(PlayerView.lookup(hit.entity().getUuid()));
     }
 
     private boolean vulnerableToInstakill(LivingEntity livingEntity) {
