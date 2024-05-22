@@ -16,7 +16,9 @@ public interface FriendDatabase {
     // unused - use only for stat API
     @NotNull CompletableFuture<Set<FriendEntry>> fetchNFriendsWithTime(@NotNull UUID requester, int numberOfRows, int offset);
 
+    @NotNull CompletableFuture<Boolean> validateFriend(@NotNull UUID player1, @NotNull UUID player2);
+
     @NotNull CompletableFuture<Void> submitFriend(@NotNull UUID player1, @NotNull UUID player2, long timeCreated);
 
-    @NotNull CompletableFuture<Boolean> deleteFriend(@NotNull UUID player1, @NotNull UUID player2);
+    @NotNull CompletableFuture<Void> deleteFriend(@NotNull UUID player1, @NotNull UUID player2);
 }
