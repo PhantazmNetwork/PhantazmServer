@@ -3,7 +3,6 @@ package org.phantazm.zombies.map.shop.interactor;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.vector.Vec3I;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
@@ -34,8 +33,7 @@ public class SpawnPowerupInteractor implements ShopInteractor {
             return false;
         }
 
-        Point target = shop.mapOrigin().add(data.target.x(), data.target.y(), data.target.z());
-        handler.spawn(data.powerup, target);
+        handler.spawn(data.powerup, shop.mapOrigin().add(data.target.x(), data.target.y(), data.target.z()));
         return true;
     }
 
