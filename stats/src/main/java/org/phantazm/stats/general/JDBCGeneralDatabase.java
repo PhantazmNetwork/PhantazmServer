@@ -2,7 +2,6 @@ package org.phantazm.stats.general;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.stats.DatabaseUtils;
-import org.phantazm.stats.zombies.JDBCZombiesStatsDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +13,7 @@ import java.util.concurrent.Executor;
 
 public class JDBCGeneralDatabase implements GeneralDatabase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCZombiesStatsDatabase.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JDBCGeneralDatabase.class);
 
     private final Executor executor;
 
@@ -60,7 +59,7 @@ public class JDBCGeneralDatabase implements GeneralDatabase {
             DatabaseUtils.runPreparedSql(LOGGER, "handleJoin", dataSource, """
                 INSERT INTO player_stats (player_uuid, first_join, last_join)
                 VALUES(?, ?, ?)
-                ON DUPLICATE KEY UPDATE 
+                ON DUPLICATE KEY UPDATE
                 first_join=?,
                 last_join=?
                 """, (connection, statement) -> {
