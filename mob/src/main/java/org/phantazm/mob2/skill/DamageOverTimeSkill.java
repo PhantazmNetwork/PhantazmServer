@@ -61,7 +61,8 @@ public class DamageOverTimeSkill implements SkillComponent {
           sound=null,
           trigger=null,
           bypassArmor=false,
-          exceedMobLifetime=true
+          exceedMobLifetime=true,
+          canKill=true
         }
         """)
     @DataObject
@@ -72,7 +73,8 @@ public class DamageOverTimeSkill implements SkillComponent {
         int damageTime,
         float damageAmount,
         boolean bypassArmor,
-        boolean exceedMobLifetime) {
+        boolean exceedMobLifetime,
+        boolean canKill) {
 
     }
 

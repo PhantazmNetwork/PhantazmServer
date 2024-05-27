@@ -22,7 +22,7 @@ class BasicEndlessTest {
 
         BasicEndless.balance(actualValues, actualMobCounts);
 
-        assertArrayEquals(new int[]{0, 1, 10, 16}, actualValues);
+        assertArrayEquals(new int[]{1, 1, 10, 15}, actualValues);
     }
 
     @Test

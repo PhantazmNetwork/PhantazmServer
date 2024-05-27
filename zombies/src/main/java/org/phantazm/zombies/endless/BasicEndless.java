@@ -429,6 +429,31 @@ public class BasicEndless implements Endless {
                 actualCounts[index]++;
             }
         }
+
+        for (int i = 0; i < actualCounts.length; i++) {
+            if (actualCounts[i] != 0) {
+                continue;
+            }
+
+            int largest = 0;
+            int largestIndex = -1;
+            for (int j = 0; j < actualCounts.length; j++) {
+                if (j == i) {
+                    continue;
+                }
+
+                int largestCandidate = actualCounts[j];
+                if (largestCandidate > largest) {
+                    largest = largestCandidate;
+                    largestIndex = j;
+                }
+            }
+
+            if (largestIndex != -1) {
+                actualCounts[i]++;
+                actualCounts[largestIndex]--;
+            }
+        }
     }
 
     private static int getLargestDecimalPartIndex(double[] exactCounts, int skipIndex) {
