@@ -271,7 +271,7 @@ public final class PhantazmServer {
         });
 
         CompletableFuture<?> game = CompletableFuture.runAsync(() -> {
-            LoginValidatorFeature.initialize(databaseContext);
+            LoginValidatorFeature.initialize(databaseContext, configContext);
 
             PartyFeature.initialize(configContext, ethyleneContext, dataLoadingContext);
             PermissionFeature.initialize(databaseContext, ethyleneContext, dataLoadingContext);

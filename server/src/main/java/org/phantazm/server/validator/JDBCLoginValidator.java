@@ -24,19 +24,22 @@ public class JDBCLoginValidator implements LoginValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(JDBCLoginValidator.class);
     private static final CompletableFuture<LoginEntry> UNBANNED_FUTURE = FutureUtils.completedFuture(UNBANNED);
     private static final CompletableFuture<BanHistory> NEVER_BANNED_FUTURE = FutureUtils.completedFuture(NEVER_BANNED);
+    private static final CompletableFuture<LoginEntry> NOT_WHITELISTED_FUTURE = FutureUtils.completedFuture(NOT_WHITELISTED);
 
     private final Cache<UUID, LoginEntry> banCache;
     private final Cache<UUID, Boolean> whitelistCache;
     private final Cache<UUID, BanHistory> banHistoryCache;
     private final DataSource dataSource;
     private final Executor executor;
+    private final boolean whitelist;
 
-    public JDBCLoginValidator(@NotNull DataSource dataSource, @NotNull Executor executor) {
+    public JDBCLoginValidator(@NotNull DataSource dataSource, @NotNull Executor executor, boolean whitelist) {
         this.banCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.whitelistCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.banHistoryCache = Caffeine.newBuilder().maximumSize(1024).expireAfterAccess(Duration.ofMinutes(5)).build();
         this.dataSource = Objects.requireNonNull(dataSource);
         this.executor = Objects.requireNonNull(executor);
+        this.whitelist = whitelist;
     }
 
     private LoginEntry entryFor(UUID uuid) {
@@ -97,6 +100,10 @@ public class JDBCLoginValidator implements LoginValidator {
     @Override
     public @NotNull CompletableFuture<LoginEntry> login(@NotNull UUID uuid) {
         Objects.requireNonNull(uuid);
+
+        if (whitelist && !whitelistCache.get(uuid, this::isWhitelisted0)) {
+            return NOT_WHITELISTED_FUTURE;
+        }
 
         LoginEntry entry = banCache.getIfPresent(uuid);
         if (entry != null) {
@@ -261,22 +268,26 @@ public class JDBCLoginValidator implements LoginValidator {
         });
     }
 
+    private boolean isWhitelisted0(UUID uuid) {
+        return DatabaseUtils.runPreparedSql(LOGGER, "isWhitelisted", () -> true, dataSource, """
+            SELECT player_uuid FROM player_whitelist
+            WHERE player_uuid=?
+            LIMIT 1
+            """, (connection, statement) -> {
+            statement.setString(1, uuid.toString());
+            statement.setFetchSize(1);
+
+            ResultSet result = statement.executeQuery();
+            return result.next();
+        });
+    }
+
     @Override
     public boolean isWhitelisted(@NotNull UUID uuid) {
         Objects.requireNonNull(uuid);
 
         return whitelistCache.get(uuid, key -> {
-            return DatabaseUtils.runPreparedSql(LOGGER, "isWhitelisted", () -> true, dataSource, """
-                SELECT player_uuid FROM player_whitelist
-                WHERE player_uuid=?
-                LIMIT 1
-                """, (connection, statement) -> {
-                statement.setString(1, uuid.toString());
-                statement.setFetchSize(1);
-
-                ResultSet result = statement.executeQuery();
-                return result.next();
-            });
+            return isWhitelisted0(uuid);
         });
     }
 

@@ -1,6 +1,7 @@
 package org.phantazm.server;
 
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.server.context.ConfigContext;
 import org.phantazm.server.context.DatabaseContext;
 import org.phantazm.server.validator.JDBCLoginValidator;
 import org.phantazm.server.validator.LoginValidator;
@@ -12,9 +13,9 @@ public final class LoginValidatorFeature {
         throw new UnsupportedOperationException();
     }
 
-    static void initialize(@NotNull DatabaseContext databaseContext) {
+    static void initialize(@NotNull DatabaseContext databaseContext, @NotNull ConfigContext configContext) {
         LoginValidatorFeature.loginValidator = new JDBCLoginValidator(databaseContext.dataSource(),
-            databaseContext.databaseExecutor());
+            databaseContext.databaseExecutor(), configContext.serverConfig().serverInfo().whitelist());
 
         LoginValidatorFeature.loginValidator.initTables().join();
     }
