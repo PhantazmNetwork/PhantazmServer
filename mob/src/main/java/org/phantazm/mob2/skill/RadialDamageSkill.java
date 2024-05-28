@@ -3,9 +3,9 @@ package org.phantazm.mob2.skill;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.LivingEntity;
-import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.Trigger;
@@ -59,7 +59,7 @@ public class RadialDamageSkill implements SkillComponent {
                 float damage = (float) calculateDamage(mob.getDistance(livingEntity));
 
                 livingEntity.scheduleNextTick(self -> {
-                    ((LivingEntity) self).damage(Damage.fromEntity(mob, damage), data.bypassArmor);
+                    DamageUtils.damage((LivingEntity) self, mob, damage, data.bypassArmor);
                 });
             });
         }

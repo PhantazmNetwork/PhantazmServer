@@ -13,6 +13,7 @@ import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.coin.PlayerCoins;
@@ -99,10 +100,9 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
                             Mob mob = (Mob) self;
                             if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_INSTAKILL, false)) {
                                 switch (data.bossDamageType) {
-                                    case HEALTH_FACTOR -> mob.damage(Damage.fromPlayer(player, mob
-                                        .getMaxHealth() * data.bossDamage), data.bypassArmor);
-                                    case CONSTANT -> mob.damage(Damage.fromPlayer(player, data.bossDamage),
-                                        data.bypassArmor);
+                                    case HEALTH_FACTOR ->
+                                        DamageUtils.damage(mob, player, mob.getMaxHealth() * data.bossDamage, data.bypassArmor);
+                                    case CONSTANT -> DamageUtils.damage(mob, player, data.bossDamage, data.bypassArmor);
                                 }
 
                                 if (mob.getHealth() <= 0) {
@@ -113,7 +113,7 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
                             }
 
                             giveCoins(zombiesPlayer);
-                            mob.damage(Damage.fromPlayer(player, mob.getHealth()), data.bypassArmor);
+                            mob.damage(Damage.fromPlayer(player, mob.getHealth()));
                         });
                     });
         }

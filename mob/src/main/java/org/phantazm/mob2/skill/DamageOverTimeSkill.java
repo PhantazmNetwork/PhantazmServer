@@ -13,6 +13,7 @@ import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.ExtensionHolder;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.mob2.BasicMobSpawner;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
@@ -62,7 +63,7 @@ public class DamageOverTimeSkill implements SkillComponent {
           trigger=null,
           bypassArmor=false,
           exceedMobLifetime=true,
-          canKill=true
+          minHealth=0F
         }
         """)
     @DataObject
@@ -74,7 +75,7 @@ public class DamageOverTimeSkill implements SkillComponent {
         float damageAmount,
         boolean bypassArmor,
         boolean exceedMobLifetime,
-        boolean canKill) {
+        float minHealth) {
 
     }
 
@@ -169,10 +170,13 @@ public class DamageOverTimeSkill implements SkillComponent {
 
         private void damageTarget(Mob self, LivingEntity target) {
             target.getAcquirable().sync(targetEntity -> {
-                if (data.sound != null && targetEntity instanceof Player player) {
+                float actualDamage = data.bypassArmor ? data.damageAmount :
+                    DamageUtils.computeDamageWithArmor((LivingEntity) targetEntity, data.damageAmount);
+                float overflow = Math.max(0, data.minHealth - (((LivingEntity) targetEntity).getHealth() - actualDamage));
+                if (((LivingEntity) targetEntity).damage(Damage.fromEntity(self, actualDamage - overflow)) &&
+                    data.sound != null && targetEntity instanceof Player player) {
                     player.playSound(data.sound);
                 }
-                ((LivingEntity) targetEntity).damage(Damage.fromEntity(self, data.damageAmount), data.bypassArmor);
             });
         }
 

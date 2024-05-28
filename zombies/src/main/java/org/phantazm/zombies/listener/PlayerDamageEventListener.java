@@ -59,7 +59,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         ZombiesPlayerDamageEvent damageEvent = new ZombiesPlayerDamageEvent((Player) event.getEntity(), zombiesPlayer);
         scene.broadcastEvent(damageEvent);
 
-        if (!damageEvent.shouldKnock() && event.getActualAmount() < event.getEntity().getHealth()) {
+        if (!damageEvent.shouldKnock() && event.getDamage().getAmount() <= event.getEntity().getHealth()) {
             return;
         }
 

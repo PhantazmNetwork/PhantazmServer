@@ -13,6 +13,7 @@ import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.core.TagUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
@@ -93,8 +94,8 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     }
 
     private void doDamage(LivingEntity entity, Entity damager) {
-        Damage damage = new Damage(DamageType.ON_FIRE, null, damager, null, data.damage);
-        entity.damage(damage, data.bypassArmor);
+        DamageUtils.damage(entity, amount -> new Damage(DamageType.ON_FIRE, null, damager, null, amount),
+            data.damage, data.bypassArmor);
     }
 
     private void stopFire(Entity entity) {

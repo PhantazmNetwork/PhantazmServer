@@ -3,11 +3,11 @@ package org.phantazm.zombies.listener;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.core.TagUtils;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryAccessRegistry;
@@ -104,10 +104,11 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
             return;
         }
 
-        double angle = player.getPosition().yaw() * (Math.PI / 180);
+        if (DamageUtils.damage(hit, player, punchDamage, false)) {
+            double angle = player.getPosition().yaw() * (Math.PI / 180);
+            hit.takeKnockback(punchKnockback, Math.sin(angle), -Math.cos(angle));
+        }
 
-        hit.damage(Damage.fromPlayer(player, punchDamage), false);
-        hit.takeKnockback(punchKnockback, Math.sin(angle), -Math.cos(angle));
         player.setTag(lastPunchTicksTag, currentTick);
     }
 }

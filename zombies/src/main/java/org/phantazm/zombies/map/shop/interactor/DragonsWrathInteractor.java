@@ -78,7 +78,7 @@ public class DragonsWrathInteractor implements ShopInteractor {
 
                 interaction.player().getPlayer().ifPresent(player -> {
                     entity.getAcquirable().sync(ignored -> {
-                        entity.damage(Damage.fromPlayer(player, entity.getHealth()), true);
+                        entity.damage(Damage.fromPlayer(player, entity.getHealth()));
                     });
                 });
 

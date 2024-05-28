@@ -9,8 +9,8 @@ import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
-import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
@@ -83,9 +83,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 double angle = pos.yaw() * (Math.PI / 180);
                 livingEntity.getAcquirable().sync(entity -> {
                     LivingEntity actualEntity = (LivingEntity) entity;
-                    boolean damaged = actualEntity.damage(Damage.fromEntity(self, damageAmount), data.bypassArmor);
-
-                    if (!damaged) {
+                    if (!DamageUtils.damage(actualEntity, entity, damageAmount, data.bypassArmor)) {
                         return;
                     }
 

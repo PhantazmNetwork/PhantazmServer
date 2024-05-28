@@ -307,8 +307,8 @@ public class Mob extends ProximaEntity {
     }
 
     @Override
-    public boolean damage(@NotNull Damage damage, boolean bypassArmor) {
-        boolean result = super.damage(damage, bypassArmor);
+    public boolean damage(@NotNull Damage damage) {
+        boolean result = super.damage(damage);
 
         if (canUseSkills()) {
             useIfPresent(Trigger.DAMAGED);

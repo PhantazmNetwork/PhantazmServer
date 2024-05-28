@@ -6,10 +6,12 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.core.TagUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
@@ -19,6 +21,8 @@ import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.UUID;
@@ -30,11 +34,15 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @Model("zombies.gun.shot_handler.ignite")
 @Cache(false)
 public class IgniteShotHandler implements ShotHandler {
+    private record Target(Reference<LivingEntity> entity,
+        Reference<Entity> attacker) {
+    }
+
     private final Data data;
     private final ZombiesScene scene;
 
     private final Tag<Long> lastFireDamageTicksTag;
-    private final Deque<LivingEntity> targets;
+    private final Deque<Target> targets;
 
     /**
      * Creates an {@link IgniteShotHandler}.
@@ -53,11 +61,11 @@ public class IgniteShotHandler implements ShotHandler {
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
         @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
-        setFire(shot.regularTargets(), data.normalFireTicks);
-        setFire(shot.headshotTargets(), data.headshotFireTicks);
+        setFire(shot.regularTargets(), data.normalFireTicks, attacker);
+        setFire(shot.headshotTargets(), data.headshotFireTicks, attacker);
     }
 
-    private void setFire(Collection<GunHit> hits, int duration) {
+    private void setFire(Collection<GunHit> hits, int duration, @NotNull Entity attacker) {
         for (GunHit target : hits) {
             LivingEntity entity = target.entity();
             if (!(entity instanceof Mob mob)) {
@@ -76,7 +84,7 @@ public class IgniteShotHandler implements ShotHandler {
             tags.setTag(lastFireDamageTicksTag, ++lastFireDamageTicks);
 
             if (!alreadyActive) {
-                targets.add(entity);
+                targets.add(new Target(new WeakReference<>(entity), new WeakReference<>(attacker)));
             }
         }
     }
@@ -84,14 +92,19 @@ public class IgniteShotHandler implements ShotHandler {
     @Override
     public void tick(@NotNull GunState state, long time) {
         targets.removeIf(target -> {
-            if (target.isDead() || target.isRemoved() || !target.isOnFire()) {
-                remove(target);
+            LivingEntity entity = target.entity.get();
+            if (entity == null) {
                 return true;
             }
 
-            TagHandler tags = TagUtils.sceneLocalTags(target, scene);
+            if (entity.isDead() || entity.isRemoved() || !entity.isOnFire()) {
+                remove(entity);
+                return true;
+            }
+
+            TagHandler tags = TagUtils.sceneLocalTags(entity, scene);
             if (tags.getTag(this.lastFireDamageTicksTag) >= data.damageInterval) {
-                damage(target);
+                damage(entity, target.attacker.get());
                 tags.setTag(this.lastFireDamageTicksTag, 0L);
             }
 
@@ -103,8 +116,9 @@ public class IgniteShotHandler implements ShotHandler {
         TagUtils.removeSceneLocalTag(target, scene, lastFireDamageTicksTag);
     }
 
-    private void damage(LivingEntity target) {
-        target.damage(DamageType.ON_FIRE, data.damage, data.bypassArmor);
+    private void damage(LivingEntity target, Entity attacker) {
+        DamageUtils.damage(target, amount ->
+            new Damage(DamageType.ON_FIRE, null, attacker, null, amount), data.damage, data.bypassArmor);
     }
 
     @DataObject

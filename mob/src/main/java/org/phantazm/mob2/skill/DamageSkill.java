@@ -3,9 +3,9 @@ package org.phantazm.mob2.skill;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.LivingEntity;
-import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.Trigger;
@@ -64,7 +64,7 @@ public class DamageSkill implements SkillComponent {
                     entity.takeKnockback(data.knockback, data.horizontal, Math.sin(angle), -Math.cos(angle));
                 }
 
-                entity.damage(Damage.fromEntity(mob, data.amount), data.bypassArmor);
+                DamageUtils.damage(entity, mob, data.amount, data.bypassArmor);
             }));
         }
 

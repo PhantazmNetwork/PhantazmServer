@@ -14,6 +14,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Flags;
@@ -114,12 +115,13 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                 boolean isInstaKill;
                 if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
                     (!hitMob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_INSTAKILL, false))) {
-                    livingEntity.damage(Damage.fromPlayer(player, livingEntity.getHealth()), true);
+                    livingEntity.damage(Damage.fromPlayer(player, livingEntity.getHealth()));
                     isInstaKill = true;
                 } else {
                     double angle = playerPosition.yaw() * (Math.PI / 180);
-                    livingEntity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
-                    livingEntity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
+                    if (DamageUtils.damage(livingEntity, player, data.damage, data.bypassArmor)) {
+                        livingEntity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
+                    }
                     isInstaKill = false;
                 }
 

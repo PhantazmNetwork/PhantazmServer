@@ -266,7 +266,7 @@ public class SelectBombedRoom implements Action<Round> {
 
                         long ticksSinceEnter = MinecraftServer.currentTick() - lastEnterBombedRoom;
                         if (ticksSinceEnter >= data.damageDelay) {
-                            player.damage(bombDamage, true);
+                            player.damage(bombDamage);
                         }
 
                         if (ticksSinceEnter >= data.effectDelay) {

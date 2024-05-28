@@ -8,6 +8,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
@@ -47,13 +48,13 @@ public class DamageShotHandler implements ShotHandler {
         handleDamageTargets(gun, attacker, shot.headshotTargets(), data.headshotDamage, true);
     }
 
-    private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damage,
+    private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damageAmount,
         boolean headshot) {
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();
 
             EntityDamageByGunEvent event =
-                new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damage);
+                new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damageAmount);
             zombiesScene.broadcastEvent(event);
 
             if (event.isCancelled()) {
@@ -63,7 +64,7 @@ public class DamageShotHandler implements ShotHandler {
             targetEntity.getAcquirable().sync(ignored -> {
                 float actualDamage = event.getDamage();
                 if (event.isInstakill()) {
-                    targetEntity.damage(Damage.fromEntity(attacker, targetEntity.getHealth()), true);
+                    targetEntity.damage(Damage.fromEntity(attacker, targetEntity.getHealth()));
                     return;
                 }
 
@@ -75,12 +76,11 @@ public class DamageShotHandler implements ShotHandler {
                     actualDamage *= target.entity().getAttributeValue(Attributes.HEADSHOT_DAMAGE_MULTIPLIER);
                 }
 
-                Damage damageType = Damage.fromEntity(attacker, actualDamage);
                 switch (data.armorBehavior) {
-                    case ALWAYS_BYPASS -> targetEntity.damage(damageType, true);
-                    case NEVER_BYPASS -> targetEntity.damage(damageType, false);
-                    case BYPASS_ON_HEADSHOT -> targetEntity.damage(damageType, headshot);
-                    case BYPASS_ON_NON_HEADSHOT -> targetEntity.damage(damageType, !headshot);
+                    case ALWAYS_BYPASS -> targetEntity.damage(Damage.fromEntity(attacker, actualDamage));
+                    case NEVER_BYPASS -> DamageUtils.damage(targetEntity, attacker, actualDamage, false);
+                    case BYPASS_ON_HEADSHOT -> DamageUtils.damage(targetEntity, attacker, actualDamage, headshot);
+                    case BYPASS_ON_NON_HEADSHOT -> DamageUtils.damage(targetEntity, attacker, actualDamage, !headshot);
                 }
             });
         }
