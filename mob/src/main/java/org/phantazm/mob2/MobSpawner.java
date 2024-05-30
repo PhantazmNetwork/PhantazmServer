@@ -49,4 +49,6 @@ public interface MobSpawner {
      * @return true if this spawner can spawn the mob; false otherwise
      */
     boolean canSpawn(@NotNull Key identifier);
+
+    MobData dataForType(@NotNull Key identifier);
 }

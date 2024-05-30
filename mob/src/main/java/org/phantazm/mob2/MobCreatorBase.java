@@ -73,7 +73,12 @@ public class MobCreatorBase implements MobCreator {
         setup(mob);
         return mob;
     }
-    
+
+    @Override
+    public @NotNull MobData data() {
+        return data;
+    }
+
     protected void setup(@NotNull Mob mob) {
         setEquipment(mob);
         setAttributes(mob);

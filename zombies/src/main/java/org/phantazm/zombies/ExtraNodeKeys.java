@@ -10,6 +10,7 @@ public final class ExtraNodeKeys {
     public static final String SPEEDUP_AMOUNT = "speedupAmount";
     public static final String ANNOUNCE_KILL = "announceKill";
     public static final String BYPASS_ENDLESS_SCALING = "bypassEndlessScaling";
+    public static final String PART_OF_ROUND = "partOfRound";
 
     private ExtraNodeKeys() {
         throw new UnsupportedOperationException();

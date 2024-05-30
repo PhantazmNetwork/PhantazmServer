@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.core.packet.MinestomPacketUtils;
 import org.phantazm.messaging.packet.server.RoundStartPacket;
 import org.phantazm.mob2.Mob;
+import org.phantazm.mob2.MobData;
+import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -57,13 +59,15 @@ public class Round implements Tickable {
     }
 
     public void removeMob(@NotNull Mob mob) {
-        if (spawnedMobs.remove(mob.getUuid()) != null) {
+        if (spawnedMobs.remove(mob.getUuid()) != null && mob.data().extra()
+            .getBooleanOrDefault(ExtraNodeKeys.PART_OF_ROUND, true)) {
             totalMobCount--;
         }
     }
 
     public void addMob(@NotNull Mob mob) {
-        if (spawnedMobs.put(mob.getUuid(), mob) == null) {
+        if (spawnedMobs.put(mob.getUuid(), mob) == null && mob.data().extra()
+            .getBooleanOrDefault(ExtraNodeKeys.PART_OF_ROUND, true)) {
             totalMobCount++;
         }
     }
@@ -84,6 +88,18 @@ public class Round implements Tickable {
 
     public boolean isActive() {
         return isActive;
+    }
+
+    private static int actualSpawnsForWave(SpawnDistributor distributor, Wave wave) {
+        int amount = 0;
+        for (SpawnInfo info : wave.spawns()) {
+            MobData data = distributor.mobSpawner().dataForType(info.id());
+            if (data == null || data.extra().getBooleanOrDefault(ExtraNodeKeys.PART_OF_ROUND, true)) {
+                amount += info.amount();
+            }
+        }
+
+        return amount;
     }
 
     public void startRound() {
@@ -114,11 +130,15 @@ public class Round implements Tickable {
 
         currentWave = waves.get(waveIndex = 0);
         waveTicks = 0;
-
         totalMobCount = 0;
+
+        SpawnDistributor distributor = sceneSupplier.get().map().objects().spawnDistributor();
+        int amount = 0;
         for (Wave wave : waves) {
-            totalMobCount += wave.mobCount();
+            amount += actualSpawnsForWave(distributor, wave);
         }
+
+        totalMobCount = amount;
     }
 
     public void endRound() {
@@ -168,12 +188,19 @@ public class Round implements Tickable {
             spawnedMobs.put(spawn.getUuid(), spawn);
         }
 
+        int mobsSpawned = 0;
+        for (Mob mob : spawns) {
+            if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.PART_OF_ROUND, true)) {
+                mobsSpawned++;
+            }
+        }
+
         if (isWave) {
             //adjust for mobs that may have failed to spawn
             //only reached when calling internally
-            totalMobCount -= currentWave.mobCount() - spawns.size();
+            totalMobCount -= actualSpawnsForWave(spawnDistributor, currentWave) - mobsSpawned;
         } else {
-            totalMobCount += spawns.size();
+            totalMobCount += mobsSpawned;
         }
 
         return spawns;

@@ -53,6 +53,16 @@ public class BasicMobSpawner implements MobSpawner {
         return mobCreatorMap.containsKey(identifier);
     }
 
+    @Override
+    public MobData dataForType(@NotNull Key identifier) {
+        MobCreator mobCreator = mobCreatorMap.get(identifier);
+        if (mobCreator == null) {
+            return null;
+        }
+
+        return mobCreator.data();
+    }
+
     protected void buildDependencies(@NotNull ExtensionHolder extensionHolder) {
         extensionHolder.set(SPAWNER_KEY, this);
     }
