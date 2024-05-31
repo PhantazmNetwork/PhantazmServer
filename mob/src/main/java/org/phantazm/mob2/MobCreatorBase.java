@@ -10,6 +10,7 @@ import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.entity.metadata.animal.tameable.WolfMeta;
 import net.minestom.server.entity.metadata.item.ItemEntityMeta;
 import net.minestom.server.entity.metadata.monster.zombie.ZombieMeta;
+import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.entity.metadata.other.SlimeMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
@@ -131,6 +132,10 @@ public class MobCreatorBase implements MobCreator {
 
         if (meta instanceof SlimeMeta slimeMeta) {
             slimeMeta.setSize(dataMeta.size());
+        }
+
+        if (meta instanceof ArmorStandMeta armorStandMeta) {
+            armorStandMeta.setSmall(dataMeta.isSmall());
         }
 
         ItemStack itemStack = dataMeta.itemStack();

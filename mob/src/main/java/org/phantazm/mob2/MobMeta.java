@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
       isGlowing=false,
       angerTime=-1,
       isBaby=false,
+      isSmall=false,
       size=0,
       itemStack=null
     }
@@ -23,6 +24,7 @@ public record MobMeta(@Nullable Component customName,
     boolean isGlowing,
     int angerTime,
     boolean isBaby,
+    boolean isSmall,
     int size,
     ItemStack itemStack) {
 
