@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public class VelocityCommand extends PermissionLockedCommand {
     private static final UUID PERSON_WHO_SHOULDNT_USE_VELO =
-        UUID.fromString("7825e26a-df0b-4391-baf4-4c9ce151293d");
+        UUID.fromString("ade229bf-d062-46e8-99d8-97b667d5a127");
 
     public enum Type {
         VERTICAL,
