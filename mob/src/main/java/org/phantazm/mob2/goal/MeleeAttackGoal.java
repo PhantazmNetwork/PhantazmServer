@@ -83,7 +83,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 double angle = pos.yaw() * (Math.PI / 180);
                 livingEntity.getAcquirable().sync(entity -> {
                     LivingEntity actualEntity = (LivingEntity) entity;
-                    if (!DamageUtils.damage(actualEntity, entity, damageAmount, data.bypassArmor)) {
+                    if (!DamageUtils.damage(actualEntity, self, damageAmount, data.bypassArmor)) {
                         return;
                     }
 

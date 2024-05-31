@@ -59,12 +59,10 @@ public class DamageSkill implements SkillComponent {
         protected void useOnTarget(@NotNull Target target, @NotNull Mob mob) {
             target.forType(LivingEntity.class, livingEntity -> livingEntity.getAcquirable().sync(e -> {
                 LivingEntity entity = (LivingEntity) e;
-                if (data.knockback > 0) {
+                if (data.knockback > 0 && DamageUtils.damage(entity, mob, data.amount, data.bypassArmor)) {
                     double angle = mob.getPosition().yaw() * (Math.PI / 180);
                     entity.takeKnockback(data.knockback, data.horizontal, Math.sin(angle), -Math.cos(angle));
                 }
-
-                DamageUtils.damage(entity, mob, data.amount, data.bypassArmor);
             }));
         }
 
