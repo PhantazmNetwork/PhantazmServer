@@ -5,8 +5,6 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -50,6 +48,12 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
         return new Interactor(data, zombiesPlayer, mapFlags);
     }
 
+    @Default("""
+        {
+          instaKillCoins=50,
+          bypassArmor=false
+        }
+        """)
     @DataObject
     public record Data(
         @Description("The damage it does on a successful hit") float damage,
@@ -58,15 +62,6 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
         @Description("The number of coins to give on a successful hit.") int coins,
         @Description("The number of coins to give when instakill is active.") int instaKillCoins,
         @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor) {
-        @Default("instaKillCoins")
-        public static @NotNull ConfigElement defaultInstaKillCoins() {
-            return ConfigPrimitive.of(50);
-        }
-
-        @Default("bypassArmor")
-        public static @NotNull ConfigElement defaultBypassArmor() {
-            return ConfigPrimitive.of(false);
-        }
     }
 
     private record Interactor(Data data,

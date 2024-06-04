@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
@@ -47,6 +45,13 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
         CONSTANT
     }
 
+    @Default("""
+        {
+          bossDamageType='HEALTH_FACTOR',
+          bossDamage=0.25F,
+          bypassArmor=true
+        }
+        """)
     @DataObject
     public record Data(
         double radius,
@@ -55,20 +60,6 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
         @NotNull BossDamageType bossDamageType,
         float bossDamage,
         boolean bypassArmor) {
-        @Default("bossDamageType")
-        public static @NotNull ConfigElement defaultBossDamageType() {
-            return ConfigPrimitive.of("HEALTH_FACTOR");
-        }
-
-        @Default("bossDamage")
-        public static @NotNull ConfigElement defaultBossDamage() {
-            return ConfigPrimitive.of(0.25F);
-        }
-
-        @Default("bypassArmor")
-        public static @NotNull ConfigElement defaultBypassArmor() {
-            return ConfigPrimitive.of(true);
-        }
     }
 
     private static class Action extends InstantAction {

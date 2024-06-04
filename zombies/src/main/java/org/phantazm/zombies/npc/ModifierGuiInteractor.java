@@ -5,8 +5,6 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.key.Constants;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -55,6 +53,11 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
         return new Impl(data, loader.modifierHandlerLoader().first());
     }
 
+    @Default("""
+        {
+          modifierTogglePadding=0
+        }
+        """)
     @DataObject
     public record Data(int modifierTogglePadding,
         @NotNull String titleFormat,
@@ -72,10 +75,6 @@ public class ModifierGuiInteractor implements MonoComponent<NPCInteractor> {
         @NotNull Component noPermissionMessage,
         @NotNull Sound successSound,
         @NotNull Sound failureSound) {
-        @Default("modifierTogglePadding")
-        public static @NotNull ConfigElement defaultModifierTogglePadding() {
-            return ConfigPrimitive.of(0);
-        }
     }
 
     private static class Impl implements NPCInteractor {

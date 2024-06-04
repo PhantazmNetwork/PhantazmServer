@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -39,6 +37,11 @@ public class CoinGainModifier implements DualComponent<ZombiesScene, Modifier> {
         }
     }
 
+    @Default("""
+        {
+          priority=0
+        }
+        """)
     @DataObject
     public record Data(
         @NotNull Key group,
@@ -46,9 +49,5 @@ public class CoinGainModifier implements DualComponent<ZombiesScene, Modifier> {
         @NotNull Transaction.Modifier.Action modifierAction,
         double amount,
         int priority) {
-        @Default("priority")
-        public static @NotNull ConfigElement priorityDefault() {
-            return ConfigPrimitive.of(0);
-        }
     }
 }

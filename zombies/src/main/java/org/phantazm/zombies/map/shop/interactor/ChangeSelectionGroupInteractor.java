@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -130,24 +128,17 @@ public class ChangeSelectionGroupInteractor implements ShopInteractor {
         }
     }
 
+    @Default("""
+        {
+          excludeCurrent=true,
+          moveMessage=null,
+          broadcast=false
+        }
+        """)
     @DataObject
     public record Data(@NotNull Key group,
         boolean excludeCurrent,
         @Nullable String moveMessage,
         boolean broadcast) {
-        @Default("excludeCurrent")
-        public static @NotNull ConfigElement defaultExcludeCurrent() {
-            return ConfigPrimitive.of(true);
-        }
-
-        @Default("moveMessage")
-        public static @NotNull ConfigElement defaultMoveMessage() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("broadcast")
-        public static @NotNull ConfigElement defaultBroadcast() {
-            return ConfigPrimitive.of(false);
-        }
     }
 }

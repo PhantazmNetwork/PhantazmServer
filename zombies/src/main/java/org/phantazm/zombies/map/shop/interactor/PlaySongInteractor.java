@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -74,6 +72,14 @@ public class PlaySongInteractor implements ShopInteractor {
         return true;
     }
 
+    @Default("""
+        {
+          broadcast=false,
+          atLocation=true,
+          volume=2F,
+          source='MASTER'
+        }
+        """)
     @DataObject
     public record Data(
         @NotNull Key songKey,
@@ -81,24 +87,5 @@ public class PlaySongInteractor implements ShopInteractor {
         boolean atLocation,
         float volume,
         @NotNull Sound.Source source) {
-        @Default("broadcast")
-        public static @NotNull ConfigElement broadcastDefault() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("atLocation")
-        public static @NotNull ConfigElement atLocationDefault() {
-            return ConfigPrimitive.of(true);
-        }
-
-        @Default("volume")
-        public static @NotNull ConfigElement volumeDefault() {
-            return ConfigPrimitive.of(2F);
-        }
-
-        @Default("source")
-        public static @NotNull ConfigElement sourceDefault() {
-            return ConfigPrimitive.of("MASTER");
-        }
     }
 }
