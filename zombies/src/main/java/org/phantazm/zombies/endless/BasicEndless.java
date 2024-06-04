@@ -3,6 +3,9 @@ package org.phantazm.zombies.endless;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.core.ConfigElement;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
+import com.github.steanky.ethylene.core.collection.ConfigNode;
+import com.github.steanky.ethylene.core.processor.ConfigProcessException;
+import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -23,9 +26,8 @@ import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 @Model("zombies.endless.basic")
@@ -518,6 +520,29 @@ public class BasicEndless implements Endless {
         return applicableIntroductions == null ? List.of() : applicableIntroductions;
     }
 
+    private static final ConfigProcessor<ScalingMethod> SCALING_METHOD_PROCESSOR =
+        ConfigProcessor.enumProcessor(ScalingMethod.class, false);
+    private static final ConfigProcessor<ScalingValue> SCALING_VALUE_PROCESSOR = new ConfigProcessor<>() {
+        @Override
+        public ScalingValue dataFromElement(@NotNull ConfigElement configElement) throws ConfigProcessException {
+            ScalingMethod kind = SCALING_METHOD_PROCESSOR.dataFromElement(configElement.atOrThrow("kind"));
+            double ceiling = configElement.atOrThrow("ceiling").asNumberOrThrow().doubleValue();
+            double floor = configElement.numberAtOrDefault("floor", 0).doubleValue();
+
+            double a = configElement.numberAtOrDefault("a", 1).doubleValue();
+            double b = configElement.numberAtOrDefault("b", 1).doubleValue();
+            double c = configElement.numberAtOrDefault("c", 1).doubleValue();
+            double d = configElement.numberAtOrDefault("d", 1).doubleValue();
+
+            return new ScalingValue(kind, ceiling, floor, a, b, c, d);
+        }
+
+        @Override
+        public @NotNull ConfigElement elementFromData(ScalingValue scalingValue) throws ConfigProcessException {
+            throw new ConfigProcessException("Read-only");
+        }
+    };
+
     private void onMobSetup(@NotNull ZombiesMobSetupEvent event) {
         Mob mob = event.getEntity();
         ConfigElement bypassesScaling = mob.data().extra().atOrDefault(ExtraNodeKeys.BYPASS_ENDLESS_SCALING,
@@ -538,12 +563,55 @@ public class BasicEndless implements Endless {
                 return;
             }
 
-            scaleAttribute(mob, Attribute.MAX_HEALTH, data.healthScaling, endlessRound);
-            scaleAttribute(mob, Attribute.ATTACK_DAMAGE, data.damageScaling, endlessRound);
-            scaleAttribute(mob, Attribute.MOVEMENT_SPEED, data.speedScaling, endlessRound);
+            Key mobKey = mob.data().key();
+            ConfigNode extra = mob.data().extra();
+
+            ScalingValue[] values = scaling(mobKey, extra);
+
+            ScalingValue healthScaling = Objects.requireNonNullElse(values[0], data.healthScaling);
+            ScalingValue damageScaling = Objects.requireNonNullElse(values[1], data.damageScaling);
+            ScalingValue speedScaling = Objects.requireNonNullElse(values[2], data.speedScaling);
+
+            scaleAttribute(mob, Attribute.MAX_HEALTH, healthScaling, endlessRound);
+            scaleAttribute(mob, Attribute.ATTACK_DAMAGE, damageScaling, endlessRound);
+            scaleAttribute(mob, Attribute.MOVEMENT_SPEED, speedScaling, endlessRound);
 
             mob.heal();
         });
+    }
+
+    private static final ScalingValue[] NULL_SENTINEL = new ScalingValue[]{null, null, null};
+    private static final Map<Key, ScalingValue[]> entryCache = new ConcurrentHashMap<>();
+
+    private static ScalingValue[] scaling(Key mobKey, ConfigNode extra) {
+        return entryCache.computeIfAbsent(mobKey, ignored -> {
+            ScalingValue one = parse(extra, ExtraNodeKeys.ENDLESS_HEALTH_SCALING);
+            ScalingValue two = parse(extra, ExtraNodeKeys.ENDLESS_DAMAGE_SCALING);
+            ScalingValue three = parse(extra, ExtraNodeKeys.ENDLESS_SPEED_SCALING);
+            if (one == null && two == null && three == null) {
+                return NULL_SENTINEL;
+            }
+
+            return new ScalingValue[]{
+                one,
+                two,
+                three
+            };
+        });
+    }
+
+    private static ScalingValue parse(ConfigNode extra, String key) {
+        ConfigElement element = extra.at(key);
+        if (element == null) {
+            return null;
+        }
+
+        try {
+            return SCALING_VALUE_PROCESSOR.dataFromElement(element);
+        } catch (ConfigProcessException ignored) {
+        }
+
+        return null;
     }
 
     private static void scaleAttribute(Mob mob, Attribute attribute, ScalingValue scalingValue, int endlessRound) {
@@ -553,8 +621,7 @@ public class BasicEndless implements Endless {
 
     @Default("""
         {
-          waveBase=3,
-          waveDelayBase=0,
+          waveDelayBase=0
         }
         """)
     @DataObject
