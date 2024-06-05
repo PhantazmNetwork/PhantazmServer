@@ -2,6 +2,7 @@ package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
+import com.github.steanky.vector.Vec3D;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -81,7 +82,8 @@ public class SpawnMobSkill implements SkillComponent {
     @Default("""
         {
           trigger=null,
-          useLocalCount=false
+          useLocalCount=false,
+          offset=null
         }
         """)
     @DataObject
@@ -90,7 +92,8 @@ public class SpawnMobSkill implements SkillComponent {
         @NotNull Key identifier,
         int spawnAmount,
         int maxSpawn,
-        boolean useLocalCount) {
+        boolean useLocalCount,
+        @Nullable Vec3D offset) {
 
         private boolean unlimitedSpawns() {
             return maxSpawn < 0;
@@ -155,7 +158,8 @@ public class SpawnMobSkill implements SkillComponent {
 
                 for (int i = 0; i < data.spawnAmount; i++) {
                     for (Point point : points) {
-                        spawnTargets.add(point);
+                        spawnTargets.add(data.offset == null ? point : point.add(data.offset.x(), data.offset.y(),
+                            data.offset.z()));
                         if (++currentAmount >= data.maxSpawn) {
                             return currentAmount;
                         }
