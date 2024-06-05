@@ -36,6 +36,10 @@ public final class Attributes {
 
     public static final Attribute FIRE_DAMAGE = new Attribute("damage.fire", 1F, false);
 
+    public static final Attribute EXPLOSION_DAMAGE = new Attribute("damage.explosion", 1F, false);
+
+    public static final Attribute POISON_DAMAGE = new Attribute("damage.poison", 1F, false);
+
     /**
      * The "nil" attribute. Used as a fallback when the desired attribute cannot be found.
      */
@@ -53,6 +57,8 @@ public final class Attributes {
         ATTACK_SPEED_MULTIPLIER.register();
         HEADSHOT_DAMAGE_MULTIPLIER.register();
         FIRE_DAMAGE.register();
+        EXPLOSION_DAMAGE.register();
+        POISON_DAMAGE.register();
         NIL.register();
     }
 }
