@@ -63,7 +63,8 @@ public class DamageOverTimeSkill implements SkillComponent {
           trigger=null,
           bypassArmor=false,
           exceedMobLifetime=true,
-          minHealth=0F
+          minHealth=0F,
+          damageType=null
         }
         """)
     @DataObject
@@ -75,7 +76,8 @@ public class DamageOverTimeSkill implements SkillComponent {
         float damageAmount,
         boolean bypassArmor,
         boolean exceedMobLifetime,
-        float minHealth) {
+        float minHealth,
+        String damageType) {
 
     }
 
@@ -171,7 +173,7 @@ public class DamageOverTimeSkill implements SkillComponent {
         private void damageTarget(Mob self, LivingEntity target) {
             target.getAcquirable().sync(targetEntity -> {
                 float actualDamage = data.bypassArmor ? data.damageAmount :
-                    DamageUtils.computeDamageWithArmor((LivingEntity) targetEntity, data.damageAmount);
+                    DamageUtils.computeDamageWithArmorAndResistances(data.damageType, (LivingEntity) targetEntity, data.damageAmount);
                 float overflow = Math.max(0, data.minHealth - (((LivingEntity) targetEntity).getHealth() - actualDamage));
                 if (((LivingEntity) targetEntity).damage(Damage.fromEntity(self, actualDamage - overflow)) &&
                     data.sound != null && targetEntity instanceof Player player) {

@@ -83,11 +83,9 @@ public class MeleeAttackGoal implements GoalCreator {
                 double angle = pos.yaw() * (Math.PI / 180);
                 livingEntity.getAcquirable().sync(entity -> {
                     LivingEntity actualEntity = (LivingEntity) entity;
-                    if (!DamageUtils.damage(actualEntity, self, damageAmount, data.bypassArmor)) {
-                        return;
+                    if (DamageUtils.damage(data.damageType, actualEntity, self, damageAmount, data.bypassArmor)) {
+                        actualEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));
                     }
-
-                    actualEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));
                 });
             }
         }
@@ -103,7 +101,8 @@ public class MeleeAttackGoal implements GoalCreator {
         {
           swingHand=true,
           bypassArmor=false,
-          horizontal=false
+          horizontal=false,
+          damageType=null
         }
         """)
     @DataObject
@@ -111,6 +110,7 @@ public class MeleeAttackGoal implements GoalCreator {
         double range,
         boolean swingHand,
         boolean bypassArmor,
-        boolean horizontal) {
+        boolean horizontal,
+        String damageType) {
     }
 }

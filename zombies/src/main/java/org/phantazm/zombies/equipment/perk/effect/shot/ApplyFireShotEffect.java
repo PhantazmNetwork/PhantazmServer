@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.Tickable;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
@@ -94,7 +95,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     }
 
     private void doDamage(LivingEntity entity, Entity damager) {
-        DamageUtils.damage(entity, amount -> new Damage(DamageType.ON_FIRE, null, damager, null, amount),
+        DamageUtils.damage(data.damageType, entity, amount -> new Damage(DamageType.ON_FIRE, null, damager, null, amount),
             data.damage, data.bypassArmor);
     }
 
@@ -106,11 +107,18 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         LivingEntity target) {
     }
 
+    @Default("""
+        {
+          bypassArmor=false,
+          damageType=null
+        }
+        """)
     @DataObject
     public record Data(
         @Description("The number of ticks the hit entity will be set on fire") int fireTicks,
         @Description("The number of ticks between fire damage applications") int damageInterval,
         @Description("The amount of damage dealt on each application") float damage,
-        @Description("Whether fire damage should bypass armor damage reduction") boolean bypassArmor) {
+        @Description("Whether fire damage should bypass armor damage reduction") boolean bypassArmor,
+        String damageType) {
     }
 }

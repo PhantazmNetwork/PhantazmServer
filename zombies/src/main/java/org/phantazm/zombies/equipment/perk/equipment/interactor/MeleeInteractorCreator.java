@@ -51,7 +51,8 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
     @Default("""
         {
           instaKillCoins=50,
-          bypassArmor=false
+          bypassArmor=false,
+          damageType=null
         }
         """)
     @DataObject
@@ -61,7 +62,8 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
             "unarmed hand") float knockback,
         @Description("The number of coins to give on a successful hit.") int coins,
         @Description("The number of coins to give when instakill is active.") int instaKillCoins,
-        @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor) {
+        @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor,
+        String damageType) {
     }
 
     private record Interactor(Data data,
@@ -114,7 +116,7 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
                     isInstaKill = true;
                 } else {
                     double angle = playerPosition.yaw() * (Math.PI / 180);
-                    if (DamageUtils.damage(livingEntity, player, data.damage, data.bypassArmor)) {
+                    if (DamageUtils.damage(data.damageType, livingEntity, player, data.damage, data.bypassArmor)) {
                         livingEntity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
                     }
                     isInstaKill = false;

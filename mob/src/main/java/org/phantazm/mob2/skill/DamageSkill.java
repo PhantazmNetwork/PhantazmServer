@@ -36,7 +36,8 @@ public class DamageSkill implements SkillComponent {
           trigger=null,
           knockback=0,
           horizontal=true,
-          bypassArmor=false
+          bypassArmor=false,
+          damageType=null
         }
         """)
     @DataObject
@@ -44,7 +45,8 @@ public class DamageSkill implements SkillComponent {
         float amount,
         float knockback,
         boolean horizontal,
-        boolean bypassArmor) {
+        boolean bypassArmor,
+        String damageType) {
     }
 
     private static class Internal extends TargetedSkill {
@@ -59,7 +61,7 @@ public class DamageSkill implements SkillComponent {
         protected void useOnTarget(@NotNull Target target, @NotNull Mob mob) {
             target.forType(LivingEntity.class, livingEntity -> livingEntity.getAcquirable().sync(e -> {
                 LivingEntity entity = (LivingEntity) e;
-                if (data.knockback > 0 && DamageUtils.damage(entity, mob, data.amount, data.bypassArmor)) {
+                if (data.knockback > 0 & DamageUtils.damage(data.damageType, entity, mob, data.amount, data.bypassArmor)) {
                     double angle = mob.getPosition().yaw() * (Math.PI / 180);
                     entity.takeKnockback(data.knockback, data.horizontal, Math.sin(angle), -Math.cos(angle));
                 }

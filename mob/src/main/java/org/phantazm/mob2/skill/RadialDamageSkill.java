@@ -34,7 +34,8 @@ public class RadialDamageSkill implements SkillComponent {
     @Default("""
         {
           trigger=null,
-          bypassArmor=false
+          bypassArmor=false,
+          damageType=null
         }
         """)
     @DataObject
@@ -42,7 +43,8 @@ public class RadialDamageSkill implements SkillComponent {
         @Nullable Trigger trigger,
         float damage,
         boolean bypassArmor,
-        double range) {
+        double range,
+        String damageType) {
     }
 
     private static class Internal extends TargetedSkill {
@@ -59,7 +61,7 @@ public class RadialDamageSkill implements SkillComponent {
                 float damage = (float) calculateDamage(mob.getDistance(livingEntity));
 
                 livingEntity.scheduleNextTick(self -> {
-                    DamageUtils.damage((LivingEntity) self, mob, damage, data.bypassArmor);
+                    DamageUtils.damage(data.damageType, (LivingEntity) self, mob, damage, data.bypassArmor);
                 });
             });
         }

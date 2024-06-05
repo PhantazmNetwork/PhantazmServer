@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
@@ -117,17 +118,24 @@ public class IgniteShotHandler implements ShotHandler {
     }
 
     private void damage(LivingEntity target, Entity attacker) {
-        DamageUtils.damage(target, amount ->
+        DamageUtils.damage(data.damageType, target, amount ->
             new Damage(DamageType.ON_FIRE, null, attacker, null, amount), data.damage, data.bypassArmor);
     }
 
+    @Default("""
+        {
+          bypassArmor=false,
+          damageType=null
+        }
+        """)
     @DataObject
     public record Data(
         int normalFireTicks,
         int headshotFireTicks,
         int damageInterval,
         float damage,
-        boolean bypassArmor) {
+        boolean bypassArmor,
+        String damageType) {
 
     }
 

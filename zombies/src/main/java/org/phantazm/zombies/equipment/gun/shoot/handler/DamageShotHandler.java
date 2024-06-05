@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
@@ -77,10 +78,14 @@ public class DamageShotHandler implements ShotHandler {
                 }
 
                 switch (data.armorBehavior) {
-                    case ALWAYS_BYPASS -> targetEntity.damage(Damage.fromEntity(attacker, actualDamage));
-                    case NEVER_BYPASS -> DamageUtils.damage(targetEntity, attacker, actualDamage, false);
-                    case BYPASS_ON_HEADSHOT -> DamageUtils.damage(targetEntity, attacker, actualDamage, headshot);
-                    case BYPASS_ON_NON_HEADSHOT -> DamageUtils.damage(targetEntity, attacker, actualDamage, !headshot);
+                    case ALWAYS_BYPASS -> targetEntity.damage(Damage.fromEntity(attacker, DamageUtils
+                        .computeDamageWithResistances(targetEntity, data.damageType, actualDamage)));
+                    case NEVER_BYPASS ->
+                        DamageUtils.damage(data.damageType, targetEntity, attacker, actualDamage, false);
+                    case BYPASS_ON_HEADSHOT ->
+                        DamageUtils.damage(data.damageType, targetEntity, attacker, actualDamage, headshot);
+                    case BYPASS_ON_NON_HEADSHOT ->
+                        DamageUtils.damage(data.damageType, targetEntity, attacker, actualDamage, !headshot);
                 }
             });
         }
@@ -104,10 +109,16 @@ public class DamageShotHandler implements ShotHandler {
      * @param damage         The amount of damage to deal to regular targets
      * @param headshotDamage The amount of damage to deal to headshots
      */
+    @Default("""
+        {
+          damageType=null
+        }
+        """)
     @DataObject
     public record Data(float damage,
         float headshotDamage,
-        @NotNull ArmorBehavior armorBehavior) {
+        @NotNull ArmorBehavior armorBehavior,
+        String damageType) {
 
     }
 }

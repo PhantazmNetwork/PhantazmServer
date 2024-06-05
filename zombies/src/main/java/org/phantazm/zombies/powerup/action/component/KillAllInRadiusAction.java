@@ -49,7 +49,8 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
         {
           bossDamageType='HEALTH_FACTOR',
           bossDamage=0.25F,
-          bypassArmor=true
+          bypassArmor=true,
+          damageType=null
         }
         """)
     @DataObject
@@ -59,7 +60,8 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
         int coinsPerKill,
         @NotNull BossDamageType bossDamageType,
         float bossDamage,
-        boolean bypassArmor) {
+        boolean bypassArmor,
+        String damageType) {
     }
 
     private static class Action extends InstantAction {
@@ -92,8 +94,9 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
                             if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_INSTAKILL, false)) {
                                 switch (data.bossDamageType) {
                                     case HEALTH_FACTOR ->
-                                        DamageUtils.damage(mob, player, mob.getMaxHealth() * data.bossDamage, data.bypassArmor);
-                                    case CONSTANT -> DamageUtils.damage(mob, player, data.bossDamage, data.bypassArmor);
+                                        DamageUtils.damage(data.damageType, mob, player, mob.getMaxHealth() * data.bossDamage, data.bypassArmor);
+                                    case CONSTANT ->
+                                        DamageUtils.damage(data.damageType, mob, player, data.bossDamage, data.bypassArmor);
                                 }
 
                                 if (mob.getHealth() <= 0) {
