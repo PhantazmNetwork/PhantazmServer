@@ -83,7 +83,7 @@ public class SpawnMobSkill implements SkillComponent {
         {
           trigger=null,
           useLocalCount=false,
-          offset={x=0.0,y=0.0,z=0.0}
+          offset=null
         }
         """)
     @DataObject
@@ -93,7 +93,7 @@ public class SpawnMobSkill implements SkillComponent {
         int spawnAmount,
         int maxSpawn,
         boolean useLocalCount,
-        @NotNull Vec3D offset) {
+        @Nullable Vec3D offset) {
 
         private boolean unlimitedSpawns() {
             return maxSpawn < 0;
