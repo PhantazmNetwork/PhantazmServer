@@ -33,6 +33,9 @@ public final class Attributes {
      */
     public static final Attribute HEADSHOT_DAMAGE_MULTIPLIER =
         new Attribute("phantazm.headshot_multiplier", 1F, false);
+
+    public static final Attribute FIRE_DAMAGE = new Attribute("damage.fire", 1F, false);
+
     /**
      * The "nil" attribute. Used as a fallback when the desired attribute cannot be found.
      */
@@ -49,6 +52,7 @@ public final class Attributes {
         DAMAGE_MULTIPLIER.register();
         ATTACK_SPEED_MULTIPLIER.register();
         HEADSHOT_DAMAGE_MULTIPLIER.register();
+        FIRE_DAMAGE.register();
         NIL.register();
     }
 }
