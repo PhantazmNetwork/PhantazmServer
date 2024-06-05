@@ -158,8 +158,7 @@ public class SpawnMobSkill implements SkillComponent {
 
                 for (int i = 0; i < data.spawnAmount; i++) {
                     for (Point point : points) {
-                        spawnTargets.add(data.offset == null ? point : point.add(data.offset.x(), data.offset.y(),
-                            data.offset.z()));
+                        spawnTargets.add(point);
                         if (++currentAmount >= data.maxSpawn) {
                             return currentAmount;
                         }
@@ -175,7 +174,8 @@ public class SpawnMobSkill implements SkillComponent {
         private void spawnAt(Mob self, Instance instance, Collection<? extends Point> targets) {
             MobSpawner mobSpawner = self.extensions().get(BasicMobSpawner.SPAWNER_KEY);
             for (Point point : targets) {
-                callback.accept(mobSpawner.spawn(data.identifier, instance, Pos.fromPoint(point), newMob -> {
+                callback.accept(mobSpawner.spawn(data.identifier, instance, Pos.fromPoint(data.offset == null ? point :
+                    point.add(data.offset.x(), data.offset.y(), data.offset.z())), newMob -> {
                     setup(self, newMob);
                 }));
             }
