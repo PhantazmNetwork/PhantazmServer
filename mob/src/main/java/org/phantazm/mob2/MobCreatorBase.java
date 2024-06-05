@@ -117,6 +117,7 @@ public class MobCreatorBase implements MobCreator {
         meta.setCustomNameVisible(dataMeta.customNameVisible());
         meta.setHasGlowingEffect(dataMeta.isGlowing());
         meta.setInvisible(dataMeta.isInvisible());
+        meta.setHasNoGravity(!dataMeta.hasGravity());
 
         if (meta instanceof AgeableMobMeta ageableMobMeta) {
             ageableMobMeta.setBaby(dataMeta.isBaby());
