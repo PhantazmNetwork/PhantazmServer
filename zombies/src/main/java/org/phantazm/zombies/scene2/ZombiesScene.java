@@ -202,6 +202,8 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         Player player = playerOptional.get();
 
         player.stateHolder().setStage(Stages.ZOMBIES_GAME);
+
+        zombiesPlayer.start();
         zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
 
         Stage stage = currentStage();
@@ -230,6 +232,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
             }
 
             leavingZombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(true));
+            leavingZombiesPlayer.end();
         }
 
         return leftPlayers;
@@ -276,6 +279,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
 
         for (ZombiesPlayer zombiesPlayer : managedPlayers.values()) {
             database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
+            zombiesPlayer.end();
         }
     }
 

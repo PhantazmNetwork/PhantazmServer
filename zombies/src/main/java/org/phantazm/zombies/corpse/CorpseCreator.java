@@ -240,7 +240,7 @@ public class CorpseCreator {
         }
 
         public @NotNull Activable asKnockActivable() {
-            return new Activable() {
+            return Activable.threadsafeWrapper(new Activable() {
                 @Override
                 public void start() {
                     Corpse.this.start();
@@ -255,16 +255,16 @@ public class CorpseCreator {
                 public void end() {
                     Corpse.this.remove();
                 }
-            };
+            });
         }
 
         public @NotNull Activable asDeathActivable() {
-            return new Activable() {
+            return Activable.threadsafeWrapper(new Activable() {
                 @Override
                 public void end() {
                     Corpse.this.disable();
                 }
-            };
+            });
         }
 
     }
