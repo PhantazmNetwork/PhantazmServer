@@ -34,11 +34,16 @@ public final class Attributes {
     public static final Attribute HEADSHOT_DAMAGE_MULTIPLIER =
         new Attribute("phantazm.headshot_multiplier", 1F, false);
 
-    public static final Attribute FIRE_DAMAGE = new Attribute("damage.fire", 1F, false);
+    public static final Attribute FIRE_DAMAGE = new Attribute("damage.fire", 0F, false);
 
-    public static final Attribute EXPLOSION_DAMAGE = new Attribute("damage.explosion", 1F, false);
+    public static final Attribute EXPLOSION_DAMAGE = new Attribute("damage.explosion", 0F, false);
 
-    public static final Attribute POISON_DAMAGE = new Attribute("damage.poison", 1F, false);
+    public static final Attribute POISON_DAMAGE = new Attribute("damage.poison", 0F, false);
+
+
+    public static final Attribute FIRE_APPLY_DURATION = new Attribute("damage.fire.duration", 0F, false);
+
+    public static final Attribute FIRE_APPLY_DAMAGE = new Attribute("damage.fire.apply", 0F, false);
 
     /**
      * The "nil" attribute. Used as a fallback when the desired attribute cannot be found.
@@ -59,6 +64,9 @@ public final class Attributes {
         FIRE_DAMAGE.register();
         EXPLOSION_DAMAGE.register();
         POISON_DAMAGE.register();
+
+        FIRE_APPLY_DURATION.register();
+        FIRE_APPLY_DAMAGE.register();
         NIL.register();
     }
 }

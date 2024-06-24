@@ -3,6 +3,7 @@ package org.phantazm.zombies.mob2;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.proxima.path.Pathfinder;
 import com.github.steanky.toolkit.collection.Wrapper;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
@@ -36,8 +37,10 @@ public class ZombiesMobCreator extends MobCreatorBase {
         @NotNull List<Skill> skills, @NotNull List<GoalApplier> goalAppliers,
         @NotNull Pathfinder pathfinder,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction,
-        @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap) {
-        super(data, pathfinding, skills, goalAppliers, pathfinder, settingsFunction, equipmentMap, attributeMap);
+        @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap,
+        @NotNull List<Pair<Attribute, AttributeModifier>> attributeModifiers) {
+        super(data, pathfinding, skills, goalAppliers, pathfinder, settingsFunction, equipmentMap, attributeMap,
+            attributeModifiers);
     }
 
     @Override

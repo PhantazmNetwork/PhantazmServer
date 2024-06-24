@@ -1,9 +1,11 @@
 package org.phantazm.mob2;
 
 import com.github.steanky.proxima.path.Pathfinder;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2FloatArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import net.minestom.server.attribute.Attribute;
+import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.AgeableMobMeta;
 import net.minestom.server.entity.metadata.EntityMeta;
@@ -24,10 +26,7 @@ import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class MobCreatorBase implements MobCreator {
@@ -44,11 +43,13 @@ public class MobCreatorBase implements MobCreator {
 
     private final Map<EquipmentSlot, ItemStack> equipmentMap;
     private final Object2FloatMap<String> attributeMap;
+    private final List<Pair<Attribute, AttributeModifier>> attributeModifiers;
 
     public MobCreatorBase(@NotNull MobData data, Pathfinding.@NotNull Factory pathfinding,
         @NotNull List<Skill> skills, @NotNull List<GoalApplier> goalAppliers, @NotNull Pathfinder pathfinder,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction,
-        @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap) {
+        @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap,
+        @NotNull List<Pair<Attribute, AttributeModifier>> attributeModifiers) {
         this.data = Objects.requireNonNull(data);
         this.pathfinding = Objects.requireNonNull(pathfinding);
         this.skills = List.copyOf(skills);
@@ -59,6 +60,7 @@ public class MobCreatorBase implements MobCreator {
 
         this.equipmentMap = Map.copyOf(equipmentMap);
         this.attributeMap = Objects.requireNonNull(attributeMap);
+        this.attributeModifiers = List.copyOf(attributeModifiers);
     }
 
     @Override
@@ -100,6 +102,10 @@ public class MobCreatorBase implements MobCreator {
             if (attribute != null) {
                 mob.getAttribute(attribute).setBaseValue(entry.getFloatValue());
             }
+        }
+
+        for (Pair<Attribute, AttributeModifier> modifier : attributeModifiers) {
+            mob.getAttribute(modifier.first()).addModifier(modifier.second());
         }
 
         mob.heal();

@@ -22,7 +22,7 @@ public final class DamageUtils {
             return incoming;
         }
 
-        return Math.max(incoming * entity.getAttributeValue(attribute), 0);
+        return Math.max(AttributeUtils.computeWithBase(incoming, entity.getAttribute(attribute)), 0);
     }
 
     public static float computeDamageWithArmor(float baseDamage, float defense, float toughness) {

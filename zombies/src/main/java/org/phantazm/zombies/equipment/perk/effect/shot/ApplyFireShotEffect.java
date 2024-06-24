@@ -7,14 +7,17 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.Tickable;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.AttributeUtils;
 import org.phantazm.core.DamageUtils;
 import org.phantazm.core.TagUtils;
 import org.phantazm.mob2.Mob;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -22,6 +25,7 @@ import org.phantazm.zombies.scene2.ZombiesScene;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Deque;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Model("zombies.perk.effect.shot_entity.apply_fire")
@@ -43,22 +47,28 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
     @Override
     public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer) {
+        Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+        if (playerOptional.isEmpty()) {
+            return;
+        }
+
+        Player player = playerOptional.get();
+
         if (!(entity instanceof LivingEntity livingEntity) || (entity instanceof Mob mob) &&
             mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_FIRE, false)) {
             //can't set non-LivingEntity on fire as they have no health
             return;
         }
 
-        livingEntity.setFireForDuration(data.fireTicks);
+        livingEntity.setFireForDuration(Math.round(AttributeUtils.computeWithBase(data.fireTicks, player
+            .getAttribute(Attributes.FIRE_APPLY_DURATION))));
 
         TagHandler tags = TagUtils.sceneLocalTags(entity, scene);
         boolean alreadyActive = tags.getTag(lastDamageTicksTag) != -1;
         tags.setTag(lastDamageTicksTag, 0L);
 
         if (!alreadyActive) {
-            zombiesPlayer.getPlayer().ifPresent(player -> {
-                activeEntities.add(new DamageTarget(new WeakReference<>(player), new WeakReference<>(livingEntity)));
-            });
+            activeEntities.add(new DamageTarget(new WeakReference<>(player), new WeakReference<>(livingEntity)));
         }
     }
 
@@ -87,10 +97,12 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         });
     }
 
-    private void doDamage(LivingEntity entity, Entity damager) {
+    private void doDamage(LivingEntity entity, LivingEntity damager) {
         entity.getAcquirable().sync(self -> {
             DamageUtils.damage(data.damageType, (LivingEntity) self, amount -> new Damage(DamageType.ON_FIRE,
-                null, damager, null, amount), data.damage, data.bypassArmor);
+                    null, damager, null, amount),
+                Math.round(AttributeUtils.computeWithBase(data.damage, damager, Attributes.FIRE_APPLY_DAMAGE)),
+                data.bypassArmor);
         });
     }
 
@@ -98,7 +110,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         TagUtils.removeSceneLocalTag(entity, scene, lastDamageTicksTag);
     }
 
-    private record DamageTarget(Reference<Entity> damager,
+    private record DamageTarget(Reference<LivingEntity> damager,
         Reference<LivingEntity> target) {
     }
 
