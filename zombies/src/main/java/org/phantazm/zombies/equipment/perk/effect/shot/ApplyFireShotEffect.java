@@ -19,6 +19,7 @@ import org.phantazm.core.TagUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
+import org.phantazm.zombies.event.player.FireProcEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -68,7 +69,8 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         tags.setTag(lastDamageTicksTag, 0L);
 
         if (!alreadyActive) {
-            activeEntities.add(new DamageTarget(new WeakReference<>(player), new WeakReference<>(livingEntity)));
+            activeEntities.add(new DamageTarget(new WeakReference<>(player), new WeakReference<>(livingEntity),
+                zombiesPlayer));
         }
     }
 
@@ -89,7 +91,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             long lastDamageTicks = tags.updateAndGetTag(this.lastDamageTicksTag, oldValue -> oldValue + 1);
 
             if (lastDamageTicks >= data.damageInterval) {
-                doDamage(entity, target.damager.get());
+                doDamage(entity, target.damager.get(), target.player);
                 tags.setTag(this.lastDamageTicksTag, 0L);
             }
 
@@ -97,12 +99,17 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         });
     }
 
-    private void doDamage(LivingEntity entity, LivingEntity damager) {
-        entity.getAcquirable().sync(self -> {
-            DamageUtils.damage(data.damageType, (LivingEntity) self, amount -> new Damage(DamageType.ON_FIRE,
-                    null, damager, null, amount),
-                Math.round(AttributeUtils.computeWithBase(data.damage, damager, Attributes.FIRE_APPLY_DAMAGE)),
-                data.bypassArmor);
+    private void doDamage(LivingEntity target, Player damager, ZombiesPlayer player) {
+        if (damager == null) {
+            return;
+        }
+
+        float damage = AttributeUtils.computeWithBase(data.damage, damager.getAttribute(Attributes.FIRE_APPLY_DAMAGE));
+
+        scene.broadcastCancellable(new FireProcEvent(damager, player, damage, target), event -> {
+            target.getAcquirable().sync(self -> DamageUtils.damage(data.damageType, (LivingEntity) self, amount ->
+                    new Damage(DamageType.ON_FIRE, null, damager, null, amount), event.damageAmount(),
+                data.bypassArmor));
         });
     }
 
@@ -110,8 +117,9 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         TagUtils.removeSceneLocalTag(entity, scene, lastDamageTicksTag);
     }
 
-    private record DamageTarget(Reference<LivingEntity> damager,
-        Reference<LivingEntity> target) {
+    private record DamageTarget(Reference<Player> damager,
+        Reference<LivingEntity> target,
+        ZombiesPlayer player) {
     }
 
     @DataObject
