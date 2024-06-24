@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.element.core.annotation.document.Description;
-import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.Tickable;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
@@ -21,12 +19,11 @@ import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-@Description("""
-    An entity action that sets an entity on fire for a configurable amount of time, health, and damage interval.
-    """)
 @Model("zombies.perk.effect.shot_entity.apply_fire")
 @Cache(false)
 public class ApplyFireShotEffect implements ShotEffect, Tickable {
@@ -46,16 +43,9 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
     @Override
     public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer) {
-        if (!(entity instanceof LivingEntity livingEntity)) {
+        if (!(entity instanceof LivingEntity livingEntity) || (entity instanceof Mob mob) &&
+            mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_FIRE, false)) {
             //can't set non-LivingEntity on fire as they have no health
-            return;
-        }
-
-        if (!(livingEntity instanceof Mob mob)) {
-            return;
-        }
-
-        if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_FIRE, false)) {
             return;
         }
 
@@ -67,7 +57,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
         if (!alreadyActive) {
             zombiesPlayer.getPlayer().ifPresent(player -> {
-                activeEntities.add(new DamageTarget(player, livingEntity));
+                activeEntities.add(new DamageTarget(new WeakReference<>(player), new WeakReference<>(livingEntity)));
             });
         }
     }
@@ -75,7 +65,10 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     @Override
     public void tick(long time) {
         activeEntities.removeIf(target -> {
-            LivingEntity entity = target.target;
+            LivingEntity entity = target.target.get();
+            if (entity == null) {
+                return true;
+            }
 
             if (entity.isRemoved() || entity.isDead() || !entity.isOnFire()) {
                 stopFire(entity);
@@ -86,7 +79,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             long lastDamageTicks = tags.updateAndGetTag(this.lastDamageTicksTag, oldValue -> oldValue + 1);
 
             if (lastDamageTicks >= data.damageInterval) {
-                doDamage(entity, target.damager);
+                doDamage(entity, target.damager.get());
                 tags.setTag(this.lastDamageTicksTag, 0L);
             }
 
@@ -95,30 +88,26 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     }
 
     private void doDamage(LivingEntity entity, Entity damager) {
-        DamageUtils.damage(data.damageType, entity, amount -> new Damage(DamageType.ON_FIRE, null, damager, null, amount),
-            data.damage, data.bypassArmor);
+        entity.getAcquirable().sync(self -> {
+            DamageUtils.damage(data.damageType, (LivingEntity) self, amount -> new Damage(DamageType.ON_FIRE,
+                null, damager, null, amount), data.damage, data.bypassArmor);
+        });
     }
 
     private void stopFire(Entity entity) {
         TagUtils.removeSceneLocalTag(entity, scene, lastDamageTicksTag);
     }
 
-    private record DamageTarget(Entity damager,
-        LivingEntity target) {
+    private record DamageTarget(Reference<Entity> damager,
+        Reference<LivingEntity> target) {
     }
 
-    @Default("""
-        {
-          bypassArmor=false,
-          damageType=null
-        }
-        """)
     @DataObject
     public record Data(
-        @Description("The number of ticks the hit entity will be set on fire") int fireTicks,
-        @Description("The number of ticks between fire damage applications") int damageInterval,
-        @Description("The amount of damage dealt on each application") float damage,
-        @Description("Whether fire damage should bypass armor damage reduction") boolean bypassArmor,
+        int fireTicks,
+        int damageInterval,
+        float damage,
+        boolean bypassArmor,
         String damageType) {
     }
 }
