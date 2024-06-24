@@ -18,11 +18,11 @@ import java.util.UUID;
 
 @Model("zombies.upgrade.player_attribute")
 @Cache
-public class PlayerAttributeModifier implements PlayerUpgradeComponent {
+public class PlayerAttributeUpgrade implements PlayerUpgradeComponent {
     private final Data data;
 
     @FactoryMethod
-    public PlayerAttributeModifier(@NotNull Data data) {
+    public PlayerAttributeUpgrade(@NotNull Data data) {
         this.data = data;
     }
 
@@ -31,7 +31,7 @@ public class PlayerAttributeModifier implements PlayerUpgradeComponent {
         return new Internal(player, data);
     }
 
-    private static class Internal implements PlayerUpgrade {
+    private static class Internal extends GuardedPlayerUpgrade {
         private final ZombiesPlayer zombiesPlayer;
 
         private final Activable state;
@@ -67,12 +67,12 @@ public class PlayerAttributeModifier implements PlayerUpgradeComponent {
         }
 
         @Override
-        public void start() {
+        public void startGuarded() {
             zombiesPlayer.addActivable(state);
         }
 
         @Override
-        public void end() {
+        public void endGuarded() {
             zombiesPlayer.removeActivable(state);
         }
     }
