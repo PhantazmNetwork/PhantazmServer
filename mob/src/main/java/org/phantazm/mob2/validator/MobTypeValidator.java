@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -26,8 +27,15 @@ public class MobTypeValidator implements ValidatorComponent {
         return new Internal(data);
     }
 
+    @Default("""
+        {
+          types=[],
+          tags=[]
+        }
+        """)
     @DataObject
     public record Data(@NotNull Set<Key> types,
+        @NotNull Set<Key> tags,
         boolean blacklist) {
 
     }
@@ -39,7 +47,8 @@ public class MobTypeValidator implements ValidatorComponent {
                 return false;
             }
 
-            return data.blacklist != data.types.contains(entityAsMob.data().key());
+            return data.blacklist != data.types.contains(entityAsMob.data().key()) &&
+                data.blacklist != data.tags.stream().anyMatch(tag -> entityAsMob.data().tags().contains(tag));
         }
     }
 }

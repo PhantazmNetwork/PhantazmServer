@@ -85,8 +85,8 @@ public class Mob extends ProximaEntity {
         this.tickableSkills = new ArrayList<>();
         this.useOnTick = new ArrayList<>();
         this.triggeredSkills = new EnumMap<>(Trigger.class);
-        this.data = data == null ? new MobData(NONE_MOB_KEY, entityType, ConfigNode.of(), false,
-            ConfigNode.of(), ConfigNode.of(), null, List.of(), List.of(), ConfigNode.of()) : data;
+        this.data = data == null ? new MobData(NONE_MOB_KEY, entityType, ConfigNode.of(), false, Set.of(),
+            ConfigNode.of(), ConfigNode.of(), ConfigNode.of(), null, List.of(), List.of(), ConfigNode.of()) : data;
 
         this.lastHitEntity = ReferenceUtils.nullReference();
         this.lastInteractingPlayer = ReferenceUtils.nullReference();

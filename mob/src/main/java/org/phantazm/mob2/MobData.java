@@ -9,10 +9,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 @Default("""
     {
       showNameTag=false,
+      tags=[],
       equipment={},
       attributes={},
       attributeModifiers={},
@@ -26,6 +28,7 @@ public record MobData(@NotNull Key key,
     @NotNull EntityType type,
     @NotNull ConfigNode pathfinding,
     boolean showNameTag,
+    @NotNull Set<Key> tags,
     @NotNull ConfigNode equipment,
     @NotNull ConfigNode attributes,
     @NotNull ConfigNode attributeModifiers,
