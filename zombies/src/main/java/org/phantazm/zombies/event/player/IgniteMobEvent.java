@@ -4,24 +4,26 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class FireProcEvent implements ZombiesPlayerEvent, CancellableEvent {
+public class IgniteMobEvent implements ZombiesPlayerEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
+    private final ShotEffect cause;
     private final LivingEntity target;
-    private float amount;
 
     private boolean cancelled;
 
-    public FireProcEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer, float amount,
+    public IgniteMobEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
+        @NotNull ShotEffect cause,
         @NotNull LivingEntity target) {
         this.player = Objects.requireNonNull(player);
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
+        this.cause = Objects.requireNonNull(cause);
         this.target = Objects.requireNonNull(target);
-        this.amount = amount;
     }
 
     @Override
@@ -44,12 +46,8 @@ public class FireProcEvent implements ZombiesPlayerEvent, CancellableEvent {
         return zombiesPlayer;
     }
 
-    public float damageAmount() {
-        return amount;
-    }
-
-    public void setDamageAmount(float amount) {
-        this.amount = amount;
+    public @NotNull ShotEffect cause() {
+        return cause;
     }
 
     public @NotNull LivingEntity target() {

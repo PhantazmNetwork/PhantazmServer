@@ -20,6 +20,7 @@ import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.event.player.FireProcEvent;
+import org.phantazm.zombies.event.player.IgniteMobEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -58,6 +59,13 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         if (!(entity instanceof LivingEntity livingEntity) || (entity instanceof Mob mob) &&
             mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_FIRE, false)) {
             //can't set non-LivingEntity on fire as they have no health
+            return;
+        }
+
+        IgniteMobEvent event = new IgniteMobEvent(player, zombiesPlayer, this, livingEntity);
+        scene.broadcastEvent(event);
+
+        if (event.isCancelled()) {
             return;
         }
 

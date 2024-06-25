@@ -32,14 +32,8 @@ public class PlayerAttributeUpgrade implements PlayerUpgradeComponent {
     }
 
     private static class Internal extends GuardedPlayerUpgrade {
-        private final ZombiesPlayer zombiesPlayer;
-
-        private final Activable state;
-
         private Internal(ZombiesPlayer zombiesPlayer, Data data) {
-            this.zombiesPlayer = zombiesPlayer;
-
-            this.state = Activable.threadsafeWrapper(new Activable() {
+            super(Activable.threadsafeWrapper(new Activable() {
                 private final UUID uuid = UUID.randomUUID();
                 private final String uuidString = uuid.toString();
 
@@ -58,22 +52,12 @@ public class PlayerAttributeUpgrade implements PlayerUpgradeComponent {
                             .removeModifier(uuid);
                     });
                 }
-            });
+            }), zombiesPlayer);
         }
 
         @Override
         public boolean needsTicking() {
             return false;
-        }
-
-        @Override
-        public void startGuarded() {
-            zombiesPlayer.addActivable(state);
-        }
-
-        @Override
-        public void endGuarded() {
-            zombiesPlayer.removeActivable(state);
         }
     }
 
