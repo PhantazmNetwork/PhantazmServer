@@ -9,6 +9,7 @@ import com.github.steanky.proxima.solid.Solid;
 import com.github.steanky.toolkit.collection.Wrapper;
 import it.unimi.dsi.fastutil.longs.LongArrayList;
 import it.unimi.dsi.fastutil.longs.LongList;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -55,6 +56,7 @@ import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.mob2.MobSpawnerSource;
 import org.phantazm.zombies.modifier.ModifierHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.upgrade.PlayerUpgradeComponent;
 import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.sidebar.ElementSidebarUpdaterCreator;
 import org.phantazm.zombies.sidebar.SidebarModule;
@@ -88,6 +90,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
     private final ZombiesLeaderboardContext leaderboardContext;
     private final RoleStore roleStore;
     private final IdentitySource identitySource;
+    private final Map<Key, PlayerUpgradeComponent> playerUpgradeComponentMap;
 
     private final SongLoader songLoader;
 
@@ -100,7 +103,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         @NotNull PowerupHandler.Source powerupHandlerSource, @NotNull ModifierHandler modifierHandler,
         @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource,
         @NotNull Endless.Source endlessSource, @NotNull ZombiesLeaderboardContext leaderboardContext, @NotNull RoleStore roleStore,
-        @NotNull IdentitySource identitySource) {
+        @NotNull IdentitySource identitySource, @NotNull Map<Key, PlayerUpgradeComponent> playerUpgradeComponentMap) {
         this.sceneCap = sceneCap;
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction);
         this.mapInfo = Objects.requireNonNull(mapInfo);
@@ -130,6 +133,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         this.leaderboardContext = Objects.requireNonNull(leaderboardContext);
         this.roleStore = Objects.requireNonNull(roleStore);
         this.identitySource = Objects.requireNonNull(identitySource);
+        this.playerUpgradeComponentMap = Map.copyOf(playerUpgradeComponentMap);
         this.songLoader = Objects.requireNonNull(songLoader);
     }
 
@@ -217,8 +221,8 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
                 belowNameTag);
         };
 
-        ZombiesScene scene = new ZombiesScene(instance, map, settings, zombiesPlayers, stageTransition, playerCreator,
-            database, childNode, tickTaskScheduler);
+        ZombiesScene scene = new ZombiesScene(instance, map, settings, zombiesPlayers, playerUpgradeComponentMap,
+            stageTransition, playerCreator, database, childNode, tickTaskScheduler);
         sceneWrapper.set(scene);
         rootNode.addChild(childNode);
 

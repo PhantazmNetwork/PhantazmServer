@@ -31,7 +31,7 @@ public abstract class GuardedPlayerUpgrade implements PlayerUpgrade {
     }
 
     @Override
-    public boolean isActivated() {
+    public final boolean isActivated() {
         return activated.get();
     }
 
