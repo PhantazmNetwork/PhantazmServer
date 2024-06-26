@@ -18,6 +18,7 @@ import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.event.player.ZombiesPlayerModifyAttributeEvent;
+import org.phantazm.zombies.event.mob.MobAttributeWearOffEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -94,8 +95,12 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
     }
 
     private void removeAttribute(LivingEntity entity) {
-        entity.getAttribute(attribute).removeModifier(attributeUUID);
+        AttributeModifier modifier = entity.getAttribute(attribute).removeModifier(attributeUUID);
         TagUtils.removeSceneLocalTag(entity, scene, applyTicksTag);
+
+        if (modifier != null) {
+            scene.broadcastEvent(new MobAttributeWearOffEvent(this, entity, attribute, modifier));
+        }
     }
 
     @DataObject
