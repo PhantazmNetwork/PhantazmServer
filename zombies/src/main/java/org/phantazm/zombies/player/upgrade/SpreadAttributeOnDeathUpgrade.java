@@ -20,6 +20,8 @@ import org.phantazm.zombies.event.player.ZombiesPlayerKillMobEvent;
 import org.phantazm.zombies.event.player.ZombiesPlayerModifyAttributeEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
+import java.util.Set;
+
 @Model("zombies.upgrade.spread_attribute_on_death")
 @Cache
 public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
@@ -87,7 +89,8 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void handleModifyAttribute(ZombiesPlayerModifyAttributeEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer || !(event.target() instanceof Mob mob)) {
+                    if (event.getZombiesPlayer() != zombiesPlayer || !(event.target() instanceof Mob mob) ||
+                        !data.attributesToScale.contains(event.attribute().key())) {
                         return;
                     }
 
@@ -109,7 +112,8 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
 
     @DataObject
     public record Data(double radius,
-        double effectScale) {
+        double effectScale,
+        Set<String> attributesToScale) {
 
     }
 }
