@@ -76,7 +76,7 @@ public class BasicTargetFinder implements TargetFinder {
             }
         }
 
-        List<Pair<? extends LivingEntity, Vec>> adjustedLocations = targetLimiter.limitTargets(start, locations);
+        List<Pair<? extends LivingEntity, Vec>> adjustedLocations = targetLimiter.limitTargets(shooter, gun, start, locations);
 
         Collection<GunHit> targets = new ArrayList<>(adjustedLocations.size());
         Collection<GunHit> headshots = new ArrayList<>(adjustedLocations.size());
