@@ -4,6 +4,9 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import net.minestom.server.attribute.Attribute;
+import net.minestom.server.attribute.AttributeModifier;
+import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.instance.EntityTracker;
@@ -21,6 +24,7 @@ import org.phantazm.zombies.event.player.ZombiesPlayerModifyAttributeEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Model("zombies.upgrade.spread_attribute_on_death")
 @Cache
@@ -40,12 +44,15 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
     private static class Internal extends GuardedPlayerUpgrade {
         private Internal(ZombiesPlayer zombiesPlayer, Data data) {
             super(Activable.threadsafeWrapper(new Activable() {
-                private final EventListener<ZombiesPlayerKillMobEvent> killMobEvent = EventListener.builder(ZombiesPlayerKillMobEvent.class)
-                    .handler(this::handleMobDeath).build();
-                private final EventListener<ZombiesPlayerModifyAttributeEvent> modifyAttributeEvent = EventListener.builder(ZombiesPlayerModifyAttributeEvent.class)
-                    .handler(this::handleModifyAttribute).build();
-                private final ExtensionHolder.Key<ShotEffect> EFFECT_KEY = ExtensionHolder.requestKey(ShotEffect.class);
-                private final Tag<Boolean> scaleEffect = Tag.Boolean(TagUtils.uniqueTagName()).defaultValue(false);
+                private static final Tag<Boolean> SCALE_EFFECT = Tag.Boolean(TagUtils.uniqueTagName()).defaultValue(false);
+                private static final ExtensionHolder.Key<ShotEffect> EFFECT_KEY = ExtensionHolder.requestKey(ShotEffect.class);
+                private static final UUID RANDOM_UUID = UUID.randomUUID();
+                private static final String NAME = RANDOM_UUID.toString();
+
+                private final EventListener<ZombiesPlayerKillMobEvent> killMobEvent = EventListener
+                    .builder(ZombiesPlayerKillMobEvent.class).handler(this::handleMobDeath).build();
+                private final EventListener<ZombiesPlayerModifyAttributeEvent> modifyAttributeEvent = EventListener
+                    .builder(ZombiesPlayerModifyAttributeEvent.class).handler(this::handleModifyAttribute).build();
 
                 @Override
                 public void start() {
@@ -79,22 +86,30 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
 
                     instance.getEntityTracker().nearbyEntities(center, data.radius,
                         EntityTracker.Target.LIVING_ENTITIES, otherMob -> {
-                            if (!(otherMob instanceof Mob mob) || otherMob == target) {
+                            if (!(otherMob instanceof Mob mob) || otherMob == target ||
+                                mob.tagHandler().getAndUpdateTag(SCALE_EFFECT, ignored -> true)) {
                                 return;
                             }
 
-                            mob.setTag(scaleEffect, true);
                             effect.perform(mob, zombiesPlayer);
+
+                            Attribute attribute = Attribute.fromKey(data.attribute);
+                            if (attribute == null) {
+                                return;
+                            }
+
+                            mob.getAttribute(attribute).addModifier(new AttributeModifier(RANDOM_UUID, NAME, data.amount,
+                                data.operation));
                         });
                 }
 
                 private void handleModifyAttribute(ZombiesPlayerModifyAttributeEvent event) {
                     if (event.getZombiesPlayer() != zombiesPlayer || !(event.target() instanceof Mob mob) ||
-                        !data.attributesToScale.contains(event.attribute().key())) {
+                        !data.spreadAttributes.contains(event.attribute().key())) {
                         return;
                     }
 
-                    if (mob.getTag(scaleEffect)) {
+                    if (mob.getTag(SCALE_EFFECT)) {
                         event.setAttributeAmount((float) (event.attributeAmount() * data.effectScale));
                         return;
                     }
@@ -113,7 +128,10 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
     @DataObject
     public record Data(double radius,
         double effectScale,
-        Set<String> attributesToScale) {
+        Set<String> spreadAttributes,
+        String attribute,
+        float amount,
+        AttributeOperation operation) {
 
     }
 }
