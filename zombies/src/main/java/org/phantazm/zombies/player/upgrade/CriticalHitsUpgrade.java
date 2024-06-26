@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.event.EventListener;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -49,6 +50,10 @@ public class CriticalHitsUpgrade implements PlayerUpgradeComponent {
                         return;
                     }
 
+                    if (!event.isHeadshot() && data.headshotRequired) {
+                        return;
+                    }
+
                     if (Math.random() >= data.critChance) {
                         return;
                     }
@@ -74,11 +79,17 @@ public class CriticalHitsUpgrade implements PlayerUpgradeComponent {
         }
     }
 
+    @Default("""
+        {
+          headshotRequired=true
+        }
+        """)
     @DataObject
     public record Data(double critChance,
         double critDamageFactor,
         double instakillChance,
-        double instakillDamageFactor) {
+        double instakillDamageFactor,
+        boolean headshotRequired) {
 
     }
 }
