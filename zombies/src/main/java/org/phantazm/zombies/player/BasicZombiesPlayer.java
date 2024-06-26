@@ -14,10 +14,7 @@ import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -28,7 +25,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final TickTaskScheduler taskScheduler;
 
     private final AtomicBoolean blockHandAnimation;
-    private volatile List<Activable> activables;
+    private volatile Set<Activable> activables;
 
     private final Lock activablesLock;
 
@@ -38,7 +35,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         this.module = Objects.requireNonNull(module);
         this.taskScheduler = Objects.requireNonNull(taskScheduler);
         this.blockHandAnimation = new AtomicBoolean();
-        this.activables = List.of();
+        this.activables = Set.of();
         this.activablesLock = new ReentrantLock();
     }
 
@@ -72,7 +69,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     public void addActivable(@NotNull Activable activable) {
         activablesLock.lock();
         try {
-            List<Activable> mutableActivables = new ArrayList<>(activables);
+            Set<Activable> mutableActivables = new HashSet<>(activables);
             mutableActivables.add(activable);
 
             this.activables = mutableActivables;
@@ -88,7 +85,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         boolean removed;
         activablesLock.lock();
         try {
-            List<Activable> mutableActivables = new ArrayList<>(activables);
+            Set<Activable> mutableActivables = new HashSet<>(activables);
             removed = mutableActivables.remove(activable);
 
             this.activables = mutableActivables;

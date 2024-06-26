@@ -17,11 +17,11 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 @Model("zombies.upgrade.fire_aoe_spread")
 @Cache
-public class FireAOESpread implements PlayerUpgradeComponent {
+public class FireAOESpreadUpgrade implements PlayerUpgradeComponent {
     private final Data data;
 
     @FactoryMethod
-    public FireAOESpread(@NotNull Data data) {
+    public FireAOESpreadUpgrade(@NotNull Data data) {
         this.data = data;
     }
 
@@ -48,14 +48,13 @@ public class FireAOESpread implements PlayerUpgradeComponent {
                 }
 
                 private void handleMobIgnite(IgniteMobEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer) {
+                    if (event.getZombiesPlayer() != zombiesPlayer || event.target().getTag(AOE_IGNITED)) {
                         return;
                     }
-
-
+                    
                     zombiesPlayer.getScene().instance().getEntityTracker().nearbyEntities(event.target().getPosition(),
                         data.radius, EntityTracker.Target.LIVING_ENTITIES, entity -> {
-                            if (!(entity instanceof Mob mob) || mob.getTag(AOE_IGNITED)) {
+                            if (entity == event.target() || !(entity instanceof Mob mob) || mob.getTag(AOE_IGNITED)) {
                                 return;
                             }
 

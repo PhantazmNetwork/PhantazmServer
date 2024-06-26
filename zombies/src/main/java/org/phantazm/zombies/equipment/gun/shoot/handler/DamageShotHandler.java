@@ -9,6 +9,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.DamageUtils;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.Gun;
@@ -118,7 +119,7 @@ public class DamageShotHandler implements ShotHandler {
     public record Data(float damage,
         float headshotDamage,
         @NotNull ArmorBehavior armorBehavior,
-        String damageType) {
+        @Nullable String damageType) {
 
     }
 }
