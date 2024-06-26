@@ -51,16 +51,12 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
         String name = NAMES.computeIfAbsent(data, ignored -> TagUtils.uniqueTagName());
         this.entities = new ConcurrentLinkedDeque<>();
-        this.applyTicksTag = Tag.Long(name).defaultValue(-1L);
+        this.applyTicksTag = Tag.Long(name).defaultValue(0L);
     }
 
     @Override
     public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer) {
-        if (!(entity instanceof LivingEntity livingEntity)) {
-            return;
-        }
-
-        if (!(livingEntity instanceof Mob mob)) {
+        if (!(entity instanceof Mob mob)) {
             return;
         }
 
@@ -74,18 +70,13 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
             return;
         }
 
-        Player player = playerOptional.get();
+        scene.broadcastCancellable(new ZombiesPlayerModifyAttributeEvent(playerOptional.get(), zombiesPlayer,
+            this, mob, attribute, (float) data.amount), event -> {
+            mob.getAttribute(attribute).addModifier(
+                new AttributeModifier(attributeUUID, attributeName, event.attributeAmount(), data.attributeOperation));
+            entities.add(mob);
+        });
 
-        long lastApplyTicks = TagUtils.sceneLocalTags(entity, scene)
-            .getAndUpdateTag(applyTicksTag, oldValue -> oldValue + 1);
-
-        if (lastApplyTicks == 0) {
-            scene.broadcastCancellable(new ZombiesPlayerModifyAttributeEvent(player, zombiesPlayer, this, mob, attribute, (float) data.amount), event -> {
-                livingEntity.getAttribute(attribute).addModifier(
-                    new AttributeModifier(attributeUUID, attributeName, event.attributeAmount(), data.attributeOperation));
-                entities.add(livingEntity);
-            });
-        }
     }
 
     @Override
@@ -99,7 +90,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
             return true;
         }
 
-        return TagUtils.sceneLocalTags(livingEntity, scene).getTag(applyTicksTag) >= data.duration;
+        return TagUtils.sceneLocalTags(livingEntity, scene).getAndUpdateTag(applyTicksTag, tick -> tick + 1) >= data.duration;
     }
 
     private void removeAttribute(LivingEntity entity) {
