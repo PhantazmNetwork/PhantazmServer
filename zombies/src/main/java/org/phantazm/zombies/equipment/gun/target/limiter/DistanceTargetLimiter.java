@@ -10,9 +10,9 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.AttributeUtils;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.Gun;
-import org.phantazm.zombies.event.equipment.GunTargetLimitEvent;
-import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,12 +23,10 @@ import java.util.Objects;
 @Cache
 public class DistanceTargetLimiter implements TargetLimiter {
     private final Data data;
-    private final ZombiesScene zombiesScene;
 
     @FactoryMethod
-    public DistanceTargetLimiter(@NotNull Data data, @NotNull ZombiesScene zombiesScene) {
+    public DistanceTargetLimiter(@NotNull Data data) {
         this.data = Objects.requireNonNull(data);
-        this.zombiesScene = Objects.requireNonNull(zombiesScene);
     }
 
     @Override
@@ -43,9 +41,15 @@ public class DistanceTargetLimiter implements TargetLimiter {
 
         targetsCopy.sort(comparator);
 
-        GunTargetLimitEvent event = new GunTargetLimitEvent(shooter, gun, targetsCopy, data.targetLimit);
-        zombiesScene.broadcastEvent(event);
-        return targetsCopy.subList(0, Math.min(targets.size(), event.targetLimit()));
+        int actualLimit;
+        if (shooter instanceof LivingEntity livingEntity) {
+            actualLimit = Math.round(AttributeUtils.computeWithBase(data.targetLimit, livingEntity
+                .getAttribute(Attributes.BULLET_PENETRATION)));
+        } else {
+            actualLimit = data.targetLimit;
+        }
+
+        return targetsCopy.subList(0, Math.min(targets.size(), actualLimit));
     }
 
     @DataObject

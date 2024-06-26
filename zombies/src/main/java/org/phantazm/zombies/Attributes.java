@@ -23,6 +23,8 @@ public final class Attributes {
      * Damage multiplier for the player.
      */
     public static final Attribute DAMAGE_MULTIPLIER = new Attribute("phantazm.damage_multiplier", 1F, false);
+
+    public static final Attribute BULLET_PENETRATION = new Attribute("phantazm.bullet_penetration", 1F, false);
     /**
      * Attack speed multiplier for mobs.
      */
