@@ -10,6 +10,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.AttributeUtils;
 import org.phantazm.core.DamageUtils;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.Gun;
@@ -64,29 +65,28 @@ public class DamageShotHandler implements ShotHandler {
             }
 
             targetEntity.getAcquirable().sync(ignored -> {
-                float actualDamage = event.getDamage();
+                float baseDamage = event.getDamage();
                 if (event.isInstakill()) {
                     targetEntity.damage(Damage.fromEntity(attacker, targetEntity.getHealth()));
                     return;
                 }
 
                 if (attacker instanceof LivingEntity livingEntity) {
-                    actualDamage *= livingEntity.getAttributeValue(Attributes.DAMAGE_MULTIPLIER);
+                    baseDamage = AttributeUtils.computeWithBase(baseDamage, livingEntity.getAttribute(Attributes.GUN_DAMAGE));
                 }
 
                 if (headshot) {
-                    actualDamage *= target.entity().getAttributeValue(Attributes.HEADSHOT_DAMAGE_MULTIPLIER);
+                    baseDamage = AttributeUtils.computeWithBase(baseDamage, target.entity().getAttribute(Attributes.HEADSHOT_DAMAGE_RECEIVED));
                 }
 
                 switch (data.armorBehavior) {
                     case ALWAYS_BYPASS -> targetEntity.damage(Damage.fromEntity(attacker, DamageUtils
-                        .computeDamageWithResistances(targetEntity, data.damageType, actualDamage)));
-                    case NEVER_BYPASS ->
-                        DamageUtils.damage(data.damageType, targetEntity, attacker, actualDamage, false);
+                        .computeDamageWithResistances(targetEntity, data.damageType, baseDamage)));
+                    case NEVER_BYPASS -> DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, false);
                     case BYPASS_ON_HEADSHOT ->
-                        DamageUtils.damage(data.damageType, targetEntity, attacker, actualDamage, headshot);
+                        DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, headshot);
                     case BYPASS_ON_NON_HEADSHOT ->
-                        DamageUtils.damage(data.damageType, targetEntity, attacker, actualDamage, !headshot);
+                        DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, !headshot);
                 }
             });
         }
