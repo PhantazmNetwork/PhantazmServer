@@ -8,7 +8,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class FireProcEvent implements ZombiesPlayerEvent, CancellableEvent {
+public class ZombiesPlayerProcFireEvent implements ZombiesPlayerEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final LivingEntity target;
@@ -16,7 +16,7 @@ public class FireProcEvent implements ZombiesPlayerEvent, CancellableEvent {
 
     private boolean cancelled;
 
-    public FireProcEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer, float amount,
+    public ZombiesPlayerProcFireEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer, float amount,
         @NotNull LivingEntity target) {
         this.player = Objects.requireNonNull(player);
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);

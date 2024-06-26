@@ -8,14 +8,14 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class OpenDoorEvent implements ZombiesPlayerEvent, CancellableEvent {
+public class ZombiesPlayerOpenDoorEvent implements ZombiesPlayerEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final Door door;
 
     private boolean cancelled;
 
-    public OpenDoorEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer, @NotNull Door door) {
+    public ZombiesPlayerOpenDoorEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer, @NotNull Door door) {
         this.player = Objects.requireNonNull(player);
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
         this.door = Objects.requireNonNull(door);

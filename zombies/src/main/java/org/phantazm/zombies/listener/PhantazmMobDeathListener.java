@@ -26,6 +26,7 @@ import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.event.mob.PhantazmMobDeathEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerKillMobEvent;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Round;
@@ -102,6 +103,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
         player.getPlayer().ifPresent(actualPlayer -> {
             player.module().getKills().onKill(mob);
+            scene.broadcastEvent(new ZombiesPlayerKillMobEvent(actualPlayer, player, mob));
 
             if (!mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.ANNOUNCE_KILL, false)) {
                 return;

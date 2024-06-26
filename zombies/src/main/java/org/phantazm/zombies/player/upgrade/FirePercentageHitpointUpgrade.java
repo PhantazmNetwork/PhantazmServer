@@ -8,7 +8,7 @@ import net.minestom.server.event.EventListener;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.tick.Activable;
-import org.phantazm.zombies.event.player.FireProcEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerProcFireEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 @Model("zombies.upgrade.fire_percentage_hitpoint")
@@ -29,7 +29,7 @@ public class FirePercentageHitpointUpgrade implements PlayerUpgradeComponent {
     private static class Internal extends GuardedPlayerUpgrade {
         private Internal(ZombiesPlayer zombiesPlayer, Data data) {
             super(Activable.threadsafeWrapper(new Activable() {
-                private final EventListener<FireProcEvent> event = EventListener.builder(FireProcEvent.class)
+                private final EventListener<ZombiesPlayerProcFireEvent> event = EventListener.builder(ZombiesPlayerProcFireEvent.class)
                     .handler(this::handleFireProc).build();
 
                 @Override
@@ -42,7 +42,7 @@ public class FirePercentageHitpointUpgrade implements PlayerUpgradeComponent {
                     zombiesPlayer.getScene().sceneNode().removeListener(event);
                 }
 
-                private void handleFireProc(FireProcEvent event) {
+                private void handleFireProc(ZombiesPlayerProcFireEvent event) {
                     if (event.getZombiesPlayer() != zombiesPlayer) {
                         return;
                     }

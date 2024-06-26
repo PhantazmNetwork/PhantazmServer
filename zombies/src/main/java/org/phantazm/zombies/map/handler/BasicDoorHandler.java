@@ -7,7 +7,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.zombies.coin.*;
-import org.phantazm.zombies.event.player.OpenDoorEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerOpenDoorEvent;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.DoorInfo;
 import org.phantazm.zombies.map.Room;
@@ -62,7 +62,7 @@ public class BasicDoorHandler implements DoorHandler {
                     return;
                 }
 
-                OpenDoorEvent event = new OpenDoorEvent(actualPlayer, player, door);
+                ZombiesPlayerOpenDoorEvent event = new ZombiesPlayerOpenDoorEvent(actualPlayer, player, door);
                 zombiesScene.get().broadcastEvent(event);
                 if (event.isCancelled()) {
                     return;

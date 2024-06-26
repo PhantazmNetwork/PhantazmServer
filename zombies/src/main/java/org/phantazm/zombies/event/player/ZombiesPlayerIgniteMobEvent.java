@@ -9,7 +9,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class IgniteMobEvent implements ZombiesPlayerEvent, CancellableEvent {
+public class ZombiesPlayerIgniteMobEvent implements ZombiesPlayerEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final ShotEffect cause;
@@ -17,7 +17,7 @@ public class IgniteMobEvent implements ZombiesPlayerEvent, CancellableEvent {
 
     private boolean cancelled;
 
-    public IgniteMobEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
+    public ZombiesPlayerIgniteMobEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
         @NotNull ShotEffect cause,
         @NotNull LivingEntity target) {
         this.player = Objects.requireNonNull(player);

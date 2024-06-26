@@ -4,20 +4,20 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.element.core.annotation.document.Description;
 import net.minestom.server.Tickable;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.TagUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
+import org.phantazm.zombies.event.player.ZombiesPlayerModifyAttributeEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -25,10 +25,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-@Description("""
-    An entity action that applies a temporary attribute modification to an entity when it is hit by the player's
-    weapon shots.
-    """)
 @Model("zombies.perk.effect.shot_entity.apply_attribute")
 @Cache(false)
 public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
@@ -73,13 +69,22 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
             return;
         }
 
-        TagHandler tags = TagUtils.sceneLocalTags(entity, scene);
-        long tag = tags.getAndUpdateTag(applyTicksTag, oldValue -> oldValue + 1);
+        Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+        if (playerOptional.isEmpty()) {
+            return;
+        }
 
-        if (tag == 0) {
-            livingEntity.getAttribute(attribute).addModifier(
-                new AttributeModifier(attributeUUID, attributeName, data.amount, data.attributeOperation));
-            entities.add(livingEntity);
+        Player player = playerOptional.get();
+
+        long lastApplyTicks = TagUtils.sceneLocalTags(entity, scene)
+            .getAndUpdateTag(applyTicksTag, oldValue -> oldValue + 1);
+
+        if (lastApplyTicks == 0) {
+            scene.broadcastCancellable(new ZombiesPlayerModifyAttributeEvent(player, zombiesPlayer, this, mob, attribute, (float) data.amount), event -> {
+                livingEntity.getAttribute(attribute).addModifier(
+                    new AttributeModifier(attributeUUID, attributeName, event.attributeAmount(), data.attributeOperation));
+                entities.add(livingEntity);
+            });
         }
     }
 
@@ -104,9 +109,9 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
     @DataObject
     public record Data(
-        @NotNull @Description("The attribute to apply") String attribute,
-        @Description("The attribute amount") double amount,
-        @NotNull @Description("The attribute operation") AttributeOperation attributeOperation,
-        @Description("The duration the effect will exist") int duration) {
+        String attribute,
+        double amount,
+        AttributeOperation attributeOperation,
+        int duration) {
     }
 }

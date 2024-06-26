@@ -19,8 +19,8 @@ import org.phantazm.core.TagUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
-import org.phantazm.zombies.event.player.FireProcEvent;
-import org.phantazm.zombies.event.player.IgniteMobEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerProcFireEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerIgniteMobEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -62,7 +62,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             return;
         }
 
-        IgniteMobEvent event = new IgniteMobEvent(player, zombiesPlayer, this, livingEntity);
+        ZombiesPlayerIgniteMobEvent event = new ZombiesPlayerIgniteMobEvent(player, zombiesPlayer, this, livingEntity);
         scene.broadcastEvent(event);
 
         if (event.isCancelled()) {
@@ -114,7 +114,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
         float damage = AttributeUtils.computeWithBase(data.damage, damager.getAttribute(Attributes.FIRE_APPLY_DAMAGE));
 
-        scene.broadcastCancellable(new FireProcEvent(damager, player, damage, target), event -> {
+        scene.broadcastCancellable(new ZombiesPlayerProcFireEvent(damager, player, damage, target), event -> {
             target.getAcquirable().sync(self -> DamageUtils.damage(data.damageType, (LivingEntity) self, amount ->
                     new Damage(DamageType.ON_FIRE, null, damager, null, amount), event.damageAmount(),
                 data.bypassArmor));
