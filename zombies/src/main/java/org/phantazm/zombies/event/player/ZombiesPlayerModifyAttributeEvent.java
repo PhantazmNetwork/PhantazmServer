@@ -9,12 +9,14 @@ import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final ShotEffect cause;
     private final LivingEntity target;
+    private final UUID attributeUUID;
     private final Attribute attribute;
 
     private float attributeAmount;
@@ -24,11 +26,13 @@ public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, Ca
         @NotNull ShotEffect cause,
         @NotNull LivingEntity target,
         @NotNull Attribute attribute,
+        @NotNull UUID attributeUUID,
         float attributeAmount) {
         this.player = Objects.requireNonNull(player);
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
         this.cause = Objects.requireNonNull(cause);
         this.target = Objects.requireNonNull(target);
+        this.attributeUUID = Objects.requireNonNull(attributeUUID);
         this.attribute = Objects.requireNonNull(attribute);
         this.attributeAmount = attributeAmount;
     }
@@ -59,6 +63,10 @@ public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, Ca
 
     public @NotNull LivingEntity target() {
         return target;
+    }
+
+    public @NotNull UUID attributeUUID() {
+        return attributeUUID;
     }
 
     public @NotNull Attribute attribute() {

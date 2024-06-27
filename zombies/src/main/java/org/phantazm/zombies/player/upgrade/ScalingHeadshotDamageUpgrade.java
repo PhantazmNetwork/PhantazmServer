@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.ethylene.mapper.annotation.Default;
+import net.minestom.server.attribute.AttributeInstance;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.entity.LivingEntity;
@@ -68,8 +69,10 @@ public class ScalingHeadshotDamageUpgrade implements PlayerUpgradeComponent {
                     }
 
                     float actualModifier = (float) (currentLevel * data.levelFactor);
-                    shooter.getAttribute(Attributes.GUN_DAMAGE)
-                        .addModifier(new AttributeModifier(attributeUUID, name, actualModifier, data.operation));
+
+                    AttributeInstance instance = shooter.getAttribute(Attributes.GUN_DAMAGE);
+                    instance.removeModifier(attributeUUID);
+                    instance.addModifier(new AttributeModifier(attributeUUID, name, actualModifier, data.operation));
                 }
             }), zombiesPlayer);
         }

@@ -24,6 +24,7 @@ import org.phantazm.zombies.event.player.ZombiesPlayerKillMobEvent;
 import org.phantazm.zombies.event.player.ZombiesPlayerModifyAttributeEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -45,15 +46,20 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
     private static class Internal extends GuardedPlayerUpgrade {
         private Internal(ZombiesPlayer zombiesPlayer, Data data) {
             super(Activable.threadsafeWrapper(new Activable() {
-                private static final Tag<Boolean> SCALE_EFFECT = Tag.Boolean(TagUtils.uniqueTagName()).defaultValue(false);
+                private static final Tag<Boolean> HAS_SPREAD_EFFECT = Tag.Boolean(TagUtils.uniqueTagName()).defaultValue(false);
+                private static final Tag<UUID> EFFECT_TAG = Tag.UUID(TagUtils.uniqueTagName());
+
                 private static final ExtensionHolder.Key<ShotEffect> EFFECT_KEY = ExtensionHolder.requestKey(ShotEffect.class);
+
                 private static final UUID RANDOM_UUID = UUID.randomUUID();
                 private static final String NAME = RANDOM_UUID.toString();
 
                 private final EventListener<ZombiesPlayerKillMobEvent> killMobEvent = EventListener
                     .builder(ZombiesPlayerKillMobEvent.class).handler(this::handleMobDeath).build();
+
                 private final EventListener<ZombiesPlayerModifyAttributeEvent> modifyAttributeEvent = EventListener
                     .builder(ZombiesPlayerModifyAttributeEvent.class).handler(this::handleModifyAttribute).build();
+
                 private final EventListener<MobAttributeWearOffEvent> wearOffEvent = EventListener
                     .builder(MobAttributeWearOffEvent.class).handler(this::handleWearOffEvent).build();
 
@@ -76,7 +82,6 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
                         return;
                     }
 
-                    Pos center = event.target().getPosition();
                     Instance instance = event.target().getInstance();
                     if (instance == null) {
                         return;
@@ -87,10 +92,11 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
                         return;
                     }
 
+                    Pos center = event.target().getPosition();
                     instance.getEntityTracker().nearbyEntities(center, data.radius,
                         EntityTracker.Target.LIVING_ENTITIES, otherMob -> {
                             if (!(otherMob instanceof Mob mob) || otherMob == event.target() ||
-                                mob.tagHandler().getAndUpdateTag(SCALE_EFFECT, ignored -> true)) {
+                                mob.tagHandler().getAndUpdateTag(HAS_SPREAD_EFFECT, ignored -> true)) {
                                 return;
                             }
 
@@ -110,8 +116,9 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
                         return;
                     }
 
-                    if (mob.getTag(SCALE_EFFECT)) {
+                    if (mob.getTag(HAS_SPREAD_EFFECT)) {
                         event.setAttributeAmount((float) (event.attributeAmount() * data.effectScale));
+                        mob.setTag(EFFECT_TAG, event.attributeUUID());
                         return;
                     }
 
@@ -119,8 +126,18 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void handleWearOffEvent(MobAttributeWearOffEvent event) {
-                    if ((event.target() instanceof Mob mob) && event.removedModifier().getId().equals(RANDOM_UUID)) {
-                        mob.tagHandler().removeTag(SCALE_EFFECT);
+                    if (Objects.equals(event.removedModifier().getId(), event.target().getTag(EFFECT_TAG))) {
+                        Mob mob = (Mob) event.target();
+                        mob.extensions().remove(EFFECT_KEY);
+                        mob.removeTag(HAS_SPREAD_EFFECT);
+                        mob.removeTag(EFFECT_TAG);
+
+                        if (data.removeModifierOnWearOff) {
+                            Attribute attribute = Attribute.fromKey(data.attribute);
+                            if (attribute != null) {
+                                mob.getAttribute(attribute).removeModifier(RANDOM_UUID);
+                            }
+                        }
                     }
                 }
             }), zombiesPlayer);
@@ -138,7 +155,8 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
         @NotNull Set<String> spreadAttributes,
         @NotNull String attribute,
         float amount,
-        @NotNull AttributeOperation operation) {
+        @NotNull AttributeOperation operation,
+        boolean removeModifierOnWearOff) {
 
     }
 }

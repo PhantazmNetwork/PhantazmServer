@@ -72,7 +72,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
         }
 
         scene.broadcastCancellable(new ZombiesPlayerModifyAttributeEvent(playerOptional.get(), zombiesPlayer,
-            this, mob, attribute, (float) data.amount), event -> {
+            this, mob, attribute, attributeUUID, (float) data.amount), event -> {
             mob.getAttribute(attribute).addModifier(
                 new AttributeModifier(attributeUUID, attributeName, event.attributeAmount(), data.attributeOperation));
             entities.add(mob);
