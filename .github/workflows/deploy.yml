@@ -40,7 +40,7 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
       - name: Copy server files to remote
         run: |
-          scp /tmp/server.tar.gz phantazm:/home/prod/archive/server.tar.gz
+          scp /tmp/server.tar.gz phantazm:/home/prod/servers/server.tar.gz
       - name: Restart server
         uses: appleboy/ssh-action@master
         with:
@@ -48,4 +48,4 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           script: |
-            /home/prod/archive/sync.sh
+            puppet deploy-conf
