@@ -243,6 +243,22 @@ elif [ "$1" == "deploy-conf" ]; then
   rm -rf "$build" && mkdir "$build"
   tar -xzf "$blob" -C "$server_dir" build || exit 1
 elif [ "$1" == "help" ]; then
+  printf "USAGE: puppet OPTION\n\n"
+  printf "puppet orchestrates Phantazm servers. It allows for safely re-launching with\n"
+  printf "updated configuration or code, without abruptly ending existing games.\n\n"
+  printf "Valid values for OPTION:\n"
+  printf "  help           Prints this help message and exits.\n"
+  printf "  main           Attaches to the main server terminal.\n"
+  printf "  fallback       Attaches to the fallback server terminal.\n"
+  printf "  shutdown       Shuts down the main server.\n"
+  printf "  restart        Restarts the main server, or starts it if it is not running.\n"
+  printf "  deploy-src     Builds the server from source, synchronizes configuration,\n"
+  printf "                 then launches (or restarts) it.\n"
+  printf "  deploy-conf    Synchronizes configuration, then restarts the server. Requires\n"
+  printf "                 the server.tar.gz file to exist.\n"
+  printf "  deploy         Restarts the server. Requires the server.tar.gz file to exist.\n"
+  printf "  install        Installs puppet, if it is not already installed.\n"
+  printf "  uninstall      Uninstalls puppet, if it is installed.\n"
   exit 0
 elif [ -n "$1" ]; then
   echo "Unknown directive $1; try 'puppet help' for more info" 1<&2
@@ -290,8 +306,16 @@ fi
 chgrp server_access "$socket_1"
 chgrp server_access "$socket_2"
 
+chgrp server_access "$main_pid_file"
+chgrp server_access "$fallback_pid_file"
+chgrp server_access "$temp_log"
+
 chmod 660 "$socket_1"
 chmod 660 "$socket_2"
+
+chmod 660 "$main_pid_file"
+chmod 660 "$fallback_pid_file"
+chmod 660 "$temp_log"
 
 ## Function definitions
 
@@ -346,7 +370,7 @@ synchronize_target () {
     elif [ "$target" == "$server_2" ]; then
       rsync -ac --delete "$server_2_unique/" "$persistent/" "$build/" "$config/" "$1" || exit 1
     else
-      echo "Warning: invalid synchronize symlink $1 -> $target; exiting (no server files have changed)"
+      echo "Invalid synchronize symlink $1 -> $target; exiting (no server files have changed)" 1<&2
       exit 1
     fi
   fi
