@@ -85,8 +85,9 @@ check_dependency git || exit 1
 check_dependency rsync || exit 1
 check_dependency tar || exit 1
 
+user=$(whoami)
+
 if [ "$1" == "install" ]; then
-  user=$(whoami)
   script_file=$( readlink -f -- "$0" )
   start_file="$persistent/start.sh"
 
@@ -151,6 +152,27 @@ if [ "$1" == "uninstall" ]; then
   rm -rf "$data_dir"
   rm -f "$bin_dir/puppet"
   rm -rf "$log_dir"
+
+  exit 0
+fi
+
+is_in_group () {
+  groupname="$1"
+  current_user="$(id -un)"
+  user="${2:-$current_user}"
+
+  for group in $(id -Gn "$user") ; do
+    if [ "$group" = "$groupname" ]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+if ! is_in_group "server_access" "$user"; then
+  echo "'$user' is not part of the 'server_access' group!" 1<&2
+  exit 1
 fi
 
 # Make sure needed folders and files exist
