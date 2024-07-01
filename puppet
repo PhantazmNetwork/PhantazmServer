@@ -62,24 +62,6 @@ check_dependency () {
   fi
 }
 
-require_blob () {
-  if [ ! -f "$blob" ]; then
-    echo "Missing required file '$blob'. Running 'puppet deploy-src' should generate it, or else it can be brought in externally." 1<&2
-    exit 1
-  fi
-}
-
-update_config () {
-  cd "$config" || exit 1
-
-  if [ ! -d "$config/.git" ]; then
-    rm -rf "$config"
-    git clone "$config_repo" "$config" || exit 1
-  fi
-
-  git checkout "$config_branch" && git pull
-}
-
 check_dependency tmux || exit 1
 check_dependency git || exit 1
 check_dependency rsync || exit 1
@@ -105,16 +87,20 @@ if [ "$1" == "install" ]; then
   mkdir -p "$bin_dir"
   mkdir -p "$log_dir"
 
-  mkdir -p "$persistent"
-
   groupadd -f server_access
 
   # rwxrws--- perms on both the data directory and the log directory
   chmod 2770 "$data_dir"
   chmod 2770 "$log_dir"
 
+  # Ensure new files and directories are created with the correct permissions
+  setfacl -d -m u::rwX,g::rwX,o::- "$data_dir"
+  setfacl -d -m u::rwX,g::rwX,o::- "$log_dir"
+
   chgrp server_access "$data_dir"
   chgrp server_access "$log_dir"
+
+  mkdir -p "$persistent"
 
   # Create symlink to log folder
   if [ ! -L "$logs" ]; then
@@ -191,6 +177,26 @@ mkdir -p "$src"
 mkdir -p "$shared"
 mkdir -p "$persistent"
 
+require_blob () {
+  if [ ! -f "$blob" ]; then
+    echo "Missing required file '$blob'. Running 'puppet deploy-src' should generate it, or else it can be brought in externally." 1<&2
+    exit 1
+  fi
+}
+
+update_config () {
+  cd "$config" || exit 1
+
+  if [ ! -d "$config/.git" ]; then
+    rm -rf "$config"
+    cd .. || exit 1
+    git clone "$config_repo" "$config" || exit 1
+    cd "$config" || exit 1
+  fi
+
+  git checkout "$config_branch" && git pull
+}
+
 if [ "$1" == "main" ]; then
   tmux -S "$main_socket" attach-session
   exit "$?"
@@ -210,7 +216,9 @@ elif [ "$1" == "deploy-src" ]; then
   cd "$src" || exit 1
   if [ ! -d "$src/.git" ]; then
     rm -rf "$src"
+    cd .. || exit 1
     git clone --recurse-submodules "$code_repo" "$src" || exit 1
+    cd "$src" || exit 1
   fi
 
   git checkout "$code_branch" && git pull --recurse-submodules
