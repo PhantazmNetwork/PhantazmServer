@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.proxima.node.Node;
 import com.github.steanky.proxima.path.Pathfinder;
@@ -91,6 +89,12 @@ public class GroundPathfindingFactory implements Pathfinding.Factory {
         };
     }
 
+    @Default("""
+        {
+          targetDeviation=0.0,
+          lineOfSight=true
+        }
+        """)
     @DataObject
     public record Data(
         float jumpHeight,
@@ -98,14 +102,5 @@ public class GroundPathfindingFactory implements Pathfinding.Factory {
         float stepHeight,
         double targetDeviation,
         boolean lineOfSight) {
-        @Default("targetDeviation")
-        public static @NotNull ConfigElement defaultTargetDeviation() {
-            return ConfigPrimitive.of(0.0);
-        }
-
-        @Default("lineOfSight")
-        public static @NotNull ConfigElement defaultLineOfSight() {
-            return ConfigPrimitive.of(true);
-        }
     }
 }

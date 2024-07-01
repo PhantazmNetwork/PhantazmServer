@@ -1,6 +1,9 @@
 package org.phantazm.zombies.equipment.gun.effect;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.MathUtils;
@@ -58,14 +61,5 @@ public class ShootExpEffect implements GunEffect {
     @Override
     public void tick(@NotNull GunState state, long time) {
 
-    }
-
-    /**
-     * Data for a {@link ShootExpEffect}.
-     *
-     * @param stats A path to the gun's {@link GunStats}
-     */
-    @DataObject
-    public record Data(@NotNull @ChildPath("stats") String stats) {
     }
 }

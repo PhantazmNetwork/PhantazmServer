@@ -44,7 +44,7 @@ abstract class InsertManifest : DefaultTask() {
         val files = copyLibs.outputs.files
 
         val classPath = files.joinToString(" ") {
-            "$rootFolder/${it.relativeTo(libraryDirectory)}"
+            "$rootFolder/${it.relativeTo(libraryDirectory).toPath().toList().joinToString("/")}"
         }
 
         attributes[Attributes.Name.MANIFEST_VERSION] = "1.0"

@@ -1,8 +1,6 @@
 package org.phantazm.zombies.equipment.gun.shoot.fire;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +30,7 @@ public class SpreadFirer implements Firer {
      */
     @FactoryMethod
     public SpreadFirer(@NotNull Data data, @NotNull Random random,
-        @NotNull @Child("sub_firers") Collection<Firer> subFirers) {
+        @NotNull @Child("subFirers") Collection<Firer> subFirers) {
         this.data = Objects.requireNonNull(data);
         this.random = Objects.requireNonNull(random);
         this.subFirers = List.copyOf(subFirers);
@@ -74,18 +72,17 @@ public class SpreadFirer implements Firer {
     /**
      * Data for a {@link SpreadFirer}.
      *
-     * @param subFirers     A {@link Collection} of paths to the {@link SpreadFirer}'s sub-{@link Firer}s
      * @param angleVariance The maximum angle variance for each sub-{@link Firer}
      */
+    @Default("""
+        {
+          amount=-1
+        }
+        """)
     @DataObject
     public record Data(
-        @NotNull @ChildPath("sub_firers") Collection<String> subFirers,
         int amount,
         float angleVariance) {
-        @Default("amount")
-        public static @NotNull ConfigElement defaultAmount() {
-            return ConfigPrimitive.of(-1);
-        }
     }
 
 }

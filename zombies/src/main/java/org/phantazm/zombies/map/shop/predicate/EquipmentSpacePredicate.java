@@ -22,8 +22,8 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
     private final EquipmentPredicate equipmentPredicate;
 
     @FactoryMethod
-    public EquipmentSpacePredicate(@NotNull Data data, @NotNull @Child("upgrade_path") UpgradePath upgradePath,
-        @NotNull @Child("equipment_predicate") EquipmentPredicate equipmentPredicate) {
+    public EquipmentSpacePredicate(@NotNull Data data, @NotNull @Child("upgradePath") UpgradePath upgradePath,
+        @NotNull @Child("equipmentPredicate") EquipmentPredicate equipmentPredicate) {
         super(data);
         this.upgradePath = Objects.requireNonNull(upgradePath);
         this.equipmentPredicate = Objects.requireNonNull(equipmentPredicate);
@@ -109,8 +109,6 @@ public class EquipmentSpacePredicate extends PredicateBase<EquipmentSpacePredica
         @NotNull Key groupKey,
         boolean allowUpgrade,
         boolean mustHoldItemToUpgrade,
-        boolean allowDuplicate,
-        @NotNull @ChildPath("upgrade_path") String upgradePath,
-        @NotNull @ChildPath("equipment_predicate") String equipmentPredicatePath) {
+        boolean allowDuplicate) {
     }
 }

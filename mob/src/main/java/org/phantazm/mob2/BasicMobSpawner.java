@@ -3,41 +3,37 @@ package org.phantazm.mob2;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
+import org.phantazm.loader.Loader;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import org.phantazm.commons.InjectionStore.Builder;
-import org.phantazm.loader.Loader;
-
 public class BasicMobSpawner implements MobSpawner {
-    private final Map<Key, MobCreator> mobCreatorMap;
-    private final InjectionStore.Builder builder;
+    public static final ExtensionHolder.Key<MobSpawner> SPAWNER_KEY = ExtensionHolder.requestKey(MobSpawner.class);
+    public static final ExtensionHolder.Key<Scheduler> SCHEDULER_KEY = ExtensionHolder.requestKey(Scheduler.class);
 
-    private volatile InjectionStore injectionStore;
+    private final Map<Key, MobCreator> mobCreatorMap;
 
     public BasicMobSpawner(@NotNull Loader<MobCreator> mobCreatorLoader) {
         this.mobCreatorMap = Objects.requireNonNull(mobCreatorLoader).data();
-        this.builder = InjectionStore.builder();
     }
 
     @Override
     public @NotNull Mob spawn(@NotNull Key identifier, @NotNull Instance instance, @NotNull Pos pos,
         @NotNull Consumer<? super @NotNull Mob> setup) {
-        InjectionStore store = this.injectionStore;
-        if (store == null) {
-            throw new IllegalStateException("this spawner has not yet been initialized");
-        }
-
         MobCreator creator = mobCreatorMap.get(identifier);
         if (creator == null) {
             throw new IllegalArgumentException("missing mob identifier " + identifier);
         }
 
-        Mob mob = creator.create(instance, store);
+        ExtensionHolder mobHolder = new ExtensionHolder();
+        buildDependencies(mobHolder);
+
+        Mob mob = creator.create(instance, mobHolder);
         setup.accept(mob);
 
         preSetup(mob);
@@ -58,21 +54,17 @@ public class BasicMobSpawner implements MobSpawner {
     }
 
     @Override
-    public void init() {
-        buildDependencies(builder);
-        this.injectionStore = builder.build();
-        builder.clear();
+    public MobData dataForType(@NotNull Key identifier) {
+        MobCreator mobCreator = mobCreatorMap.get(identifier);
+        if (mobCreator == null) {
+            return null;
+        }
+
+        return mobCreator.data();
     }
 
-    /**
-     * Builds dependencies. By default, the only dependency added is this MobSpawner, under the key
-     * {@link InjectionKeys#MOB_SPAWNER}. This method can be overridden by subclasses to add additional dependencies,
-     * which can be appended to the builder using {@link Builder#with(InjectionStore.Key, Object)}.
-     *
-     * @param builder the builder to which additional dependencies may be added
-     */
-    protected void buildDependencies(InjectionStore.@NotNull Builder builder) {
-        builder.with(InjectionKeys.MOB_SPAWNER, this);
+    protected void buildDependencies(@NotNull ExtensionHolder extensionHolder) {
+        extensionHolder.set(SPAWNER_KEY, this);
     }
 
     /**

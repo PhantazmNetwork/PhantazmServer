@@ -2,7 +2,7 @@ package org.phantazm.zombies.mob2;
 
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.loader.Loader;
 import org.phantazm.mob2.BasicMobSpawner;
 import org.phantazm.mob2.Mob;
@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 public class ZombiesMobSpawner extends BasicMobSpawner {
+    public static ExtensionHolder.Key<ZombiesScene> SCENE_KEY = ExtensionHolder.requestKey(ZombiesScene.class);
+
     private final Supplier<ZombiesScene> scene;
 
     public ZombiesMobSpawner(@NotNull Loader<MobCreator> mobCreatorLoader, @NotNull Supplier<ZombiesScene> scene) {
@@ -23,12 +25,12 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
     }
 
     @Override
-    public void buildDependencies(InjectionStore.@NotNull Builder builder) {
-        super.buildDependencies(builder);
+    public void buildDependencies(@NotNull ExtensionHolder holder) {
+        super.buildDependencies(holder);
         ZombiesScene scene = this.scene.get();
 
-        builder.with(InjectionKeys.SCENE, scene);
-        builder.with(org.phantazm.mob2.InjectionKeys.SCHEDULER, scene.getScheduler());
+        holder.set(SCENE_KEY, scene);
+        holder.set(SCHEDULER_KEY, scene.getScheduler());
     }
 
     @Override

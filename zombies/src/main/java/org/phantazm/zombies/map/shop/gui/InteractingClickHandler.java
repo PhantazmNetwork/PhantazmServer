@@ -1,8 +1,6 @@
 package org.phantazm.zombies.map.shop.gui;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
@@ -20,7 +18,6 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
 @Model("zombies.map.shop.gui.click_handler.interacting")
 @Cache(false)
@@ -33,8 +30,8 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
 
     @FactoryMethod
     public InteractingClickHandler(@NotNull Data data, @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
-        @NotNull @Child("updating_item") UpdatingItem updatingItem,
-        @NotNull @Child("click_interactor") ShopInteractor clickInteractor) {
+        @NotNull @Child("updatingItem") UpdatingItem updatingItem,
+        @NotNull @Child("clickInteractor") ShopInteractor clickInteractor) {
         super(data, playerMap);
         this.updatingItem = Objects.requireNonNull(updatingItem);
         this.clickInteractor = Objects.requireNonNull(clickInteractor);
@@ -82,16 +79,15 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
         return redraw;
     }
 
+    @Default("""
+        {
+          closeOnInteract=true
+        }
+        """)
     @DataObject
     public record Data(
         @NotNull Set<ClickType> clickTypes,
         boolean blacklist,
-        @NotNull @ChildPath("updating_item") String updatingItem,
-        @NotNull @ChildPath("click_interactor") String clickInteractor,
         boolean closeOnInteract) {
-        @Default("closeOnInteract")
-        public static @NotNull ConfigElement defaultCloseOnInteract() {
-            return ConfigPrimitive.of(true);
-        }
     }
 }

@@ -17,7 +17,7 @@ public class ParticleWrapper {
 
     @FactoryMethod
     public ParticleWrapper(@NotNull Data data,
-        @NotNull @Child("variant_data") ParticleVariantData particleVariantData) {
+        @NotNull @Child("variantData") ParticleVariantData particleVariantData) {
         this.data = data;
         this.particleVariantData = particleVariantData;
     }
@@ -44,7 +44,6 @@ public class ParticleWrapper {
     @DataObject
     public record Data(
         @NotNull Particle particle,
-        @NotNull @ChildPath("variant_data") String variantData,
         boolean distance,
         float offsetX,
         float offsetY,

@@ -1,6 +1,7 @@
 package org.phantazm.zombies.scene2;
 
 import com.github.steanky.vector.Vec3I;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -18,10 +19,10 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.FutureUtils;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.scene2.EventScene;
 import org.phantazm.core.scene2.InstanceScene;
 import org.phantazm.core.scene2.SceneManager;
-import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.Stages;
@@ -35,17 +36,23 @@ import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
+import org.phantazm.zombies.player.upgrade.PlayerUpgradeComponent;
+import org.phantazm.zombies.player.upgrade.PlayerUpgradeHandler;
 import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageKeys;
 import org.phantazm.zombies.stage.StageTransition;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class ZombiesScene extends InstanceScene implements EventScene {
     private final Map<PlayerView, ZombiesPlayer> managedPlayers;
     private final Map<PlayerView, ZombiesPlayer> managedPlayersView;
+
+    private final Map<Key, PlayerUpgradeComponent> playerUpgradeComponentMap;
+    private final Map<UUID, PlayerUpgradeHandler> upgradeHandlers;
 
     private final ZombiesMap map;
     private final MapSettingsInfo mapSettingsInfo;
@@ -72,6 +79,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         @NotNull ZombiesMap map,
         @NotNull MapSettingsInfo mapSettingsInfo,
         @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
+        @NotNull Map<Key, PlayerUpgradeComponent> upgradeComponents,
         @NotNull StageTransition stageTransition,
         @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
         @NotNull ZombiesStatsDatabase database,
@@ -80,6 +88,8 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         super(instance, -1);
         this.managedPlayers = Objects.requireNonNull(playerMap);
         this.managedPlayersView = Collections.unmodifiableMap(playerMap);
+        this.playerUpgradeComponentMap = Map.copyOf(upgradeComponents);
+        this.upgradeHandlers = new ConcurrentHashMap<>();
 
         this.map = Objects.requireNonNull(map);
         this.mapSettingsInfo = Objects.requireNonNull(mapSettingsInfo);
@@ -190,6 +200,10 @@ public class ZombiesScene extends InstanceScene implements EventScene {
                 modifiersTag, modifierKeyTag));
         }
 
+        if (!playerUpgradeComponentMap.isEmpty()) {
+            upgradeHandlers.put(newPlayer.getUUID(), new PlayerUpgradeHandler(playerUpgradeComponentMap, zombiesPlayer));
+        }
+
         return teleportOrSetInstance(player, spawnPos);
     }
 
@@ -202,6 +216,8 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         Player player = playerOptional.get();
 
         player.stateHolder().setStage(Stages.ZOMBIES_GAME);
+
+        zombiesPlayer.start();
         zombiesPlayer.setState(ZombiesPlayerStateKeys.DEAD, DeadPlayerStateContext.rejoin());
 
         Stage stage = currentStage();
@@ -218,7 +234,8 @@ public class ZombiesScene extends InstanceScene implements EventScene {
 
         Stage stage = stageTransition.getCurrentStage();
         for (PlayerView player : players) {
-            ZombiesPlayer leavingZombiesPlayer = (stage == null || !stage.hasPermanentPlayers()) ?
+            boolean shouldRemove = (stage == null || !stage.hasPermanentPlayers());
+            ZombiesPlayer leavingZombiesPlayer = shouldRemove ?
                 managedPlayers.remove(player) : managedPlayers.get(player);
 
             if (leavingZombiesPlayer == null) {
@@ -230,6 +247,11 @@ public class ZombiesScene extends InstanceScene implements EventScene {
             }
 
             leavingZombiesPlayer.setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(true));
+            leavingZombiesPlayer.end();
+
+            if (shouldRemove && !playerUpgradeComponentMap.isEmpty()) {
+                upgradeHandlers.remove(player.getUUID());
+            }
         }
 
         return leftPlayers;
@@ -260,6 +282,12 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         for (Modifier modifier : tickingModifiers) {
             modifier.tick(time);
         }
+
+        if (!playerUpgradeComponentMap.isEmpty()) {
+            for (PlayerUpgradeHandler upgradeHandler : upgradeHandlers.values()) {
+                upgradeHandler.tick(time);
+            }
+        }
     }
 
     @Override
@@ -276,7 +304,10 @@ public class ZombiesScene extends InstanceScene implements EventScene {
 
         for (ZombiesPlayer zombiesPlayer : managedPlayers.values()) {
             database.synchronizeZombiesPlayerMapStats(zombiesPlayer.module().getStats());
+            zombiesPlayer.end();
         }
+
+        upgradeHandlers.clear();
     }
 
     @Override

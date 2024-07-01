@@ -5,8 +5,6 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -14,6 +12,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Flags;
@@ -49,6 +48,13 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
         return new Interactor(data, zombiesPlayer, mapFlags);
     }
 
+    @Default("""
+        {
+          instaKillCoins=50,
+          bypassArmor=false,
+          damageType=null
+        }
+        """)
     @DataObject
     public record Data(
         @Description("The damage it does on a successful hit") float damage,
@@ -56,16 +62,8 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
             "unarmed hand") float knockback,
         @Description("The number of coins to give on a successful hit.") int coins,
         @Description("The number of coins to give when instakill is active.") int instaKillCoins,
-        @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor) {
-        @Default("instaKillCoins")
-        public static @NotNull ConfigElement defaultInstaKillCoins() {
-            return ConfigPrimitive.of(50);
-        }
-
-        @Default("bypassArmor")
-        public static @NotNull ConfigElement defaultBypassArmor() {
-            return ConfigPrimitive.of(false);
-        }
+        @Description("Whether damage from this weapon should bypass enemy armor") boolean bypassArmor,
+        String damageType) {
     }
 
     private record Interactor(Data data,
@@ -113,13 +111,14 @@ public class MeleeInteractorCreator implements PerkInteractorCreator {
             livingEntity.getAcquirable().sync(ignored -> {
                 boolean isInstaKill;
                 if ((mapFlags.hasFlag(Flags.INSTA_KILL) || zombiesPlayer.flags().hasFlag(Flags.INSTA_KILL)) &&
-                    (!hitMob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL))) {
-                    livingEntity.damage(Damage.fromPlayer(player, livingEntity.getHealth()), true);
+                    (!hitMob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_INSTAKILL, false))) {
+                    livingEntity.damage(Damage.fromPlayer(player, livingEntity.getHealth()));
                     isInstaKill = true;
                 } else {
                     double angle = playerPosition.yaw() * (Math.PI / 180);
-                    livingEntity.damage(Damage.fromPlayer(player, data.damage), data.bypassArmor);
-                    livingEntity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
+                    if (DamageUtils.damage(data.damageType, livingEntity, player, data.damage, data.bypassArmor)) {
+                        livingEntity.takeKnockback(data.knockback, Math.sin(angle), -Math.cos(angle));
+                    }
                     isInstaKill = false;
                 }
 

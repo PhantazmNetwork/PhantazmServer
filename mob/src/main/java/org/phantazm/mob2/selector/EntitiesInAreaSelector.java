@@ -1,15 +1,12 @@
 package org.phantazm.mob2.selector;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.doubles.DoubleObjectPair;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.TrackerTargetType;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
@@ -28,7 +25,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
     private final ValidatorComponent validator;
 
     @FactoryMethod
-    public EntitiesInAreaSelector(@NotNull Data data, @NotNull @Child("origin") SelectorComponent originSelector,
+    public EntitiesInAreaSelector(@NotNull Data data, @NotNull @Child("originSelector") SelectorComponent originSelector,
         @NotNull @Child("validator") ValidatorComponent validator) {
         this.data = data;
         this.originSelector = originSelector;
@@ -36,51 +33,37 @@ public class EntitiesInAreaSelector implements SelectorComponent {
     }
 
     @Override
-    public @NotNull Selector apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob, originSelector.apply(mob, injectionStore), validator.apply(mob, injectionStore), data);
+    public @NotNull Selector get() {
+        return new Internal(originSelector.get(), validator.get(), data);
     }
 
+    @Default("""
+        {
+          limitSelf=true,
+          target='ENTITIES',
+          range=-1.0,
+          limit=-1
+        }
+        """)
     @DataObject
     public record Data(
-        @NotNull @ChildPath("origin") String originSelector,
-        @NotNull @ChildPath("validator") String validator,
         boolean limitSelf,
         @NotNull TrackerTargetType target,
         double range,
         int limit) {
-        @Default("limitSelf")
-        public static @NotNull ConfigElement limitSelfDefault() {
-            return ConfigPrimitive.of(true);
-        }
-
-        @Default("target")
-        public static @NotNull ConfigElement targetDefault() {
-            return ConfigPrimitive.of("ENTITIES");
-        }
-
-        @Default("range")
-        public static @NotNull ConfigElement rangeDefault() {
-            return ConfigPrimitive.of(-1D);
-        }
-
-        @Default("limit")
-        public static @NotNull ConfigElement limitDefault() {
-            return ConfigPrimitive.of(-1);
-        }
     }
 
-    private record Internal(Mob self,
-        Selector originSelector,
+    private record Internal(Selector originSelector,
         Validator validator,
         Data data) implements Selector {
         @Override
-        public @NotNull Target select() {
-            Instance instance = self.getInstance();
+        public @NotNull Target select(@NotNull Mob mob) {
+            Instance instance = mob.getInstance();
             if (instance == null || data.limit == 0) {
                 return Target.NONE;
             }
 
-            Target originTarget = originSelector.select();
+            Target originTarget = originSelector.select(mob);
             Optional<? extends Point> optionalOrigin = originTarget.location();
             if (optionalOrigin.isEmpty()) {
                 return Target.NONE;
@@ -91,11 +74,11 @@ public class EntitiesInAreaSelector implements SelectorComponent {
 
             if (data.range < 0) {
                 for (Entity target : instance.getEntityTracker().entities(data.target.target())) {
-                    handleEntity(origin, target, targets);
+                    handleEntity(mob, origin, target, targets);
                 }
             } else {
                 instance.getEntityTracker().nearbyEntities(origin, data.range, data.target.target(),
-                    target -> handleEntity(origin, target, targets));
+                    target -> handleEntity(mob, origin, target, targets));
             }
 
             if (targets.isEmpty()) {
@@ -110,8 +93,8 @@ public class EntitiesInAreaSelector implements SelectorComponent {
             return Target.entities(actualTargets);
         }
 
-        private void handleEntity(Point origin, Entity target, List<DoubleObjectPair<Entity>> targets) {
-            if ((data.limitSelf && target == self) || !validator.valid(target)) {
+        private void handleEntity(Mob mob, Point origin, Entity target, List<DoubleObjectPair<Entity>> targets) {
+            if ((data.limitSelf && target == mob) || !validator.valid(mob, target)) {
                 return;
             }
 

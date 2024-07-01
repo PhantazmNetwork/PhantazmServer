@@ -17,14 +17,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.jglrxavpok.hephaistos.nbt.NBTException;
 import org.jglrxavpok.hephaistos.parser.SNBTParser;
-import org.phantazm.core.tick.Activable;
-import org.phantazm.core.tick.BasicTickTaskScheduler;
-import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.equipment.EquipmentCreator;
 import org.phantazm.core.equipment.EquipmentHandler;
 import org.phantazm.core.inventory.*;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.tick.Activable;
+import org.phantazm.core.tick.BasicTickTaskScheduler;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.core.time.PrecisionSecondTickFormatter;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.mob2.MobSpawner;
@@ -144,15 +144,14 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
         Function<AlivePlayerStateContext, ZombiesPlayerState> aliveStateCreator = context -> {
             return new BasicZombiesPlayerState(Component.text("ALIVE"), ZombiesPlayerStateKeys.ALIVE.key(),
-                List.of(new BasicAliveStateActivable(context, instance, accessRegistry, playerView, meta,
-                    mapSettingsInfo, sidebar, tabList, belowNameTag)));
+                List.of(Activable.threadsafeWrapper(new BasicAliveStateActivable(context, instance, accessRegistry, playerView, meta,
+                    mapSettingsInfo, sidebar, tabList, belowNameTag))));
         };
         BiFunction<DeadPlayerStateContext, Collection<Activable>, ZombiesPlayerState> deadStateCreator =
             (context, activables) -> {
                 List<Activable> combinedActivables = new ArrayList<>(activables);
-                combinedActivables.add(
-                    new BasicDeadStateActivable(accessRegistry, context, instance, playerView, meta,
-                        mapSettingsInfo, sidebar, tabList, belowNameTag, stats));
+                combinedActivables.add(Activable.threadsafeWrapper(new BasicDeadStateActivable(accessRegistry, context,
+                    instance, playerView, meta, mapSettingsInfo, sidebar, tabList, belowNameTag, stats)));
                 return new BasicZombiesPlayerState(Component.text("DEAD").color(NamedTextColor.RED),
                     ZombiesPlayerStateKeys.DEAD.key(), combinedActivables);
             };
@@ -165,12 +164,12 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     DeadPlayerStateContext.killed(context.getKnockLocation(), context.getKiller().orElse(null),
                         context.getKnockRoom().orElse(null));
                 return deadStateCreator.apply(deathContext,
-                    List.of(corpseWrapper.get().asDeathActivable(), new Activable() {
+                    List.of(corpseWrapper.get().asDeathActivable(), Activable.threadsafeWrapper(new Activable() {
                         @Override
                         public void end() {
                             meta.setCorpse(null);
                         }
-                    }));
+                    })));
             };
 
             ReviveHandler reviveHandler =
@@ -183,22 +182,22 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
 
             corpseWrapper.set(corpse);
             return new KnockedPlayerState(reviveHandler,
-                List.of(new BasicKnockedStateActivable(context, instance, playerView, meta, actionBar,
+                List.of(Activable.threadsafeWrapper(new BasicKnockedStateActivable(context, instance, playerView, meta, actionBar,
                         mapSettingsInfo, reviveHandler, tickFormatter, sidebar, tabList, belowNameTag, stats,
-                        mapSettingsInfo, zombiesPlayerWrapper.unmodifiableView()), corpse.asKnockActivable(),
-                    new Activable() {
+                        mapSettingsInfo, zombiesPlayerWrapper.unmodifiableView())), corpse.asKnockActivable(),
+                    Activable.threadsafeWrapper(new Activable() {
                         @Override
                         public void start() {
                             meta.setCorpse(corpse);
                         }
-                    }));
+                    })));
         };
         TickTaskScheduler taskScheduler = new BasicTickTaskScheduler();
         Function<QuitPlayerStateContext, ZombiesPlayerState> quitStateCreator = unused -> {
             return new BasicZombiesPlayerState(Component.text("QUIT").color(NamedTextColor.RED),
                 ZombiesPlayerStateKeys.QUIT.key(),
-                List.of(new BasicQuitStateActivable(instance, playerView, mapSettingsInfo, sidebar, tabList,
-                    belowNameTag, accessRegistry, taskScheduler)));
+                List.of(Activable.threadsafeWrapper(new BasicQuitStateActivable(instance, playerView, mapSettingsInfo, sidebar, tabList,
+                    belowNameTag, accessRegistry, taskScheduler))));
         };
 
         Map<PlayerStateKey<?>, Function<?, ? extends ZombiesPlayerState>> stateFunctions =

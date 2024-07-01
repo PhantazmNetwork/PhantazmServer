@@ -32,7 +32,7 @@ public class MessageShotHandler implements ShotHandler {
      */
     @FactoryMethod
     public MessageShotHandler(@NotNull Data data,
-        @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
+        @NotNull @Child("audienceProvider") AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data);
         this.audienceProvider = Objects.requireNonNull(audienceProvider);
     }
@@ -58,13 +58,11 @@ public class MessageShotHandler implements ShotHandler {
     /**
      * Data for a {@link MessageShotHandler}.
      *
-     * @param audienceProvider A path to the {@link MessageShotHandler}'s {@link AudienceProvider}
-     * @param message          The message to send for regular hits
-     * @param headshotMessage  The message to send for headshots
+     * @param message         The message to send for regular hits
+     * @param headshotMessage The message to send for headshots
      */
     @DataObject
     public record Data(
-        @NotNull @ChildPath("audience_provider") String audienceProvider,
         @NotNull Component message,
         @NotNull Component headshotMessage) {
     }

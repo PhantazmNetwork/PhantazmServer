@@ -183,4 +183,9 @@ public class BasicSpawnDistributor implements SpawnDistributor {
 
         return spawnedMobs;
     }
+
+    @Override
+    public @NotNull MobSpawner mobSpawner() {
+        return spawner;
+    }
 }

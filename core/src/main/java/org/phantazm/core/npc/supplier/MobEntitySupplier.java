@@ -8,8 +8,8 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.MonoComponent;
 
 import java.util.function.Supplier;
 

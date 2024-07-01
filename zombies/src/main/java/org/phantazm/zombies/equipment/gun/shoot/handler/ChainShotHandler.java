@@ -89,17 +89,12 @@ public class ChainShotHandler implements ShotHandler {
     /**
      * Data for a {@link ChainShotHandler}.
      *
-     * @param finder             A path to the {@link ChainShotHandler}'s {@link PositionalEntityFinder} which finds
-     *                           {@link Entity}s to shoot in the direction of
-     * @param firer              A path to the {@link ChainShotHandler}'s {@link Firer} used to shoot new shots
      * @param ignorePreviousHits Whether the {@link ChainShotHandler} should shoot in the direction of previously hit
      *                           targets
      * @param fireAttempts       The number of times the {@link ChainShotHandler} should try to shoot at new targets
      */
     @DataObject
     public record Data(
-        @NotNull @ChildPath("finder") String finder,
-        @NotNull @ChildPath("firer") String firer,
         boolean ignorePreviousHits,
         int fireAttempts) {
     }

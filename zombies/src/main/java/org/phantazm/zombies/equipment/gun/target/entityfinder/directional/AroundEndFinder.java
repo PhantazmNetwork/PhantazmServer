@@ -47,7 +47,7 @@ public class AroundEndFinder implements DirectionalEntityFinder {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                double range = element.getNumberOrThrow("range").doubleValue();
+                double range = element.atOrThrow("range").asNumberOrThrow().doubleValue();
                 if (range < 0) {
                     throw new ConfigProcessException("range must be greater than or equal to 0");
                 }

@@ -16,7 +16,9 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.TagUtils;
 import org.phantazm.core.player.PlayerViewProvider;
 
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 public class WhisperManager {
     private static final Tag<UUID> LAST_MESSAGED_TAG = Tag.UUID(TagUtils.uniqueTagName());

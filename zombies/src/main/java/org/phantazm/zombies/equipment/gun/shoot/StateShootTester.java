@@ -1,6 +1,9 @@
 package org.phantazm.zombies.equipment.gun.shoot;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.GunState;
@@ -32,7 +35,7 @@ public class StateShootTester implements ShootTester {
      */
     @FactoryMethod
     public StateShootTester(@NotNull @Child("stats") GunStats stats,
-        @NotNull @Child("reload_tester") ReloadTester reloadTester,
+        @NotNull @Child("reloadTester") ReloadTester reloadTester,
         @NotNull Supplier<Optional<? extends Entity>> entitySupplier) {
         this.stats = Objects.requireNonNull(stats);
         this.reloadTester = Objects.requireNonNull(reloadTester);
@@ -63,29 +66,4 @@ public class StateShootTester implements ShootTester {
         return this.entitySupplier.get().map(GunUtils::fireRateFactor).orElse(1F);
 
     }
-
-    /**
-     * Data for a {@link StateShootTester}.
-     *
-     * @param stats        A path to the gun's {@link GunStats}
-     * @param reloadTester A path to the gun's {@link ReloadTester}
-     */
-    @DataObject
-    public record Data(
-        @NotNull @ChildPath("stats") String stats,
-        @NotNull @ChildPath("reload_tester") String reloadTester) {
-
-        /**
-         * Creates a {@link Data}.
-         *
-         * @param stats        A path to the gun's {@link GunStats}
-         * @param reloadTester A path to the gun's {@link ReloadTester}
-         */
-        public Data {
-            Objects.requireNonNull(stats);
-            Objects.requireNonNull(reloadTester);
-        }
-
-    }
-
 }

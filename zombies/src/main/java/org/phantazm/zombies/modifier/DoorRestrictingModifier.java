@@ -6,7 +6,7 @@ import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.DualComponent;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.zombies.event.player.OpenDoorEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerOpenDoorEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.modifier.door_restricting")
@@ -24,7 +24,7 @@ public class DoorRestrictingModifier implements DualComponent<ZombiesScene, Modi
     private record Impl(ZombiesScene scene) implements Modifier {
         @Override
         public void apply() {
-            scene.addListener(OpenDoorEvent.class, event -> event.setCancelled(true));
+            scene.addListener(ZombiesPlayerOpenDoorEvent.class, event -> event.setCancelled(true));
         }
     }
 }

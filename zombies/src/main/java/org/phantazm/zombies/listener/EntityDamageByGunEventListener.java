@@ -45,6 +45,6 @@ public class EntityDamageByGunEventListener extends PhantazmMobEventListener<Ent
     }
 
     private boolean mobResistsInstakill(Mob mob) {
-        return mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL);
+        return mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_INSTAKILL, false);
     }
 }

@@ -1,6 +1,9 @@
 package org.phantazm.zombies.equipment.gun.shoot.fire;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -39,9 +42,9 @@ public class HitScanFirer implements Firer {
      */
     @FactoryMethod
     public HitScanFirer(@NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-        @NotNull @Child("end_selector") ShotEndpointSelector endSelector,
-        @NotNull @Child("target_finder") TargetFinder targetFinder,
-        @NotNull @Child("shot_handlers") Collection<ShotHandler> shotHandlers) {
+        @NotNull @Child("endSelector") ShotEndpointSelector endSelector,
+        @NotNull @Child("targetFinder") TargetFinder targetFinder,
+        @NotNull @Child("shotHandlers") Collection<ShotHandler> shotHandlers) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier);
         this.endSelector = Objects.requireNonNull(endSelector);
         this.targetFinder = Objects.requireNonNull(targetFinder);
@@ -80,19 +83,4 @@ public class HitScanFirer implements Firer {
             handler.tick(state, time);
         }
     }
-
-    /**
-     * Data for a {@link HitScanFirer}.
-     *
-     * @param endSelector  A path to the {@link HitScanFirer}'s {@link ShotEndpointSelector}
-     * @param targetFinder A path to the {@link HitScanFirer}'s {@link TargetFinder}
-     * @param shotHandlers A path to the {@link HitScanFirer}'s {@link ShotHandler}s
-     */
-    @DataObject
-    public record Data(
-        @NotNull @ChildPath("end_selector") String endSelector,
-        @NotNull @ChildPath("target_finder") String targetFinder,
-        @NotNull @ChildPath("shot_handlers") Collection<String> shotHandlers) {
-    }
-
 }

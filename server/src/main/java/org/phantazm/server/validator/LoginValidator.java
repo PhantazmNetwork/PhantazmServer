@@ -21,11 +21,11 @@ public interface LoginValidator {
         int banCount) {
     }
 
-    LoginEntry UNBANNED = new LoginEntry(true, null, -1L, -1L);
-
-    BanHistory NEVER_BANNED = new BanHistory(-1, 0);
-
     Component NOT_WHITELISTED_MESSAGE = Component.text("You are not whitelisted on this server!");
+
+    LoginEntry UNBANNED = new LoginEntry(true, null, -1L, -1L);
+    LoginEntry NOT_WHITELISTED = new LoginEntry(false, NOT_WHITELISTED_MESSAGE, -1L, -1L);
+    BanHistory NEVER_BANNED = new BanHistory(-1, 0);
 
     @NotNull CompletableFuture<Void> initTables();
 

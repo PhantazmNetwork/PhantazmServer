@@ -9,7 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.player.PlayerViewProvider;
-import org.phantazm.core.scene2.*;
+import org.phantazm.core.scene2.InstanceScene;
+import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.scene2.join.JoinSpectator;
 
 import java.util.Set;

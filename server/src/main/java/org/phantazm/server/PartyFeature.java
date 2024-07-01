@@ -48,7 +48,8 @@ public class PartyFeature {
         TickFormatter tickFormatter;
         try {
             ConfigElement partyConfigNode = Configuration.read(ConfigFeature.PARTY_CONFIG_PATH, ethyleneContext.tomlCodec());
-            tickFormatter = contextManager.makeContext(partyConfigNode.getNodeOrThrow("tickFormatter")).provide();
+            tickFormatter = contextManager.makeContext(partyConfigNode.atOrThrow("tickFormatter")
+                .asContainerOrThrow()).provide();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

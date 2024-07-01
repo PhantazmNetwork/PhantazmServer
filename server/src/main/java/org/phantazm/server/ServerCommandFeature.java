@@ -5,11 +5,11 @@ import net.minestom.server.command.CommandManager;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.IdentitySource;
+import org.phantazm.core.role.RoleStore;
 import org.phantazm.server.command.server.*;
 import org.phantazm.server.context.ConfigContext;
 import org.phantazm.server.context.PlayerContext;
 import org.phantazm.server.permission.PermissionHandler;
-import org.phantazm.core.role.RoleStore;
 import org.phantazm.server.validator.LoginValidator;
 
 public final class ServerCommandFeature {

@@ -1,6 +1,9 @@
 package org.phantazm.zombies.equipment.gun.shoot.handler;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -43,9 +46,5 @@ public class ParticlePointShotHandler implements ShotHandler {
     @Override
     public void tick(@NotNull GunState state, long time) {
 
-    }
-
-    @DataObject
-    public record Data(@NotNull @ChildPath("particle") String particle) {
     }
 }

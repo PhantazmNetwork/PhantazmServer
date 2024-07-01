@@ -35,7 +35,7 @@ public class AnnounceRoundAction implements Action<Round> {
      */
     @FactoryMethod
     public AnnounceRoundAction(@NotNull Data data, @NotNull Instance instance, @NotNull Wrapper<Long> ticksSinceStart,
-        @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
+        @NotNull @Child("tickFormatter") TickFormatter tickFormatter) {
         this.data = Objects.requireNonNull(data);
         this.instance = Objects.requireNonNull(instance);
         this.tickFormatter = Objects.requireNonNull(tickFormatter);
@@ -60,9 +60,7 @@ public class AnnounceRoundAction implements Action<Round> {
     @DataObject
     public record Data(
         @NotNull String format,
-        @NotNull ChatDestination destination,
-        @NotNull @ChildPath("tick_formatter") String tickFormatter) {
-
+        @NotNull ChatDestination destination) {
     }
 
 }

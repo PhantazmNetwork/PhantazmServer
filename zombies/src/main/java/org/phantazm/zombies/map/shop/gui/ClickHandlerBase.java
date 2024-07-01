@@ -11,7 +11,6 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 public abstract class ClickHandlerBase<TData> implements GuiItem, ShopInteractor {
     protected final TData data;

@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
@@ -53,16 +51,16 @@ public class AnalogTickFormatter implements TickFormatter {
         return builder.toString();
     }
 
+    @Default("""
+        {
+          showTicks=false
+        }
+        """)
     @DataObject
     public record Data(boolean ceil,
         boolean showTicks) {
         public Data(boolean ceil) {
             this(ceil, false);
-        }
-
-        @Default("showTicks")
-        public static @NotNull ConfigElement defaultShowTicks() {
-            return ConfigPrimitive.FALSE;
         }
     }
 }

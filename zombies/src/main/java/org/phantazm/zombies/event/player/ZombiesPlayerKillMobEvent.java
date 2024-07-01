@@ -1,0 +1,34 @@
+package org.phantazm.zombies.event.player;
+
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob2.Mob;
+import org.phantazm.zombies.player.ZombiesPlayer;
+
+import java.util.Objects;
+
+public class ZombiesPlayerKillMobEvent implements ZombiesPlayerEvent {
+    private final Player player;
+    private final ZombiesPlayer zombiesPlayer;
+    private final Mob mob;
+
+    public ZombiesPlayerKillMobEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer, @NotNull Mob mob) {
+        this.player = Objects.requireNonNull(player);
+        this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
+        this.mob = mob;
+    }
+
+    @Override
+    public @NotNull Player getPlayer() {
+        return player;
+    }
+
+    @Override
+    public @NotNull ZombiesPlayer getZombiesPlayer() {
+        return zombiesPlayer;
+    }
+
+    public @NotNull Mob target() {
+        return mob;
+    }
+}

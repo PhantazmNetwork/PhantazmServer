@@ -2,10 +2,14 @@ package org.phantazm.core.player;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import net.minestom.server.tag.*;
+import net.minestom.server.tag.TagHandler;
+import net.minestom.server.tag.Taggable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.IntFunction;
 

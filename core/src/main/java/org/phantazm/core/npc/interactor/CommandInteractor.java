@@ -7,8 +7,8 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.MonoComponent;
 
 @Model("npc.interactor.command")
 @Cache

@@ -22,7 +22,7 @@ public class AlertNoAmmoEffect implements GunEffect {
 
     @FactoryMethod
     public AlertNoAmmoEffect(@NotNull Data data,
-        @NotNull @Child("audience_provider") AudienceProvider audienceProvider) {
+        @NotNull @Child("audienceProvider") AudienceProvider audienceProvider) {
         this.data = Objects.requireNonNull(data);
         this.audienceProvider = Objects.requireNonNull(audienceProvider);
     }
@@ -59,9 +59,7 @@ public class AlertNoAmmoEffect implements GunEffect {
     }
 
     @DataObject
-    public record Data(
-        @NotNull @ChildPath("audience_provider") String audienceProvider,
-        @NotNull MessageWithDestination message) {
+    public record Data(@NotNull MessageWithDestination message) {
     }
 
 }

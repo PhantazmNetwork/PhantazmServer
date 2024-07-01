@@ -1,32 +1,32 @@
 package org.phantazm.mob2;
 
 import com.github.steanky.proxima.path.Pathfinder;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2FloatArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import net.minestom.server.attribute.Attribute;
+import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.metadata.AgeableMobMeta;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.entity.metadata.animal.tameable.WolfMeta;
 import net.minestom.server.entity.metadata.item.ItemEntityMeta;
 import net.minestom.server.entity.metadata.monster.zombie.ZombieMeta;
+import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.entity.metadata.other.SlimeMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.goal.GoalApplier;
-import org.phantazm.mob2.skill.SkillComponent;
+import org.phantazm.mob2.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 
 public class MobCreatorBase implements MobCreator {
@@ -35,7 +35,7 @@ public class MobCreatorBase implements MobCreator {
     protected final MobData data;
 
     private final Pathfinding.Factory pathfinding;
-    private final List<SkillComponent> skills;
+    private final List<Skill> skills;
     private final List<GoalApplier> goalAppliers;
 
     private final Pathfinder pathfinder;
@@ -43,12 +43,13 @@ public class MobCreatorBase implements MobCreator {
 
     private final Map<EquipmentSlot, ItemStack> equipmentMap;
     private final Object2FloatMap<String> attributeMap;
+    private final List<Pair<Attribute, AttributeModifier>> attributeModifiers;
 
     public MobCreatorBase(@NotNull MobData data, Pathfinding.@NotNull Factory pathfinding,
-        @NotNull List<SkillComponent> skills, @NotNull List<GoalApplier> goalAppliers,
-        @NotNull Pathfinder pathfinder,
+        @NotNull List<Skill> skills, @NotNull List<GoalApplier> goalAppliers, @NotNull Pathfinder pathfinder,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction,
-        @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap) {
+        @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap,
+        @NotNull List<Pair<Attribute, AttributeModifier>> attributeModifiers) {
         this.data = Objects.requireNonNull(data);
         this.pathfinding = Objects.requireNonNull(pathfinding);
         this.skills = List.copyOf(skills);
@@ -59,28 +60,33 @@ public class MobCreatorBase implements MobCreator {
 
         this.equipmentMap = Map.copyOf(equipmentMap);
         this.attributeMap = Objects.requireNonNull(attributeMap);
+        this.attributeModifiers = List.copyOf(attributeModifiers);
     }
 
     @Override
-    public @NotNull Mob create(@NotNull Instance instance, @NotNull InjectionStore injectionStore) {
+    public @NotNull Mob create(@NotNull Instance instance, @NotNull ExtensionHolder extensionHolder) {
         InstanceSpawner.InstanceSettings settings = settingsFunction.apply(instance);
 
         Pathfinding pathfinding = this.pathfinding.make(pathfinder, settings.nodeLocal(), settings.spaceHandler());
+
         Mob mob = new Mob(data.type(), UUID.randomUUID(), pathfinding, data);
+        mob.setExtensions(extensionHolder);
+        mob.addSkills(skills);
 
-        for (SkillComponent component : skills) {
-            mob.addSkill(component.apply(mob, injectionStore));
-        }
-
-        setup(mob, injectionStore);
+        setup(mob);
         return mob;
     }
 
-    protected void setup(@NotNull Mob mob, @NotNull InjectionStore store) {
+    @Override
+    public @NotNull MobData data() {
+        return data;
+    }
+
+    protected void setup(@NotNull Mob mob) {
         setEquipment(mob);
         setAttributes(mob);
         setMeta(mob);
-        setGoals(mob, store);
+        setGoals(mob);
         setTeam(mob);
     }
 
@@ -98,6 +104,10 @@ public class MobCreatorBase implements MobCreator {
             }
         }
 
+        for (Pair<Attribute, AttributeModifier> modifier : attributeModifiers) {
+            mob.getAttribute(modifier.first()).addModifier(modifier.second());
+        }
+
         mob.heal();
     }
 
@@ -113,6 +123,7 @@ public class MobCreatorBase implements MobCreator {
         meta.setCustomNameVisible(dataMeta.customNameVisible());
         meta.setHasGlowingEffect(dataMeta.isGlowing());
         meta.setInvisible(dataMeta.isInvisible());
+        meta.setHasNoGravity(!dataMeta.hasGravity());
 
         if (meta instanceof AgeableMobMeta ageableMobMeta) {
             ageableMobMeta.setBaby(dataMeta.isBaby());
@@ -130,15 +141,19 @@ public class MobCreatorBase implements MobCreator {
             slimeMeta.setSize(dataMeta.size());
         }
 
+        if (meta instanceof ArmorStandMeta armorStandMeta) {
+            armorStandMeta.setSmall(dataMeta.isSmall());
+        }
+
         ItemStack itemStack = dataMeta.itemStack();
         if (itemStack != null && meta instanceof ItemEntityMeta itemMeta) {
             itemMeta.setItem(itemStack);
         }
     }
 
-    protected void setGoals(@NotNull Mob mob, @NotNull InjectionStore store) {
+    protected void setGoals(@NotNull Mob mob) {
         for (GoalApplier applier : goalAppliers) {
-            applier.apply(mob, store);
+            applier.apply(mob);
         }
     }
 

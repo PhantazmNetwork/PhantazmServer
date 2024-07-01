@@ -3,6 +3,7 @@ package org.phantazm.zombies.mob2;
 import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.proxima.path.Pathfinder;
 import com.github.steanky.toolkit.collection.Wrapper;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
@@ -13,13 +14,12 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobCreatorBase;
 import org.phantazm.mob2.MobData;
 import org.phantazm.mob2.goal.GoalApplier;
-import org.phantazm.mob2.skill.SkillComponent;
+import org.phantazm.mob2.skill.Skill;
 import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.proxima.bindings.minestom.Pathfinding;
 import org.phantazm.zombies.ExtraNodeKeys;
@@ -34,23 +34,24 @@ import java.util.function.Function;
 
 public class ZombiesMobCreator extends MobCreatorBase {
     public ZombiesMobCreator(@NotNull MobData data, Pathfinding.@NotNull Factory pathfinding,
-        @NotNull List<SkillComponent> skills, @NotNull List<GoalApplier> goalAppliers,
+        @NotNull List<Skill> skills, @NotNull List<GoalApplier> goalAppliers,
         @NotNull Pathfinder pathfinder,
         @NotNull Function<? super Instance, ? extends InstanceSpawner.InstanceSettings> settingsFunction,
-        @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap) {
-        super(data, pathfinding, skills, goalAppliers, pathfinder, settingsFunction, equipmentMap, attributeMap);
+        @NotNull Map<EquipmentSlot, ItemStack> equipmentMap, @NotNull Object2FloatMap<String> attributeMap,
+        @NotNull List<Pair<Attribute, AttributeModifier>> attributeModifiers) {
+        super(data, pathfinding, skills, goalAppliers, pathfinder, settingsFunction, equipmentMap, attributeMap,
+            attributeModifiers);
     }
 
     @Override
-    protected void setup(@NotNull Mob mob, @NotNull InjectionStore store) {
-        super.setup(mob, store);
-        setPathfinding(mob, store);
+    protected void setup(@NotNull Mob mob) {
+        super.setup(mob);
+        setPathfinding(mob);
         setTasks(mob);
     }
 
-
-    protected void setPathfinding(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        ZombiesScene scene = injectionStore.get(InjectionKeys.SCENE);
+    protected void setPathfinding(@NotNull Mob mob) {
+        ZombiesScene scene = mob.extensions().get(ZombiesMobSpawner.SCENE_KEY);
         BoundedTracker<Window> windowTracker = scene.map().objects().windowTracker();
 
         mob.pathfinding().setPenalty((x, y, z, h) -> {
@@ -68,10 +69,10 @@ public class ZombiesMobCreator extends MobCreatorBase {
     protected void setTasks(@NotNull Mob mob) {
         ConfigNode extraNode = mob.data().extra();
 
-        int ticksUntilDeath = extraNode.getNumberOrDefault(6000, ExtraNodeKeys.TICKS_UNTIL_DEATH).intValue();
-        int speedupIncrements = extraNode.getNumberOrDefault(5, ExtraNodeKeys.SPEEDUP_INCREMENTS).intValue();
-        int speedupInterval = extraNode.getNumberOrDefault(1200, ExtraNodeKeys.SPEEDUP_INTERVAL).intValue();
-        double speedupAmount = extraNode.getNumberOrDefault(0.1D, ExtraNodeKeys.SPEEDUP_AMOUNT).doubleValue();
+        int ticksUntilDeath = extraNode.getNumberOrDefault(ExtraNodeKeys.TICKS_UNTIL_DEATH, 6000).intValue();
+        int speedupIncrements = extraNode.getNumberOrDefault(ExtraNodeKeys.SPEEDUP_INCREMENTS, 5).intValue();
+        int speedupInterval = extraNode.getNumberOrDefault(ExtraNodeKeys.SPEEDUP_INTERVAL, 1200).intValue();
+        double speedupAmount = extraNode.getNumberOrDefault(ExtraNodeKeys.SPEEDUP_AMOUNT, 0.1D).doubleValue();
 
         if (ticksUntilDeath >= 0) {
             mob.scheduler()

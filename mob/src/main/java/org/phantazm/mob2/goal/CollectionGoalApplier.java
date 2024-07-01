@@ -1,8 +1,10 @@
 package org.phantazm.mob2.goal;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
@@ -16,21 +18,17 @@ public class CollectionGoalApplier implements GoalApplier {
     private final Collection<GoalCreator> creators;
 
     @FactoryMethod
-    public CollectionGoalApplier(@NotNull @Child("creators") Collection<GoalCreator> creators) {
+    public CollectionGoalApplier(@NotNull @Child("goalCreators") Collection<GoalCreator> creators) {
         this.creators = List.copyOf(creators);
     }
 
     @Override
-    public void apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+    public void apply(@NotNull Mob mob) {
         Collection<ProximaGoal> goalCollection = new ArrayList<>(creators.size());
         for (GoalCreator creator : creators) {
-            goalCollection.add(creator.create(mob, injectionStore));
+            goalCollection.add(creator.create(mob));
         }
 
         mob.addGoalGroup(new CollectionGoalGroup(goalCollection));
-    }
-
-    @DataObject
-    public record Data(@NotNull @ChildPath("creators") List<String> goalCreators) {
     }
 }

@@ -2,7 +2,7 @@ package org.phantazm.zombies.powerup;
 
 import com.github.steanky.element.core.ElementException;
 import com.github.steanky.element.core.context.ContextManager;
-import com.github.steanky.element.core.path.ElementPath;
+import com.github.steanky.ethylene.core.path.ConfigPath;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -39,10 +39,10 @@ public class BasicPowerupHandlerSource implements PowerupHandler.Source {
             PowerupData data = dataEntry.getValue();
 
             Collection<PowerupVisualComponent> visuals =
-                contextManager.makeContext(data.visuals()).provideCollection(ElementPath.EMPTY, HANDLER);
+                contextManager.makeContext(data.visuals()).provideCollection(ConfigPath.EMPTY, HANDLER);
 
             Collection<PowerupActionComponent> actions =
-                contextManager.makeContext(data.actions()).provideCollection(ElementPath.EMPTY, HANDLER);
+                contextManager.makeContext(data.actions()).provideCollection(ConfigPath.EMPTY, HANDLER);
 
             DeactivationPredicateComponent deactivationPredicate;
             try {

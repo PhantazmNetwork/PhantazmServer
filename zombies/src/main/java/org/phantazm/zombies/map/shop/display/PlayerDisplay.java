@@ -1,6 +1,9 @@
 package org.phantazm.zombies.map.shop.display;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.element.core.annotation.document.Description;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
@@ -27,7 +30,7 @@ public class PlayerDisplay implements ShopDisplay {
     private final Map<? super UUID, ShopDisplay> playerDisplays;
 
     @FactoryMethod
-    public PlayerDisplay(@NotNull @Child("display_creator") PlayerDisplayCreator playerDisplayCreator,
+    public PlayerDisplay(@NotNull @Child("displayCreator") PlayerDisplayCreator playerDisplayCreator,
         @NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
         this.playerDisplayCreator = Objects.requireNonNull(playerDisplayCreator);
         this.playerMap = Objects.requireNonNull(playerMap);
@@ -65,9 +68,5 @@ public class PlayerDisplay implements ShopDisplay {
         for (ShopDisplay display : playerDisplays.values()) {
             display.tick(time);
         }
-    }
-
-    @DataObject
-    public record Data(@NotNull @ChildPath("display_creator") String displayCreator) {
     }
 }

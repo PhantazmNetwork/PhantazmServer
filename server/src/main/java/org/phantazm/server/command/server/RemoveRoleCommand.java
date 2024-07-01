@@ -9,8 +9,8 @@ import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.player.IdentitySource;
-import org.phantazm.server.permission.PermissionHandler;
 import org.phantazm.core.role.RoleStore;
+import org.phantazm.server.permission.PermissionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

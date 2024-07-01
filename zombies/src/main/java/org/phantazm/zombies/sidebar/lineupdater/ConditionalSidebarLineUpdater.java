@@ -1,6 +1,9 @@
 package org.phantazm.zombies.sidebar.lineupdater;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +20,7 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
     private final List<ChildUpdater> childUpdaters;
 
     @FactoryMethod
-    public ConditionalSidebarLineUpdater(@NotNull @Child("child_updaters") List<ChildUpdater> childUpdaters) {
+    public ConditionalSidebarLineUpdater(@NotNull @Child("childUpdaterPaths") List<ChildUpdater> childUpdaters) {
         this.childUpdaters = List.copyOf(childUpdaters);
     }
 
@@ -47,8 +50,8 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
         private final SidebarLineUpdater updater;
 
         @FactoryMethod
-        public ChildUpdater(@NotNull @Child("condition") BooleanSupplier condition,
-            @NotNull @Child("updater") SidebarLineUpdater updater) {
+        public ChildUpdater(@NotNull @Child("conditionPath") BooleanSupplier condition,
+            @NotNull @Child("updaterPath") SidebarLineUpdater updater) {
             this.condition = Objects.requireNonNull(condition);
             this.updater = Objects.requireNonNull(updater);
         }
@@ -60,27 +63,5 @@ public class ConditionalSidebarLineUpdater implements SidebarLineUpdater {
         public @NotNull SidebarLineUpdater getUpdater() {
             return updater;
         }
-
-        @DataObject
-        public record Data(
-            @NotNull @ChildPath("condition") String conditionPath,
-            @NotNull @ChildPath("updater") String updaterPath) {
-
-            public Data {
-                Objects.requireNonNull(conditionPath);
-                Objects.requireNonNull(updaterPath);
-            }
-
-        }
-
-    }
-
-    @DataObject
-    public record Data(@NotNull @ChildPath("child_updaters") List<String> childUpdaterPaths) {
-
-        public Data {
-            Objects.requireNonNull(childUpdaterPaths);
-        }
-
     }
 }

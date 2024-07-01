@@ -9,8 +9,9 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob2.*;
+import org.phantazm.mob2.BasicMobSpawner;
+import org.phantazm.mob2.Mob;
+import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
@@ -29,43 +30,40 @@ public class LingeringSkill implements SkillComponent {
 
     @FactoryMethod
     public LingeringSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector,
-        @NotNull @Child("target_skills") List<SkillComponent> targetSkills) {
+        @NotNull @Child("targetSkills") List<SkillComponent> targetSkills) {
         this.data = data;
         this.selector = selector;
         this.targetSkills = targetSkills;
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, mob, selector.apply(mob, injectionStore), targetSkills, injectionStore,
-            injectionStore.getOrDefault(InjectionKeys.SCHEDULER, MinecraftServer::getSchedulerManager));
+    public @NotNull Skill get() {
+        return new Internal(data, selector.get(), targetSkills);
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector,
-        @NotNull @ChildPath("target_skills") List<String> targetSkills,
-        int lifetime) {
-
+    public record Data(int lifetime) {
     }
 
     private static class Internal extends TargetedSkill {
         private final Data data;
-        private final List<SkillComponent> targetSkills;
-        private final InjectionStore injectionStore;
-        private final Scheduler scheduler;
+        private final List<Skill> targetSkills;
 
-        private Internal(Data data, Mob self, Selector selector, List<SkillComponent> targetSkills,
-            InjectionStore injectionStore, Scheduler scheduler) {
-            super(self, selector);
+        private Internal(Data data, Selector selector, List<SkillComponent> targetSkills) {
+            super(selector);
             this.data = data;
-            this.targetSkills = targetSkills;
-            this.injectionStore = injectionStore;
-            this.scheduler = scheduler;
+
+            List<Skill> skills = new ArrayList<>(targetSkills.size());
+            for (SkillComponent skillComponent : targetSkills) {
+                skills.add(skillComponent.get());
+            }
+
+            this.targetSkills = List.copyOf(skills);
         }
 
         @Override
-        protected void useOnTarget(@NotNull Target target) {
-            Instance instance = self.getInstance();
+        protected void useOnTarget(@NotNull Target target, @NotNull Mob mob) {
+            Instance instance = mob.getInstance();
             if (instance == null) {
                 return;
             }
@@ -77,21 +75,20 @@ public class LingeringSkill implements SkillComponent {
 
             List<Reference<Mob>> spawnedMobs = data.lifetime < 0 ? null : new ArrayList<>(locations.size());
             for (Point point : locations) {
-                Mob mob = new Mob(EntityType.ARMOR_STAND);
-                ArmorStandMeta armorStandMeta = (ArmorStandMeta) mob.getEntityMeta();
+                Mob armorStand = new Mob(EntityType.ARMOR_STAND);
+
+                ArmorStandMeta armorStandMeta = (ArmorStandMeta) armorStand.getEntityMeta();
                 armorStandMeta.setMarker(true);
                 armorStandMeta.setInvisible(true);
                 armorStandMeta.setHasNoGravity(true);
-                mob.setHasPhysics(false);
+                armorStand.setHasPhysics(false);
+                armorStand.setExtensions(mob.extensions().copy());
+                armorStand.addSkills(targetSkills);
 
-                for (SkillComponent skillComponent : targetSkills) {
-                    mob.addSkill(skillComponent.apply(mob, injectionStore));
-                }
-
-                mob.setInstance(instance, point);
+                armorStand.setInstance(instance, point);
 
                 if (spawnedMobs != null) {
-                    spawnedMobs.add(new WeakReference<>(mob));
+                    spawnedMobs.add(new WeakReference<>(armorStand));
                 }
             }
 
@@ -104,6 +101,8 @@ public class LingeringSkill implements SkillComponent {
                 return;
             }
 
+            Scheduler scheduler = mob.extensions().getOrDefault(BasicMobSpawner.SCHEDULER_KEY,
+                MinecraftServer::getSchedulerManager);
             scheduler.scheduleTask(() -> {
                 killMobs(spawnedMobs);
             }, TaskSchedule.tick(data.lifetime), TaskSchedule.stop());

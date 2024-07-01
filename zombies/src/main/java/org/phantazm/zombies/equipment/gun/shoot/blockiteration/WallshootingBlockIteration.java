@@ -28,7 +28,7 @@ public class WallshootingBlockIteration implements BlockIteration {
 
     @FactoryMethod
     public WallshootingBlockIteration(@NotNull Data data,
-        @NotNull @Child("wallshooting_checker") WallshootingChecker wallshootingChecker) {
+        @NotNull @Child("wallshootingChecker") WallshootingChecker wallshootingChecker) {
         this.data = Objects.requireNonNull(data);
         this.wallshootingChecker = Objects.requireNonNull(wallshootingChecker);
     }
@@ -65,7 +65,6 @@ public class WallshootingBlockIteration implements BlockIteration {
 
     @DataObject
     public record Data(
-        @NotNull @ChildPath("wallshooting_checker") String wallshootingChecker,
         @NotNull Set<Key> passableBlocks) {
     }
 }

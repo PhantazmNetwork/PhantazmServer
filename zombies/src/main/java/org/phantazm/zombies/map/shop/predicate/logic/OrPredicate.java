@@ -1,8 +1,6 @@
 package org.phantazm.zombies.map.shop.predicate.logic;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
@@ -18,7 +16,7 @@ public class OrPredicate extends PredicateBase<OrPredicate.Data> {
     private final List<ShopPredicate> predicates;
 
     @FactoryMethod
-    public OrPredicate(@NotNull Data data, @Child("predicates") List<ShopPredicate> predicates) {
+    public OrPredicate(@NotNull Data data, @Child("paths") List<ShopPredicate> predicates) {
         super(data);
         this.predicates = List.copyOf(predicates);
     }
@@ -39,12 +37,13 @@ public class OrPredicate extends PredicateBase<OrPredicate.Data> {
         return succeeded;
     }
 
-    @DataObject
-    public record Data(boolean shortCircuit,
-        @NotNull @ChildPath("predicates") List<String> paths) {
-        @Default("shortCircuit")
-        public static @NotNull ConfigElement shortCircuitDefault() {
-            return ConfigPrimitive.of(true);
+    @Default("""
+        {
+          shortCircuit=true
         }
+        """)
+    @DataObject
+    public record Data(boolean shortCircuit) {
+
     }
 }

@@ -14,7 +14,6 @@ import org.phantazm.zombies.player.state.context.AlivePlayerStateContext;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 @Model("zombies.map.round.action.revive_players")
 @Cache(false)

@@ -21,7 +21,7 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
 
     @FactoryMethod
     public OpenGuiInteractor(@NotNull Data data, @NotNull SlotDistributor slotDistributor,
-        @NotNull @Child("items") List<ClickHandlerBase<?>> guiItems) {
+        @NotNull @Child("guiItems") List<ClickHandlerBase<?>> guiItems) {
         super(data);
         this.slotDistributor = Objects.requireNonNull(slotDistributor);
         this.guiItems = Objects.requireNonNull(guiItems);
@@ -48,8 +48,7 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     @DataObject
     public record Data(
         @NotNull Component title,
-        @NotNull InventoryType inventoryType,
-        @NotNull @ChildPath("items") List<String> guiItems) {
+        @NotNull InventoryType inventoryType) {
 
     }
 }

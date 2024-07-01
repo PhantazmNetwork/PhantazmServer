@@ -34,7 +34,7 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
 
     @FactoryMethod
     public EquipmentUpgradeCostDisplayCreator(@NotNull Data data,
-        @NotNull @Child("upgrade_path") UpgradePath upgradePath) {
+        @NotNull @Child("upgradePath") UpgradePath upgradePath) {
         this.data = Objects.requireNonNull(data);
         this.upgradePath = Objects.requireNonNull(upgradePath);
     }
@@ -133,7 +133,6 @@ public class EquipmentUpgradeCostDisplayCreator implements PlayerDisplayCreator 
         int baseCost,
         @NotNull Map<Key, Integer> upgradeCosts,
         @NotNull Key costModifier,
-        int updateInterval,
-        @NotNull @ChildPath("upgrade_path") String upgradePath) {
+        int updateInterval) {
     }
 }

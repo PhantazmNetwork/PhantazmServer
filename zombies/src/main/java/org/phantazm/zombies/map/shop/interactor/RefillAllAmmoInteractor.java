@@ -13,7 +13,6 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.InventoryKeys;
 
 import java.util.Map;
-import java.util.UUID;
 
 @Model("zombies.map.shop.interactor.refill_all_ammo")
 @Cache(false)

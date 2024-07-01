@@ -91,12 +91,4 @@ public class BasicPerkEquipmentCreator implements PerkEquipmentCreator {
             interactor.attack(target);
         }
     }
-
-    @DataObject
-    public record Data(
-        @NotNull @ChildPath("interactor") @Description(
-            "The interactor, which handles player actions") String interactor,
-        @NotNull @ChildPath("visual") @Description(
-            "The visual, which controls how the perk appears") String visual) {
-    }
 }

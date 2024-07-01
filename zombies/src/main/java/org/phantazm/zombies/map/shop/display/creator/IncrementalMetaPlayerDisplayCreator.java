@@ -29,11 +29,10 @@ public class IncrementalMetaPlayerDisplayCreator implements PlayerDisplayCreator
             displays.add(creator.forPlayer(zombiesPlayer));
         }
 
-        return new IncrementalMetaDisplay(new IncrementalMetaDisplay.Data(data.displays, data.cycle), displays);
+        return new IncrementalMetaDisplay(new IncrementalMetaDisplay.Data(data.cycle), displays);
     }
 
     @DataObject
-    public record Data(boolean cycle,
-        @NotNull @ChildPath("displays") List<String> displays) {
+    public record Data(boolean cycle) {
     }
 }

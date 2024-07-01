@@ -9,6 +9,7 @@ import com.github.steanky.ethylene.core.collection.ConfigNode;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.Event;
@@ -34,15 +35,17 @@ import org.phantazm.proxima.bindings.minestom.InstanceSpawner;
 import org.phantazm.server.config.zombies.ZombiesConfig;
 import org.phantazm.server.context.*;
 import org.phantazm.stats.zombies.ZombiesStatsDatabase;
-import org.phantazm.zombies.map.MapLoader;
 import org.phantazm.zombies.command.ZombiesCommand;
 import org.phantazm.zombies.corpse.CorpseCreator;
 import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.map.MapInfo;
+import org.phantazm.zombies.map.MapLoader;
+import org.phantazm.zombies.map.PlayerUpgradeInfo;
 import org.phantazm.zombies.mob2.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob2.MobSpawnerSource;
 import org.phantazm.zombies.modifier.*;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
+import org.phantazm.zombies.player.upgrade.PlayerUpgradeComponent;
 import org.phantazm.zombies.powerup.BasicPowerupHandlerSource;
 import org.phantazm.zombies.powerup.PowerupData;
 import org.phantazm.zombies.powerup.PowerupHandler;
@@ -173,11 +176,18 @@ public final class ZombiesFeature {
                 ModifierHandler modifierHandler = modifierHandlerLoader.anonymousData().iterator().next();
                 PowerupHandler.Source powerupHandlerSource = powerupLoader.anonymousData().iterator().next();
 
+                Map<Key, PlayerUpgradeComponent> upgradeComponentMap = new HashMap<>();
+                for (PlayerUpgradeInfo upgradeInfo : mapInfo.upgrades()) {
+                    PlayerUpgradeComponent upgrade = contextManager.makeContext(upgradeInfo.data()).provide();
+                    upgradeComponentMap.put(upgradeInfo.id(), upgrade);
+                }
+
                 return new ZombiesSceneCreator(zombiesConfig.maximumScenes(), mapInfo, instanceLoader, keyParser,
                     contextManager, songLoader, database, instanceSettingsFunction, globalEventNode,
                     mobSpawnerSource, clientBlockHandlerSource, powerupHandlerSource, modifierHandler,
                     new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator), corpseCreatorSource,
-                    endlessSource, leaderboardContext, playerContext.roles(), IdentitySource.MOJANG);
+                    endlessSource, leaderboardContext, playerContext.roles(), IdentitySource.MOJANG,
+                    Map.copyOf(upgradeComponentMap));
             }, "creator")
             .accepting(maps -> {
                 LOGGER.info("Loaded {} maps", maps.size());

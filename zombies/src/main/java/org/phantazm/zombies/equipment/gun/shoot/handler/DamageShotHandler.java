@@ -4,11 +4,14 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.AttributeUtils;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
@@ -48,13 +51,13 @@ public class DamageShotHandler implements ShotHandler {
         handleDamageTargets(gun, attacker, shot.headshotTargets(), data.headshotDamage, true);
     }
 
-    private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damage,
+    private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damageAmount,
         boolean headshot) {
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();
 
             EntityDamageByGunEvent event =
-                new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damage);
+                new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damageAmount);
             zombiesScene.broadcastEvent(event);
 
             if (event.isCancelled()) {
@@ -62,26 +65,28 @@ public class DamageShotHandler implements ShotHandler {
             }
 
             targetEntity.getAcquirable().sync(ignored -> {
-                float actualDamage = event.getDamage();
+                float baseDamage = event.getDamage();
                 if (event.isInstakill()) {
-                    targetEntity.damage(Damage.fromEntity(attacker, targetEntity.getHealth()), true);
+                    targetEntity.damage(Damage.fromEntity(attacker, targetEntity.getHealth()));
                     return;
                 }
 
                 if (attacker instanceof LivingEntity livingEntity) {
-                    actualDamage *= livingEntity.getAttributeValue(Attributes.DAMAGE_MULTIPLIER);
+                    baseDamage = AttributeUtils.computeWithBase(baseDamage, livingEntity.getAttribute(Attributes.GUN_DAMAGE));
                 }
 
                 if (headshot) {
-                    actualDamage *= target.entity().getAttributeValue(Attributes.HEADSHOT_DAMAGE_MULTIPLIER);
+                    baseDamage = AttributeUtils.computeWithBase(baseDamage, target.entity().getAttribute(Attributes.HEADSHOT_DAMAGE_RECEIVED));
                 }
 
-                Damage damageType = Damage.fromEntity(attacker, actualDamage);
                 switch (data.armorBehavior) {
-                    case ALWAYS_BYPASS -> targetEntity.damage(damageType, true);
-                    case NEVER_BYPASS -> targetEntity.damage(damageType, false);
-                    case BYPASS_ON_HEADSHOT -> targetEntity.damage(damageType, headshot);
-                    case BYPASS_ON_NON_HEADSHOT -> targetEntity.damage(damageType, !headshot);
+                    case ALWAYS_BYPASS -> targetEntity.damage(Damage.fromEntity(attacker, DamageUtils
+                        .computeDamageWithResistances(targetEntity, data.damageType, baseDamage)));
+                    case NEVER_BYPASS -> DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, false);
+                    case BYPASS_ON_HEADSHOT ->
+                        DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, headshot);
+                    case BYPASS_ON_NON_HEADSHOT ->
+                        DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, !headshot);
                 }
             });
         }
@@ -105,10 +110,16 @@ public class DamageShotHandler implements ShotHandler {
      * @param damage         The amount of damage to deal to regular targets
      * @param headshotDamage The amount of damage to deal to headshots
      */
+    @Default("""
+        {
+          damageType=null
+        }
+        """)
     @DataObject
     public record Data(float damage,
         float headshotDamage,
-        @NotNull ArmorBehavior armorBehavior) {
+        @NotNull ArmorBehavior armorBehavior,
+        @Nullable String damageType) {
 
     }
 }

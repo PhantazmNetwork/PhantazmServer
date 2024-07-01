@@ -4,9 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
-import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -47,18 +44,15 @@ public class EquipmentRestrictingModifier implements DualComponent<ZombiesScene,
         }
     }
 
+    @Default("""
+        {
+          blacklist=false,
+          equipment=[]
+        }
+        """)
     @DataObject
     public record Data(
         boolean blacklist,
         @NotNull Set<Key> equipment) {
-        @Default("blacklist")
-        public static @NotNull ConfigElement defaultBlacklist() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("equipment")
-        public static @NotNull ConfigElement defaultEquipment() {
-            return ConfigList.of();
-        }
     }
 }

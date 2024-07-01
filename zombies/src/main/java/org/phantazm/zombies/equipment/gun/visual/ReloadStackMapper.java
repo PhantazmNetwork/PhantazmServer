@@ -1,6 +1,9 @@
 package org.phantazm.zombies.equipment.gun.visual;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.GunState;
@@ -27,7 +30,7 @@ public class ReloadStackMapper implements GunStackMapper {
      */
     @FactoryMethod
     public ReloadStackMapper(@NotNull @Child("stats") GunStats stats,
-        @NotNull @Child("reload_tester") ReloadTester reloadTester) {
+        @NotNull @Child("reloadTester") ReloadTester reloadTester) {
         this.stats = Objects.requireNonNull(stats);
         this.reloadTester = Objects.requireNonNull(reloadTester);
     }
@@ -43,17 +46,5 @@ public class ReloadStackMapper implements GunStackMapper {
         }
 
         return intermediate;
-    }
-
-    /**
-     * Data for a {@link ReloadStackMapper}.
-     *
-     * @param stats        A path to the gun's {@link GunStats}
-     * @param reloadTester A path to the gun's {@link ReloadTester}
-     */
-    @DataObject
-    public record Data(
-        @NotNull @ChildPath("stats") String stats,
-        @NotNull @ChildPath("reload_tester") String reloadTester) {
     }
 }

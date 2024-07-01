@@ -13,7 +13,6 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 
 @Model("zombies.map.round.action.play_sound")
 @Cache(false)

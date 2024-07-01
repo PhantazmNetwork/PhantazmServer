@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
@@ -13,6 +11,7 @@ import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.DamageUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.coin.PlayerCoins;
@@ -46,6 +45,14 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
         CONSTANT
     }
 
+    @Default("""
+        {
+          bossDamageType='HEALTH_FACTOR',
+          bossDamage=0.25F,
+          bypassArmor=true,
+          damageType=null
+        }
+        """)
     @DataObject
     public record Data(
         double radius,
@@ -53,21 +60,8 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
         int coinsPerKill,
         @NotNull BossDamageType bossDamageType,
         float bossDamage,
-        boolean bypassArmor) {
-        @Default("bossDamageType")
-        public static @NotNull ConfigElement defaultBossDamageType() {
-            return ConfigPrimitive.of("HEALTH_FACTOR");
-        }
-
-        @Default("bossDamage")
-        public static @NotNull ConfigElement defaultBossDamage() {
-            return ConfigPrimitive.of(0.25F);
-        }
-
-        @Default("bypassArmor")
-        public static @NotNull ConfigElement defaultBypassArmor() {
-            return ConfigPrimitive.of(true);
-        }
+        boolean bypassArmor,
+        String damageType) {
     }
 
     private static class Action extends InstantAction {
@@ -97,12 +91,12 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
 
                         entity.getAcquirable().sync(self -> {
                             Mob mob = (Mob) self;
-                            if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                            if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_INSTAKILL, false)) {
                                 switch (data.bossDamageType) {
-                                    case HEALTH_FACTOR -> mob.damage(Damage.fromPlayer(player, mob
-                                        .getMaxHealth() * data.bossDamage), data.bypassArmor);
-                                    case CONSTANT -> mob.damage(Damage.fromPlayer(player, data.bossDamage),
-                                        data.bypassArmor);
+                                    case HEALTH_FACTOR ->
+                                        DamageUtils.damage(data.damageType, mob, player, mob.getMaxHealth() * data.bossDamage, data.bypassArmor);
+                                    case CONSTANT ->
+                                        DamageUtils.damage(data.damageType, mob, player, data.bossDamage, data.bypassArmor);
                                 }
 
                                 if (mob.getHealth() <= 0) {
@@ -113,7 +107,7 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
                             }
 
                             giveCoins(zombiesPlayer);
-                            mob.damage(Damage.fromPlayer(player, mob.getHealth()), data.bypassArmor);
+                            mob.damage(Damage.fromPlayer(player, mob.getHealth()));
                         });
                     });
         }

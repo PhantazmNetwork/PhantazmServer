@@ -2,15 +2,14 @@ package org.phantazm.core;
 
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.scene2.Scene;
+import org.phantazm.core.scene2.SceneManager;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-
-import net.minestom.server.tag.Tag;
-import org.phantazm.core.scene2.Scene;
-import org.phantazm.core.scene2.SceneManager;
 
 public final class TagUtils {
     private static final AtomicLong TAG_INDEX = new AtomicLong();

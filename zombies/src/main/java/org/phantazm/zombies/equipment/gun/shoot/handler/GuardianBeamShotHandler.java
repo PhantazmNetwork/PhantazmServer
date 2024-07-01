@@ -58,8 +58,8 @@ public class GuardianBeamShotHandler implements ShotHandler {
 
             @Override
             public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                boolean isElder = element.getBooleanOrThrow("isElder");
-                long beamTime = element.getNumberOrThrow("beamTime").longValue();
+                boolean isElder = element.atOrThrow("isElder").asBooleanOrThrow();
+                long beamTime = element.atOrThrow("beamTime").asNumberOrThrow().longValue();
                 if (beamTime < 0) {
                     throw new ConfigProcessException("beamTime must be greater than or equal to 0");
                 }

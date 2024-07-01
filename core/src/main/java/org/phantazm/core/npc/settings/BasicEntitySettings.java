@@ -4,9 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
-import com.github.steanky.ethylene.core.collection.ConfigList;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Entity;
@@ -16,8 +13,8 @@ import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.entity.metadata.other.ArmorStandMeta;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.MonoComponent;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.commons.MonoComponent;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -66,6 +63,19 @@ public class BasicEntitySettings implements MonoComponent<Consumer<Entity>> {
         }
     }
 
+    @Default("""
+        {
+          displayName='',
+          hasGravity=false,
+          hasPhysics=false,
+          onFire=false,
+          invisible=false,
+          small=false,
+          glowing=false,
+          pose='STANDING',
+          equipment=[]
+        }
+        """)
     @DataObject
     public record Data(
         @NotNull Component displayName,
@@ -77,49 +87,5 @@ public class BasicEntitySettings implements MonoComponent<Consumer<Entity>> {
         boolean glowing,
         @NotNull Entity.Pose pose,
         @NotNull Map<EquipmentSlot, ItemStack> equipment) {
-        @Default("displayName")
-        public static ConfigElement defaultDisplayName() {
-            return ConfigPrimitive.of("");
-        }
-
-        @Default("hasGravity")
-        public static ConfigElement defaultHasGravity() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("hasPhysics")
-        public static ConfigElement defaultHasPhysics() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("onFire")
-        public static ConfigElement defaultOnFire() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("invisible")
-        public static ConfigElement defaultInvisible() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("small")
-        public static ConfigElement defaultSmall() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("glowing")
-        public static ConfigElement defaultGlowing() {
-            return ConfigPrimitive.of(false);
-        }
-
-        @Default("pose")
-        public static ConfigElement defaultPose() {
-            return ConfigPrimitive.of("STANDING");
-        }
-
-        @Default("equipment")
-        public static ConfigElement defaultEquipment() {
-            return ConfigList.of();
-        }
     }
 }

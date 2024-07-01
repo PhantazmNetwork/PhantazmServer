@@ -1,8 +1,6 @@
 package org.phantazm.core.leaderboard;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import com.github.steanky.vector.Vec3D;
 import it.unimi.dsi.fastutil.ints.*;
@@ -64,7 +62,7 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
     }
 
     @FactoryMethod
-    public ZombiesBestTimeLeaderboard(@NotNull Data data, @NotNull @Child("tick_formatter") TickFormatter tickFormatter) {
+    public ZombiesBestTimeLeaderboard(@NotNull Data data, @NotNull @Child("tickFormatter") TickFormatter tickFormatter) {
         this.data = data;
         this.tickFormatter = tickFormatter;
     }
@@ -489,10 +487,18 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
         }
     }
 
+    @Default("""
+        {
+          armorStandOffset={x=0, y=-0.20, z=0},
+          widthBeforeLineBreak=32,
+          lineBreakGap=0.0,
+          leaderboardEntryGap=0.1,
+          gap=0.05
+        }
+        """)
     @DataObject
     public record Data(@NotNull Vec3D location,
         @NotNull Vec3D armorStandOffset,
-        @NotNull @ChildPath("tick_formatter") String tickFormatter,
         @NotNull Key map,
         @NotNull IntList teamSizes,
         @NotNull List<Modifier> modifiers,
@@ -517,29 +523,5 @@ public class ZombiesBestTimeLeaderboard implements MonoComponent<Leaderboard> {
         double lineBreakGap,
         double leaderboardEntryGap,
         double gap) {
-        @Default("armorStandOffset")
-        public static @NotNull ConfigElement armorStandOffsetDefault() {
-            return ConfigElement.of("{x=0, y=-0.20, z=0}");
-        }
-
-        @Default("widthBeforeLineBreak")
-        public static @NotNull ConfigElement widthBeforeLineBreakDefault() {
-            return ConfigPrimitive.of(32);
-        }
-
-        @Default("lineBreakGap")
-        public static @NotNull ConfigElement lineBreakGapDefault() {
-            return ConfigPrimitive.of(0D);
-        }
-
-        @Default("leaderboardEntryGap")
-        public static @NotNull ConfigElement leaderboardEntryGapDefault() {
-            return ConfigPrimitive.of(0.1D);
-        }
-
-        @Default("gap")
-        public static @NotNull ConfigElement gapDefault() {
-            return ConfigPrimitive.of(0.05D);
-        }
     }
 }

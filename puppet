@@ -1,0 +1,388 @@
+#!/bin/bash
+
+## Configuration
+
+# Install locations
+data_dir="/usr/local/etc/puppet"
+bin_dir="/usr/local/bin"
+log_dir="/var/log/puppet"
+
+# Directory where socket and PID files are stored
+pid_dir="/tmp/puppet.rDpkBbrf5I"
+
+lock_folder="$pid_dir/lock"
+
+# 'main' and 'fallback' PID files
+main_pid_file="$pid_dir/main.pid"
+fallback_pid_file="$pid_dir/fallback.pid"
+
+# Symlinks to the actual socket files
+main_socket="$pid_dir/main.sock"
+fallback_socket="$pid_dir/fallback.sock"
+
+# Socket files
+socket_1="$pid_dir/socket_1.sock"
+socket_2="$pid_dir/socket_2.sock"
+
+# Temporary log file, used to watch fallback server output
+temp_log="$pid_dir/log"
+
+# Server directory
+server_dir="$data_dir/servers"
+server_1="$server_dir/server_1"
+server_2="$server_dir/server_2"
+
+config="$server_dir/config"
+build="$server_dir/build"
+src="$server_dir/src"
+shared="$server_dir/shared"
+blob="$server_dir/server.tar.gz"
+persistent="$server_dir/persistent"
+
+server_1_unique="$server_dir/unique_1"
+server_2_unique="$server_dir/unique_2"
+
+# Symlinks
+main="$pid_dir/main"
+fallback="$pid_dir/fallback"
+logs="$persistent/logs"
+
+# Git repository branches
+code_branch="dev"
+config_branch="main"
+
+# Repositories
+config_repo="git@github.com-Configuration:PhantazmNetwork/Configuration.git"
+code_repo="https://github.com/PhantazmNetwork/PhantazmServer"
+
+check_dependency () {
+  if ! which "$1" > /dev/null; then
+    echo "Missing required program $1"
+    false
+  fi
+}
+
+check_dependency tmux || exit 1
+check_dependency git || exit 1
+check_dependency rsync || exit 1
+check_dependency tar || exit 1
+
+user=$(whoami)
+
+if [ "$1" == "install" ]; then
+  script_file=$( readlink -f -- "$0" )
+  start_file="$persistent/start.sh"
+
+  if [ "$user" != "root" ]; then
+    echo "The setup script must be run as root!" 1<&2
+    exit 1
+  fi
+
+  if [ -f "$bin_dir/puppet" ]; then
+    echo "Puppet is already installed" 1<&2
+    exit 1
+  fi
+
+  mkdir -p "$data_dir"
+  mkdir -p "$bin_dir"
+  mkdir -p "$log_dir"
+
+  groupadd -f server_access
+
+  # rwxrws--- perms on both the data directory and the log directory
+  chmod 2770 "$data_dir"
+  chmod 2770 "$log_dir"
+
+  # Ensure new files and directories are created with the correct permissions
+  setfacl -d -m u::rwX,g::rwX,o::- "$data_dir"
+  setfacl -d -m u::rwX,g::rwX,o::- "$log_dir"
+
+  chgrp server_access "$data_dir"
+  chgrp server_access "$log_dir"
+
+  mkdir -p "$persistent"
+
+  # Create symlink to log folder
+  if [ ! -L "$logs" ]; then
+    ln -s "$log_dir" "$logs"
+  fi
+
+  # Create start script
+  printf '#!/bin/bash\njava -Dfile.encoding=UTF-8 -jar server.jar' > "$start_file"
+  chgrp server_access "$start_file"
+  chmod 770 "$start_file"
+
+  cp "$script_file" "$bin_dir/puppet"
+  chmod 755 "$bin_dir/puppet"
+  chown root "$bin_dir/puppet"
+  chgrp root "$bin_dir/puppet"
+
+  echo "Installation complete. Some notes:"
+  echo "* In order to allow users to use puppet commands, you must add them to the 'server_access' group."
+  echo "* You will need to add worlds (or links to worlds) inside $persistent."
+  exit 0
+fi
+
+if [ ! -f "/usr/local/bin/puppet" ]; then
+  echo "Puppet has not been installed; do so by running 'puppet install' with root permissions." 1<&2
+  exit 1
+fi
+
+if [ "$1" == "uninstall" ]; then
+  user=$(whoami)
+  if [ "$user" != "root" ]; then
+    echo "The uninstall script must be run at root!" 1<&2
+    exit 1
+  fi
+
+  rm -rf "$data_dir"
+  rm -f "$bin_dir/puppet"
+  rm -rf "$log_dir"
+
+  exit 0
+fi
+
+is_in_group () {
+  groupname="$1"
+  current_user="$(id -un)"
+  user="${2:-$current_user}"
+
+  for group in $(id -Gn "$user") ; do
+    if [ "$group" = "$groupname" ]; then
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+if ! is_in_group "server_access" "$user"; then
+  echo "'$user' is not part of the 'server_access' group!" 1<&2
+  exit 1
+fi
+
+# Make sure needed folders and files exist
+mkdir -p "$pid_dir"
+
+mkdir -p "$server_1"
+mkdir -p "$server_2"
+
+mkdir -p "$server_1_unique"
+mkdir -p "$server_2_unique"
+
+mkdir -p "$config"
+mkdir -p "$build"
+mkdir -p "$src"
+
+mkdir -p "$shared"
+mkdir -p "$persistent"
+
+require_blob () {
+  if [ ! -f "$blob" ]; then
+    echo "Missing required file '$blob'. Running 'puppet deploy-src' should generate it, or else it can be brought in externally." 1<&2
+    exit 1
+  fi
+}
+
+update_config () {
+  cd "$config" || exit 1
+
+  if [ ! -d "$config/.git" ]; then
+    rm -rf "$config"
+    cd .. || exit 1
+    git clone "$config_repo" "$config" || exit 1
+    cd "$config" || exit 1
+  fi
+
+  git checkout "$config_branch" && git pull
+}
+
+if [ "$1" == "main" ]; then
+  tmux -S "$main_socket" attach-session
+  exit "$?"
+elif [ "$1" == "fallback" ]; then
+  tmux -S "$fallback_socket" attach-session
+  exit "$?"
+elif [ "$1" == "shutdown" ]; then
+  tmux -S "$main_socket" send-keys -t "server" "orderly_shutdown" Enter
+  exit "$?"
+elif [ "$1" == "restart" ]; then
+  no_sync="true"
+elif [ "$1" == "deploy-src" ]; then
+  rm -rf "$build" && mkdir "$build"
+
+  update_config
+
+  cd "$src" || exit 1
+  if [ ! -d "$src/.git" ]; then
+    rm -rf "$src"
+    cd .. || exit 1
+    git clone --recurse-submodules "$code_repo" "$src" || exit 1
+    cd "$src" || exit 1
+  fi
+
+  git checkout "$code_branch" && git pull --recurse-submodules
+  ./gradlew -PskipBuild=snbt-builder,dev-launcher,velocity phantazm-server:copyJar phantazm-server:copyLibs || exit 1
+
+  cp -r "run/server-1/libs" "$build/" || exit 1
+  cp "run/server-1/server.jar" "$build/" || exit 1
+
+  tar -czf "$blob" -C "$server_dir" build || exit 1
+elif [ "$1" == "deploy" ]; then
+  require_blob
+
+  rm -rf "$build" && mkdir "$build"
+  tar -xzf "$blob" -C "$server_dir" build || exit 1
+elif [ "$1" == "deploy-conf" ]; then
+  require_blob
+
+  update_config
+
+  rm -rf "$build" && mkdir "$build"
+  tar -xzf "$blob" -C "$server_dir" build || exit 1
+elif [ "$1" == "help" ]; then
+  exit 0
+elif [ -n "$1" ]; then
+  echo "Unknown directive $1; try 'puppet help' for more info" 1<&2
+  exit 1
+else
+  echo "Incorrect usage; try running 'puppet help' for more info" 1<&2
+  exit 1
+fi
+
+# Simple folder-based mutex
+if ! mkdir "$lock_folder"; then
+  echo "An instance of puppet is already running!"
+  echo "If this is an error, run 'rm -rf $lock_folder' and try launching puppet again."
+  exit 1
+fi
+
+exit_hook () {
+  rm -rf "$lock_folder"
+}
+
+trap "exit_hook" EXIT
+
+## Setup
+
+# Make sure needed folders and files exist
+touch "$main_pid_file"
+touch "$fallback_pid_file"
+touch "$temp_log"
+
+tmux -S "$socket_1" new-session -d -n "server" -s "server" &> /dev/null
+tmux -S "$socket_2" new-session -d -n "server" -s "server" &> /dev/null
+
+# Create symlinks to the sockets, for switching the active server
+if [ ! -L "$main_socket" ] && [ ! -L "$fallback_socket" ]; then
+  ln -s "$socket_1" "$main_socket"
+  ln -s "$socket_2" "$fallback_socket"
+fi
+
+# Create symlinks to the server directories
+if [ ! -L "$main" ] && [ ! -L "$fallback" ]; then
+  ln -s "$server_1" "$main"
+  ln -s "$server_2" "$fallback"
+fi
+
+chgrp server_access "$socket_1"
+chgrp server_access "$socket_2"
+
+chmod 660 "$socket_1"
+chmod 660 "$socket_2"
+
+## Function definitions
+
+# Checks if a given process ID is empty or doesn't exist
+check_status () {
+  if [ -z "$1" ]; then
+    echo "false"
+  else
+    if [ -z "$(ps -p "$1" -o args | grep -E "/tmp/puppet\\.rDpkBbrf5I/(main|fallback)")" ]; then
+      echo "false"
+    else
+      echo "true"
+    fi
+  fi
+}
+
+# Promotes the fallback server to the main server. Should be called if the fallback server is the only running server.
+promote_fallback () {
+  cat "$fallback_pid_file" > "$main_pid_file"
+  echo "" > "$fallback_pid_file"
+
+  new_active=$(readlink -f "$fallback_socket")
+  new_server=$(readlink -f "$fallback")
+
+  if [ "$new_active" == "$socket_1" ]; then
+    old_active="$socket_2"
+    old_server="$server_2"
+  else
+    old_active="$socket_1"
+    old_server="$server_1"
+  fi
+
+  rm "$fallback_socket"
+  rm "$main_socket"
+
+  rm "$fallback"
+  rm "$main"
+
+  ln -s "$old_active" "$fallback_socket"
+  ln -s "$new_active" "$main_socket"
+
+  ln -s "$old_server" "$fallback"
+  ln -s "$new_server" "$main"
+}
+
+synchronize_target () {
+  if [ -z "$no_sync" ]; then
+    target=$(readlink -f "$1")
+
+    if [ "$target" == "$server_1" ]; then
+      rsync -ac --delete "$server_1_unique/" "$persistent/" "$build/" "$config/" "$1" || exit 1
+    elif [ "$target" == "$server_2" ]; then
+      rsync -ac --delete "$server_2_unique/" "$persistent/" "$build/" "$config/" "$1" || exit 1
+    else
+      echo "Warning: invalid synchronize symlink $1 -> $target; exiting (no server files have changed)"
+      exit 1
+    fi
+  fi
+}
+
+## Server startup
+
+main_pid=$(cat "$main_pid_file")
+fallback_pid=$(cat "$fallback_pid_file")
+
+main_is_running=$(check_status "$main_pid")
+fallback_is_running=$(check_status "$fallback_pid")
+
+if [ "$main_is_running" == "false" ] && [ "$fallback_is_running" == "false" ]; then
+  synchronize_target "$main"
+
+  tmux -S "$main_socket" send-keys -t "server" "sh -c 'cd \"$main\"; echo \$\$ > \"$main_pid_file\"; exec ./start.sh'" Enter
+  echo "" > "$fallback_pid_file"
+elif [ "$main_is_running" == "true" ] && [ "$fallback_is_running" == "false" ]; then
+  synchronize_target "$fallback"
+
+  echo "" > "$temp_log"
+  tmux -S "$fallback_socket" send-keys -t "server" "sh -c 'cd \"$fallback\"; echo \$\$ > \"$fallback_pid_file\"; exec ./start.sh | tee \"$temp_log\"'" Enter
+
+  tail -f -q "$temp_log" | sed "/serverIP/ q"
+  echo "" > "$temp_log"
+
+  tmux -S "$main_socket" send-keys -t "server" "orderly_shutdown" Enter
+  tail --pid="$main_pid" -f /dev/null
+
+  promote_fallback
+elif [ "$main_is_running" == "false" ] && [ "$fallback_is_running" == "true" ]; then
+  echo "Warning: Invalid state detected, 'fallback' is alive but 'main' is not." 1<&2
+  echo "Puppet will attempt to promote the fallback instance to the main instance." 1<&2
+  echo "If changes were deployed, they will not be visible in the new instance." 1<&2
+  echo "You can try running puppet again to apply them." 1<&2
+  promote_fallback
+else
+  echo "Both main and fallback are running! This is likely an error (did something break our mutex?), doing nothing." 1<&2
+  exit 1
+fi

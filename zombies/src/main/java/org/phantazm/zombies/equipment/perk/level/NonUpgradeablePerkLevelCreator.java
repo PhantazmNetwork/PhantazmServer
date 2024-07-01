@@ -29,7 +29,7 @@ public class NonUpgradeablePerkLevelCreator implements PerkLevelCreator {
     @FactoryMethod
     public NonUpgradeablePerkLevelCreator(@NotNull Data data,
         @NotNull @Child("equipment") PerkEquipmentCreator equipment,
-        @NotNull @Child("perk_effects") Collection<PerkEffectCreator> effects) {
+        @NotNull @Child("effects") Collection<PerkEffectCreator> effects) {
         this.data = Objects.requireNonNull(data);
         this.equipment = Objects.requireNonNull(equipment);
         this.effects = List.copyOf(effects);
@@ -53,10 +53,6 @@ public class NonUpgradeablePerkLevelCreator implements PerkLevelCreator {
 
     @DataObject
     public record Data(
-        @NotNull @Description("The level key for this level") Key key,
-        @NotNull @Description("The equipment controlling this perk's visuals") @ChildPath(
-            "equipment") String equipment,
-        @NotNull @Description("The perk effect(s) which are applied for this level") @ChildPath(
-            "perk_effects") Collection<String> effects) {
+        @NotNull @Description("The level key for this level") Key key) {
     }
 }

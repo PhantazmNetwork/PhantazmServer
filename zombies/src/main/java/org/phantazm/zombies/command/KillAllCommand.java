@@ -23,7 +23,7 @@ public class KillAllCommand extends SandboxLockedCommand {
         scene.map().roundHandler().currentRound().ifPresent(round -> {
             for (Mob mob : round.getSpawnedMobs()) {
                 mob.getAcquirable().sync(self1 -> {
-                    ((LivingEntity) self1).damage(Damage.fromPlayer(sender, mob.getHealth()), true);
+                    ((LivingEntity) self1).damage(Damage.fromPlayer(sender, mob.getHealth()));
                 });
             }
         });

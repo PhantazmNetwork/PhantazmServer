@@ -51,8 +51,8 @@ public final class ProximaFeature {
                 thread.setName("proxima-worker-" + count.getAndIncrement());
                 return thread;
             }
-        }, null, asyncMode,
-            corePoolSize, maximumPoolSize, minimumRunnable, forkJoinPool -> true, keepAliveTime, keepAliveTimeUnit);
+        }, null, asyncMode, corePoolSize, maximumPoolSize, minimumRunnable, forkJoinPool -> true, keepAliveTime,
+            keepAliveTimeUnit);
 
         pathfinder = new BasicAsyncPathfinder(fjp, BasicPathOperation::new, 1000000);
         settingsFunction = new InstanceSettingsFunction(MinecraftServer.getGlobalEventHandler());

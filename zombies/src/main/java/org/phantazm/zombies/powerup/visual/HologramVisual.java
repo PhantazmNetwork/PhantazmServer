@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
@@ -32,16 +30,17 @@ public class HologramVisual implements PowerupVisualComponent {
         return new Visual(data, scene.instance());
     }
 
+    @Default("""
+        {
+          heightOffset=0.0
+        }
+        """)
     @DataObject
     public record Data(
         @NotNull List<Component> lines,
         long timeUntilBlink,
         @NotNull List<Frame> blinkFrames,
         double heightOffset) {
-        @Default("heightOffset")
-        public static @NotNull ConfigElement heightOffsetDefault() {
-            return ConfigPrimitive.of(0.0);
-        }
     }
 
     public record Frame(@NotNull List<Component> components,

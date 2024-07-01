@@ -4,9 +4,9 @@ import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.Flags;
-import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 

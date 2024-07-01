@@ -1,9 +1,11 @@
 package org.phantazm.mob2.validator;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 
 import java.util.ArrayList;
@@ -20,24 +22,20 @@ public class AndValidator implements ValidatorComponent {
     }
 
     @Override
-    public @NotNull Validator apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
+    public @NotNull Validator get() {
         List<Validator> validators = new ArrayList<>(this.validators.size());
         for (ValidatorComponent component : this.validators) {
-            validators.add(component.apply(mob, injectionStore));
+            validators.add(component.get());
         }
 
         return new Internal(validators);
     }
 
-    @DataObject
-    public record Data(@NotNull @ChildPath("validators") List<String> validators) {
-    }
-
     private record Internal(List<Validator> validators) implements Validator {
         @Override
-        public boolean valid(@NotNull Entity entity) {
+        public boolean valid(@NotNull Mob mob, @NotNull Entity entity) {
             for (Validator validator : validators) {
-                if (!validator.valid(entity)) {
+                if (!validator.valid(mob, entity)) {
                     return false;
                 }
             }

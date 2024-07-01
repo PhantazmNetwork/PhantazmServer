@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -73,6 +71,13 @@ public class CostSubstitutingItem implements UpdatingItem {
         return cost;
     }
 
+    @Default("""
+        {
+          displayName=null,
+          lore=null,
+          tag=null
+        }
+        """)
     @DataObject
     public record Data(
         @NotNull Material material,
@@ -81,19 +86,5 @@ public class CostSubstitutingItem implements UpdatingItem {
         @Nullable String tag,
         int cost,
         @NotNull Key modifier) {
-        @Default("displayName")
-        public static @NotNull ConfigElement defaultDisplayName() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("lore")
-        public static @NotNull ConfigElement defaultLore() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("tag")
-        public static @NotNull ConfigElement defaultTag() {
-            return ConfigPrimitive.NULL;
-        }
     }
 }

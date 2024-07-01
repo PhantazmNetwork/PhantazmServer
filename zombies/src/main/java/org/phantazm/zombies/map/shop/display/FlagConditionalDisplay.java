@@ -1,8 +1,6 @@
 package org.phantazm.zombies.map.shop.display;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -115,15 +113,15 @@ public class FlagConditionalDisplay implements ShopDisplay {
         };
     }
 
+    @Default("""
+        {
+          source='MAP'
+        }
+        """)
     @DataObject
     public record Data(
         @NotNull Key flag,
-        @NotNull ShopFlagSource source,
-        @NotNull @ChildPath("success") List<String> success,
-        @NotNull @ChildPath("failure") List<String> failure) {
-        @Default("source")
-        public static @NotNull ConfigElement defaultShopFlagSource() {
-            return ConfigPrimitive.of("MAP");
-        }
+        @NotNull ShopFlagSource source) {
+
     }
 }

@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -91,6 +89,11 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
             miniMessage.deserialize(data.openedRoomsFormat, roomsPlaceholder));
     }
 
+    @Default("""
+        {
+          separator=', '
+        }
+        """)
     @DataObject
     public record Data(
         @NotNull String nameFormat,
@@ -98,9 +101,5 @@ public class DoorSendOpenedRoomsAction implements Action<Door> {
         @NotNull String separator,
         @NotNull TitlePart<Component> nameTitlePart,
         @NotNull TitlePart<Component> openedRoomsTitlePart) {
-        @Default("separator")
-        public static ConfigElement separatorDefault() {
-            return ConfigPrimitive.of(", ");
-        }
     }
 }

@@ -1,8 +1,6 @@
 package org.phantazm.zombies.powerup.action.component;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -23,7 +21,7 @@ public class MapTransactionModifierAction implements PowerupActionComponent {
 
     @FactoryMethod
     public MapTransactionModifierAction(@NotNull Data data,
-        @NotNull @Child("deactivation_predicate") DeactivationPredicateComponent deactivationPredicate) {
+        @NotNull @Child("deactivationPredicate") DeactivationPredicateComponent deactivationPredicate) {
         this.data = data;
         this.deactivationPredicate = deactivationPredicate;
     }
@@ -34,18 +32,18 @@ public class MapTransactionModifierAction implements PowerupActionComponent {
             scene.map().objects().module().modifierSource());
     }
 
+    @Default("""
+        {
+          priority=0
+        }
+        """)
     @DataObject
     public record Data(
-        @NotNull @ChildPath("deactivation_predicate") String deactivationPredicate,
         @NotNull Key modifierGroup,
         @NotNull Component displayName,
         @NotNull Transaction.Modifier.Action modifierAction,
         double amount,
         int priority) {
-        @Default("priority")
-        public static @NotNull ConfigElement defaultPriority() {
-            return ConfigPrimitive.of(0);
-        }
     }
 
     private static class Action extends MapTransactionAction {

@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -32,13 +30,14 @@ public class HealAction implements PowerupActionComponent {
         return new Action(data);
     }
 
+    @Default("""
+        {
+          noTakeOnFull=true
+        }
+        """)
     @DataObject
     public record Data(float amount,
         boolean noTakeOnFull) {
-        @Default("noTakeOnFull")
-        public static @NotNull ConfigElement defaultNoTakeOnFull() {
-            return ConfigPrimitive.of(true);
-        }
     }
 
     private static class Action extends InstantAction {

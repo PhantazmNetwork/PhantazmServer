@@ -66,7 +66,7 @@ public class DragonsWrathInteractor implements ShopInteractor {
                     return;
                 }
 
-                if (mob.data().extra().getBooleanOrDefault(false, ExtraNodeKeys.RESIST_INSTAKILL)) {
+                if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_INSTAKILL, false)) {
                     return;
                 }
 
@@ -78,7 +78,7 @@ public class DragonsWrathInteractor implements ShopInteractor {
 
                 interaction.player().getPlayer().ifPresent(player -> {
                     entity.getAcquirable().sync(ignored -> {
-                        entity.damage(Damage.fromPlayer(player, entity.getHealth()), true);
+                        entity.damage(Damage.fromPlayer(player, entity.getHealth()));
                     });
                 });
 

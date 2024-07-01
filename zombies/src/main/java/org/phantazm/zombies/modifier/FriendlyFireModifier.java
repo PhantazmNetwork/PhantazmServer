@@ -4,8 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
@@ -71,11 +69,12 @@ public class FriendlyFireModifier implements DualComponent<ZombiesScene, Modifie
         }
     }
 
+    @Default("""
+        {
+          playerDamageMultiplier=0.5
+        }
+        """)
     @DataObject
     public record Data(double playerDamageMultiplier) {
-        @Default("playerDamageMultiplier")
-        public static @NotNull ConfigElement defaultPlayerDamageMultiplier() {
-            return ConfigPrimitive.of(0.5);
-        }
     }
 }

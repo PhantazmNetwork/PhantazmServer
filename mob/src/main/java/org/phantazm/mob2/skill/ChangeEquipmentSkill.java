@@ -5,7 +5,6 @@ import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.inventory.EquipmentHandler;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.selector.Selector;
@@ -26,25 +25,24 @@ public class ChangeEquipmentSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Impl(mob, selector.apply(mob, injectionStore), data);
+    public @NotNull Skill get() {
+        return new Internal(selector.get(), data);
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("selector") String selector,
-        @NotNull Map<EquipmentSlot, ItemStack> equipment) {
+    public record Data(@NotNull Map<EquipmentSlot, ItemStack> equipment) {
     }
 
-    private static class Impl extends TargetedSkill {
+    private static class Internal extends TargetedSkill {
         private final Data data;
 
-        private Impl(Mob self, Selector selector, Data data) {
-            super(self, selector);
+        private Internal(Selector selector, Data data) {
+            super(selector);
             this.data = data;
         }
 
         @Override
-        protected void useOnTarget(@NotNull Target target) {
+        protected void useOnTarget(@NotNull Target target, @NotNull Mob mob) {
             target.forType(EquipmentHandler.class, entity -> {
                 for (Map.Entry<EquipmentSlot, ItemStack> entry : data.equipment.entrySet()) {
                     entity.setEquipment(entry.getKey(), entry.getValue());

@@ -1,6 +1,9 @@
 package org.phantazm.zombies.sidebar;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +26,7 @@ public class SidebarUpdater implements Activable {
     private int totalSize = 0;
 
     @FactoryMethod
-    public SidebarUpdater(@NotNull Sidebar sidebar, @NotNull @Child("sections") Collection<SidebarSection> sections) {
+    public SidebarUpdater(@NotNull Sidebar sidebar, @NotNull @Child("sectionPaths") Collection<SidebarSection> sections) {
         this.sidebar = Objects.requireNonNull(sidebar);
         this.sections = List.copyOf(sections);
         this.sizes = new int[sections.size()];
@@ -116,14 +119,4 @@ public class SidebarUpdater implements Activable {
     private @NotNull String lineId(int index) {
         return "line" + index;
     }
-
-    @DataObject
-    public record Data(@NotNull @ChildPath("sections") Collection<String> sectionPaths) {
-
-        public Data {
-            Objects.requireNonNull(sectionPaths);
-        }
-
-    }
-
 }

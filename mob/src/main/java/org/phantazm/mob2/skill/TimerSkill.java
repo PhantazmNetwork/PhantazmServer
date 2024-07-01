@@ -2,13 +2,9 @@ package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob2.InjectionKeys;
-import org.phantazm.mob2.Mob;
+import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.mob2.Trigger;
 
 import java.util.Objects;
@@ -26,9 +22,9 @@ public class TimerSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(data, delegate.apply(mob, injectionStore), mob,
-            injectionStore.getOrDefault(InjectionKeys.SCHEDULER, MinecraftServer::getSchedulerManager));
+    public @NotNull Skill get() {
+        return new Internal(data, ExtensionHolder.requestKey(TimerSkillAbstract.Extension.class),
+            delegate.get());
     }
 
     @Default("""
@@ -42,7 +38,6 @@ public class TimerSkill implements SkillComponent {
         """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
-        @NotNull @ChildPath("delegate") String delegate,
         int repeat,
         int interval,
         boolean requiresActivation,
@@ -54,8 +49,8 @@ public class TimerSkill implements SkillComponent {
         private final Data data;
         private final int interval;
 
-        public Internal(Data data, Skill delegate, Mob self, Scheduler scheduler) {
-            super(scheduler, self, delegate, data.requiresActivation, data.resetOnActivation, data.repeat, data.interval,
+        public Internal(Data data, ExtensionHolder.Key<Extension> key, Skill delegate) {
+            super(key, delegate, data.requiresActivation, data.resetOnActivation, data.repeat, data.interval,
                 !data.exceedMobLifetime);
             this.data = data;
             this.interval = data.interval;

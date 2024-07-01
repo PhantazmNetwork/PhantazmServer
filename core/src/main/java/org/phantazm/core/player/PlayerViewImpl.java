@@ -10,14 +10,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.ReferenceUtils;
 import org.phantazm.core.scene2.Scene;
+import org.phantazm.core.scene2.SceneManager;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-
-import org.phantazm.core.scene2.SceneManager;
 
 /**
  * <p>Basic implementation of a {@link PlayerView}. Caches the player object, so {@code getPlayer} is safe to call

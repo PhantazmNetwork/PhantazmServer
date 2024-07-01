@@ -26,7 +26,7 @@ public class ShotEffectCreator implements PerkEffectCreator {
 
     @FactoryMethod
     public ShotEffectCreator(@NotNull EventNode<Event> rootNode,
-        @NotNull @Child("action") Collection<ShotEffect> actions) {
+        @NotNull @Child("actions") Collection<ShotEffect> actions) {
         this.rootNode = rootNode;
         this.actions = List.copyOf(actions);
     }
@@ -98,12 +98,5 @@ public class ShotEffectCreator implements PerkEffectCreator {
                 }
             }
         }
-    }
-
-    @DataObject
-    public record Data(
-        @NotNull @Description(
-            "The actions to be executed on the entities that are hit by gun shots") @ChildPath(
-            "action") Collection<String> actions) {
     }
 }

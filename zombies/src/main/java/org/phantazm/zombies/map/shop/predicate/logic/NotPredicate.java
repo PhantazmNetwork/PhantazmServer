@@ -26,6 +26,6 @@ public class NotPredicate extends PredicateBase<NotPredicate.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull @ChildPath("predicate") String predicate) {
+    public record Data() {
     }
 }

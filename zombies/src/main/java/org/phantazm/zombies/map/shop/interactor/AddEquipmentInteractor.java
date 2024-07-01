@@ -16,8 +16,8 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
 
     @FactoryMethod
     public AddEquipmentInteractor(@NotNull Data data,
-        @NotNull @Child("success") List<ShopInteractor> successInteractors,
-        @NotNull @Child("failure") List<ShopInteractor> failureInteractors) {
+        @NotNull @Child("successInteractors") List<ShopInteractor> successInteractors,
+        @NotNull @Child("failureInteractors") List<ShopInteractor> failureInteractors) {
         super(data);
         this.successInteractors = successInteractors;
         this.failureInteractors = failureInteractors;
@@ -56,8 +56,6 @@ public class AddEquipmentInteractor extends InteractorBase<AddEquipmentInteracto
         @NotNull Key groupKey,
         boolean allowReplace,
         boolean allowDuplicate,
-        int specificSlot,
-        @NotNull @ChildPath("success") List<String> successInteractors,
-        @NotNull @ChildPath("failure") List<String> failureInteractors) {
+        int specificSlot) {
     }
 }

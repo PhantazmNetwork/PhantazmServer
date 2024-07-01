@@ -1,6 +1,9 @@
 package org.phantazm.zombies.sidebar.lineupdater.creator;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -71,12 +74,5 @@ public class ConditionalUpdaterCreator implements PlayerUpdaterCreator {
             previousState = false;
             return ifFalse.tick(time);
         }
-    }
-
-    @DataObject
-    public record Data(
-        @NotNull @ChildPath("condition") String condition,
-        @NotNull @ChildPath("success") String success,
-        @NotNull @ChildPath("failure") String failure) {
     }
 }

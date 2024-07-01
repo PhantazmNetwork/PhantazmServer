@@ -1,6 +1,9 @@
 package org.phantazm.zombies.equipment.gun.visual;
 
-import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.element.core.annotation.Cache;
+import com.github.steanky.element.core.annotation.Child;
+import com.github.steanky.element.core.annotation.FactoryMethod;
+import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.GunState;
@@ -23,7 +26,7 @@ public class ClipStackMapper implements GunStackMapper {
      * @param reloadTester The {@link ReloadTester} to use to determine whether the gun is currently reloading
      */
     @FactoryMethod
-    public ClipStackMapper(@NotNull @Child("reload_tester") ReloadTester reloadTester) {
+    public ClipStackMapper(@NotNull @Child("reloadTester") ReloadTester reloadTester) {
         this.reloadTester = Objects.requireNonNull(reloadTester);
     }
 
@@ -34,14 +37,5 @@ public class ClipStackMapper implements GunStackMapper {
         }
 
         return intermediate;
-    }
-
-    /**
-     * Data for a {@link ClipStackMapper}.
-     *
-     * @param reloadTester A path to the gun's {@link ReloadTester}
-     */
-    @DataObject
-    public record Data(@NotNull @ChildPath("reload_tester") String reloadTester) {
     }
 }

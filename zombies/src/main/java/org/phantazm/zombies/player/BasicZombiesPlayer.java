@@ -4,17 +4,20 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.tick.TickTaskScheduler;
+import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
+import org.phantazm.core.tick.Activable;
+import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.zombies.Attributes;
-import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final ZombiesScene scene;
@@ -22,6 +25,9 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final TickTaskScheduler taskScheduler;
 
     private final AtomicBoolean blockHandAnimation;
+    private volatile Set<Activable> activables;
+
+    private final Lock activablesLock;
 
     public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module,
         @NotNull TickTaskScheduler taskScheduler) {
@@ -29,6 +35,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         this.module = Objects.requireNonNull(module);
         this.taskScheduler = Objects.requireNonNull(taskScheduler);
         this.blockHandAnimation = new AtomicBoolean();
+        this.activables = Set.of();
+        this.activablesLock = new ReentrantLock();
     }
 
     @Override
@@ -58,8 +66,45 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     }
 
     @Override
+    public void addActivable(@NotNull Activable activable) {
+        activablesLock.lock();
+        try {
+            Set<Activable> mutableActivables = new HashSet<>(activables);
+            mutableActivables.add(activable);
+
+            this.activables = mutableActivables;
+        } finally {
+            activablesLock.unlock();
+        }
+
+        activable.start();
+    }
+
+    @Override
+    public void removeActivable(@NotNull Activable activable) {
+        boolean removed;
+        activablesLock.lock();
+        try {
+            Set<Activable> mutableActivables = new HashSet<>(activables);
+            removed = mutableActivables.remove(activable);
+
+            this.activables = mutableActivables;
+        } finally {
+            activablesLock.unlock();
+        }
+
+        if (removed) {
+            activable.end();
+        }
+    }
+
+    @Override
     public void start() {
         module.getStateSwitcher().start();
+
+        for (Activable activable : activables) {
+            activable.start();
+        }
     }
 
     @Override
@@ -68,6 +113,10 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
             inventoryTick(player, time);
+        }
+
+        for (Activable activable : activables) {
+            activable.tick(time);
         }
 
         module.getStateSwitcher().tick(time);
@@ -82,6 +131,10 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
             setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(false));
         }
         module.getStateSwitcher().end();
+
+        for (Activable activable : activables) {
+            activable.end();
+        }
     }
 
     private void inventoryTick(Player player, long time) {

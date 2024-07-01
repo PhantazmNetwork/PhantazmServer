@@ -1,14 +1,11 @@
 package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.Target;
 import org.phantazm.mob2.Trigger;
@@ -30,43 +27,39 @@ public class PushSkill implements SkillComponent {
     }
 
     @Override
-    public @NotNull Skill apply(@NotNull Mob mob, @NotNull InjectionStore injectionStore) {
-        return new Internal(mob, selector.apply(mob, injectionStore), data);
+    public @NotNull Skill get() {
+        return new Internal(selector.get(), data);
     }
 
+    @Default("""
+        {
+          trigger=null,
+          additive=false
+        }
+        """)
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        @NotNull @ChildPath("selector") String selector,
         double power,
         double vertical,
         boolean additive) {
-        @Default("trigger")
-        public static @NotNull ConfigElement defaultTrigger() {
-            return ConfigPrimitive.NULL;
-        }
-
-        @Default("additive")
-        public static @NotNull ConfigElement defaultAdditive() {
-            return ConfigPrimitive.of(false);
-        }
     }
 
     private static class Internal extends TargetedSkill {
         private final Data data;
 
-        public Internal(Mob self, Selector selector, Data data) {
-            super(self, selector);
+        public Internal(Selector selector, Data data) {
+            super(selector);
             this.data = data;
         }
 
         @Override
-        protected void useOnTarget(@NotNull Target target) {
-            target.forType(Entity.class, this::setVelocity);
+        protected void useOnTarget(@NotNull Target target, @NotNull Mob mob) {
+            target.forType(Entity.class, targetEntity -> setVelocity(mob, targetEntity));
         }
 
-        private void setVelocity(Entity target) {
-            Vec diff = target.getPosition().sub(self.getPosition()).asVec().normalize();
+        private void setVelocity(Mob mob, Entity target) {
+            Vec diff = target.getPosition().sub(mob.getPosition()).asVec().normalize();
             target.getAcquirable().sync(targetEntity -> {
                 if (data.additive) {
                     targetEntity.setVelocity(
