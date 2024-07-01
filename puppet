@@ -123,7 +123,7 @@ if [ "$1" == "install" ]; then
   exit 0
 fi
 
-if [ ! -f "/usr/local/bin/puppet" ]; then
+if [ ! -f "$bin_dir/puppet" ]; then
   echo "Puppet has not been installed; do so by running 'puppet install' with root permissions." 1<&2
   exit 1
 fi
@@ -158,7 +158,7 @@ is_in_group () {
   return 1
 }
 
-if ! is_in_group "server_access" "$user"; then
+if ! is_in_group server_access "$user"; then
   echo "'$user' is not part of the 'server_access' group!" 1<&2
   exit 1
 fi
