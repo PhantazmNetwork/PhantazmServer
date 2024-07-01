@@ -139,6 +139,8 @@ if [ "$1" == "uninstall" ]; then
   rm -f "$bin_dir/puppet"
   rm -rf "$log_dir"
 
+  rm -rf "$pid_dir"
+
   exit 0
 fi
 
@@ -252,8 +254,8 @@ fi
 
 # Simple folder-based mutex
 if ! mkdir "$lock_folder"; then
-  echo "An instance of puppet is already running!"
-  echo "If this is an error, run 'rm -rf $lock_folder' and try launching puppet again."
+  echo "An instance of puppet is already running!" 1<&2
+  echo "If this is an error, run 'rm -rf $lock_folder' and try launching puppet again." 1<&2
   exit 1
 fi
 
