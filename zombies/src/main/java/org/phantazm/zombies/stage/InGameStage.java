@@ -116,8 +116,9 @@ public class InGameStage implements Stage {
                 }
 
                 for (Key key : defaultEquipment.get(groupKey)) {
-                    module.getEquipmentCreator().createEquipment(key)
-                        .ifPresent(equipment -> equipmentHandler.addEquipment(equipment, groupKey));
+                    equipmentHandler.addOrReplaceEquipment(groupKey, key, false,
+                        -1, false, () -> module.getEquipmentCreator().createEquipment(key),
+                        zombiesPlayer.getPlayer().orElse(null));
 
                     if (!equipmentHandler.canAddEquipment(groupKey)) {
                         break;

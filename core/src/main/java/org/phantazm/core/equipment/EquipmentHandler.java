@@ -27,7 +27,7 @@ public class EquipmentHandler {
         return accessRegistry;
     }
 
-    public void addEquipment(@NotNull Equipment equipment, @NotNull Key groupKey) {
+    private void addEquipment(@NotNull Equipment equipment, @NotNull Key groupKey) {
         Objects.requireNonNull(equipment);
         Objects.requireNonNull(groupKey);
 
@@ -114,6 +114,7 @@ public class EquipmentHandler {
     public @NotNull Result addOrReplaceEquipment(Key groupKey, Key equipmentKey, boolean allowReplace, int specificSlot,
         boolean allowDuplicate, @NotNull Supplier<? extends Optional<? extends Equipment>> equipmentSupplier,
         @Nullable Player player) {
+        // TODO: adding equipment when player is null should still add the equipment to the registry
         if (player == null) {
             return Result.FAILED;
         }
@@ -142,7 +143,7 @@ public class EquipmentHandler {
 
             Equipment equipment = equipmentOptional.get();
             if (specificSlot < 0) {
-                if (callEvent(equipment, player)) {
+                if (callEvent(equipment, player, groupKey)) {
                     return Result.CANCELLED;
                 }
 
@@ -157,7 +158,7 @@ public class EquipmentHandler {
 
             InventoryProfile profile = group.getProfile();
             if (!profile.hasInventoryObject(specificSlot)) {
-                if (callEvent(equipment, player)) {
+                if (callEvent(equipment, player, groupKey)) {
                     return Result.CANCELLED;
                 }
 
@@ -167,7 +168,7 @@ public class EquipmentHandler {
 
             InventoryObject currentObject = profile.getInventoryObject(specificSlot);
             if (allowReplace || group.defaultObject() == currentObject) {
-                if (callEvent(equipment, player)) {
+                if (callEvent(equipment, player, groupKey)) {
                     return Result.CANCELLED;
                 }
 
@@ -191,7 +192,7 @@ public class EquipmentHandler {
         }
 
         Equipment equipment = equipmentOptional.get();
-        if (callEvent(equipment, player)) {
+        if (callEvent(equipment, player, groupKey)) {
             return Result.CANCELLED;
         }
 
@@ -199,8 +200,8 @@ public class EquipmentHandler {
         return old == null || old == group.defaultObject() ? Result.ADDED : Result.REPLACED;
     }
 
-    private boolean callEvent(Equipment equipment, Player player) {
-        EquipmentAddEvent addEvent = new EquipmentAddEvent(player, equipment);
+    private boolean callEvent(Equipment equipment, Player player, Key groupKey) {
+        EquipmentAddEvent addEvent = new EquipmentAddEvent(player, equipment, groupKey, accessRegistry);
         eventScene.broadcastEvent(addEvent);
         return addEvent.isCancelled();
     }

@@ -45,7 +45,9 @@ import org.phantazm.zombies.mob2.BasicMobSpawnerSource;
 import org.phantazm.zombies.mob2.MobSpawnerSource;
 import org.phantazm.zombies.modifier.*;
 import org.phantazm.zombies.player.BasicZombiesPlayerSource;
+import org.phantazm.zombies.player.upgrade.NoUpgradeActivator;
 import org.phantazm.zombies.player.upgrade.PlayerUpgradeComponent;
+import org.phantazm.zombies.player.upgrade.UpgradeActivatorComponent;
 import org.phantazm.zombies.powerup.BasicPowerupHandlerSource;
 import org.phantazm.zombies.powerup.PowerupData;
 import org.phantazm.zombies.powerup.PowerupHandler;
@@ -182,12 +184,19 @@ public final class ZombiesFeature {
                     upgradeComponentMap.put(upgradeInfo.id(), upgrade);
                 }
 
+                UpgradeActivatorComponent upgradeActivatorComponent;
+                if (mapInfo.upgradeActivator().isEmpty()) {
+                    upgradeActivatorComponent = NoUpgradeActivator.INSTANCE;
+                } else {
+                    upgradeActivatorComponent = contextManager.makeContext(mapInfo.upgradeActivator()).provide();
+                }
+
                 return new ZombiesSceneCreator(zombiesConfig.maximumScenes(), mapInfo, instanceLoader, keyParser,
                     contextManager, songLoader, database, instanceSettingsFunction, globalEventNode,
                     mobSpawnerSource, clientBlockHandlerSource, powerupHandlerSource, modifierHandler,
                     new BasicZombiesPlayerSource(EquipmentFeature::createEquipmentCreator), corpseCreatorSource,
                     endlessSource, leaderboardContext, playerContext.roles(), IdentitySource.MOJANG,
-                    Map.copyOf(upgradeComponentMap));
+                    Map.copyOf(upgradeComponentMap), upgradeActivatorComponent);
             }, "creator")
             .accepting(maps -> {
                 LOGGER.info("Loaded {} maps", maps.size());

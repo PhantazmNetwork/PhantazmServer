@@ -38,6 +38,8 @@ import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.player.upgrade.PlayerUpgradeComponent;
 import org.phantazm.zombies.player.upgrade.PlayerUpgradeHandler;
+import org.phantazm.zombies.player.upgrade.UpgradeActivator;
+import org.phantazm.zombies.player.upgrade.UpgradeActivatorComponent;
 import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageKeys;
 import org.phantazm.zombies.stage.StageTransition;
@@ -52,6 +54,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
     private final Map<PlayerView, ZombiesPlayer> managedPlayersView;
 
     private final Map<Key, PlayerUpgradeComponent> playerUpgradeComponentMap;
+    private final UpgradeActivatorComponent upgradeActivatorComponent;
     private final Map<UUID, PlayerUpgradeHandler> upgradeHandlers;
 
     private final ZombiesMap map;
@@ -80,6 +83,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         @NotNull MapSettingsInfo mapSettingsInfo,
         @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
         @NotNull Map<Key, PlayerUpgradeComponent> upgradeComponents,
+        @NotNull UpgradeActivatorComponent upgradeActivatorComponent,
         @NotNull StageTransition stageTransition,
         @NotNull Function<? super PlayerView, ? extends ZombiesPlayer> playerCreator,
         @NotNull ZombiesStatsDatabase database,
@@ -89,6 +93,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         this.managedPlayers = Objects.requireNonNull(playerMap);
         this.managedPlayersView = Collections.unmodifiableMap(playerMap);
         this.playerUpgradeComponentMap = Map.copyOf(upgradeComponents);
+        this.upgradeActivatorComponent = Objects.requireNonNull(upgradeActivatorComponent);
         this.upgradeHandlers = new ConcurrentHashMap<>();
 
         this.map = Objects.requireNonNull(map);
@@ -403,6 +408,10 @@ public class ZombiesScene extends InstanceScene implements EventScene {
 
     public @NotNull Scheduler getScheduler() {
         return scheduler;
+    }
+
+    public PlayerUpgradeHandler upgradeHandler(@NotNull UUID uuid) {
+        return upgradeHandlers.get(uuid);
     }
 
     @SuppressWarnings("unchecked")

@@ -36,6 +36,11 @@ public class BasicInventoryProfile implements InventoryProfile {
     }
 
     @Override
+    public InventoryObject getInventoryObjectSafe(int slot) {
+        return objects[slot];
+    }
+
+    @Override
     public @NotNull InventoryObject setInventoryObject(int slot, @NotNull InventoryObject object) {
         Objects.requireNonNull(object);
 

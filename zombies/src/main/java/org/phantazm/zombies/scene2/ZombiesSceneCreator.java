@@ -57,6 +57,7 @@ import org.phantazm.zombies.mob2.MobSpawnerSource;
 import org.phantazm.zombies.modifier.ModifierHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgradeComponent;
+import org.phantazm.zombies.player.upgrade.UpgradeActivatorComponent;
 import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.sidebar.ElementSidebarUpdaterCreator;
 import org.phantazm.zombies.sidebar.SidebarModule;
@@ -91,6 +92,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
     private final RoleStore roleStore;
     private final IdentitySource identitySource;
     private final Map<Key, PlayerUpgradeComponent> playerUpgradeComponentMap;
+    private final UpgradeActivatorComponent upgradeActivatorComponent;
 
     private final SongLoader songLoader;
 
@@ -103,7 +105,8 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         @NotNull PowerupHandler.Source powerupHandlerSource, @NotNull ModifierHandler modifierHandler,
         @NotNull ZombiesPlayer.Source zombiesPlayerSource, @NotNull CorpseCreator.Source corpseCreatorSource,
         @NotNull Endless.Source endlessSource, @NotNull ZombiesLeaderboardContext leaderboardContext, @NotNull RoleStore roleStore,
-        @NotNull IdentitySource identitySource, @NotNull Map<Key, PlayerUpgradeComponent> playerUpgradeComponentMap) {
+        @NotNull IdentitySource identitySource, @NotNull Map<Key, PlayerUpgradeComponent> playerUpgradeComponentMap,
+        @NotNull UpgradeActivatorComponent upgradeActivatorComponent) {
         this.sceneCap = sceneCap;
         this.instanceSpaceFunction = Objects.requireNonNull(instanceSpaceFunction);
         this.mapInfo = Objects.requireNonNull(mapInfo);
@@ -134,6 +137,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         this.roleStore = Objects.requireNonNull(roleStore);
         this.identitySource = Objects.requireNonNull(identitySource);
         this.playerUpgradeComponentMap = Map.copyOf(playerUpgradeComponentMap);
+        this.upgradeActivatorComponent = Objects.requireNonNull(upgradeActivatorComponent);
         this.songLoader = Objects.requireNonNull(songLoader);
     }
 
@@ -222,7 +226,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         };
 
         ZombiesScene scene = new ZombiesScene(instance, map, settings, zombiesPlayers, playerUpgradeComponentMap,
-            stageTransition, playerCreator, database, childNode, tickTaskScheduler);
+            upgradeActivatorComponent, stageTransition, playerCreator, database, childNode, tickTaskScheduler);
         sceneWrapper.set(scene);
         rootNode.addChild(childNode);
 

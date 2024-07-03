@@ -3,6 +3,8 @@ package org.phantazm.core.inventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 /**
  * A profile of an inventory.
  */
@@ -23,8 +25,12 @@ public interface InventoryProfile {
      * @param slot The slot to get the {@link InventoryObject} from
      * @return The {@link InventoryObject}
      * @throws IllegalArgumentException If no {@link InventoryObject} exists in the slot
+     * @deprecated calls to hasInventoryObject(int) and getInventoryObject(int) are subject to race conditions
      */
+    @Deprecated
     @NotNull InventoryObject getInventoryObject(int slot);
+
+    InventoryObject getInventoryObjectSafe(int slot);
 
     /**
      * Sets the {@link InventoryObject} within a certain slot.

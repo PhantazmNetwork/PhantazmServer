@@ -77,7 +77,9 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
             activablesLock.unlock();
         }
 
-        activable.start();
+        if (!hasQuit()) {
+            activable.start();
+        }
     }
 
     @Override
