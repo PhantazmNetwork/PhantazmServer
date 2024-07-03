@@ -8,6 +8,7 @@ import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
@@ -27,6 +28,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 @Model("zombies.upgrade.spread_attribute_on_death")
 @Cache
@@ -88,24 +90,35 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
                     }
 
                     ShotEffect effect = event.target().extensions().get(EFFECT_KEY);
-                    if (effect == null) {
+                    if (effect == null || data.amount == 0) {
                         return;
                     }
 
                     Pos center = event.target().getPosition();
-                    instance.getEntityTracker().nearbyEntities(center, data.radius,
-                        EntityTracker.Target.LIVING_ENTITIES, otherMob -> {
-                            if (!(otherMob instanceof Mob mob) || otherMob == event.target() ||
-                                mob.tagHandler().getAndUpdateTag(HAS_SPREAD_EFFECT, ignored -> true)) {
-                                return;
-                            }
+                    instance.getEntityTracker().nearbyEntitiesUntil(center, data.radius,
+                        EntityTracker.Target.LIVING_ENTITIES, new Predicate<>() {
+                            private int amount;
 
-                            effect.perform(mob, zombiesPlayer);
+                            @Override
+                            public boolean test(LivingEntity otherMob) {
+                                if (!(otherMob instanceof Mob mob) || otherMob == event.target() ||
+                                    mob.tagHandler().getAndUpdateTag(HAS_SPREAD_EFFECT, ignored -> true)) {
+                                    return false;
+                                }
 
-                            Attribute attribute = Attribute.fromKey(data.attribute);
-                            if (attribute != null) {
-                                mob.getAttribute(attribute).addModifier(new AttributeModifier(RANDOM_UUID, NAME, data.amount,
-                                    data.operation));
+                                effect.perform(mob, zombiesPlayer);
+
+                                Attribute attribute = Attribute.fromKey(data.attribute);
+                                if (attribute != null) {
+                                    mob.getAttribute(attribute).addModifier(new AttributeModifier(RANDOM_UUID, NAME, data.amount,
+                                        data.operation));
+                                }
+
+                                if (data.limit < 0) {
+                                    return false;
+                                }
+
+                                return ++amount >= data.limit;
                             }
                         });
                 }
@@ -156,6 +169,7 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
         @NotNull String attribute,
         float amount,
         @NotNull AttributeOperation operation,
+        int limit,
         boolean removeModifierOnWearOff) {
 
     }
