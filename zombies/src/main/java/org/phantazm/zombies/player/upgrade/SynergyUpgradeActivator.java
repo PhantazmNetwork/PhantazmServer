@@ -18,9 +18,7 @@ import org.phantazm.core.inventory.InventoryObjectGroup;
 import org.phantazm.zombies.player.state.InventoryKeys;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Model("zombies.upgrade.activator.synergy")
 @Cache
@@ -40,10 +38,18 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
     private static class Internal implements UpgradeActivator {
         private final ZombiesScene zombiesScene;
         private final Data data;
+        private final Set<Key> allSynergies;
 
         private Internal(ZombiesScene zombiesScene, Data data) {
             this.zombiesScene = zombiesScene;
             this.data = data;
+
+            Set<Key> allSynergies = new HashSet<>(data.synergies.size());
+            for (Synergy synergy : data.synergies.values()) {
+                allSynergies.add(synergy.synergy);
+            }
+
+            this.allSynergies = Set.copyOf(allSynergies);
         }
 
         @Override
@@ -65,6 +71,7 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
             }
 
             IntSet slots = group.getSlots();
+            Set<Key> activeSynergies = new HashSet<>();
             for (int i = 0; i < slots.size() - 1; i++) {
                 InventoryObject first = access.profile().getInventoryObjectSafe(i);
                 if (!(first instanceof Equipment firstEquipment)) {
@@ -84,9 +91,19 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
 
                     if (TagUtils.sceneLocalTags(event.getPlayer(), zombiesScene)
                         .getTag(Tag.Boolean(synergy.requiredTag).defaultValue(false))) {
-                        upgradeHandler.activateUpgrade(synergy.synergy);
+                        activeSynergies.add(synergy.synergy);
                     }
                 }
+            }
+
+            for (Key otherSynergy : allSynergies) {
+                if (!activeSynergies.contains(otherSynergy)) {
+                    upgradeHandler.deactivateUpgrade(otherSynergy);
+                }
+            }
+
+            for (Key active : activeSynergies) {
+                upgradeHandler.activateUpgrade(active);
             }
         }
     }
