@@ -184,12 +184,9 @@ public final class ZombiesFeature {
                     upgradeComponentMap.put(upgradeInfo.id(), upgrade);
                 }
 
-                UpgradeActivatorComponent upgradeActivatorComponent;
-                if (mapInfo.upgradeActivator().isEmpty()) {
-                    upgradeActivatorComponent = NoUpgradeActivator.INSTANCE;
-                } else {
-                    upgradeActivatorComponent = contextManager.makeContext(mapInfo.upgradeActivator()).provide();
-                }
+                ConfigNode upgradeActivator = mapInfo.upgradeActivator();
+                UpgradeActivatorComponent upgradeActivatorComponent = upgradeActivator.isEmpty() ?
+                    NoUpgradeActivator.INSTANCE : contextManager.makeContext(upgradeActivator).provide();
 
                 return new ZombiesSceneCreator(zombiesConfig.maximumScenes(), mapInfo, instanceLoader, keyParser,
                     contextManager, songLoader, database, instanceSettingsFunction, globalEventNode,
