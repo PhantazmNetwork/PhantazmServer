@@ -89,7 +89,7 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
                         continue;
                     }
 
-                    if (TagUtils.sceneLocalTags(event.getPlayer(), zombiesScene)
+                    if (synergy.requiredTag == null || TagUtils.sceneLocalTags(event.getPlayer(), zombiesScene)
                         .getTag(Tag.Boolean(synergy.requiredTag).defaultValue(false))) {
                         activeSynergies.add(synergy.synergy);
                     }
@@ -131,7 +131,7 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
     }
 
     public record Synergy(@NotNull Key synergy,
-        @NotNull String requiredTag) {
+        String requiredTag) {
     }
 
     @DataObject

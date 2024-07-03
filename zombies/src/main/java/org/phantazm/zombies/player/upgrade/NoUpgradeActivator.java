@@ -11,11 +11,8 @@ public class NoUpgradeActivator implements UpgradeActivatorComponent {
 
     }
 
-    private static final UpgradeActivator NIL = new UpgradeActivator() {
-        @Override
-        public void hook() {
+    private static final UpgradeActivator NIL = () -> {
 
-        }
     };
 
     @Override

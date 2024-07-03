@@ -21,6 +21,8 @@ public final class Attributes {
     public static final Attribute HEADSHOT_DAMAGE_RECEIVED =
         new Attribute("phantazm.gun_headshot_damage_received", 0F, false);
 
+    public static final Attribute FIRE_DAMAGE_APPLY_INTERVAL = new Attribute("phantazm.fire_damage_apply_interval", 0F, false);
+
     // damage type API
     public static final Attribute FIRE_DAMAGE = new Attribute("damage.fire", 0F, false);
 
@@ -47,6 +49,7 @@ public final class Attributes {
         BULLET_PENETRATION.register();
         ATTACK_SPEED_MULTIPLIER.register();
         HEADSHOT_DAMAGE_RECEIVED.register();
+        FIRE_DAMAGE_APPLY_INTERVAL.register();
         FIRE_DAMAGE.register();
         EXPLOSION_DAMAGE.register();
         POISON_DAMAGE.register();

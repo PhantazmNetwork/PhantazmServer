@@ -77,8 +77,11 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         tags.setTag(lastDamageTicksTag, 0L);
 
         if (!alreadyActive) {
+            int interval = Math.round(AttributeUtils.computeWithBase(data.damageInterval, player
+                .getAttribute(Attributes.FIRE_DAMAGE_APPLY_INTERVAL)));
+
             activeEntities.add(new DamageTarget(new WeakReference<>(player), new WeakReference<>(livingEntity),
-                zombiesPlayer));
+                zombiesPlayer, interval));
         }
     }
 
@@ -98,7 +101,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             TagHandler tags = TagUtils.sceneLocalTags(entity, scene);
             long lastDamageTicks = tags.updateAndGetTag(this.lastDamageTicksTag, oldValue -> oldValue + 1);
 
-            if (lastDamageTicks >= data.damageInterval) {
+            if (lastDamageTicks >= target.interval) {
                 doDamage(entity, target.damager.get(), target.player);
                 tags.setTag(this.lastDamageTicksTag, 0L);
             }
@@ -127,7 +130,8 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
     private record DamageTarget(Reference<Player> damager,
         Reference<LivingEntity> target,
-        ZombiesPlayer player) {
+        ZombiesPlayer player,
+        int interval) {
     }
 
     @DataObject
