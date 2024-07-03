@@ -37,5 +37,6 @@ public class ZombiesCommand extends Command {
         addSubcommand(new FlagToggleCommand(keyParser));
         addSubcommand(new ZombiesRejoinCommand(joiner));
         addSubcommand(new ModifierCommand(keyParser, commandConfig, modifierHandlerLoader));
+        addSubcommand(new TogglePlayerUpgradeCommand(keyParser));
     }
 }

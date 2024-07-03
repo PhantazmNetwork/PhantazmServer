@@ -42,6 +42,10 @@ public class PlayerUpgradeHandler implements Tickable {
         }
     }
 
+    public PlayerUpgrade getUpgrade(@NotNull Key key) {
+        return upgrades.get(key);
+    }
+
     @Override
     public void tick(long time) {
         for (PlayerUpgrade upgrade : tickables) {
