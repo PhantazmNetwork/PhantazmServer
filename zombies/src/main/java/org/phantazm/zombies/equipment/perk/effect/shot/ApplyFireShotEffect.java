@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.Tickable;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
@@ -134,6 +135,11 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         int interval) {
     }
 
+    @Default("""
+        {
+          damageType='damage.fire'
+        }
+        """)
     @DataObject
     public record Data(
         int fireTicks,

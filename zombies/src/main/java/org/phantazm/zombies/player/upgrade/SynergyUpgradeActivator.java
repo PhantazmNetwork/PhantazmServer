@@ -4,14 +4,14 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.TagUtils;
 import org.phantazm.core.equipment.Equipment;
-import org.phantazm.core.event.equipment.EquipmentAddEvent;
+import org.phantazm.core.event.equipment.EquipmentPostAddEvent;
 import org.phantazm.core.inventory.InventoryAccess;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryObjectGroup;
@@ -54,10 +54,10 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
 
         @Override
         public void hook() {
-            zombiesScene.sceneNode().addListener(EquipmentAddEvent.class, this::handleAddEquipment);
+            zombiesScene.sceneNode().addListener(EquipmentPostAddEvent.class, this::handleAddEquipment);
         }
 
-        private void handleAddEquipment(EquipmentAddEvent event) {
+        private void handleAddEquipment(EquipmentPostAddEvent event) {
             UUID uuid = event.getPlayer().getUuid();
             PlayerUpgradeHandler upgradeHandler = zombiesScene.upgradeHandler(uuid);
             if (upgradeHandler == null) {
@@ -70,16 +70,18 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
                 return;
             }
 
-            IntSet slots = group.getSlots();
+            IntList slots = new IntArrayList(group.getSlots());
+            slots.sort(IntComparators.NATURAL_COMPARATOR);
+
             Set<Key> activeSynergies = new HashSet<>();
             for (int i = 0; i < slots.size() - 1; i++) {
-                InventoryObject first = access.profile().getInventoryObjectSafe(i);
+                InventoryObject first = access.profile().getInventoryObjectSafe(slots.getInt(i));
                 if (!(first instanceof Equipment firstEquipment)) {
                     continue;
                 }
 
                 for (int j = i + 1; j < slots.size(); j++) {
-                    InventoryObject second = access.profile().getInventoryObjectSafe(j);
+                    InventoryObject second = access.profile().getInventoryObjectSafe(slots.getInt(j));
                     if (!(second instanceof Equipment secondEquipment)) {
                         continue;
                     }

@@ -7,7 +7,8 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.phantazm.core.event.equipment.EquipmentAddEvent;
+import org.phantazm.core.event.equipment.EquipmentPostAddEvent;
+import org.phantazm.core.event.equipment.EquipmentPreAddEvent;
 import org.phantazm.core.inventory.*;
 import org.phantazm.core.scene2.EventScene;
 
@@ -148,6 +149,7 @@ public class EquipmentHandler {
                 }
 
                 addEquipment(equipment, groupKey);
+                eventScene.broadcastEvent(new EquipmentPostAddEvent(player, equipment, groupKey, accessRegistry));
                 return Result.ADDED;
             }
 
@@ -163,6 +165,7 @@ public class EquipmentHandler {
                 }
 
                 accessRegistry.replaceObject(specificSlot, equipment);
+                eventScene.broadcastEvent(new EquipmentPostAddEvent(player, equipment, groupKey, accessRegistry));
                 return Result.ADDED;
             }
 
@@ -173,6 +176,7 @@ public class EquipmentHandler {
                 }
 
                 InventoryObject old = accessRegistry.replaceObject(specificSlot, equipment);
+                eventScene.broadcastEvent(new EquipmentPostAddEvent(player, equipment, groupKey, accessRegistry));
                 return old == null || old == group.defaultObject() ? Result.ADDED : Result.REPLACED;
             }
 
@@ -197,11 +201,12 @@ public class EquipmentHandler {
         }
 
         InventoryObject old = accessRegistry.replaceObject(targetSlot, equipment);
+        eventScene.broadcastEvent(new EquipmentPostAddEvent(player, equipment, groupKey, accessRegistry));
         return old == null || old == group.defaultObject() ? Result.ADDED : Result.REPLACED;
     }
 
     private boolean callEvent(Equipment equipment, Player player, Key groupKey) {
-        EquipmentAddEvent addEvent = new EquipmentAddEvent(player, equipment, groupKey, accessRegistry);
+        EquipmentPreAddEvent addEvent = new EquipmentPreAddEvent(player, equipment, groupKey, accessRegistry);
         eventScene.broadcastEvent(addEvent);
         return addEvent.isCancelled();
     }

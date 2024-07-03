@@ -240,6 +240,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
         });
 
         endless.init();
+        scene.hook();
         return scene;
     }
 

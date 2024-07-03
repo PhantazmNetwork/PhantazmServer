@@ -73,6 +73,8 @@ public class ZombiesScene extends InstanceScene implements EventScene {
     private boolean restricted;
     private boolean modified;
 
+    private UpgradeActivator activator;
+
     private final Set<ModifierComponent> activeModifiers;
     private final Set<ModifierComponent> activeModifiersView;
 
@@ -412,6 +414,11 @@ public class ZombiesScene extends InstanceScene implements EventScene {
 
     public PlayerUpgradeHandler upgradeHandler(@NotNull UUID uuid) {
         return upgradeHandlers.get(uuid);
+    }
+
+    public void hook() {
+        this.activator = upgradeActivatorComponent.apply(InjectionStore.of(), this);
+        this.activator.hook();
     }
 
     @SuppressWarnings("unchecked")

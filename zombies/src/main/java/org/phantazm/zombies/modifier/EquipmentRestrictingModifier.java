@@ -9,7 +9,7 @@ import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.DualComponent;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.event.equipment.EquipmentAddEvent;
+import org.phantazm.core.event.equipment.EquipmentPreAddEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
@@ -34,7 +34,7 @@ public class EquipmentRestrictingModifier implements DualComponent<ZombiesScene,
         ZombiesScene scene) implements Modifier {
         @Override
         public void apply() {
-            scene.addListener(EquipmentAddEvent.class, event -> {
+            scene.addListener(EquipmentPreAddEvent.class, event -> {
                 //if blacklist == true, and equipment is in the list, it will be cancelled, otherwise not
                 //if whitelist (blacklist == false, default), and equipment is NOT in the list, it will be cancelled
                 if (data.blacklist == data.equipment.contains(event.equipment().key())) {
