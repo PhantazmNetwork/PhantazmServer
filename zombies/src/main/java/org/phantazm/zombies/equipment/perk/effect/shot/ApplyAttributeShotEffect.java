@@ -86,12 +86,13 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
     }
 
     private boolean process(LivingEntity livingEntity) {
-        if (livingEntity.isRemoved() || livingEntity.isDead()) {
+        if (livingEntity.isRemoved() || livingEntity.isDead() || TagUtils.sceneLocalTags(livingEntity, scene)
+            .getAndUpdateTag(applyTicksTag, tick -> tick + 1) >= data.duration) {
             removeAttribute(livingEntity);
             return true;
         }
 
-        return TagUtils.sceneLocalTags(livingEntity, scene).getAndUpdateTag(applyTicksTag, tick -> tick + 1) >= data.duration;
+        return false;
     }
 
     private void removeAttribute(LivingEntity entity) {
