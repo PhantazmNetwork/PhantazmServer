@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
@@ -92,10 +93,7 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
                     }
 
                     if (old == 1 && activationType.compareAndSet(ActivationType.BY_DAMAGE, ActivationType.NOT_ACTIVATED)) {
-                        zombiesPlayer.getPlayer().ifPresent(player -> {
-                            player.getAttribute(attribute).removeModifier(attributeModifier);
-                            player.sendMessage(data.deactivateMessage);
-                        });
+                        zombiesPlayer.getPlayer().ifPresent(this::deactivate);
                     }
                 }
 
@@ -111,19 +109,13 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
 
                 private void onIgnited() {
                     if (activationType.compareAndSet(ActivationType.NOT_ACTIVATED, ActivationType.BY_FIRE)) {
-                        zombiesPlayer.getPlayer().ifPresent(player -> {
-                            player.getAttribute(attribute).addModifier(attributeModifier);
-                            player.sendMessage(data.activateMessage);
-                        });
+                        zombiesPlayer.getPlayer().ifPresent(this::activate);
                     }
                 }
 
                 private void onExtinguished() {
                     if (activationType.compareAndSet(ActivationType.BY_FIRE, ActivationType.NOT_ACTIVATED)) {
-                        zombiesPlayer.getPlayer().ifPresent(player -> {
-                            player.getAttribute(attribute).removeModifier(attributeModifier);
-                            player.sendMessage(data.deactivateMessage);
-                        });
+                        zombiesPlayer.getPlayer().ifPresent(this::deactivate);
 
                     }
                 }
@@ -141,9 +133,20 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
 
                     if (damage.getAmount() >= amount && activationType.compareAndSet(ActivationType.NOT_ACTIVATED, ActivationType.BY_DAMAGE)
                         && effectTicks.compareAndSet(0, data.duration)) {
-                        event.getPlayer().getAttribute(attribute).addModifier(attributeModifier);
-                        event.getPlayer().sendMessage(data.activateMessage);
+                        activate(event.getPlayer());
                     }
+                }
+
+                private void activate(Player player) {
+                    player.getAttribute(attribute).addModifier(attributeModifier);
+                    player.sendMessage(data.activateMessage);
+                    player.playSound(data.activateSound);
+                }
+
+                private void deactivate(Player player) {
+                    player.getAttribute(attribute).removeModifier(attributeModifier);
+                    player.sendMessage(data.deactivateMessage);
+                    player.playSound(data.deactivateSound);
                 }
             }), zombiesPlayer);
         }
@@ -161,6 +164,8 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
         int duration,
         @NotNull Component activateMessage,
         @NotNull Component deactivateMessage,
+        @NotNull Sound activateSound,
+        @NotNull Sound deactivateSound,
         @NotNull String attribute,
         float amount,
         AttributeOperation operation) {
