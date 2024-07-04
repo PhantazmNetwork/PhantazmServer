@@ -175,7 +175,11 @@ public class DamageOverTimeSkill implements SkillComponent {
                 float actualDamage = data.bypassArmor ? data.damageAmount :
                     DamageUtils.computeDamageWithArmorAndResistances(data.damageType, (LivingEntity) targetEntity, data.damageAmount);
                 float overflow = Math.max(0, data.minHealth - (((LivingEntity) targetEntity).getHealth() - actualDamage));
-                if (((LivingEntity) targetEntity).damage(Damage.fromEntity(self, actualDamage - overflow)) &&
+
+                Damage damage = Damage.fromEntity(self, actualDamage - overflow);
+                damage.setTag(DamageUtils.DAMAGE_TYPE_TAG, data.damageType);
+
+                if (((LivingEntity) targetEntity).damage(damage) &&
                     data.sound != null && targetEntity instanceof Player player) {
                     player.playSound(data.sound);
                 }

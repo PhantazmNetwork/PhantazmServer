@@ -80,8 +80,7 @@ public class DamageShotHandler implements ShotHandler {
                 }
 
                 switch (data.armorBehavior) {
-                    case ALWAYS_BYPASS -> targetEntity.damage(Damage.fromEntity(attacker, DamageUtils
-                        .computeDamageWithResistances(targetEntity, data.damageType, baseDamage)));
+                    case ALWAYS_BYPASS -> DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, true);
                     case NEVER_BYPASS -> DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, false);
                     case BYPASS_ON_HEADSHOT ->
                         DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, headshot);

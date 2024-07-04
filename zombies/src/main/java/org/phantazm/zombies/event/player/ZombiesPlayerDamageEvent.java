@@ -1,6 +1,7 @@
 package org.phantazm.zombies.event.player;
 
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -9,12 +10,15 @@ import java.util.Objects;
 public class ZombiesPlayerDamageEvent implements ZombiesPlayerEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
+    private final EntityDamageEvent damageCause;
 
     private boolean shouldKnock;
 
-    public ZombiesPlayerDamageEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer) {
+    public ZombiesPlayerDamageEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
+        @NotNull EntityDamageEvent damageCause) {
         this.player = Objects.requireNonNull(player);
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
+        this.damageCause = Objects.requireNonNull(damageCause);
     }
 
     @Override
@@ -33,5 +37,9 @@ public class ZombiesPlayerDamageEvent implements ZombiesPlayerEvent {
 
     public boolean shouldKnock() {
         return shouldKnock;
+    }
+
+    public @NotNull EntityDamageEvent cause() {
+        return damageCause;
     }
 }
