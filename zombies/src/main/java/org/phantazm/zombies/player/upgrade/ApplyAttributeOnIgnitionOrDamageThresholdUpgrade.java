@@ -87,7 +87,6 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
                     }
 
                     int old = effectTicks.getAndUpdate(current -> current == 0 ? current : current - 1);
-                    System.out.println(old);
                     if (old == 0) {
                         return;
                     }

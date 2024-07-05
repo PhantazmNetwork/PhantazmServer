@@ -1,7 +1,6 @@
 package org.phantazm.zombies.equipment.perk.effect;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.element.core.annotation.document.Description;
 import net.minestom.server.Tickable;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
@@ -17,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-@Description("An effect that can perform arbitrary actions on entities shot by the player who has the effect.")
 @Model("zombies.perk.effect.shot")
 @Cache(false)
 public class ShotEffectCreator implements PerkEffectCreator {
@@ -71,6 +69,9 @@ public class ShotEffectCreator implements PerkEffectCreator {
         @Override
         public void start() {
             rootNode.addListener(listener);
+            for (ShotEffect effect : actions) {
+                zombiesPlayer.registerShotEffect(effect);
+            }
         }
 
         @Override
@@ -83,6 +84,9 @@ public class ShotEffectCreator implements PerkEffectCreator {
         @Override
         public void end() {
             rootNode.removeListener(listener);
+            for (ShotEffect effect : actions) {
+                zombiesPlayer.removeShotEffect(effect);
+            }
         }
 
         private void onEntityDamageByGun(EntityDamageByGunEvent event) {

@@ -181,7 +181,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     reviveHandler);
 
             corpseWrapper.set(corpse);
-            return new KnockedPlayerState(reviveHandler,
+            return new KnockedPlayerState(scene, zombiesPlayerWrapper, reviveHandler,
                 List.of(Activable.threadsafeWrapper(new BasicKnockedStateActivable(context, instance, playerView, meta, actionBar,
                         mapSettingsInfo, reviveHandler, tickFormatter, sidebar, tabList, belowNameTag, stats,
                         mapSettingsInfo, zombiesPlayerWrapper.unmodifiableView())), corpse.asKnockActivable(),

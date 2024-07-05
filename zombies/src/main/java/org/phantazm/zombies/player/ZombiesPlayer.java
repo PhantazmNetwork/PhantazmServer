@@ -9,6 +9,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.BelowNameTag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryObject;
@@ -18,6 +19,7 @@ import org.phantazm.core.tick.Activable;
 import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 import org.phantazm.zombies.corpse.CorpseCreator;
+import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.PlayerCoinsInfo;
@@ -29,10 +31,7 @@ import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.scene2.ZombiesScene;
 import org.phantazm.zombies.stage.Stage;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
@@ -53,6 +52,12 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
     void addActivable(@NotNull Activable activable);
 
     void removeActivable(@NotNull Activable activable);
+
+    void registerShotEffect(@NotNull ShotEffect shotEffect);
+
+    void removeShotEffect(@NotNull ShotEffect shotEffect);
+
+    @NotNull @UnmodifiableView Set<ShotEffect> shotEffects();
 
     default @NotNull Optional<Equipment> getHeldEquipment() {
         Optional<Player> playerOptional = module().getPlayerView().getPlayer();

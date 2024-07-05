@@ -4,12 +4,14 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.zombies.Attributes;
+import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -25,8 +27,9 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final TickTaskScheduler taskScheduler;
 
     private final AtomicBoolean blockHandAnimation;
-    private volatile Set<Activable> activables;
+    private final Set<ShotEffect> shotEffects;
 
+    private volatile Set<Activable> activables;
     private final Lock activablesLock;
 
     public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module,
@@ -35,6 +38,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         this.module = Objects.requireNonNull(module);
         this.taskScheduler = Objects.requireNonNull(taskScheduler);
         this.blockHandAnimation = new AtomicBoolean();
+        this.shotEffects = new HashSet<>();
         this.activables = Set.of();
         this.activablesLock = new ReentrantLock();
     }
@@ -98,6 +102,21 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         if (removed) {
             activable.end();
         }
+    }
+
+    @Override
+    public void registerShotEffect(@NotNull ShotEffect shotEffect) {
+        shotEffects.add(shotEffect);
+    }
+
+    @Override
+    public void removeShotEffect(@NotNull ShotEffect shotEffect) {
+        shotEffects.remove(shotEffect);
+    }
+
+    @Override
+    public @NotNull @UnmodifiableView Set<ShotEffect> shotEffects() {
+        return Collections.unmodifiableSet(shotEffects);
     }
 
     @Override
