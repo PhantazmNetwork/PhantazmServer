@@ -301,13 +301,16 @@ require_server_access () {
   fi
 }
 
+# Ensures that the server.tar.gz file exists
 require_blob () {
-  if [ ! -f "$blob" ]; then
-    echo "Missing required file '$blob'. Running '$pname deploy-src' should generate it, or else it can be brought in externally." 1<&2
+  su "$server_user" -c "
+  if [ ! -f \"$blob\" ]; then
+    echo \"Missing required file '$blob'. Running '$pname deploy-src' should generate it, or else it can be brought in externally.\" 1<&2
     exit 1
-  fi
+  fi" || exit 1
 }
 
+# Updates the config directory to the latest branch
 update_config () {
   su "$server_user" -c "
   cd \"$config\" || exit 1
@@ -321,6 +324,19 @@ update_config () {
 
   git checkout \"$config_branch\" || exit 1
   git pull" || exit 1
+}
+
+# Checks if a given server process ID is empty or doesn't exist
+check_status () {
+  if [ -z "$1" ]; then
+    echo "false"
+  else
+    if [ -z "$(ps -p "$1" -o args | grep -E "/usr/local/etc/$pname/(main|fallback)")" ]; then
+      echo "false"
+    else
+      echo "true"
+    fi
+  fi
 }
 
 tmux_init () {
@@ -356,6 +372,31 @@ elif [ "$1" == "deny" ]; then
   usermod -rG server_access "$2" || exit 1
   tmux -S "$socket_1" server-access -d "$2"
   tmux -S "$socket_2" server-access -d "$2"
+  exit 0
+elif [ "$1" == "status" ]; then
+  require_server_access
+
+  main_pid=$(su "$server_user" -c "cat \"$main_pid_file\"")
+  fallback_pid=$(su "$server_user" -c "cat \"$fallback_pid_file\"")
+
+  main_is_running=$(check_status "$main_pid")
+  fallback_is_running=$(check_status "$fallback_pid")
+
+  if [ "$main_is_running" == "true" ]; then
+    main_status="Running"
+  else
+    main_status="Stopped"
+  fi
+
+  if [ "$main_is_running" == "true" ]; then
+    fallback_status="Running"
+  else
+    fallback_status="Stopped"
+  fi
+
+  echo "'main' status: $main_status"
+  echo "'fallback' status: $fallback_status"
+
   exit 0
 elif [ "$1" == "fallback" ]; then
   require_server_access
@@ -417,6 +458,7 @@ elif [ "$1" == "help" ]; then
   printf "  help           Prints this help message and exits.\n"
   printf "  allow [user]   Allows a user to attach to or run servers. Requires root.\n"
   printf "  deny [user]    Denies a user to attach to or run servers. Requires root.\n"
+  printf "  status         Prints the current status of the main & fallback servers.\n"
   printf "  main           Attaches to the main server terminal.\n"
   printf "  fallback       Attaches to the fallback server terminal.\n"
   printf "  shutdown       Shuts down the main server.\n"
@@ -458,19 +500,6 @@ trap "exit_hook" EXIT
 tmux_init
 
 ## Function definitions
-
-# Checks if a given server process ID is empty or doesn't exist
-check_status () {
-  if [ -z "$1" ]; then
-    echo "false"
-  else
-    if [ -z "$(ps -p "$1" -o args | grep -E "/usr/local/etc/$pname/(main|fallback)")" ]; then
-      echo "false"
-    else
-      echo "true"
-    fi
-  fi
-}
 
 # Promotes the fallback server to the main server. Should be called if the fallback server is the only running server.
 promote_fallback () {
@@ -519,8 +548,8 @@ synchronize_target () {
 
 ## Server startup
 
-main_pid=$(cat "$main_pid_file")
-fallback_pid=$(cat "$fallback_pid_file")
+main_pid=$(su "$server_user" -c "cat \"$main_pid_file\"")
+fallback_pid=$(su "$server_user" -c "cat \"$fallback_pid_file\"")
 
 main_is_running=$(check_status "$main_pid")
 fallback_is_running=$(check_status "$fallback_pid")
