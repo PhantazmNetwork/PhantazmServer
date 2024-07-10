@@ -1,9 +1,13 @@
 #!/bin/bash
+# c2301c68dfe54232af2a63a47cc8b782
 
 ## Configuration
 
 # Program name, can be changed in case of conflicts
 pname="puppet"
+
+# Server file owner
+server_user="phantazm-server"
 
 # Install locations
 bin_dir="/usr/local/bin"
@@ -51,15 +55,21 @@ main="$data_dir/main"
 fallback="$data_dir/fallback"
 logs="$persistent/logs"
 
-# BEGIN USER CONFIG (should probably be changed by users before installing)
+# BEGIN USER CONFIG
+
+# You can change these options before installing
 # Git repository branches
 code_branch="dev"
-config_branch="main"
+config_branch="just-in-case"
 
 # Repositories
 config_repo="git@github.com-Configuration:PhantazmNetwork/Configuration.git"
 code_repo="https://github.com/PhantazmNetwork/PhantazmServer"
+
 # END USER CONFIG
+
+# Running user
+user=$(whoami)
 
 check_dependency () {
   if ! which "$1" > /dev/null; then
@@ -80,89 +90,89 @@ check_dependency git || exit 1
 check_dependency rsync || exit 1
 check_dependency tar || exit 1
 
-user=$(whoami)
-
 if [ "$1" == "install" ]; then
   require_root
-
-  # Ensure that our current working directory exists
-  cd "/" || exit
-
-  script_file=$( readlink -f -- "$0" )
 
   if [ -f "$bin_dir/$pname" ]; then
     echo "$pname is already installed" 1<&2
     exit 1
   fi
 
-  mkdir -p "$bin_dir"
+  script_file="$2"
+  if [ ! -f "$script_file" ]; then
+    echo "Failed to locate '$script_file'; cannot install"
+    exit 1
+  fi
 
+  if [ -z "$( grep -E "# c2301c68dfe54232af2a63a47cc8b782" < "$script_file" )" ]; then
+      echo "$script_file is not the correct script file!"
+      exit 1
+  fi
+
+  # User/group management
+  groupadd -f server_access
+  useradd "$server_user"
+  usermod -aG server_access "$server_user"
+
+  # Necessary folders
+  mkdir -p "$bin_dir"
   mkdir -p "$data_dir"
   mkdir -p "$log_dir"
-  mkdir -p "$pid_dir"
 
-  groupadd -f server_access
+  # rwxr-x--- perms on the data dir, rwx------ perms on the log dir
+  chmod 750 "$data_dir"
+  chmod 700 "$log_dir"
 
-  # rwxrws--- perms on the data, log, and pid directory
-  chmod 2770 "$data_dir"
-  chmod 2770 "$log_dir"
-  chmod 2770 "$pid_dir"
+  chown "$server_user" "$data_dir"
+  chown "$server_user" "$log_dir"
 
-  # Ensure new files and directories are created with the correct permissions
-  setfacl -d -m u::rwX,g::rwX,o::- "$data_dir"
-  setfacl -d -m u::rwX,g::rwX,o::- "$log_dir"
-  setfacl -d -m u::rwX,g::rwX,o::- "$pid_dir"
+  # Make all required directories and symlinks as $server_user
+  su "$server_user" -c "
+  mkdir -p \"$pid_dir\";
+  mkdir -p \"$persistent\";
 
-  chgrp server_access "$data_dir"
-  chgrp server_access "$log_dir"
-  chgrp server_access "$pid_dir"
+  mkdir -p \"$server_1\";
+  mkdir -p \"$server_2\";
 
-  # Make all required files
-  mkdir -p "$persistent"
+  mkdir -p \"$server_1_unique\";
+  mkdir -p \"$server_2_unique\";
 
-  mkdir -p "$server_1"
-  mkdir -p "$server_2"
+  mkdir -p \"$config\";
+  mkdir -p \"$build\";
+  mkdir -p \"$src\";
+  mkdir -p \"$shared\";
+  mkdir -p \"$persistent\";
 
-  mkdir -p "$server_1_unique"
-  mkdir -p "$server_2_unique"
-
-  mkdir -p "$config"
-  mkdir -p "$build"
-  mkdir -p "$src"
-
-  mkdir -p "$shared"
-  mkdir -p "$persistent"
-
-  ln -s "$log_dir" "$logs"
+  ln -s \"$log_dir\" \"$logs\";
+  "
 
   # Create start script
   start_file="$persistent/start.sh"
-  printf '#!/bin/bash\njava -Dfile.encoding=UTF-8 -jar server.jar' > "$start_file"
-  chgrp server_access "$start_file"
-  chmod 770 "$start_file"
+  su "$server_user" -c "printf '#!/bin/bash\njava -Dfile.encoding=UTF-8 -jar server.jar' > \"$start_file\""
+  chmod 700 "$start_file"
 
   # Create the PID files
-  touch "$main_pid_file"
-  touch "$fallback_pid_file"
+  su "$server_user" -c "touch \"$main_pid_file\""
+  su "$server_user" -c "touch \"$fallback_pid_file\""
 
   # Create the tmux socket files
-  tmux -S "$socket_1" new-session -d -n "server" -s "server" &> /dev/null
-  tmux -S "$socket_2" new-session -d -n "server" -s "server" &> /dev/null
+  su "$server_user" -c "tmux -S \"$socket_1\" new-session -d -n server -s server &> /dev/null"
+  su "$server_user" -c "tmux -S \"$socket_2\" new-session -d -n server -s server &> /dev/null"
 
   # Set rw-rw---- perms on each socket
-  chmod 660 "$socket_1"
-  chmod 660 "$socket_2"
+  chmod 660 "$socket_1" "$socket_2"
+  chgrp server_access "$socket_1" "$socket_2"
 
   # Create symlinks to the sockets, for switching the active server
-  ln -s "$socket_1" "$main_socket"
-  ln -s "$socket_2" "$fallback_socket"
+  su "$server_user" -c "ln -s \"$socket_1\" \"$main_socket\""
+  su "$server_user" -c "ln -s \"$socket_2\" \"$fallback_socket\""
 
   # Create symlinks to the server directories
-  ln -s "$server_1" "$main"
-  ln -s "$server_2" "$fallback"
+  su "$server_user" -c "ln -s \"$server_1\" \"$main\""
+  su "$server_user" -c "ln -s \"$server_2\" \"$fallback\""
 
   # Create the temporary log file
-  touch "$temp_log"
+  su "$server_user" -c "touch \"$temp_log\""
 
   # Set up binary file, ensure it's owned by root
   cp "$script_file" "$bin_dir/$pname"
@@ -170,39 +180,64 @@ if [ "$1" == "install" ]; then
   chgrp root "$bin_dir/$pname"
   chmod 755 "$bin_dir/$pname"
 
+  # Generate new /etc/pam.d/su file
+  new_file=$(
+  sed '/^[[:space:]]\{0,\}auth[[:space:]]\{1,\}sufficient[[:space:]]\{1,\}pam_rootok\.so[[:space:]]\{0,\}$/a\
+# AUTOGENERATED, DO NOT EDIT c2301c68dfe54232af2a63a47cc8b782\
+auth [success=ignore_default=1] pam_succeed_if.so user = phantazm-server\
+auth sufficient pam_succeed_if.so use_uid user ingroup server_access\
+# END AUTOGENERATED SECTION' /etc/pam.d/su
+  )
+
+  echo "$new_file" > /etc/pam.d/su
+
   echo "Installation complete. Some notes:"
   echo "* In order to allow users to use $pname commands, you must add them using $pname allow [user]."
   echo "* You will need to add worlds (or links to worlds) inside $persistent."
   echo "* Server files are located in $server_dir."
   echo "* Server logs are located in $log_dir."
-  echo "* PID files are stored in $pid_dir."
   exit 0
 fi
 
 if [ ! -f "$bin_dir/$pname" ]; then
-  echo "$pname has not been installed; do so by running '$pname install' with root permissions." 1<&2
+  echo "$pname has not been installed; do so by running '$pname install [path-to-this-script-file]' with root permissions." 1<&2
   exit 1
 fi
 
 if [ "$1" == "uninstall" ]; then
-  user=$(whoami)
   require_root
+
+  echo "Warning: uninstalling will abruptly kill any active servers!"
+  printf "Are you sure you want to proceed? [y/n] "
+  read -r user_input
+
+  if [ "$user_input" != "y" ]; then
+    exit 0
+  fi
+
+  tmux -S "$socket_1" kill-server
+  tmux -S "$socket_2" kill-server
 
   rm -rf "$data_dir"
   rm -f "$bin_dir/$pname"
   rm -rf "$log_dir"
 
   rm -rf "$pid_dir"
+  userdel -f "$server_user"
+  groupdel server_access
+
+  new_file=$(sed '/# AUTOGENERATED, DO NOT EDIT c2301c68dfe54232af2a63a47cc8b782/,/# END AUTOGENERATED SECTION/d' /etc/pam.d/su)
+  echo "$new_file" > /etc/pam.d/su
 
   exit 0
 fi
 
 is_in_group () {
   groupname="$1"
-  current_user="$(id -un)"
-  user="${2:-$current_user}"
+  current_user="$user"
+  temp_user="${2:-$current_user}"
 
-  for group in $(id -Gn "$user") ; do
+  for group in $(id -Gn "$temp_user") ; do
     if [ "$group" = "$groupname" ]; then
       return 0
     fi
@@ -229,13 +264,13 @@ update_config () {
   cd "$config" || exit 1
 
   if [ ! -d "$config/.git" ]; then
-    rm -rf "$config"
+    su "$server_user" -c "rm -rf \"$config\""
     cd .. || exit 1
-    git clone "$config_repo" "$config" || exit 1
+    su "$server_user" -c "git clone \"$config_repo\" \"$config\"" || exit 1
     cd "$config" || exit 1
   fi
 
-  git checkout "$config_branch" && git pull
+  su "$server_user" -c "git checkout \"$config_branch\" && git pull"
 }
 
 if [ "$1" == "main" ]; then
@@ -265,6 +300,7 @@ elif [ "$1" == "deny" ]; then
   tmux -S "$socket_2" server-access -d "$2"
   exit 0
 elif [ "$1" == "fallback" ]; then
+  require_server_access
   tmux -S "$fallback_socket" attach-session
   exit "$?"
 elif [ "$1" == "shutdown" ]; then
@@ -276,7 +312,7 @@ elif [ "$1" == "restart" ]; then
   no_sync="true"
 elif [ "$1" == "deploy-src" ]; then
   require_server_access
-  rm -rf "$build" && mkdir "$build"
+  su "$server_user" -c "rm -rf \"$build\" && mkdir \"$build\""
 
   update_config
 
@@ -284,31 +320,31 @@ elif [ "$1" == "deploy-src" ]; then
   if [ ! -d "$src/.git" ]; then
     rm -rf "$src"
     cd .. || exit 1
-    git clone --recurse-submodules "$code_repo" "$src" || exit 1
+    su "$server_user" -c "git clone --recurse-submodules \"$code_repo\" \"$src\"" || exit 1
     cd "$src" || exit 1
   fi
 
-  git checkout "$code_branch" && git pull --recurse-submodules
-  ./gradlew -PskipBuild=snbt-builder,dev-launcher,velocity phantazm-server:copyJar phantazm-server:copyLibs || exit 1
+  su "$server_user" -c "git checkout \"$code_branch\" && git pull --recurse-submodules"
+  su "$server_user" -c "./gradlew -PskipBuild=snbt-builder,dev-launcher,velocity phantazm-server:copyJar phantazm-server:copyLibs" || exit 1
 
-  cp -r "run/server-1/libs" "$build/" || exit 1
-  cp "run/server-1/server.jar" "$build/" || exit 1
+  su "$server_user" -c "cp -r \"run/server-1/libs\" \"$build/\"" || exit 1
+  su "$server_user" -c "cp \"run/server-1/server.jar\" \"$build/\"" || exit 1
 
-  tar -czf "$blob" -C "$server_dir" build || exit 1
+  su "$server_user" -c "tar -czf \"$blob\" -C \"$server_dir\" build" || exit 1
 elif [ "$1" == "deploy" ]; then
   require_server_access
   require_blob
 
-  rm -rf "$build" && mkdir "$build"
-  tar -xzf "$blob" -C "$server_dir" build || exit 1
+  su "$server_user" -c "rm -rf \"$build\" && mkdir \"$build\""
+  su "$server_user" -c "tar -xzf \"$blob\" -C \"$server_dir\" build" || exit 1
 elif [ "$1" == "deploy-conf" ]; then
   require_server_access
   require_blob
 
   update_config
 
-  rm -rf "$build" && mkdir "$build"
-  tar -xzf "$blob" -C "$server_dir" build || exit 1
+  su "$server_user" -c "rm -rf \"$build\" && mkdir \"$build\""
+  su "$server_user" -c "tar -xzf \"$blob\" -C \"$server_dir\" build" || exit 1
 elif [ "$1" == "help" ]; then
   printf "USAGE: %s OPTION\n\n" "$pname"
   printf "%s orchestrates Phantazm servers. It allows for safely re-launching with\n" "$pname"
@@ -353,12 +389,12 @@ exit_hook () {
 trap "exit_hook" EXIT
 
 ## Setup
-tmux -S "$socket_1" new-session -d -n "server" -s "server" &> /dev/null
-tmux -S "$socket_2" new-session -d -n "server" -s "server" &> /dev/null
+su "$server_user" -c "tmux -S \"$socket_1\" new-session -d -n \"server\" -s \"server\" &> /dev/null"
+su "$server_user" -c "tmux -S \"$socket_2\" new-session -d -n \"server\" -s \"server\" &> /dev/null"
 
 ## Function definitions
 
-# Checks if a given process ID is empty or doesn't exist
+# Checks if a given server process ID is empty or doesn't exist
 check_status () {
   if [ -z "$1" ]; then
     echo "false"
@@ -373,8 +409,10 @@ check_status () {
 
 # Promotes the fallback server to the main server. Should be called if the fallback server is the only running server.
 promote_fallback () {
-  cat "$fallback_pid_file" > "$main_pid_file"
-  echo "" > "$fallback_pid_file"
+  su "$server_user" -c "
+  cat \"$fallback_pid_file\" > \"$main_pid_file\";
+  echo \"\" > \"$fallback_pid_file\";
+  "
 
   new_active=$(readlink -f "$fallback_socket")
   new_server=$(readlink -f "$fallback")
@@ -387,17 +425,19 @@ promote_fallback () {
     old_server="$server_1"
   fi
 
-  rm "$fallback_socket"
-  rm "$main_socket"
+  su "$server_user" -c "
+  rm \"$fallback_socket\";
+  rm \"$main_socket\";
 
-  rm "$fallback"
-  rm "$main"
+  rm \"$fallback\";
+  rm \"$main\";
 
-  ln -s "$old_active" "$fallback_socket"
-  ln -s "$new_active" "$main_socket"
+  ln -s \"$old_active\" \"$fallback_socket\";
+  ln -s \"$new_active\" \"$main_socket\";
 
-  ln -s "$old_server" "$fallback"
-  ln -s "$new_server" "$main"
+  ln -s \"$old_server\" \"$fallback\";
+  ln -s \"$new_server\" \"$main\";
+  "
 }
 
 synchronize_target () {
@@ -405,9 +445,9 @@ synchronize_target () {
     target=$(readlink -f "$1")
 
     if [ "$target" == "$server_1" ]; then
-      rsync -ac --delete "$server_1_unique/" "$persistent/" "$build/" "$config/" "$1" || exit 1
+      su "$server_user" -c "rsync -ac --delete \"$server_1_unique/\" \"$persistent/\" \"$build/\" \"$config/\" \"$1\"" || exit 1
     elif [ "$target" == "$server_2" ]; then
-      rsync -ac --delete "$server_2_unique/" "$persistent/" "$build/" "$config/" "$1" || exit 1
+      su "$server_user" -c "rsync -ac --delete \"$server_2_unique/\" \"$persistent/\" \"$build/\" \"$config/\" \"$1\"" || exit 1
     else
       echo "Invalid synchronize symlink $1 -> $target; exiting (no server files have changed)" 1<&2
       exit 1
