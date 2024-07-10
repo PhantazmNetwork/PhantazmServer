@@ -63,7 +63,7 @@ code_branch="dev"
 config_branch="just-in-case"
 
 # Repositories
-config_repo="git@github.com-Configuration:PhantazmNetwork/Configuration.git"
+config_repo="git@Configuration:PhantazmNetwork/Configuration.git"
 code_repo="https://github.com/PhantazmNetwork/PhantazmServer"
 
 # END USER CONFIG
@@ -93,6 +93,11 @@ check_dependency tar || exit 1
 if [ "$1" == "install" ]; then
   require_root
 
+  if [ ! -d /etc/pam.d ]; then
+    echo "This script requires PAM to run properly"
+    exit 1
+  fi
+
   if [ -f "$bin_dir/$pname" ]; then
     echo "$pname is already installed" 1<&2
     exit 1
@@ -111,7 +116,7 @@ if [ "$1" == "install" ]; then
 
   # User/group management
   groupadd -f server_access
-  useradd "$server_user"
+  useradd -m "$server_user"
   usermod -aG server_access "$server_user"
 
   # Necessary folders
@@ -128,51 +133,46 @@ if [ "$1" == "install" ]; then
 
   # Make all required directories and symlinks as $server_user
   su "$server_user" -c "
-  mkdir -p \"$pid_dir\";
-  mkdir -p \"$persistent\";
+  mkdir -p \"$pid_dir\"
+  mkdir -p \"$persistent\"
 
-  mkdir -p \"$server_1\";
-  mkdir -p \"$server_2\";
+  mkdir -p \"$server_1\"
+  mkdir -p \"$server_2\"
 
-  mkdir -p \"$server_1_unique\";
-  mkdir -p \"$server_2_unique\";
+  mkdir -p \"$server_1_unique\"
+  mkdir -p \"$server_2_unique\"
 
-  mkdir -p \"$config\";
-  mkdir -p \"$build\";
-  mkdir -p \"$src\";
-  mkdir -p \"$shared\";
-  mkdir -p \"$persistent\";
+  mkdir -p \"$config\"
+  mkdir -p \"$build\"
+  mkdir -p \"$src\"
+  mkdir -p \"$shared\"
+  mkdir -p \"$persistent\"
 
-  ln -s \"$log_dir\" \"$logs\";
-  "
+  ln -s \"$log_dir\" \"$logs\""
 
   # Create start script
   start_file="$persistent/start.sh"
   su "$server_user" -c "printf '#!/bin/bash\njava -Dfile.encoding=UTF-8 -jar server.jar' > \"$start_file\""
   chmod 700 "$start_file"
 
-  # Create the PID files
-  su "$server_user" -c "touch \"$main_pid_file\""
-  su "$server_user" -c "touch \"$fallback_pid_file\""
+  # Create PID, socket files, setup tmux server, socket symlinks
+  su "$server_user" -c "
+  touch \"$main_pid_file\"
+  touch \"$fallback_pid_file\"
 
-  # Create the tmux socket files
-  su "$server_user" -c "tmux -S \"$socket_1\" new-session -d -n server -s server &> /dev/null"
-  su "$server_user" -c "tmux -S \"$socket_2\" new-session -d -n server -s server &> /dev/null"
+  tmux -S \"$socket_1\" new-session -d -n server -s server &> /dev/null
+  tmux -S \"$socket_2\" new-session -d -n server -s server &> /dev/null
+
+  ln -s \"$socket_1\" \"$main_socket\"
+  ln -s \"$socket_2\" \"$fallback_socket\"
+  ln -s \"$server_1\" \"$main\"
+  ln -s \"$server_2\" \"$fallback\"
+
+  touch \"$temp_log\""
 
   # Set rw-rw---- perms on each socket
   chmod 660 "$socket_1" "$socket_2"
   chgrp server_access "$socket_1" "$socket_2"
-
-  # Create symlinks to the sockets, for switching the active server
-  su "$server_user" -c "ln -s \"$socket_1\" \"$main_socket\""
-  su "$server_user" -c "ln -s \"$socket_2\" \"$fallback_socket\""
-
-  # Create symlinks to the server directories
-  su "$server_user" -c "ln -s \"$server_1\" \"$main\""
-  su "$server_user" -c "ln -s \"$server_2\" \"$fallback\""
-
-  # Create the temporary log file
-  su "$server_user" -c "touch \"$temp_log\""
 
   # Set up binary file, ensure it's owned by root
   cp "$script_file" "$bin_dir/$pname"
@@ -191,11 +191,54 @@ auth sufficient pam_succeed_if.so use_uid user ingroup server_access\
 
   echo "$new_file" > /etc/pam.d/su
 
+  printf "Is your configuration repository '%s' private? [y/n] " "$config_repo"
+  read -r response
+  if [ "$response" == "y" ]; then
+    printf "Enter the hostname of the repository (ex. github.com): "
+    read -r hostname
+
+    while true ; do
+      printf "Enter a path to a passwordless SSH identity file (private key): "
+      read -r key_path
+
+      if [ ! -f "$key_path" ]; then
+        echo "Cannot find the file referenced by $key_path"
+      else
+        break
+      fi
+    done
+
+    ssh_dir="/home/$server_user/.ssh"
+    su "$server_user" -c "
+    mkdir -p \"$ssh_dir\"
+    touch \"$ssh_dir/config\"
+    touch \"$ssh_dir/key\""
+
+    config_file="$ssh_dir/config"
+    key_file="$ssh_dir/key"
+
+    chmod 700 "$ssh_dir"
+    chmod 644 "$config_file"
+    chmod 600 "$key_file"
+
+    cat "$key_path" > "$key_file"
+
+    echo "Host Configuration
+    Hostname $hostname
+    IdentityFile=$key_file
+    IdentitiesOnly yes
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null" > "$config_file"
+  else
+    echo "Skipping credential initialization."
+  fi
+
   echo "Installation complete. Some notes:"
   echo "* In order to allow users to use $pname commands, you must add them using $pname allow [user]."
   echo "* You will need to add worlds (or links to worlds) inside $persistent."
   echo "* Server files are located in $server_dir."
   echo "* Server logs are located in $log_dir."
+  echo "* SSH identity file located in /home/$server_user/.ssh/key, if using a private repository"
   exit 0
 fi
 
@@ -223,7 +266,7 @@ if [ "$1" == "uninstall" ]; then
   rm -rf "$log_dir"
 
   rm -rf "$pid_dir"
-  userdel -f "$server_user"
+  userdel -fr "$server_user"
   groupdel server_access
 
   new_file=$(sed '/# AUTOGENERATED, DO NOT EDIT c2301c68dfe54232af2a63a47cc8b782/,/# END AUTOGENERATED SECTION/d' /etc/pam.d/su)
@@ -261,16 +304,18 @@ require_blob () {
 }
 
 update_config () {
-  cd "$config" || exit 1
+  su "$server_user" -c "
+  cd \"$config\" || exit 1
 
-  if [ ! -d "$config/.git" ]; then
-    su "$server_user" -c "rm -rf \"$config\""
+  if [ ! -d \"$config/.git\" ]; then
+    rm -rf \"$config\"
     cd .. || exit 1
-    su "$server_user" -c "git clone \"$config_repo\" \"$config\"" || exit 1
-    cd "$config" || exit 1
+    git clone \"$config_repo\" \"$config\" || exit 1
+    cd \"$config\" || exit 1
   fi
 
-  su "$server_user" -c "git checkout \"$config_branch\" && git pull"
+  git checkout \"$config_branch\" || exit 1
+  git pull" || exit 1
 }
 
 if [ "$1" == "main" ]; then
@@ -316,35 +361,37 @@ elif [ "$1" == "deploy-src" ]; then
 
   update_config
 
-  cd "$src" || exit 1
-  if [ ! -d "$src/.git" ]; then
-    rm -rf "$src"
+  su "$server_user" -c "
+  cd \"$src\" || exit 1
+  if [ ! -d \"$src/.git\" ]; then
+    rm -rf \"$src\"
     cd .. || exit 1
-    su "$server_user" -c "git clone --recurse-submodules \"$code_repo\" \"$src\"" || exit 1
-    cd "$src" || exit 1
+    git clone --recurse-submodules \"$code_repo\" \"$src\" || exit 1
+    cd \"$src\" || exit 1
   fi
 
-  su "$server_user" -c "git checkout \"$code_branch\" && git pull --recurse-submodules"
-  su "$server_user" -c "./gradlew -PskipBuild=snbt-builder,dev-launcher,velocity phantazm-server:copyJar phantazm-server:copyLibs" || exit 1
+  git checkout \"$code_branch\" && git pull --recurse-submodules
+  ./gradlew -PskipBuild=snbt-builder,dev-launcher,velocity phantazm-server:copyJar phantazm-server:copyLibs
+  cp -r \"run/server-1/libs\" \"$build/\" || exit 1
+  cp \"run/server-1/server.jar\" \"$build/\" || exit 1
 
-  su "$server_user" -c "cp -r \"run/server-1/libs\" \"$build/\"" || exit 1
-  su "$server_user" -c "cp \"run/server-1/server.jar\" \"$build/\"" || exit 1
-
-  su "$server_user" -c "tar -czf \"$blob\" -C \"$server_dir\" build" || exit 1
+  tar -czf \"$blob\" -C \"$server_dir\" build || exit 1" || exit 1
 elif [ "$1" == "deploy" ]; then
   require_server_access
   require_blob
 
-  su "$server_user" -c "rm -rf \"$build\" && mkdir \"$build\""
-  su "$server_user" -c "tar -xzf \"$blob\" -C \"$server_dir\" build" || exit 1
+  su "$server_user" -c "
+  rm -rf \"$build\" && mkdir \"$build\"
+  tar -xzf \"$blob\" -C \"$server_dir\" build || exit 1" || exit 1
 elif [ "$1" == "deploy-conf" ]; then
   require_server_access
   require_blob
 
   update_config
 
-  su "$server_user" -c "rm -rf \"$build\" && mkdir \"$build\""
-  su "$server_user" -c "tar -xzf \"$blob\" -C \"$server_dir\" build" || exit 1
+  su "$server_user" -c "
+  rm -rf \"$build\" && mkdir \"$build\"
+  tar -xzf \"$blob\" -C \"$server_dir\" build || exit 1" || exit 1
 elif [ "$1" == "help" ]; then
   printf "USAGE: %s OPTION\n\n" "$pname"
   printf "%s orchestrates Phantazm servers. It allows for safely re-launching with\n" "$pname"
@@ -389,8 +436,9 @@ exit_hook () {
 trap "exit_hook" EXIT
 
 ## Setup
-su "$server_user" -c "tmux -S \"$socket_1\" new-session -d -n \"server\" -s \"server\" &> /dev/null"
-su "$server_user" -c "tmux -S \"$socket_2\" new-session -d -n \"server\" -s \"server\" &> /dev/null"
+su "$server_user" -c "
+tmux -S \"$socket_1\" new-session -d -n server -s server &> /dev/null
+tmux -S \"$socket_2\" new-session -d -n server -s server &> /dev/null"
 
 ## Function definitions
 
@@ -410,9 +458,8 @@ check_status () {
 # Promotes the fallback server to the main server. Should be called if the fallback server is the only running server.
 promote_fallback () {
   su "$server_user" -c "
-  cat \"$fallback_pid_file\" > \"$main_pid_file\";
-  echo \"\" > \"$fallback_pid_file\";
-  "
+  cat \"$fallback_pid_file\" > \"$main_pid_file\"
+  echo \"\" > \"$fallback_pid_file\""
 
   new_active=$(readlink -f "$fallback_socket")
   new_server=$(readlink -f "$fallback")
@@ -426,18 +473,17 @@ promote_fallback () {
   fi
 
   su "$server_user" -c "
-  rm \"$fallback_socket\";
-  rm \"$main_socket\";
+  rm \"$fallback_socket\"
+  rm \"$main_socket\"
 
-  rm \"$fallback\";
-  rm \"$main\";
+  rm \"$fallback\"
+  rm \"$main\"
 
-  ln -s \"$old_active\" \"$fallback_socket\";
-  ln -s \"$new_active\" \"$main_socket\";
+  ln -s \"$old_active\" \"$fallback_socket\"
+  ln -s \"$new_active\" \"$main_socket\"
 
-  ln -s \"$old_server\" \"$fallback\";
-  ln -s \"$new_server\" \"$main\";
-  "
+  ln -s \"$old_server\" \"$fallback\"
+  ln -s \"$new_server\" \"$main\""
 }
 
 synchronize_target () {
