@@ -36,7 +36,6 @@ import org.phantazm.zombies.scene2.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -77,7 +76,6 @@ public final class PhantazmServer {
         LobbiesConfig lobbiesConfig;
         PathfinderConfig pathfinderConfig;
         ShutdownConfig shutdownConfig;
-        StartupConfig startupConfig;
         PartyConfig partyConfig;
         WhisperConfig whisperConfig;
         ChatConfig chatConfig;
@@ -135,7 +133,6 @@ public final class PhantazmServer {
             lobbiesConfig = handler.loadDataNow(ConfigFeature.LOBBIES_CONFIG_KEY);
             pathfinderConfig = handler.loadDataNow(ConfigFeature.PATHFINDER_CONFIG_KEY);
             shutdownConfig = handler.loadDataNow(ConfigFeature.SHUTDOWN_CONFIG_KEY);
-            startupConfig = handler.loadDataNow(ConfigFeature.STARTUP_CONFIG_KEY);
             partyConfig = handler.loadDataNow(ConfigFeature.PARTY_CONFIG_KEY);
             whisperConfig = handler.loadDataNow(ConfigFeature.WHISPER_CONFIG_KEY);
             chatConfig = handler.loadDataNow(ConfigFeature.CHAT_CONFIG_KEY);
@@ -177,7 +174,7 @@ public final class PhantazmServer {
         MinecraftServer.setBrandName(BRAND_NAME);
 
         try {
-            startServer(node, minecraftServer, serverConfig, startupConfig);
+            startServer(node, minecraftServer, serverConfig);
         } catch (Exception exception) {
             LOGGER.error("Fatal error during server startup", exception);
             shutdown("error during startup");
@@ -306,8 +303,7 @@ public final class PhantazmServer {
         CompletableFuture.allOf(independentFeatures, game).join();
     }
 
-    private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig,
-        StartupConfig startupConfig) {
+    private static void startServer(EventNode<Event> node, MinecraftServer server, ServerConfig serverConfig) {
         ServerInfoConfig infoConfig = serverConfig.serverInfo();
 
         switch (infoConfig.authType()) {
@@ -323,16 +319,6 @@ public final class PhantazmServer {
             event -> event.getResponseData().setDescription(serverConfig.pingList().description()));
 
         server.start(infoConfig.serverIP(), infoConfig.port());
-
-        if (startupConfig.hasCommand()) {
-            ProcessBuilder processBuilder = new ProcessBuilder(startupConfig.command());
-            try {
-                processBuilder.start();
-            } catch (IOException e) {
-                LOGGER.warn("Failed to run startup command", e);
-            }
-        }
-
         LOGGER.info("serverIP: " + infoConfig.serverIP() + ", port: " + infoConfig.port());
     }
 }
