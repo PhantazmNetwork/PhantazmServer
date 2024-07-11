@@ -54,9 +54,8 @@ main="$data_dir/main"
 fallback="$data_dir/fallback"
 logs="$common/logs"
 
-# BEGIN USER CONFIG
+# BEGIN USER CONFIG (you can change these options before installing)
 
-# You can change these options before installing
 # Git repository branches
 code_branch="dev"
 config_branch="just-in-case"
@@ -88,6 +87,7 @@ check_dependency tmux || exit 1
 check_dependency git || exit 1
 check_dependency rsync || exit 1
 check_dependency tar || exit 1
+check_dependency java || exit 1
 
 if [ "$1" == "install" ]; then
   require_root
@@ -119,66 +119,47 @@ if [ "$1" == "install" ]; then
   usermod -aG server_access "$server_user"
 
   # Necessary folders
-  mkdir -p "$bin_dir"
-  mkdir -p "$data_dir"
-  mkdir -p "$log_dir"
+  mkdir -p "$bin_dir" "$data_dir" "$log_dir"
 
   # rwxr-x--- perms on the data dir, rwx------ perms on the log dir
   chmod 750 "$data_dir"
   chmod 700 "$log_dir"
 
-  chown "$server_user" "$data_dir"
-  chown "$server_user" "$log_dir"
+  chown "$server_user" "$data_dir" "$log_dir"
+  chgrp server_access "$data_dir" "$log_dir"
 
-  chgrp server_access "$data_dir"
-  chgrp server_access "$log_dir"
+  start_file="$common/start.sh"
 
   # Make all required directories and symlinks as $server_user
   su "$server_user" -c "
-  mkdir -p \"$pid_dir\"
+  mkdir -p \"$pid_dir\" \"$server_1\" \"$server_2\" \"$server_1_unique\" \"$server_2_unique\" \"$config\" \"$build\" \"$src\" \"$common\"
 
-  mkdir -p \"$server_1\"
-  mkdir -p \"$server_2\"
-
-  mkdir -p \"$server_1_unique\"
-  mkdir -p \"$server_2_unique\"
-
-  mkdir -p \"$config\"
-  mkdir -p \"$build\"
-  mkdir -p \"$src\"
-  mkdir -p \"$common\"
-
-  ln -s \"$log_dir\" \"$logs\""
-
-  # Create start script
-  start_file="$common/start.sh"
-  su "$server_user" -c "printf '#!/bin/bash\njava -Dfile.encoding=UTF-8 -jar server.jar' > \"$start_file\""
-  chmod 700 "$start_file"
-
-  # Create PID, socket files, setup tmux server, socket symlinks
-  su "$server_user" -c "
-  touch \"$main_pid_file\"
-  touch \"$fallback_pid_file\"
+  ln -s \"$log_dir\" \"$logs\"
+  touch \"$main_pid_file\" \"$fallback_pid_file\" \"$temp_log\"
 
   tmux -S \"$socket_1\" new-session -d -n server -s server &> /dev/null
   tmux -S \"$socket_2\" new-session -d -n server -s server &> /dev/null
 
   ln -s \"$socket_1\" \"$main_socket\"
   ln -s \"$socket_2\" \"$fallback_socket\"
+
   ln -s \"$server_1\" \"$main\"
   ln -s \"$server_2\" \"$fallback\"
 
-  touch \"$temp_log\""
+  printf '#!/bin/bash\njava -Dfile.encoding=UTF-8 -jar server.jar' > \"$start_file\"
+  chmod 700 \"$start_file\""
 
   # Set rw-rw---- perms on each socket
   chmod 660 "$socket_1" "$socket_2"
   chgrp server_access "$socket_1" "$socket_2"
 
   # Set up binary file, ensure it's owned by root
-  cp "$script_file" "$bin_dir/$pname"
+  touch "$bin_dir/$pname"
   chown root "$bin_dir/$pname"
   chgrp root "$bin_dir/$pname"
   chmod 755 "$bin_dir/$pname"
+
+  cat "$script_file" > "$bin_dir/$pname"
 
   # Generate new /etc/pam.d/su file
   new_file=$(
@@ -226,9 +207,7 @@ auth sufficient pam_succeed_if.so use_uid user ingroup server_access\
     echo "Host Configuration
     Hostname $hostname
     IdentityFile=$key_file
-    IdentitiesOnly yes
-    StrictHostKeyChecking no
-    UserKnownHostsFile /dev/null" > "$config_file"
+    IdentitiesOnly yes" > "$config_file"
   else
     echo "Skipping credential initialization."
   fi
@@ -266,11 +245,10 @@ if [ "$1" == "uninstall" ]; then
   cd \"$src\"
   ./gradlew --stop"
 
-  rm -rf "$data_dir"
-  rm -f "$bin_dir/$pname"
-  rm -rf "$log_dir"
+  # $bin_dir and $pname are both constants
+  # shellcheck disable=SC2115
+  rm -rf "$data_dir" "$bin_dir/$pname" "$log_dir" "$pid_dir"
 
-  rm -rf "$pid_dir"
   userdel -fr "$server_user"
   groupdel server_access
 
@@ -408,7 +386,7 @@ elif [ "$1" == "shutdown" ]; then
   require_server_access
   tmux_init
 
-  tmux -S "$main_socket" send-keys -t "server" "orderly_shutdown" Enter
+  tmux -S "$main_socket" send-keys -t server orderly_shutdown Enter
   exit "$?"
 elif [ "$1" == "restart" ]; then
   require_server_access
@@ -518,11 +496,7 @@ promote_fallback () {
     old_server=\"$server_1\"
   fi
 
-  rm \"$fallback_socket\"
-  rm \"$main_socket\"
-
-  rm \"$fallback\"
-  rm \"$main\"
+  rm \"$fallback_socket\" \"$main_socket\" \"$fallback\" \"$main\"
 
   ln -s \"\$old_active\" \"$fallback_socket\"
   ln -s \"\$new_active\" \"$main_socket\"
