@@ -40,14 +40,14 @@ gson = { module = "com.google.code.gson:gson", version = "2.8.9" }
 hephaistos-common = { module = "io.github.jglrxavpok.hephaistos:common", version.ref = "hephaistos" }
 hephaistos-gson = { module = "io.github.jglrxavpok.hephaistos:gson", version.ref = "hephaistos" }
 
-hikariCP = { module = "com.zaxxer:HikariCP", version = "5.0.1" }
+hikariCP = { module = "com.zaxxer:HikariCP", version = "5.1.0" }
 
 jetbrains-annotations = { module = "org.jetbrains:annotations", version = "23.0.0" }
 
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
 
-mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.0.10" }
+mariadb = { module = "org.mariadb.jdbc:mariadb-java-client", version = "3.4.0" }
 
 minestom = { module = "org.phantazm.Minestom:Minestom", version.ref = "minestom" }
 
