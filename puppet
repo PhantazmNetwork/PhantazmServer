@@ -71,7 +71,7 @@ user=$(whoami)
 
 check_dependency () {
   if ! which "$1" > /dev/null; then
-    echo "Missing required program $1"
+    echo "Missing required program $1" 1<&2
     false
   fi
 }
@@ -93,7 +93,7 @@ if [ "$1" == "install" ]; then
   require_root
 
   if [ ! -d /etc/pam.d ]; then
-    echo "This script requires PAM to run properly"
+    echo "This script requires PAM to run properly" 1<&2
     exit 1
   fi
 
@@ -104,12 +104,12 @@ if [ "$1" == "install" ]; then
 
   script_file="$2"
   if [ ! -f "$script_file" ]; then
-    echo "Failed to locate '$script_file'; cannot install"
+    echo "Failed to locate '$script_file'; cannot install" 1<&2
     exit 1
   fi
 
   if [ -z "$( grep -E "# c2301c68dfe54232af2a63a47cc8b782" < "$script_file" )" ]; then
-      echo "$script_file is not the correct script file!"
+      echo "$script_file is not the correct script file!" 1<&2
       exit 1
   fi
 
@@ -183,7 +183,7 @@ auth sufficient pam_succeed_if.so use_uid user ingroup server_access\
       read -r key_path
 
       if [ ! -f "$key_path" ]; then
-        echo "Cannot find the file referenced by $key_path"
+        echo "Cannot find the file referenced by $key_path" 1<&2
       else
         break
       fi
@@ -218,7 +218,7 @@ auth sufficient pam_succeed_if.so use_uid user ingroup server_access\
   echo "* Server files are located in $server_dir."
   echo "* Server logs are located in $log_dir."
   echo "* SSH identity file located in /home/$server_user/.ssh/key, if using a private repository"
-  echo "* Since changes to user permissions were made, you may have to log out and back in again to use $pname"
+  echo "* Since changes to user permissions were made, you may have to log out and back in again"
   exit 0
 fi
 
@@ -539,8 +539,9 @@ elif [ "$main_is_running" == "true" ] && [ "$fallback_is_running" == "false" ]; 
   su "$server_user" -c "echo \"\" > \"$temp_log\""
   tmux -S "$fallback_socket" send-keys -t "server" "sh -c 'cd \"$fallback\"; echo \$\$ > \"$fallback_pid_file\"; exec ./start.sh | tee \"$temp_log\"'" Enter
 
-  su "$server_user" -c "tail -f -q \"$temp_log\" | sed \"/serverIP/ q\""
-  su "$server_user" -c "echo \"\" > \"$temp_log\""
+  su "$server_user" -c "
+  tail -f -q \"$temp_log\" | sed \"/serverIP/ q\"
+  echo \"\" > \"$temp_log\""
 
   tmux -S "$main_socket" send-keys -t "server" "orderly_shutdown" Enter
   su "$server_user" -c "tail --pid=\"$main_pid\" -f /dev/null"
