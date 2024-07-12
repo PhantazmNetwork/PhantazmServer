@@ -27,7 +27,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final TickTaskScheduler taskScheduler;
 
     private final AtomicBoolean blockHandAnimation;
-    private final Set<ShotEffect> shotEffects;
 
     private volatile Set<Activable> activables;
     private final Lock activablesLock;
@@ -38,7 +37,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         this.module = Objects.requireNonNull(module);
         this.taskScheduler = Objects.requireNonNull(taskScheduler);
         this.blockHandAnimation = new AtomicBoolean();
-        this.shotEffects = new HashSet<>();
         this.activables = Set.of();
         this.activablesLock = new ReentrantLock();
     }
@@ -102,21 +100,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         if (removed) {
             activable.end();
         }
-    }
-
-    @Override
-    public void registerShotEffect(@NotNull ShotEffect shotEffect) {
-        shotEffects.add(shotEffect);
-    }
-
-    @Override
-    public void removeShotEffect(@NotNull ShotEffect shotEffect) {
-        shotEffects.remove(shotEffect);
-    }
-
-    @Override
-    public @NotNull @UnmodifiableView Set<ShotEffect> shotEffects() {
-        return Collections.unmodifiableSet(shotEffects);
     }
 
     @Override

@@ -48,19 +48,7 @@ public class ShotEffectCreator implements PerkEffectCreator {
             this.zombiesPlayer = zombiesPlayer;
             this.actions = actions;
 
-            this.listener = new EventListener<>() {
-                @Override
-                public @NotNull Class<EntityDamageByGunEvent> eventType() {
-                    return EntityDamageByGunEvent.class;
-                }
-
-                @Override
-                public @NotNull Result run(@NotNull EntityDamageByGunEvent event) {
-                    onEntityDamageByGun(event);
-                    return Result.SUCCESS;
-                }
-            };
-
+            this.listener = EventListener.builder(EntityDamageByGunEvent.class).handler(this::onEntityDamageByGun).build();
             this.tickableActions =
                 actions.stream().filter(action -> action instanceof Tickable).map(action -> (Tickable) action)
                     .toArray(Tickable[]::new);
@@ -69,9 +57,6 @@ public class ShotEffectCreator implements PerkEffectCreator {
         @Override
         public void start() {
             rootNode.addListener(listener);
-            for (ShotEffect effect : actions) {
-                zombiesPlayer.registerShotEffect(effect);
-            }
         }
 
         @Override
@@ -84,9 +69,6 @@ public class ShotEffectCreator implements PerkEffectCreator {
         @Override
         public void end() {
             rootNode.removeListener(listener);
-            for (ShotEffect effect : actions) {
-                zombiesPlayer.removeShotEffect(effect);
-            }
         }
 
         private void onEntityDamageByGun(EntityDamageByGunEvent event) {
