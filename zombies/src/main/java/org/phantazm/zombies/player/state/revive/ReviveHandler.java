@@ -145,11 +145,13 @@ public class ReviveHandler implements Activable {
     }
 
     private void clearReviverState() {
-        if (reviver != null) {
-            reviver.module().getMeta().setReviving(false);
-            reviver.module().getActionBar()
-                .sendActionBar(Component.empty(), ZombiesPlayerActionBar.REVIVE_MESSAGE_CLEAR_PRIORITY);
+        if (reviver == null) {
+            return;
         }
+
+        reviver.module().getMeta().setReviving(false);
+        reviver.module().getActionBar().sendActionBar(Component.empty(), ZombiesPlayerActionBar.REVIVE_MESSAGE_CLEAR_PRIORITY);
+
     }
 
     public boolean isReviving() {

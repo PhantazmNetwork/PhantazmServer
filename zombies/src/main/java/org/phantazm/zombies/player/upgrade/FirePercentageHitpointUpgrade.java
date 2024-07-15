@@ -47,8 +47,7 @@ public class FirePercentageHitpointUpgrade implements PlayerUpgradeComponent {
                         return;
                     }
 
-                    event.setDamageAmount(Math.max((float) (event.target().getHealth() * data.hitpointFactor),
-                        event.damageAmount()));
+                    event.setDamageAmount((float) Math.max((event.target().getHealth() * data.hitpointFactor), event.damageAmount()));
                 }
             }), zombiesPlayer);
         }

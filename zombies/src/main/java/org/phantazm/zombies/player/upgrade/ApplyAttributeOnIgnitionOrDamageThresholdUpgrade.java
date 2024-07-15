@@ -115,7 +115,6 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
                 private void onExtinguished() {
                     if (activationType.compareAndSet(ActivationType.BY_FIRE, ActivationType.NOT_ACTIVATED)) {
                         zombiesPlayer.getPlayer().ifPresent(this::deactivate);
-
                     }
                 }
 
