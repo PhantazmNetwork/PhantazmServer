@@ -11,6 +11,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.event.EventListener;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.Cooldown;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
@@ -23,7 +24,6 @@ import java.util.Deque;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Model("zombies.upgrade.apply_attribute_on_shot_with_cooldown")
 @Cache
@@ -47,7 +47,7 @@ public class ApplyAttributeOnShotWithCooldown implements PlayerUpgradeComponent 
                 private final EventListener<EntitiesDamageByGunEvent> listener = EventListener
                     .builder(EntitiesDamageByGunEvent.class).handler(this::onShotByGun).build();
 
-                private final AtomicInteger applyCooldown = new AtomicInteger();
+                private final Cooldown applyCooldown = Cooldown.cooldown();
                 private final Attribute attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
                 private final UUID uuid = UUID.randomUUID();
                 private final AttributeModifier modifier = new AttributeModifier(uuid, uuid.toString(), data.value, data.operation);
@@ -55,7 +55,7 @@ public class ApplyAttributeOnShotWithCooldown implements PlayerUpgradeComponent 
                 private final Deque<HitTarget> targets = new ConcurrentLinkedDeque<>();
 
                 private record HitTarget(Reference<LivingEntity> entityReference,
-                    AtomicInteger cooldown) {
+                    Cooldown cooldown) {
                 }
 
                 @Override
@@ -65,14 +65,14 @@ public class ApplyAttributeOnShotWithCooldown implements PlayerUpgradeComponent 
 
                 @Override
                 public void tick(long time) {
-                    applyCooldown.updateAndGet(current -> current == 0 ? current : current - 1);
+                    applyCooldown.step();
                     targets.removeIf(target -> {
                         LivingEntity entity = target.entityReference.get();
                         if (entity == null || entity.isRemoved() || entity.isDead()) {
                             return true;
                         }
 
-                        if (target.cooldown.getAndUpdate(current -> current == 0 ? current : current - 1) == 1) {
+                        if (target.cooldown.step()) {
                             entity.getAttribute(attribute).removeModifier(uuid);
                             return true;
                         }
@@ -88,7 +88,7 @@ public class ApplyAttributeOnShotWithCooldown implements PlayerUpgradeComponent 
 
                 private void onShotByGun(EntitiesDamageByGunEvent event) {
                     if (!event.getShooter().getUuid().equals(zombiesPlayer.getUUID()) ||
-                        !applyCooldown.compareAndSet(0, data.cooldown)) {
+                        !applyCooldown.takeCooldown(data.cooldown)) {
                         return;
                     }
 
@@ -96,7 +96,8 @@ public class ApplyAttributeOnShotWithCooldown implements PlayerUpgradeComponent 
                         hit.entity().getAttribute(attribute).addModifier(modifier);
 
                         if (data.attributeDuration >= 0) {
-                            targets.push(new HitTarget(new WeakReference<>(hit.entity()), new AtomicInteger(data.attributeDuration)));
+                            targets.push(new HitTarget(new WeakReference<>(hit.entity()), Cooldown
+                                .cooldown(data.attributeDuration)));
                         }
                     }
                 }

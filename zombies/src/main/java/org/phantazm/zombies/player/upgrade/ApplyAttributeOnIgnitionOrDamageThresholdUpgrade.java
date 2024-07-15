@@ -14,6 +14,7 @@ import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.event.EventListener;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.Cooldown;
 import org.phantazm.core.DamageUtils;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.zombies.Attributes;
@@ -25,7 +26,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Model("zombies.upgrade.apply_attribute_on_ignition_or_damage_threshold")
@@ -58,7 +58,7 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
                 private final Attribute attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
 
                 private final AtomicBoolean onFire = new AtomicBoolean();
-                private final AtomicInteger effectTicks = new AtomicInteger();
+                private final Cooldown effectCooldown = Cooldown.cooldown();
                 private final AtomicReference<ActivationType> activationType = new AtomicReference<>(ActivationType.NOT_ACTIVATED);
 
                 private enum ActivationType {
@@ -86,12 +86,7 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
                         }
                     }
 
-                    int old = effectTicks.getAndUpdate(current -> current == 0 ? current : current - 1);
-                    if (old == 0) {
-                        return;
-                    }
-
-                    if (old == 1 && activationType.compareAndSet(ActivationType.BY_DAMAGE, ActivationType.NOT_ACTIVATED)) {
+                    if (effectCooldown.step() && activationType.compareAndSet(ActivationType.BY_DAMAGE, ActivationType.NOT_ACTIVATED)) {
                         zombiesPlayer.getPlayer().ifPresent(this::deactivate);
                     }
                 }
@@ -103,7 +98,7 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
                         .removeModifier(attributeModifier));
 
                     activationType.set(ActivationType.NOT_ACTIVATED);
-                    effectTicks.set(0);
+                    effectCooldown.reset();
                 }
 
                 private void onIgnited() {
@@ -130,7 +125,7 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
                     }
 
                     if (damage.getAmount() >= amount && activationType.compareAndSet(ActivationType.NOT_ACTIVATED, ActivationType.BY_DAMAGE)
-                        && effectTicks.compareAndSet(0, data.duration)) {
+                        && effectCooldown.takeCooldown(data.duration)) {
                         activate(event.getPlayer());
                     }
                 }
