@@ -5,7 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * A simple, thread-safe tick-based cooldown.
+ * A simple, thread-safe cooldown based on {@link AtomicInteger}. Instances can be obtained by calling
+ * {@link Cooldown#cooldown()} or {@link Cooldown#cooldown(int)}.
  */
 public final class Cooldown {
     private final AtomicInteger counter;
@@ -45,10 +46,10 @@ public final class Cooldown {
      * Steps the counter. Should be called once every tick. Returns {@code true} for the tick that the cooldown
      * expires.
      *
-     * @return true if this is the last tick the timer will be active, false otherwise
+     * @return true if this tick ended the cooldown, false otherwise
      */
     public boolean step() {
-        return counter.getAndAccumulate(-1, (a, b) -> a == 0 ? a : a + b) == 1;
+        return counter.getAndUpdate(current -> Math.max(0, current - 1)) == 1;
     }
 
     /**

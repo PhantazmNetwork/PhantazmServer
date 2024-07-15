@@ -20,7 +20,7 @@ public abstract class GuardedPlayerUpgrade implements PlayerUpgrade {
 
     @Override
     public final void start() {
-        if (!activated.compareAndExchange(false, true)) {
+        if (activated.compareAndSet(false, true)) {
             zombiesPlayer.addActivable(activable);
         }
     }
@@ -34,7 +34,7 @@ public abstract class GuardedPlayerUpgrade implements PlayerUpgrade {
 
     @Override
     public final void end() {
-        if (activated.compareAndExchange(true, false)) {
+        if (activated.compareAndSet(true, false)) {
             zombiesPlayer.removeActivable(activable);
         }
     }

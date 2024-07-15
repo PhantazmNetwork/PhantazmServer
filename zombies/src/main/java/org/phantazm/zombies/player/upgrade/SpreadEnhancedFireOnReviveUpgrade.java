@@ -10,6 +10,7 @@ import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.Cooldown;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.event.player.PlayerReviveEvent;
@@ -31,14 +32,20 @@ public class SpreadEnhancedFireOnReviveUpgrade implements PlayerUpgradeComponent
     }
 
     private static class Internal extends GuardedPlayerUpgrade {
-        private Internal(ZombiesPlayer zombiesPlayer, SpreadEnhancedFireOnReviveUpgrade.Data data) {
+        private Internal(ZombiesPlayer zombiesPlayer, Data data) {
             super(Activable.threadsafeWrapper(new Activable() {
                 private final EventListener<PlayerReviveEvent> event = EventListener.builder(PlayerReviveEvent.class)
                     .handler(this::handleRevive).build();
+                private final Cooldown cooldown = Cooldown.cooldown();
 
                 @Override
                 public void start() {
                     zombiesPlayer.getScene().sceneNode().addListener(event);
+                }
+
+                @Override
+                public void tick(long time) {
+                    cooldown.step();
                 }
 
                 @Override
@@ -53,7 +60,7 @@ public class SpreadEnhancedFireOnReviveUpgrade implements PlayerUpgradeComponent
 
                     Entity reviver = event.getEntity();
                     Instance instance = reviver.getInstance();
-                    if (instance == null) {
+                    if (instance == null || !cooldown.takeCooldown(data.cooldown)) {
                         return;
                     }
 
@@ -63,7 +70,7 @@ public class SpreadEnhancedFireOnReviveUpgrade implements PlayerUpgradeComponent
                                 return;
                             }
 
-                            
+
                         });
                 }
             }), zombiesPlayer);
@@ -71,12 +78,13 @@ public class SpreadEnhancedFireOnReviveUpgrade implements PlayerUpgradeComponent
 
         @Override
         public boolean needsTicking() {
-            return false;
+            return true;
         }
     }
 
     @DataObject
-    public record Data(double radius) {
+    public record Data(double radius,
+        int cooldown) {
 
     }
 }
