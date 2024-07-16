@@ -8,14 +8,13 @@ import com.github.steanky.ethylene.core.processor.ConfigProcessException;
 import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Finds entities around the end of a shot.
@@ -66,17 +65,9 @@ public class AroundEndFinder implements DirectionalEntityFinder {
     }
 
     @Override
-    public @NotNull Collection<LivingEntity> findEntities(@NotNull Instance instance, @NotNull Pos start,
-        @NotNull Point end) {
-        Collection<Entity> entities = instance.getNearbyEntities(end, data.range());
-        Collection<LivingEntity> livingEntities = new ArrayList<>(entities.size());
-        for (Entity entity : entities) {
-            if (entity instanceof LivingEntity livingEntity) {
-                livingEntities.add(livingEntity);
-            }
-        }
-
-        return livingEntities;
+    public void findEntities(@NotNull Instance instance, @NotNull Pos start,
+        @NotNull Point end, @NotNull Consumer<? super LivingEntity> callback) {
+        instance.getEntityTracker().nearbyEntities(end, data.range, EntityTracker.Target.LIVING_ENTITIES, callback::accept);
     }
 
     /**

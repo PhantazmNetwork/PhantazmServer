@@ -6,7 +6,7 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
+import java.util.function.Consumer;
 
 /**
  * Finds entities given the start and end of a shot.
@@ -20,8 +20,8 @@ public interface DirectionalEntityFinder {
      * @param instance The instance to search in
      * @param start    The start of the shot
      * @param end      The end of the shot
-     * @return A {@link Collection} of {@link LivingEntity}s
      */
-    @NotNull Collection<LivingEntity> findEntities(@NotNull Instance instance, @NotNull Pos start, @NotNull Point end);
+    void findEntities(@NotNull Instance instance, @NotNull Pos start, @NotNull Point end,
+        @NotNull Consumer<? super LivingEntity> callback);
 
 }

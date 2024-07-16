@@ -10,8 +10,7 @@ import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.function.Consumer;
 
 /**
  * A {@link DirectionalEntityFinder} that finds entities between the start and end point of a shot.
@@ -25,11 +24,8 @@ public class BetweenPointsFinder implements DirectionalEntityFinder {
     }
 
     @Override
-    public @NotNull Collection<LivingEntity> findEntities(@NotNull Instance instance, @NotNull Pos start,
-        @NotNull Point end) {
-        Collection<LivingEntity> entities = new ArrayList<>();
-        instance.getEntityTracker().raytraceCandidates(start, end, EntityTracker.Target.LIVING_ENTITIES, entities::add);
-
-        return entities;
+    public void findEntities(@NotNull Instance instance, @NotNull Pos start,
+        @NotNull Point end, @NotNull Consumer<? super LivingEntity> callback) {
+        instance.getEntityTracker().raytraceCandidates(start, end, EntityTracker.Target.LIVING_ENTITIES, callback::accept);
     }
 }
