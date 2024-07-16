@@ -7,7 +7,6 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.event.EventDispatcher;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
@@ -16,6 +15,8 @@ import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
 import org.phantazm.zombies.equipment.gun.shoot.handler.ShotHandler;
 import org.phantazm.zombies.equipment.gun.target.TargetFinder;
+import org.phantazm.zombies.event.equipment.EntitiesHitByGunEvent;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -27,6 +28,7 @@ import java.util.function.Supplier;
 @Cache(false)
 public class HitScanFirer implements Firer {
     private final Supplier<Optional<? extends Entity>> entitySupplier;
+    private final ZombiesScene zombiesScene;
     private final ShotEndpointSelector endSelector;
     private final TargetFinder targetFinder;
     private final Collection<ShotHandler> shotHandlers;
@@ -41,10 +43,12 @@ public class HitScanFirer implements Firer {
      */
     @FactoryMethod
     public HitScanFirer(@NotNull Supplier<Optional<? extends Entity>> entitySupplier,
+        @NotNull ZombiesScene zombiesScene,
         @NotNull @Child("endSelector") ShotEndpointSelector endSelector,
         @NotNull @Child("targetFinder") TargetFinder targetFinder,
         @NotNull @Child("shotHandlers") Collection<ShotHandler> shotHandlers) {
         this.entitySupplier = Objects.requireNonNull(entitySupplier);
+        this.zombiesScene = Objects.requireNonNull(zombiesScene);
         this.endSelector = Objects.requireNonNull(endSelector);
         this.targetFinder = Objects.requireNonNull(targetFinder);
         this.shotHandlers = List.copyOf(shotHandlers);
@@ -58,16 +62,22 @@ public class HitScanFirer implements Firer {
             if (endOptional.isEmpty()) {
                 return;
             }
-            Point end = endOptional.get();
 
+            Point end = endOptional.get();
             TargetFinder.Result target = targetFinder.findTarget(gun, entity, start, end, previousHits);
 
             GunShot shot = new GunShot(start, end, target.hits());
-            EventDispatcher.call(new GunShootEvent(gun, shot, entity));
+            zombiesScene.broadcastEvent(new GunShootEvent(gun, shot, entity));
 
-            for (ShotHandler shotHandler : shotHandlers) {
-                shotHandler.handle(gun, state, entity, previousHits, shot);
+            if (target.hits().isEmpty()) {
+                return;
             }
+
+            zombiesScene.broadcastCancellable(new EntitiesHitByGunEvent(gun, target.hits(), entity), ignored -> {
+                for (ShotHandler shotHandler : shotHandlers) {
+                    shotHandler.handle(gun, state, entity, previousHits, shot);
+                }
+            });
         });
     }
 

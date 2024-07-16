@@ -9,14 +9,18 @@ import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import java.util.Collection;
 import java.util.Objects;
 
-public class EntitiesDamageByGunEvent implements CancellableEvent {
+/**
+ * Event raised when one or more entities are hit by a gun's shot. Can be cancelled to prevent the gun's handlers from
+ * being run on any of the targets.
+ */
+public class EntitiesHitByGunEvent implements CancellableEvent {
     private final Gun gun;
     private final Collection<GunHit> targets;
     private final Entity shooter;
 
     private boolean cancelled;
 
-    public EntitiesDamageByGunEvent(@NotNull Gun gun, @NotNull Collection<GunHit> targets, @NotNull Entity shooter) {
+    public EntitiesHitByGunEvent(@NotNull Gun gun, @NotNull Collection<GunHit> targets, @NotNull Entity shooter) {
         this.gun = Objects.requireNonNull(gun);
         this.targets = Objects.requireNonNull(targets);
         this.shooter = Objects.requireNonNull(shooter);

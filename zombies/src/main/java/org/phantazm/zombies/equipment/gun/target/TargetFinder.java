@@ -12,8 +12,7 @@ import java.util.UUID;
 
 public interface TargetFinder {
 
-    @NotNull
-    Result findTarget(@NotNull Gun gun, @NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
+    @NotNull Result findTarget(@NotNull Gun gun, @NotNull Entity shooter, @NotNull Pos start, @NotNull Point end,
         @NotNull Collection<UUID> previousHits);
 
     record Result(@NotNull Collection<GunHit> hits) {

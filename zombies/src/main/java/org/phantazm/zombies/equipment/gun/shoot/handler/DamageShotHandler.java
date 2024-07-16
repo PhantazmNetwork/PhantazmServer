@@ -17,7 +17,6 @@ import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
-import org.phantazm.zombies.event.equipment.EntitiesDamageByGunEvent;
 import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -52,12 +51,6 @@ public class DamageShotHandler implements ShotHandler {
     }
 
     private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damageAmount) {
-        EntitiesDamageByGunEvent firstEvent = new EntitiesDamageByGunEvent(gun, targets, attacker);
-        zombiesScene.broadcastEvent(firstEvent);
-        if (firstEvent.isCancelled()) {
-            return;
-        }
-
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();
             boolean headshot = target.isHeadshot();

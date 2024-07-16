@@ -175,6 +175,21 @@ final class EquipmentFeature {
             perkCreatorMap.put(equipmentName, new BasicPerkCreator(equipmentName, data.rootLevel(), perkLevels));
         }
 
+        equipmentModule.getEventNode().addListener(GunShootEvent.class, event -> {
+            equipmentModule.getMapStats().setShots(equipmentModule.getMapStats().getShots() + 1);
+            int headshot = 0;
+            int regularShot = 0;
+            for (GunHit hit : event.shot().gunHits()) {
+                if (hit.isHeadshot()) headshot++;
+                else regularShot++;
+            }
+
+            equipmentModule.getMapStats()
+                .setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + headshot);
+            equipmentModule.getMapStats()
+                .setRegularHits(equipmentModule.getMapStats().getRegularHits() + regularShot);
+        });
+
         Map<Key, PerkCreator> perkMap = Map.copyOf(perkCreatorMap);
 
         return new EquipmentCreator() {
@@ -231,28 +246,8 @@ final class EquipmentFeature {
                     return Optional.empty();
                 }
 
-                GunModel model = new GunModel(rootLevel, levels);
-                Gun gun = new Gun(equipmentKey, equipmentModule.getPlayerView()::getPlayer, model);
-                equipmentModule.getEventNode().addListener(GunShootEvent.class, event -> {
-                    if (event.gun() != gun) {
-                        return;
-                    }
-
-                    equipmentModule.getMapStats().setShots(equipmentModule.getMapStats().getShots() + 1);
-                    int headshot = 0;
-                    int regularShot = 0;
-                    for (GunHit hit : event.shot().gunHits()) {
-                        if (hit.isHeadshot()) headshot++;
-                        else regularShot++;
-                    }
-
-                    equipmentModule.getMapStats()
-                        .setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + headshot);
-                    equipmentModule.getMapStats()
-                        .setRegularHits(equipmentModule.getMapStats().getRegularHits() + regularShot);
-                });
-
-                return Optional.of(gun);
+                return Optional.of(new Gun(equipmentKey, equipmentModule.getPlayerView()::getPlayer,
+                    new GunModel(rootLevel, levels)));
             }
         };
     }

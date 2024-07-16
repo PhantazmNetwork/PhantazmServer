@@ -6,6 +6,13 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 
+/**
+ * Event called when a gun is fired. The shot may or may not have hit any entities.
+ *
+ * @param gun    the gun that was used to shoot
+ * @param shot   the {@link GunShot} that was fired
+ * @param entity the shooter
+ */
 public record GunShootEvent(
     @NotNull Gun gun,
     @NotNull GunShot shot,

@@ -5,7 +5,6 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.instance.Instance;
@@ -22,6 +21,7 @@ import org.phantazm.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
 import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.shoot.handler.ShotHandler;
 import org.phantazm.zombies.equipment.gun.target.TargetFinder;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
@@ -39,6 +39,7 @@ public class ProjectileFirer implements Firer {
     private final Map<UUID, FiredShot> firedShots = new HashMap<>();
     private final Data data;
     private final Supplier<Optional<? extends Entity>> entitySupplier;
+    private final ZombiesScene zombiesScene;
     private final UUID shooterUUID;
     private final ShotEndpointSelector endSelector;
     private final TargetFinder targetFinder;
@@ -60,6 +61,7 @@ public class ProjectileFirer implements Firer {
      */
     @FactoryMethod
     public ProjectileFirer(@NotNull Data data, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
+        @NotNull ZombiesScene zombiesScene,
         @NotNull UUID shooterUUID,
         @NotNull @Child("endSelector") ShotEndpointSelector endSelector,
         @NotNull @Child("targetFinder") TargetFinder targetFinder,
@@ -67,6 +69,7 @@ public class ProjectileFirer implements Firer {
         @NotNull @Child("shotHandlers") Collection<ShotHandler> shotHandlers, @NotNull MobSpawner spawner) {
         this.data = Objects.requireNonNull(data);
         this.entitySupplier = Objects.requireNonNull(entitySupplier);
+        this.zombiesScene = Objects.requireNonNull(zombiesScene);
         this.shooterUUID = Objects.requireNonNull(shooterUUID);
         this.endSelector = Objects.requireNonNull(endSelector);
         this.targetFinder = Objects.requireNonNull(targetFinder);
@@ -169,7 +172,7 @@ public class ProjectileFirer implements Firer {
             }
 
             GunShot shot = new GunShot(firedShot.start(), collision, target.hits());
-            EventDispatcher.call(new GunShootEvent(firedShot.gun, shot, firedShot.shooter()));
+            zombiesScene.broadcastEvent(new GunShootEvent(firedShot.gun, shot, firedShot.shooter()));
             for (ShotHandler shotHandler : shotHandlers) {
                 shotHandler.handle(firedShot.gun(), firedShot.state(), firedShot.shooter(), firedShot.previousHits(),
                     shot);

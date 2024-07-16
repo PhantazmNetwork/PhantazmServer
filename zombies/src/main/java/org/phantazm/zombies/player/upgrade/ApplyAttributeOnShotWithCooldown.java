@@ -15,7 +15,7 @@ import org.phantazm.core.Cooldown;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
-import org.phantazm.zombies.event.equipment.EntitiesDamageByGunEvent;
+import org.phantazm.zombies.event.equipment.EntitiesHitByGunEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.lang.ref.Reference;
@@ -44,8 +44,8 @@ public class ApplyAttributeOnShotWithCooldown implements PlayerUpgradeComponent 
     private static final class Internal extends GuardedPlayerUpgrade {
         private Internal(ZombiesPlayer zombiesPlayer, Data data) {
             super(Activable.threadsafeWrapper(new Activable() {
-                private final EventListener<EntitiesDamageByGunEvent> listener = EventListener
-                    .builder(EntitiesDamageByGunEvent.class).handler(this::onShotByGun).build();
+                private final EventListener<EntitiesHitByGunEvent> listener = EventListener
+                    .builder(EntitiesHitByGunEvent.class).handler(this::onShotByGun).build();
 
                 private final Cooldown applyCooldown = Cooldown.cooldown();
                 private final Attribute attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
@@ -86,7 +86,7 @@ public class ApplyAttributeOnShotWithCooldown implements PlayerUpgradeComponent 
                     zombiesPlayer.getScene().sceneNode().removeListener(listener);
                 }
 
-                private void onShotByGun(EntitiesDamageByGunEvent event) {
+                private void onShotByGun(EntitiesHitByGunEvent event) {
                     if (!event.getShooter().getUuid().equals(zombiesPlayer.getUUID()) ||
                         !applyCooldown.takeCooldown(data.cooldown)) {
                         return;
