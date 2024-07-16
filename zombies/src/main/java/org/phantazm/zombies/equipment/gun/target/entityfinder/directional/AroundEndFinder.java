@@ -1,11 +1,6 @@
 package org.phantazm.zombies.equipment.gun.target.entityfinder.directional;
 
 import com.github.steanky.element.core.annotation.*;
-import com.github.steanky.ethylene.core.ConfigElement;
-import com.github.steanky.ethylene.core.collection.ConfigNode;
-import com.github.steanky.ethylene.core.collection.LinkedConfigNode;
-import com.github.steanky.ethylene.core.processor.ConfigProcessException;
-import com.github.steanky.ethylene.core.processor.ConfigProcessor;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.LivingEntity;
@@ -22,7 +17,6 @@ import java.util.function.Consumer;
 @Model("zombies.gun.entity_finder.directional.around_end")
 @Cache
 public class AroundEndFinder implements DirectionalEntityFinder {
-
     private final Data data;
 
     /**
@@ -33,35 +27,6 @@ public class AroundEndFinder implements DirectionalEntityFinder {
     @FactoryMethod
     public AroundEndFinder(@NotNull Data data) {
         this.data = Objects.requireNonNull(data);
-    }
-
-    /**
-     * Creates a {@link ConfigProcessor} for {@link Data}s.
-     *
-     * @return A {@link ConfigProcessor} for {@link Data}s
-     */
-    @ProcessorMethod
-    public static @NotNull ConfigProcessor<Data> processor() {
-        return new ConfigProcessor<>() {
-
-            @Override
-            public @NotNull Data dataFromElement(@NotNull ConfigElement element) throws ConfigProcessException {
-                double range = element.atOrThrow("range").asNumberOrThrow().doubleValue();
-                if (range < 0) {
-                    throw new ConfigProcessException("range must be greater than or equal to 0");
-                }
-
-                return new Data(range);
-            }
-
-            @Override
-            public @NotNull ConfigElement elementFromData(@NotNull Data data) {
-                ConfigNode node = new LinkedConfigNode(1);
-                node.putNumber("range", data.range());
-
-                return node;
-            }
-        };
     }
 
     @Override
@@ -79,5 +44,4 @@ public class AroundEndFinder implements DirectionalEntityFinder {
     public record Data(double range) {
 
     }
-
 }
