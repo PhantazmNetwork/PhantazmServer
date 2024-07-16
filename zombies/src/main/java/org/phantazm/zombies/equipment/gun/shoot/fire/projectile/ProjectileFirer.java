@@ -17,7 +17,6 @@ import org.phantazm.mob2.goal.ProjectileMovementGoal;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.event.GunShootEvent;
-import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
 import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
@@ -165,17 +164,11 @@ public class ProjectileFirer implements Firer {
             TargetFinder.Result target = targetFinder.findTarget(firedShot.gun, firedShot.shooter(), firedShot.start(),
                 collision, firedShot.previousHits());
 
-            target.regular().removeIf(hit -> hit.entity().getUuid().equals(projectile.getUuid()));
-            target.headshot().removeIf(hit -> hit.entity().getUuid().equals(projectile.getUuid()));
-
-            for (GunHit hit : target.regular()) {
-                firedShot.previousHits().add(hit.entity().getUuid());
-            }
-            for (GunHit hit : target.headshot()) {
-                firedShot.previousHits().add(hit.entity().getUuid());
+            if (!target.hits().isEmpty()) {
+                target.hits().removeIf(hit -> hit.entity().getUuid().equals(projectile.getUuid()));
             }
 
-            GunShot shot = new GunShot(firedShot.start(), collision, target.regular(), target.headshot());
+            GunShot shot = new GunShot(firedShot.start(), collision, target.hits());
             EventDispatcher.call(new GunShootEvent(firedShot.gun, shot, firedShot.shooter()));
             for (ShotHandler shotHandler : shotHandlers) {
                 shotHandler.handle(firedShot.gun(), firedShot.state(), firedShot.shooter(), firedShot.previousHits(),

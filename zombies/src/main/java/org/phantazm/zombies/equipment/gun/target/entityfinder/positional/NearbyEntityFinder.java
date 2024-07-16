@@ -6,11 +6,12 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * A {@link PositionalEntityFinder} which finds all nearby {@link Entity}s.
@@ -32,8 +33,8 @@ public class NearbyEntityFinder implements PositionalEntityFinder {
     }
 
     @Override
-    public @NotNull Collection<Entity> findEntities(@NotNull Instance instance, @NotNull Point start) {
-        return instance.getNearbyEntities(start, data.range());
+    public void findEntities(@NotNull Instance instance, @NotNull Point start, @NotNull Consumer<? super Entity> callback) {
+        instance.getEntityTracker().nearbyEntities(start, data.range, EntityTracker.Target.ENTITIES, callback::accept);
     }
 
     /**

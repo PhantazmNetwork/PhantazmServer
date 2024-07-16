@@ -37,11 +37,8 @@ public class PotionShotHandler implements ShotHandler {
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
         @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
-        for (GunHit target : shot.regularTargets()) {
-            target.entity().addEffect(data.potion());
-        }
-        for (GunHit target : shot.headshotTargets()) {
-            target.entity().addEffect(data.headshotPotion());
+        for (GunHit hit : shot.gunHits()) {
+            hit.entity().addEffect(hit.isHeadshot() ? data.headshotPotion : data.potion);
         }
     }
 

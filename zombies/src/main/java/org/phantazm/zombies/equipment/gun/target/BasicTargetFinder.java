@@ -4,12 +4,9 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.Child;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import it.unimi.dsi.fastutil.Pair;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
@@ -28,6 +25,8 @@ import java.util.*;
 @Model("zombies.gun.target_finder.basic")
 @Cache(false)
 public class BasicTargetFinder implements TargetFinder {
+    private static final Result EMPTY = new Result(List.of());
+
     private final DirectionalEntityFinder entityFinder;
     private final TargetTester targetTester;
     private final IntersectionFinder intersectionFinder;
@@ -61,32 +60,38 @@ public class BasicTargetFinder implements TargetFinder {
         @NotNull Collection<UUID> previousHits) {
         Instance instance = shooter.getInstance();
         if (instance == null) {
-            return new Result(new ArrayList<>(0), new ArrayList<>(0));
+            return EMPTY;
         }
 
         double distanceLimitSquared = start.distanceSquared(end);
-        List<Pair<? extends LivingEntity, Vec>> locations = new ArrayList<>();
+        List<GunHit> gunHits = new ArrayList<>();
         entityFinder.findEntities(instance, start, end, entity -> {
-            if (targetTester.useTarget(gun, entity, previousHits)) {
-                intersectionFinder.getHitLocation(entity, start, end, distanceLimitSquared).ifPresent(intersection -> {
-                    locations.add(Pair.of(entity, intersection));
-                });
+            if (!targetTester.useTarget(gun, entity, previousHits)) {
+                return;
             }
+
+            intersectionFinder.getHitLocation(entity, start, end, distanceLimitSquared).ifPresent(intersection -> {
+                gunHits.add(new GunHit(entity, intersection));
+            });
         });
 
-        List<Pair<? extends LivingEntity, Vec>> adjustedLocations = targetLimiter.limitTargets(shooter, gun, start, locations);
-
-        Collection<GunHit> targets = new ArrayList<>(adjustedLocations.size());
-        Collection<GunHit> headshots = new ArrayList<>(adjustedLocations.size());
-        for (Pair<? extends LivingEntity, Vec> pair : adjustedLocations) {
-            if (headshotTester.isHeadshot(shooter, pair.left(), pair.right())) {
-                headshots.add(new GunHit(pair.left(), pair.right()));
-            } else {
-                targets.add(new GunHit(pair.left(), pair.right()));
-            }
-            previousHits.add(pair.left().getUuid());
+        if (gunHits.isEmpty()) {
+            return EMPTY;
         }
 
-        return new Result(targets, headshots);
+        List<GunHit> adjustedLocations = targetLimiter.limitTargets(shooter, gun, start, gunHits);
+        if (adjustedLocations.isEmpty()) {
+            return EMPTY;
+        }
+
+        for (GunHit hit : adjustedLocations) {
+            if (headshotTester.isHeadshot(shooter, hit.entity(), hit.location())) {
+                hit.setHeadshot();
+            }
+
+            previousHits.add(hit.entity().getUuid());
+        }
+
+        return new Result(adjustedLocations);
     }
 }

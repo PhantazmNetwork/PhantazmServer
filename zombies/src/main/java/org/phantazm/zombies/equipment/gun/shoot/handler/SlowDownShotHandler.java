@@ -70,8 +70,8 @@ public class SlowDownShotHandler implements ShotHandler {
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
         @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
-        for (GunHit target : shot.regularTargets()) {
-            if (!(target.entity() instanceof Mob mob)) {
+        for (GunHit hit : shot.gunHits()) {
+            if (!(hit.entity() instanceof Mob mob)) {
                 continue;
             }
 
@@ -79,30 +79,13 @@ public class SlowDownShotHandler implements ShotHandler {
                 continue;
             }
 
-            removalQueue.add(ObjectLongPair.of(target.entity().getUuid(), selfTick + data.headshotDuration()));
-            latestTimeMap.put(target.entity().getUuid(), selfTick + data.duration());
+            long duration = (hit.isHeadshot() ? data.headshotDuration : data.duration);
+            removalQueue.add(ObjectLongPair.of(hit.entity().getUuid(), selfTick + duration));
+            latestTimeMap.put(hit.entity().getUuid(), selfTick + duration);
             AttributeModifier modifier =
                 new AttributeModifier(SLOW_DOWN_UUID, "slowdown_shot_handler", data.multiplier(),
                     AttributeOperation.MULTIPLY_TOTAL);
-            AttributeInstance attribute = target.entity().getAttribute(Attribute.MOVEMENT_SPEED);
-            attribute.removeModifier(SLOW_DOWN_UUID);
-            attribute.addModifier(modifier);
-        }
-        for (GunHit target : shot.headshotTargets()) {
-            if (!(target.entity() instanceof Mob mob)) {
-                continue;
-            }
-
-            if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_SLOW_DOWN, false)) {
-                continue;
-            }
-
-            removalQueue.add(ObjectLongPair.of(target.entity().getUuid(), selfTick + data.headshotDuration()));
-            latestTimeMap.put(target.entity().getUuid(), selfTick + data.headshotDuration());
-            AttributeModifier modifier =
-                new AttributeModifier(SLOW_DOWN_UUID, "slowdown_shot_handler", data.headshotMultiplier(),
-                    AttributeOperation.MULTIPLY_TOTAL);
-            AttributeInstance attribute = target.entity().getAttribute(Attribute.MOVEMENT_SPEED);
+            AttributeInstance attribute = hit.entity().getAttribute(Attribute.MOVEMENT_SPEED);
             attribute.removeModifier(SLOW_DOWN_UUID);
             attribute.addModifier(modifier);
         }

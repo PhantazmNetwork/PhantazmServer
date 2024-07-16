@@ -6,24 +6,31 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-/**
- * Represents an individual hit target of a gun. A gun may have multiple hits in a single fire.
- *
- * @param entity   The target {@link LivingEntity} of the hit
- * @param location The location of the hit
- */
-public record GunHit(@NotNull LivingEntity entity,
-    @NotNull Vec location) {
 
-    /**
-     * Creates a {@link GunHit}.
-     *
-     * @param entity   The target {@link LivingEntity} of the hit
-     * @param location The location of the hit
-     */
-    public GunHit {
-        Objects.requireNonNull(entity);
-        Objects.requireNonNull(location);
+public class GunHit {
+    private final LivingEntity entity;
+    private final Vec location;
+
+    private boolean isHeadshot;
+
+    public GunHit(@NotNull LivingEntity entity, @NotNull Vec location) {
+        this.entity = Objects.requireNonNull(entity);
+        this.location = Objects.requireNonNull(location);
     }
 
+    public @NotNull LivingEntity entity() {
+        return entity;
+    }
+
+    public @NotNull Vec location() {
+        return location;
+    }
+
+    public boolean isHeadshot() {
+        return isHeadshot;
+    }
+
+    public void setHeadshot() {
+        isHeadshot = true;
+    }
 }

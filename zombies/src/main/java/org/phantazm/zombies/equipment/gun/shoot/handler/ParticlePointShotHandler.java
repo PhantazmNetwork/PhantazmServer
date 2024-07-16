@@ -34,11 +34,7 @@ public class ParticlePointShotHandler implements ShotHandler {
             return;
         }
 
-        for (GunHit hit : shot.regularTargets()) {
-            wrapper.sendTo(instance, hit.location());
-        }
-
-        for (GunHit hit : shot.headshotTargets()) {
+        for (GunHit hit : shot.gunHits()) {
             wrapper.sendTo(instance, hit.location());
         }
     }

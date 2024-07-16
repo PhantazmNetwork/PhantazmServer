@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.event.GunShootEvent;
-import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.gun.shoot.GunShot;
 import org.phantazm.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
 import org.phantazm.zombies.equipment.gun.shoot.handler.ShotHandler;
@@ -62,15 +61,10 @@ public class HitScanFirer implements Firer {
             Point end = endOptional.get();
 
             TargetFinder.Result target = targetFinder.findTarget(gun, entity, start, end, previousHits);
-            for (GunHit hit : target.regular()) {
-                previousHits.add(hit.entity().getUuid());
-            }
-            for (GunHit hit : target.headshot()) {
-                previousHits.add(hit.entity().getUuid());
-            }
 
-            GunShot shot = new GunShot(start, end, target.regular(), target.headshot());
+            GunShot shot = new GunShot(start, end, target.hits());
             EventDispatcher.call(new GunShootEvent(gun, shot, entity));
+
             for (ShotHandler shotHandler : shotHandlers) {
                 shotHandler.handle(gun, state, entity, previousHits, shot);
             }

@@ -62,27 +62,26 @@ public class GiveCoinsShotHandler implements ShotHandler {
         int change = 0;
 
         Collection<Component> displays = new ArrayList<>(2);
-        if (!shot.regularTargets().isEmpty()) {
-            displays.add(Component.text((isInstaKill ? "Insta Kill " : "") + shot.regularTargets().size() + "x"));
-            for (GunHit hit : shot.regularTargets()) {
-                if (cannotGiveCoins(hit)) {
-                    continue;
-                }
+        int headshots = 0;
+        int normalShots = 0;
+        for (GunHit hit : shot.gunHits()) {
+            if (hit.isHeadshot()) headshots++;
+            else normalShots++;
 
-                change += isInstaKill && vulnerableToInstakill(hit.entity()) ? data.instaKillCoins : data.normalCoins;
+            if (cannotGiveCoins(hit)) {
+                continue;
             }
+
+            change += isInstaKill && vulnerableToInstakill(hit.entity()) ? data.instaKillCoins :
+                (hit.isHeadshot() ? data.headshotCoins : data.normalCoins);
         }
 
-        if (!shot.headshotTargets().isEmpty()) {
-            displays.add(
-                Component.text((isInstaKill ? "Insta Kill " : "Critical Hit ") + shot.headshotTargets().size() + "x"));
-            for (GunHit hit : shot.headshotTargets()) {
-                if (cannotGiveCoins(hit)) {
-                    continue;
-                }
+        if (normalShots > 0) {
+            displays.add(Component.text((isInstaKill ? "Insta Kill " : "") + normalShots + "x"));
+        }
 
-                change += isInstaKill && vulnerableToInstakill(hit.entity()) ? data.instaKillCoins : data.headshotCoins;
-            }
+        if (headshots > 0) {
+            displays.add(Component.text((isInstaKill ? "Insta Kill " : "Critical Hit ") + headshots + "x"));
         }
 
         coins.runTransaction(new Transaction(modifiers, displays, change)).applyIfAffordable(coins);

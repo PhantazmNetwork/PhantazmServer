@@ -4,17 +4,15 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import it.unimi.dsi.fastutil.Pair;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.AttributeUtils;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.Gun;
+import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -30,16 +28,14 @@ public class DistanceTargetLimiter implements TargetLimiter {
     }
 
     @Override
-    public @NotNull List<Pair<? extends LivingEntity, Vec>> limitTargets(@NotNull Entity shooter, @NotNull Gun gun, @NotNull Pos start,
-        @NotNull List<Pair<? extends LivingEntity, Vec>> targets) {
-        List<Pair<? extends LivingEntity, Vec>> targetsCopy = new ArrayList<>(targets);
-        Comparator<Pair<? extends LivingEntity, Vec>> comparator =
-            Comparator.comparingDouble(pair -> start.distanceSquared(pair.value()));
+    public @NotNull List<GunHit> limitTargets(@NotNull Entity shooter, @NotNull Gun gun, @NotNull Pos start,
+        @NotNull List<GunHit> targets) {
+        Comparator<GunHit> comparator = Comparator.comparingDouble(pair -> start.distanceSquared(pair.location()));
         if (!data.prioritizeClosest()) {
             comparator = comparator.reversed();
         }
 
-        targetsCopy.sort(comparator);
+        targets.sort(comparator);
 
         int actualLimit;
         if (shooter instanceof LivingEntity livingEntity) {
@@ -49,7 +45,7 @@ public class DistanceTargetLimiter implements TargetLimiter {
             actualLimit = data.targetLimit;
         }
 
-        return targetsCopy.subList(0, Math.min(targets.size(), actualLimit));
+        return targets.subList(0, Math.min(targets.size(), actualLimit));
     }
 
     @DataObject

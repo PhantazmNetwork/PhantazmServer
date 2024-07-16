@@ -39,20 +39,9 @@ public class SoundShotHandler implements ShotHandler {
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
         @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         audienceProvider.provideAudience().ifPresent(audience -> {
-            Set<UUID> played = Collections.newSetFromMap(new IdentityHashMap<>(shot.regularTargets().size()));
-            for (GunHit hit : shot.regularTargets()) {
-                if (played.add(hit.entity().getUuid())) {
-                    Pos pos = data.atShooter ? attacker.getPosition() : hit.entity().getPosition();
-                    audience.playSound(data.sound(), pos.x(), pos.y(), pos.z());
-                }
-            }
-
-            played.clear();
-            for (GunHit hit : shot.headshotTargets()) {
-                if (played.add(hit.entity().getUuid())) {
-                    Pos pos = data.atShooter ? attacker.getPosition() : hit.entity().getPosition();
-                    audience.playSound(data.headshotSound(), pos.x(), pos.y(), pos.z());
-                }
+            for (GunHit hit : shot.gunHits()) {
+                Pos pos = data.atShooter ? attacker.getPosition() : hit.entity().getPosition();
+                audience.playSound(hit.isHeadshot() ? data.headshotSound : data.sound, pos.x(), pos.y(), pos.z());
             }
         });
     }

@@ -15,6 +15,7 @@ import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.target.entityfinder.positional.PositionalEntityFinder;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * A {@link ShotHandler} which fires its own shots based on the entities that are hit.
@@ -49,35 +50,32 @@ public class ChainShotHandler implements ShotHandler {
             return;
         }
 
-        int attempts = data.fireAttempts();
-        int combinedSize = shot.headshotTargets().size() + shot.regularTargets().size();
-        Collection<GunHit> combinedHits = new ArrayList<>(combinedSize);
-        combinedHits.addAll(shot.regularTargets());
-        combinedHits.addAll(shot.headshotTargets());
-
-        Set<UUID> previousUUIDs = new HashSet<>(combinedSize);
-        for (GunHit hit : combinedHits) {
+        Set<UUID> previousUUIDs = new HashSet<>(shot.gunHits().size());
+        for (GunHit hit : shot.gunHits()) {
             previousUUIDs.add(hit.entity().getUuid());
         }
 
-        for (GunHit hit : combinedHits) {
-            Collection<Entity> entities = finder.findEntities(instance, hit.location());
+        for (GunHit hit : shot.gunHits()) {
+            finder.findEntities(instance, hit.location(), new Consumer<>() {
+                private int attempts = data.fireAttempts();
 
-            for (Entity entity : entities) {
-                if (data.ignorePreviousHits() && previousUUIDs.contains(entity.getUuid())) {
-                    continue;
-                }
+                @Override
+                public void accept(Entity entity) {
+                    if (data.ignorePreviousHits() && previousUUIDs.contains(entity.getUuid())) {
+                        return;
+                    }
 
-                BoundingBox boundingBox = entity.getBoundingBox();
-                Vec direction =
-                    Vec.fromPoint(entity.getPosition().add(0, boundingBox.height() / 2, 0).sub(hit.location()));
-                int initialSize = previousHits.size();
-                firer.fire(gun, state, new Pos(hit.location()).withDirection(direction), previousHits);
-                if (previousHits.size() > initialSize && --attempts <= 0) {
-                    return;
+                    BoundingBox boundingBox = entity.getBoundingBox();
+                    Vec direction =
+                        Vec.fromPoint(entity.getPosition().add(0, boundingBox.height() / 2, 0).sub(hit.location()));
+                    int initialSize = previousHits.size();
+                    firer.fire(gun, state, new Pos(hit.location()).withDirection(direction), previousHits);
+                    if (previousHits.size() > initialSize && --attempts <= 0) {
+                        return;
+                    }
+                    previousUUIDs.addAll(previousHits);
                 }
-                previousUUIDs.addAll(previousHits);
-            }
+            });
         }
     }
 

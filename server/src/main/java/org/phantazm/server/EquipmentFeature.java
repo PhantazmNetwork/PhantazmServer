@@ -28,6 +28,7 @@ import org.phantazm.zombies.equipment.gun.GunLevel;
 import org.phantazm.zombies.equipment.gun.GunModel;
 import org.phantazm.zombies.equipment.gun.ZombiesEquipmentModule;
 import org.phantazm.zombies.equipment.gun.event.GunShootEvent;
+import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.equipment.perk.BasicPerkCreator;
 import org.phantazm.zombies.equipment.perk.PerkCreator;
 import org.phantazm.zombies.equipment.perk.level.PerkLevelCreator;
@@ -238,14 +239,17 @@ final class EquipmentFeature {
                     }
 
                     equipmentModule.getMapStats().setShots(equipmentModule.getMapStats().getShots() + 1);
-
-                    if (!event.shot().headshotTargets().isEmpty()) {
-                        equipmentModule.getMapStats()
-                            .setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + 1);
-                    } else if (!event.shot().regularTargets().isEmpty()) {
-                        equipmentModule.getMapStats()
-                            .setRegularHits(equipmentModule.getMapStats().getRegularHits() + 1);
+                    int headshot = 0;
+                    int regularShot = 0;
+                    for (GunHit hit : event.shot().gunHits()) {
+                        if (hit.isHeadshot()) headshot++;
+                        else regularShot++;
                     }
+
+                    equipmentModule.getMapStats()
+                        .setHeadshotHits(equipmentModule.getMapStats().getHeadshotHits() + headshot);
+                    equipmentModule.getMapStats()
+                        .setRegularHits(equipmentModule.getMapStats().getRegularHits() + regularShot);
                 });
 
                 return Optional.of(gun);

@@ -48,13 +48,11 @@ public class DamageShotHandler implements ShotHandler {
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
         @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
-        handleDamageTargets(gun, attacker, shot.regularTargets(), data.damage, false);
-        handleDamageTargets(gun, attacker, shot.headshotTargets(), data.headshotDamage, true);
+        handleDamageTargets(gun, attacker, shot.gunHits(), data.damage);
     }
 
-    private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damageAmount,
-        boolean headshot) {
-        EntitiesDamageByGunEvent firstEvent = new EntitiesDamageByGunEvent(gun, targets, attacker, headshot, false, damageAmount);
+    private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damageAmount) {
+        EntitiesDamageByGunEvent firstEvent = new EntitiesDamageByGunEvent(gun, targets, attacker);
         zombiesScene.broadcastEvent(firstEvent);
         if (firstEvent.isCancelled()) {
             return;
@@ -62,6 +60,7 @@ public class DamageShotHandler implements ShotHandler {
 
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();
+            boolean headshot = target.isHeadshot();
 
             EntityDamageByGunEvent event =
                 new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damageAmount);
@@ -83,7 +82,7 @@ public class DamageShotHandler implements ShotHandler {
                 }
 
                 if (headshot) {
-                    baseDamage = AttributeUtils.computeWithBase(baseDamage, target.entity().getAttribute(Attributes.HEADSHOT_DAMAGE_RECEIVED));
+                    baseDamage = AttributeUtils.computeWithBase(baseDamage, targetEntity.getAttribute(Attributes.HEADSHOT_DAMAGE_RECEIVED));
                 }
 
                 switch (data.armorBehavior) {

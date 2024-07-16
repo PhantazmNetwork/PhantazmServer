@@ -5,7 +5,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
+import java.util.function.Consumer;
 
 /**
  * Finds entities based on a search {@link Point}.
@@ -18,8 +18,7 @@ public interface PositionalEntityFinder {
      *
      * @param instance The {@link Instance} to search in
      * @param start    The {@link Point} to search from
-     * @return A {@link Collection} of {@link Entity}s found
      */
-    @NotNull Collection<Entity> findEntities(@NotNull Instance instance, @NotNull Point start);
+    void findEntities(@NotNull Instance instance, @NotNull Point start, @NotNull Consumer<? super Entity> callback);
 
 }

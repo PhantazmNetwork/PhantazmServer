@@ -39,15 +39,10 @@ public class KnockbackShotHandler implements ShotHandler {
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
         @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         Pos attackerPos = attacker.getPosition();
-        for (GunHit target : shot.regularTargets()) {
-            Entity entity = target.entity();
-            entity.takeKnockback(data.knockback, true, Math.sin(attackerPos.yaw() * (Math.PI / 180)),
-                -Math.cos(attackerPos.yaw() * (Math.PI / 180)));
-        }
-
-        for (GunHit target : shot.headshotTargets()) {
-            Entity entity = target.entity();
-            entity.takeKnockback(data.headshotKnockback, true, Math.sin(attackerPos.yaw() * (Math.PI / 180)),
+        for (GunHit hit : shot.gunHits()) {
+            Entity entity = hit.entity();
+            entity.takeKnockback(hit.isHeadshot() ? data.headshotKnockback : data.knockback, true,
+                Math.sin(attackerPos.yaw() * (Math.PI / 180)),
                 -Math.cos(attackerPos.yaw() * (Math.PI / 180)));
         }
     }

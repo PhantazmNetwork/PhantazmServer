@@ -62,11 +62,10 @@ public class IgniteShotHandler implements ShotHandler {
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
         @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
-        setFire(shot.regularTargets(), data.normalFireTicks, attacker);
-        setFire(shot.headshotTargets(), data.headshotFireTicks, attacker);
+        setFire(shot.gunHits(), attacker);
     }
 
-    private void setFire(Collection<GunHit> hits, int duration, @NotNull Entity attacker) {
+    private void setFire(Collection<GunHit> hits, @NotNull Entity attacker) {
         for (GunHit target : hits) {
             LivingEntity entity = target.entity();
             if (!(entity instanceof Mob mob)) {
@@ -77,7 +76,7 @@ public class IgniteShotHandler implements ShotHandler {
                 continue;
             }
 
-            entity.setFireForDuration(duration);
+            entity.setFireForDuration(target.isHeadshot() ? data.headshotFireTicks : data.normalFireTicks);
 
             TagHandler tags = TagUtils.sceneLocalTags(entity, scene);
             long lastFireDamageTicks = tags.getTag(lastFireDamageTicksTag);

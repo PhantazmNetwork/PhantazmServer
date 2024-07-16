@@ -41,11 +41,8 @@ public class MessageShotHandler implements ShotHandler {
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
         @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
         audienceProvider.provideAudience().ifPresent(audience -> {
-            for (GunHit ignored : shot.regularTargets()) {
-                audience.sendMessage(data.message());
-            }
-            for (GunHit ignored : shot.headshotTargets()) {
-                audience.sendMessage(data.headshotMessage());
+            for (GunHit hit : shot.gunHits()) {
+                audience.sendMessage(hit.isHeadshot() ? data.headshotMessage : data.message);
             }
         });
     }
