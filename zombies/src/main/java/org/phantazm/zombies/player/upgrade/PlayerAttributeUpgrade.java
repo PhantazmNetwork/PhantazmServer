@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +12,6 @@ import org.phantazm.core.tick.Activable;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Model("zombies.upgrade.player_attribute")
@@ -40,7 +38,7 @@ public class PlayerAttributeUpgrade implements PlayerUpgradeComponent {
                 @Override
                 public void start() {
                     zombiesPlayer.getPlayer().ifPresent(player -> {
-                        player.getAttribute(Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
+                        player.getAttribute(Attributes.get(data.attribute))
                             .addModifier(new AttributeModifier(uuid, uuidString, data.amount, data.attributeOperation));
                     });
                 }
@@ -48,8 +46,7 @@ public class PlayerAttributeUpgrade implements PlayerUpgradeComponent {
                 @Override
                 public void end() {
                     zombiesPlayer.getPlayer().ifPresent(player -> {
-                        player.getAttribute(Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL))
-                            .removeModifier(uuid);
+                        player.getAttribute(Attributes.get(data.attribute)).removeModifier(uuid);
                     });
                 }
             }), zombiesPlayer);

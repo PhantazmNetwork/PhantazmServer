@@ -11,7 +11,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.coordinate.Point;
@@ -288,8 +287,7 @@ public class SelectBombedRoom implements Action<Round> {
                 CancellableState<Entity> state = CancellableState.state(actualPlayer,
                     entity -> {
                         for (TargetedAttribute modifier : modifiers) {
-                            ((Player) entity).getAttribute(Objects.requireNonNullElse(Attribute.fromKey(modifier.attribute),
-                                Attributes.NIL)).addModifier(modifier.modifier);
+                            ((Player) entity).getAttribute(Attributes.get(modifier.attribute)).addModifier(modifier.modifier);
                         }
 
                         for (TimedPotion potion : entity.getActiveEffects()) {
@@ -302,8 +300,7 @@ public class SelectBombedRoom implements Action<Round> {
                     }, entity -> {
                         Player player = (Player) entity;
                         for (TargetedAttribute modifier : modifiers) {
-                            player.getAttribute(
-                                    Objects.requireNonNullElse(Attribute.fromKey(modifier.attribute), Attributes.NIL))
+                            player.getAttribute(Attributes.get(modifier.attribute))
                                 .removeModifier(modifier.modifier.getId());
                         }
 

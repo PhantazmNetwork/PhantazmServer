@@ -4,7 +4,6 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.coordinate.Pos;
@@ -19,6 +18,7 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.TagUtils;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.mob2.Mob;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
 import org.phantazm.zombies.event.mob.MobAttributeWearOffEvent;
 import org.phantazm.zombies.event.player.ZombiesPlayerKillMobEvent;
@@ -108,11 +108,8 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
 
                                 effect.perform(mob, zombiesPlayer);
 
-                                Attribute attribute = Attribute.fromKey(data.attribute);
-                                if (attribute != null) {
-                                    mob.getAttribute(attribute).addModifier(new AttributeModifier(RANDOM_UUID, NAME, data.amount,
-                                        data.operation));
-                                }
+                                mob.getAttribute(Attributes.get(data.attribute))
+                                    .addModifier(new AttributeModifier(RANDOM_UUID, NAME, data.amount, data.operation));
 
                                 if (data.limit < 0) {
                                     return false;
@@ -146,10 +143,7 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
                         mob.removeTag(EFFECT_TAG);
 
                         if (data.removeModifierOnWearOff) {
-                            Attribute attribute = Attribute.fromKey(data.attribute);
-                            if (attribute != null) {
-                                mob.getAttribute(attribute).removeModifier(RANDOM_UUID);
-                            }
+                            mob.getAttribute(Attributes.get(data.attribute)).removeModifier(RANDOM_UUID);
                         }
                     }
                 }

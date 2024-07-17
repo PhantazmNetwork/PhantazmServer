@@ -4,6 +4,9 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.deactivation_predicate.immediate")
@@ -23,7 +26,7 @@ public class ImmediateDeactivationPredicate implements DeactivationPredicateComp
     private static class Predicate implements DeactivationPredicate {
 
         @Override
-        public void activate(long time) {
+        public void activate(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer, long time) {
 
         }
 

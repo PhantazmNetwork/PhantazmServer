@@ -48,7 +48,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
         this.attributeUUID = UUID.randomUUID();
         this.attributeName = this.attributeUUID.toString();
 
-        this.attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
+        this.attribute = Objects.requireNonNullElse(Attributes.get(data.attribute), Attributes.NIL);
 
         String name = NAMES.computeIfAbsent(data, ignored -> TagUtils.uniqueTagName());
         this.entities = new ConcurrentLinkedDeque<>();

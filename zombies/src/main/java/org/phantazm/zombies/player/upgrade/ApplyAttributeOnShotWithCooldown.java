@@ -48,7 +48,7 @@ public class ApplyAttributeOnShotWithCooldown implements PlayerUpgradeComponent 
                     .builder(EntitiesHitByGunEvent.class).handler(this::onShotByGun).build();
 
                 private final Cooldown applyCooldown = Cooldown.cooldown();
-                private final Attribute attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
+                private final Attribute attribute = Attributes.get(data.attribute);
                 private final UUID uuid = UUID.randomUUID();
                 private final AttributeModifier modifier = new AttributeModifier(uuid, uuid.toString(), data.value, data.operation);
 

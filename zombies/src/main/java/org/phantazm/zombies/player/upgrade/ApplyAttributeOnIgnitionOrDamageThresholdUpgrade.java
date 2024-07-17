@@ -55,7 +55,7 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
                 private final UUID uuid = UUID.randomUUID();
                 private final AttributeModifier attributeModifier = new AttributeModifier(uuid, uuid.toString(),
                     data.amount, data.operation);
-                private final Attribute attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
+                private final Attribute attribute = Objects.requireNonNullElse(Attributes.get(data.attribute), Attributes.NIL);
 
                 private final AtomicBoolean onFire = new AtomicBoolean();
                 private final Cooldown effectCooldown = Cooldown.cooldown();

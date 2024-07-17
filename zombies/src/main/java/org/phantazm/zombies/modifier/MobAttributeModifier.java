@@ -38,7 +38,7 @@ public class MobAttributeModifier implements DualComponent<ZombiesScene, Modifie
         @Override
         public void apply() {
             UUID uuid = UUID.randomUUID();
-            Attribute attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
+            Attribute attribute = Attributes.get(data.attribute);
 
             scene.addListener(ZombiesMobSetupEvent.class, event -> {
                 LivingEntity entity = event.getEntity();

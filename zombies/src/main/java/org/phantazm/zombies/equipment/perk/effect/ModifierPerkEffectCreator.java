@@ -72,7 +72,7 @@ public class ModifierPerkEffectCreator implements PerkEffectCreator {
             this.data = data;
             this.zombiesPlayer = zombiesPlayer;
 
-            this.attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
+            this.attribute = Objects.requireNonNullElse(Attributes.get(data.attribute), Attributes.NIL);
             this.uuid = UUID.randomUUID();
             this.name = this.uuid.toString();
         }

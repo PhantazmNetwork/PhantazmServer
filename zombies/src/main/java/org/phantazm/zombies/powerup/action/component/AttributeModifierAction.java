@@ -61,7 +61,7 @@ public class AttributeModifierAction implements PowerupActionComponent {
             Map<PlayerView, ZombiesPlayer> playerMap) {
             super(deactivationPredicate);
             this.data = data;
-            this.attribute = Objects.requireNonNullElse(Attribute.fromKey(data.attribute), Attributes.NIL);
+            this.attribute = Attributes.get(data.attribute);
             this.attributeUID = UUID.randomUUID();
             this.attributeName = attributeUID.toString();
             this.playerMap = playerMap;

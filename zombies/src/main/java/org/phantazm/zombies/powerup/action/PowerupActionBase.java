@@ -9,6 +9,7 @@ import java.util.Objects;
 
 public abstract class PowerupActionBase implements PowerupAction {
     private final DeactivationPredicate deactivationPredicate;
+    volatile ZombiesPlayer activatingPlayer;
 
     public PowerupActionBase(@NotNull DeactivationPredicate deactivationPredicate) {
         this.deactivationPredicate = Objects.requireNonNull(deactivationPredicate);
@@ -16,7 +17,8 @@ public abstract class PowerupActionBase implements PowerupAction {
 
     @Override
     public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
-        deactivationPredicate.activate(time);
+        activatingPlayer = player;
+        deactivationPredicate.activate(powerup, player, time);
     }
 
     @Override
