@@ -21,7 +21,6 @@ import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.event.player.ZombiesPlayerProcFireEvent;
-import org.phantazm.zombies.event.player.ZombiesPlayerIgniteTargetEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -66,13 +65,6 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         }
 
         Player player = playerOptional.get();
-        ZombiesPlayerIgniteTargetEvent event = new ZombiesPlayerIgniteTargetEvent(player, zombiesPlayer, this, livingEntity);
-        scene.broadcastEvent(event);
-
-        if (event.isCancelled()) {
-            return;
-        }
-
         livingEntity.setFireForDuration((int) Math.round(AttributeUtils.computeWithBase(data.fireTicks, player
             .getAttribute(Attributes.FIRE_APPLY_DURATION)) * effectScale));
 
