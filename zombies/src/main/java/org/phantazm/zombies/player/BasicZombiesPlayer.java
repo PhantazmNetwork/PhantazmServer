@@ -17,6 +17,7 @@ import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -28,6 +29,10 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     private final AtomicBoolean blockHandAnimation;
 
+    private final Set<ShotEffect> shotEffects;
+    private final Set<ShotEffect> shotEffectView;
+
+
     private volatile Set<Activable> activables;
     private final Lock activablesLock;
 
@@ -37,6 +42,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         this.module = Objects.requireNonNull(module);
         this.taskScheduler = Objects.requireNonNull(taskScheduler);
         this.blockHandAnimation = new AtomicBoolean();
+        this.shotEffects = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.shotEffectView = Collections.unmodifiableSet(shotEffects);
         this.activables = Set.of();
         this.activablesLock = new ReentrantLock();
     }
@@ -100,6 +107,21 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         if (removed) {
             activable.end();
         }
+    }
+
+    @Override
+    public @NotNull @UnmodifiableView Set<ShotEffect> shotEffects() {
+        return shotEffectView;
+    }
+
+    @Override
+    public void addShotEffect(@NotNull ShotEffect effect) {
+        this.shotEffects.add(effect);
+    }
+
+    @Override
+    public void removeShotEffect(@NotNull ShotEffect effect) {
+        this.shotEffects.remove(effect);
     }
 
     @Override

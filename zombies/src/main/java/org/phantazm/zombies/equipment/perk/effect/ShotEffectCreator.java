@@ -57,6 +57,9 @@ public class ShotEffectCreator implements PerkEffectCreator {
         @Override
         public void start() {
             rootNode.addListener(listener);
+            for (ShotEffect effect : actions) {
+                zombiesPlayer.addShotEffect(effect);
+            }
         }
 
         @Override
@@ -69,6 +72,9 @@ public class ShotEffectCreator implements PerkEffectCreator {
         @Override
         public void end() {
             rootNode.removeListener(listener);
+            for (ShotEffect effect : actions) {
+                zombiesPlayer.removeShotEffect(effect);
+            }
         }
 
         private void onEntityDamageByGun(EntityDamageByGunEvent event) {

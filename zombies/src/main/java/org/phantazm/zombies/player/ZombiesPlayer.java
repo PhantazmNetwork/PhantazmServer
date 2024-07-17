@@ -53,6 +53,12 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     void removeActivable(@NotNull Activable activable);
 
+    @NotNull @UnmodifiableView Set<ShotEffect> shotEffects();
+
+    void addShotEffect(@NotNull ShotEffect effect);
+
+    void removeShotEffect(@NotNull ShotEffect effect);
+
     default @NotNull Optional<Equipment> getHeldEquipment() {
         Optional<Player> playerOptional = module().getPlayerView().getPlayer();
         if (playerOptional.isEmpty()) {

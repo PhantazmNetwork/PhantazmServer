@@ -88,27 +88,29 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
     @Override
     public void tick(long time) {
-        activeEntities.removeIf(target -> {
-            LivingEntity entity = target.target.get();
-            if (entity == null) {
-                return true;
-            }
+        activeEntities.removeIf(this::shouldRemoveTarget);
+    }
 
-            if (entity.isRemoved() || entity.isDead() || !entity.isOnFire()) {
-                stopFire(entity);
-                return true;
-            }
+    private boolean shouldRemoveTarget(DamageTarget target) {
+        LivingEntity entity = target.target.get();
+        if (entity == null) {
+            return true;
+        }
 
-            TagHandler tags = TagUtils.sceneLocalTags(entity, scene);
-            long lastDamageTicks = tags.updateAndGetTag(this.lastDamageTicksTag, oldValue -> oldValue + 1);
+        if (entity.isRemoved() || entity.isDead() || !entity.isOnFire()) {
+            TagUtils.removeSceneLocalTag(entity, scene, lastDamageTicksTag);
+            return true;
+        }
 
-            if (lastDamageTicks >= target.interval) {
-                doDamage(entity, target.damager.get(), target.player);
-                tags.setTag(this.lastDamageTicksTag, 0L);
-            }
+        TagHandler tags = TagUtils.sceneLocalTags(entity, scene);
+        long lastDamageTicks = tags.updateAndGetTag(this.lastDamageTicksTag, oldValue -> oldValue + 1);
 
-            return false;
-        });
+        if (lastDamageTicks >= target.interval) {
+            doDamage(entity, target.damager.get(), target.player);
+            tags.setTag(this.lastDamageTicksTag, 0L);
+        }
+
+        return false;
     }
 
     private void doDamage(LivingEntity target, Player damager, ZombiesPlayer player) {
@@ -123,10 +125,6 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
                     new Damage(DamageType.ON_FIRE, null, damager, null, amount), event.damageAmount(),
                 data.bypassArmor));
         });
-    }
-
-    private void stopFire(Entity entity) {
-        TagUtils.removeSceneLocalTag(entity, scene, lastDamageTicksTag);
     }
 
     private record DamageTarget(Reference<Player> damager,
