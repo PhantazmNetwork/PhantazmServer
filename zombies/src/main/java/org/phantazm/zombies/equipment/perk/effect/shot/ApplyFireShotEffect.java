@@ -59,14 +59,13 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             return;
         }
 
-        Player player = playerOptional.get();
-
-        if (!(entity instanceof LivingEntity livingEntity) || (entity instanceof Mob mob) &&
-            mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_FIRE, false)) {
+        if (!(entity instanceof LivingEntity livingEntity) || (entity instanceof Mob mob &&
+            mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_FIRE, false))) {
             //can't set non-LivingEntity on fire as they have no health
             return;
         }
 
+        Player player = playerOptional.get();
         ZombiesPlayerIgniteTargetEvent event = new ZombiesPlayerIgniteTargetEvent(player, zombiesPlayer, this, livingEntity);
         scene.broadcastEvent(event);
 

@@ -103,7 +103,7 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
                         });
                     });
 
-            if (damageRadiusEnd > 0) {
+            if (damageRadiusEnd > 0 && damageRadiusStart < damageRadiusEnd) {
                 instance.getEntityTracker().nearbyEntities(powerup.spawnLocation(), damageRadiusEnd,
                     EntityTracker.Target.LIVING_ENTITIES, livingEntity -> {
                         if (!(livingEntity instanceof Mob) || livingEntity.isDead()) {
@@ -124,11 +124,12 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
 
                         double difference = damageRadiusEnd - damageRadiusStart;
                         double lerpScale = MathUtils.clamp(offset / difference, 0, 1);
-                        double damage = data.damageStart + lerpScale * (data.damageEnd - data.damageStart);
+                        double damage = data.damageStart + ((lerpScale * data.damageEnd) - (lerpScale * data.damageStart));
 
                         livingEntity.getAcquirable().sync(self -> {
                             Mob mob = (Mob) self;
                             DamageUtils.damage(data.damageType, mob, player, (float) damage, data.bypassArmor);
+                            if (mob.getHealth() <= 0) giveCoins(zombiesPlayer);
                         });
                     });
             }
