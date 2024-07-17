@@ -12,7 +12,7 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.TagUtils;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.mob2.Mob;
-import org.phantazm.zombies.event.player.ZombiesPlayerIgniteMobEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerIgniteTargetEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 @Model("zombies.upgrade.fire_aoe_spread")
@@ -33,7 +33,7 @@ public class FireAOESpreadUpgrade implements PlayerUpgradeComponent {
     private static class Internal extends GuardedPlayerUpgrade {
         private Internal(ZombiesPlayer zombiesPlayer, Data data) {
             super(Activable.threadsafeWrapper(new Activable() {
-                private final EventListener<ZombiesPlayerIgniteMobEvent> event = EventListener.builder(ZombiesPlayerIgniteMobEvent.class)
+                private final EventListener<ZombiesPlayerIgniteTargetEvent> event = EventListener.builder(ZombiesPlayerIgniteTargetEvent.class)
                     .handler(this::handleMobIgnite).build();
                 private static final Tag<Boolean> AOE_IGNITED = Tag.Boolean(TagUtils.uniqueTagName()).defaultValue(false);
 
@@ -47,11 +47,11 @@ public class FireAOESpreadUpgrade implements PlayerUpgradeComponent {
                     zombiesPlayer.getScene().sceneNode().removeListener(event);
                 }
 
-                private void handleMobIgnite(ZombiesPlayerIgniteMobEvent event) {
+                private void handleMobIgnite(ZombiesPlayerIgniteTargetEvent event) {
                     if (event.getZombiesPlayer() != zombiesPlayer || event.target().getTag(AOE_IGNITED)) {
                         return;
                     }
-                    
+
                     zombiesPlayer.getScene().instance().getEntityTracker().nearbyEntities(event.target().getPosition(),
                         data.radius, EntityTracker.Target.LIVING_ENTITIES, entity -> {
                             if (entity == event.target() || !(entity instanceof Mob mob) || mob.getTag(AOE_IGNITED)) {

@@ -21,7 +21,7 @@ import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.event.player.ZombiesPlayerProcFireEvent;
-import org.phantazm.zombies.event.player.ZombiesPlayerIgniteMobEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerIgniteTargetEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -67,7 +67,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             return;
         }
 
-        ZombiesPlayerIgniteMobEvent event = new ZombiesPlayerIgniteMobEvent(player, zombiesPlayer, this, livingEntity);
+        ZombiesPlayerIgniteTargetEvent event = new ZombiesPlayerIgniteTargetEvent(player, zombiesPlayer, this, livingEntity);
         scene.broadcastEvent(event);
 
         if (event.isCancelled()) {
