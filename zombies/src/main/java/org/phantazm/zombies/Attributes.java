@@ -35,6 +35,18 @@ public final class Attributes {
 
     public static final Attribute FIRE_APPLY_DAMAGE = new Attribute("damage.fire.apply", 0F, false);
 
+    public static final Attribute POWERUP_KILL_ALL_IN_RADIUS_INSTAKILL_DISTANCE_SCALING =
+        new Attribute("phantazm.powerup.kill_all_in_radius.instakill_distance_scaling", 0F, false);
+
+    public static final Attribute POWERUP_KILL_ALL_IN_RADIUS_DAMAGE_DISTANCE_START_SCALING =
+        new Attribute("phantazm.powerup.kill_all_in_radius.damage_distance_start_scaling", 0F, false);
+
+    public static final Attribute POWERUP_KILL_ALL_IN_RADIUS_DAMAGE_DISTANCE_END_SCALING =
+        new Attribute("phantazm.powerup.kill_all_in_radius.damage_distance_end_scaling", 0F, false);
+
+    public static final Attribute POWERUP_OVERCLOCK_DURATION =
+        new Attribute("phantazm.powerup.overclock.duration", 0F, false);
+
     public static final Attribute NIL = new Attribute("phantazm.nil", 0F, false);
 
     private Attributes() {
@@ -53,6 +65,10 @@ public final class Attributes {
         FIRE_DAMAGE.register();
         EXPLOSION_DAMAGE.register();
         POISON_DAMAGE.register();
+        POWERUP_KILL_ALL_IN_RADIUS_DAMAGE_DISTANCE_START_SCALING.register();
+        POWERUP_KILL_ALL_IN_RADIUS_INSTAKILL_DISTANCE_SCALING.register();
+        POWERUP_KILL_ALL_IN_RADIUS_DAMAGE_DISTANCE_END_SCALING.register();
+        POWERUP_OVERCLOCK_DURATION.register();
 
         FIRE_APPLY_DURATION.register();
         FIRE_APPLY_DAMAGE.register();

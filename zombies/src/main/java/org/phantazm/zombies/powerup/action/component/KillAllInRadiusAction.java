@@ -11,8 +11,11 @@ import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.commons.MathUtils;
+import org.phantazm.core.AttributeUtils;
 import org.phantazm.core.DamageUtils;
 import org.phantazm.mob2.Mob;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
@@ -45,25 +48,6 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
         CONSTANT
     }
 
-    @Default("""
-        {
-          bossDamageType='HEALTH_FACTOR',
-          bossDamage=0.25F,
-          bypassArmor=true,
-          damageType=null
-        }
-        """)
-    @DataObject
-    public record Data(
-        double radius,
-        @NotNull Key modifier,
-        int coinsPerKill,
-        @NotNull BossDamageType bossDamageType,
-        float bossDamage,
-        boolean bypassArmor,
-        String damageType) {
-    }
-
     private static class Action extends InstantAction {
         private final Data data;
         private final Instance instance;
@@ -81,9 +65,17 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
             }
 
             Player player = playerOptional.get();
+            double instakillRadius = AttributeUtils.computeWithBase((float) data.radius,
+                player.getAttribute(Attributes.POWERUP_KILL_ALL_IN_RADIUS_INSTAKILL_DISTANCE_SCALING));
+
+            double damageRadiusStart = AttributeUtils.computeWithBase((float) data.damageRadiusStart,
+                player.getAttribute(Attributes.POWERUP_KILL_ALL_IN_RADIUS_DAMAGE_DISTANCE_START_SCALING));
+
+            double damageRadiusEnd = AttributeUtils.computeWithBase((float) data.damageRadiusEnd,
+                player.getAttribute(Attributes.POWERUP_KILL_ALL_IN_RADIUS_DAMAGE_DISTANCE_END_SCALING));
 
             instance.getEntityTracker()
-                .nearbyEntities(powerup.spawnLocation(), data.radius, EntityTracker.Target.LIVING_ENTITIES,
+                .nearbyEntities(powerup.spawnLocation(), instakillRadius, EntityTracker.Target.LIVING_ENTITIES,
                     entity -> {
                         if (!(entity instanceof Mob)) {
                             return;
@@ -110,6 +102,36 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
                             mob.damage(Damage.fromPlayer(player, mob.getHealth()));
                         });
                     });
+
+            if (damageRadiusEnd > 0) {
+                instance.getEntityTracker().nearbyEntities(powerup.spawnLocation(), damageRadiusEnd,
+                    EntityTracker.Target.LIVING_ENTITIES, livingEntity -> {
+                        if (!(livingEntity instanceof Mob) || livingEntity.isDead()) {
+                            return;
+                        }
+
+                        double distanceSquared = powerup.spawnLocation().distanceSquared(livingEntity.getPosition());
+                        if (distanceSquared < damageRadiusStart * damageRadiusStart) {
+                            return;
+                        }
+
+                        double actualDistance = Math.sqrt(distanceSquared);
+                        double offset = actualDistance - damageRadiusStart;
+                        if (offset < 0 || damageRadiusStart + offset > damageRadiusEnd) {
+                            // sanity check
+                            return;
+                        }
+
+                        double difference = damageRadiusEnd - damageRadiusStart;
+                        double lerpScale = MathUtils.clamp(offset / difference, 0, 1);
+                        double damage = data.damageStart + lerpScale * (data.damageEnd - data.damageStart);
+
+                        livingEntity.getAcquirable().sync(self -> {
+                            Mob mob = (Mob) self;
+                            DamageUtils.damage(data.damageType, mob, player, (float) damage, data.bypassArmor);
+                        });
+                    });
+            }
         }
 
         private void giveCoins(ZombiesPlayer zombiesPlayer) {
@@ -120,5 +142,32 @@ public class KillAllInRadiusAction implements PowerupActionComponent {
                     data.coinsPerKill));
             result.applyIfAffordable(coins);
         }
+    }
+
+    @Default("""
+        {
+          damageRadiusStart=0.0,
+          damageRadiusEnd=0.0,
+          damageStart=0.0,
+          damageEnd=0.0,
+          bossDamageType='HEALTH_FACTOR',
+          bossDamage=0.25F,
+          bypassArmor=true,
+          damageType=null
+        }
+        """)
+    @DataObject
+    public record Data(
+        double radius,
+        double damageRadiusStart,
+        double damageRadiusEnd,
+        double damageStart,
+        double damageEnd,
+        @NotNull Key modifier,
+        int coinsPerKill,
+        @NotNull BossDamageType bossDamageType,
+        float bossDamage,
+        boolean bypassArmor,
+        String damageType) {
     }
 }
