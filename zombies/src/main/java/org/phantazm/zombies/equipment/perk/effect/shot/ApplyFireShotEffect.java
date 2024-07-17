@@ -50,6 +50,10 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
     @Override
     public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer) {
+        perform(entity, zombiesPlayer, 1.0D);
+    }
+
+    public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer, double effectScale) {
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
         if (playerOptional.isEmpty()) {
             return;
@@ -70,8 +74,8 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             return;
         }
 
-        livingEntity.setFireForDuration(Math.round(AttributeUtils.computeWithBase(data.fireTicks, player
-            .getAttribute(Attributes.FIRE_APPLY_DURATION))));
+        livingEntity.setFireForDuration((int) Math.round(AttributeUtils.computeWithBase(data.fireTicks, player
+            .getAttribute(Attributes.FIRE_APPLY_DURATION)) * effectScale));
 
         TagHandler tags = TagUtils.sceneLocalTags(entity, scene);
         boolean alreadyActive = tags.getTag(lastDamageTicksTag) != -1;
@@ -82,7 +86,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
                 .getAttribute(Attributes.FIRE_DAMAGE_APPLY_INTERVAL)));
 
             activeEntities.add(new DamageTarget(new WeakReference<>(player), new WeakReference<>(livingEntity),
-                zombiesPlayer, interval));
+                zombiesPlayer, interval, effectScale));
         }
     }
 
@@ -106,14 +110,14 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         long lastDamageTicks = tags.updateAndGetTag(this.lastDamageTicksTag, oldValue -> oldValue + 1);
 
         if (lastDamageTicks >= target.interval) {
-            doDamage(entity, target.damager.get(), target.player);
+            doDamage(entity, target.damager.get(), target.player, target.scale);
             tags.setTag(this.lastDamageTicksTag, 0L);
         }
 
         return false;
     }
 
-    private void doDamage(LivingEntity target, Player damager, ZombiesPlayer player) {
+    private void doDamage(LivingEntity target, Player damager, ZombiesPlayer player, double scale) {
         if (damager == null) {
             return;
         }
@@ -122,15 +126,16 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
         scene.broadcastCancellable(new ZombiesPlayerProcFireEvent(damager, player, damage, target), event -> {
             target.getAcquirable().sync(self -> DamageUtils.damage(data.damageType, (LivingEntity) self, amount ->
-                    new Damage(DamageType.ON_FIRE, null, damager, null, amount), event.damageAmount(),
-                data.bypassArmor));
+                    new Damage(DamageType.ON_FIRE, null, damager, null, amount),
+                (float) (event.damageAmount() * scale), data.bypassArmor));
         });
     }
 
     private record DamageTarget(Reference<Player> damager,
         Reference<LivingEntity> target,
         ZombiesPlayer player,
-        int interval) {
+        int interval,
+        double scale) {
     }
 
     @Default("""

@@ -59,6 +59,16 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     void removeShotEffect(@NotNull ShotEffect effect);
 
+    default <T extends ShotEffect> T lookupShotEffect(@NotNull Class<T> type) {
+        for (ShotEffect effect : shotEffects()) {
+            if (type.isAssignableFrom(effect.getClass())) {
+                return type.cast(effect);
+            }
+        }
+
+        return null;
+    }
+
     default @NotNull Optional<Equipment> getHeldEquipment() {
         Optional<Player> playerOptional = module().getPlayerView().getPlayer();
         if (playerOptional.isEmpty()) {

@@ -13,6 +13,7 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Cooldown;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.mob2.Mob;
+import org.phantazm.zombies.equipment.perk.effect.shot.ApplyFireShotEffect;
 import org.phantazm.zombies.event.player.PlayerReviveEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -58,6 +59,11 @@ public class SpreadEnhancedFireOnReviveUpgrade implements PlayerUpgradeComponent
                         return;
                     }
 
+                    ApplyFireShotEffect applyFire = zombiesPlayer.lookupShotEffect(ApplyFireShotEffect.class);
+                    if (applyFire == null) {
+                        return;
+                    }
+
                     Entity reviver = event.getEntity();
                     Instance instance = reviver.getInstance();
                     if (instance == null || !cooldown.takeCooldown(data.cooldown)) {
@@ -70,7 +76,7 @@ public class SpreadEnhancedFireOnReviveUpgrade implements PlayerUpgradeComponent
                                 return;
                             }
 
-
+                            applyFire.perform(mob, zombiesPlayer, data.scale);
                         });
                 }
             }), zombiesPlayer);
@@ -84,7 +90,8 @@ public class SpreadEnhancedFireOnReviveUpgrade implements PlayerUpgradeComponent
 
     @DataObject
     public record Data(double radius,
-        int cooldown) {
+        int cooldown,
+        double scale) {
 
     }
 }
