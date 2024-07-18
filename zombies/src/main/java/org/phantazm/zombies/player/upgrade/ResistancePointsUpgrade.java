@@ -67,14 +67,12 @@ public class ResistancePointsUpgrade implements PlayerUpgradeComponent {
 
                 private void handleDamage(ZombiesPlayerDamageEvent event) {
                     if (event.getZombiesPlayer() != zombiesPlayer) return;
-                    resistanceLevel.getAndUpdate(current -> Math.max(current - 1, 0));
+                    applyLevel(event.getPlayer(), resistanceLevel.updateAndGet(current -> Math.max(current - 1, 0)));
                 }
 
                 private void applyLevel(Player player, int level) {
                     player.getAttribute(Attributes.get(data.attribute)).removeModifier(id);
-                    if (level == 0) {
-                        return;
-                    }
+                    if (level == 0) return;
 
                     player.getAttribute(Attributes.get(data.attribute)).addModifier(new AttributeModifier(id, idString,
                         data.baseValue * level, data.operation));
