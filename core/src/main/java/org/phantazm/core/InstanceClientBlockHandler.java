@@ -4,7 +4,6 @@ import com.github.steanky.vector.HashVec3I2ObjectMap;
 import com.github.steanky.vector.Vec3I2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.minestom.server.Viewable;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.EventNode;
@@ -20,12 +19,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.listener.PlayerDiggingListener;
 import net.minestom.server.network.packet.server.play.BlockChangePacket;
-import net.minestom.server.network.packet.server.play.BlockEntityDataPacket;
-import net.minestom.server.registry.Registry;
-import net.minestom.server.utils.block.BlockUtils;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.Objects;
 
@@ -63,15 +58,6 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
         instanceNode.addListener(InstanceChunkUnloadEvent.class, this::onChunkUnload);
     }
 
-    private void updateBlock(Viewable viewable, Block block, Vec position) {
-        viewable.sendPacketsToViewers(new BlockChangePacket(position, block));
-        Registry.BlockEntry entry = block.registry();
-        if (entry.isBlockEntity()) {
-            NBTCompound nbt = BlockUtils.extractClientNbt(block);
-            viewable.sendPacketsToViewers(new BlockEntityDataPacket(position, entry.blockEntityId(), nbt));
-        }
-    }
-
     @Override
     public void setClientBlock(@NotNull Block type, int x, int y, int z) {
         Instance instance = this.instance;
@@ -105,9 +91,8 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
             }
 
             data.dirty = true;
+            serverChunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), type));
         }
-
-        updateBlock(serverChunk, type, new Vec(x, y, z));
     }
 
     @Override
@@ -132,7 +117,8 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
                 synchronized (serverChunk) {
                     for (PositionedBlock block : blocks.values()) {
                         Block serverBlock = serverChunk.getBlock(block.x, block.y, block.z);
-                        updateBlock(serverChunk, serverBlock, new Vec(block.x, block.y, block.z));
+                        serverChunk.sendPacketToViewers(
+                            new BlockChangePacket(new Vec(block.x, block.y, block.z), serverBlock));
                     }
                 }
 
@@ -170,7 +156,7 @@ public class InstanceClientBlockHandler implements ClientBlockHandler {
                 Block serverBlock = serverChunk.getBlock(x, y, z);
 
                 //make sure player gets the actual block
-                updateBlock(serverChunk, serverBlock, new Vec(x, y, z));
+                serverChunk.sendPacketToViewers(new BlockChangePacket(new Vec(x, y, z), serverBlock));
 
                 if (data.blocks.isEmpty()) {
                     clientData.remove(index);
