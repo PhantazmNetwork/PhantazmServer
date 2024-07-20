@@ -2,6 +2,7 @@ package org.phantazm.zombies.listener;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.instance.Instance;
@@ -16,6 +17,7 @@ import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Flags;
+import org.phantazm.zombies.event.player.ZombiesPlayerMeleeEntityEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -71,6 +73,10 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
             if (!(object instanceof Equipment equipment)) {
                 handleNoEquipmentAttack(zombiesPlayer, player, target);
                 return;
+            }
+
+            if (target instanceof LivingEntity entity) {
+                scene.broadcastEvent(new ZombiesPlayerMeleeEntityEvent(player, zombiesPlayer, entity, equipment));
             }
 
             equipment.attack(target);
