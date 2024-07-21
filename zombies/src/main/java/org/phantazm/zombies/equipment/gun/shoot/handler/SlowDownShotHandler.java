@@ -75,7 +75,7 @@ public class SlowDownShotHandler implements ShotHandler {
                 continue;
             }
 
-            if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_SLOW_DOWN, false)) {
+            if (mob.property(ExtraNodeKeys.RESIST_SLOW_DOWN)) {
                 continue;
             }
 

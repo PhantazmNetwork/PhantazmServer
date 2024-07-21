@@ -491,4 +491,8 @@ public class Mob extends ProximaEntity {
         super.updateOldViewer(player);
         player.sendPacket(cachedRemoveTeamPacket);
     }
+
+    public boolean property(@NotNull String key) {
+        return data.extra().getBooleanOrDefault(key, false);
+    }
 }
