@@ -22,14 +22,14 @@ public class TogglePlayerUpgradeCommand extends SandboxLockedCommand {
     private final KeyParser keyParser;
 
     public TogglePlayerUpgradeCommand(@NotNull KeyParser keyParser) {
-        super("upgrade", PERMISSION, ArgumentType.String("upgrade"));
+        super("upgrade", PERMISSION, ArgumentType.String("player-upgrade"));
         this.keyParser = Objects.requireNonNull(keyParser);
     }
 
     @Override
     protected void runCommand(@NotNull CommandContext context, @NotNull ZombiesScene scene, @NotNull Player sender) {
         @Subst(Constants.NAMESPACE_OR_KEY)
-        String upgrade = context.get("upgrade");
+        String upgrade = context.get("player-upgrade");
         if (!keyParser.isValidKey(upgrade)) {
             return;
         }
