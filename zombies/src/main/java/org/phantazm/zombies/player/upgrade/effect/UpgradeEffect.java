@@ -6,4 +6,11 @@ import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 
 public interface UpgradeEffect {
     void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer);
+
+    default boolean needsTicking() {
+        return false;
+    }
+
+    default void tick() {
+    }
 }
