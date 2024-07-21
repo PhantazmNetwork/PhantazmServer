@@ -492,7 +492,7 @@ public class Mob extends ProximaEntity {
         player.sendPacket(cachedRemoveTeamPacket);
     }
 
-    public boolean property(@NotNull String key) {
+    public boolean hasProperty(@NotNull String key) {
         return data.extra().getBooleanOrDefault(key, false);
     }
 }

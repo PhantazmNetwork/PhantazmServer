@@ -62,7 +62,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
         }
 
         if (data.amount < 0 && attribute.equals(Attribute.MOVEMENT_SPEED) &&
-            mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_SLOW_DOWN, false)) {
+            mob.hasProperty(ExtraNodeKeys.RESIST_SLOW_DOWN)) {
             return;
         }
 

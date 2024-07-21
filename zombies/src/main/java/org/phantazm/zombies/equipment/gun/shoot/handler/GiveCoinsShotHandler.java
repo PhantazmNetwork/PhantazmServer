@@ -96,7 +96,7 @@ public class GiveCoinsShotHandler implements ShotHandler {
             return true;
         }
 
-        return !mob.property(ExtraNodeKeys.RESIST_INSTAKILL);
+        return !mob.hasProperty(ExtraNodeKeys.RESIST_INSTAKILL);
     }
 
     @DataObject

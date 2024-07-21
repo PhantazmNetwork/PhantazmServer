@@ -58,17 +58,11 @@ public class HealOnHeadshotKillUpgrade implements PlayerUpgradeComponent {
                     }
 
                     Mob target = event.target();
-                    if (target.data().tags().contains(data.specialTag)) {
-                        event.getPlayer().getAcquirable().sync(entity -> {
-                            Player player = (Player) entity;
-                            player.setHealth((float) (player.getHealth() + data.specialHealAmount));
-                        });
-                    } else {
-                        event.getPlayer().getAcquirable().sync(entity -> {
-                            Player player = (Player) entity;
-                            player.setHealth((float) (player.getHealth() + data.healAmount));
-                        });
-                    }
+                    double healAmount = target.data().tags().contains(data.specialTag) ? data.specialHealAmount : data.healAmount;
+                    event.getPlayer().getAcquirable().sync(entity -> {
+                        Player player = (Player) entity;
+                        player.setHealth((float) (player.getHealth() + healAmount));
+                    });
                 }
             }), zombiesPlayer);
         }
