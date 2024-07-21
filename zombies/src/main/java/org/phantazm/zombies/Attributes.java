@@ -3,8 +3,7 @@ package org.phantazm.zombies;
 import net.minestom.server.attribute.Attribute;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 
 public final class Attributes {
     public static final Attribute HITBOX_EXPANSION = new Attribute("phantazm.hitbox_expand", 0.35F, false);
@@ -56,14 +55,19 @@ public final class Attributes {
     private Attributes() {
     }
 
-    private static final Map<String, Attribute> cache = new ConcurrentHashMap<>();
-
     public static @NotNull Attribute get(@NotNull String name) {
-        return cache.computeIfAbsent(name, n -> {
-            Attribute attribute = new Attribute(n, 0F, false);
-            attribute.register();
+        return Objects.requireNonNullElse(Attribute.fromKey(name), NIL);
+    }
+
+    public static @NotNull Attribute getOrRegister(@NotNull String name, float baseValue) {
+        Attribute attribute = Attribute.fromKey(name);
+        if (attribute != null) {
             return attribute;
-        });
+        }
+
+        attribute = new Attribute(name, baseValue, false);
+        attribute.register();
+        return attribute;
     }
 
     public static void registerAll() {

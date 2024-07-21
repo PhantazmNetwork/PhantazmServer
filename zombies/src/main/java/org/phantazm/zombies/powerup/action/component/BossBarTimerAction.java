@@ -71,7 +71,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
 
                 @Override
                 public void activate(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer, long time) {
-                    Attribute attribute = Attributes.get("phantazm.powerup.duration." + powerup.key().value());
+                    Attribute attribute = Attributes.getOrRegister("phantazm.powerup.duration." + powerup.key().value(), 0);
                     Optional<Player> playerOptional;
                     if (zombiesPlayer == null || (playerOptional = zombiesPlayer.getPlayer()).isEmpty()) {
                         this.time = (int) data.duration;
@@ -105,7 +105,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
 
         @Override
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
-            Attribute attribute = Attributes.get("phantazm.powerup.duration." + powerup.key().value());
+            Attribute attribute = Attributes.getOrRegister("phantazm.powerup.duration." + powerup.key().value(), 0);
             Optional<Player> playerOptional;
             if ((playerOptional = player.getPlayer()).isEmpty()) {
                 this.time = (int) data.duration;

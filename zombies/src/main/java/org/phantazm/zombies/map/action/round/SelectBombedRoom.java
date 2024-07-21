@@ -130,7 +130,7 @@ public class SelectBombedRoom implements Action<Round> {
         int startRoundIndex = objects.module().roundHandlerSupplier().get().currentRoundIndex();
 
         Damage bombDamage = new Damage(DamageType.GENERIC, null, null, null, data.damage);
-        bombDamage.tagHandler().setTag(Tags.DAMAGE_NAME, data.bombingDamageName);
+        bombDamage.setTag(Tags.DAMAGE_NAME, data.bombingDamageName);
 
         objects.taskScheduler().scheduleTaskAfter(new TickableTask() {
             private final List<CancellableState<Entity>> states = new ArrayList<>();

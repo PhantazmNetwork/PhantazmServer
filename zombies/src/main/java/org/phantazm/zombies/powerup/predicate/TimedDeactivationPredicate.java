@@ -48,7 +48,7 @@ public class TimedDeactivationPredicate implements DeactivationPredicateComponen
         public void activate(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer, long time) {
             startTick = MinecraftServer.currentTick();
 
-            Attribute attribute = Attributes.get("phantazm.powerup.duration." + powerup.key().value());
+            Attribute attribute = Attributes.getOrRegister("phantazm.powerup.duration." + powerup.key().value(), 0);
             Optional<Player> playerOptional;
             if (zombiesPlayer == null || (playerOptional = zombiesPlayer.getPlayer()).isEmpty()) {
                 this.time = (int) data.time;
