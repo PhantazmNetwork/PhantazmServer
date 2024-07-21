@@ -6,12 +6,10 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.event.EventListener;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.tick.Activable;
-import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.event.player.ZombiesPlayerKillMobEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -48,17 +46,13 @@ public class HealOnHeadshotKillUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void onMobKill(ZombiesPlayerKillMobEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer) {
+                    if (event.getZombiesPlayer() != zombiesPlayer ||
+                        !event.lastDamageSource().getTag(Tags.HEADSHOT_TAG)) {
                         return;
                     }
 
-                    Damage damage = event.lastDamageSource();
-                    if (!damage.getTag(Tags.HEADSHOT_TAG)) {
-                        return;
-                    }
-
-                    Mob target = event.target();
-                    double healAmount = target.data().tags().contains(data.specialTag) ? data.specialHealAmount : data.healAmount;
+                    double healAmount = event.target().data().tags().contains(data.specialTag) ?
+                        data.specialHealAmount : data.healAmount;
                     event.getPlayer().getAcquirable().sync(entity -> {
                         Player player = (Player) entity;
                         player.setHealth((float) (player.getHealth() + healAmount));
