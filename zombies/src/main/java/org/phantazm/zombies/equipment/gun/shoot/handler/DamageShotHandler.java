@@ -8,11 +8,13 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.damage.Damage;
+import net.minestom.server.entity.damage.DamageType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.AttributeUtils;
 import org.phantazm.core.DamageUtils;
 import org.phantazm.zombies.Attributes;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
@@ -79,15 +81,26 @@ public class DamageShotHandler implements ShotHandler {
                 }
 
                 switch (data.armorBehavior) {
-                    case ALWAYS_BYPASS -> DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, true);
-                    case NEVER_BYPASS -> DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, false);
-                    case BYPASS_ON_HEADSHOT ->
-                        DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, headshot);
-                    case BYPASS_ON_NON_HEADSHOT ->
-                        DamageUtils.damage(data.damageType, targetEntity, attacker, baseDamage, !headshot);
+                    case ALWAYS_BYPASS -> DamageUtils.damage(data.damageType, targetEntity,
+                        amount -> makeDamage(attacker, amount, headshot), baseDamage, true);
+
+                    case NEVER_BYPASS -> DamageUtils.damage(data.damageType, targetEntity,
+                        amount -> makeDamage(attacker, amount, headshot), baseDamage, false);
+
+                    case BYPASS_ON_HEADSHOT -> DamageUtils.damage(data.damageType, targetEntity,
+                        amount -> makeDamage(attacker, amount, headshot), baseDamage, headshot);
+
+                    case BYPASS_ON_NON_HEADSHOT -> DamageUtils.damage(data.damageType, targetEntity,
+                        amount -> makeDamage(attacker, amount, headshot), baseDamage, !headshot);
                 }
             });
         }
+    }
+
+    private static Damage makeDamage(Entity attacker, float amount, boolean headshot) {
+        Damage damage = new Damage(DamageType.MOB_ATTACK, attacker, attacker, attacker.getPosition(), amount);
+        if (headshot) damage.setTag(Tags.HEADSHOT_TAG, true);
+        return damage;
     }
 
     @Override
