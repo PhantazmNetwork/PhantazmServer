@@ -37,11 +37,9 @@ public class CooldownEffectComponent implements UpgradeEffectComponent {
 
         @Override
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
-            if (!cooldown.takeCooldown(data.cooldown)) {
-                return;
+            if (cooldown.takeCooldown(data.cooldown)) {
+                effect.apply(upgrade, zombiesPlayer);
             }
-
-            effect.apply(upgrade, zombiesPlayer);
         }
 
         @Override
