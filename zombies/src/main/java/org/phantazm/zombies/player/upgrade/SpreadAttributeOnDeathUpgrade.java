@@ -20,7 +20,7 @@ import org.phantazm.core.tick.Activable;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
-import org.phantazm.zombies.event.entity.EntityAttributeWearOffEvent;
+import org.phantazm.zombies.event.entity.EntityAttributeModifierRemoveEvent;
 import org.phantazm.zombies.event.player.ZombiesPlayerKillMobEvent;
 import org.phantazm.zombies.event.player.ZombiesPlayerModifyAttributeEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -62,8 +62,8 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
                 private final EventListener<ZombiesPlayerModifyAttributeEvent> modifyAttributeEvent = EventListener
                     .builder(ZombiesPlayerModifyAttributeEvent.class).handler(this::handleModifyAttribute).build();
 
-                private final EventListener<EntityAttributeWearOffEvent> wearOffEvent = EventListener
-                    .builder(EntityAttributeWearOffEvent.class).handler(this::handleWearOffEvent).build();
+                private final EventListener<EntityAttributeModifierRemoveEvent> wearOffEvent = EventListener
+                    .builder(EntityAttributeModifierRemoveEvent.class).handler(this::handleWearOffEvent).build();
 
                 @Override
                 public void start() {
@@ -128,15 +128,15 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
 
                     if (mob.getTag(HAS_SPREAD_EFFECT)) {
                         event.setAttributeAmount((float) (event.attributeAmount() * data.effectScale));
-                        mob.setTag(EFFECT_TAG, event.attributeUUID());
+                        mob.setTag(EFFECT_TAG, event.attributeUuid());
                         return;
                     }
 
                     mob.extensions().set(EFFECT_KEY, event.cause());
                 }
 
-                private void handleWearOffEvent(EntityAttributeWearOffEvent event) {
-                    if (Objects.equals(event.removedModifier().getId(), event.getEntity().getTag(EFFECT_TAG))) {
+                private void handleWearOffEvent(EntityAttributeModifierRemoveEvent event) {
+                    if (Objects.equals(event.attributeUuid(), event.getEntity().getTag(EFFECT_TAG))) {
                         Mob mob = (Mob) event.getEntity();
                         mob.extensions().remove(EFFECT_KEY);
                         mob.removeTag(HAS_SPREAD_EFFECT);

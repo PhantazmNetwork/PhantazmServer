@@ -6,19 +6,19 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
-import org.phantazm.zombies.event.trait.LivingTargetEvent;
+import org.phantazm.zombies.event.trait.SettableAttributeEvent;
 import org.phantazm.zombies.event.trait.ZombiesPlayerEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 import java.util.UUID;
 
-public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, LivingTargetEvent, CancellableEvent {
+public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, SettableAttributeEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final ShotEffect cause;
     private final LivingEntity target;
-    private final UUID attributeUUID;
+    private final UUID attributeUuid;
     private final Attribute attribute;
 
     private float attributeAmount;
@@ -28,13 +28,13 @@ public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, Li
         @NotNull ShotEffect cause,
         @NotNull LivingEntity target,
         @NotNull Attribute attribute,
-        @NotNull UUID attributeUUID,
+        @NotNull UUID attributeUuid,
         float attributeAmount) {
         this.player = Objects.requireNonNull(player);
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
         this.cause = Objects.requireNonNull(cause);
         this.target = Objects.requireNonNull(target);
-        this.attributeUUID = Objects.requireNonNull(attributeUUID);
+        this.attributeUuid = Objects.requireNonNull(attributeUuid);
         this.attribute = Objects.requireNonNull(attribute);
         this.attributeAmount = attributeAmount;
     }
@@ -63,12 +63,8 @@ public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, Li
         return target;
     }
 
-    public @NotNull ShotEffect cause() {
-        return cause;
-    }
-
-    public @NotNull UUID attributeUUID() {
-        return attributeUUID;
+    public @NotNull UUID attributeUuid() {
+        return attributeUuid;
     }
 
     public @NotNull Attribute attribute() {
@@ -79,7 +75,16 @@ public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, Li
         return attributeAmount;
     }
 
+    @Override
+    public boolean isRemove() {
+        return false;
+    }
+
     public void setAttributeAmount(float amount) {
         this.attributeAmount = amount;
+    }
+
+    public @NotNull ShotEffect cause() {
+        return cause;
     }
 }

@@ -5,15 +5,17 @@ import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.event.trait.AttributeEvent;
 
 import java.util.Objects;
+import java.util.UUID;
 
-public class EntityAttributeWearOffEvent implements EntityInstanceEvent {
+public class EntityAttributeModifierRemoveEvent implements EntityInstanceEvent, AttributeEvent {
     private final LivingEntity target;
     private final Attribute attribute;
     private final AttributeModifier removedModifier;
 
-    public EntityAttributeWearOffEvent(
+    public EntityAttributeModifierRemoveEvent(
         @NotNull LivingEntity target,
         @NotNull Attribute attribute,
         @NotNull AttributeModifier removedModifier) {
@@ -23,15 +25,31 @@ public class EntityAttributeWearOffEvent implements EntityInstanceEvent {
     }
 
     @Override
-    public @NotNull LivingEntity getEntity() {
-        return target;
+    public @NotNull UUID attributeUuid() {
+        return removedModifier.getId();
     }
 
     public @NotNull Attribute attribute() {
         return attribute;
     }
 
-    public @NotNull AttributeModifier removedModifier() {
-        return removedModifier;
+    @Override
+    public float attributeAmount() {
+        return (float) removedModifier.getAmount();
+    }
+
+    @Override
+    public boolean isRemove() {
+        return true;
+    }
+
+    @Override
+    public @NotNull LivingEntity getEntity() {
+        return target;
+    }
+
+    @Override
+    public @NotNull LivingEntity target() {
+        return target;
     }
 }

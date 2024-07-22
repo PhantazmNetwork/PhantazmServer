@@ -18,7 +18,7 @@ import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.event.player.ZombiesPlayerModifyAttributeEvent;
-import org.phantazm.zombies.event.entity.EntityAttributeWearOffEvent;
+import org.phantazm.zombies.event.entity.EntityAttributeModifierRemoveEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -100,7 +100,7 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
         TagUtils.removeSceneLocalTag(entity, scene, applyTicksTag);
 
         if (modifier != null) {
-            scene.broadcastEvent(new EntityAttributeWearOffEvent(entity, attribute, modifier));
+            scene.broadcastEvent(new EntityAttributeModifierRemoveEvent(entity, attribute, modifier));
         }
     }
 
