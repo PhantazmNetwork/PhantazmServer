@@ -18,7 +18,7 @@ import org.jetbrains.annotations.VisibleForTesting;
 import org.phantazm.commons.MathUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
-import org.phantazm.zombies.event.mob.ZombiesMobSetupEvent;
+import org.phantazm.zombies.event.entity.MobSetupEvent;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.SpawnInfo;
 import org.phantazm.zombies.map.Wave;
@@ -482,7 +482,7 @@ public class BasicEndless implements Endless {
 
     @Override
     public void init() {
-        this.zombiesScene.get().addListener(ZombiesMobSetupEvent.class, this::onMobSetup);
+        this.zombiesScene.get().addListener(MobSetupEvent.class, this::onMobSetup);
     }
 
     private List<Introduction> applicableIntroductions(int endlessRound) {
@@ -543,7 +543,7 @@ public class BasicEndless implements Endless {
         }
     };
 
-    private void onMobSetup(@NotNull ZombiesMobSetupEvent event) {
+    private void onMobSetup(@NotNull MobSetupEvent event) {
         Mob mob = event.getEntity();
         ConfigElement bypassesScaling = mob.data().extra().atOrDefault(ExtraNodeKeys.BYPASS_ENDLESS_SCALING,
             ConfigPrimitive.FALSE);

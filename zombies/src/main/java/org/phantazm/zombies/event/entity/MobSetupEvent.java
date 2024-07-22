@@ -1,8 +1,8 @@
-package org.phantazm.zombies.event.mob;
+package org.phantazm.zombies.event.entity;
 
-import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
+import org.phantazm.zombies.event.trait.MobEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
@@ -12,15 +12,20 @@ import java.util.Objects;
  * is <i>not</i> being ticked yet, and this event is broadcast synchronously, it is not necessary to acquire the mob in
  * order to call methods on it.
  */
-public class ZombiesMobSetupEvent implements EntityInstanceEvent {
+public class MobSetupEvent implements MobEvent {
     private final Mob mob;
 
-    public ZombiesMobSetupEvent(@NotNull Mob mob) {
+    public MobSetupEvent(@NotNull Mob mob) {
         this.mob = Objects.requireNonNull(mob);
     }
 
     @Override
     public @NotNull Mob getEntity() {
+        return mob;
+    }
+
+    @Override
+    public @NotNull Mob mob() {
         return mob;
     }
 }

@@ -5,7 +5,7 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
-import org.phantazm.mob2.Target;
+import org.phantazm.core.Target;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 

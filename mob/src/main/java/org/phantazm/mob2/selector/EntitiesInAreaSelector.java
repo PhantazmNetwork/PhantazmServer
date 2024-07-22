@@ -9,7 +9,7 @@ import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.TrackerTargetType;
 import org.phantazm.mob2.Mob;
-import org.phantazm.mob2.Target;
+import org.phantazm.core.Target;
 import org.phantazm.mob2.validator.Validator;
 import org.phantazm.mob2.validator.ValidatorComponent;
 

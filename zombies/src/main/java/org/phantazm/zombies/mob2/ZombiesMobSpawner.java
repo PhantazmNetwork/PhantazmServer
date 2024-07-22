@@ -8,7 +8,7 @@ import org.phantazm.mob2.BasicMobSpawner;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobCreator;
 import org.phantazm.zombies.Stages;
-import org.phantazm.zombies.event.mob.ZombiesMobSetupEvent;
+import org.phantazm.zombies.event.entity.MobSetupEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
@@ -46,6 +46,6 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
         mob.setCollisionRule(mobPlayerCollisions ? TeamsPacket.CollisionRule.PUSH_OTHER_TEAMS :
             TeamsPacket.CollisionRule.NEVER);
 
-        scene.broadcastEvent(new ZombiesMobSetupEvent(mob));
+        scene.broadcastEvent(new MobSetupEvent(mob));
     }
 }

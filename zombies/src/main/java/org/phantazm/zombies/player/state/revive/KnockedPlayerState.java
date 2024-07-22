@@ -5,7 +5,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.tick.Activable;
-import org.phantazm.zombies.event.player.PlayerReviveEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerReviveEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
@@ -63,7 +63,7 @@ public class KnockedPlayerState implements ZombiesPlayerState {
             ZombiesPlayer reviveTarget = self.get();
 
             reviver.getPlayer().ifPresent(player -> zombiesScene
-                .broadcastEvent(new PlayerReviveEvent(player, reviver, reviveTarget)));
+                .broadcastEvent(new ZombiesPlayerReviveEvent(player, reviver, reviveTarget)));
         }
 
         return state;

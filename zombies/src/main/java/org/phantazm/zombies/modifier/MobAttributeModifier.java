@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.DualComponent;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.Attributes;
-import org.phantazm.zombies.event.mob.ZombiesMobSetupEvent;
+import org.phantazm.zombies.event.entity.MobSetupEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
@@ -40,7 +40,7 @@ public class MobAttributeModifier implements DualComponent<ZombiesScene, Modifie
             UUID uuid = UUID.randomUUID();
             Attribute attribute = Attributes.get(data.attribute);
 
-            scene.addListener(ZombiesMobSetupEvent.class, event -> {
+            scene.addListener(MobSetupEvent.class, event -> {
                 LivingEntity entity = event.getEntity();
 
                 entity.getAttribute(attribute)

@@ -60,13 +60,13 @@ public class ResistancePointsUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void handleMobDeath(ZombiesPlayerKillMobEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer) return;
+                    if (event.zombiesPlayer() != zombiesPlayer) return;
                     applyLevel(event.getPlayer(), resistanceLevel.updateAndGet(current ->
                         Math.min(current + 1, data.maxPoints)));
                 }
 
                 private void handleDamage(ZombiesPlayerDamageEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer) return;
+                    if (event.zombiesPlayer() != zombiesPlayer) return;
                     applyLevel(event.getPlayer(), resistanceLevel.updateAndGet(current -> Math.max(current - 1, 0)));
                 }
 

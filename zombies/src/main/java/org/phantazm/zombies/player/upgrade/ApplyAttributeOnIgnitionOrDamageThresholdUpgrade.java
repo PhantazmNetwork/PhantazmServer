@@ -114,7 +114,7 @@ public class ApplyAttributeOnIgnitionOrDamageThresholdUpgrade implements PlayerU
                 }
 
                 private void onPlayerTakeDamage(ZombiesPlayerDamageEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer) {
+                    if (event.zombiesPlayer() != zombiesPlayer) {
                         return;
                     }
 

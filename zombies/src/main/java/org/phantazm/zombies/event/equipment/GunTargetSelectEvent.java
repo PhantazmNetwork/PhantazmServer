@@ -4,10 +4,11 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
+import org.phantazm.zombies.event.trait.GunEvent;
 
 import java.util.Objects;
 
-public class GunTargetSelectEvent implements EntityInstanceEvent {
+public class GunTargetSelectEvent implements EntityInstanceEvent, GunEvent {
     private final Entity entity;
     private final Gun gun;
 

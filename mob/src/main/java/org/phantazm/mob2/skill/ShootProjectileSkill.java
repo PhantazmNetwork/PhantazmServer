@@ -10,6 +10,7 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEv
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.Target;
 import org.phantazm.mob2.*;
 import org.phantazm.mob2.goal.CollectionGoalGroup;
 import org.phantazm.mob2.goal.ProjectileMovementGoal;

@@ -4,11 +4,14 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
+import org.phantazm.zombies.event.trait.DamageEvent;
+import org.phantazm.zombies.event.trait.MobTargetEvent;
+import org.phantazm.zombies.event.trait.ZombiesPlayerEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class ZombiesPlayerKillMobEvent implements ZombiesPlayerEvent {
+public class ZombiesPlayerKillMobEvent implements ZombiesPlayerEvent, MobTargetEvent, DamageEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final Mob mob;
@@ -28,15 +31,17 @@ public class ZombiesPlayerKillMobEvent implements ZombiesPlayerEvent {
     }
 
     @Override
-    public @NotNull ZombiesPlayer getZombiesPlayer() {
+    public @NotNull ZombiesPlayer zombiesPlayer() {
         return zombiesPlayer;
     }
 
+    @Override
     public @NotNull Mob target() {
         return mob;
     }
 
-    public @NotNull Damage lastDamageSource() {
+    @Override
+    public @NotNull Damage damage() {
         return lastDamageSource;
     }
 }

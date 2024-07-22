@@ -43,7 +43,7 @@ public class DodgeDamageUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void handleDamage(ZombiesPlayerDamageEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer) {
+                    if (event.zombiesPlayer() != zombiesPlayer) {
                         return;
                     }
 

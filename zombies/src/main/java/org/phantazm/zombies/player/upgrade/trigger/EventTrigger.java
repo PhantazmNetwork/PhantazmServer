@@ -84,11 +84,9 @@ public class EventTrigger implements UpgradeTriggerComponent {
 
         private void handle(Event event) {
             ArmData armData = target.get();
-            if (armData == null) {
-                return;
+            if (armData != null) {
+                armData.effect.apply(armData.upgrade, zombiesPlayer, TriggerData.of(event));
             }
-
-            armData.effect.apply(armData.upgrade, zombiesPlayer, TriggerData.of(event));
         }
     }
 

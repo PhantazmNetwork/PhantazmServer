@@ -25,7 +25,7 @@ import org.phantazm.core.tracker.BoundedTracker;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.ExtraNodeKeys;
 import org.phantazm.zombies.Tags;
-import org.phantazm.zombies.event.mob.PhantazmMobDeathEvent;
+import org.phantazm.zombies.event.entity.MobDeathEvent;
 import org.phantazm.zombies.event.player.ZombiesPlayerKillMobEvent;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.Room;
@@ -78,7 +78,7 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
     @Override
     public void accept(@NotNull ZombiesScene scene, @NotNull Mob mob, @NotNull EntityDeathEvent event) {
-        scene.broadcastEvent(new PhantazmMobDeathEvent(mob));
+        scene.broadcastEvent(new MobDeathEvent(mob));
 
         roundSupplier.get().ifPresent(round -> {
             round.removeMob(mob);

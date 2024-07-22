@@ -4,11 +4,14 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.event.trait.SettableDamageAmountEvent;
+import org.phantazm.zombies.event.trait.LivingTargetEvent;
+import org.phantazm.zombies.event.trait.ZombiesPlayerEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class ZombiesPlayerProcFireEvent implements ZombiesPlayerEvent, CancellableEvent {
+public class ZombiesPlayerProcFireEvent implements ZombiesPlayerEvent, LivingTargetEvent, SettableDamageAmountEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final LivingEntity target;
@@ -40,19 +43,21 @@ public class ZombiesPlayerProcFireEvent implements ZombiesPlayerEvent, Cancellab
     }
 
     @Override
-    public @NotNull ZombiesPlayer getZombiesPlayer() {
+    public @NotNull ZombiesPlayer zombiesPlayer() {
         return zombiesPlayer;
-    }
-
-    public float damageAmount() {
-        return amount;
-    }
-
-    public void setDamageAmount(float amount) {
-        this.amount = amount;
     }
 
     public @NotNull LivingEntity target() {
         return target;
+    }
+
+    @Override
+    public float damageAmount() {
+        return amount;
+    }
+
+    @Override
+    public void setDamageAmount(float damage) {
+        this.amount = damage;
     }
 }

@@ -4,8 +4,9 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
+import org.phantazm.zombies.event.trait.GunEvent;
 
-public class GunLoseAmmoEvent implements EntityInstanceEvent {
+public class GunLoseAmmoEvent implements EntityInstanceEvent, GunEvent {
     private final Entity entity;
     private final Gun gun;
 
@@ -22,15 +23,16 @@ public class GunLoseAmmoEvent implements EntityInstanceEvent {
         return entity;
     }
 
-    public @NotNull Gun getGun() {
-        return gun;
-    }
-
     public int getAmmoLost() {
         return ammoLost;
     }
 
     public void setAmmoLost(int ammoLost) {
         this.ammoLost = ammoLost;
+    }
+
+    @Override
+    public @NotNull Gun gun() {
+        return gun;
     }
 }

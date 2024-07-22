@@ -12,11 +12,11 @@ import java.util.List;
 
 @Model("zombies.upgrade.effect.composite")
 @Cache
-public class CompositeEffectComponent implements UpgradeEffectComponent {
+public class CompositeEffect implements UpgradeEffectComponent {
     private final List<UpgradeEffectComponent> delegates;
 
     @FactoryMethod
-    public CompositeEffectComponent(@Child("delegates") List<UpgradeEffectComponent> delegates) {
+    public CompositeEffect(@Child("delegates") List<UpgradeEffectComponent> delegates) {
         this.delegates = delegates;
     }
 

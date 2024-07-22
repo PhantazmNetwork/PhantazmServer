@@ -62,7 +62,7 @@ public class LifeLinkUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void damageEvent(ZombiesPlayerDamageEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer) {
+                    if (event.zombiesPlayer() != zombiesPlayer) {
                         return;
                     }
 
@@ -94,7 +94,7 @@ public class LifeLinkUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void meleeEvent(ZombiesPlayerMeleeEntityEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer) {
+                    if (event.zombiesPlayer() != zombiesPlayer) {
                         return;
                     }
 

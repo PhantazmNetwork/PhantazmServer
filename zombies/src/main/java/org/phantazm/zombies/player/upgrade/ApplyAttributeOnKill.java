@@ -72,7 +72,7 @@ public class ApplyAttributeOnKill implements PlayerUpgradeComponent {
                 }
 
                 private void onKillMob(ZombiesPlayerKillMobEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer || !event.target().data().tags().contains(data.requiredTag)) {
+                    if (event.zombiesPlayer() != zombiesPlayer || !event.target().data().tags().contains(data.requiredTag)) {
                         return;
                     }
 

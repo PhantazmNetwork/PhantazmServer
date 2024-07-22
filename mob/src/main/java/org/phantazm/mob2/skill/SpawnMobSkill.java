@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.ExtensionHolder;
 import org.phantazm.core.TagUtils;
+import org.phantazm.core.Target;
 import org.phantazm.mob2.*;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;

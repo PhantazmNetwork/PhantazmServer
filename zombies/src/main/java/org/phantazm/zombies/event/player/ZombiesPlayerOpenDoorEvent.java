@@ -3,12 +3,14 @@ package org.phantazm.zombies.event.player;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.event.trait.DoorEvent;
+import org.phantazm.zombies.event.trait.ZombiesPlayerEvent;
 import org.phantazm.zombies.map.Door;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class ZombiesPlayerOpenDoorEvent implements ZombiesPlayerEvent, CancellableEvent {
+public class ZombiesPlayerOpenDoorEvent implements ZombiesPlayerEvent, DoorEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final Door door;
@@ -27,7 +29,7 @@ public class ZombiesPlayerOpenDoorEvent implements ZombiesPlayerEvent, Cancellab
     }
 
     @Override
-    public @NotNull ZombiesPlayer getZombiesPlayer() {
+    public @NotNull ZombiesPlayer zombiesPlayer() {
         return zombiesPlayer;
     }
 

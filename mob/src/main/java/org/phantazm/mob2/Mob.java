@@ -495,4 +495,8 @@ public class Mob extends ProximaEntity {
     public boolean hasProperty(@NotNull String key) {
         return data.extra().getBooleanOrDefault(key, false);
     }
+
+    public boolean hasDataTag(@NotNull Key tag) {
+        return data.tags().contains(tag);
+    }
 }

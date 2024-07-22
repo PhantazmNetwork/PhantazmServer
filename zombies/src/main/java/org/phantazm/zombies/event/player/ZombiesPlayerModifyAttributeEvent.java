@@ -6,12 +6,14 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
+import org.phantazm.zombies.event.trait.LivingTargetEvent;
+import org.phantazm.zombies.event.trait.ZombiesPlayerEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 import java.util.UUID;
 
-public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, CancellableEvent {
+public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, LivingTargetEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final ShotEffect cause;
@@ -53,16 +55,16 @@ public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, Ca
     }
 
     @Override
-    public @NotNull ZombiesPlayer getZombiesPlayer() {
+    public @NotNull ZombiesPlayer zombiesPlayer() {
         return zombiesPlayer;
-    }
-
-    public @NotNull ShotEffect cause() {
-        return cause;
     }
 
     public @NotNull LivingEntity target() {
         return target;
+    }
+
+    public @NotNull ShotEffect cause() {
+        return cause;
     }
 
     public @NotNull UUID attributeUUID() {

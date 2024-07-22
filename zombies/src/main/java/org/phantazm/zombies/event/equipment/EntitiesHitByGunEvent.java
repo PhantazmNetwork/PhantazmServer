@@ -5,6 +5,7 @@ import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
+import org.phantazm.zombies.event.trait.GunEvent;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -13,7 +14,7 @@ import java.util.Objects;
  * Event raised when one or more entities are hit by a gun's shot. Can be cancelled to prevent the gun's handlers from
  * being run on any of the targets.
  */
-public class EntitiesHitByGunEvent implements CancellableEvent {
+public class EntitiesHitByGunEvent implements CancellableEvent, GunEvent {
     private final Gun gun;
     private final Collection<GunHit> targets;
     private final Entity shooter;
@@ -30,14 +31,6 @@ public class EntitiesHitByGunEvent implements CancellableEvent {
         return gun;
     }
 
-    public @NotNull Collection<GunHit> targets() {
-        return targets;
-    }
-
-    public @NotNull Entity getShooter() {
-        return shooter;
-    }
-
     @Override
     public boolean isCancelled() {
         return cancelled;
@@ -46,5 +39,13 @@ public class EntitiesHitByGunEvent implements CancellableEvent {
     @Override
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
+    }
+
+    public @NotNull Collection<GunHit> targets() {
+        return targets;
+    }
+
+    public @NotNull Entity getShooter() {
+        return shooter;
     }
 }

@@ -43,7 +43,7 @@ public class FirePercentageHitpointUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void handleFireProc(ZombiesPlayerProcFireEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer) {
+                    if (event.zombiesPlayer() != zombiesPlayer) {
                         return;
                     }
 

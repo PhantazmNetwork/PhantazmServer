@@ -1,4 +1,4 @@
-package org.phantazm.mob2;
+package org.phantazm.core;
 
 import com.github.steanky.toolkit.collection.Containers;
 import net.minestom.server.coordinate.Point;
@@ -11,7 +11,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * Represents a target of a particular skill.
+ * A generic target of something, such as a mob skill. Can represent of one or more entities, one or more positions, or
+ * a mix of the two.
  */
 public sealed interface Target
     permits Target.NoTarget, Target.SinglePointTarget, Target.MultiPointTarget, Target.SingleEntityTarget,
@@ -179,7 +180,9 @@ public sealed interface Target
     @Unmodifiable
     Collection<? extends @NotNull Entity> targets();
 
-    @NotNull @Unmodifiable Collection<TargetEntry> entries();
+    @NotNull
+    @Unmodifiable
+    Collection<TargetEntry> entries();
 
     @NotNull
     Optional<? extends Entity> target();
@@ -225,12 +228,14 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends @NotNull Point> locations() {
+        public @NotNull
+        @Unmodifiable Collection<? extends @NotNull Point> locations() {
             return Containers.mappedView(TargetEntry::point, entries);
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<? extends @NotNull Entity> targets() {
+        public @NotNull
+        @Unmodifiable Collection<? extends @NotNull Entity> targets() {
             List<Entity> targets = new ArrayList<>(entries.size());
             for (TargetEntry targetEntry : entries) {
                 Entity entity = targetEntry.entity;
@@ -245,7 +250,8 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
+        public @NotNull
+        @Unmodifiable Collection<TargetEntry> entries() {
             return entries;
         }
 
@@ -284,7 +290,8 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
+        public @NotNull
+        @Unmodifiable Collection<TargetEntry> entries() {
             return List.of();
         }
 
@@ -319,7 +326,8 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
+        public @NotNull
+        @Unmodifiable Collection<TargetEntry> entries() {
             return List.of(new TargetEntry(point, null));
         }
 
@@ -354,7 +362,8 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
+        public @NotNull
+        @Unmodifiable Collection<TargetEntry> entries() {
             return Containers.mappedView(point -> new TargetEntry(point, null), points);
         }
 
@@ -389,7 +398,8 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
+        public @NotNull
+        @Unmodifiable Collection<TargetEntry> entries() {
             return List.of(new TargetEntry(null, entity));
         }
 
@@ -429,7 +439,8 @@ public sealed interface Target
         }
 
         @Override
-        public @NotNull @Unmodifiable Collection<TargetEntry> entries() {
+        public @NotNull
+        @Unmodifiable Collection<TargetEntry> entries() {
             return Containers.mappedView(entity -> new TargetEntry(null, entity), entities);
         }
 

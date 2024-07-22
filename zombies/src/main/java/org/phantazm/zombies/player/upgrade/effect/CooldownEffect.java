@@ -10,12 +10,12 @@ import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 @Model("zombies.upgrade.effect.cooldown")
 @Cache
-public class CooldownEffectComponent implements UpgradeEffectComponent {
+public class CooldownEffect implements UpgradeEffectComponent {
     private final Data data;
     private final UpgradeEffectComponent delegate;
 
     @FactoryMethod
-    public CooldownEffectComponent(@NotNull Data data, @Child("delegate") UpgradeEffectComponent delegate) {
+    public CooldownEffect(@NotNull Data data, @Child("delegate") UpgradeEffectComponent delegate) {
         this.data = data;
         this.delegate = delegate;
     }

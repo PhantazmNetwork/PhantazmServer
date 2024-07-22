@@ -4,11 +4,13 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.event.trait.DamageEvent;
+import org.phantazm.zombies.event.trait.ZombiesPlayerEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class ZombiesPlayerDeathEvent implements ZombiesPlayerEvent, CancellableEvent {
+public class ZombiesPlayerDeathEvent implements ZombiesPlayerEvent, DamageEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final Damage damage;
@@ -28,12 +30,8 @@ public class ZombiesPlayerDeathEvent implements ZombiesPlayerEvent, CancellableE
     }
 
     @Override
-    public @NotNull ZombiesPlayer getZombiesPlayer() {
+    public @NotNull ZombiesPlayer zombiesPlayer() {
         return zombiesPlayer;
-    }
-
-    public @NotNull Damage damageType() {
-        return damage;
     }
 
     public boolean isCancelled() {
@@ -42,5 +40,10 @@ public class ZombiesPlayerDeathEvent implements ZombiesPlayerEvent, CancellableE
 
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
+    }
+
+    @Override
+    public @NotNull Damage damage() {
+        return damage;
     }
 }

@@ -14,7 +14,7 @@ import org.phantazm.core.Cooldown;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.equipment.perk.effect.shot.ApplyFireShotEffect;
-import org.phantazm.zombies.event.player.PlayerReviveEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerReviveEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 @Model("zombies.upgrade.spread_enhanced_fire_on_revive")
@@ -35,7 +35,7 @@ public class SpreadEnhancedFireOnReviveUpgrade implements PlayerUpgradeComponent
     private static class Internal extends GuardedPlayerUpgrade {
         private Internal(ZombiesPlayer zombiesPlayer, Data data) {
             super(Activable.threadsafeWrapper(new Activable() {
-                private final EventListener<PlayerReviveEvent> event = EventListener.builder(PlayerReviveEvent.class)
+                private final EventListener<ZombiesPlayerReviveEvent> event = EventListener.builder(ZombiesPlayerReviveEvent.class)
                     .handler(this::handleRevive).build();
                 private final Cooldown cooldown = Cooldown.cooldown();
 
@@ -54,8 +54,8 @@ public class SpreadEnhancedFireOnReviveUpgrade implements PlayerUpgradeComponent
                     zombiesPlayer.getScene().sceneNode().removeListener(event);
                 }
 
-                private void handleRevive(PlayerReviveEvent event) {
-                    if (event.getZombiesPlayer() != zombiesPlayer) {
+                private void handleRevive(ZombiesPlayerReviveEvent event) {
+                    if (event.zombiesPlayer() != zombiesPlayer) {
                         return;
                     }
 
