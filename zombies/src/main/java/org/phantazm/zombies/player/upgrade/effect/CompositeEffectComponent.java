@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
+import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,16 +32,49 @@ public class CompositeEffectComponent implements UpgradeEffectComponent {
 
     private static final class Internal implements UpgradeEffect {
         private final List<UpgradeEffect> effects;
+        private final List<UpgradeEffect> tickables;
+        private final boolean needsTicking;
 
         private Internal(List<UpgradeEffect> effects) {
             this.effects = effects;
+
+            ArrayList<UpgradeEffect> tickables = null;
+            for (UpgradeEffect effect : effects) {
+                if (effect.needsTicking()) {
+                    (tickables = (tickables == null ? new ArrayList<>() : tickables)).add(effect);
+                }
+            }
+
+            this.needsTicking = tickables != null;
+            if (tickables != null) {
+                tickables.trimToSize();
+            }
+
+            this.tickables = tickables;
         }
 
         @Override
-        public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
+        public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
+            @NotNull TriggerData triggerData) {
             for (UpgradeEffect effect : effects) {
-                effect.apply(upgrade, zombiesPlayer);
+                effect.apply(upgrade, zombiesPlayer, triggerData);
             }
+        }
+
+        @Override
+        public void tick() {
+            if (tickables == null) {
+                return;
+            }
+
+            for (UpgradeEffect tickable : tickables) {
+                tickable.tick();
+            }
+        }
+
+        @Override
+        public boolean needsTicking() {
+            return needsTicking;
         }
     }
 }

@@ -6,6 +6,7 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Cooldown;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
+import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 @Model("zombies.upgrade.effect.cooldown")
 @Cache
@@ -36,9 +37,10 @@ public class CooldownEffectComponent implements UpgradeEffectComponent {
         }
 
         @Override
-        public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
+        public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
+            @NotNull TriggerData triggerData) {
             if (cooldown.takeCooldown(data.cooldown)) {
-                effect.apply(upgrade, zombiesPlayer);
+                effect.apply(upgrade, zombiesPlayer, triggerData);
             }
         }
 
@@ -50,6 +52,9 @@ public class CooldownEffectComponent implements UpgradeEffectComponent {
         @Override
         public void tick() {
             cooldown.step();
+            if (effect.needsTicking()) {
+                effect.tick();
+            }
         }
     }
 

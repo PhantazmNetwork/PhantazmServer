@@ -88,7 +88,7 @@ public class EventTrigger implements UpgradeTriggerComponent {
                 return;
             }
 
-            armData.effect.apply(armData.upgrade, zombiesPlayer);
+            armData.effect.apply(armData.upgrade, zombiesPlayer, TriggerData.of(event));
         }
     }
 
