@@ -22,22 +22,26 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import java.util.*;
 
 /**
- * Developed for the Frozen Bullets and Quick Fire synergy. When a player
- * shoots a zombie, this class applies a modifier that can stack up to a
- * limited level and where each level expires after some time.
+ * Developed for the Frozen Bullets and Quick Fire synergy. When a player shoots a zombie, this class applies a modifier
+ * that can stack up to a limited level and where each level expires after some time.
  */
 @Model("zombies.upgrade.apply_limited_attribute_on_shot")
 @Cache
 public class ApplyLimitedAttributeOnShot implements PlayerUpgradeComponent {
 
-    /** A record of configurable data fields for this upgrade. */
+    /**
+     * A record of configurable data fields for this upgrade.
+     */
     private final Data data;
 
-    /** I think this might make sure that the data fields aren't null */
+    /**
+     * I think this might make sure that the data fields aren't null
+     */
     @FactoryMethod
     public ApplyLimitedAttributeOnShot(@NotNull Data data) {
         this.data = Objects.requireNonNull(data);
     }
+
     @Override
     public @NotNull PlayerUpgrade apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
         return new Internal(zombiesPlayer, data);
@@ -51,8 +55,9 @@ public class ApplyLimitedAttributeOnShot implements PlayerUpgradeComponent {
 
         /**
          * Private constructor.
+         *
          * @param zombiesPlayer the player who owns this upgrade
-         * @param data a record of configurable data fields for this upgrade
+         * @param data          a record of configurable data fields for this upgrade
          */
         private Internal(ZombiesPlayer zombiesPlayer, Data data) {
             super(Activable.threadsafeWrapper(new Activable() {
@@ -102,13 +107,12 @@ public class ApplyLimitedAttributeOnShot implements PlayerUpgradeComponent {
                  */
                 private void onEntityShot(EntityDamageByGunEvent event) {
 
-                    Entity shooter = event.getShooter();
+                    Entity shooter = event.shooter();
                     Entity target = event.getEntity();
 
                     if (shooter.getUuid().equals(zombiesPlayer.getUUID()) &&
                         numberOfStacks < data.maxStoredStacks &&
-                        !targetIsResistant(target))
-                    {
+                        !targetIsResistant(target)) {
                         schedule.add(tickTimer + data.attributeDuration);
                         numberOfStacks++;
                     }
@@ -154,12 +158,13 @@ public class ApplyLimitedAttributeOnShot implements PlayerUpgradeComponent {
 
     /**
      * Record constructor.
-     * @param attribute Minecraft attribute that should be modified
+     *
+     * @param attribute          Minecraft attribute that should be modified
      * @param maxEffectiveStacks Max number of stacks before the attribute modifier can't go any higher
-     * @param maxStoredStacks Max number of stacks stored before we stop keeping track
-     * @param attributeDuration How long one stack of the attribute modifier lasts before expiring
-     * @param value How much to modify the attribute by
-     * @param operation How to modify the attribute
+     * @param maxStoredStacks    Max number of stacks stored before we stop keeping track
+     * @param attributeDuration  How long one stack of the attribute modifier lasts before expiring
+     * @param value              How much to modify the attribute by
+     * @param operation          How to modify the attribute
      */
     @DataObject
     public record Data(

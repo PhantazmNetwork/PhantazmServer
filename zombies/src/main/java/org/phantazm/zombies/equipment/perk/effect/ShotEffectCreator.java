@@ -78,7 +78,7 @@ public class ShotEffectCreator implements PerkEffectCreator {
         }
 
         private void onEntityDamageByGun(EntityDamageByGunEvent event) {
-            Entity shooter = event.getShooter();
+            Entity shooter = event.shooter();
             if (!(shooter instanceof Player player)) {
                 return;
             }

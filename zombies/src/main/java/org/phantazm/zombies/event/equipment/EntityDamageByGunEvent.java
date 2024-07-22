@@ -6,10 +6,11 @@ import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.event.trait.GunEvent;
+import org.phantazm.zombies.event.trait.ShooterEvent;
 
 import java.util.Objects;
 
-public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableEvent, GunEvent {
+public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableEvent, ShooterEvent, GunEvent {
     private final Gun gun;
     private final Entity damagedEntity;
     private final Entity shooter;
@@ -36,10 +37,6 @@ public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableE
     @Override
     public @NotNull Entity getEntity() {
         return damagedEntity;
-    }
-
-    public @NotNull Entity getShooter() {
-        return shooter;
     }
 
     public boolean isHeadshot() {
@@ -70,5 +67,10 @@ public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableE
     @Override
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
+    }
+
+    @Override
+    public @NotNull Entity shooter() {
+        return shooter;
     }
 }

@@ -46,7 +46,7 @@ public class CriticalHitsUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void handleMobShot(EntityDamageByGunEvent event) {
-                    if (!event.getShooter().getUuid().equals(zombiesPlayer.getUUID())) {
+                    if (!event.shooter().getUuid().equals(zombiesPlayer.getUUID())) {
                         return;
                     }
 

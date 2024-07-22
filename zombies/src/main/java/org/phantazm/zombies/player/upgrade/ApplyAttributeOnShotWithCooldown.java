@@ -87,7 +87,7 @@ public class ApplyAttributeOnShotWithCooldown implements PlayerUpgradeComponent 
                 }
 
                 private void onShotByGun(EntitiesHitByGunEvent event) {
-                    if (!event.getShooter().getUuid().equals(zombiesPlayer.getUUID()) ||
+                    if (!event.shooter().getUuid().equals(zombiesPlayer.getUUID()) ||
                         !applyCooldown.takeCooldown(data.cooldown)) {
                         return;
                     }

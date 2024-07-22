@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.equipment.gun.shoot.GunHit;
 import org.phantazm.zombies.event.trait.GunEvent;
+import org.phantazm.zombies.event.trait.ShooterEvent;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -14,7 +15,7 @@ import java.util.Objects;
  * Event raised when one or more entities are hit by a gun's shot. Can be cancelled to prevent the gun's handlers from
  * being run on any of the targets.
  */
-public class EntitiesHitByGunEvent implements CancellableEvent, GunEvent {
+public class EntitiesHitByGunEvent implements CancellableEvent, ShooterEvent, GunEvent {
     private final Gun gun;
     private final Collection<GunHit> targets;
     private final Entity shooter;
@@ -45,7 +46,8 @@ public class EntitiesHitByGunEvent implements CancellableEvent, GunEvent {
         return targets;
     }
 
-    public @NotNull Entity getShooter() {
+    @Override
+    public @NotNull Entity shooter() {
         return shooter;
     }
 }

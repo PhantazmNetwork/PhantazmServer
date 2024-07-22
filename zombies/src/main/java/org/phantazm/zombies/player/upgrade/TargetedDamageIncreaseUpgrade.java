@@ -47,7 +47,7 @@ public class TargetedDamageIncreaseUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void handleMobShot(EntityDamageByGunEvent event) {
-                    if (!event.getShooter().getUuid().equals(zombiesPlayer.getUUID()) ||
+                    if (!event.shooter().getUuid().equals(zombiesPlayer.getUUID()) ||
                         !(event.getEntity() instanceof Mob mob) ||
                         mob.data().tags().stream().noneMatch(data.tags::contains)) {
                         return;

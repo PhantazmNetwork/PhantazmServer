@@ -48,7 +48,7 @@ public class FireAOESpreadUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void handleMobShot(EntitiesHitByGunEvent event) {
-                    if (!event.getShooter().getUuid().equals(zombiesPlayer.getUUID())) {
+                    if (!event.shooter().getUuid().equals(zombiesPlayer.getUUID())) {
                         return;
                     }
 
@@ -61,7 +61,7 @@ public class FireAOESpreadUpgrade implements PlayerUpgradeComponent {
                         Entity hitEntity = hit.entity();
                         zombiesPlayer.getScene().instance().getEntityTracker().nearbyEntities(hitEntity.getPosition(),
                             data.radius, EntityTracker.Target.LIVING_ENTITIES, target -> {
-                                if (target == event.getShooter() || target == hitEntity || !(target instanceof Mob)) {
+                                if (target == event.shooter() || target == hitEntity || !(target instanceof Mob)) {
                                     return;
                                 }
 

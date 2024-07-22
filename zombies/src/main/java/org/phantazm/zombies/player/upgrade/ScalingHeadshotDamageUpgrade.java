@@ -55,12 +55,12 @@ public class ScalingHeadshotDamageUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void handleMobShot(EntityDamageByGunEvent event) {
-                    if (!event.getShooter().getUuid().equals(zombiesPlayer.getUUID())) {
+                    if (!event.shooter().getUuid().equals(zombiesPlayer.getUUID())) {
                         return;
                     }
 
                     // cast is safe as we know the shooter is our player
-                    LivingEntity shooter = (LivingEntity) event.getShooter();
+                    LivingEntity shooter = (LivingEntity) event.shooter();
 
                     if (event.isHeadshot()) {
                         currentLevel = Math.min(currentLevel + data.levelIncrement, data.maxLevel);
