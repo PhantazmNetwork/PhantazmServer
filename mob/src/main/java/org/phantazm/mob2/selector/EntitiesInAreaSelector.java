@@ -2,20 +2,14 @@ package org.phantazm.mob2.selector;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
-import it.unimi.dsi.fastutil.doubles.DoubleObjectPair;
-import net.minestom.server.coordinate.Point;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.EntityTrackerUtils;
 import org.phantazm.core.TrackerTargetType;
 import org.phantazm.mob2.Mob;
 import org.phantazm.core.Target;
 import org.phantazm.mob2.validator.Validator;
 import org.phantazm.mob2.validator.ValidatorComponent;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Model("mob.selector.entities_in_area")
 @Cache
@@ -63,60 +57,10 @@ public class EntitiesInAreaSelector implements SelectorComponent {
                 return Target.NONE;
             }
 
-            Target originTarget = originSelector.select(mob);
-            Optional<? extends Point> optionalOrigin = originTarget.location();
-            if (optionalOrigin.isEmpty()) {
-                return Target.NONE;
-            }
-
-            Point origin = optionalOrigin.get();
-            List<DoubleObjectPair<Entity>> targets = new ArrayList<>(data.limit < 0 ? 10 : data.limit);
-
-            if (data.range < 0) {
-                for (Entity target : instance.getEntityTracker().entities(data.target.target())) {
-                    handleEntity(mob, origin, target, targets);
-                }
-            } else {
-                instance.getEntityTracker().nearbyEntities(origin, data.range, data.target.target(),
-                    target -> handleEntity(mob, origin, target, targets));
-            }
-
-            if (targets.isEmpty()) {
-                return Target.NONE;
-            }
-
-            List<Entity> actualTargets = new ArrayList<>(targets.size());
-            for (DoubleObjectPair<Entity> target : targets) {
-                actualTargets.add(target.right());
-            }
-
-            return Target.entities(actualTargets);
-        }
-
-        private void handleEntity(Mob mob, Point origin, Entity target, List<DoubleObjectPair<Entity>> targets) {
-            if ((data.limitSelf && target == mob) || !validator.valid(mob, target)) {
-                return;
-            }
-
-            double thisDistanceSquared = origin.distanceSquared(target.getPosition());
-
-            for (int i = 0; i < targets.size(); i++) {
-                DoubleObjectPair<Entity> existingTarget = targets.get(i);
-                if (existingTarget.firstDouble() > thisDistanceSquared) {
-                    if (targets.size() == data.limit) {
-                        targets.remove(targets.size() - 1);
-                    }
-
-                    targets.add(i, DoubleObjectPair.of(thisDistanceSquared, target));
-                    return;
-                }
-            }
-
-            if (targets.size() == data.limit) {
-                return;
-            }
-
-            targets.add(DoubleObjectPair.of(thisDistanceSquared, target));
+            return EntityTrackerUtils.select(instance, data.target.target(), originSelector.select(mob), data.limit,
+                data.range, candidate -> {
+                    return (!data.limitSelf || candidate != mob) && validator.valid(mob, candidate);
+                });
         }
     }
 }
