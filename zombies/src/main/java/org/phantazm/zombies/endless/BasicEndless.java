@@ -544,7 +544,7 @@ public class BasicEndless implements Endless {
     };
 
     private void onMobSetup(@NotNull MobSetupEvent event) {
-        Mob mob = event.getEntity();
+        Mob mob = event.target();
         ConfigElement bypassesScaling = mob.data().extra().atOrDefault(ExtraNodeKeys.BYPASS_ENDLESS_SCALING,
             ConfigPrimitive.FALSE);
 

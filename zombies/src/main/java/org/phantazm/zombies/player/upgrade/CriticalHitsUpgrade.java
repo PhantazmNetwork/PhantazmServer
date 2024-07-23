@@ -59,13 +59,13 @@ public class CriticalHitsUpgrade implements PlayerUpgradeComponent {
                     }
 
                     if (Math.random() >= data.instakillChance) {
-                        event.setDamage((float) (event.getDamage() * data.critDamageFactor));
+                        event.setDamageAmount((float) (event.damageAmount() * data.critDamageFactor));
                         return;
                     }
 
                     if (event.getEntity() instanceof Mob mob &&
                         mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_INSTAKILL, false)) {
-                        event.setDamage((float) (event.getDamage() * data.instakillDamageFactor));
+                        event.setDamageAmount((float) (event.damageAmount() * data.instakillDamageFactor));
                     } else {
                         event.setInstakill(true);
                     }

@@ -11,7 +11,7 @@ public final class Tags {
     public static final Tag<Integer> ARMOR_TIER = Tag.Integer(TagUtils.uniqueTagName()).defaultValue(-1);
     public static final Tag<Long> LAST_ENTER_BOMBED_ROOM = Tag.Long(TagUtils.uniqueTagName()).defaultValue(-1L);
     public static final Tag<Component> DAMAGE_NAME = Tag.Component(TagUtils.uniqueTagName());
-    public static final Tag<Boolean> HEADSHOT_TAG = Tag.Boolean(TagUtils.uniqueTagName());
+    public static final Tag<Boolean> HEADSHOT_TAG = Tag.Boolean("phantazm.zombies.is_headshot");
 
     private Tags() {
         throw new UnsupportedOperationException();

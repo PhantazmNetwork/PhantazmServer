@@ -66,7 +66,7 @@ public class DamageShotHandler implements ShotHandler {
             }
 
             targetEntity.getAcquirable().sync(ignored -> {
-                float baseDamage = event.getDamage();
+                float baseDamage = event.damageAmount();
                 if (event.isInstakill()) {
                     targetEntity.damage(Damage.fromEntity(attacker, targetEntity.getHealth()));
                     return;

@@ -53,7 +53,7 @@ public class TargetedDamageIncreaseUpgrade implements PlayerUpgradeComponent {
                         return;
                     }
 
-                    event.setDamage(Math.max(0, (float) (event.getDamage() * data.damageMultiplier)));
+                    event.setDamageAmount(Math.max(0, (float) (event.damageAmount() * data.damageMultiplier)));
                 }
             }), zombiesPlayer);
         }

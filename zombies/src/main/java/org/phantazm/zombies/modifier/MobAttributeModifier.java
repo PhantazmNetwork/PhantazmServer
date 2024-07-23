@@ -41,7 +41,7 @@ public class MobAttributeModifier implements DualComponent<ZombiesScene, Modifie
             Attribute attribute = Attributes.get(data.attribute);
 
             scene.addListener(MobSetupEvent.class, event -> {
-                LivingEntity entity = event.getEntity();
+                LivingEntity entity = event.target();
 
                 entity.getAttribute(attribute)
                     .addModifier(new AttributeModifier(uuid, uuid.toString(), data.amount, data.attributeOperation));

@@ -64,7 +64,7 @@ public class FriendlyFireModifier implements DualComponent<ZombiesScene, Modifie
                     return;
                 }
 
-                event.setDamage((float) (event.getDamage() * data.playerDamageMultiplier));
+                event.setDamageAmount((float) (event.damageAmount() * data.playerDamageMultiplier));
             });
         }
     }
