@@ -1,7 +1,6 @@
 package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -13,7 +12,7 @@ import org.phantazm.zombies.player.upgrade.selector.Selector;
 import org.phantazm.zombies.player.upgrade.selector.SelectorComponent;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
-@Model("zombies.upgrade.effect.targeted_damage_increase")
+@Model("zombies.upgrade.effect.damage_increase")
 @Cache
 public class TargetedDamageIncreaseEffect implements UpgradeEffectComponent {
     private final Data data;
@@ -49,16 +48,13 @@ public class TargetedDamageIncreaseEffect implements UpgradeEffectComponent {
             }
 
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Mob.class).ifPresent(mob -> {
-                if (mob.data().tags().contains(data.tag)) {
-                    settableDamageAmountEvent.setDamageAmount((float) (settableDamageAmountEvent.damageAmount() *
-                        data.damageMultiplier));
-                }
+                settableDamageAmountEvent.setDamageAmount((float) (settableDamageAmountEvent.damageAmount() *
+                    data.damageMultiplier));
             });
         }
     }
 
     @DataObject
-    public record Data(@NotNull Key tag,
-        double damageMultiplier) {
+    public record Data(double damageMultiplier) {
     }
 }

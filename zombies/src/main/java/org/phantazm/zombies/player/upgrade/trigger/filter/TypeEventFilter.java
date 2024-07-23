@@ -56,7 +56,7 @@ public class TypeEventFilter implements EventFilterComponent {
                         if (test(condition, event)) yield true;
                     }
 
-                    yield false;
+                    yield conditions.isEmpty();
                 }
             };
         }
