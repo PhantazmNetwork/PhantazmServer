@@ -14,12 +14,12 @@ import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 @Model("zombies.upgrade.effect.damage_increase")
 @Cache
-public class TargetedDamageIncreaseEffect implements UpgradeEffectComponent {
+public class DamageIncreaseEffect implements UpgradeEffectComponent {
     private final Data data;
     private final SelectorComponent selectorComponent;
 
     @FactoryMethod
-    public TargetedDamageIncreaseEffect(@NotNull Data data,
+    public DamageIncreaseEffect(@NotNull Data data,
         @NotNull @Child("selector") SelectorComponent selectorComponent) {
         this.data = data;
         this.selectorComponent = selectorComponent;
@@ -49,12 +49,12 @@ public class TargetedDamageIncreaseEffect implements UpgradeEffectComponent {
 
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Mob.class).ifPresent(mob -> {
                 settableDamageAmountEvent.setDamageAmount((float) (settableDamageAmountEvent.damageAmount() *
-                    data.damageMultiplier));
+                    data.multiplier));
             });
         }
     }
 
     @DataObject
-    public record Data(double damageMultiplier) {
+    public record Data(double multiplier) {
     }
 }
