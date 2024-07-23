@@ -31,6 +31,11 @@ public class ZombiesPlayerMeleeEntityEvent implements ZombiesPlayerEvent, Equipm
     }
 
     @Override
+    public @NotNull Player getEntity() {
+        return player;
+    }
+
+    @Override
     public @NotNull ZombiesPlayer zombiesPlayer() {
         return zombiesPlayer;
     }

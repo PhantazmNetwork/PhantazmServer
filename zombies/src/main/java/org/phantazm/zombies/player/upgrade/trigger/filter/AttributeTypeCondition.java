@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.event.trait.AttributeEvent;
@@ -40,12 +41,24 @@ public class AttributeTypeCondition implements EventConditionComponent {
 
         @Override
         public boolean filter(@NotNull AttributeEvent event) {
-            return data.attributes.contains(event.attribute().key()) != data.blacklist;
+            if (data.shouldFilterRemove && (event.isRemove() != data.remove)) {
+                return false;
+            }
+
+            return data.attributes.contains(event.attribute().key()) != data.attributesIsBlacklist;
         }
     }
 
+    @Default("""
+        {
+          shouldFilterRemove=false,
+          remove=false
+        }
+        """)
     @DataObject
     public record Data(@NotNull Set<String> attributes,
-        boolean blacklist) {
+        boolean attributesIsBlacklist,
+        boolean shouldFilterRemove,
+        boolean remove) {
     }
 }

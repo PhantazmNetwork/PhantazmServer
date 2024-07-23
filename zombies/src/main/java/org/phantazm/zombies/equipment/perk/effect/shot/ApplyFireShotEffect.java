@@ -115,7 +115,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
 
         float damage = AttributeUtils.computeWithBase(data.damage, damager.getAttribute(Attributes.FIRE_APPLY_DAMAGE));
 
-        scene.broadcastCancellable(new ZombiesPlayerProcFireEvent(damager, player, damage, target), event -> {
+        scene.broadcastCancellable(new ZombiesPlayerProcFireEvent(damager, player, target, damage), event -> {
             target.getAcquirable().sync(self -> DamageUtils.damage(data.damageType, (LivingEntity) self, amount ->
                     new Damage(DamageType.ON_FIRE, null, damager, null, amount),
                 (float) (event.damageAmount() * scale), data.bypassArmor));

@@ -42,12 +42,12 @@ public class EntitiesHitByGunEvent implements CancellableEvent, ShooterEvent, Gu
         this.cancelled = cancel;
     }
 
-    public @NotNull Collection<GunHit> targets() {
-        return targets;
-    }
-
     @Override
     public @NotNull Entity shooter() {
         return shooter;
+    }
+
+    public @NotNull Collection<GunHit> targets() {
+        return targets;
     }
 }

@@ -6,7 +6,6 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.TagUtils;
-import org.phantazm.zombies.event.entity.EntityAttributeModifierRemoveEvent;
 import org.phantazm.zombies.event.trait.AttributeEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
@@ -49,9 +48,8 @@ public class LinkAttributeToTagEffect implements UpgradeEffectComponent {
         @Override
         public void applyEvent(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData, @NotNull AttributeEvent attributeEvent) {
-            boolean remove = attributeEvent instanceof EntityAttributeModifierRemoveEvent;
             selector.select(upgrade, zombiesPlayer, triggerData).forType(LivingEntity.class, livingEntity -> {
-                if (remove) {
+                if (attributeEvent.isRemove()) {
                     if (Objects.equals(livingEntity.getTag(uuidTag), attributeEvent.attributeUuid())) {
                         livingEntity.removeTag(tag);
                         livingEntity.removeTag(uuidTag);

@@ -11,7 +11,8 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.Objects;
 
-public class ZombiesPlayerProcFireEvent implements ZombiesPlayerEvent, LivingTargetEvent, SettableDamageAmountEvent, CancellableEvent {
+public class ZombiesPlayerProcFireEvent implements ZombiesPlayerEvent, LivingTargetEvent, SettableDamageAmountEvent,
+    CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
     private final LivingEntity target;
@@ -19,8 +20,8 @@ public class ZombiesPlayerProcFireEvent implements ZombiesPlayerEvent, LivingTar
 
     private boolean cancelled;
 
-    public ZombiesPlayerProcFireEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer, float amount,
-        @NotNull LivingEntity target) {
+    public ZombiesPlayerProcFireEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
+        @NotNull LivingEntity target, float amount) {
         this.player = Objects.requireNonNull(player);
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
         this.target = Objects.requireNonNull(target);
@@ -39,6 +40,11 @@ public class ZombiesPlayerProcFireEvent implements ZombiesPlayerEvent, LivingTar
 
     @Override
     public @NotNull Player getPlayer() {
+        return player;
+    }
+
+    @Override
+    public @NotNull Player getEntity() {
         return player;
     }
 

@@ -23,16 +23,16 @@ public class GunLoseAmmoEvent implements EntityInstanceEvent, GunEvent {
         return entity;
     }
 
+    @Override
+    public @NotNull Gun gun() {
+        return gun;
+    }
+
     public int getAmmoLost() {
         return ammoLost;
     }
 
     public void setAmmoLost(int ammoLost) {
         this.ammoLost = ammoLost;
-    }
-
-    @Override
-    public @NotNull Gun gun() {
-        return gun;
     }
 }

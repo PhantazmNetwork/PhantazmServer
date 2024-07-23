@@ -55,12 +55,13 @@ public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, Se
     }
 
     @Override
-    public @NotNull ZombiesPlayer zombiesPlayer() {
-        return zombiesPlayer;
+    public @NotNull Player getEntity() {
+        return player;
     }
 
-    public @NotNull LivingEntity target() {
-        return target;
+    @Override
+    public @NotNull ZombiesPlayer zombiesPlayer() {
+        return zombiesPlayer;
     }
 
     public @NotNull UUID attributeUuid() {
@@ -82,6 +83,11 @@ public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, Se
 
     public void setAttributeAmount(float amount) {
         this.attributeAmount = amount;
+    }
+
+    @Override
+    public @NotNull LivingEntity target() {
+        return target;
     }
 
     public @NotNull ShotEffect cause() {

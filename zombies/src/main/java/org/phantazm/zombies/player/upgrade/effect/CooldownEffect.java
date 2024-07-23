@@ -28,11 +28,15 @@ public class CooldownEffect implements UpgradeEffectComponent {
     private static final class Internal implements UpgradeEffect {
         private final Data data;
         private final UpgradeEffect effect;
+        private final boolean tickDelegate;
+
         private final Cooldown cooldown;
 
         private Internal(Data data, UpgradeEffect effect) {
             this.data = data;
             this.effect = effect;
+            this.tickDelegate = effect.needsTicking();
+
             this.cooldown = Cooldown.cooldown();
         }
 
@@ -52,7 +56,8 @@ public class CooldownEffect implements UpgradeEffectComponent {
         @Override
         public void tick() {
             cooldown.step();
-            if (effect.needsTicking()) {
+
+            if (tickDelegate) {
                 effect.tick();
             }
         }

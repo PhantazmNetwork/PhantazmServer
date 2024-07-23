@@ -2,7 +2,7 @@ package org.phantazm.zombies.event.entity;
 
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
-import org.phantazm.zombies.event.trait.MobEvent;
+import org.phantazm.zombies.event.trait.MobTargetEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Objects;
@@ -12,7 +12,7 @@ import java.util.Objects;
  * is <i>not</i> being ticked yet, and this event is broadcast synchronously, it is not necessary to acquire the mob in
  * order to call methods on it.
  */
-public class MobSetupEvent implements MobEvent {
+public class MobSetupEvent implements MobTargetEvent {
     private final Mob mob;
 
     public MobSetupEvent(@NotNull Mob mob) {
@@ -20,12 +20,7 @@ public class MobSetupEvent implements MobEvent {
     }
 
     @Override
-    public @NotNull Mob getEntity() {
-        return mob;
-    }
-
-    @Override
-    public @NotNull Mob mob() {
+    public @NotNull Mob target() {
         return mob;
     }
 }

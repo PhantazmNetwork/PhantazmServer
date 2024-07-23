@@ -1,14 +1,14 @@
 package org.phantazm.zombies.event.equipment;
 
 import net.minestom.server.entity.Entity;
-import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
+import org.phantazm.zombies.event.trait.EntityTargetEvent;
 import org.phantazm.zombies.event.trait.GunEvent;
 
 import java.util.Objects;
 
-public class GunTargetSelectEvent implements EntityInstanceEvent, GunEvent {
+public class GunTargetSelectEvent implements EntityTargetEvent, GunEvent {
     private final Entity entity;
     private final Gun gun;
 
@@ -20,7 +20,7 @@ public class GunTargetSelectEvent implements EntityInstanceEvent, GunEvent {
     }
 
     @Override
-    public @NotNull Entity getEntity() {
+    public @NotNull Entity target() {
         return entity;
     }
 

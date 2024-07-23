@@ -6,11 +6,13 @@ import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.event.trait.GunEvent;
+import org.phantazm.zombies.event.trait.SettableDamageAmountEvent;
 import org.phantazm.zombies.event.trait.ShooterEvent;
 
 import java.util.Objects;
 
-public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableEvent, ShooterEvent, GunEvent {
+public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableEvent, SettableDamageAmountEvent,
+    ShooterEvent, GunEvent {
     private final Gun gun;
     private final Entity damagedEntity;
     private final Entity shooter;
@@ -39,26 +41,6 @@ public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableE
         return damagedEntity;
     }
 
-    public boolean isHeadshot() {
-        return isHeadshot;
-    }
-
-    public boolean isInstakill() {
-        return isInstakill;
-    }
-
-    public void setInstakill(boolean instakill) {
-        this.isInstakill = instakill;
-    }
-
-    public float getDamage() {
-        return damage;
-    }
-
-    public void setDamage(float damage) {
-        this.damage = damage;
-    }
-
     @Override
     public boolean isCancelled() {
         return cancelled;
@@ -72,5 +54,27 @@ public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableE
     @Override
     public @NotNull Entity shooter() {
         return shooter;
+    }
+
+    @Override
+    public float damageAmount() {
+        return damage;
+    }
+
+    @Override
+    public void setDamageAmount(float damage) {
+        this.damage = damage;
+    }
+
+    public boolean isHeadshot() {
+        return isHeadshot;
+    }
+
+    public boolean isInstakill() {
+        return isInstakill;
+    }
+
+    public void setInstakill(boolean instakill) {
+        this.isInstakill = instakill;
     }
 }

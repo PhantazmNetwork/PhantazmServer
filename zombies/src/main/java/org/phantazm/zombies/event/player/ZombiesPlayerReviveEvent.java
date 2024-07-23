@@ -12,7 +12,8 @@ public class ZombiesPlayerReviveEvent implements ZombiesPlayerEvent {
     private final ZombiesPlayer zombiesPlayer;
     private final ZombiesPlayer reviveTarget;
 
-    public ZombiesPlayerReviveEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer, @NotNull ZombiesPlayer reviveTarget) {
+    public ZombiesPlayerReviveEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
+        @NotNull ZombiesPlayer reviveTarget) {
         this.player = Objects.requireNonNull(player);
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
         this.reviveTarget = Objects.requireNonNull(reviveTarget);

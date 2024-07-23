@@ -3,6 +3,7 @@ package org.phantazm.zombies.player.upgrade.selector;
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import net.minestom.server.event.trait.EntityEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Target;
@@ -34,6 +35,10 @@ public class MobTargetSelector implements SelectorComponent {
             @NotNull TriggerData triggerData) {
             if (triggerData.raw() instanceof MobTargetEvent mobTargetEvent) {
                 return Target.entities(mobTargetEvent.target());
+            }
+
+            if (triggerData.raw() instanceof EntityEvent entityEvent) {
+                return Target.entities(entityEvent.getEntity());
             }
 
             return Target.NONE;

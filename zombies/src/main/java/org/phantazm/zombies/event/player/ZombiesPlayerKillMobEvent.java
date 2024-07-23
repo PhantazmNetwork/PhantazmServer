@@ -31,6 +31,11 @@ public class ZombiesPlayerKillMobEvent implements ZombiesPlayerEvent, MobTargetE
     }
 
     @Override
+    public @NotNull Player getEntity() {
+        return player;
+    }
+
+    @Override
     public @NotNull ZombiesPlayer zombiesPlayer() {
         return zombiesPlayer;
     }

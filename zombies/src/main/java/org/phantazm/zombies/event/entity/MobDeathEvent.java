@@ -1,13 +1,13 @@
 package org.phantazm.zombies.event.entity;
 
-import net.minestom.server.entity.Entity;
+import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
-import org.phantazm.zombies.event.trait.MobInstanceEvent;
+import org.phantazm.zombies.event.trait.MobTargetEvent;
 
 import java.util.Objects;
 
-public class MobDeathEvent implements MobInstanceEvent {
+public class MobDeathEvent implements MobTargetEvent, EntityInstanceEvent {
     private final Mob mob;
 
     public MobDeathEvent(@NotNull Mob mob) {
@@ -15,12 +15,7 @@ public class MobDeathEvent implements MobInstanceEvent {
     }
 
     @Override
-    public @NotNull Entity getEntity() {
-        return mob;
-    }
-
-    @Override
-    public @NotNull Mob mob() {
+    public @NotNull Mob target() {
         return mob;
     }
 }

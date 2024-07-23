@@ -2,11 +2,11 @@ package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.event.trait.SettableDamageAmountEvent;
-import org.phantazm.zombies.event.trait.MobTargetEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.selector.Selector;
@@ -31,19 +31,19 @@ public class TargetedDamageIncreaseEffect implements UpgradeEffectComponent {
         return new Internal(data, selectorComponent.apply(injectionStore, zombiesPlayer));
     }
 
-    private static final class Internal extends SingleEventEffect<MobTargetEvent> {
+    private static final class Internal extends SingleEventEffect<Event> {
         private final Data data;
         private final Selector selector;
 
         private Internal(Data data, Selector selector) {
-            super(MobTargetEvent.class);
+            super(Event.class);
             this.data = data;
             this.selector = selector;
         }
 
         @Override
         protected void applyEvent(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
-            @NotNull TriggerData triggerData, @NotNull MobTargetEvent event) {
+            @NotNull TriggerData triggerData, @NotNull Event event) {
             if (!(event instanceof SettableDamageAmountEvent settableDamageAmountEvent)) {
                 return;
             }

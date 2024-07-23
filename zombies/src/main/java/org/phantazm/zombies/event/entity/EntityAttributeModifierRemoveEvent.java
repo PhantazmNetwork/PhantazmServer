@@ -6,11 +6,12 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.event.trait.AttributeEvent;
+import org.phantazm.zombies.event.trait.LivingTargetEvent;
 
 import java.util.Objects;
 import java.util.UUID;
 
-public class EntityAttributeModifierRemoveEvent implements EntityInstanceEvent, AttributeEvent {
+public class EntityAttributeModifierRemoveEvent implements EntityInstanceEvent, AttributeEvent, LivingTargetEvent {
     private final LivingEntity target;
     private final Attribute attribute;
     private final AttributeModifier removedModifier;
@@ -41,11 +42,6 @@ public class EntityAttributeModifierRemoveEvent implements EntityInstanceEvent, 
     @Override
     public boolean isRemove() {
         return true;
-    }
-
-    @Override
-    public @NotNull LivingEntity getEntity() {
-        return target;
     }
 
     @Override
