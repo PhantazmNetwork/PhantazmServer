@@ -33,7 +33,7 @@ public interface Activable extends Tickable {
 
             @Override
             public void start() {
-                if (!started.compareAndExchange(false, true)) {
+                if (started.compareAndSet(false, true)) {
                     other.start();
                 }
             }
@@ -47,7 +47,7 @@ public interface Activable extends Tickable {
 
             @Override
             public void end() {
-                if (started.compareAndExchange(true, false)) {
+                if (started.compareAndSet(true, false)) {
                     other.end();
                 }
             }
