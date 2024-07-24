@@ -340,6 +340,14 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         return false;
     }
 
+    public @NotNull EventNode<Event> sceneNode() {
+        return sceneNode;
+    }
+
+    public ZombiesPlayer getPlayer(@NotNull UUID uuid) {
+        return managedPlayers.get(PlayerView.lookup(uuid));
+    }
+
     public void setRestricted(boolean restricted) {
         this.restricted = restricted;
     }
@@ -382,10 +390,6 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         if (sandbox) {
             this.legit = false;
         }
-    }
-
-    public @NotNull EventNode<Event> sceneNode() {
-        return sceneNode;
     }
 
     public void addModifier(@NotNull ModifierComponent modifier) {
