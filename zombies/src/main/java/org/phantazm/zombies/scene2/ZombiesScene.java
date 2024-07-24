@@ -7,6 +7,7 @@ import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
@@ -261,7 +262,9 @@ public class ZombiesScene extends InstanceScene implements EventScene {
             }
 
             leavingPlayerView.getPlayer().ifPresent(player -> {
-                
+                for (Attribute attribute : Attribute.values()) {
+                    player.getAttribute(attribute).clearModifiers();
+                }
             });
         }
 
