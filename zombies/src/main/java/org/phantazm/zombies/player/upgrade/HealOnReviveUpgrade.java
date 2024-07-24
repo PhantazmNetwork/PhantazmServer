@@ -160,6 +160,7 @@ public class HealOnReviveUpgrade implements PlayerUpgradeComponent {
         {
           maxPlayersInVicinity=-1,
           radius=0.0,
+          restrictSamePlayerRevival=false,
           cooldown=0
         }
         """)
