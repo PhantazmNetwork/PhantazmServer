@@ -32,14 +32,6 @@ public class HealOnReviveUpgrade implements PlayerUpgradeComponent {
         this.data = data;
     }
 
-    @Default("""
-        {
-          maxPlayersInVicinity=-1,
-          radius=0.0,
-          cooldown=0
-        }
-        """)
-
     @Override
     public @NotNull PlayerUpgrade apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
         return new Internal(zombiesPlayer, data);
@@ -163,6 +155,14 @@ public class HealOnReviveUpgrade implements PlayerUpgradeComponent {
         }
 
     }
+
+    @Default("""
+        {
+          maxPlayersInVicinity=-1,
+          radius=0.0,
+          cooldown=0
+        }
+        """)
     @DataObject
     public record Data(
        double healAmount,
