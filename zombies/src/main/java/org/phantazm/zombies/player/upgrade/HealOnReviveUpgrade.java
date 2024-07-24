@@ -50,7 +50,7 @@ public class HealOnReviveUpgrade implements PlayerUpgradeComponent {
             super(Activable.threadsafeWrapper(new Activable() {
                 private final EventListener<ZombiesPlayerReviveEvent> event = EventListener.builder(ZombiesPlayerReviveEvent.class)
                     .handler(this::handleRevive).build();
-                private final HashSet<PastPlayer> pastPlayers = new HashSet<PastPlayer>();
+                private final HashSet<PastPlayer> pastPlayers = new HashSet<>();
 
                 @Override
                 public void start() {
@@ -112,13 +112,9 @@ public class HealOnReviveUpgrade implements PlayerUpgradeComponent {
                             return;
                         }
 
-                        UUID reviveeUuid = revivee.get().getUuid();
-                        for(PastPlayer player : pastPlayers) {
-                            if(reviveeUuid.equals(player.uuid)) {
-                                return;
-                            }
+                        if(!pastPlayers.add(new PastPlayer(revivee.get().getUuid()))) {
+                            return;
                         }
-                        pastPlayers.add(new PastPlayer(reviveeUuid));
                     }
 
                     event.getPlayer().getAcquirable().sync(revivingPlayer -> {
@@ -134,6 +130,28 @@ public class HealOnReviveUpgrade implements PlayerUpgradeComponent {
                     public PastPlayer(UUID uuid) {
                         this.uuid = uuid;
                         this.duration = data.cooldown;
+                    }
+
+                    @Override
+                    public boolean equals(Object obj) {
+                        if(obj == null) {
+                            return false;
+                        }
+
+                        if(obj == this) {
+                            return true;
+                        }
+
+                        if(!(obj instanceof PastPlayer pastPlayer)) {
+                            return false;
+                        }
+
+                        return this.uuid.equals(pastPlayer.uuid);
+                    }
+
+                    @Override
+                    public int hashCode() {
+                        return this.uuid.hashCode();
                     }
                 }
             }), zombiesPlayer);
