@@ -11,9 +11,7 @@ import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.TagUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.ExtraNodeKeys;
@@ -22,15 +20,15 @@ import org.phantazm.zombies.event.entity.EntityAttributeModifierRemoveEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Model("zombies.perk.effect.shot_entity.apply_attribute")
 @Cache(false)
 public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
-    private static final Map<Data, String> NAMES = new ConcurrentHashMap<>();
-
     private final Data data;
     private final ZombiesScene scene;
     private final UUID attributeUUID;
@@ -38,8 +36,11 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
     private final Attribute attribute;
 
-    private final Deque<LivingEntity> entities;
-    private final Tag<Long> applyTicksTag;
+    private final Deque<Entry> entities;
+
+    private record Entry(Reference<LivingEntity> target,
+        AtomicInteger timer) {
+    }
 
     @FactoryMethod
     public ApplyAttributeShotEffect(@NotNull Data data, @NotNull ZombiesScene scene) {
@@ -50,13 +51,11 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
         this.attribute = Objects.requireNonNullElse(Attributes.get(data.attribute), Attributes.NIL);
 
-        String name = NAMES.computeIfAbsent(data, ignored -> TagUtils.uniqueTagName());
         this.entities = new ConcurrentLinkedDeque<>();
-        this.applyTicksTag = Tag.Long(name).defaultValue(0L);
     }
 
     @Override
-    public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer) {
+    public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer, double scale) {
         if (!(entity instanceof Mob mob)) {
             return;
         }
@@ -74,8 +73,9 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
         scene.broadcastCancellable(new ZombiesPlayerModifyAttributeEvent(playerOptional.get(), zombiesPlayer,
             this, mob, attribute, attributeUUID, (float) data.amount), event -> {
             mob.getAttribute(attribute).addModifier(
-                new AttributeModifier(attributeUUID, attributeName, event.attributeAmount(), data.attributeOperation));
-            entities.add(mob);
+                new AttributeModifier(attributeUUID, attributeName, event.attributeAmount() * scale,
+                    data.attributeOperation));
+            entities.add(new Entry(new WeakReference<>(mob), new AtomicInteger((int) Math.round(data.duration * scale))));
         });
 
     }
@@ -85,9 +85,13 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
         entities.removeIf(this::process);
     }
 
-    private boolean process(LivingEntity livingEntity) {
-        if (livingEntity.isRemoved() || livingEntity.isDead() || TagUtils.sceneLocalTags(livingEntity, scene)
-            .getAndUpdateTag(applyTicksTag, tick -> tick + 1) >= data.duration) {
+    private boolean process(Entry entry) {
+        LivingEntity livingEntity = entry.target.get();
+        if (livingEntity == null) {
+            return true;
+        }
+
+        if (livingEntity.isRemoved() || livingEntity.isDead() || entry.timer.getAndDecrement() <= 0) {
             removeAttribute(livingEntity);
             return true;
         }
@@ -97,7 +101,6 @@ public class ApplyAttributeShotEffect implements ShotEffect, Tickable {
 
     private void removeAttribute(LivingEntity entity) {
         AttributeModifier modifier = entity.getAttribute(attribute).removeModifier(attributeUUID);
-        TagUtils.removeSceneLocalTag(entity, scene, applyTicksTag);
 
         if (modifier != null) {
             scene.broadcastEvent(new EntityAttributeModifierRemoveEvent(entity, attribute, modifier));

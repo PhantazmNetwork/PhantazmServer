@@ -5,5 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 public interface ShotEffect {
-    void perform(@NotNull Entity entity, @NotNull ZombiesPlayer player);
+    default void perform(@NotNull Entity entity, @NotNull ZombiesPlayer player) {
+        perform(entity, player, 1.0D);
+    }
+
+    void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer, double scale);
 }

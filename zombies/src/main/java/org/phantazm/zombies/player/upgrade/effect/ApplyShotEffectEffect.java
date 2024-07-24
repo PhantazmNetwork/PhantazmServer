@@ -4,22 +4,26 @@ import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.event.Event;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.equipment.perk.effect.shot.ApplyFireShotEffect;
+import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.selector.Selector;
 import org.phantazm.zombies.player.upgrade.selector.SelectorComponent;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
-@Model("zombies.upgrade.effect.apply_fire")
+import org.phantazm.zombies.equipment.perk.effect.shot.ApplyAttributeShotEffect;
+
+@Model("zombies.upgrade.effect.apply_shot_effect")
 @Cache
-public class ApplyFireEffect implements UpgradeEffectComponent {
+public class ApplyShotEffectEffect implements UpgradeEffectComponent {
     private final Data data;
     private final SelectorComponent selectorComponent;
 
     @FactoryMethod
-    public ApplyFireEffect(@NotNull Data data,
+    public ApplyShotEffectEffect(@NotNull Data data,
         @NotNull @Child("selector") SelectorComponent selectorComponent) {
         this.data = data;
         this.selectorComponent = selectorComponent;
@@ -51,6 +55,21 @@ public class ApplyFireEffect implements UpgradeEffectComponent {
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, entity -> {
                 applyFire.perform(entity, zombiesPlayer, data.scale);
             });
+        }
+    }
+
+    public enum ShotEffectType {
+        APPLY_FIRE(ApplyFireShotEffect.class),
+        APPLY_ATTRIBUTE(ApplyAttributeShotEffect.class);
+
+        private final Class<? extends ShotEffect> cls;
+
+        ShotEffectType(Class<? extends ShotEffect> cls) {
+            this.cls = cls;
+        }
+
+        public @Nullable ShotEffect lookup(@NotNull ZombiesPlayer zombiesPlayer) {
+            return zombiesPlayer.lookupShotEffect(cls);
         }
     }
 

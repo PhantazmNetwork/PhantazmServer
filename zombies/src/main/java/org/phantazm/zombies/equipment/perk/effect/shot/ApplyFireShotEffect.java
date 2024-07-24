@@ -36,7 +36,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     private final Data data;
     private final ZombiesScene scene;
     private final Tag<Long> lastDamageTicksTag;
-    private final Deque<DamageTarget> activeEntities;
+    private final Deque<Target> activeEntities;
 
     @FactoryMethod
     public ApplyFireShotEffect(@NotNull Data data, @NotNull ZombiesScene scene) {
@@ -48,10 +48,6 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
     }
 
     @Override
-    public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer) {
-        perform(entity, zombiesPlayer, 1.0D);
-    }
-
     public void perform(@NotNull Entity entity, @NotNull ZombiesPlayer zombiesPlayer, double effectScale) {
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
         if (playerOptional.isEmpty()) {
@@ -76,7 +72,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
             int interval = Math.round(AttributeUtils.computeWithBase(data.damageInterval, player
                 .getAttribute(Attributes.FIRE_DAMAGE_APPLY_INTERVAL)));
 
-            activeEntities.add(new DamageTarget(new WeakReference<>(player), new WeakReference<>(livingEntity),
+            activeEntities.add(new Target(new WeakReference<>(player), new WeakReference<>(livingEntity),
                 zombiesPlayer, interval, effectScale));
         }
     }
@@ -86,7 +82,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         activeEntities.removeIf(this::shouldRemoveTarget);
     }
 
-    private boolean shouldRemoveTarget(DamageTarget target) {
+    private boolean shouldRemoveTarget(Target target) {
         LivingEntity entity = target.target.get();
         if (entity == null) {
             return true;
@@ -122,7 +118,7 @@ public class ApplyFireShotEffect implements ShotEffect, Tickable {
         });
     }
 
-    private record DamageTarget(Reference<Player> damager,
+    private record Target(Reference<Player> damager,
         Reference<LivingEntity> target,
         ZombiesPlayer player,
         int interval,

@@ -240,10 +240,10 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         Set<PlayerView> leftPlayers = super.leave(players);
 
         Stage stage = stageTransition.getCurrentStage();
-        for (PlayerView player : players) {
+        for (PlayerView leavingPlayerView : players) {
             boolean shouldRemove = (stage == null || !stage.hasPermanentPlayers());
             ZombiesPlayer leavingZombiesPlayer = shouldRemove ?
-                managedPlayers.remove(player) : managedPlayers.get(player);
+                managedPlayers.remove(leavingPlayerView) : managedPlayers.get(leavingPlayerView);
 
             if (leavingZombiesPlayer == null) {
                 continue;
@@ -257,8 +257,12 @@ public class ZombiesScene extends InstanceScene implements EventScene {
             leavingZombiesPlayer.end();
 
             if (shouldRemove && !playerUpgradeComponentMap.isEmpty()) {
-                upgradeHandlers.remove(player.getUUID());
+                upgradeHandlers.remove(leavingPlayerView.getUUID());
             }
+
+            leavingPlayerView.getPlayer().ifPresent(player -> {
+                
+            });
         }
 
         return leftPlayers;
