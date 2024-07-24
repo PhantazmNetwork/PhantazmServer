@@ -998,7 +998,7 @@ public final class SceneManager {
      */
     public boolean inScene(@NotNull PlayerView player, @NotNull Scene scene) {
         PlayerViewImpl view = (PlayerViewImpl) player;
-        return view.currentSceneReference() == scene;
+        return view.currentSceneReference().get() == scene;
     }
 
     /**
