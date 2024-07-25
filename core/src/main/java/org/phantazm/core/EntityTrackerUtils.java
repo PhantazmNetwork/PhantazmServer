@@ -12,10 +12,22 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
+/**
+ * Utils for locating and processing/targeting entities.
+ */
 public final class EntityTrackerUtils {
     private EntityTrackerUtils() {
     }
 
+    /**
+     * @param instance
+     * @param targetType
+     * @param originTarget
+     * @param limit
+     * @param range
+     * @param entityTester
+     * @return
+     */
     public static @NotNull Target select(@NotNull Instance instance, @NotNull EntityTracker.Target<?> targetType,
         @NotNull Target originTarget, int limit, double range, @NotNull Predicate<? super Entity> entityTester) {
         Collection<? extends Point> origins = originTarget.locations();
@@ -24,7 +36,7 @@ public final class EntityTrackerUtils {
         }
 
         List<Entity> actualTargets = null;
-        for (Point origin : originTarget.locations()) {
+        for (Point origin : origins) {
             List<DoubleObjectPair<Entity>> targets = new ArrayList<>(limit < 0 ? 10 : limit);
 
             if (range < 0) {

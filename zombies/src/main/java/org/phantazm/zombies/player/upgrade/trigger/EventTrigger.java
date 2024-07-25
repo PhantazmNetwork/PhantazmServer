@@ -1,9 +1,6 @@
 package org.phantazm.zombies.player.upgrade.trigger;
 
-import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +20,7 @@ public class EventTrigger implements UpgradeTriggerComponent {
     private final EventFilterComponent eventFilterComponent;
 
     @FactoryMethod
-    public EventTrigger(@NotNull Data data, @NotNull EventFilterComponent eventFilterComponent) {
+    public EventTrigger(@NotNull Data data, @NotNull @Child("eventFilter") EventFilterComponent eventFilterComponent) {
         this.eventClass = resolveEventClass(data.eventClass);
         this.eventFilterComponent = eventFilterComponent;
     }

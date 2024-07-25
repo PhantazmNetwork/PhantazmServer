@@ -47,13 +47,13 @@ public class ApplyShotEffectEffect implements UpgradeEffectComponent {
         @Override
         protected void applyEvent(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData, @NotNull Event event) {
-            ApplyFireShotEffect applyFire = zombiesPlayer.lookupShotEffect(ApplyFireShotEffect.class);
-            if (applyFire == null) {
+            ShotEffect shotEffect = zombiesPlayer.lookupShotEffect(data.shotEffectType.cls);
+            if (shotEffect == null) {
                 return;
             }
 
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, entity -> {
-                applyFire.perform(entity, zombiesPlayer, data.scale);
+                shotEffect.perform(entity, zombiesPlayer, data.scale);
             });
         }
     }
@@ -74,7 +74,8 @@ public class ApplyShotEffectEffect implements UpgradeEffectComponent {
     }
 
     @DataObject
-    public record Data(double scale) {
+    public record Data(double scale,
+        @NotNull ShotEffectType shotEffectType) {
 
     }
 }

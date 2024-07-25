@@ -1,9 +1,6 @@
 package org.phantazm.zombies.player.upgrade;
 
-import com.github.steanky.element.core.annotation.Child;
-import com.github.steanky.element.core.annotation.DataObject;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -18,6 +15,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Model("zombies.upgrade.standard")
+@Cache
 public class StandardUpgrade implements PlayerUpgradeComponent {
     private final List<UpgradeTriggerComponent> triggerComponents;
     private final UpgradeEffectComponent effectComponent;

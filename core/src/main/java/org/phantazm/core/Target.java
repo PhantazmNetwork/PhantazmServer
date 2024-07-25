@@ -12,13 +12,24 @@ import java.util.function.Consumer;
 
 /**
  * A generic target of something, such as a mob skill. Can represent of one or more entities, one or more positions, or
- * a mix of the two.
+ * a mix of the two. Provides methods to enumerate and filter on the
  */
 public sealed interface Target
     permits Target.NoTarget, Target.SinglePointTarget, Target.MultiPointTarget, Target.SingleEntityTarget,
     Target.MultiEntityTarget, Target.EntryListTarget {
+    /**
+     * The shared, empty Target that contains no entities and no points.
+     */
     Target NONE = new NoTarget();
 
+    /**
+     * A component of a Target, which may represent <i>only</i> a single point (in which case it has no {@link Entity})
+     * or a single {@link Entity} (in which case it has a {@link Point} corresponding to the Entity's current
+     * location).
+     *
+     * @param point  the point, must be null if {@code entity} is non-null
+     * @param entity the entity, must be null if {@code point} is non-null
+     */
     record TargetEntry(@Nullable Point point,
         @Nullable Entity entity) {
         public TargetEntry {
@@ -35,32 +46,62 @@ public sealed interface Target
             }
         }
 
+        /**
+         * The point, which may be the Entity's current location (the returned object may change over time) or the Point
+         * (which will not change).
+         *
+         * @return the point
+         */
         @SuppressWarnings("DataFlowIssue")
         public @NotNull Point point() {
             return point != null ? point : entity.getPosition();
         }
 
+        /**
+         * Gets an optional containing the entity, if it exists
+         *
+         * @return the entity optional
+         */
         public @NotNull Optional<Entity> entityOptional() {
             return Optional.ofNullable(entity);
         }
 
+        /**
+         * Tests if the entity is non-null.
+         *
+         * @return true if the entity is non-null
+         */
         public boolean isEntity() {
             return entity != null;
         }
-
-        public boolean isPoint() {
-            return point != null;
-        }
     }
 
+    /**
+     * Creates a new {@link TargetEntry} from a single Entity.
+     *
+     * @param entity the entity
+     * @return a new TargetEntry
+     */
     static @NotNull TargetEntry entry(@NotNull Entity entity) {
         return new TargetEntry(null, entity);
     }
 
+    /**
+     * Creates a new {@link TargetEntry} from a single Point.
+     *
+     * @param point the point from which to create an entry
+     * @return a new TargetEntry
+     */
     static @NotNull TargetEntry entry(@NotNull Point point) {
         return new TargetEntry(point, null);
     }
 
+    /**
+     * Creates a target from a potentially-null Entity.
+     *
+     * @param entity the nullable entity
+     * @return an empty target iff {@code entity == null}, otherwise a target containing the single entity
+     */
     static @NotNull Target ofNullable(@Nullable Entity entity) {
         if (entity == null) {
             return NONE;
@@ -69,15 +110,45 @@ public sealed interface Target
         return new SingleEntityTarget(entity);
     }
 
+    /**
+     * Creates a target from a potentially-null Point.
+     *
+     * @param point the nullable point
+     * @return an empty target iff {@code point == null}, otherwise a target containing the single point
+     */
+    static @NotNull Target ofNullable(@Nullable Point point) {
+        if (point == null) {
+            return NONE;
+        }
+
+        return new SinglePointTarget(point);
+    }
+
+    /**
+     * Overload for {@link Target#entities(Entity...)}.
+     *
+     * @return an empty target
+     */
     static @NotNull Target entities() {
         return NONE;
     }
 
+    /**
+     * Overload for {@link Target#entities(Entity...)}.
+     *
+     * @return a targe with a single entity
+     */
     static @NotNull Target entities(@NotNull Entity entity) {
         Objects.requireNonNull(entity);
         return new SingleEntityTarget(entity);
     }
 
+    /**
+     * Creates a target from some number of entities.
+     *
+     * @param entities an array of entities
+     * @return a target containing the entities
+     */
     static @NotNull Target entities(@NotNull Entity @NotNull ... entities) {
         Objects.requireNonNull(entities);
         if (entities.length == 0) {
@@ -102,14 +173,6 @@ public sealed interface Target
         }
 
         return new MultiEntityTarget(copy);
-    }
-
-    static @NotNull Target ofNullable(@Nullable Point point) {
-        if (point == null) {
-            return NONE;
-        }
-
-        return new SinglePointTarget(point);
     }
 
     static @NotNull Target points() {
