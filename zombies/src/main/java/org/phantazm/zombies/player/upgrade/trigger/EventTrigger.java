@@ -65,14 +65,17 @@ public class EventTrigger implements UpgradeTriggerComponent {
 
         @Override
         public void arm(@NotNull PlayerUpgrade upgrade, @NotNull UpgradeEffect effect) {
-            target.compareAndSet(null, new ArmData(upgrade, effect));
-            zombiesPlayer.getScene().sceneNode().addListener(listener);
+            if (target.compareAndSet(null, new ArmData(upgrade, effect))) {
+                zombiesPlayer.getScene().sceneNode().addListener(listener);
+            }
+
         }
 
         @Override
         public void disarm() {
-            zombiesPlayer.getScene().sceneNode().removeListener(listener);
-            target.set(null);
+            if (target.getAndSet(null) != null) {
+                zombiesPlayer.getScene().sceneNode().removeListener(listener);
+            }
         }
 
         private boolean filter(Event event) {
