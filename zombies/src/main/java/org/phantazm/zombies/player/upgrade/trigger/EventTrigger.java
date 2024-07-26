@@ -68,7 +68,6 @@ public class EventTrigger implements UpgradeTriggerComponent {
             if (target.compareAndSet(null, new ArmData(upgrade, effect))) {
                 zombiesPlayer.getScene().sceneNode().addListener(listener);
             }
-
         }
 
         @Override

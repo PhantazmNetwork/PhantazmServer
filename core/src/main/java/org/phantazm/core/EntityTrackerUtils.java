@@ -20,52 +20,53 @@ public final class EntityTrackerUtils {
     }
 
     /**
-     * @param instance
-     * @param targetType
-     * @param originTarget
-     * @param limit
-     * @param range
-     * @param entityTester
-     * @return
+     * Produces a {@link Target} from nearby entities in an instance.
+     *
+     * @param instance     the instance from which to select entities
+     * @param targetType   the {@link EntityTracker.Target}, which indicates which kind of entities to search for
+     * @param originTarget the origin point(s) from which to measure distance
+     * @param limit        the maximum number of entities to select; if less than 0, there are no limits
+     * @param range        the distance within which to search for entities; if less than 0, selects all entities in the
+     *                     range
+     * @param entityTester a predicate used to filter entities; only entities for which this predicate returns true will
+     *                     be present in the final target
+     * @param <T>          the entity type
+     * @return a new Target instance
      */
-    public static @NotNull Target select(@NotNull Instance instance, @NotNull EntityTracker.Target<?> targetType,
-        @NotNull Target originTarget, int limit, double range, @NotNull Predicate<? super Entity> entityTester) {
+    public static <T extends Entity> @NotNull Target select(@NotNull Instance instance,
+        @NotNull EntityTracker.Target<T> targetType, @NotNull Target originTarget, int limit, double range,
+        @NotNull Predicate<? super T> entityTester) {
         Collection<? extends Point> origins = originTarget.locations();
         if (origins.isEmpty()) {
             return Target.NONE;
         }
 
-        List<Entity> actualTargets = null;
+        List<DoubleObjectPair<T>> targets = new ArrayList<>(limit < 0 ? 10 : limit);
         for (Point origin : origins) {
-            List<DoubleObjectPair<Entity>> targets = new ArrayList<>(limit < 0 ? 10 : limit);
-
             if (range < 0) {
-                for (Entity target : instance.getEntityTracker().entities(targetType)) {
+                for (T target : instance.getEntityTracker().entities(targetType)) {
                     handleEntity(origin, target, targets, entityTester, limit);
                 }
             } else {
                 instance.getEntityTracker().nearbyEntities(origin, range, targetType,
                     target -> handleEntity(origin, target, targets, entityTester, limit));
             }
-
-            if (targets.isEmpty()) {
-                continue;
-            }
-
-            if (actualTargets == null) {
-                actualTargets = new ArrayList<>();
-            }
-
-            for (DoubleObjectPair<Entity> target : targets) {
-                actualTargets.add(target.right());
-            }
         }
 
-        return actualTargets == null ? Target.NONE : Target.entities(actualTargets);
+        if (targets.isEmpty()) {
+            return Target.NONE;
+        }
+
+        List<T> entities = new ArrayList<>(targets.size());
+        for (DoubleObjectPair<T> pair : targets) {
+            entities.add(pair.right());
+        }
+
+        return Target.entities(entities);
     }
 
-    private static void handleEntity(Point origin, Entity target, List<DoubleObjectPair<Entity>> targets,
-        Predicate<? super Entity> predicate, int limit) {
+    private static <T extends Entity> void handleEntity(Point origin, T target, List<DoubleObjectPair<T>> targets,
+        Predicate<? super T> predicate, int limit) {
         if (!predicate.test(target)) {
             return;
         }
@@ -73,7 +74,7 @@ public final class EntityTrackerUtils {
         double thisDistanceSquared = origin.distanceSquared(target.getPosition());
 
         for (int i = 0; i < targets.size(); i++) {
-            DoubleObjectPair<Entity> existingTarget = targets.get(i);
+            DoubleObjectPair<T> existingTarget = targets.get(i);
             if (existingTarget.firstDouble() > thisDistanceSquared) {
                 if (targets.size() == limit) {
                     targets.remove(targets.size() - 1);
