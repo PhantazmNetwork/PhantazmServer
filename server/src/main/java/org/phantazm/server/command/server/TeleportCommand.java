@@ -42,7 +42,7 @@ public class TeleportCommand extends PermissionLockedCommand {
             SceneManager.Global.instance().synchronizeWithCurrentScene(teleportingPlayer, currentScene -> {
                 Collection<Player> players = currentScene.getPlayers();
                 for(Player player : players) {
-                    if(player.equals(destinationPlayer)) {
+                    if(player.getUuid().equals(destinationPlayer.getUuid())) {
                         Pos pos = player.getPosition();
                         teleportingPlayer.teleport(pos);
                         return;
