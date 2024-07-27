@@ -35,17 +35,19 @@ public class StandardUpgrade implements PlayerUpgradeComponent {
             triggers.add(component.apply(injectionStore, zombiesPlayer));
         }
 
-        return new Internal(triggers, effectComponent.apply(injectionStore, zombiesPlayer));
+        return new Internal(zombiesPlayer, triggers, effectComponent.apply(injectionStore, zombiesPlayer));
     }
 
     private static final class Internal implements PlayerUpgrade {
+        private final ZombiesPlayer zombiesPlayer;
         private final List<UpgradeTrigger> triggers;
         private final UpgradeEffect effect;
         private final boolean needsTicking;
 
         private final AtomicBoolean activated;
 
-        private Internal(List<UpgradeTrigger> triggers, UpgradeEffect effect) {
+        private Internal(ZombiesPlayer zombiesPlayer, List<UpgradeTrigger> triggers, UpgradeEffect effect) {
+            this.zombiesPlayer = zombiesPlayer;
             this.triggers = triggers;
             this.effect = effect;
             this.needsTicking = effect.needsTicking();
@@ -72,6 +74,8 @@ public class StandardUpgrade implements PlayerUpgradeComponent {
                 for (UpgradeTrigger trigger : triggers) {
                     trigger.disarm();
                 }
+
+                effect.clear(this, zombiesPlayer);
             }
         }
 

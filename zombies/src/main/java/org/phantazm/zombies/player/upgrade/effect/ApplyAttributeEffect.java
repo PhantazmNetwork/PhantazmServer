@@ -17,7 +17,10 @@ import org.phantazm.zombies.player.upgrade.selector.Selector;
 import org.phantazm.zombies.player.upgrade.selector.SelectorComponent;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @Model("zombies.upgrade.effect.apply_attribute")
 @Cache
@@ -44,12 +47,16 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         private final UUID uuid;
         private final String uuidString;
 
+        private final ConcurrentLinkedDeque<Reference<Player>> targetedPlayers;
+
         private Internal(Data data, Selector selector) {
             this.data = data;
             this.selector = selector;
             this.attribute = Attributes.get(data.attribute);
             this.uuid = UUID.randomUUID();
             this.uuidString = this.uuid.toString();
+
+            this.targetedPlayers = new ConcurrentLinkedDeque<>();
         }
 
         @Override
@@ -68,7 +75,34 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
 
                 entity.getAttribute(attribute).addModifier(new AttributeModifier(uuid, uuidString, data.amount,
                     data.operation));
+
+                if (entity instanceof Player playerTarget) {
+                    targetedPlayers.add(new WeakReference<>(playerTarget));
+                }
             });
+        }
+
+        @Override
+        public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
+            targetedPlayers.removeIf(reference -> {
+                Player player = reference.get();
+                if (player == null) {
+                    return true;
+                }
+
+                player.getAttribute(attribute).removeModifier(uuid);
+                return true;
+            });
+        }
+
+        @Override
+        public boolean needsTicking() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            targetedPlayers.removeIf(playerReference -> playerReference.refersTo(null));
         }
     }
 
