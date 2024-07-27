@@ -44,6 +44,7 @@ public final class ServerCommandFeature {
         manager.register(new RemoveRoleCommand(IdentitySource.MOJANG, roleStore, permissionHandler));
         manager.register(new AnnounceCommand());
         manager.register(new TeleportCommand());
+        manager.register(new SpawnCommand());
 
         manager.getConsoleSender().addPermission(ALL_PERMISSIONS);
     }

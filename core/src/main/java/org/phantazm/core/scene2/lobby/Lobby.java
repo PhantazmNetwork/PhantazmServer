@@ -66,6 +66,13 @@ public class Lobby extends InstanceScene implements EventScene {
         npcHandler.spawnAll();
     }
 
+    /**
+     * @return the lobby's spawn coordinates.
+     */
+    public Pos getSpawnPoint() {
+        return spawnPoint;
+    }
+
     /*
     Creates an EventNode for this lobby. This cancels most events so that, for example, players can't open trapdoors,
     eat food, dig blocks, or move items out of inventories.
@@ -251,4 +258,5 @@ public class Lobby extends InstanceScene implements EventScene {
     public @NotNull EventNode<? super Event> sceneNode() {
         return lobbyNode;
     }
+
 }
