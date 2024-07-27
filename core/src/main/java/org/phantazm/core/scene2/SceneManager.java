@@ -919,12 +919,16 @@ public final class SceneManager {
 
         while (true) {
             if (!player.isOnline()) {
+                // if our player is or becomes offline, give up
                 return;
             }
 
             Scene scene = actualPlayerView.currentSceneReference().get();
             if (scene == null) {
                 // scene may transiently be null if the player is being transferred from one scene to another
+                // this will likely change as the transfer finishes, so simply continue
+                // yield our time slice as we will need another thread to make progress
+                Thread.yield();
                 continue;
             }
 
