@@ -10,11 +10,9 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.phantazm.core.command.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
-import org.phantazm.core.player.PlayerView;
-import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneManager;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
 public class TeleportCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.teleport");
@@ -42,7 +40,7 @@ public class TeleportCommand extends PermissionLockedCommand {
             }
 
             SceneManager.Global.instance().synchronizeWithCurrentScene(teleportingPlayer, currentScene -> {
-                ArrayList<Player> players = (ArrayList<Player>) currentScene.getPlayers();
+                Collection<Player> players = currentScene.getPlayers();
                 for(Player player : players) {
                     if(player.equals(destinationPlayer)) {
                         Pos pos = player.getPosition();
