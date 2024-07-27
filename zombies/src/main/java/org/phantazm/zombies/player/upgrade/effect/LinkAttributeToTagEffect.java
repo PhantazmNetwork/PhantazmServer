@@ -49,17 +49,16 @@ public class LinkAttributeToTagEffect implements UpgradeEffectComponent {
         public void applyEvent(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData, @NotNull AttributeEvent attributeEvent) {
             selector.select(upgrade, zombiesPlayer, triggerData).forType(LivingEntity.class, livingEntity -> {
-                if (attributeEvent.isRemove()) {
-                    if (Objects.equals(livingEntity.getTag(uuidTag), attributeEvent.attributeUuid())) {
-                        livingEntity.removeTag(tag);
-                        livingEntity.removeTag(uuidTag);
-                    }
-
+                if (!attributeEvent.isRemove()) {
+                    livingEntity.setTag(tag, true);
+                    livingEntity.setTag(uuidTag, attributeEvent.attributeUuid());
                     return;
                 }
 
-                livingEntity.setTag(tag, true);
-                livingEntity.setTag(uuidTag, attributeEvent.attributeUuid());
+                if (Objects.equals(livingEntity.getTag(uuidTag), attributeEvent.attributeUuid())) {
+                    livingEntity.removeTag(tag);
+                    livingEntity.removeTag(uuidTag);
+                }
             });
         }
     }
