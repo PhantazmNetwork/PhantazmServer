@@ -8,6 +8,9 @@ import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 public interface UpgradeEffect {
     void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData);
 
+    default void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
+    }
+
     default boolean needsTicking() {
         return false;
     }

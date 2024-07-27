@@ -62,6 +62,13 @@ public class CompositeEffect implements UpgradeEffectComponent {
         }
 
         @Override
+        public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
+            for (UpgradeEffect effect : effects) {
+                effect.clear(upgrade, zombiesPlayer);
+            }
+        }
+
+        @Override
         public void tick() {
             if (tickables == null) {
                 return;
