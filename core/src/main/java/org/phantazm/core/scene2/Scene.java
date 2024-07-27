@@ -240,6 +240,13 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
         return PlayerView.getMany(playersView(), ArrayList::new);
     }
 
+    /**
+     * The default join key used to join this scene. This is used for scenes that wish to expose a "standard" way of
+     * joining themselves.
+     *
+     * @return an {@link Optional} containing the default join key, which will be empty if not present for this type of
+     * scene
+     */
     default @NotNull Optional<SceneManager.Key<?>> getDefaultJoinKey() {
         return Optional.empty();
     }
