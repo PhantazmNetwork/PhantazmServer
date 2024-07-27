@@ -897,7 +897,8 @@ public final class SceneManager {
 
     /**
      * Calls {@code consumer} with the player's current scene. While control flow is inside the consumer, the scene is
-     * guaranteed to still report that it has the player.
+     * guaranteed to still report that it has the player, as it is acquired for the duration of the consumer and
+     * released afterward.
      * <b>
      * This method returns without calling {@code consumer} if the player is offline (in which case they have no
      * scene).
@@ -910,10 +911,21 @@ public final class SceneManager {
             return;
         }
 
+        Player player = playerView.getPlayer().orElse(null);
+        if (player == null) {
+            // if offline, immediately return
+            return;
+        }
+
         while (true) {
+            if (!player.isOnline()) {
+                return;
+            }
+
             Scene scene = actualPlayerView.currentSceneReference().get();
             if (scene == null) {
-                return;
+                // scene may transiently be null if the player is being transferred from one scene to another
+                continue;
             }
 
             Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
@@ -927,6 +939,17 @@ public final class SceneManager {
                 acquired.unlock();
             }
         }
+    }
+
+    /**
+     * Convenience overload for {@link SceneManager#synchronizeWithCurrentScene(PlayerView, Consumer)}. Uses the global
+     * {@link PlayerViewProvider} to obtain a {@link PlayerView} from a {@link Player}.
+     *
+     * @param player   the player to obtain the current scene from
+     * @param consumer the callback to execute while the scene is acquired
+     */
+    public void synchronizeWithCurrentScene(@NotNull Player player, @NotNull Consumer<? super Scene> consumer) {
+        synchronizeWithCurrentScene(PlayerViewProvider.Global.instance().fromPlayer(player), consumer);
     }
 
     /**
