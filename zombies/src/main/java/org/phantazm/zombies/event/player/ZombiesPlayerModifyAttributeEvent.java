@@ -5,7 +5,6 @@ import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
 import org.phantazm.zombies.event.trait.SettableAttributeEvent;
 import org.phantazm.zombies.event.trait.ZombiesPlayerEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -16,23 +15,20 @@ import java.util.UUID;
 public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, SettableAttributeEvent, CancellableEvent {
     private final Player player;
     private final ZombiesPlayer zombiesPlayer;
-    private final ShotEffect cause;
     private final LivingEntity target;
     private final UUID attributeUuid;
     private final Attribute attribute;
 
-    private float attributeAmount;
+    private double attributeAmount;
     private boolean cancelled;
 
     public ZombiesPlayerModifyAttributeEvent(@NotNull Player player, @NotNull ZombiesPlayer zombiesPlayer,
-        @NotNull ShotEffect cause,
         @NotNull LivingEntity target,
         @NotNull Attribute attribute,
         @NotNull UUID attributeUuid,
-        float attributeAmount) {
+        double attributeAmount) {
         this.player = Objects.requireNonNull(player);
         this.zombiesPlayer = Objects.requireNonNull(zombiesPlayer);
-        this.cause = Objects.requireNonNull(cause);
         this.target = Objects.requireNonNull(target);
         this.attributeUuid = Objects.requireNonNull(attributeUuid);
         this.attribute = Objects.requireNonNull(attribute);
@@ -72,7 +68,7 @@ public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, Se
         return attribute;
     }
 
-    public float attributeAmount() {
+    public double attributeAmount() {
         return attributeAmount;
     }
 
@@ -88,9 +84,5 @@ public class ZombiesPlayerModifyAttributeEvent implements ZombiesPlayerEvent, Se
     @Override
     public @NotNull LivingEntity target() {
         return target;
-    }
-
-    public @NotNull ShotEffect cause() {
-        return cause;
     }
 }

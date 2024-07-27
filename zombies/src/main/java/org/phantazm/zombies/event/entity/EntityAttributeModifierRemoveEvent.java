@@ -35,8 +35,8 @@ public class EntityAttributeModifierRemoveEvent implements EntityInstanceEvent, 
     }
 
     @Override
-    public float attributeAmount() {
-        return (float) removedModifier.getAmount();
+    public double attributeAmount() {
+        return removedModifier.getAmount();
     }
 
     @Override

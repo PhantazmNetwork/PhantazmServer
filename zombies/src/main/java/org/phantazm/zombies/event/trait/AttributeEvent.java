@@ -11,7 +11,7 @@ public interface AttributeEvent extends Event, LivingTargetEvent {
 
     @NotNull Attribute attribute();
 
-    float attributeAmount();
+    double attributeAmount();
 
     boolean isRemove();
 }

@@ -132,7 +132,8 @@ public class SpreadAttributeOnDeathUpgrade implements PlayerUpgradeComponent {
                         return;
                     }
 
-                    mob.extensions().set(EFFECT_KEY, event.cause());
+                    // TODO: remove as this is replaced by the new API
+                    // mob.extensions().set(EFFECT_KEY, event.cause());
                 }
 
                 private void handleWearOffEvent(EntityAttributeModifierRemoveEvent event) {
