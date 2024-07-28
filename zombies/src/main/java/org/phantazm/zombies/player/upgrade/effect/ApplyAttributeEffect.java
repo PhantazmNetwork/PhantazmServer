@@ -19,6 +19,7 @@ import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.Deque;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -47,7 +48,7 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         private final UUID uuid;
         private final String uuidString;
 
-        private final ConcurrentLinkedDeque<Reference<Player>> targetedPlayers;
+        private final Deque<Reference<Player>> targetedPlayers;
 
         private Internal(Data data, Selector selector) {
             this.data = data;
