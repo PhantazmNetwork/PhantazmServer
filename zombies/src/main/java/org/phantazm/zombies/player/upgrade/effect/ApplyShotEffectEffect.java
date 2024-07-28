@@ -47,7 +47,7 @@ public class ApplyShotEffectEffect implements UpgradeEffectComponent {
         @Override
         protected void applyEvent(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData, @NotNull Event event) {
-            ShotEffect shotEffect = zombiesPlayer.lookupShotEffect(data.shotEffectType.cls);
+            ShotEffect shotEffect = data.shotEffectType.lookup(zombiesPlayer);
             if (shotEffect == null) {
                 return;
             }

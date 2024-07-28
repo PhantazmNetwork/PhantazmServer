@@ -37,6 +37,8 @@ public class TemporalEffect implements UpgradeEffectComponent {
         private final AtomicInteger cooldown;
         private final AtomicReference<ApplyData> applyData;
 
+        private final boolean tickDelegate;
+
         private record ApplyData(PlayerUpgrade upgrade,
             ZombiesPlayer zombiesPlayer) {
         }
@@ -47,6 +49,8 @@ public class TemporalEffect implements UpgradeEffectComponent {
 
             this.cooldown = new AtomicInteger();
             this.applyData = new AtomicReference<>();
+
+            this.tickDelegate = delegate.needsTicking();
         }
 
         @Override
@@ -81,6 +85,10 @@ public class TemporalEffect implements UpgradeEffectComponent {
                 if (oldData != null) {
                     delegate.clear(oldData.upgrade, oldData.zombiesPlayer);
                 }
+            }
+
+            if (tickDelegate) {
+                delegate.tick();
             }
         }
     }
