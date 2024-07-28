@@ -12,8 +12,6 @@ import org.phantazm.core.command.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.scene2.SceneManager;
 
-import java.util.Collection;
-
 public class TeleportCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.teleport");
 
@@ -25,14 +23,14 @@ public class TeleportCommand extends PermissionLockedCommand {
 
         addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
             Player teleportingPlayer = MinecraftServer.getConnectionManager().getPlayer(context.get(TELEPORTING_PLAYER));
-            if(teleportingPlayer == null) {
+            if (teleportingPlayer == null) {
                 sender.sendMessage(Component.text(context.get(TELEPORTING_PLAYER) + " is not online!",
                     NamedTextColor.RED));
                 return;
             }
 
             Player destinationPlayer = MinecraftServer.getConnectionManager().getPlayer(context.get(DESTINATION_PLAYER));
-            if(destinationPlayer == null) {
+            if (destinationPlayer == null) {
                 sender.sendMessage(Component.text(context.get(DESTINATION_PLAYER) + " is not online!",
                     NamedTextColor.RED));
 
@@ -40,14 +38,12 @@ public class TeleportCommand extends PermissionLockedCommand {
             }
 
             SceneManager.Global.instance().synchronizeWithCurrentScene(teleportingPlayer, currentScene -> {
-                Collection<Player> players = currentScene.getPlayers();
-                for(Player player : players) {
-                    if(player.getUuid().equals(destinationPlayer.getUuid())) {
-                        Pos pos = player.getPosition();
-                        teleportingPlayer.teleport(pos);
-                        return;
-                    }
+                if (currentScene.hasPlayer(destinationPlayer)) {
+                    Pos pos = destinationPlayer.getPosition();
+                    teleportingPlayer.teleport(pos);
+                    return;
                 }
+
                 sender.sendMessage(Component.text("The players are not in the same scene!", NamedTextColor.RED));
             });
         }, TELEPORTING_PLAYER, DESTINATION_PLAYER);
