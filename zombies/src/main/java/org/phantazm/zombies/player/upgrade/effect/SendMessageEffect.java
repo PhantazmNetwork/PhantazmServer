@@ -43,8 +43,7 @@ public class SendMessageEffect implements UpgradeEffectComponent {
                 return;
             }
 
-            PacketGroupingAudience audience = PacketGroupingAudience.of(players);
-            audience.sendMessage(component);
+            PacketGroupingAudience.of(players).sendMessage(component);
         }
     }
 

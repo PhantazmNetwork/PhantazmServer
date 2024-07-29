@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 
 /**
  * A generic target of something, such as a mob skill. Can represent of one or more entities, one or more positions, or
- * a mix of the two. Provides methods to enumerate and filter on the
+ * a mix of the two. Provides methods to enumerate and filter on the type of data contained within.
  */
 public sealed interface Target
     permits Target.NoTarget, Target.SinglePointTarget, Target.MultiPointTarget, Target.SingleEntityTarget,
@@ -162,6 +162,12 @@ public sealed interface Target
         return new MultiEntityTarget(List.of(entities));
     }
 
+    /**
+     * Creates a target from some number of entities.
+     *
+     * @param entities a collection of entities
+     * @return a target containing the entities
+     */
     static @NotNull Target entities(@NotNull Collection<? extends @NotNull Entity> entities) {
         List<? extends Entity> copy = List.copyOf(entities);
         if (copy.isEmpty()) {
@@ -175,15 +181,31 @@ public sealed interface Target
         return new MultiEntityTarget(copy);
     }
 
+    /**
+     * Overload for {@link Target#points(Point...)}.
+     *
+     * @return an empty target
+     */
     static @NotNull Target points() {
         return NONE;
     }
 
+    /**
+     * Overload for {@link Target#entities(Entity...)}.
+     *
+     * @return a target with a single point
+     */
     static @NotNull Target points(@NotNull Point point) {
         Objects.requireNonNull(point);
         return new SinglePointTarget(point);
     }
 
+    /**
+     * Creates a target from some number of points.
+     *
+     * @param points an array of points
+     * @return a target containing the points
+     */
     static @NotNull Target points(@NotNull Point @NotNull ... points) {
         Objects.requireNonNull(points);
         if (points.length == 0) {
@@ -197,6 +219,12 @@ public sealed interface Target
         return new MultiPointTarget(List.of(points));
     }
 
+    /**
+     * Creates a target from some number of points.
+     *
+     * @param points a collection of points
+     * @return a target containing the points
+     */
     static @NotNull Target points(@NotNull Collection<? extends @NotNull Point> points) {
         List<? extends Point> copy = List.copyOf(points);
         if (copy.isEmpty()) {
