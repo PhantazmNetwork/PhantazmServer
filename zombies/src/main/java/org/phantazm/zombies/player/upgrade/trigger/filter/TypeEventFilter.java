@@ -74,7 +74,8 @@ public class TypeEventFilter implements EventFilterComponent {
 
     @Default("""
         {
-          evaluation='AND'
+          evaluation='AND',
+          conditions=[]
         }
         """)
     @DataObject

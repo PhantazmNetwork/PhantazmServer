@@ -3,8 +3,19 @@ package org.phantazm.zombies.player.upgrade.trigger;
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
+import net.minestom.server.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.zombies.event.entity.EntityAttributeModifierRemoveEvent;
+import org.phantazm.zombies.event.entity.MobBreakWindowEvent;
+import org.phantazm.zombies.event.entity.MobDeathEvent;
+import org.phantazm.zombies.event.entity.MobSetupEvent;
+import org.phantazm.zombies.event.equipment.EntitiesHitByGunEvent;
+import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
+import org.phantazm.zombies.event.equipment.GunLoseAmmoEvent;
+import org.phantazm.zombies.event.equipment.GunTargetSelectEvent;
+import org.phantazm.zombies.event.player.*;
+import org.phantazm.zombies.event.trait.*;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.effect.UpgradeEffect;
@@ -21,21 +32,8 @@ public class EventTrigger implements UpgradeTriggerComponent {
 
     @FactoryMethod
     public EventTrigger(@NotNull Data data, @NotNull @Child("eventFilter") EventFilterComponent eventFilterComponent) {
-        this.eventClass = resolveEventClass(data.eventClass);
+        this.eventClass = data.event.eventClass();
         this.eventFilterComponent = eventFilterComponent;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Class<? extends Event> resolveEventClass(String name) {
-        try {
-            Class<?> cls = Class.forName(name);
-            if (Event.class.isAssignableFrom(cls)) {
-                return (Class<? extends Event>) cls;
-            }
-        } catch (ClassNotFoundException ignored) {
-        }
-
-        return null;
     }
 
     @Override
@@ -89,7 +87,49 @@ public class EventTrigger implements UpgradeTriggerComponent {
         }
     }
 
+    public enum EventType {
+        ENTITY_DAMAGE(EntityDamageEvent.class),
+        ENTITY_DAMAGE_BY_GUN(EntityDamageByGunEvent.class),
+        ENTITIES_HIT_BY_GUN(EntitiesHitByGunEvent.class),
+        ATTRIBUTE(AttributeEvent.class),
+        ENTITY_ATTRIBUTE_REMOVE(EntityAttributeModifierRemoveEvent.class),
+        MOB_BREAK_WINDOW(MobBreakWindowEvent.class),
+        MOB_DEATH(MobDeathEvent.class),
+        MOB_SETUP(MobSetupEvent.class),
+        GUN_LOSE_AMMO(GunLoseAmmoEvent.class),
+        GUN_TARGET_SELECT(GunTargetSelectEvent.class),
+        ZOMBIES_PLAYER(ZombiesPlayerEvent.class),
+        ZOMBIES_PLAYER_DAMAGE(ZombiesPlayerDamageEvent.class),
+        ZOMBIES_PLAYER_DEATH(ZombiesPlayerDeathEvent.class),
+        ZOMBIES_PLAYER_KILL_MOB(ZombiesPlayerKillMobEvent.class),
+        ZOMBIES_PLAYER_MELEE_ENTITY(ZombiesPlayerMeleeEntityEvent.class),
+        ZOMBIES_PLAYER_MODIFY_ATTRIBUTE(ZombiesPlayerModifyAttributeEvent.class),
+        ZOMBIES_PLAYER_OPEN_DOOR(ZombiesPlayerOpenDoorEvent.class),
+        ZOMBIES_PLAYER_PROC_FIRE(ZombiesPlayerProcFireEvent.class),
+        ZOMBIES_PLAYER_REPAIR_WINDOW(ZombiesPlayerRepairWindowEvent.class),
+        ZOMBIES_PLAYER_REVIVE(ZombiesPlayerReviveEvent.class),
+        DAMAGE(DamageEvent.class),
+        ENTITY_TARGET(EntityTargetEvent.class),
+        LIVING_TARGET(LivingTargetEvent.class),
+        MOB_TARGET(MobTargetEvent.class),
+        SETTABLE_ATTRIBUTE(SettableAttributeEvent.class),
+        SETTABLE_DAMAGE_AMOUNT(SettableDamageAmountEvent.class),
+        SHOOTER(ShooterEvent.class),
+        WINDOW(WindowEvent.class),
+        ;
+
+        private final Class<? extends Event> eventClass;
+
+        EventType(Class<? extends Event> eventClass) {
+            this.eventClass = eventClass;
+        }
+
+        public @NotNull Class<? extends Event> eventClass() {
+            return eventClass;
+        }
+    }
+
     @DataObject
-    public record Data(@NotNull String eventClass) {
+    public record Data(@NotNull EventType event) {
     }
 }
