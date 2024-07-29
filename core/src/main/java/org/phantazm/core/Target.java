@@ -244,11 +244,18 @@ public sealed interface Target
     Collection<? extends @NotNull Entity> targets();
 
     @NotNull
+    @Unmodifiable <T extends Entity> Collection<T> targets(@NotNull Class<T> type);
+
+    @NotNull
     @Unmodifiable
     Collection<TargetEntry> entries();
 
     @NotNull
     Optional<? extends Entity> target();
+
+    private static void test() {
+
+    }
 
     default <T> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
         Objects.requireNonNull(type);
@@ -313,6 +320,25 @@ public sealed interface Target
         }
 
         @Override
+        public @NotNull @Unmodifiable <T extends Entity> Collection<T> targets(@NotNull Class<T> type) {
+            List<T> targets = null;
+
+            for (int i = 0; i < entries.size(); i++) {
+                Entity entity = entries.get(i).entity;
+                if (entity == null) {
+                    continue;
+                }
+
+                if (type.isAssignableFrom(entity.getClass())) {
+                    (targets = (targets == null ? new ArrayList<>(entries.size() - i) : targets))
+                        .add(type.cast(entity));
+                }
+            }
+
+            return targets == null ? List.of() : List.copyOf(targets);
+        }
+
+        @Override
         public @NotNull
         @Unmodifiable Collection<TargetEntry> entries() {
             return entries;
@@ -353,6 +379,11 @@ public sealed interface Target
         }
 
         @Override
+        public @NotNull @Unmodifiable <T extends Entity> Collection<T> targets(@NotNull Class<T> type) {
+            return List.of();
+        }
+
+        @Override
         public @NotNull
         @Unmodifiable Collection<TargetEntry> entries() {
             return List.of();
@@ -385,6 +416,11 @@ public sealed interface Target
         @Override
         public @NotNull
         @Unmodifiable Collection<? extends @NotNull Entity> targets() {
+            return List.of();
+        }
+
+        @Override
+        public @NotNull @Unmodifiable <T extends Entity> Collection<T> targets(@NotNull Class<T> type) {
             return List.of();
         }
 
@@ -425,6 +461,11 @@ public sealed interface Target
         }
 
         @Override
+        public @NotNull @Unmodifiable <T extends Entity> Collection<T> targets(@NotNull Class<T> type) {
+            return List.of();
+        }
+
+        @Override
         public @NotNull
         @Unmodifiable Collection<TargetEntry> entries() {
             return Containers.mappedView(point -> new TargetEntry(point, null), points);
@@ -458,6 +499,11 @@ public sealed interface Target
         public @NotNull
         @Unmodifiable Collection<? extends Entity> targets() {
             return List.of(entity);
+        }
+
+        @Override
+        public @NotNull @Unmodifiable <T extends Entity> Collection<T> targets(@NotNull Class<T> type) {
+            return type.isAssignableFrom(entity.getClass()) ? List.of(type.cast(entity)) : List.of();
         }
 
         @Override
@@ -499,6 +545,22 @@ public sealed interface Target
         public @NotNull
         @Unmodifiable Collection<? extends Entity> targets() {
             return entities;
+        }
+
+        @Override
+        public @NotNull @Unmodifiable <T extends Entity> Collection<T> targets(@NotNull Class<T> type) {
+            List<T> targets = null;
+
+            for (int i = 0; i < entities.size(); i++) {
+                Entity entity = entities.get(i);
+
+                if (type.isAssignableFrom(entity.getClass())) {
+                    (targets = (targets == null ? new ArrayList<>(entities.size() - i) : targets))
+                        .add(type.cast(entity));
+                }
+            }
+
+            return targets == null ? List.of() : List.copyOf(targets);
         }
 
         @Override
