@@ -22,8 +22,6 @@ import org.phantazm.zombies.player.upgrade.effect.UpgradeEffect;
 import org.phantazm.zombies.player.upgrade.trigger.filter.EventFilter;
 import org.phantazm.zombies.player.upgrade.trigger.filter.EventFilterComponent;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 @Model("zombies.upgrade.trigger.event")
 @Cache
 public class EventTrigger implements UpgradeTriggerComponent {
@@ -46,7 +44,7 @@ public class EventTrigger implements UpgradeTriggerComponent {
         private final EventListener<? extends Event> listener;
         private final EventFilter eventFilter;
 
-        private final AtomicReference<ArmData> target;
+        private volatile ArmData target;
 
         private record ArmData(PlayerUpgrade upgrade,
             UpgradeEffect effect) {
@@ -56,22 +54,17 @@ public class EventTrigger implements UpgradeTriggerComponent {
             this.zombiesPlayer = zombiesPlayer;
             this.listener = EventListener.builder(cls).handler(this::handle).filter(this::filter).build();
             this.eventFilter = eventFilter;
-
-            this.target = new AtomicReference<>();
         }
 
         @Override
         public void arm(@NotNull PlayerUpgrade upgrade, @NotNull UpgradeEffect effect) {
-            if (target.compareAndSet(null, new ArmData(upgrade, effect))) {
-                zombiesPlayer.getScene().sceneNode().addListener(listener);
-            }
+            this.target = new ArmData(upgrade, effect);
+            zombiesPlayer.getScene().sceneNode().addListener(listener);
         }
 
         @Override
         public void disarm() {
-            if (target.getAndSet(null) != null) {
-                zombiesPlayer.getScene().sceneNode().removeListener(listener);
-            }
+            zombiesPlayer.getScene().sceneNode().removeListener(listener);
         }
 
         private boolean filter(Event event) {
@@ -79,7 +72,7 @@ public class EventTrigger implements UpgradeTriggerComponent {
         }
 
         private void handle(Event event) {
-            ArmData armData = target.get();
+            ArmData armData = this.target;
             if (armData != null) {
                 armData.effect.apply(armData.upgrade, zombiesPlayer, TriggerData.of(event));
             }

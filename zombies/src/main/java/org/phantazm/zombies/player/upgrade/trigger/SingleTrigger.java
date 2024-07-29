@@ -9,8 +9,6 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.effect.UpgradeEffect;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 @Model("zombies.upgrade.trigger.single")
 @Cache
 public class SingleTrigger implements UpgradeTriggerComponent {
@@ -25,24 +23,19 @@ public class SingleTrigger implements UpgradeTriggerComponent {
     }
 
     private static final class Internal implements UpgradeTrigger {
-        private final AtomicBoolean isArmed;
         private final ZombiesPlayer zombiesPlayer;
 
         private Internal(ZombiesPlayer zombiesPlayer) {
-            this.isArmed = new AtomicBoolean();
             this.zombiesPlayer = zombiesPlayer;
         }
 
         @Override
         public void arm(@NotNull PlayerUpgrade upgrade, @NotNull UpgradeEffect effect) {
-            if (isArmed.compareAndSet(false, true)) {
-                effect.apply(upgrade, zombiesPlayer, TriggerData.EMPTY);
-            }
+            effect.apply(upgrade, zombiesPlayer, TriggerData.EMPTY);
         }
 
         @Override
         public void disarm() {
-            isArmed.compareAndSet(true, false);
         }
     }
 }
