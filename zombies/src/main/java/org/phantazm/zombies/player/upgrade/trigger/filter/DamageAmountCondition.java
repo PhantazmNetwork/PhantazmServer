@@ -24,13 +24,7 @@ public class DamageAmountCondition implements EventConditionComponent {
         return new Internal(data);
     }
 
-    private static final class Internal implements EventCondition<DamageEvent> {
-        private final Data data;
-
-        private Internal(Data data) {
-            this.data = data;
-        }
-
+    private record Internal(Data data) implements EventCondition<DamageEvent> {
         @Override
         public @NotNull Class<DamageEvent> eventType() {
             return DamageEvent.class;

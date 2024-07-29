@@ -32,14 +32,8 @@ public class TypeEventFilter implements EventFilterComponent {
         return new Internal(data, conditions);
     }
 
-    private static final class Internal implements EventFilter {
-        private final Data data;
-        private final List<EventCondition<?>> conditions;
-
-        private Internal(Data data, List<EventCondition<?>> conditions) {
-            this.data = data;
-            this.conditions = conditions;
-        }
+    private record Internal(Data data,
+        List<EventCondition<?>> conditions) implements EventFilter {
 
         @Override
         public boolean test(Event event) {

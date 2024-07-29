@@ -29,13 +29,7 @@ public class SelfSelector implements SelectorComponent {
         return new Internal(validator.apply(injectionStore, zombiesPlayer));
     }
 
-    private static final class Internal implements Selector {
-        private final Validator validator;
-
-        private Internal(Validator validator) {
-            this.validator = validator;
-        }
-
+    private record Internal(Validator validator) implements Selector {
         @Override
         public @NotNull Target select(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {

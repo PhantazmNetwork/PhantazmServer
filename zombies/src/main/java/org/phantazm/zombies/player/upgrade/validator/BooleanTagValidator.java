@@ -26,18 +26,13 @@ public class BooleanTagValidator implements ValidatorComponent {
 
     @Override
     public @NotNull Validator apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
-        return new Internal(data);
+        return new Internal(Tag.Boolean(data.tag));
     }
 
-    private static class Internal implements Validator {
-        private final Tag<Boolean> tag;
-
-        private Internal(Data data) {
-            this.tag = Tag.Boolean(data.tag);
-        }
-
+    private record Internal(Tag<Boolean> tag) implements Validator {
         @Override
-        public boolean test(@NotNull Entity entity, @NotNull PlayerUpgrade playerUpgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
+        public boolean test(@NotNull Entity entity, @NotNull PlayerUpgrade playerUpgrade,
+            @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             return entity.getTag(tag);
         }
     }

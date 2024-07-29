@@ -36,7 +36,8 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
     private record Internal(Data data,
         ZombiesPlayer zombiesPlayer) implements Validator {
         @Override
-        public boolean test(@NotNull Entity entity, @NotNull PlayerUpgrade playerUpgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
+        public boolean test(@NotNull Entity entity, @NotNull PlayerUpgrade playerUpgrade,
+            @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             if (!(entity instanceof Player)) {
                 return false;
             }

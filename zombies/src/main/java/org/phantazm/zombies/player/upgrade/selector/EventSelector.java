@@ -29,14 +29,8 @@ public class EventSelector implements SelectorComponent {
         return new Internal(data, validator.apply(injectionStore, zombiesPlayer));
     }
 
-    private static final class Internal implements Selector {
-        private final Data data;
-        private final Validator validator;
-
-        private Internal(Data data, Validator validator) {
-            this.data = data;
-            this.validator = validator;
-        }
+    private record Internal(Data data,
+        Validator validator) implements Selector {
 
         @Override
         public @NotNull Target select(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,

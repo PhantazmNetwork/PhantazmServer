@@ -22,15 +22,10 @@ public class DamageTagCondition implements EventConditionComponent {
 
     @Override
     public @NotNull EventCondition<?> apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
-        return new Internal(data);
+        return new Internal(Tag.Boolean(data.tag));
     }
 
-    private static final class Internal implements EventCondition<DamageEvent> {
-        private final Tag<Boolean> tag;
-
-        private Internal(Data data) {
-            this.tag = Tag.Boolean(data.tag);
-        }
+    private record Internal(Tag<Boolean> tag) implements EventCondition<DamageEvent> {
 
         @Override
         public @NotNull Class<DamageEvent> eventType() {

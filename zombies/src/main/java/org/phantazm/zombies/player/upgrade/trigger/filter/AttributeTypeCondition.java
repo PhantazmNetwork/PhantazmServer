@@ -27,12 +27,7 @@ public class AttributeTypeCondition implements EventConditionComponent {
         return new Internal(data);
     }
 
-    private static final class Internal implements EventCondition<AttributeEvent> {
-        private final Data data;
-
-        private Internal(Data data) {
-            this.data = data;
-        }
+    private record Internal(Data data) implements EventCondition<AttributeEvent> {
 
         @Override
         public @NotNull Class<AttributeEvent> eventType() {

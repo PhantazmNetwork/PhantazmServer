@@ -36,16 +36,9 @@ public class EntitiesInAreaSelector implements SelectorComponent {
             validator.apply(injectionStore, zombiesPlayer));
     }
 
-    private static final class Internal implements Selector {
-        private final Data data;
-        private final Selector originSelector;
-        private final Validator validator;
-
-        private Internal(Data data, Selector originSelector, Validator validator) {
-            this.data = data;
-            this.originSelector = originSelector;
-            this.validator = validator;
-        }
+    private record Internal(Data data,
+        Selector originSelector,
+        Validator validator) implements Selector {
 
         @Override
         public @NotNull Target select(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,

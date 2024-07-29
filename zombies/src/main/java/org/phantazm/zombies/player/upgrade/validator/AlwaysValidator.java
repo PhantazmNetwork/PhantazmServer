@@ -26,7 +26,8 @@ public class AlwaysValidator implements ValidatorComponent {
 
     private static final class Internal implements Validator {
         @Override
-        public boolean test(@NotNull Entity candidate, @NotNull PlayerUpgrade playerUpgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
+        public boolean test(@NotNull Entity candidate, @NotNull PlayerUpgrade playerUpgrade,
+            @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             return true;
         }
     }
