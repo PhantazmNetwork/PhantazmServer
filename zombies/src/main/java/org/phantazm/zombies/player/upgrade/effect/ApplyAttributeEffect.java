@@ -1,13 +1,17 @@
 package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.attribute.Attribute;
+import net.minestom.server.attribute.AttributeInstance;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.event.player.ZombiesPlayerModifyAttributeEvent;
@@ -47,6 +51,7 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         private final Attribute attribute;
         private final UUID uuid;
         private final String uuidString;
+        private final Tag<Integer> tag;
 
         private final Deque<Reference<Player>> targetedPlayers;
 
@@ -56,6 +61,7 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
             this.attribute = Attributes.get(data.attribute);
             this.uuid = UUID.randomUUID();
             this.uuidString = this.uuid.toString();
+            this.tag = data.tag == null ? null : Tag.Integer(data.tag).defaultValue(0);
 
             this.targetedPlayers = new ConcurrentLinkedDeque<>();
         }
@@ -64,18 +70,22 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             Player player = zombiesPlayer.getPlayer().orElse(null);
+
+
             selector.select(upgrade, zombiesPlayer, triggerData).forType(LivingEntity.class, entity -> {
+                double amount = tag == null ? data.amount : data.amount * entity.getTag(tag);
                 if (player != null) {
                     CancellableEvent event = new ZombiesPlayerModifyAttributeEvent(player, zombiesPlayer, entity,
-                        this.attribute, uuid, data.amount);
+                        this.attribute, uuid, amount);
                     zombiesPlayer.getScene().broadcastEvent(event);
                     if (event.isCancelled()) {
                         return;
                     }
                 }
 
-                entity.getAttribute(attribute).addModifier(new AttributeModifier(uuid, uuidString, data.amount,
-                    data.operation));
+                AttributeInstance instance = entity.getAttribute(attribute);
+                instance.removeModifier(uuid);
+                instance.addModifier(new AttributeModifier(uuid, uuidString, amount, data.operation));
 
                 if (entity instanceof Player playerTarget) {
                     targetedPlayers.add(new WeakReference<>(playerTarget));
@@ -107,8 +117,14 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         }
     }
 
+    @Default("""
+        {
+          tag=null
+        }
+        """)
     @DataObject
     public record Data(@NotNull String attribute,
+        @Nullable String tag,
         double amount,
         @NotNull AttributeOperation operation) {
 
