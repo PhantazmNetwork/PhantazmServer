@@ -51,7 +51,7 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         private final Attribute attribute;
         private final UUID uuid;
         private final String uuidString;
-        private final Tag<Integer> tag;
+        private final Tag<Integer> levelTag;
 
         private final Deque<Reference<Player>> targetedPlayers;
 
@@ -61,7 +61,7 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
             this.attribute = Attributes.get(data.attribute);
             this.uuid = UUID.randomUUID();
             this.uuidString = this.uuid.toString();
-            this.tag = data.tag == null ? null : Tag.Integer(data.tag).defaultValue(0);
+            this.levelTag = data.levelTag == null ? null : Tag.Integer(data.levelTag).defaultValue(1);
 
             this.targetedPlayers = new ConcurrentLinkedDeque<>();
         }
@@ -73,7 +73,7 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
 
 
             selector.select(upgrade, zombiesPlayer, triggerData).forType(LivingEntity.class, entity -> {
-                double amount = tag == null ? data.amount : data.amount * entity.getTag(tag);
+                double amount = levelTag == null ? data.amount : data.amount * entity.getTag(levelTag);
                 if (player != null) {
                     CancellableEvent event = new ZombiesPlayerModifyAttributeEvent(player, zombiesPlayer, entity,
                         this.attribute, uuid, amount);
@@ -119,14 +119,14 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
 
     @Default("""
         {
-          tag=null
+          levelTag=null
         }
         """)
     @DataObject
     public record Data(@NotNull String attribute,
-        @Nullable String tag,
         double amount,
-        @NotNull AttributeOperation operation) {
+        @NotNull AttributeOperation operation,
+        @Nullable String levelTag) {
 
     }
 }
