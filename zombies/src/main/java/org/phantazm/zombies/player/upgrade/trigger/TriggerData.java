@@ -6,6 +6,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public sealed interface TriggerData permits TriggerData.Impl {
+    TriggerData EMPTY = TriggerData.of(new Object());
+
     final class Impl implements TriggerData {
         private final Object object;
 

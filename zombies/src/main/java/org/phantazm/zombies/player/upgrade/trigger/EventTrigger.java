@@ -38,8 +38,7 @@ public class EventTrigger implements UpgradeTriggerComponent {
 
     @Override
     public @NotNull UpgradeTrigger apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
-        return eventClass == null ? UpgradeTrigger.NONE : new Internal(zombiesPlayer, eventClass,
-            eventFilterComponent.apply(injectionStore, zombiesPlayer));
+        return new Internal(zombiesPlayer, eventClass, eventFilterComponent.apply(injectionStore, zombiesPlayer));
     }
 
     private static final class Internal implements UpgradeTrigger {
