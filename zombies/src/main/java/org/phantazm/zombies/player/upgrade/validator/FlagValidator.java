@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
+import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import java.util.Objects;
 import java.util.Set;
@@ -31,7 +33,7 @@ public class FlagValidator implements ValidatorComponent {
 
     private record Internal(Data data) implements Validator {
         @Override
-        public boolean test(Entity entity) {
+        public boolean test(@NotNull Entity entity, @NotNull PlayerUpgrade playerUpgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             if (!(entity instanceof Mob mob)) {
                 return false;
             }

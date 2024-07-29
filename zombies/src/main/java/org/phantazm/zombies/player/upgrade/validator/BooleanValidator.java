@@ -5,6 +5,8 @@ import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
+import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,18 +37,18 @@ public class BooleanValidator implements ValidatorComponent {
     private record Internal(Data data,
         List<Validator> validators) implements Validator {
         @Override
-        public boolean test(Entity entity) {
+        public boolean test(@NotNull Entity entity, @NotNull PlayerUpgrade playerUpgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             return switch (data.operation) {
                 case AND -> {
                     for (Validator validator : validators) {
-                        if (!validator.test(entity)) yield false;
+                        if (!validator.test(entity, playerUpgrade, zombiesPlayer, triggerData)) yield false;
                     }
 
                     yield true;
                 }
                 case OR -> {
                     for (Validator validator : validators) {
-                        if (validator.test(entity)) yield true;
+                        if (validator.test(entity, playerUpgrade, zombiesPlayer, triggerData)) yield true;
                     }
 
                     yield validators.isEmpty();

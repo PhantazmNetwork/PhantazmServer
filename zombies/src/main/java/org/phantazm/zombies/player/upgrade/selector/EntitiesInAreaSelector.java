@@ -55,7 +55,8 @@ public class EntitiesInAreaSelector implements SelectorComponent {
 
             return EntityTrackerUtils.select(zombiesPlayer.getScene().instance(), data.target.target(), origin,
                 data.limit, data.range, candidate -> {
-                    return (!data.limitSelf || candidate != self) && validator.test(candidate);
+                    return (!data.limitSelf || candidate != self) && validator.test(candidate, upgrade, zombiesPlayer,
+                        triggerData);
                 });
         }
     }

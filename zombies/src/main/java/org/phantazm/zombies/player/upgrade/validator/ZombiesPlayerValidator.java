@@ -12,6 +12,8 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
+import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
+import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import java.util.Objects;
 import java.util.Set;
@@ -34,12 +36,12 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
     private record Internal(Data data,
         ZombiesPlayer zombiesPlayer) implements Validator {
         @Override
-        public boolean test(Entity entity) {
+        public boolean test(@NotNull Entity entity, @NotNull PlayerUpgrade playerUpgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             if (!(entity instanceof Player)) {
                 return false;
             }
 
-            ZombiesPlayer player = zombiesPlayer.getScene().map().objects().module().playerMap()
+            ZombiesPlayer player = this.zombiesPlayer.getScene().map().objects().module().playerMap()
                 .get(PlayerView.lookup(entity.getUuid()));
             if (player == null) {
                 return false;
@@ -50,12 +52,7 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
                 return false;
             }
 
-            Key currentState = state.key();
-            if (data.blacklist) {
-                return !data.states.contains(currentState);
-            }
-
-            return data.states.contains(currentState);
+            return data.blacklist != data.states.contains(state.key());
         }
     }
 

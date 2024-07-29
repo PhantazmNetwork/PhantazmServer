@@ -44,7 +44,7 @@ public class SelfSelector implements SelectorComponent {
                 return Target.NONE;
             }
 
-            return validator.test(player) ? Target.entities(player) : Target.NONE;
+            return validator.test(player, upgrade, zombiesPlayer, triggerData) ? Target.entities(player) : Target.NONE;
         }
     }
 }

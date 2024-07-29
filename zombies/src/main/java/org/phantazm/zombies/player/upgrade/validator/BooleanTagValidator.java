@@ -9,6 +9,8 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
+import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import java.util.Objects;
 
@@ -35,7 +37,7 @@ public class BooleanTagValidator implements ValidatorComponent {
         }
 
         @Override
-        public boolean test(Entity entity) {
+        public boolean test(@NotNull Entity entity, @NotNull PlayerUpgrade playerUpgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             return entity.getTag(tag);
         }
     }

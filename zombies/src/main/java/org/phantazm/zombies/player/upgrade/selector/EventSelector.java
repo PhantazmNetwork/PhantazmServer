@@ -42,11 +42,11 @@ public class EventSelector implements SelectorComponent {
         public @NotNull Target select(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             if (data.useTarget && triggerData.raw() instanceof EntityTargetEvent event) {
-                return validator.test(event.target()) ? Target.entities(event.target()) : Target.NONE;
+                return validator.test(event.target(), upgrade, zombiesPlayer, triggerData) ? Target.entities(event.target()) : Target.NONE;
             }
 
             if (triggerData.raw() instanceof EntityEvent entityEvent) {
-                return validator.test(entityEvent.getEntity()) ? Target.entities(entityEvent.getEntity()) : Target.NONE;
+                return validator.test(entityEvent.getEntity(), upgrade, zombiesPlayer, triggerData) ? Target.entities(entityEvent.getEntity()) : Target.NONE;
             }
 
             return Target.NONE;

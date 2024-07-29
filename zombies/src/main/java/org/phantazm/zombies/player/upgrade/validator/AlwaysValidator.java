@@ -7,6 +7,8 @@ import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
+import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 @Model("zombies.upgrade.validator.always")
 @Cache
@@ -24,7 +26,7 @@ public class AlwaysValidator implements ValidatorComponent {
 
     private static final class Internal implements Validator {
         @Override
-        public boolean test(Entity entity) {
+        public boolean test(@NotNull Entity candidate, @NotNull PlayerUpgrade playerUpgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             return true;
         }
     }
