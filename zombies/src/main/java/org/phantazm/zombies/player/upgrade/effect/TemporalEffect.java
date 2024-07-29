@@ -10,7 +10,6 @@ import org.phantazm.zombies.player.upgrade.timer.TimerComponent;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Model("zombies.upgrade.effect.temporal")
 @Cache
@@ -35,20 +34,14 @@ public class TemporalEffect implements UpgradeEffectComponent {
         private final UpgradeEffect delegate;
 
         private final AtomicInteger cooldown;
-        private final AtomicReference<ApplyData> applyData;
 
         private final boolean tickDelegate;
-
-        private record ApplyData(PlayerUpgrade upgrade,
-            ZombiesPlayer zombiesPlayer) {
-        }
 
         private Internal(Timer timer, UpgradeEffect delegate) {
             this.timer = timer;
             this.delegate = delegate;
 
             this.cooldown = new AtomicInteger();
-            this.applyData = new AtomicReference<>();
 
             this.tickDelegate = delegate.needsTicking();
         }
@@ -56,20 +49,13 @@ public class TemporalEffect implements UpgradeEffectComponent {
         @Override
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
-            if (cooldown.compareAndSet(0, timer.getAsInt())) {
-                applyData.compareAndSet(null, new ApplyData(upgrade, zombiesPlayer));
-            }
+            cooldown.compareAndSet(0, timer.getAsInt());
         }
 
         @Override
         public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
-            int oldTimer = cooldown.getAndSet(0);
-
-            if (oldTimer != 0) {
-                ApplyData oldData = applyData.getAndSet(null);
-                if (oldData != null) {
-                    delegate.clear(oldData.upgrade, oldData.zombiesPlayer);
-                }
+            if (cooldown.getAndSet(0) != 0) {
+                delegate.clear(upgrade, zombiesPlayer);
             }
         }
 
@@ -80,12 +66,7 @@ public class TemporalEffect implements UpgradeEffectComponent {
 
         @Override
         public void tick() {
-            if (cooldown.getAndUpdate(current -> Math.max(current - 1, 0)) == 1) {
-                ApplyData oldData = applyData.getAndSet(null);
-                if (oldData != null) {
-                    delegate.clear(oldData.upgrade, oldData.zombiesPlayer);
-                }
-            }
+            cooldown.getAndUpdate(current -> Math.max(current - 1, 0));
 
             if (tickDelegate) {
                 delegate.tick();
