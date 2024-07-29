@@ -253,21 +253,7 @@ public sealed interface Target
     @NotNull
     Optional<? extends Entity> target();
 
-    private static void test() {
-
-    }
-
-    default <T> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(consumer);
-
-        Collection<? extends Entity> targets = targets();
-        for (Entity targetEntity : targets) {
-            if (type.isAssignableFrom(targetEntity.getClass())) {
-                consumer.accept(type.cast(targetEntity));
-            }
-        }
-    }
+    <T> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer);
 
     default <T> @NotNull Optional<T> forType(@NotNull Class<T> type) {
         Objects.requireNonNull(type);
@@ -355,6 +341,20 @@ public sealed interface Target
 
             return Optional.empty();
         }
+
+        @Override
+        public <T> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
+            for (TargetEntry entry : entries) {
+                Entity entity = entry.entity;
+                if (entity == null) {
+                    continue;
+                }
+
+                if (type.isAssignableFrom(entity.getClass())) {
+                    consumer.accept(type.cast(entity));
+                }
+            }
+        }
     }
 
     final class NoTarget implements Target {
@@ -392,6 +392,10 @@ public sealed interface Target
         @Override
         public @NotNull Optional<? extends Entity> target() {
             return Optional.empty();
+        }
+
+        @Override
+        public <T> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
         }
     }
 
@@ -434,6 +438,10 @@ public sealed interface Target
         public @NotNull Optional<? extends Entity> target() {
             return Optional.empty();
         }
+
+        @Override
+        public <T> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
+        }
     }
 
     final class MultiPointTarget implements Target {
@@ -475,6 +483,10 @@ public sealed interface Target
         public @NotNull Optional<? extends Entity> target() {
             return Optional.empty();
         }
+
+        @Override
+        public <T> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
+        }
     }
 
     final class SingleEntityTarget implements Target {
@@ -515,6 +527,13 @@ public sealed interface Target
         @Override
         public @NotNull Optional<? extends Entity> target() {
             return Optional.of(entity);
+        }
+
+        @Override
+        public <T> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
+            if (type.isAssignableFrom(entity.getClass())) {
+                consumer.accept(type.cast(entity));
+            }
         }
     }
 
@@ -572,6 +591,15 @@ public sealed interface Target
         @Override
         public @NotNull Optional<? extends Entity> target() {
             return Optional.of(entities.get(0));
+        }
+
+        @Override
+        public <T> void forType(@NotNull Class<T> type, @NotNull Consumer<? super T> consumer) {
+            for (Entity entity : entities) {
+                if (type.isAssignableFrom(entity.getClass())) {
+                    consumer.accept(type.cast(entity));
+                }
+            }
         }
     }
 }
