@@ -6,4 +6,5 @@ import java.util.function.Predicate;
 
 public interface EventFilter extends Predicate<Event> {
     EventFilter NONE = event -> false;
+    EventFilter ALL = event -> true;
 }

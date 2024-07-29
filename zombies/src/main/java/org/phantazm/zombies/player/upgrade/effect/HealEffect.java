@@ -48,8 +48,7 @@ public class HealEffect implements UpgradeEffectComponent {
 
             double healAmount;
             if (event instanceof DamageEvent damageEvent) {
-                healAmount = damageEvent.damage().getTag(tag) ?
-                    data.specialHealAmount : data.healAmount;
+                healAmount = damageEvent.damage().getTag(tag) ? data.specialHealAmount : data.healAmount;
             } else {
                 healAmount = data.healAmount;
             }

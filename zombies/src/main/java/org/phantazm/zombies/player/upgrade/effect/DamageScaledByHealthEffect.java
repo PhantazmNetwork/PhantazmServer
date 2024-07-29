@@ -5,7 +5,6 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.event.trait.SettableDamageAmountEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
@@ -15,7 +14,7 @@ import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 @Model("zombies.upgrade.effect.damage_scaled_by_health")
 @Cache
-public class DamageScaledByHealthEffect implements UpgradeEffectComponent{
+public class DamageScaledByHealthEffect implements UpgradeEffectComponent {
     private final Data data;
     private final SelectorComponent selectorComponent;
 
@@ -47,13 +46,10 @@ public class DamageScaledByHealthEffect implements UpgradeEffectComponent{
 
             selector.select(upgrade, zombiesPlayer, triggerData).forType(LivingEntity.class).ifPresent(livingEntity -> {
                 float currentDamage = event.damageAmount();
-                float health;
+                float health = data.useTotalHealth ? livingEntity.getMaxHealth() : livingEntity.getHealth();
+                float newDamage = health * (float) data.percentageOfHealth;
 
-                health = data.useTotalHealth ? livingEntity.getMaxHealth() : livingEntity.getHealth();
-
-                float newDamage = health * (float)data.percentageOfHealth;
-
-                if(data.preventDamageDecrease && newDamage < currentDamage) {
+                if (data.preventDamageDecrease && newDamage < currentDamage) {
                     return;
                 }
 
@@ -74,5 +70,6 @@ public class DamageScaledByHealthEffect implements UpgradeEffectComponent{
         double percentageOfHealth,
         boolean useTotalHealth,
         boolean preventDamageDecrease
-    ) {}
+    ) {
+    }
 }
