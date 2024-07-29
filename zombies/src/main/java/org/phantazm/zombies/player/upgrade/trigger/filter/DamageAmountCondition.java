@@ -32,12 +32,13 @@ public class DamageAmountCondition implements EventConditionComponent {
 
         @Override
         public boolean filter(@NotNull DamageEvent event) {
+            double amount = event.damage().getAmount();
             return switch (data.condition) {
-                case GREATER -> event.damage().getAmount() > data.amount;
-                case LESS_THAN -> event.damage().getAmount() < data.amount;
-                case GREATER_OR_EQUAL -> event.damage().getAmount() >= data.amount;
-                case LESS_THAN_OR_EQUAL -> event.damage().getAmount() <= data.amount;
-                case EQUAL -> event.damage().getAmount() == data.amount;
+                case GREATER -> amount > data.amount;
+                case LESS_THAN -> amount < data.amount;
+                case GREATER_OR_EQUAL -> amount >= data.amount;
+                case LESS_THAN_OR_EQUAL -> amount <= data.amount;
+                case EQUAL -> amount == data.amount;
             };
         }
     }
