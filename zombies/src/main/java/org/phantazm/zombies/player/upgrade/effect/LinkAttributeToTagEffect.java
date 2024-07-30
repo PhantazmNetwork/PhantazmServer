@@ -2,9 +2,11 @@ package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.LivingEntity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.Interval;
 import org.phantazm.core.TagUtils;
 import org.phantazm.zombies.event.trait.AttributeEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -13,8 +15,12 @@ import org.phantazm.zombies.player.upgrade.selector.Selector;
 import org.phantazm.zombies.player.upgrade.selector.SelectorComponent;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Model("zombies.upgrade.effect.link_attribute_to_tag")
 @Cache
@@ -38,11 +44,17 @@ public class LinkAttributeToTagEffect implements UpgradeEffectComponent {
         private final Tag<Boolean> tag;
         private final Tag<UUID> uuidTag;
 
+        private final Map<UUID, Reference<Player>> targetedPlayers;
+        private final Interval interval;
+
         private Internal(Data data, Selector selector) {
             super(AttributeEvent.class);
             this.selector = selector;
             this.tag = Tag.Boolean(data.tag).defaultValue(false);
             this.uuidTag = Tag.UUID(TagUtils.uniqueTagName());
+
+            this.targetedPlayers = new ConcurrentHashMap<>();
+            this.interval = Interval.of(20);
         }
 
         @Override
@@ -52,6 +64,10 @@ public class LinkAttributeToTagEffect implements UpgradeEffectComponent {
                 if (!attributeEvent.isRemove()) {
                     livingEntity.setTag(tag, true);
                     livingEntity.setTag(uuidTag, attributeEvent.attributeUuid());
+
+                    if (livingEntity instanceof Player player) {
+                        targetedPlayers.put(player.getUuid(), new WeakReference<>(player));
+                    }
                     return;
                 }
 
@@ -59,6 +75,32 @@ public class LinkAttributeToTagEffect implements UpgradeEffectComponent {
                     livingEntity.removeTag(tag);
                     livingEntity.removeTag(uuidTag);
                 }
+            });
+        }
+
+        @Override
+        public boolean needsTicking() {
+            return true;
+        }
+
+        @Override
+        public void tick() {
+            if (interval.advance()) {
+                targetedPlayers.values().removeIf(playerReference -> playerReference.refersTo(null));
+            }
+        }
+
+        @Override
+        public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
+            targetedPlayers.values().removeIf(playerReference -> {
+                Player player = playerReference.get();
+                if (player == null) {
+                    return true;
+                }
+
+                player.removeTag(tag);
+                player.removeTag(uuidTag);
+                return true;
             });
         }
     }

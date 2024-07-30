@@ -13,6 +13,7 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.Interval;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.event.player.ZombiesPlayerModifyAttributeEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -23,9 +24,9 @@ import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.Deque;
+import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Model("zombies.upgrade.effect.apply_attribute")
 @Cache
@@ -53,7 +54,8 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         private final String uuidString;
         private final Tag<Integer> levelTag;
 
-        private final Deque<Reference<Player>> targetedPlayers;
+        private final Map<UUID, Reference<Player>> targetedPlayers;
+        private final Interval interval;
 
         private Internal(Data data, Selector selector) {
             this.data = data;
@@ -63,7 +65,8 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
             this.uuidString = this.uuid.toString();
             this.levelTag = data.levelTag == null ? null : Tag.Integer(data.levelTag).defaultValue(1);
 
-            this.targetedPlayers = new ConcurrentLinkedDeque<>();
+            this.targetedPlayers = new ConcurrentHashMap<>();
+            this.interval = Interval.of(20);
         }
 
         @Override
@@ -88,14 +91,14 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
                 instance.addModifier(new AttributeModifier(uuid, uuidString, amount, data.operation));
 
                 if (entity instanceof Player playerTarget) {
-                    targetedPlayers.add(new WeakReference<>(playerTarget));
+                    targetedPlayers.put(playerTarget.getUuid(), new WeakReference<>(playerTarget));
                 }
             });
         }
 
         @Override
         public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
-            targetedPlayers.removeIf(reference -> {
+            targetedPlayers.values().removeIf(reference -> {
                 Player player = reference.get();
                 if (player == null) {
                     return true;
@@ -113,7 +116,9 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
 
         @Override
         public void tick() {
-            targetedPlayers.removeIf(playerReference -> playerReference.refersTo(null));
+            if (interval.advance()) {
+                targetedPlayers.values().removeIf(playerReference -> playerReference.refersTo(null));
+            }
         }
     }
 

@@ -3,11 +3,11 @@ package org.phantazm.zombies.player.upgrade;
 import com.github.steanky.element.core.annotation.*;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.tick.Activable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Model("zombies.upgrade.composite")
 @Cache
@@ -26,64 +26,65 @@ public class CompositeUpgrade implements PlayerUpgradeComponent {
             upgradeList.add(component.apply(injectionStore, player));
         }
 
-        return new Internal(player, upgradeList);
+        return new Internal(upgradeList);
     }
 
-    private static class Internal extends GuardedPlayerUpgrade {
-        private final boolean needsTicking;
+    private static class Internal implements PlayerUpgrade {
+        private final List<PlayerUpgrade> upgrades;
+        private final List<PlayerUpgrade> tickables;
+        private final AtomicBoolean activated;
 
-        private Internal(ZombiesPlayer zombiesPlayer, List<PlayerUpgrade> upgradeList) {
-            super(Activable.threadsafeWrapper(new Activable() {
-                private final List<PlayerUpgrade> tickables = tickables(upgradeList);
+        private Internal(List<PlayerUpgrade> upgrades) {
+            this.upgrades = upgrades;
 
-                @Override
-                public void start() {
-                    for (PlayerUpgrade upgrade : upgradeList) {
-                        upgrade.start();
-                    }
-                }
-
-                @Override
-                public void tick(long time) {
-                    for (PlayerUpgrade upgrade : tickables) {
-                        upgrade.tick(time);
-                    }
-                }
-
-                @Override
-                public void end() {
-                    for (PlayerUpgrade upgrade : upgradeList) {
-                        upgrade.end();
-                    }
-                }
-
-                private static List<PlayerUpgrade> tickables(List<PlayerUpgrade> upgrades) {
-                    ArrayList<PlayerUpgrade> tickables = new ArrayList<>(Math.min(upgrades.size(), 5));
-                    for (PlayerUpgrade playerUpgrade : upgrades) {
-                        if (playerUpgrade.needsTicking()) {
-                            tickables.add(playerUpgrade);
-                        }
-                    }
-
-                    tickables.trimToSize();
-                    return tickables.isEmpty() ? List.of() : tickables;
-                }
-            }), zombiesPlayer);
-
-            boolean needsTicking = false;
-            for (PlayerUpgrade upgrade : upgradeList) {
+            List<PlayerUpgrade> tickables = null;
+            for (PlayerUpgrade upgrade : upgrades) {
                 if (upgrade.needsTicking()) {
-                    needsTicking = true;
-                    break;
+                    (tickables = (tickables == null ? new ArrayList<>(upgrades.size()) : tickables)).add(upgrade);
                 }
             }
 
-            this.needsTicking = needsTicking;
+            this.tickables = tickables;
+            this.activated = new AtomicBoolean();
+        }
+
+        @Override
+        public void start() {
+            if (activated.compareAndSet(false, true)) {
+                for (PlayerUpgrade upgrade : upgrades) {
+                    upgrade.start();
+                }
+            }
+        }
+
+        @Override
+        public void tick(long time) {
+            if (tickables == null) {
+                return;
+            }
+
+            for (PlayerUpgrade tickable : tickables) {
+                tickable.tick(time);
+            }
+        }
+
+        @Override
+        public void end() {
+            if (activated.compareAndSet(true, false)) {
+                for (PlayerUpgrade upgrade : upgrades) {
+                    upgrade.end();
+                }
+            }
         }
 
         @Override
         public boolean needsTicking() {
-            return this.needsTicking;
+            return tickables != null;
+        }
+
+        @Override
+        public boolean isActivated() {
+            return activated.get();
         }
     }
 }
