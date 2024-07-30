@@ -34,8 +34,13 @@ public class TemporalEffect implements UpgradeEffectComponent {
         private final UpgradeEffect delegate;
 
         private final AtomicInteger cooldown;
-
         private final boolean tickDelegate;
+
+        private volatile ClearData clearData;
+
+        private record ClearData(PlayerUpgrade upgrade,
+            ZombiesPlayer zombiesPlayer) {
+        }
 
         private Internal(Timer timer, UpgradeEffect delegate) {
             this.timer = timer;
@@ -49,12 +54,16 @@ public class TemporalEffect implements UpgradeEffectComponent {
         @Override
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
-            cooldown.compareAndSet(0, timer.getAsInt());
+            if (cooldown.compareAndSet(0, timer.getAsInt())) {
+                this.clearData = new ClearData(upgrade, zombiesPlayer);
+                delegate.apply(upgrade, zombiesPlayer, triggerData);
+            }
         }
 
         @Override
         public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
             if (cooldown.getAndSet(0) != 0) {
+                this.clearData = null;
                 delegate.clear(upgrade, zombiesPlayer);
             }
         }
@@ -66,7 +75,13 @@ public class TemporalEffect implements UpgradeEffectComponent {
 
         @Override
         public void tick() {
-            cooldown.getAndUpdate(current -> Math.max(current - 1, 0));
+            if (cooldown.getAndUpdate(current -> Math.max(current - 1, 0)) == 1) {
+                ClearData clearData = this.clearData;
+                this.clearData = null;
+                if (clearData != null) {
+                    delegate.clear(clearData.upgrade, clearData.zombiesPlayer);
+                }
+            }
 
             if (tickDelegate) {
                 delegate.tick();

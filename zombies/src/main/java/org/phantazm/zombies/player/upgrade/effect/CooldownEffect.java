@@ -53,6 +53,7 @@ public class CooldownEffect implements UpgradeEffectComponent {
         @Override
         public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
             effect.clear(upgrade, zombiesPlayer);
+            cooldown.reset();
         }
 
         @Override
