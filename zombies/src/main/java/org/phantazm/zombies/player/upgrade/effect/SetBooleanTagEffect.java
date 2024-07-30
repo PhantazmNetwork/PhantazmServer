@@ -17,14 +17,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Model("zombies.upgrade.effect.adjust_integer_tag")
+@Model("zombies.upgrade.effect.set_boolean_tag")
 @Cache
-public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
+public class SetBooleanTagEffect implements UpgradeEffectComponent {
     private final Data data;
     private final SelectorComponent selector;
 
     @FactoryMethod
-    public AdjustIntegerTagEffect(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector) {
+    public SetBooleanTagEffect(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector) {
         this.data = data;
         this.selector = selector;
     }
@@ -35,15 +35,13 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
     }
 
     private static final class Internal implements UpgradeEffect {
-        private final Data data;
-        private final Tag<Integer> tag;
+        private final Tag<Boolean> tag;
         private final Selector selector;
 
         private final Map<UUID, Reference<Entity>> map;
 
         private Internal(Data data, Selector selector) {
-            this.data = data;
-            this.tag = Tag.Integer(data.tag);
+            this.tag = Tag.Boolean(data.tag);
             this.selector = selector;
 
             this.map = new ConcurrentHashMap<>();
@@ -53,11 +51,7 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, target -> {
-                target.tagHandler().updateTag(tag, currentValue -> {
-                    int next = currentValue + data.increment;
-                    return data.increment < 0 ? Math.max(next, data.limit) : Math.min(next, data.limit);
-                });
-
+                target.setTag(tag, true);
                 map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
             });
         }

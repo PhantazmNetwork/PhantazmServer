@@ -4,6 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+/**
+ * Methods of comparison between two numbers.
+ */
 @SuppressWarnings("DuplicatedCode")
 public enum CompareCondition {
     LESS_THAN,

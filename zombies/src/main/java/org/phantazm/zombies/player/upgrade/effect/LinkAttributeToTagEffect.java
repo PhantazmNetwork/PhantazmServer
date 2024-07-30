@@ -2,7 +2,6 @@ package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.LivingEntity;
-import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -44,7 +43,7 @@ public class LinkAttributeToTagEffect implements UpgradeEffectComponent {
         private final Tag<Boolean> tag;
         private final Tag<UUID> uuidTag;
 
-        private final Map<UUID, Reference<Player>> targetedPlayers;
+        private final Map<UUID, Reference<LivingEntity>> targets;
         private final Interval interval;
 
         private Internal(Data data, Selector selector) {
@@ -53,7 +52,7 @@ public class LinkAttributeToTagEffect implements UpgradeEffectComponent {
             this.tag = Tag.Boolean(data.tag).defaultValue(false);
             this.uuidTag = Tag.UUID(TagUtils.uniqueTagName());
 
-            this.targetedPlayers = new ConcurrentHashMap<>();
+            this.targets = new ConcurrentHashMap<>();
             this.interval = Interval.of(20);
         }
 
@@ -65,9 +64,7 @@ public class LinkAttributeToTagEffect implements UpgradeEffectComponent {
                     livingEntity.setTag(tag, true);
                     livingEntity.setTag(uuidTag, attributeEvent.attributeUuid());
 
-                    if (livingEntity instanceof Player player) {
-                        targetedPlayers.put(player.getUuid(), new WeakReference<>(player));
-                    }
+                    targets.putIfAbsent(livingEntity.getUuid(), new WeakReference<>(livingEntity));
                     return;
                 }
 
@@ -86,20 +83,20 @@ public class LinkAttributeToTagEffect implements UpgradeEffectComponent {
         @Override
         public void tick() {
             if (interval.advance()) {
-                targetedPlayers.values().removeIf(playerReference -> playerReference.refersTo(null));
+                targets.values().removeIf(playerReference -> playerReference.refersTo(null));
             }
         }
 
         @Override
         public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
-            targetedPlayers.values().removeIf(playerReference -> {
-                Player player = playerReference.get();
-                if (player == null) {
+            targets.values().removeIf(playerReference -> {
+                LivingEntity entity = playerReference.get();
+                if (entity == null) {
                     return true;
                 }
 
-                player.removeTag(tag);
-                player.removeTag(uuidTag);
+                entity.removeTag(tag);
+                entity.removeTag(uuidTag);
                 return true;
             });
         }

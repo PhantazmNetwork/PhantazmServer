@@ -54,7 +54,7 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         private final String uuidString;
         private final Tag<Integer> levelTag;
 
-        private final Map<UUID, Reference<Player>> targetedPlayers;
+        private final Map<UUID, Reference<LivingEntity>> targets;
         private final Interval interval;
 
         private Internal(Data data, Selector selector) {
@@ -65,7 +65,7 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
             this.uuidString = this.uuid.toString();
             this.levelTag = data.levelTag == null ? null : Tag.Integer(data.levelTag).defaultValue(1);
 
-            this.targetedPlayers = new ConcurrentHashMap<>();
+            this.targets = new ConcurrentHashMap<>();
             this.interval = Interval.of(20);
         }
 
@@ -73,7 +73,6 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             Player player = zombiesPlayer.getPlayer().orElse(null);
-
 
             selector.select(upgrade, zombiesPlayer, triggerData).forType(LivingEntity.class, entity -> {
                 double amount = levelTag == null ? data.amount : data.amount * entity.getTag(levelTag);
@@ -90,21 +89,19 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
                 instance.removeModifier(uuid);
                 instance.addModifier(new AttributeModifier(uuid, uuidString, amount, data.operation));
 
-                if (entity instanceof Player playerTarget) {
-                    targetedPlayers.put(playerTarget.getUuid(), new WeakReference<>(playerTarget));
-                }
+                targets.put(entity.getUuid(), new WeakReference<>(entity));
             });
         }
 
         @Override
         public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
-            targetedPlayers.values().removeIf(reference -> {
-                Player player = reference.get();
-                if (player == null) {
+            targets.values().removeIf(reference -> {
+                LivingEntity entity = reference.get();
+                if (entity == null) {
                     return true;
                 }
 
-                player.getAttribute(attribute).removeModifier(uuid);
+                entity.getAttribute(attribute).removeModifier(uuid);
                 return true;
             });
         }
@@ -117,7 +114,7 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         @Override
         public void tick() {
             if (interval.advance()) {
-                targetedPlayers.values().removeIf(playerReference -> playerReference.refersTo(null));
+                targets.values().removeIf(reference -> reference.refersTo(null));
             }
         }
     }

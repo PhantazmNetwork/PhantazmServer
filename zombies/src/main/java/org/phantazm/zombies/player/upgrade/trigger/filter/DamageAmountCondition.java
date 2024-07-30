@@ -33,8 +33,7 @@ public class DamageAmountCondition implements EventConditionComponent {
 
         @Override
         public boolean filter(@NotNull DamageEvent event) {
-            double amount = event.damage().getAmount();
-            return data.condition.compare(amount, data.amount);
+            return data.condition.compare(event.damage().getAmount(), data.amount);
         }
     }
 
