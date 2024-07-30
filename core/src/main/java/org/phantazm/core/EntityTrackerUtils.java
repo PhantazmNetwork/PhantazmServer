@@ -1,5 +1,7 @@
 package org.phantazm.core;
 
+import com.github.steanky.toolkit.collection.Containers;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.doubles.DoubleObjectPair;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
@@ -10,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -25,9 +28,11 @@ public final class EntityTrackerUtils {
      * @param instance     the instance from which to select entities
      * @param targetType   the {@link EntityTracker.Target}, which indicates which kind of entities to search for
      * @param originTarget the origin point(s) from which to measure distance
-     * @param limit        the maximum number of entities to select; if less than 0, there are no limits
+     * @param limit        the maximum number of entities to select; if less than 0, there are no limits; if 0, no
+     *                     entities will ever be selected. If {@code > 0}, the target will only include the nearest
+     *                     entities to the origin point(s)
      * @param range        the distance within which to search for entities; if less than 0, selects all entities in the
-     *                     range
+     *                     instance
      * @param entityTester a predicate used to filter entities; only entities for which this predicate returns true will
      *                     be present in the final target
      * @param <T>          the entity type
@@ -36,18 +41,35 @@ public final class EntityTrackerUtils {
     public static <T extends Entity> @NotNull Target select(@NotNull Instance instance,
         @NotNull EntityTracker.Target<T> targetType, @NotNull Target originTarget, int limit, double range,
         @NotNull Predicate<? super T> entityTester) {
-        Collection<? extends Point> origins = originTarget.locations();
-        if (origins.isEmpty()) {
+        if (limit == 0) {
             return Target.NONE;
         }
 
-        List<DoubleObjectPair<T>> targets = new ArrayList<>(limit < 0 ? 10 : limit);
-        for (Point origin : origins) {
-            if (range < 0) {
-                for (T target : instance.getEntityTracker().entities(targetType)) {
-                    handleEntity(origin, target, targets, entityTester, limit);
-                }
-            } else {
+        Collection<? extends Point> origins = originTarget.locations();
+
+        // if we have no origin and a set limit, fast exit: we need at least one origin point to measure distances
+        if (origins.isEmpty() && limit > 0) {
+            return Target.NONE;
+        }
+
+        List<DoubleObjectPair<T>> targets;
+
+        // negative range means all entities in an instance
+        if (range < 0) {
+            Set<T> entities = instance.getEntityTracker().entities(targetType);
+            if (entities.isEmpty()) {
+                return Target.NONE;
+            }
+
+            targets = new ArrayList<>(Math.max(entities.size(), limit));
+
+            Point origin = limit > 0 ? origins.iterator().next() : null;
+            for (T target : entities) {
+                handleEntity(origin, target, targets, entityTester, limit);
+            }
+        } else {
+            targets = new ArrayList<>(limit < 0 ? 10 : limit);
+            for (Point origin : origins) {
                 instance.getEntityTracker().nearbyEntities(origin, range, targetType,
                     target -> handleEntity(origin, target, targets, entityTester, limit));
             }
@@ -57,17 +79,18 @@ public final class EntityTrackerUtils {
             return Target.NONE;
         }
 
-        List<T> entities = new ArrayList<>(targets.size());
-        for (DoubleObjectPair<T> pair : targets) {
-            entities.add(pair.right());
-        }
-
-        return Target.entities(entities);
+        return Target.entities(Containers.mappedView(Pair::right, targets));
     }
 
     private static <T extends Entity> void handleEntity(Point origin, T target, List<DoubleObjectPair<T>> targets,
         Predicate<? super T> predicate, int limit) {
         if (!predicate.test(target)) {
+            return;
+        }
+
+        // if unlimited, don't order!
+        if (limit <= 0) {
+            targets.add(DoubleObjectPair.of(0, target));
             return;
         }
 
