@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -78,6 +79,11 @@ public class IgniteTrigger implements UpgradeTriggerComponent {
         }
     }
 
+    @Default("""
+        {
+          clear=true
+        }
+        """)
     @DataObject
     public record Data(boolean clear) {
     }
