@@ -47,7 +47,6 @@ public class TemporalEffect implements UpgradeEffectComponent {
             this.delegate = delegate;
 
             this.cooldown = new AtomicInteger();
-
             this.tickDelegate = delegate.needsTicking();
         }
 

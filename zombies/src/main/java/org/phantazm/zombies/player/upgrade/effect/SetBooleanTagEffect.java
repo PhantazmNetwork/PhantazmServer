@@ -5,6 +5,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.Interval;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.selector.Selector;
@@ -39,12 +40,14 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
         private final Selector selector;
 
         private final Map<UUID, Reference<Entity>> map;
+        private final Interval interval;
 
         private Internal(Data data, Selector selector) {
             this.tag = Tag.Boolean(data.tag);
             this.selector = selector;
 
             this.map = new ConcurrentHashMap<>();
+            this.interval = Interval.of(20);
         }
 
         @Override
@@ -76,7 +79,9 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
 
         @Override
         public void tick() {
-            map.values().removeIf(reference -> reference.refersTo(null));
+            if (interval.advance()) {
+                map.values().removeIf(reference -> reference.refersTo(null));
+            }
         }
     }
 
