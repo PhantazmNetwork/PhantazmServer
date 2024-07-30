@@ -19,7 +19,7 @@ import org.phantazm.zombies.event.trait.*;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.effect.UpgradeEffect;
-import org.phantazm.zombies.player.upgrade.trigger.filter.EventFilter;
+import org.phantazm.zombies.player.upgrade.trigger.filter.TriggerFilter;
 import org.phantazm.zombies.player.upgrade.trigger.filter.EventFilterComponent;
 
 @Model("zombies.upgrade.trigger.event")
@@ -42,7 +42,7 @@ public class EventTrigger implements UpgradeTriggerComponent {
     private static final class Internal implements UpgradeTrigger {
         private final ZombiesPlayer zombiesPlayer;
         private final EventListener<? extends Event> listener;
-        private final EventFilter eventFilter;
+        private final TriggerFilter triggerFilter;
 
         private volatile ArmData target;
 
@@ -50,10 +50,10 @@ public class EventTrigger implements UpgradeTriggerComponent {
             UpgradeEffect effect) {
         }
 
-        private Internal(ZombiesPlayer zombiesPlayer, Class<? extends Event> cls, EventFilter eventFilter) {
+        private Internal(ZombiesPlayer zombiesPlayer, Class<? extends Event> cls, TriggerFilter triggerFilter) {
             this.zombiesPlayer = zombiesPlayer;
             this.listener = EventListener.builder(cls).handler(this::handle).filter(this::filter).build();
-            this.eventFilter = eventFilter;
+            this.triggerFilter = triggerFilter;
         }
 
         @Override
@@ -73,7 +73,7 @@ public class EventTrigger implements UpgradeTriggerComponent {
         }
 
         private boolean filter(Event event) {
-            return eventFilter.test(event);
+            return triggerFilter.test(TriggerData.of(event));
         }
 
         private void handle(Event event) {

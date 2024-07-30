@@ -61,10 +61,9 @@ public class TemporalEffect implements UpgradeEffectComponent {
 
         @Override
         public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
-            if (cooldown.getAndSet(0) != 0) {
-                this.clearData = null;
-                delegate.clear(upgrade, zombiesPlayer);
-            }
+            cooldown.set(0);
+            this.clearData = null;
+            delegate.clear(upgrade, zombiesPlayer);
         }
 
         @Override

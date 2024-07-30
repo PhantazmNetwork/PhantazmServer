@@ -6,6 +6,7 @@ import net.minestom.server.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ public class TypeEventFilter implements EventFilterComponent {
     }
 
     @Override
-    public @NotNull EventFilter apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
+    public @NotNull TriggerFilter apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
         List<EventCondition<?>> conditions = new ArrayList<>(this.conditions.size());
         for (EventConditionComponent component : this.conditions) {
             conditions.add(component.apply(injectionStore, zombiesPlayer));
@@ -33,10 +34,14 @@ public class TypeEventFilter implements EventFilterComponent {
     }
 
     private record Internal(Data data,
-        List<EventCondition<?>> conditions) implements EventFilter {
+        List<EventCondition<?>> conditions) implements TriggerFilter {
 
         @Override
-        public boolean test(Event event) {
+        public boolean test(TriggerData triggerData) {
+            if (!(triggerData.raw() instanceof Event event)) {
+                return false;
+            }
+
             return switch (data.evaluation) {
                 case AND -> {
                     for (EventCondition<?> condition : conditions) {

@@ -16,7 +16,7 @@ public class NoEventFilter implements EventFilterComponent {
     }
 
     @Override
-    public @NotNull EventFilter apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
-        return EventFilter.ALL;
+    public @NotNull TriggerFilter apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
+        return TriggerFilter.ALL;
     }
 }

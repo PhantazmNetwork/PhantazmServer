@@ -3,5 +3,5 @@ package org.phantazm.zombies.player.upgrade.trigger.filter;
 import org.phantazm.commons.DualComponent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
-public interface EventFilterComponent extends DualComponent<ZombiesPlayer, EventFilter> {
+public interface EventFilterComponent extends DualComponent<ZombiesPlayer, TriggerFilter> {
 }
