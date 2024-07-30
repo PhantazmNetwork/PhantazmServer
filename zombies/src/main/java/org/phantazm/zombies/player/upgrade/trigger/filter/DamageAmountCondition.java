@@ -6,6 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.core.CompareCondition;
 import org.phantazm.zombies.event.trait.DamageEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
@@ -33,27 +34,13 @@ public class DamageAmountCondition implements EventConditionComponent {
         @Override
         public boolean filter(@NotNull DamageEvent event) {
             double amount = event.damage().getAmount();
-            return switch (data.condition) {
-                case GREATER -> amount > data.amount;
-                case LESS_THAN -> amount < data.amount;
-                case GREATER_OR_EQUAL -> amount >= data.amount;
-                case LESS_THAN_OR_EQUAL -> amount <= data.amount;
-                case EQUAL -> amount == data.amount;
-            };
+            return data.condition.compare(amount, data.amount);
         }
-    }
-
-    public enum Condition {
-        GREATER,
-        LESS_THAN,
-        GREATER_OR_EQUAL,
-        LESS_THAN_OR_EQUAL,
-        EQUAL
     }
 
     @DataObject
     public record Data(double amount,
-        @NotNull Condition condition) {
+        @NotNull CompareCondition condition) {
 
     }
 }

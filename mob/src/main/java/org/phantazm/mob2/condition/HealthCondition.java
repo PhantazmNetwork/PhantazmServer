@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.CompareCondition;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
@@ -26,12 +27,6 @@ public class HealthCondition implements SkillConditionComponent {
         return new Internal(data, selector.get());
     }
 
-    public enum Condition {
-        LESS_THAN,
-        EQUAL_TO,
-        GREATER_THAN
-    }
-
     public enum AmountType {
         FLAT,
         PERCENTAGE
@@ -43,7 +38,7 @@ public class HealthCondition implements SkillConditionComponent {
         }
         """)
     @DataObject
-    public record Data(@NotNull HealthCondition.Condition condition,
+    public record Data(@NotNull CompareCondition condition,
         @NotNull AmountType amountType,
         double amount) {
     }
@@ -57,12 +52,7 @@ public class HealthCondition implements SkillConditionComponent {
         }
 
         private boolean canTrigger(LivingEntity target) {
-            float actualHealth = adjust(target.getHealth(), target);
-            return switch (data.condition) {
-                case LESS_THAN -> actualHealth < data.amount;
-                case EQUAL_TO -> actualHealth == data.amount;
-                case GREATER_THAN -> actualHealth > data.amount;
-            };
+            return data.condition.compare(adjust(target.getHealth(), target), data.amount);
         }
 
         private float adjust(float health, LivingEntity target) {
