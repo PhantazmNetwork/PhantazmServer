@@ -15,6 +15,8 @@ import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import org.phantazm.zombies.equipment.perk.effect.shot.ApplyAttributeShotEffect;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 @Model("zombies.upgrade.effect.apply_shot_effect")
 @Cache
 public class ApplyShotEffectEffect implements UpgradeEffectComponent {
@@ -30,23 +32,31 @@ public class ApplyShotEffectEffect implements UpgradeEffectComponent {
 
     @Override
     public @NotNull UpgradeEffect apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
-        return new Internal(data, selectorComponent.apply(injectionStore, zombiesPlayer));
+        return new Internal(data, selectorComponent.apply(injectionStore, zombiesPlayer), new AtomicBoolean());
     }
 
     private record Internal(Data data,
-        Selector selector) implements UpgradeEffect {
+        Selector selector,
+        AtomicBoolean active) implements UpgradeEffect {
 
         @Override
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
-            ShotEffect shotEffect = data.shotEffectType.lookup(zombiesPlayer);
-            if (shotEffect == null) {
+            if (!active.compareAndSet(false, true)) {
                 return;
             }
 
-            selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, entity -> {
-                shotEffect.perform(entity, zombiesPlayer, data.scale);
-            });
+            try {
+                ShotEffect shotEffect = data.shotEffectType.lookup(zombiesPlayer);
+                if (shotEffect == null) {
+                    return;
+                }
+
+                selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, entity ->
+                    shotEffect.perform(entity, zombiesPlayer, data.scale));
+            } finally {
+                active.set(false);
+            }
         }
     }
 
