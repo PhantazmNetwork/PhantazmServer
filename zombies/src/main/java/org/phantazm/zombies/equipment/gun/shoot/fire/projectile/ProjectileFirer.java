@@ -21,6 +21,7 @@ import org.phantazm.zombies.equipment.gun.shoot.endpoint.ShotEndpointSelector;
 import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.shoot.handler.ShotHandler;
 import org.phantazm.zombies.equipment.gun.target.TargetFinder;
+import org.phantazm.zombies.event.equipment.EntitiesHitByGunEvent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.lang.ref.Reference;
@@ -173,10 +174,13 @@ public class ProjectileFirer implements Firer {
 
             GunShot shot = new GunShot(firedShot.start(), collision, target.hits());
             zombiesScene.broadcastEvent(new GunShootEvent(firedShot.gun, shot, firedShot.shooter()));
-            for (ShotHandler shotHandler : shotHandlers) {
-                shotHandler.handle(firedShot.gun(), firedShot.state(), firedShot.shooter(), firedShot.previousHits(),
-                    shot);
-            }
+
+            zombiesScene.broadcastCancellable(new EntitiesHitByGunEvent(firedShot.gun, target.hits(), firedShot.shooter), ignored -> {
+                for (ShotHandler shotHandler : shotHandlers) {
+                    shotHandler.handle(firedShot.gun(), firedShot.state(), firedShot.shooter(), firedShot.previousHits(),
+                        shot);
+                }
+            });
         }
 
         projectile.remove();

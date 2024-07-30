@@ -26,7 +26,6 @@ public class DamageTagCondition implements EventConditionComponent {
     }
 
     private record Internal(Tag<Boolean> tag) implements EventCondition<DamageEvent> {
-
         @Override
         public @NotNull Class<DamageEvent> eventType() {
             return DamageEvent.class;
