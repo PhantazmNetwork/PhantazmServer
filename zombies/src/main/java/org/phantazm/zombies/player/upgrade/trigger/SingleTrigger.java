@@ -37,5 +37,10 @@ public class SingleTrigger implements UpgradeTriggerComponent {
         @Override
         public void disarm() {
         }
+
+        @Override
+        public boolean needsTicking() {
+            return false;
+        }
     }
 }

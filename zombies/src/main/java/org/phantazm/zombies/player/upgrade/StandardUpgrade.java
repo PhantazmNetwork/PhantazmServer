@@ -41,16 +41,31 @@ public class StandardUpgrade implements PlayerUpgradeComponent {
     private static final class Internal implements PlayerUpgrade {
         private final ZombiesPlayer zombiesPlayer;
         private final List<UpgradeTrigger> triggers;
+        private final List<UpgradeTrigger> tickingTriggers;
         private final UpgradeEffect effect;
+        private final boolean effectNeedsTicking;
         private final boolean needsTicking;
 
         private final AtomicBoolean activated;
 
         private Internal(ZombiesPlayer zombiesPlayer, List<UpgradeTrigger> triggers, UpgradeEffect effect) {
+            ArrayList<UpgradeTrigger> tickingTriggers = null;
+            for (UpgradeTrigger trigger : triggers) {
+                if (trigger.needsTicking()) {
+                    (tickingTriggers = (tickingTriggers == null ? new ArrayList<>() : tickingTriggers)).add(trigger);
+                }
+            }
+
+            if (tickingTriggers != null) {
+                tickingTriggers.trimToSize();
+            }
+
             this.zombiesPlayer = zombiesPlayer;
             this.triggers = triggers;
+            this.tickingTriggers = tickingTriggers;
             this.effect = effect;
-            this.needsTicking = effect.needsTicking();
+            this.effectNeedsTicking = effect.needsTicking();
+            this.needsTicking = effect.needsTicking() || tickingTriggers != null;
             this.activated = new AtomicBoolean();
         }
 
@@ -65,7 +80,15 @@ public class StandardUpgrade implements PlayerUpgradeComponent {
 
         @Override
         public void tick(long time) {
-            effect.tick();
+            if (tickingTriggers != null) {
+                for (UpgradeTrigger trigger : tickingTriggers) {
+                    trigger.tick(time);
+                }
+            }
+
+            if (effectNeedsTicking) {
+                effect.tick();
+            }
         }
 
         @Override

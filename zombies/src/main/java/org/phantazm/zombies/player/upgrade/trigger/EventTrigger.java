@@ -67,6 +67,11 @@ public class EventTrigger implements UpgradeTriggerComponent {
             zombiesPlayer.getScene().sceneNode().removeListener(listener);
         }
 
+        @Override
+        public boolean needsTicking() {
+            return false;
+        }
+
         private boolean filter(Event event) {
             return eventFilter.test(event);
         }
