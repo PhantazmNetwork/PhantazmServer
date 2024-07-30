@@ -2,7 +2,6 @@ package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
@@ -34,19 +33,12 @@ public class ApplyShotEffectEffect implements UpgradeEffectComponent {
         return new Internal(data, selectorComponent.apply(injectionStore, zombiesPlayer));
     }
 
-    private static final class Internal extends SingleEventEffect<Event> {
-        private final Data data;
-        private final Selector selector;
-
-        private Internal(Data data, Selector selector) {
-            super(Event.class);
-            this.data = data;
-            this.selector = selector;
-        }
+    private record Internal(Data data,
+        Selector selector) implements UpgradeEffect {
 
         @Override
-        protected void applyEvent(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
-            @NotNull TriggerData triggerData, @NotNull Event event) {
+        public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
+            @NotNull TriggerData triggerData) {
             ShotEffect shotEffect = data.shotEffectType.lookup(zombiesPlayer);
             if (shotEffect == null) {
                 return;

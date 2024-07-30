@@ -2,7 +2,6 @@ package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.LivingEntity;
-import net.minestom.server.event.Event;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -30,24 +29,23 @@ public class HealEffect implements UpgradeEffectComponent {
         return new Internal(data, selectorComponent.apply(injectionStore, zombiesPlayer));
     }
 
-    private static final class Internal extends SingleEventEffect<Event> {
+    private static final class Internal implements UpgradeEffect {
         private final Data data;
         private final Selector selector;
         private final Tag<Boolean> tag;
 
         private Internal(Data data, Selector selector) {
-            super(Event.class);
             this.data = data;
             this.selector = selector;
             this.tag = Tag.Boolean(data.tag);
         }
 
         @Override
-        protected void applyEvent(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
-            @NotNull TriggerData triggerData, @NotNull Event event) {
+        public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
+            @NotNull TriggerData triggerData) {
 
             double healAmount;
-            if (event instanceof DamageEvent damageEvent) {
+            if (triggerData.raw() instanceof DamageEvent damageEvent) {
                 healAmount = damageEvent.damage().getTag(tag) ? data.specialHealAmount : data.healAmount;
             } else {
                 healAmount = data.healAmount;
