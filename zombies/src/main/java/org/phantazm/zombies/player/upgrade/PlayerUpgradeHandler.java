@@ -11,6 +11,7 @@ import java.util.*;
 public class PlayerUpgradeHandler implements Tickable {
     private final Map<Key, PlayerUpgrade> upgrades;
     private final List<PlayerUpgrade> tickables;
+    private final ZombiesPlayer zombiesPlayer;
 
     public PlayerUpgradeHandler(@NotNull Map<Key, PlayerUpgradeComponent> upgradeComponents,
         @NotNull ZombiesPlayer zombiesPlayer) {
@@ -26,19 +27,20 @@ public class PlayerUpgradeHandler implements Tickable {
         }
 
         this.tickables = List.copyOf(tickables);
+        this.zombiesPlayer = zombiesPlayer;
     }
 
     public void activateUpgrade(@NotNull Key key) {
         PlayerUpgrade upgrade = upgrades.get(key);
         if (upgrade != null) {
-            upgrade.start();
+            zombiesPlayer.addActivable(upgrade);
         }
     }
 
     public void deactivateUpgrade(@NotNull Key key) {
         PlayerUpgrade upgrade = upgrades.get(key);
         if (upgrade != null) {
-            upgrade.end();
+            zombiesPlayer.removeActivable(upgrade);
         }
     }
 
