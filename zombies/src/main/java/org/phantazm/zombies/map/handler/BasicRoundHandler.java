@@ -133,4 +133,9 @@ public class BasicRoundHandler implements RoundHandler {
     public void enableEndless() {
         this.isEndless = true;
     }
+
+    @Override
+    public @NotNull Optional<Endless> endless() {
+        return isEndless ? Optional.of(endless) : Optional.empty();
+    }
 }

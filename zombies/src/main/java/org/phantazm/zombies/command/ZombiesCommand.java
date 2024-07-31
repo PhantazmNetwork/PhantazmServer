@@ -1,10 +1,12 @@
 package org.phantazm.zombies.command;
 
 import com.github.steanky.element.core.key.KeyParser;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.command.builder.Command;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.loader.Loader;
+import org.phantazm.mob2.MobCreator;
 import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.modifier.ModifierHandler;
@@ -13,13 +15,14 @@ import org.phantazm.zombies.scene2.ZombiesSceneCreator;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 public class ZombiesCommand extends Command {
     public ZombiesCommand(@NotNull ZombiesJoiner joiner, @NotNull Map<? super UUID, ? extends Party> parties,
         @NotNull KeyParser keyParser, @NotNull Loader<ZombiesSceneCreator> zombiesSceneCreators,
         long joinRatelimit, @NotNull ZombiesStatsDatabase zombiesDatabase, @NotNull ModifierCommandConfig commandConfig,
-        @NotNull Loader<ModifierHandler> modifierHandlerLoader) {
+        @NotNull Loader<ModifierHandler> modifierHandlerLoader, @NotNull Loader<MobCreator> mobLoader) {
         super("zombies", "z");
 
         Objects.requireNonNull(joiner);
@@ -38,5 +41,6 @@ public class ZombiesCommand extends Command {
         addSubcommand(new ZombiesRejoinCommand(joiner));
         addSubcommand(new ModifierCommand(keyParser, commandConfig, modifierHandlerLoader));
         addSubcommand(new TogglePlayerUpgradeCommand(keyParser));
+        addSubcommand(new SpawnMobCommand(mobLoader));
     }
 }

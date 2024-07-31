@@ -2,6 +2,7 @@ package org.phantazm.zombies.map.handler;
 
 import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.map.Round;
 
 import java.util.Optional;
@@ -23,4 +24,6 @@ public interface RoundHandler extends Tickable {
     boolean isEndless();
 
     void enableEndless();
+
+    @NotNull Optional<Endless> endless();
 }

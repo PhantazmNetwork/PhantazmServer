@@ -210,7 +210,7 @@ public final class ZombiesFeature {
         ZombiesJoiner joiner = new ZombiesJoiner(sceneCreatorLoader, modifierHandlerLoader);
 
         MinecraftServer.getCommandManager().register(new ZombiesCommand(joiner, parties, keyParser, sceneCreatorLoader,
-            zombiesConfig.joinRatelimit(), database, commandConfig, modifierHandlerLoader));
+            zombiesConfig.joinRatelimit(), database, commandConfig, modifierHandlerLoader, MobFeature.mobLoader()));
     }
 
     private record PreloadedMap(@NotNull List<String> instancePath,

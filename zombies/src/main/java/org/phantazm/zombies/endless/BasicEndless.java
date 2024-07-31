@@ -485,6 +485,32 @@ public class BasicEndless implements Endless {
         this.zombiesScene.get().addListener(MobSetupEvent.class, this::onMobSetup);
     }
 
+    @Override
+    public void scaleMob(@NotNull Mob mob, int endlessRound) {
+        ConfigElement bypassesScaling = mob.data().extra().atOrDefault(ExtraNodeKeys.BYPASS_ENDLESS_SCALING,
+            ConfigPrimitive.FALSE);
+
+        if (!bypassesScaling.isBoolean() || bypassesScaling.asBoolean()) {
+            return;
+        }
+
+
+        Key mobKey = mob.data().key();
+        ConfigNode extra = mob.data().extra();
+
+        ScalingValue[] values = scaling(mobKey, extra);
+
+        ScalingValue healthScaling = Objects.requireNonNullElse(values[0], data.healthScaling);
+        ScalingValue damageScaling = Objects.requireNonNullElse(values[1], data.damageScaling);
+        ScalingValue speedScaling = Objects.requireNonNullElse(values[2], data.speedScaling);
+
+        scaleAttribute(mob, Attribute.MAX_HEALTH, healthScaling, endlessRound);
+        scaleAttribute(mob, Attribute.ATTACK_DAMAGE, damageScaling, endlessRound);
+        scaleAttribute(mob, Attribute.MOVEMENT_SPEED, speedScaling, endlessRound);
+
+        mob.heal();
+    }
+
     private List<Introduction> applicableIntroductions(int endlessRound) {
         List<Introduction> applicableIntroductions = null;
         for (Introduction introduction : introductions) {
@@ -544,14 +570,6 @@ public class BasicEndless implements Endless {
     };
 
     private void onMobSetup(@NotNull MobSetupEvent event) {
-        Mob mob = event.target();
-        ConfigElement bypassesScaling = mob.data().extra().atOrDefault(ExtraNodeKeys.BYPASS_ENDLESS_SCALING,
-            ConfigPrimitive.FALSE);
-
-        if (!bypassesScaling.isBoolean() || bypassesScaling.asBoolean()) {
-            return;
-        }
-
         this.zombiesScene.get().getAcquirable().sync(self -> {
             RoundHandler roundHandler = self.map().roundHandler();
             if (!roundHandler.isEndless()) {
@@ -563,20 +581,7 @@ public class BasicEndless implements Endless {
                 return;
             }
 
-            Key mobKey = mob.data().key();
-            ConfigNode extra = mob.data().extra();
-
-            ScalingValue[] values = scaling(mobKey, extra);
-
-            ScalingValue healthScaling = Objects.requireNonNullElse(values[0], data.healthScaling);
-            ScalingValue damageScaling = Objects.requireNonNullElse(values[1], data.damageScaling);
-            ScalingValue speedScaling = Objects.requireNonNullElse(values[2], data.speedScaling);
-
-            scaleAttribute(mob, Attribute.MAX_HEALTH, healthScaling, endlessRound);
-            scaleAttribute(mob, Attribute.ATTACK_DAMAGE, damageScaling, endlessRound);
-            scaleAttribute(mob, Attribute.MOVEMENT_SPEED, speedScaling, endlessRound);
-
-            mob.heal();
+            scaleMob(event.target(), endlessRound);
         });
     }
 
