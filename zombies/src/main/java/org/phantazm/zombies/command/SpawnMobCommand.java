@@ -34,7 +34,7 @@ public class SpawnMobCommand extends SandboxLockedCommand {
                 for (Key key : mobLoader.data().keySet()) {
                     suggestion.addEntry(new SuggestionEntry(key.asString()));
                 }
-            }));
+            }), ROUND);
     }
 
     @Override
@@ -83,6 +83,10 @@ public class SpawnMobCommand extends SandboxLockedCommand {
             });
 
             sender.sendMessage(Component.text("Mob stats scaled to round " + round, NamedTextColor.GREEN));
+        });
+
+        roundHandler.currentRound().ifPresent(round -> {
+            round.addMob(spawned);
         });
     }
 }
