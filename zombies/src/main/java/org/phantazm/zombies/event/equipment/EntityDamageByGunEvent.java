@@ -57,6 +57,11 @@ public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableE
     }
 
     @Override
+    public @NotNull Entity target() {
+        return damagedEntity;
+    }
+
+    @Override
     public float damageAmount() {
         return damage;
     }
