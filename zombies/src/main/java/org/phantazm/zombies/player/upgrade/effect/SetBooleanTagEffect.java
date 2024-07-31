@@ -86,8 +86,6 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
     }
 
     @DataObject
-    public record Data(@NotNull String tag,
-        int increment,
-        int limit) {
+    public record Data(@NotNull String tag) {
     }
 }
