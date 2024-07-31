@@ -60,30 +60,28 @@ public class BossBarTimerAction implements PowerupActionComponent {
         private long startTicks = -1;
         private BossBar bossBar;
 
-        private volatile int time;
+        protected volatile int time;
 
         private Action(Data data, Instance instance, Map<PlayerView, ZombiesPlayer> playerMap,
             TickFormatter tickFormatter) {
             this.data = data;
             this.instance = instance;
             this.predicate = new DeactivationPredicate() {
-                private volatile int time;
-
                 @Override
                 public void activate(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer, long time) {
-                    Attribute attribute = Attributes.getOrRegister("phantazm.powerup.duration." + powerup.key().value(), 0);
+                    Attribute attribute = Attributes.get("phantazm.powerup.duration." + powerup.key().value());
                     Optional<Player> playerOptional;
                     if (zombiesPlayer == null || (playerOptional = zombiesPlayer.getPlayer()).isEmpty()) {
-                        this.time = (int) data.duration;
+                        Action.this.time = (int) data.duration;
                     } else {
-                        this.time = Math.round(AttributeUtils.computeWithBase(data.duration, playerOptional.get()
+                        Action.this.time = Math.round(AttributeUtils.computeWithBase(data.duration, playerOptional.get()
                             .getAttribute(attribute)));
                     }
                 }
 
                 @Override
                 public boolean shouldDeactivate(long time) {
-                    return startTicks >= this.time;
+                    return startTicks >= Action.this.time;
                 }
             };
             this.playerMap = playerMap;
@@ -105,14 +103,7 @@ public class BossBarTimerAction implements PowerupActionComponent {
 
         @Override
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
-            Attribute attribute = Attributes.getOrRegister("phantazm.powerup.duration." + powerup.key().value(), 0);
-            Optional<Player> playerOptional;
-            if ((playerOptional = player.getPlayer()).isEmpty()) {
-                this.time = (int) data.duration;
-            } else {
-                this.time = Math.round(AttributeUtils.computeWithBase(data.duration, playerOptional.get()
-                    .getAttribute(attribute)));
-            }
+            this.predicate.activate(powerup, player, time);
 
             this.startTicks = 0;
 

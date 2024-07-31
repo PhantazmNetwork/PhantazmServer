@@ -11,6 +11,7 @@ import com.github.steanky.ethylene.mapper.MappingProcessorSource;
 import com.github.steanky.ethylene.mapper.type.Token;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -123,6 +124,11 @@ public final class ZombiesFeature {
             PowerupData powerupData = powerupDataProcessor.dataFromElement(node);
             return List.of(ObjectExtractor.entry(powerupData.id(), powerupData));
         })).accepting(powerups -> {
+            for (PowerupData data : powerups) {
+                Attribute duration = new Attribute("phantazm.powerup.duration." + data.id().value(), 0.0f, false);
+                duration.register();
+            }
+
             LOGGER.info("Loaded {} powerups", powerups.size());
         }).mergingMap(powerupDataMap -> {
             return new BasicPowerupHandlerSource(powerupDataMap, contextManager);

@@ -38,7 +38,7 @@ public class TimedDeactivationPredicate implements DeactivationPredicateComponen
     private static class Predicate implements DeactivationPredicate {
         private final Data data;
         private volatile int startTick = -1;
-        private volatile int time;
+        private volatile int time = -1;
 
         private Predicate(Data data) {
             this.data = data;
@@ -48,7 +48,7 @@ public class TimedDeactivationPredicate implements DeactivationPredicateComponen
         public void activate(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer, long time) {
             startTick = MinecraftServer.currentTick();
 
-            Attribute attribute = Attributes.getOrRegister("phantazm.powerup.duration." + powerup.key().value(), 0);
+            Attribute attribute = Attributes.get("phantazm.powerup.duration." + powerup.key().value());
             Optional<Player> playerOptional;
             if (zombiesPlayer == null || (playerOptional = zombiesPlayer.getPlayer()).isEmpty()) {
                 this.time = (int) data.time;
@@ -63,7 +63,12 @@ public class TimedDeactivationPredicate implements DeactivationPredicateComponen
                 return false;
             }
 
-            return MinecraftServer.currentTick() - startTick >= this.time;
+            int currentTime = this.time;
+            if (currentTime == -1) {
+                return false;
+            }
+
+            return MinecraftServer.currentTick() - startTick >= currentTime;
         }
     }
 }

@@ -56,17 +56,6 @@ public final class Attributes {
         return Objects.requireNonNullElse(Attribute.fromKey(name), NIL);
     }
 
-    public static @NotNull Attribute getOrRegister(@NotNull String name, float baseValue) {
-        Attribute attribute = Attribute.fromKey(name);
-        if (attribute != null) {
-            return attribute;
-        }
-
-        attribute = new Attribute(name, baseValue, false);
-        attribute.register();
-        return attribute;
-    }
-
     public static void registerAll() {
         HITBOX_EXPANSION.register();
         FIRE_RATE_MULTIPLIER.register();
