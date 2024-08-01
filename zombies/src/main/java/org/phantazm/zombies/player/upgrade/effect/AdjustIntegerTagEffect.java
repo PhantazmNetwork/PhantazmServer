@@ -56,12 +56,16 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, target -> {
-                target.tagHandler().updateTag(tag, currentValue -> {
+                int newValue = target.tagHandler().updateAndGetTag(tag, currentValue -> {
                     int next = currentValue + data.increment;
                     return data.increment < 0 ? Math.max(next, data.limit) : Math.min(next, data.limit);
                 });
 
-                map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
+                if (newValue != 0) {
+                    map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
+                } else {
+                    map.remove(target.getUuid());
+                }
             });
         }
 
