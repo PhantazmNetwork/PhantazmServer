@@ -64,6 +64,10 @@ public class PlayerUpgradeHandler implements Tickable {
         return upgrades.get(key);
     }
 
+    public @NotNull ZombiesPlayer zombiesPlayer() {
+        return zombiesPlayer;
+    }
+
     @Override
     public void tick(long time) {
         for (PlayerUpgrade upgrade : tickables) {

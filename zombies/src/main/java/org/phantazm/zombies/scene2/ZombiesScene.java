@@ -39,7 +39,6 @@ import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.player.upgrade.PlayerUpgradeComponent;
 import org.phantazm.zombies.player.upgrade.PlayerUpgradeHandler;
-import org.phantazm.zombies.player.upgrade.UpgradeActivator;
 import org.phantazm.zombies.player.upgrade.UpgradeActivatorComponent;
 import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageKeys;
@@ -73,8 +72,6 @@ public class ZombiesScene extends InstanceScene implements EventScene {
     private boolean sandbox;
     private boolean restricted;
     private boolean modified;
-
-    private UpgradeActivator activator;
 
     private final Set<ModifierComponent> activeModifiers;
     private final Set<ModifierComponent> activeModifiersView;
@@ -299,6 +296,10 @@ public class ZombiesScene extends InstanceScene implements EventScene {
 
         if (!playerUpgradeComponentMap.isEmpty()) {
             for (PlayerUpgradeHandler upgradeHandler : upgradeHandlers.values()) {
+                if (upgradeHandler.zombiesPlayer().hasQuit()) {
+                    continue;
+                }
+
                 upgradeHandler.tick(time);
             }
         }
@@ -428,8 +429,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
     }
 
     public void hook() {
-        this.activator = upgradeActivatorComponent.apply(InjectionStore.of(), this);
-        this.activator.hook();
+        upgradeActivatorComponent.apply(InjectionStore.of(), this).hook();
     }
 
     @SuppressWarnings("unchecked")
