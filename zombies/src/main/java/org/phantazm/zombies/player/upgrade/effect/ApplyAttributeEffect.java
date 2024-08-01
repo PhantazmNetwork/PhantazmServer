@@ -8,7 +8,6 @@ import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +56,8 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         private final Map<UUID, Reference<LivingEntity>> targets;
         private final Interval interval;
 
+        private volatile boolean isBroadcasting;
+
         private Internal(Data data, Selector selector) {
             this.data = data;
             this.selector = selector;
@@ -72,17 +73,27 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         @Override
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
+            if (isBroadcasting) {
+                return;
+            }
+
             Player player = zombiesPlayer.getPlayer().orElse(null);
 
             selector.select(upgrade, zombiesPlayer, triggerData).forType(LivingEntity.class, entity -> {
                 double amount = levelTag == null ? data.amount : data.amount * entity.getTag(levelTag);
                 if (player != null) {
-                    CancellableEvent event = new ZombiesPlayerModifyAttributeEvent(player, zombiesPlayer, entity,
-                        this.attribute, uuid, amount);
+                    ZombiesPlayerModifyAttributeEvent event = new ZombiesPlayerModifyAttributeEvent(player,
+                        zombiesPlayer, entity, this.attribute, uuid, amount);
+
+                    isBroadcasting = true;
                     zombiesPlayer.getScene().broadcastEvent(event);
+                    isBroadcasting = false;
+
                     if (event.isCancelled()) {
                         return;
                     }
+
+                    amount = event.attributeAmount();
                 }
 
                 AttributeInstance instance = entity.getAttribute(attribute);
