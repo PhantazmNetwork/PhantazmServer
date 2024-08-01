@@ -1,7 +1,6 @@
 package org.phantazm.zombies.command;
 
 import com.github.steanky.element.core.key.KeyParser;
-import net.kyori.adventure.key.Key;
 import net.minestom.server.command.builder.Command;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.guild.party.Party;
@@ -15,7 +14,6 @@ import org.phantazm.zombies.scene2.ZombiesSceneCreator;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 public class ZombiesCommand extends Command {
@@ -42,5 +40,6 @@ public class ZombiesCommand extends Command {
         addSubcommand(new ModifierCommand(keyParser, commandConfig, modifierHandlerLoader));
         addSubcommand(new TogglePlayerUpgradeCommand(keyParser));
         addSubcommand(new SpawnMobCommand(mobLoader));
+        addSubcommand(new DebugCommand());
     }
 }
