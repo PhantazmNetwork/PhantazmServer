@@ -7,39 +7,56 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayerUpgradeHandler implements Tickable {
+    private final Map<Key, PlayerUpgradeComponent> upgradeComponents;
     private final Map<Key, PlayerUpgrade> upgrades;
     private final List<PlayerUpgrade> tickables;
+
     private final ZombiesPlayer zombiesPlayer;
 
     public PlayerUpgradeHandler(@NotNull Map<Key, PlayerUpgradeComponent> upgradeComponents,
         @NotNull ZombiesPlayer zombiesPlayer) {
-        this.upgrades = new HashMap<>(upgradeComponents.size());
-        List<PlayerUpgrade> tickables = new ArrayList<>(upgradeComponents.size());
+        this.upgradeComponents = Map.copyOf(upgradeComponents);
+        this.upgrades = new ConcurrentHashMap<>();
+        this.tickables = new CopyOnWriteArrayList<>();
 
-        for (Map.Entry<Key, PlayerUpgradeComponent> entry : upgradeComponents.entrySet()) {
-            PlayerUpgrade upgrade = entry.getValue().apply(InjectionStore.of(), zombiesPlayer);
-            this.upgrades.put(entry.getKey(), upgrade);
-            if (upgrade.needsTicking()) {
-                tickables.add(upgrade);
-            }
-        }
-
-        this.tickables = List.copyOf(tickables);
         this.zombiesPlayer = zombiesPlayer;
     }
 
+    private PlayerUpgrade createNewUpgrade(Key key) {
+        PlayerUpgrade newUpgrade = upgradeComponents.get(key).apply(InjectionStore.of(), zombiesPlayer);
+        if (newUpgrade.needsTicking()) {
+            tickables.add(newUpgrade);
+        }
+
+        return newUpgrade;
+    }
+
     public void activateUpgrade(@NotNull Key key) {
-        PlayerUpgrade upgrade = upgrades.get(key);
-        if (upgrade != null) {
+        if (!upgradeComponents.containsKey(key)) {
+            return;
+        }
+
+        PlayerUpgrade upgrade = upgrades.computeIfAbsent(key, this::createNewUpgrade);
+        if (!upgrade.isActivated()) {
             zombiesPlayer.addActivable(upgrade);
         }
     }
 
     public void deactivateUpgrade(@NotNull Key key) {
+        if (!upgradeComponents.containsKey(key)) {
+            return;
+        }
+
         PlayerUpgrade upgrade = upgrades.get(key);
         if (upgrade != null) {
+            if (upgrade.needsTicking()) {
+                tickables.remove(upgrade);
+            }
+
             zombiesPlayer.removeActivable(upgrade);
         }
     }
