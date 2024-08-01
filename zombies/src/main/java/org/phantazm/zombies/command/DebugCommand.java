@@ -48,9 +48,14 @@ public class DebugCommand extends SandboxLockedCommand {
         scene.setDebug(true);
 
         EventNode<Event> node = scene.sceneNode();
-        node.addListener(procFireListener);
-        node.addListener(damageEventListener);
-        node.addListener(damageByGunListener);
+
+        EventNode<Event> loggerNode = EventNode.all("debug-logger").setPriority(Integer.MAX_VALUE);
+
+        loggerNode.addListener(procFireListener);
+        loggerNode.addListener(damageEventListener);
+        loggerNode.addListener(damageByGunListener);
+
+        node.addChild(loggerNode);
     }
 
     private void onProcFire(ZombiesPlayerProcFireEvent event) {
