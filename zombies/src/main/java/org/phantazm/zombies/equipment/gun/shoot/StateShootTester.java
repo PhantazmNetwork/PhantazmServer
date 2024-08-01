@@ -54,16 +54,13 @@ public class StateShootTester implements ShootTester {
 
     @Override
     public boolean isFiring(@NotNull GunState state) {
-        return state.ticksSinceLastFire() * fireRateFactor() < stats.shotInterval();
+        return state.ticksSinceLastShot() < GunUtils.exactDelayTicks(stats.shotInterval(),
+            entitySupplier.get().orElse(null));
     }
 
     @Override
     public boolean isShooting(@NotNull GunState state) {
-        return state.ticksSinceLastShot() * fireRateFactor() < stats.shootSpeed();
-    }
-
-    private float fireRateFactor() {
-        return this.entitySupplier.get().map(GunUtils::fireRateFactor).orElse(1F);
-
+        return state.ticksSinceLastShot() < GunUtils.exactDelayTicks(stats.shootSpeed(),
+            entitySupplier.get().orElse(null));
     }
 }

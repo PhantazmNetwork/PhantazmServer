@@ -8,7 +8,7 @@ import java.util.Objects;
 public final class Attributes {
     public static final Attribute HITBOX_EXPANSION = new Attribute("phantazm.hitbox_expand", 0.35F, false);
 
-    public static final Attribute FIRE_RATE_MULTIPLIER = new Attribute("phantazm.fire_rate", 1F, false);
+    public static final Attribute GUN_FIRE_DELAY = new Attribute("phantazm.gun_fire_delay", 0F, false);
 
     public static final Attribute REVIVE_TICKS = new Attribute("phantazm.revive_ticks", 30F, false);
 
@@ -58,7 +58,7 @@ public final class Attributes {
 
     public static void registerAll() {
         HITBOX_EXPANSION.register();
-        FIRE_RATE_MULTIPLIER.register();
+        GUN_FIRE_DELAY.register();
         REVIVE_TICKS.register();
         HEAL_TICKS.register();
         GUN_DAMAGE.register();

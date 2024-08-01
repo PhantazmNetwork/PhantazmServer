@@ -43,7 +43,8 @@ public class ShootExpEffect implements GunEffect {
     public void apply(@NotNull GunState state) {
         if (state.isMainEquipment()) {
             float exp = MathUtils.clamp(
-                state.ammo() > 0 ? (state.ticksSinceLastShot() * fireRateFactor()) / (float) stats.shootSpeed() : 0F,
+                state.ammo() > 0 ? (state.ticksSinceLastShot()) /
+                    GunUtils.exactDelayTicks(stats.shootSpeed(), playerView.getPlayer().orElse(null)) : 0F,
                 0, 1);
 
             playerView.getPlayer().ifPresent(player -> player.setExp(exp));
@@ -52,10 +53,6 @@ public class ShootExpEffect implements GunEffect {
             playerView.getPlayer().ifPresent(player -> player.setExp(0));
             currentlyActive = false;
         }
-    }
-
-    private float fireRateFactor() {
-        return playerView.getPlayer().map(GunUtils::fireRateFactor).orElse(1F);
     }
 
     @Override
