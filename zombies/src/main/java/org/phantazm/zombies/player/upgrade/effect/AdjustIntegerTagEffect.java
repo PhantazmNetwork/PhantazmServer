@@ -45,7 +45,7 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
 
         private Internal(Data data, Selector selector) {
             this.data = data;
-            this.tag = Tag.Integer(data.tag);
+            this.tag = Tag.Integer(data.tag).defaultValue(0);
             this.selector = selector;
 
             this.map = new ConcurrentHashMap<>();
