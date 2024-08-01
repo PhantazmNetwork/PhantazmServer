@@ -49,16 +49,16 @@ public class DamageShotHandler implements ShotHandler {
     @Override
     public void handle(@NotNull Gun gun, @NotNull GunState state, @NotNull Entity attacker,
         @NotNull Collection<UUID> previousHits, @NotNull GunShot shot) {
-        handleDamageTargets(gun, attacker, shot.gunHits(), data.damage);
+        handleDamageTargets(gun, attacker, shot.gunHits(), data.damage, data.headshotDamage);
     }
 
-    private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damageAmount) {
+    private void handleDamageTargets(Gun gun, Entity attacker, Collection<GunHit> targets, float damageAmount, float headshotDamageAmount) {
         for (GunHit target : targets) {
             LivingEntity targetEntity = target.entity();
             boolean headshot = target.isHeadshot();
 
             EntityDamageByGunEvent event =
-                new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, damageAmount);
+                new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, headshot ? headshotDamageAmount : damageAmount);
             zombiesScene.broadcastEvent(event);
 
             if (event.isCancelled()) {
