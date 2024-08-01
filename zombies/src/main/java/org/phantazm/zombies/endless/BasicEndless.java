@@ -494,11 +494,7 @@ public class BasicEndless implements Endless {
             return;
         }
 
-
-        Key mobKey = mob.data().key();
-        ConfigNode extra = mob.data().extra();
-
-        ScalingValue[] values = scaling(mobKey, extra);
+        ScalingValue[] values = scaling(mob.data().key(), mob.data().extra());
 
         ScalingValue healthScaling = Objects.requireNonNullElse(values[0], data.healthScaling);
         ScalingValue damageScaling = Objects.requireNonNullElse(values[1], data.damageScaling);
