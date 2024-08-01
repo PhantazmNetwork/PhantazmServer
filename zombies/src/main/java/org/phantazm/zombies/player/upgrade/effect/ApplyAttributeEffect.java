@@ -98,9 +98,12 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
 
                 AttributeInstance instance = entity.getAttribute(attribute);
                 instance.removeModifier(uuid);
-                instance.addModifier(new AttributeModifier(uuid, uuidString, amount, data.operation));
 
-                targets.put(entity.getUuid(), new WeakReference<>(entity));
+                // 0 amount modifiers can never do anything
+                if (amount != 0) {
+                    instance.addModifier(new AttributeModifier(uuid, uuidString, amount, data.operation));
+                    targets.put(entity.getUuid(), new WeakReference<>(entity));
+                }
             });
         }
 
