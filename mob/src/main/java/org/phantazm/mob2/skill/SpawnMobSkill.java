@@ -174,6 +174,10 @@ public class SpawnMobSkill implements SkillComponent {
 
         private void spawnAt(Mob self, Instance instance, Collection<? extends Point> targets) {
             MobSpawner mobSpawner = self.extensions().get(BasicMobSpawner.SPAWNER_KEY);
+            if (!mobSpawner.canSpawn(data.identifier)) {
+                return;
+            }
+
             for (Point point : targets) {
                 callback.accept(mobSpawner.spawn(data.identifier, instance, Pos.fromPoint(data.offset == null ? point :
                     point.add(data.offset.x(), data.offset.y(), data.offset.z())), newMob -> {
