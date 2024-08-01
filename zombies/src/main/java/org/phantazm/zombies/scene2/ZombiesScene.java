@@ -72,6 +72,7 @@ public class ZombiesScene extends InstanceScene implements EventScene {
     private boolean sandbox;
     private boolean restricted;
     private boolean modified;
+    private boolean debug;
 
     private final Set<ModifierComponent> activeModifiers;
     private final Set<ModifierComponent> activeModifiersView;
@@ -410,6 +411,14 @@ public class ZombiesScene extends InstanceScene implements EventScene {
 
     public boolean isModified() {
         return modified;
+    }
+
+    public boolean isDebug() {
+        return debug;
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
     public @NotNull @UnmodifiableView Set<ModifierComponent> activeModifiers() {

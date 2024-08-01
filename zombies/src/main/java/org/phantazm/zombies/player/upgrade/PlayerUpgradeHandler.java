@@ -35,6 +35,10 @@ public class PlayerUpgradeHandler implements Tickable {
         return newUpgrade;
     }
 
+    public boolean hasUpgrade(@NotNull Key key) {
+        return upgradeComponents.containsKey(key);
+    }
+
     public void activateUpgrade(@NotNull Key key) {
         if (!upgradeComponents.containsKey(key)) {
             return;

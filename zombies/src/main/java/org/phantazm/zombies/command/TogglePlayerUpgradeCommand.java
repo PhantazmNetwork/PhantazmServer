@@ -3,7 +3,8 @@ package org.phantazm.zombies.command;
 import com.github.steanky.element.core.key.Constants;
 import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
@@ -40,13 +41,14 @@ public class TogglePlayerUpgradeCommand extends SandboxLockedCommand {
         }
 
         Key key = keyParser.parseKey(upgrade);
-        PlayerUpgrade playerUpgrade = handler.getUpgrade(key);
-        if (playerUpgrade == null) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<red>Invalid upgrade: " + key));
+        if (!handler.hasUpgrade(key)) {
+            sender.sendMessage(Component.text("Invalid upgrade " + key, NamedTextColor.RED));
             return;
         }
 
-        if (playerUpgrade.isActivated()) {
+        PlayerUpgrade playerUpgrade = handler.getUpgrade(key);
+
+        if (playerUpgrade != null && playerUpgrade.isActivated()) {
             handler.deactivateUpgrade(key);
             sender.sendMessage("Deactivated " + key);
         } else {
