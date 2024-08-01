@@ -40,10 +40,7 @@ public class PlayerUpgradeHandler implements Tickable {
             return;
         }
 
-        PlayerUpgrade upgrade = upgrades.computeIfAbsent(key, this::createNewUpgrade);
-        if (!upgrade.isActivated()) {
-            zombiesPlayer.addActivable(upgrade);
-        }
+        zombiesPlayer.addActivable(upgrades.computeIfAbsent(key, this::createNewUpgrade));
     }
 
     public void deactivateUpgrade(@NotNull Key key) {
@@ -52,13 +49,15 @@ public class PlayerUpgradeHandler implements Tickable {
         }
 
         PlayerUpgrade upgrade = upgrades.get(key);
-        if (upgrade != null) {
-            if (upgrade.needsTicking()) {
-                tickables.remove(upgrade);
-            }
-
-            zombiesPlayer.removeActivable(upgrade);
+        if (upgrade == null) {
+            return;
         }
+
+        if (upgrade.needsTicking()) {
+            tickables.remove(upgrade);
+        }
+
+        zombiesPlayer.removeActivable(upgrade);
     }
 
     public PlayerUpgrade getUpgrade(@NotNull Key key) {

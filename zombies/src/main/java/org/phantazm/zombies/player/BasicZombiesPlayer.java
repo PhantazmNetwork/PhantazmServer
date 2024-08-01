@@ -141,10 +141,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
             inventoryTick(player, time);
         }
 
-        for (Activable activable : activables) {
-            activable.tick(time);
-        }
-
         module.getStateSwitcher().tick(time);
         taskScheduler.tick(time);
         module.getCoins().tick(time);
