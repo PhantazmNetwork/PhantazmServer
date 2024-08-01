@@ -13,7 +13,7 @@ public class NoUpgradeActivator implements UpgradeActivatorComponent {
     public static NoUpgradeActivator INSTANCE = new NoUpgradeActivator();
 
     @FactoryMethod
-    private NoUpgradeActivator() {
+    public NoUpgradeActivator() {
 
     }
 
