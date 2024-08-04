@@ -46,12 +46,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
     @Override
     protected void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull EntityDamageEvent event) {
-        if (!zombiesPlayer.canTakeDamage()) {
-            event.setCancelled(true);
-            return;
-        }
-
-        if (zombiesPlayer.flags().hasFlag(Flags.GODMODE)) {
+        if (!zombiesPlayer.canTakeDamage() || zombiesPlayer.flags().hasFlag(Flags.GODMODE)) {
             event.setCancelled(true);
             return;
         }
