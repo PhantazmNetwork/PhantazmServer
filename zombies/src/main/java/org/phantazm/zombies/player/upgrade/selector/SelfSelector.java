@@ -1,9 +1,7 @@
 package org.phantazm.zombies.player.upgrade.selector;
 
-import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.Child;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -40,5 +38,16 @@ public class SelfSelector implements SelectorComponent {
 
             return validator.test(player, upgrade, zombiesPlayer, triggerData) ? Target.entities(player) : Target.NONE;
         }
+    }
+
+    @DataObject
+    @Default("""
+        {
+          validator={
+            type='zombies.upgrade.validator.always'
+          }
+        }
+        """)
+    public record Data() {
     }
 }
