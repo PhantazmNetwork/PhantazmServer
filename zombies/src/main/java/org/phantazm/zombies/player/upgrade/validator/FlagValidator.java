@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +49,11 @@ public class FlagValidator implements ValidatorComponent {
         }
     }
 
+    @Default("""
+        {
+          blacklist=false
+        }
+        """)
     @DataObject
     public record Data(@NotNull Set<Key> flags,
         boolean blacklist) {
