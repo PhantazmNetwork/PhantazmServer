@@ -1,9 +1,7 @@
 package org.phantazm.zombies.player.upgrade.effect;
 
-import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.Child;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -20,8 +18,8 @@ public class ConditionalEffect implements UpgradeEffectComponent {
     private final EventFilterComponent filter;
 
     @FactoryMethod
-    public ConditionalEffect(@NotNull @Child("first") UpgradeEffectComponent first,
-        @NotNull @Child("second") UpgradeEffectComponent second,
+    public ConditionalEffect(@NotNull @Child("pass") UpgradeEffectComponent first,
+        @NotNull @Child("fail") UpgradeEffectComponent second,
         @NotNull @Child("filter") EventFilterComponent filter) {
         this.first = first;
         this.second = second;
@@ -30,8 +28,8 @@ public class ConditionalEffect implements UpgradeEffectComponent {
 
     @Override
     public @NotNull UpgradeEffect apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
-        return new Internal(first.apply(injectionStore, zombiesPlayer), second.apply(injectionStore, zombiesPlayer),
-            filter.apply(injectionStore, zombiesPlayer));
+        return new Internal(first.apply(injectionStore, zombiesPlayer),
+            second.apply(injectionStore, zombiesPlayer), filter.apply(injectionStore, zombiesPlayer));
     }
 
     private static final class Internal implements UpgradeEffect {
@@ -45,6 +43,7 @@ public class ConditionalEffect implements UpgradeEffectComponent {
         private Internal(UpgradeEffect first, UpgradeEffect second, TriggerFilter filter) {
             this.first = first;
             this.second = second;
+
             this.filter = filter;
 
             this.firstNeedsTicking = first.needsTicking();
@@ -82,5 +81,15 @@ public class ConditionalEffect implements UpgradeEffectComponent {
         public boolean needsTicking() {
             return firstNeedsTicking || secondNeedsTicking;
         }
+    }
+
+    @DataObject
+    @Default("""
+        {
+          pass={type='zombies.upgrade.effect.none'},
+          fail={type='zombies.upgrade.effect.none'}
+        }
+        """)
+    public record Data() {
     }
 }
