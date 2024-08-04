@@ -59,7 +59,8 @@ public class EntitiesInAreaSelector implements SelectorComponent {
           limitSelf=true,
           target='ENTITIES',
           range=-1.0,
-          limit=-1
+          limit=-1,
+          validator={type='zombies.upgrade.validator.always'}
         }
         """)
     @DataObject

@@ -43,9 +43,7 @@ public class SelfSelector implements SelectorComponent {
     @DataObject
     @Default("""
         {
-          validator={
-            type='zombies.upgrade.validator.always'
-          }
+          validator={type='zombies.upgrade.validator.always'}
         }
         """)
     public record Data() {

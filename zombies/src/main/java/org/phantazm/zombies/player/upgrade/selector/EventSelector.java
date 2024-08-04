@@ -1,6 +1,7 @@
 package org.phantazm.zombies.player.upgrade.selector;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.event.trait.EntityEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -48,6 +49,11 @@ public class EventSelector implements SelectorComponent {
     }
 
     @DataObject
+    @Default("""
+        {
+          validator={type='zombies.upgrade.validator.always'}
+        }
+        """)
     public record Data(boolean useTarget) {
     }
 }
