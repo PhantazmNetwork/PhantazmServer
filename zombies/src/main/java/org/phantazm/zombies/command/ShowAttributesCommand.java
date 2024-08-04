@@ -32,7 +32,7 @@ public class ShowAttributesCommand extends SandboxLockedCommand {
             while (modifierIterator.hasNext()) {
                 AttributeModifier modifier = modifierIterator.next();
                 sender.sendMessage(Component.text("  - amount: " + modifier.getAmount(), NamedTextColor.DARK_GRAY));
-                sender.sendMessage(Component.text("  - operation: " + modifier.getOperation(), NamedTextColor.DARK_GRAY));
+                sender.sendMessage(Component.text("    operation: " + modifier.getOperation(), NamedTextColor.DARK_GRAY));
                 if (modifierIterator.hasNext()) {
                     sender.sendMessage("");
                 }
