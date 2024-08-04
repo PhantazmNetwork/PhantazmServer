@@ -57,8 +57,14 @@ public class DamageShotHandler implements ShotHandler {
             LivingEntity targetEntity = target.entity();
             boolean headshot = target.isHeadshot();
 
+            float finalDamage = Math.max(0, computeDamageAmount(attacker, targetEntity, headshot, damageAmount,
+                headshotDamageAmount));
+            if (finalDamage == 0) {
+                continue;
+            }
+
             EntityDamageByGunEvent event =
-                new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, headshot ? headshotDamageAmount : damageAmount);
+                new EntityDamageByGunEvent(gun, targetEntity, attacker, headshot, false, finalDamage);
             zombiesScene.broadcastEvent(event);
 
             if (event.isCancelled()) {
@@ -70,14 +76,6 @@ public class DamageShotHandler implements ShotHandler {
                 if (event.isInstakill()) {
                     targetEntity.damage(Damage.fromEntity(attacker, targetEntity.getHealth()));
                     return;
-                }
-
-                if (attacker instanceof LivingEntity livingEntity) {
-                    baseDamage = AttributeUtils.computeWithBase(baseDamage, livingEntity.getAttribute(Attributes.GUN_DAMAGE));
-                }
-
-                if (headshot) {
-                    baseDamage = AttributeUtils.computeWithBase(baseDamage, targetEntity.getAttribute(Attributes.HEADSHOT_DAMAGE_RECEIVED));
                 }
 
                 switch (data.armorBehavior) {
@@ -95,6 +93,20 @@ public class DamageShotHandler implements ShotHandler {
                 }
             });
         }
+    }
+
+    private static float computeDamageAmount(Entity attacker, LivingEntity target, boolean headshot, float amount, float headshotAmount) {
+        if (!(attacker instanceof LivingEntity livingAttacker)) {
+            return headshot ? AttributeUtils.computeWithBase(headshotAmount,
+                target.getAttribute(Attributes.HEADSHOT_DAMAGE_RECEIVED)) : amount;
+        }
+
+        float baseDamage = AttributeUtils.computeWithBase(headshotAmount, livingAttacker.getAttribute(Attributes.GUN_DAMAGE));
+        if (!headshot) {
+            return baseDamage;
+        }
+
+        return AttributeUtils.computeWithBase(baseDamage, target.getAttribute(Attributes.HEADSHOT_DAMAGE_RECEIVED));
     }
 
     private static Damage makeDamage(Entity attacker, float amount, boolean headshot) {
