@@ -42,5 +42,6 @@ public class ZombiesCommand extends Command {
         addSubcommand(new SpawnMobCommand(mobLoader));
         addSubcommand(new DebugCommand());
         addSubcommand(new ShowAttributesCommand());
+        addSubcommand(new ListPlayerUpgradeCommand());
     }
 }

@@ -9,6 +9,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public class PlayerUpgradeHandler implements Tickable {
     private final Map<Key, PlayerUpgradeComponent> upgradeComponents;
@@ -66,6 +67,10 @@ public class PlayerUpgradeHandler implements Tickable {
 
     public PlayerUpgrade getUpgrade(@NotNull Key key) {
         return upgrades.get(key);
+    }
+
+    public @NotNull Collection<Map.Entry<Key, PlayerUpgrade>> activeUpgrades() {
+        return upgrades.entrySet().stream().filter(entry -> entry.getValue().isActivated()).collect(Collectors.toList());
     }
 
     public @NotNull ZombiesPlayer zombiesPlayer() {
