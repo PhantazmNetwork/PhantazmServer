@@ -9,24 +9,20 @@ import org.phantazm.mob2.MobCreator;
 import org.phantazm.stats.zombies.ZombiesStatsDatabase;
 import org.phantazm.zombies.modifier.ModifierCommandConfig;
 import org.phantazm.zombies.modifier.ModifierHandler;
+import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.scene2.ZombiesJoiner;
 import org.phantazm.zombies.scene2.ZombiesSceneCreator;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 public class ZombiesCommand extends Command {
     public ZombiesCommand(@NotNull ZombiesJoiner joiner, @NotNull Map<? super UUID, ? extends Party> parties,
         @NotNull KeyParser keyParser, @NotNull Loader<ZombiesSceneCreator> zombiesSceneCreators,
         long joinRatelimit, @NotNull ZombiesStatsDatabase zombiesDatabase, @NotNull ModifierCommandConfig commandConfig,
-        @NotNull Loader<ModifierHandler> modifierHandlerLoader, @NotNull Loader<MobCreator> mobLoader) {
+        @NotNull Loader<ModifierHandler> modifierHandlerLoader, @NotNull Loader<MobCreator> mobLoader,
+        @NotNull Loader<PowerupHandler.Source> powerupLoader) {
         super("zombies", "z");
-
-        Objects.requireNonNull(joiner);
-        Objects.requireNonNull(parties);
-        Objects.requireNonNull(keyParser);
-        Objects.requireNonNull(zombiesSceneCreators);
 
         addSubcommand(new ZombiesJoinCommand(joiner, parties, keyParser, zombiesSceneCreators, modifierHandlerLoader,
             joinRatelimit, zombiesDatabase));
@@ -43,5 +39,6 @@ public class ZombiesCommand extends Command {
         addSubcommand(new DebugCommand());
         addSubcommand(new ShowAttributesCommand());
         addSubcommand(new ListPlayerUpgradeCommand());
+        addSubcommand(new SpawnPowerupCommand(powerupLoader));
     }
 }

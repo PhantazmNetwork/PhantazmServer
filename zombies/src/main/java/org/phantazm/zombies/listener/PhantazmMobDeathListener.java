@@ -7,16 +7,11 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.minestom.server.collision.BoundingBox;
-import net.minestom.server.collision.CollisionUtils;
-import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.event.entity.EntityDeathEvent;
-import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +28,7 @@ import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.Window;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.PowerupHandler;
+import org.phantazm.zombies.powerup.PowerupUtils;
 import org.phantazm.zombies.scene2.ZombiesScene;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +40,6 @@ import java.util.function.Supplier;
 
 public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDeathEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(PhantazmMobDeathListener.class);
-    private static final BoundingBox POWERUP_BOUNDING_BOX = new BoundingBox(0.25, 0.0625, 0.25);
-    private static final Vec DOWNWARD_SEARCH_VECTOR = new Vec(0, -10, 0);
     private static final Vec OFFSET = new Vec(0.5, 0, 0.5);
     private static final double ROOM_PENETRATION_DEPTH = 1.5;
 
@@ -138,18 +132,18 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
         Optional<Room> roomOptional = roomTracker.atPoint(position);
         if (roomOptional.isPresent()) {
-            powerupHandler.spawn(key, seekDown(position));
+            powerupHandler.spawn(key, PowerupUtils.powerupSpawnPosition(instance, position));
             return;
         }
 
-        Optional<Window> windowOptional = windowTracker.closestInRangeToBounds(position, POWERUP_BOUNDING_BOX.width(),
-            POWERUP_BOUNDING_BOX.height(), 10);
+        Optional<Window> windowOptional = windowTracker.closestInRangeToBounds(position, PowerupUtils.POWERUP_BOUNDING_BOX.width(),
+            PowerupUtils.POWERUP_BOUNDING_BOX.height(), 10);
         if (windowOptional.isEmpty()) {
             Optional<Pair<Room, Vec>> nearestRoomOptional =
-                roomTracker.closestInRangeToBoundsWithVec(position, POWERUP_BOUNDING_BOX.width(),
-                    POWERUP_BOUNDING_BOX.height(), 15);
+                roomTracker.closestInRangeToBoundsWithVec(position, PowerupUtils.POWERUP_BOUNDING_BOX.width(),
+                    PowerupUtils.POWERUP_BOUNDING_BOX.height(), 15);
             if (nearestRoomOptional.isEmpty()) {
-                Point targetPoint = seekDown(position);
+                Point targetPoint = PowerupUtils.powerupSpawnPosition(instance, position);
                 LOGGER.warn("Failed to find nearby room or window for powerup spawn at " + targetPoint);
                 powerupHandler.spawn(key, targetPoint);
                 return;
@@ -157,8 +151,8 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
 
             Pair<Room, Vec> nearestRoom = nearestRoomOptional.get();
             Vec roomVec = nearestRoom.right();
-            powerupHandler.spawn(key,
-                seekDown(roomVec.add(roomVec.sub(position).normalize().mul(ROOM_PENETRATION_DEPTH))));
+            powerupHandler.spawn(key, PowerupUtils.powerupSpawnPosition(instance, roomVec.add(roomVec.sub(position).normalize()
+                .mul(ROOM_PENETRATION_DEPTH))));
             return;
         }
 
@@ -185,27 +179,11 @@ public class PhantazmMobDeathListener extends PhantazmMobEventListener<EntityDea
             LOGGER.warn("Unable to find matching room at window near " + center);
         }
 
-        Point test = seekDown(center.add(targetNormal));
+        Point test = PowerupUtils.powerupSpawnPosition(instance, center.add(targetNormal));
         if (roomTracker.atPoint(test).isEmpty()) {
             LOGGER.warn("Spawning powerup outside of a room");
         }
 
         powerupHandler.spawn(key, test);
-    }
-
-    private Point seekDown(Point point) {
-        Chunk chunk = instance.getChunkAt(point);
-        if (chunk == null) {
-            return point;
-        }
-
-        PhysicsResult result = CollisionUtils.handlePhysics(instance, chunk, POWERUP_BOUNDING_BOX, Pos.fromPoint(point),
-            DOWNWARD_SEARCH_VECTOR, null);
-
-        if (!result.hasCollision()) {
-            return point;
-        }
-
-        return result.newPosition();
     }
 }
