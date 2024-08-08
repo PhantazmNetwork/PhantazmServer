@@ -51,7 +51,8 @@ public class TagScaling implements ScalingComponent {
 
     @Default("""
         {
-          defaultValue=0
+          defaultValue=0,
+          selector={type='zombies.upgrade.selector.self'}
         }
         """)
     @DataObject
