@@ -1,6 +1,7 @@
 package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -14,22 +15,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Model("zombies.upgrade.effect.temporal")
 @Cache
 public class TemporalEffect implements UpgradeEffectComponent {
+    private final Data data;
     private final TimerComponent timer;
     private final UpgradeEffectComponent delegate;
 
     @FactoryMethod
-    public TemporalEffect(@NotNull @Child("timer") TimerComponent timer,
+    public TemporalEffect(@NotNull Data data, @NotNull @Child("timer") TimerComponent timer,
         @NotNull @Child("delegate") UpgradeEffectComponent delegate) {
+        this.data = data;
         this.timer = timer;
         this.delegate = delegate;
     }
 
     @Override
     public @NotNull UpgradeEffect apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
-        return new Internal(timer.apply(injectionStore, zombiesPlayer), delegate.apply(injectionStore, zombiesPlayer));
+        return new Internal(data, timer.apply(injectionStore, zombiesPlayer), delegate.apply(injectionStore, zombiesPlayer));
     }
 
     private static final class Internal implements UpgradeEffect {
+        private final Data data;
         private final Timer timer;
         private final UpgradeEffect delegate;
 
@@ -42,7 +46,8 @@ public class TemporalEffect implements UpgradeEffectComponent {
             ZombiesPlayer zombiesPlayer) {
         }
 
-        private Internal(Timer timer, UpgradeEffect delegate) {
+        private Internal(Data data, Timer timer, UpgradeEffect delegate) {
+            this.data = data;
             this.timer = timer;
             this.delegate = delegate;
 
@@ -53,7 +58,8 @@ public class TemporalEffect implements UpgradeEffectComponent {
         @Override
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
-            if (cooldown.compareAndSet(0, timer.getAsInt())) {
+            if (data.resetTimerOnApply ? (cooldown.getAndSet(timer.getAsInt()) == 0) :
+                (cooldown.compareAndSet(0, timer.getAsInt()))) {
                 this.clearData = new ClearData(upgrade, zombiesPlayer);
                 delegate.apply(upgrade, zombiesPlayer, triggerData);
             }
@@ -85,5 +91,15 @@ public class TemporalEffect implements UpgradeEffectComponent {
                 delegate.tick();
             }
         }
+    }
+
+    @Default("""
+        {
+          resetTimerOnApply=false
+        }
+        """)
+    @DataObject
+    public record Data(boolean resetTimerOnApply) {
+
     }
 }
