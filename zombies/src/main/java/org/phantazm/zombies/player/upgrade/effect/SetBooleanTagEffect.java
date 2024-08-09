@@ -1,6 +1,7 @@
 package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -85,6 +86,11 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
         }
     }
 
+    @Default("""
+        {
+          selector={type='zombies.upgrade.selector.self'}
+        }
+        """)
     @DataObject
     public record Data(@NotNull String tag) {
     }
