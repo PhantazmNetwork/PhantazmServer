@@ -1,6 +1,7 @@
 package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +46,7 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
 
         private Internal(Data data, Selector selector) {
             this.data = data;
-            this.tag = Tag.Integer(data.tag).defaultValue(0);
+            this.tag = Tag.Integer(data.tag).defaultValue(data.defaultValue);
             this.selector = selector;
 
             this.map = new ConcurrentHashMap<>();
@@ -61,7 +62,7 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
                     return data.increment < 0 ? Math.max(next, data.limit) : Math.min(next, data.limit);
                 });
 
-                if (newValue != 0) {
+                if (newValue != data.defaultValue) {
                     map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
                 } else {
                     map.remove(target.getUuid());
@@ -95,8 +96,14 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
         }
     }
 
+    @Default("""
+        {
+          defaultValue=0
+        }
+        """)
     @DataObject
     public record Data(@NotNull String tag,
+        int defaultValue,
         int increment,
         int limit) {
     }
