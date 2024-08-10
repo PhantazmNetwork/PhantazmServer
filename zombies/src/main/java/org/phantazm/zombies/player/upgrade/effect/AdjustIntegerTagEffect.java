@@ -98,7 +98,8 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
 
     @Default("""
         {
-          defaultValue=0
+          defaultValue=0,
+          selector={type='zombies.upgrade.selector.self'}
         }
         """)
     @DataObject
