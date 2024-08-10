@@ -45,7 +45,8 @@ public class TagScaling implements ScalingComponent {
             @NotNull TriggerData triggerData) {
             return selector.select(upgrade, zombiesPlayer, triggerData)
                 .forType(Entity.class)
-                .map(entity -> entity.getTag(levelTag)).orElse(data.defaultValue);
+                .map(entity -> entity.getTag(levelTag))
+                .orElse(data.defaultValue);
         }
     }
 
