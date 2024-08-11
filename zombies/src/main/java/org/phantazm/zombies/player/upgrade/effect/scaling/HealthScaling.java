@@ -81,13 +81,11 @@ public class HealthScaling implements ScalingComponent {
             }
 
             double range = largerNumber - smallerNumber;
+            double minMult = Math.min(data.maxMultiplier, data.minMultiplier);
+            double maxMult = Math.max(data.maxMultiplier, data.minMultiplier);
             if(largerNumberIsStart) {
-                double minMult = Math.min(data.maxMultiplier, data.minMultiplier);
-                double maxMult = Math.max(data.maxMultiplier, data.minMultiplier);
                 return ((largerNumber - percentage) / range) * (maxMult - minMult) + minMult;
             } else {
-                double minMult = Math.min(data.maxMultiplier, data.minMultiplier);
-                double maxMult = Math.max(data.maxMultiplier, data.minMultiplier);
                 return ((range - (largerNumber - percentage)) / range) * (maxMult - minMult) + minMult;
             }
         }
