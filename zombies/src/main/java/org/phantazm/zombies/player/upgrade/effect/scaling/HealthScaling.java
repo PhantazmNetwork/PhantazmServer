@@ -66,7 +66,7 @@ public class HealthScaling implements ScalingComponent {
 
     @VisibleForTesting
     static double computeMultiplier(boolean returnZeroOutsideRange, double percentage, boolean largerNumberIsStart,
-        double largerNumber, double smallerNumber, double minMultiplier, double maxMultiplier) {
+        double largerNumber, double smallerNumber, double startMultiplier, double endMultiplier) {
         if (returnZeroOutsideRange) {
             if (percentage > largerNumber || percentage < smallerNumber) {
                 return 0.0;
@@ -74,24 +74,24 @@ public class HealthScaling implements ScalingComponent {
         } else {
             if (largerNumberIsStart) {
                 if (percentage > largerNumber) {
-                    return minMultiplier;
+                    return startMultiplier;
                 }
                 if (percentage < smallerNumber) {
-                    return maxMultiplier;
+                    return endMultiplier;
                 }
             } else {
                 if (percentage > largerNumber) {
-                    return maxMultiplier;
+                    return endMultiplier;
                 }
                 if (percentage < smallerNumber) {
-                    return minMultiplier;
+                    return startMultiplier;
                 }
             }
         }
 
         double range = largerNumber - smallerNumber;
-        return largerNumberIsStart ? ((largerNumber - percentage) / range) * (maxMultiplier - minMultiplier) + minMultiplier :
-            ((range - (largerNumber - percentage)) / range) * (maxMultiplier - minMultiplier) + minMultiplier;
+        return largerNumberIsStart ? ((largerNumber - percentage) / range) * (endMultiplier - startMultiplier) + startMultiplier :
+            ((range - (largerNumber - percentage)) / range) * (endMultiplier - startMultiplier) + startMultiplier;
     }
 
     @Default("""
