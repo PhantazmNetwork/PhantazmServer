@@ -96,7 +96,7 @@ public class HealthScaling implements ScalingComponent {
 
     @Default("""
         {
-          selector={type='zombies.upgrade.selector.self'}
+          selector={type='zombies.upgrade.selector.self'},
           start=1.0,
           end=0.0,
           returnZeroOutsideRange=false
