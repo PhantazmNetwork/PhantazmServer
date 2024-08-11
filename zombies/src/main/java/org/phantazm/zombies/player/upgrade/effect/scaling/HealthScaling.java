@@ -41,16 +41,9 @@ public class HealthScaling implements ScalingComponent {
             this.data = data;
             this.selector = selector;
 
-            if(data.start > data.end) {
-                largerNumber = data.start;
-                smallerNumber = data.end;
-                largerNumberIsStart = true;
-            } else {
-                largerNumber = data.end;
-                smallerNumber = data.start;
-                largerNumberIsStart = false;
-            }
-
+            largerNumber = Math.max(data.start, data.end);
+            smallerNumber = Math.min(data.start, data.end);
+            largerNumberIsStart = data.start > data.end;
         }
 
         public double getMultiplier(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
