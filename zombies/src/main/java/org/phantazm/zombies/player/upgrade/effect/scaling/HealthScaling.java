@@ -60,7 +60,7 @@ public class HealthScaling implements ScalingComponent {
             double percentage = (double) target.getHealth() / target.getMaxHealth();
 
             return computeMultiplier(data.returnZeroOutsideRange, percentage, largerNumberIsStart, largerNumber,
-                smallerNumber, data.minMultiplier, data.maxMultiplier);
+                smallerNumber, data.startMultiplier, data.endMultiplier);
         }
     }
 
@@ -99,8 +99,6 @@ public class HealthScaling implements ScalingComponent {
           selector={type='zombies.upgrade.selector.self'}
           start=1.0,
           end=0.0,
-          maxMultiplier=0.0,
-          minMultiplier=0.0,
           returnZeroOutsideRange=false
         }
         """
@@ -109,8 +107,8 @@ public class HealthScaling implements ScalingComponent {
     public record Data(
         double start,
         double end,
-        double maxMultiplier,
-        double minMultiplier,
+        double startMultiplier,
+        double endMultiplier,
         boolean returnZeroOutsideRange
     ) {
     }
