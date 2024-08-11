@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
@@ -51,41 +52,48 @@ public class HealthScaling implements ScalingComponent {
 
             Optional<LivingEntity> possibleTarget = selector.select(upgrade, zombiesPlayer, triggerData).forType(LivingEntity.class);
 
-            if(possibleTarget.isEmpty()) {
+            if (possibleTarget.isEmpty()) {
                 return 1.0;
             }
 
             LivingEntity target = possibleTarget.get();
             double percentage = (double) target.getHealth() / target.getMaxHealth();
 
-            if(data.returnZeroOutsideRange) {
-                if(percentage > largerNumber || percentage < smallerNumber) {
-                    return 0.0;
+            return computeMultiplier(data.returnZeroOutsideRange, percentage, largerNumberIsStart, largerNumber,
+                smallerNumber, data.minMultiplier, data.maxMultiplier);
+        }
+    }
+
+    @VisibleForTesting
+    static double computeMultiplier(boolean returnZeroOutsideRange, double percentage, boolean largerNumberIsStart,
+        double largerNumber, double smallerNumber, double minMultiplier, double maxMultiplier) {
+        if (returnZeroOutsideRange) {
+            if (percentage > largerNumber || percentage < smallerNumber) {
+                return 0.0;
+            }
+        } else {
+            if (largerNumberIsStart) {
+                if (percentage > largerNumber) {
+                    return minMultiplier;
+                }
+                if (percentage < smallerNumber) {
+                    return maxMultiplier;
                 }
             } else {
-                if(largerNumberIsStart) {
-                    if(percentage > largerNumber) {
-                        return data.minMultiplier;
-                    }
-                    if(percentage < smallerNumber) {
-                        return data.maxMultiplier;
-                    }
-                } else {
-                    if(percentage > largerNumber) {
-                        return data.maxMultiplier;
-                    }
-                    if(percentage < smallerNumber) {
-                        return data.minMultiplier;
-                    }
+                if (percentage > largerNumber) {
+                    return maxMultiplier;
+                }
+                if (percentage < smallerNumber) {
+                    return minMultiplier;
                 }
             }
-
-            double range = largerNumber - smallerNumber;
-            double minMult = Math.min(data.maxMultiplier, data.minMultiplier);
-            double maxMult = Math.max(data.maxMultiplier, data.minMultiplier);
-            return largerNumberIsStart ? ((largerNumber - percentage) / range) * (maxMult - minMult) + minMult :
-                ((range - (largerNumber - percentage)) / range) * (maxMult - minMult) + minMult;
         }
+
+        double range = largerNumber - smallerNumber;
+        double minMult = Math.min(maxMultiplier, minMultiplier);
+        double maxMult = Math.max(maxMultiplier, minMultiplier);
+        return largerNumberIsStart ? ((largerNumber - percentage) / range) * (maxMult - minMult) + minMult :
+            ((range - (largerNumber - percentage)) / range) * (maxMult - minMult) + minMult;
     }
 
     @Default("""
@@ -106,5 +114,6 @@ public class HealthScaling implements ScalingComponent {
         double maxMultiplier,
         double minMultiplier,
         boolean returnZeroOutsideRange
-    ) {}
+    ) {
+    }
 }
