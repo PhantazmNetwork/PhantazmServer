@@ -69,4 +69,28 @@ class HealthScalingTest {
 
         assertEquals(4.125, result, MARGIN_OF_ERROR);
     }
+
+    @Test
+    void cursed2() {
+        double result = HealthScaling.computeMultiplier(false, 0.71,
+            false, 0.78, 0.22, 5, -2);
+
+        assertEquals(-1.125, result, MARGIN_OF_ERROR);
+    }
+
+    @Test
+    void cursed3() {
+        double result = HealthScaling.computeMultiplier(false, 0.71,
+            true, 0.78, 0.22, -2, 5);
+
+        assertEquals(-1.125, result, MARGIN_OF_ERROR);
+    }
+
+    @Test
+    void cursed4() {
+        double result = HealthScaling.computeMultiplier(false, 0.71,
+            false, 0.78, 0.22, -2, 5);
+
+        assertEquals(4.125, result, MARGIN_OF_ERROR);
+    }
 }
