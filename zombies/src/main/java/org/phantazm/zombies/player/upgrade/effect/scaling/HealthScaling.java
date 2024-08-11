@@ -90,10 +90,8 @@ public class HealthScaling implements ScalingComponent {
         }
 
         double range = largerNumber - smallerNumber;
-        double minMult = Math.min(maxMultiplier, minMultiplier);
-        double maxMult = Math.max(maxMultiplier, minMultiplier);
-        return largerNumberIsStart ? ((largerNumber - percentage) / range) * (maxMult - minMult) + minMult :
-            ((range - (largerNumber - percentage)) / range) * (maxMult - minMult) + minMult;
+        return largerNumberIsStart ? ((largerNumber - percentage) / range) * (maxMultiplier - minMultiplier) + minMultiplier :
+            ((range - (largerNumber - percentage)) / range) * (maxMultiplier - minMultiplier) + minMultiplier;
     }
 
     @Default("""
