@@ -9,6 +9,7 @@ import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Interval;
 import org.phantazm.zombies.Attributes;
@@ -30,9 +31,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @Model("zombies.upgrade.effect.apply_attribute")
 @Cache
 public class ApplyAttributeEffect implements UpgradeEffectComponent {
+    private static final Map<String, UUID> NAMED_ATTRIBUTES = new ConcurrentHashMap<>();
+
     private final Data data;
     private final ScalingComponent scalingComponent;
     private final SelectorComponent selectorComponent;
+
+    private final UUID uuid;
 
     @FactoryMethod
     public ApplyAttributeEffect(@NotNull Data data,
@@ -41,12 +46,18 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         this.data = data;
         this.scalingComponent = scalingComponent;
         this.selectorComponent = selectorComponent;
+
+        if (data.shareKey != null) {
+            this.uuid = NAMED_ATTRIBUTES.computeIfAbsent(data.shareKey, ignored -> UUID.randomUUID());
+        } else {
+            this.uuid = null;
+        }
     }
 
     @Override
     public @NotNull UpgradeEffect apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
         return new Internal(data, scalingComponent.apply(injectionStore, zombiesPlayer),
-            selectorComponent.apply(injectionStore, zombiesPlayer));
+            selectorComponent.apply(injectionStore, zombiesPlayer), this.uuid);
     }
 
     private static final class Internal implements UpgradeEffect {
@@ -62,12 +73,12 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
 
         private volatile boolean isBroadcasting;
 
-        private Internal(Data data, Scaling scaling, Selector selector) {
+        private Internal(Data data, Scaling scaling, Selector selector, UUID uuid) {
             this.data = data;
             this.scaling = scaling;
             this.selector = selector;
             this.attribute = Attributes.get(data.attribute);
-            this.uuid = UUID.randomUUID();
+            this.uuid = uuid == null ? UUID.randomUUID() : uuid;
             this.uuidString = this.uuid.toString();
 
             this.targets = new ConcurrentHashMap<>();
@@ -141,13 +152,15 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
 
     @Default("""
         {
-          scaling={type='zombies.upgrade.effect.scaling.none'}
+          scaling={type='zombies.upgrade.effect.scaling.none'},
+          shareKey=null
         }
         """)
     @DataObject
     public record Data(@NotNull String attribute,
         double amount,
-        @NotNull AttributeOperation operation) {
+        @NotNull AttributeOperation operation,
+        @Nullable String shareKey) {
 
     }
 }
