@@ -841,6 +841,15 @@ public final class SceneManager {
             return CompletableFuture.completedFuture(JoinResult.unrecognizedType());
         }
 
+        Object joinContext = new Object();
+
+        for (PlayerView playerView : players) {
+            if (!((PlayerViewImpl) playerView).joinContext().compareAndSet(null, joinContext)) {
+                resetJoinContext(players, joinContext);
+                return CompletableFuture.completedFuture(JoinResult.alreadyJoining());
+            }
+        }
+
         CompletableFuture<JoinResult<T>> result = CompletableFuture.supplyAsync(() -> {
             for (Map.Entry<Class<? extends Scene>, SceneEntry> entry : targetEntries) {
                 SceneEntry sceneEntry = entry.getValue();
@@ -874,6 +883,7 @@ public final class SceneManager {
         }, executor);
 
         return result.whenComplete((joinResult, error) -> {
+            resetJoinContext(players, joinContext);
             EventDispatcher.call(new SceneJoinEvent((joinResult == null || error != null) ?
                 JoinResult.INTERNAL_ERROR : joinResult, players));
 
@@ -882,6 +892,12 @@ public final class SceneManager {
                     Arrays.deepToString(players.toArray()), error);
             }
         });
+    }
+
+    private static void resetJoinContext(Iterable<PlayerView> players, Object joinContext) {
+        for (PlayerView view : players) {
+            ((PlayerViewImpl) view).joinContext().compareAndSet(joinContext, null);
+        }
     }
 
     private <T extends Scene> T tryJoinScenes(Set<Scene> scenes, Join<T> join) {

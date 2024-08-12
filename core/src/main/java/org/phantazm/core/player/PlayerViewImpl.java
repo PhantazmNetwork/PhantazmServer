@@ -44,6 +44,7 @@ public final class PlayerViewImpl implements PlayerView {
 
     private final int hashCode;
 
+    private final AtomicReference<Object> joinContext;
     private final AtomicReference<Scene> currentSceneReference;
 
     private volatile Reference<Player> playerReference;
@@ -63,6 +64,7 @@ public final class PlayerViewImpl implements PlayerView {
         this.connectionManager = Objects.requireNonNull(connectionManager);
         this.uuid = Objects.requireNonNull(uuid);
         this.playerReference = ReferenceUtils.nullReference();
+        this.joinContext = new AtomicReference<>();
         this.currentSceneReference = new AtomicReference<>();
 
         this.hashCode = uuid.hashCode();
@@ -83,6 +85,7 @@ public final class PlayerViewImpl implements PlayerView {
         this.uuid = player.getUuid();
         this.playerReference = new WeakReference<>(player);
         this.username = player.getUsername();
+        this.joinContext = new AtomicReference<>();
         this.currentSceneReference = new AtomicReference<>();
 
         this.hashCode = uuid.hashCode();
@@ -225,5 +228,19 @@ public final class PlayerViewImpl implements PlayerView {
     @ApiStatus.Internal
     public @NotNull AtomicReference<Scene> currentSceneReference() {
         return currentSceneReference;
+    }
+
+    /**
+     * A unique token representing an attempt to join a scene. Will be {@code null} if the player is attempting to join
+     * a scene; non-null otherwise.
+     * <p>
+     * This method is marked internal because it is only used by {@link SceneManager} to ensure that players cannot join
+     * more than one scene at the same time.
+     *
+     * @return an {@link AtomicReference} containing the unique token for this player's current join attempt
+     */
+    @ApiStatus.Internal
+    public @NotNull AtomicReference<Object> joinContext() {
+        return joinContext;
     }
 }

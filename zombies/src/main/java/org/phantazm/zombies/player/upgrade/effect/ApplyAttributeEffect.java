@@ -47,11 +47,7 @@ public class ApplyAttributeEffect implements UpgradeEffectComponent {
         this.scalingComponent = scalingComponent;
         this.selectorComponent = selectorComponent;
 
-        if (data.shareKey != null) {
-            this.uuid = NAMED_ATTRIBUTES.computeIfAbsent(data.shareKey, ignored -> UUID.randomUUID());
-        } else {
-            this.uuid = null;
-        }
+        this.uuid = data.shareKey == null ? null : NAMED_ATTRIBUTES.computeIfAbsent(data.shareKey, ignored -> UUID.randomUUID());
     }
 
     @Override
