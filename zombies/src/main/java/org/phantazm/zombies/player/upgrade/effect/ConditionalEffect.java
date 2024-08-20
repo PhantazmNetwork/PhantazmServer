@@ -8,19 +8,19 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 import org.phantazm.zombies.player.upgrade.trigger.filter.TriggerFilter;
-import org.phantazm.zombies.player.upgrade.trigger.filter.EventFilterComponent;
+import org.phantazm.zombies.player.upgrade.trigger.filter.TriggerFilterComponent;
 
 @Model("zombies.upgrade.effect.conditional")
 @Cache
 public class ConditionalEffect implements UpgradeEffectComponent {
     private final UpgradeEffectComponent first;
     private final UpgradeEffectComponent second;
-    private final EventFilterComponent filter;
+    private final TriggerFilterComponent filter;
 
     @FactoryMethod
     public ConditionalEffect(@NotNull @Child("pass") UpgradeEffectComponent first,
         @NotNull @Child("fail") UpgradeEffectComponent second,
-        @NotNull @Child("filter") EventFilterComponent filter) {
+        @NotNull @Child("filter") TriggerFilterComponent filter) {
         this.first = first;
         this.second = second;
         this.filter = filter;
@@ -53,7 +53,7 @@ public class ConditionalEffect implements UpgradeEffectComponent {
         @Override
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
-            if (filter.test(triggerData)) {
+            if (filter.test(upgrade, zombiesPlayer, triggerData)) {
                 first.apply(upgrade, zombiesPlayer, triggerData);
             } else {
                 second.apply(upgrade, zombiesPlayer, triggerData);

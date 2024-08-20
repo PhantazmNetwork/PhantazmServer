@@ -20,23 +20,23 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.effect.UpgradeEffect;
 import org.phantazm.zombies.player.upgrade.trigger.filter.TriggerFilter;
-import org.phantazm.zombies.player.upgrade.trigger.filter.EventFilterComponent;
+import org.phantazm.zombies.player.upgrade.trigger.filter.TriggerFilterComponent;
 
 @Model("zombies.upgrade.trigger.event")
 @Cache
 public class EventTrigger implements UpgradeTriggerComponent {
     private final Class<? extends Event> eventClass;
-    private final EventFilterComponent eventFilterComponent;
+    private final TriggerFilterComponent triggerFilterComponent;
 
     @FactoryMethod
-    public EventTrigger(@NotNull Data data, @NotNull @Child("eventFilter") EventFilterComponent eventFilterComponent) {
+    public EventTrigger(@NotNull Data data, @NotNull @Child("eventFilter") TriggerFilterComponent triggerFilterComponent) {
         this.eventClass = data.event.eventClass();
-        this.eventFilterComponent = eventFilterComponent;
+        this.triggerFilterComponent = triggerFilterComponent;
     }
 
     @Override
     public @NotNull UpgradeTrigger apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
-        return new Internal(zombiesPlayer, eventClass, eventFilterComponent.apply(injectionStore, zombiesPlayer));
+        return new Internal(zombiesPlayer, eventClass, triggerFilterComponent.apply(injectionStore, zombiesPlayer));
     }
 
     private static final class Internal implements UpgradeTrigger {
@@ -73,7 +73,12 @@ public class EventTrigger implements UpgradeTriggerComponent {
         }
 
         private boolean filter(Event event) {
-            return triggerFilter.test(TriggerData.of(event));
+            ArmData armData = this.target;
+            if (armData == null) {
+                return false;
+            }
+
+            return triggerFilter.test(armData.upgrade, zombiesPlayer, TriggerData.of(event));
         }
 
         private void handle(Event event) {

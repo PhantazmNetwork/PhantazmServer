@@ -6,6 +6,7 @@ import net.minestom.server.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
+import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import java.util.ArrayList;
@@ -13,12 +14,12 @@ import java.util.List;
 
 @Model("zombies.upgrade.filter.type")
 @Cache
-public class TypeEventFilter implements EventFilterComponent {
+public class TypeTriggerFilter implements TriggerFilterComponent {
     private final Data data;
     private final List<EventConditionComponent> conditions;
 
     @FactoryMethod
-    public TypeEventFilter(@NotNull Data data, @Child("conditions") List<EventConditionComponent> conditions) {
+    public TypeTriggerFilter(@NotNull Data data, @Child("conditions") List<EventConditionComponent> conditions) {
         this.data = data;
         this.conditions = conditions;
     }
@@ -36,8 +37,13 @@ public class TypeEventFilter implements EventFilterComponent {
     private record Internal(Data data,
         List<EventCondition<?>> conditions) implements TriggerFilter {
 
+        private <T extends Event> boolean test(EventCondition<T> condition, Event event) {
+            return condition.eventType().isAssignableFrom(event.getClass()) &&
+                condition.filter(condition.eventType().cast(event));
+        }
+
         @Override
-        public boolean test(TriggerData triggerData) {
+        public boolean test(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             if (!(triggerData.raw() instanceof Event event)) {
                 return false;
             }
@@ -58,11 +64,6 @@ public class TypeEventFilter implements EventFilterComponent {
                     yield conditions.isEmpty();
                 }
             };
-        }
-
-        private <T extends Event> boolean test(EventCondition<T> condition, Event event) {
-            return condition.eventType().isAssignableFrom(event.getClass()) &&
-                condition.filter(condition.eventType().cast(event));
         }
     }
 

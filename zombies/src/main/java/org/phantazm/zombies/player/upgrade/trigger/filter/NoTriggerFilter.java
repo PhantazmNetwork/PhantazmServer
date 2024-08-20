@@ -9,9 +9,9 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 
 @Model("zombies.upgrade.filter.none")
 @Cache
-public class NoEventFilter implements EventFilterComponent {
+public class NoTriggerFilter implements TriggerFilterComponent {
     @FactoryMethod
-    public NoEventFilter() {
+    public NoTriggerFilter() {
 
     }
 

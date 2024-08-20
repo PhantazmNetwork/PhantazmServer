@@ -28,7 +28,6 @@ public class AttributeTypeCondition implements EventConditionComponent {
     }
 
     private record Internal(Data data) implements EventCondition<AttributeEvent> {
-
         @Override
         public @NotNull Class<AttributeEvent> eventType() {
             return AttributeEvent.class;

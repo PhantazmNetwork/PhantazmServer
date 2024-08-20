@@ -1034,14 +1034,14 @@ public final class SceneManager {
     /**
      * Tests if the player is in the given scene. Should generally be much faster than running
      * {@link Scene#hasPlayer(Player)} as it does not have to run {@link Set#contains(Object)} or acquire any locks.
+     * However, its usage is limited, as the player can leave the scene at any time.
      *
      * @param player the player to test
      * @param scene  the scene to test
      * @return true if the player is in the given scene; false otherwise
      */
     public boolean inScene(@NotNull PlayerView player, @NotNull Scene scene) {
-        PlayerViewImpl view = (PlayerViewImpl) player;
-        return view.currentSceneReference().get() == scene;
+        return ((PlayerViewImpl) player).currentSceneReference().get() == scene;
     }
 
     /**
