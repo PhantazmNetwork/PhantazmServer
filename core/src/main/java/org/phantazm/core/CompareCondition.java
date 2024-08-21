@@ -75,7 +75,7 @@ public enum CompareCondition {
         };
     }
 
-    public <T extends Comparable<T>> boolean compare(@NotNull T first, @NotNull T second) {
+    public <T extends Comparable<T>> boolean compareObject(@NotNull T first, @NotNull T second) {
         Objects.requireNonNull(first);
         Objects.requireNonNull(second);
 
