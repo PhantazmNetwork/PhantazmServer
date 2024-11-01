@@ -18,6 +18,8 @@ public final class Attributes {
 
     public static final Attribute BULLET_PENETRATION = new Attribute("phantazm.bullet_penetration", 0F, false);
 
+    public static final Attribute RELOAD_DELAY = new Attribute("phantazm.reload_delay", 0F, false);
+
     public static final Attribute ATTACK_SPEED_MULTIPLIER =
         new Attribute("phantazm.attack_speed_multiplier", 1F, false);
 
@@ -63,6 +65,7 @@ public final class Attributes {
         HEAL_TICKS.register();
         GUN_DAMAGE.register();
         BULLET_PENETRATION.register();
+        RELOAD_DELAY.register();
         ATTACK_SPEED_MULTIPLIER.register();
         HEADSHOT_DAMAGE_RECEIVED.register();
         FIRE_DAMAGE_APPLY_INTERVAL.register();
