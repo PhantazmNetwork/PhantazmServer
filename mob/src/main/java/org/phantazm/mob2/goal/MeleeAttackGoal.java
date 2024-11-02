@@ -10,6 +10,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.AttributeUtils;
 import org.phantazm.core.DamageUtils;
 import org.phantazm.mob2.Mob;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
@@ -84,7 +85,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 livingEntity.getAcquirable().sync(entity -> {
                     LivingEntity actualEntity = (LivingEntity) entity;
                     if (DamageUtils.damage(data.damageType, actualEntity, self, damageAmount, data.bypassArmor)) {
-                        actualEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));
+                        actualEntity.takeKnockback(AttributeUtils.computeWithBase(knockbackStrength, actualEntity.getAttribute(Attribute.KNOCKBACK_RESISTANCE)), data.horizontal, Math.sin(angle), -Math.cos(angle));
                     }
                 });
             }
