@@ -202,10 +202,6 @@ public class CorpseCreator {
             corpseEntity.setPose(Entity.Pose.SLEEPING);
         }
 
-        public @NotNull ReviveHandler reviveHandler() {
-            return reviveHandler;
-        }
-
         public void tick(long time) {
             List<CorpseLine> currentLines = this.currentLines;
             if (currentLines == null) {

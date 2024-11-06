@@ -173,7 +173,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             };
 
             ReviveHandler reviveHandler =
-                new ReviveHandler(context, zombiesPlayers.values(), aliveStateCreator, deadStateSupplier,
+                new ReviveHandler(zombiesPlayerWrapper, context, zombiesPlayers.values(), aliveStateCreator, deadStateSupplier,
                     new NearbyReviverPredicate(playerView, mapSettingsInfo.reviveRadius()), 500L);
 
             CorpseCreator.Corpse corpse =
@@ -181,7 +181,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
                     reviveHandler);
 
             corpseWrapper.set(corpse);
-            return new KnockedPlayerState(scene, zombiesPlayerWrapper, reviveHandler,
+            return new KnockedPlayerState(reviveHandler,
                 List.of(Activable.threadsafeWrapper(new BasicKnockedStateActivable(context, instance, playerView, meta, actionBar,
                         mapSettingsInfo, reviveHandler, tickFormatter, sidebar, tabList, belowNameTag, stats,
                         mapSettingsInfo, zombiesPlayerWrapper.unmodifiableView())), corpse.asKnockActivable(),
