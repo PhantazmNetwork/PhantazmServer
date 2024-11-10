@@ -85,7 +85,7 @@ public class MeleeAttackGoal implements GoalCreator {
                 livingEntity.getAcquirable().sync(entity -> {
                     LivingEntity actualEntity = (LivingEntity) entity;
                     if (DamageUtils.damage(data.damageType, actualEntity, self, damageAmount, data.bypassArmor)) {
-                        actualEntity.takeKnockback(AttributeUtils.computeWithBase(knockbackStrength, actualEntity.getAttribute(Attribute.KNOCKBACK_RESISTANCE)), data.horizontal, Math.sin(angle), -Math.cos(angle));
+                        actualEntity.takeKnockback(knockbackStrength, data.horizontal, Math.sin(angle), -Math.cos(angle));
                     }
                 });
             }
