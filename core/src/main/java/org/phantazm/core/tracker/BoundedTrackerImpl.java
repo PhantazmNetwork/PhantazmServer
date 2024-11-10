@@ -243,6 +243,25 @@ class BoundedTrackerImpl<T extends Bounded> implements BoundedTracker<T> {
     }
 
     @Override
+    public boolean isAtPoint(int x, int y, int z) {
+        Object[] chunkItems = chunkedItems.get(ChunkUtils.getChunkIndex(x >> 4, z >> 4));
+        if (chunkItems == null) {
+            return false;
+        }
+
+        for (Object item : chunkItems) {
+            T boundedItem = (T) item;
+            for (Bounds3I bounds : boundedItem.bounds()) {
+                if (bounds.contains(x, y, z)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    @Override
     public @NotNull @Unmodifiable List<T> items() {
         return items;
     }

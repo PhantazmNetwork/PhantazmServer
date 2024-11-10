@@ -38,6 +38,10 @@ public interface BoundedTracker<T extends Bounded> {
 
     @NotNull Optional<T> atPoint(int x, int y, int z);
 
+    default boolean isAtPoint(int x, int y, int z) {
+        return atPoint(x, y, z).isPresent();
+    }
+
     default @NotNull Optional<T> atPoint(@NotNull Point point) {
         return atPoint(point.blockX(), point.blockY(), point.blockZ());
     }
