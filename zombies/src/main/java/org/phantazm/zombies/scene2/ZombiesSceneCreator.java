@@ -232,7 +232,7 @@ public class ZombiesSceneCreator implements SceneCreator<ZombiesScene> {
 
         InstanceSpawner.InstanceSettings instanceSettings = instanceSpaceFunction.apply(instance);
         instanceSettings.spaceHandler().space().setOverrideFunction((x, y, z) -> {
-            if (windowHandler.tracker().atPoint(x, y, z).isPresent()) {
+            if (windowHandler.tracker().isAtPoint(x, y, z)) {
                 return Solid.EMPTY;
             }
 
