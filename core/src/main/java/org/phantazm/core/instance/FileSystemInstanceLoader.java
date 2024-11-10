@@ -1,5 +1,6 @@
 package org.phantazm.core.instance;
 
+import com.github.steanky.toolkit.function.ExceptionHandler;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minestom.server.coordinate.Point;
@@ -18,7 +19,6 @@ import org.phantazm.commons.FileUtils;
 import org.phantazm.commons.FutureUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import relocated.com.github.steanky.toolkit.function.ExceptionHandler;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

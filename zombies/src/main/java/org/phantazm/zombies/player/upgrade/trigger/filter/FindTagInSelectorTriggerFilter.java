@@ -1,9 +1,6 @@
 package org.phantazm.zombies.player.upgrade.trigger.filter;
 
-import com.github.steanky.element.core.annotation.Cache;
-import com.github.steanky.element.core.annotation.Child;
-import com.github.steanky.element.core.annotation.FactoryMethod;
-import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
@@ -35,25 +32,27 @@ public class FindTagInSelectorTriggerFilter implements TriggerFilterComponent {
         return new Internal(data, selectorComponent.apply(injectionStore, zombiesPlayer), Tag.Integer(data.tag).defaultValue(data.defaultIfTagNotPresent));
     }
 
-    private record Internal(Data data, Selector selector, Tag<Integer> tag) implements TriggerFilter {
+    private record Internal(Data data,
+        Selector selector,
+        Tag<Integer> tag) implements TriggerFilter {
         public boolean test(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             Collection<? extends Entity> targets = selector.select(upgrade, zombiesPlayer, triggerData).targets();
 
-            if(targets.isEmpty()) {
+            if (targets.isEmpty()) {
                 return false;
             }
 
-            if(data.allTargetsMustMatch) {
-                for(Entity target : targets) {
-                    if(!data.condition.compare(data.value, target.getTag(tag))) {
+            if (data.allTargetsMustMatch) {
+                for (Entity target : targets) {
+                    if (!data.condition.compare(data.value, target.getTag(tag))) {
                         return false;
                     }
                 }
 
                 return true;
             }
-            for(Entity target : targets) {
-                if(data.condition.compare(data.value, target.getTag(tag))) {
+            for (Entity target : targets) {
+                if (data.condition.compare(data.value, target.getTag(tag))) {
                     return true;
                 }
             }
@@ -65,13 +64,16 @@ public class FindTagInSelectorTriggerFilter implements TriggerFilterComponent {
     @Default("""
         {
           allTargetsMustMatch=true,
-          condition=EQUAL_TO,
-          defaultIfTagNotPresent=0
+          condition='EQUAL_TO',
+          defaultIfTagNotPresent=0,
+          selector={type='zombies.upgrade.selector.self'}
         }
         """)
+    @DataObject
     public record Data(@NotNull String tag,
         boolean allTargetsMustMatch,
         @NotNull CompareCondition condition,
         int value,
-        int defaultIfTagNotPresent) {}
+        int defaultIfTagNotPresent) {
+    }
 }
