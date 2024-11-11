@@ -70,7 +70,7 @@ public class QueueTriggerFilter implements TriggerFilterComponent {
                 }
             }
 
-            return data.allTargetsMustMatch;
+            return !data.whitelist;
         }
     }
 
