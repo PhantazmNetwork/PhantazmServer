@@ -16,12 +16,8 @@ import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Queue;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Model("zombies.upgrade.effect.record_target")
@@ -46,11 +42,29 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
     }
 
     public record QueueEntry(int time,
-        @NotNull UUID uuid) {
+        @NotNull UUID uuid) implements Comparable<QueueEntry> {
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+
+            return obj == this || (obj instanceof QueueEntry other && Objects.equals(other.uuid, uuid));
+        }
+
+        @Override
+        public int hashCode() {
+            return uuid.hashCode();
+        }
+
+        @Override
+        public int compareTo(@NotNull RecordTargetEffect.QueueEntry o) {
+            return Integer.compare(time, o.time);
+        }
     }
 
     private static final class Internal implements UpgradeEffect {
-        private final Tag<Queue<QueueEntry>> queueTag;
+        private final Tag<Map<QueueEntry, Void>> queueTag;
 
         private final Data data;
         private final Selector target;
@@ -73,17 +87,18 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             queueSelector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, entity -> {
-                Wrapper<Queue<QueueEntry>> queue = Wrapper.ofNull();
+                Wrapper<Map<QueueEntry, Void>> queue = Wrapper.ofNull();
 
                 int time = this.time.get();
                 target.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, target -> {
                     if (queue.get() == null) {
-                        queue.set(entity.tagHandler().updateAndGetTag(queueTag,
-                            current -> current == null ? new ConcurrentLinkedQueue<>() : current));
+                        queue.set(entity.tagHandler().updateAndGetTag(queueTag, current -> current == null ?
+                            new ConcurrentSkipListMap<>() : current));
                         targets.put(entity.getUuid(), new WeakReference<>(entity));
                     }
 
-                    queue.get().add(new QueueEntry(time, target.getUuid()));
+                    QueueEntry newEntry = new QueueEntry(time, target.getUuid());
+                    queue.get().put(newEntry, null);
                 });
             });
         }
@@ -116,15 +131,19 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
                     return true;
                 }
 
-                Queue<QueueEntry> queue = entity.getTag(queueTag);
+                Map<QueueEntry, Void> queue = entity.getTag(queueTag);
                 if (queue == null || queue.isEmpty()) {
                     return true;
                 }
 
-                Iterator<QueueEntry> entryIterator = queue.iterator();
-                while (entryIterator.hasNext()) {
-                    if (time - entryIterator.next().time >= data.duration) {
-                        entryIterator.remove();
+                if (data.duration < 0) {
+                    return false;
+                }
+
+                Iterator<QueueEntry> keyIterator = queue.keySet().iterator();
+                while (keyIterator.hasNext()) {
+                    if (time - keyIterator.next().time >= data.duration) {
+                        keyIterator.remove();
                         continue;
                     }
 
