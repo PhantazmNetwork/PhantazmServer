@@ -56,10 +56,23 @@ public class QueueTriggerFilter implements TriggerFilterComponent {
 
             for (Entity queueHolder : queueHolders) {
                 Map<RecordTargetEffect.QueueEntry, Void> queue = queueHolder.getTag(tag);
+                if (queue == null || queue.isEmpty()) {
+                    if (data.whitelist && data.allTargetsMustMatch) {
+                        // empty whitelist queue, any target will fail, but all targets must succeed
+                        return false;
+                    }
+
+                    if (!data.whitelist && !data.allTargetsMustMatch) {
+                        // empty blacklist queue, any target will succeed, and at least one target must succeed
+                        return true;
+                    }
+
+                    continue;
+                }
 
                 for (Entity queueTarget : targets) {
-                    boolean matches = (queue != null && queue.containsKey(new RecordTargetEffect.QueueEntry(-1,
-                        queueTarget.getUuid()))) == data.whitelist;
+                    boolean matches = queue.containsKey(new RecordTargetEffect.QueueEntry(-1,
+                        queueTarget.getUuid())) == data.whitelist;
                     if (data.allTargetsMustMatch && !matches) {
                         return false;
                     }
