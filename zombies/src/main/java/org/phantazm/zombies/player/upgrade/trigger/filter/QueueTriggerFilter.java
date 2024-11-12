@@ -41,7 +41,7 @@ public class QueueTriggerFilter implements TriggerFilterComponent {
     private record Internal(Data data,
         Selector queueSelector,
         Selector targetSelector,
-        Tag<Map<RecordTargetEffect.QueueEntry, Void>> tag) implements TriggerFilter {
+        Tag<Map<RecordTargetEffect.QueueEntry, Object>> tag) implements TriggerFilter {
         public boolean test(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             Collection<? extends Entity> queueHolders = queueSelector.select(upgrade, zombiesPlayer, triggerData).targets();
 
@@ -55,7 +55,7 @@ public class QueueTriggerFilter implements TriggerFilterComponent {
             }
 
             for (Entity queueHolder : queueHolders) {
-                Map<RecordTargetEffect.QueueEntry, Void> queue = queueHolder.getTag(tag);
+                Map<RecordTargetEffect.QueueEntry, Object> queue = queueHolder.getTag(tag);
                 if (queue == null || queue.isEmpty()) {
                     if (data.whitelist && data.allTargetsMustMatch) {
                         // empty whitelist queue, any target will fail, but all targets must succeed

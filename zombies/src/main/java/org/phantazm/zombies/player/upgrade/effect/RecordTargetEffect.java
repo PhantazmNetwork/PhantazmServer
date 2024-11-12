@@ -2,7 +2,6 @@ package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
-import com.github.steanky.toolkit.collection.Wrapper;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +13,7 @@ import org.phantazm.zombies.player.upgrade.selector.Selector;
 import org.phantazm.zombies.player.upgrade.selector.SelectorComponent;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
+import java.lang.invoke.VarHandle;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -42,7 +42,7 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
     }
 
     public record QueueEntry(int time,
-        @NotNull UUID uuid) implements Comparable<QueueEntry> {
+        @NotNull UUID uuid) {
         @Override
         public boolean equals(Object obj) {
             if (obj == null) {
@@ -56,15 +56,12 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
         public int hashCode() {
             return uuid.hashCode();
         }
-
-        @Override
-        public int compareTo(@NotNull RecordTargetEffect.QueueEntry o) {
-            return Integer.compare(time, o.time);
-        }
     }
 
     private static final class Internal implements UpgradeEffect {
-        private final Tag<Map<QueueEntry, Void>> queueTag;
+        private static final Object OBJECT = new Object();
+
+        private final Tag<Map<QueueEntry, Object>> queueTag;
 
         private final Data data;
         private final Selector target;
@@ -87,18 +84,29 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             queueSelector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, entity -> {
-                Wrapper<Map<QueueEntry, Void>> queue = Wrapper.ofNull();
+                Collection<? extends Entity> targets = target.select(upgrade, zombiesPlayer, triggerData).targets();
+                if (targets.isEmpty()) {
+                    return;
+                }
 
                 int time = this.time.get();
-                target.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, target -> {
-                    if (queue.get() == null) {
-                        queue.set(entity.tagHandler().updateAndGetTag(queueTag, current -> current == null ?
-                            new ConcurrentSkipListMap<>() : current));
-                        targets.put(entity.getUuid(), new WeakReference<>(entity));
+                Map<QueueEntry, Object> newEntries = new LinkedHashMap<>(targets.size());
+                for (Entity target : targets) {
+                    newEntries.put(new QueueEntry(time, target.getUuid()), OBJECT);
+                }
+
+                this.targets.put(entity.getUuid(), new WeakReference<>(entity));
+                VarHandle.storeStoreFence();
+                entity.tagHandler().updateTag(queueTag, currentQueue -> {
+                    if (currentQueue == null) {
+                        return newEntries;
                     }
 
-                    QueueEntry newEntry = new QueueEntry(time, target.getUuid());
-                    queue.get().put(newEntry, null);
+                    Map<QueueEntry, Object> newMap = new LinkedHashMap<>(currentQueue.size() + newEntries.size());
+                    newMap.putAll(currentQueue);
+                    newMap.putAll(newEntries);
+
+                    return newMap;
                 });
             });
         }
@@ -111,7 +119,7 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
                     return true;
                 }
 
-                entity.setTag(queueTag, null);
+                entity.removeTag(queueTag);
                 return true;
             });
         }
@@ -126,31 +134,40 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
             int time = this.time.getAndIncrement();
 
             targets.values().removeIf(entityReference -> {
+                if (entityReference.refersTo(null)) {
+                    return true;
+                }
+
                 Entity entity = entityReference.get();
                 if (entity == null) {
                     return true;
                 }
 
-                Map<QueueEntry, Void> queue = entity.getTag(queueTag);
-                if (queue == null || queue.isEmpty()) {
-                    return true;
-                }
-
-                if (data.duration < 0) {
-                    return false;
-                }
-
-                Iterator<QueueEntry> keyIterator = queue.keySet().iterator();
-                while (keyIterator.hasNext()) {
-                    if (time - keyIterator.next().time >= data.duration) {
-                        keyIterator.remove();
-                        continue;
+                return entity.tagHandler().updateAndGetTag(queueTag, currentQueue -> {
+                    if (currentQueue == null || currentQueue.isEmpty()) {
+                        return null;
                     }
 
-                    break;
-                }
+                    if (data.duration < 0) {
+                        return currentQueue;
+                    }
 
-                return queue.isEmpty();
+                    Map<QueueEntry, Object> newQueue = currentQueue;
+                    for (QueueEntry next : currentQueue.keySet()) {
+                        if (time - next.time >= data.duration) {
+                            if (newQueue == currentQueue) {
+                                newQueue = new LinkedHashMap<>(currentQueue);
+                            }
+
+                            newQueue.remove(next);
+                            continue;
+                        }
+
+                        break;
+                    }
+
+                    return newQueue.isEmpty() ? null : newQueue;
+                }) == null;
             });
         }
     }
