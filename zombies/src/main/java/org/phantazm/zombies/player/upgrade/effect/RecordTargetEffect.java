@@ -6,7 +6,6 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.TagUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.selector.Selector;
@@ -71,7 +70,7 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
         private final Map<UUID, Reference<Entity>> targets;
 
         private Internal(Data data, Selector target, Selector queue, String queueName) {
-            this.queueTag = TagUtils.transientTag(queueName);
+            this.queueTag = Tag.Transient(queueName);
 
             this.data = data;
             this.target = target;

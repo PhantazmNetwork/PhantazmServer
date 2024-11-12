@@ -6,7 +6,6 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.TagUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.effect.RecordTargetEffect;
@@ -35,7 +34,7 @@ public class QueueTriggerFilter implements TriggerFilterComponent {
     @Override
     public @NotNull TriggerFilter apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
         return new Internal(data, queueComponent.apply(injectionStore, zombiesPlayer),
-            targetComponent.apply(injectionStore, zombiesPlayer), TagUtils.transientTag(data.queueName));
+            targetComponent.apply(injectionStore, zombiesPlayer), Tag.Transient(data.queueName));
     }
 
     private record Internal(Data data,
@@ -54,6 +53,7 @@ public class QueueTriggerFilter implements TriggerFilterComponent {
                 return !data.whitelist;
             }
 
+            boolean anyMatchFound = false;
             for (Entity queueHolder : queueHolders) {
                 Map<RecordTargetEffect.QueueEntry, Object> queue = queueHolder.getTag(tag);
                 if (queue == null || queue.isEmpty()) {
@@ -80,10 +80,14 @@ public class QueueTriggerFilter implements TriggerFilterComponent {
                     if (!data.allTargetsMustMatch && matches) {
                         return true;
                     }
+
+                    if (matches) {
+                        anyMatchFound = true;
+                    }
                 }
             }
 
-            return !data.whitelist;
+            return anyMatchFound;
         }
     }
 

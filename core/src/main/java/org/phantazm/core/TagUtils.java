@@ -4,7 +4,6 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.tag.*;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.scene2.Scene;
 import org.phantazm.core.scene2.SceneManager;
 
@@ -67,22 +66,5 @@ public final class TagUtils {
         }
 
         entity.setTag(tag, value);
-    }
-
-    private static final TagSerializer<?> EMPTY_SERIALIZER = new TagSerializer<>() {
-        @Override
-        public @Nullable Object read(@NotNull TagReadable reader) {
-            return null;
-        }
-
-        @Override
-        public void write(@NotNull TagWritable writer, @NotNull Object value) {
-
-        }
-    };
-
-    @SuppressWarnings("unchecked")
-    public static <T> @NotNull Tag<T> transientTag(@NotNull String name) {
-        return Tag.Structure(name, (TagSerializer<T>) EMPTY_SERIALIZER);
     }
 }
