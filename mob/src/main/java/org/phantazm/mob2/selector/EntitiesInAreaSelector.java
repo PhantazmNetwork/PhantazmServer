@@ -33,6 +33,7 @@ public class EntitiesInAreaSelector implements SelectorComponent {
 
     @Default("""
         {
+          originSelector={type='mob.selector.self'}
           limitSelf=true,
           target='ENTITIES',
           range=-1.0,
