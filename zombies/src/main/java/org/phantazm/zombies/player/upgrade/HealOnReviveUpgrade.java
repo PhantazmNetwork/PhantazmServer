@@ -19,7 +19,6 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.UUID;
 
 @Model("zombies.upgrade.heal_on_revive")
@@ -60,22 +59,22 @@ public class HealOnReviveUpgrade implements PlayerUpgradeComponent {
                 }
 
                 private void handleRevive(ZombiesPlayerReviveEvent event) {
-                    if(event.zombiesPlayer() != zombiesPlayer) {
+                    if (event.zombiesPlayer() != zombiesPlayer) {
                         return;
                     }
 
                     Entity reviver = event.getPlayer();
                     Instance instance = reviver.getInstance();
-                    if(instance == null ) {
+                    if (instance == null) {
                         return;
                     }
 
-                    if(data.maxPlayersInVicinity >= 0) {
+                    if (data.maxPlayersInVicinity >= 0) {
                         int[] nearbyPlayers = new int[1];
                         event.zombiesPlayer().getScene().getAcquirable().sync(scene -> {
                             instance.getEntityTracker().nearbyEntities(reviver.getPosition(), data.radius,
                                 EntityTracker.Target.PLAYERS, candidatePlayer -> {
-                                    if(candidatePlayer == reviver) {
+                                    if (candidatePlayer == reviver) {
                                         return;
                                     }
 
@@ -93,18 +92,13 @@ public class HealOnReviveUpgrade implements PlayerUpgradeComponent {
                                 });
                         });
 
-                        if(nearbyPlayers[0] > data.maxPlayersInVicinity) {
+                        if (nearbyPlayers[0] > data.maxPlayersInVicinity) {
                             return;
                         }
                     }
 
-                    if(data.restrictSamePlayerRevival && data.cooldown != 0) {
-                        Optional<Player> revivee = event.reviveTarget().getPlayer();
-                        if(revivee.isEmpty()) {
-                            return;
-                        }
-
-                        if(!pastPlayers.add(new PastPlayer(revivee.get().getUuid()))) {
+                    if (data.restrictSamePlayerRevival && data.cooldown != 0) {
+                        if (!pastPlayers.add(new PastPlayer(event.target().getUuid()))) {
                             return;
                         }
                     }
@@ -126,15 +120,15 @@ public class HealOnReviveUpgrade implements PlayerUpgradeComponent {
 
                     @Override
                     public boolean equals(Object obj) {
-                        if(obj == null) {
+                        if (obj == null) {
                             return false;
                         }
 
-                        if(obj == this) {
+                        if (obj == this) {
                             return true;
                         }
 
-                        if(!(obj instanceof PastPlayer pastPlayer)) {
+                        if (!(obj instanceof PastPlayer pastPlayer)) {
                             return false;
                         }
 
@@ -166,10 +160,11 @@ public class HealOnReviveUpgrade implements PlayerUpgradeComponent {
         """)
     @DataObject
     public record Data(
-       double healAmount,
-       int maxPlayersInVicinity,
-       double radius,
-       boolean restrictSamePlayerRevival,
-       int cooldown
-    ) {}
+        double healAmount,
+        int maxPlayersInVicinity,
+        double radius,
+        boolean restrictSamePlayerRevival,
+        int cooldown
+    ) {
+    }
 }

@@ -73,18 +73,23 @@ public class ReviveHandler implements Activable {
             ZombiesPlayer revivee = this.revivee.get();
             ZombiesScene scene = revivee.getScene();
 
-            scene.broadcastEvent(new ZombiesPlayerEndReviveEvent(reviverPlayer, reviver, revivee));
+            revivee.getPlayer().ifPresent(reviveePlayer -> {
+                scene.broadcastEvent(new ZombiesPlayerEndReviveEvent(reviverPlayer, reviver, reviveePlayer, revivee));
 
-            if (isRevived) {
-                scene.broadcastEvent(new ZombiesPlayerReviveEvent(reviverPlayer, reviver, revivee));
-            }
+                if (isRevived) {
+                    scene.broadcastEvent(new ZombiesPlayerReviveEvent(reviverPlayer, reviver, reviveePlayer, revivee));
+                }
+            });
         });
     }
 
     private void broadcastReviveStart(@NotNull ZombiesPlayer reviver) {
         reviver.getPlayer().ifPresent(reviverPlayer -> {
             ZombiesPlayer revivee = this.revivee.get();
-            revivee.getScene().broadcastEvent(new ZombiesPlayerStartReviveEvent(reviverPlayer, reviver, revivee));
+
+            revivee.getPlayer().ifPresent(reviveePlayer -> {
+                revivee.getScene().broadcastEvent(new ZombiesPlayerStartReviveEvent(reviverPlayer, reviver, reviveePlayer, revivee));
+            });
         });
     }
 
