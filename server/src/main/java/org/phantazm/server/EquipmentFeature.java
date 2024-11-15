@@ -247,7 +247,7 @@ final class EquipmentFeature {
                 }
 
                 return Optional.of(new Gun(equipmentKey, equipmentModule.getPlayerView()::getPlayer,
-                    new GunModel(rootLevel, levels)));
+                    new GunModel(rootLevel, levels), equipmentModule.getScene()));
             }
         };
     }

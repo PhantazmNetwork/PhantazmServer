@@ -3,7 +3,6 @@ package org.phantazm.zombies.equipment.gun;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.Equipment;
@@ -14,6 +13,7 @@ import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.visual.GunStackMapper;
 import org.phantazm.zombies.event.equipment.GunLoseAmmoEvent;
 import org.phantazm.zombies.event.equipment.GunRefillEvent;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -28,6 +28,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
     private final Supplier<Optional<? extends Entity>> entitySupplier;
     private final GunModel model;
     private final Set<GunLevel> tickingLevels;
+    private final ZombiesScene zombiesScene;
     private Key levelKey;
     private GunLevel level;
     private GunState state;
@@ -39,11 +40,12 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
      * @param model          The {@link GunModel} of the {@link Gun}
      */
     public Gun(@NotNull Key equipmentKey, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
-        @NotNull GunModel model) {
+        @NotNull GunModel model, @NotNull ZombiesScene zombiesScene) {
         this.equipmentKey = Objects.requireNonNull(equipmentKey);
         this.entitySupplier = Objects.requireNonNull(entitySupplier);
         this.model = Objects.requireNonNull(model);
         this.tickingLevels = Collections.newSetFromMap(new IdentityHashMap<>(model.levels().size()));
+        this.zombiesScene = Objects.requireNonNull(zombiesScene);
         this.levelKey = model.rootLevel();
         this.level = model.levels().get(levelKey);
         tickingLevels.add(level);
@@ -80,7 +82,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         int ammoLoss;
         if (entityOptional.isPresent()) {
             GunLoseAmmoEvent event = new GunLoseAmmoEvent(entityOptional.get(), this, state.ammo(), 1);
-            EventDispatcher.call(event);
+            zombiesScene.broadcastEvent(event);
             ammoLoss = event.getAmmoLost();
         } else {
             ammoLoss = 1;
@@ -138,7 +140,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         Optional<? extends Entity> entityOptional = entitySupplier.get();
         if (entityOptional.isPresent()) {
             GunRefillEvent event = new GunRefillEvent(entityOptional.get(), this);
-            EventDispatcher.call(event);
+            zombiesScene.broadcastEvent(event);
         }
     }
 
