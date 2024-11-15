@@ -78,7 +78,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
         int ammoLoss;
         if (entityOptional.isPresent()) {
-            GunLoseAmmoEvent event = new GunLoseAmmoEvent(entityOptional.get(), this, 1);
+            GunLoseAmmoEvent event = new GunLoseAmmoEvent(entityOptional.get(), this, state.ammo(), 1);
             EventDispatcher.call(event);
             ammoLoss = event.getAmmoLost();
         } else {
