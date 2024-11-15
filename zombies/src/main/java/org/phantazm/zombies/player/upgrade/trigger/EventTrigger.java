@@ -96,7 +96,7 @@ public class EventTrigger implements UpgradeTriggerComponent {
         MOB_DEATH(MobDeathEvent.class),
         MOB_SETUP(MobSetupEvent.class),
         GUN_LOSE_AMMO(GunLoseAmmoEvent.class),
-        GUN_REFILL_EVENT(GunRefillEvent.class),
+        GUN_REFILL(GunRefillEvent.class),
         GUN_TARGET_SELECT(GunTargetSelectEvent.class),
         ZOMBIES_PLAYER(ZombiesPlayerEvent.class),
         ZOMBIES_PLAYER_DAMAGE(ZombiesPlayerDamageEvent.class),
