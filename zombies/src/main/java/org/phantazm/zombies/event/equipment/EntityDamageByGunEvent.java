@@ -5,14 +5,13 @@ import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.EntityInstanceEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.equipment.gun.Gun;
-import org.phantazm.zombies.event.trait.GunEvent;
 import org.phantazm.zombies.event.trait.SettableDamageAmountEvent;
 import org.phantazm.zombies.event.trait.ShooterEvent;
 
 import java.util.Objects;
 
 public class EntityDamageByGunEvent implements EntityInstanceEvent, CancellableEvent, SettableDamageAmountEvent,
-    ShooterEvent, GunEvent {
+    ShooterEvent {
     private final Gun gun;
     private final Entity damagedEntity;
     private final Entity shooter;
