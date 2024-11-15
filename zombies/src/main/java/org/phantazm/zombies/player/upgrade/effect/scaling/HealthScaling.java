@@ -6,6 +6,7 @@ import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.VisibleForTesting;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.zombies.ScalingFormulae;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.selector.Selector;
@@ -59,39 +60,9 @@ public class HealthScaling implements ScalingComponent {
             LivingEntity target = possibleTarget.get();
             double percentage = (double) target.getHealth() / target.getMaxHealth();
 
-            return computeMultiplier(data.returnZeroOutsideRange, percentage, largerNumberIsStart, largerNumber,
+            return ScalingFormulae.computeMultiplier(data.returnZeroOutsideRange, percentage, largerNumberIsStart, largerNumber,
                 smallerNumber, data.startMultiplier, data.endMultiplier);
         }
-    }
-
-    @VisibleForTesting
-    static double computeMultiplier(boolean returnZeroOutsideRange, double percentage, boolean largerNumberIsStart,
-        double largerNumber, double smallerNumber, double startMultiplier, double endMultiplier) {
-        if (returnZeroOutsideRange) {
-            if (percentage > largerNumber || percentage < smallerNumber) {
-                return 0.0;
-            }
-        } else {
-            if (largerNumberIsStart) {
-                if (percentage > largerNumber) {
-                    return startMultiplier;
-                }
-                if (percentage < smallerNumber) {
-                    return endMultiplier;
-                }
-            } else {
-                if (percentage > largerNumber) {
-                    return endMultiplier;
-                }
-                if (percentage < smallerNumber) {
-                    return startMultiplier;
-                }
-            }
-        }
-
-        double range = largerNumber - smallerNumber;
-        return largerNumberIsStart ? ((largerNumber - percentage) / range) * (endMultiplier - startMultiplier) + startMultiplier :
-            ((range - (largerNumber - percentage)) / range) * (endMultiplier - startMultiplier) + startMultiplier;
     }
 
     @Default("""
