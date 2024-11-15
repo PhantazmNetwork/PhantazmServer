@@ -10,10 +10,7 @@ import org.phantazm.zombies.event.entity.EntityAttributeModifierRemoveEvent;
 import org.phantazm.zombies.event.entity.MobBreakWindowEvent;
 import org.phantazm.zombies.event.entity.MobDeathEvent;
 import org.phantazm.zombies.event.entity.MobSetupEvent;
-import org.phantazm.zombies.event.equipment.EntitiesHitByGunEvent;
-import org.phantazm.zombies.event.equipment.EntityDamageByGunEvent;
-import org.phantazm.zombies.event.equipment.GunLoseAmmoEvent;
-import org.phantazm.zombies.event.equipment.GunTargetSelectEvent;
+import org.phantazm.zombies.event.equipment.*;
 import org.phantazm.zombies.event.player.*;
 import org.phantazm.zombies.event.trait.*;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -99,6 +96,7 @@ public class EventTrigger implements UpgradeTriggerComponent {
         MOB_DEATH(MobDeathEvent.class),
         MOB_SETUP(MobSetupEvent.class),
         GUN_LOSE_AMMO(GunLoseAmmoEvent.class),
+        GUN_REFILL_EVENT(GunRefillEvent.class),
         GUN_TARGET_SELECT(GunTargetSelectEvent.class),
         ZOMBIES_PLAYER(ZombiesPlayerEvent.class),
         ZOMBIES_PLAYER_DAMAGE(ZombiesPlayerDamageEvent.class),

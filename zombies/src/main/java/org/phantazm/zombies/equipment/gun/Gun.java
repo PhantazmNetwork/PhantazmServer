@@ -13,6 +13,7 @@ import org.phantazm.zombies.equipment.gun.effect.GunEffect;
 import org.phantazm.zombies.equipment.gun.shoot.fire.Firer;
 import org.phantazm.zombies.equipment.gun.visual.GunStackMapper;
 import org.phantazm.zombies.event.equipment.GunLoseAmmoEvent;
+import org.phantazm.zombies.event.equipment.GunRefillEvent;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -134,6 +135,11 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             builder.setClip(level.stats().maxClip());
             builder.setTicksSinceLastReload(level.stats().reloadSpeed());
         });
+        Optional<? extends Entity> entityOptional = entitySupplier.get();
+        if (entityOptional.isPresent()) {
+            GunRefillEvent event = new GunRefillEvent(entityOptional.get(), this);
+            EventDispatcher.call(event);
+        }
     }
 
     @Override
