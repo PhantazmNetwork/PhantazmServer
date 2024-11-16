@@ -4,8 +4,12 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.Child;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.AttributeUtils;
+import org.phantazm.core.player.PlayerView;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.GunStats;
 import org.phantazm.zombies.equipment.gun.reload.ReloadTester;
@@ -21,6 +25,7 @@ public class ReloadStackMapper implements GunStackMapper {
 
     private final GunStats stats;
     private final ReloadTester reloadTester;
+    private final PlayerView player;
 
     /**
      * Creates a {@link ReloadStackMapper}.
@@ -30,15 +35,20 @@ public class ReloadStackMapper implements GunStackMapper {
      */
     @FactoryMethod
     public ReloadStackMapper(@NotNull @Child("stats") GunStats stats,
-        @NotNull @Child("reloadTester") ReloadTester reloadTester) {
+        @NotNull @Child("reloadTester") ReloadTester reloadTester, @NotNull PlayerView player) {
         this.stats = Objects.requireNonNull(stats);
         this.reloadTester = Objects.requireNonNull(reloadTester);
+        this.player = player;
     }
 
     @Override
     public @NotNull ItemStack map(@NotNull GunState state, @NotNull ItemStack intermediate) {
         if (reloadTester.isReloading(state)) {
-            long reloadSpeed = stats.reloadSpeed();
+            Player actualPlayer = player.getPlayer().orElse(null);
+            long reloadSpeed = (actualPlayer == null ? stats.reloadSpeed() :
+                (Math.round(AttributeUtils.computeWithBase(stats.reloadSpeed(),
+                    actualPlayer.getAttribute(Attributes.RELOAD_DELAY)))));
+
             int maxDamage = intermediate.material().registry().maxDamage();
             int damage = maxDamage - (int) (maxDamage * ((double) state.ticksSinceLastReload() / reloadSpeed));
 
