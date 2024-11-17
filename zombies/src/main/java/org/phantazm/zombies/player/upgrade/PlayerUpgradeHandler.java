@@ -2,7 +2,6 @@ package org.phantazm.zombies.player.upgrade;
 
 import net.kyori.adventure.key.Key;
 import net.minestom.server.Tickable;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.event.player.ZombiesPlayerModifyUpgrade;
