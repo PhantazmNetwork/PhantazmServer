@@ -4,9 +4,11 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Interval;
+import org.phantazm.core.TagUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.selector.Selector;
@@ -57,7 +59,17 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, target -> {
-                int newValue = target.tagHandler().updateAndGetTag(tag, currentValue -> {
+                ZombiesPlayer targetPlayer = zombiesPlayer.getScene().getPlayer(target.getUuid());
+
+                TagHandler handler;
+                if (targetPlayer != null) {
+                    handler = targetPlayer.getPlayer().map(player -> TagUtils.sceneLocalTags(player,
+                        zombiesPlayer.getScene())).orElseGet(target::tagHandler);
+                } else {
+                    handler = target.tagHandler();
+                }
+
+                int newValue = handler.updateAndGetTag(tag, currentValue -> {
                     int next = currentValue + data.increment;
                     return data.increment < 0 ? Math.max(next, data.limit) : Math.min(next, data.limit);
                 });
