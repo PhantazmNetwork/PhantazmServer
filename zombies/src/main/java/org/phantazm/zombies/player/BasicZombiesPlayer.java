@@ -75,11 +75,12 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     }
 
     @Override
-    public void addActivable(@NotNull Activable activable) {
+    public boolean addActivable(@NotNull Activable activable) {
         activablesLock.lock();
+        boolean result;
         try {
             Set<Activable> mutableActivables = new HashSet<>(activables);
-            mutableActivables.add(activable);
+            result = mutableActivables.add(activable);
 
             this.activables = mutableActivables;
         } finally {
@@ -89,10 +90,12 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         if (!hasQuit()) {
             activable.start();
         }
+
+        return result;
     }
 
     @Override
-    public void removeActivable(@NotNull Activable activable) {
+    public boolean removeActivable(@NotNull Activable activable) {
         boolean removed;
         activablesLock.lock();
         try {
@@ -107,6 +110,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         if (removed) {
             activable.end();
         }
+
+        return removed;
     }
 
     @Override

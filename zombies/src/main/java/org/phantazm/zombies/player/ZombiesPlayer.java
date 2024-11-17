@@ -49,9 +49,9 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     boolean blockHandAnimation();
 
-    void addActivable(@NotNull Activable activable);
+    boolean addActivable(@NotNull Activable activable);
 
-    void removeActivable(@NotNull Activable activable);
+    boolean removeActivable(@NotNull Activable activable);
 
     @NotNull @UnmodifiableView Set<ShotEffect> shotEffects();
 
