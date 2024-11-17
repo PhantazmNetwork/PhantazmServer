@@ -10,7 +10,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.TagUtils;
+import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.event.player.ZombiesPlayerModifyUpgrade;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
@@ -55,7 +55,7 @@ public class CountUpgradeEffect implements UpgradeEffectComponent {
                 return;
             }
 
-            TagUtils.sceneLocalTags(player.get(), zombiesPlayer.getScene())
+            ZombiesTagUtils.sceneLocalTags(zombiesPlayer)
                 .updateTag(countTag, value -> zombiesPlayerModifyUpgrade.added() ? ++value : --value);
         }
     }
@@ -69,5 +69,6 @@ public class CountUpgradeEffect implements UpgradeEffectComponent {
     @DataObject
     public record Data(@NotNull Set<Key> upgradeKeys,
         boolean whitelist,
-        @NotNull String outputTag) {}
+        @NotNull String outputTag) {
+    }
 }

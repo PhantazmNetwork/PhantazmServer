@@ -3,10 +3,12 @@ package org.phantazm.zombies.player.upgrade.effect;
 import com.github.steanky.element.core.annotation.*;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Interval;
 import org.phantazm.core.TagUtils;
+import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.event.trait.AttributeEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
@@ -60,17 +62,19 @@ public class LinkAttributeToTagEffect implements UpgradeEffectComponent {
         public void applyEvent(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData, @NotNull AttributeEvent attributeEvent) {
             selector.select(upgrade, zombiesPlayer, triggerData).forType(LivingEntity.class, livingEntity -> {
+                TagHandler handler = ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), livingEntity);
+
                 if (!attributeEvent.isRemove()) {
-                    livingEntity.setTag(tag, true);
-                    livingEntity.setTag(uuidTag, attributeEvent.attributeUuid());
+                    handler.setTag(tag, true);
+                    handler.setTag(uuidTag, attributeEvent.attributeUuid());
 
                     targets.putIfAbsent(livingEntity.getUuid(), new WeakReference<>(livingEntity));
                     return;
                 }
 
-                if (Objects.equals(livingEntity.getTag(uuidTag), attributeEvent.attributeUuid())) {
-                    livingEntity.removeTag(tag);
-                    livingEntity.removeTag(uuidTag);
+                if (Objects.equals(handler.getTag(uuidTag), attributeEvent.attributeUuid())) {
+                    handler.removeTag(tag);
+                    handler.removeTag(uuidTag);
                 }
             });
         }

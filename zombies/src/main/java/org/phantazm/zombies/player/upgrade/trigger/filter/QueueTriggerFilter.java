@@ -6,6 +6,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.effect.RecordTargetEffect;
@@ -55,7 +56,8 @@ public class QueueTriggerFilter implements TriggerFilterComponent {
 
             boolean anyMatchFound = false;
             for (Entity queueHolder : queueHolders) {
-                Map<RecordTargetEffect.QueueEntry, Object> queue = queueHolder.getTag(tag);
+                Map<RecordTargetEffect.QueueEntry, Object> queue =
+                    ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), queueHolder).getTag(tag);
                 if (queue == null || queue.isEmpty()) {
                     if (data.whitelist && data.allTargetsMustMatch) {
                         // empty whitelist queue, any target will fail, but all targets must succeed
