@@ -6,7 +6,6 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
@@ -16,7 +15,6 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Model("zombies.upgrade.effect.count_upgrade")
@@ -47,11 +45,6 @@ public class CountUpgradeEffect implements UpgradeEffectComponent {
         @Override
         protected void applyEvent(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData, @NotNull ZombiesPlayerModifyUpgrade zombiesPlayerModifyUpgrade) {
             if (data.upgradeKeys.contains(zombiesPlayerModifyUpgrade.upgradeKey()) != data.whitelist) {
-                return;
-            }
-
-            Optional<? extends Player> player = zombiesPlayer.getPlayer();
-            if (player.isEmpty()) {
                 return;
             }
 
