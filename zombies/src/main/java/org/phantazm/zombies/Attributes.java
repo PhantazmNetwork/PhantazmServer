@@ -49,6 +49,8 @@ public final class Attributes {
     public static final Attribute POWERUP_KILL_ALL_IN_RADIUS_DAMAGE_DISTANCE_END_SCALING =
         new Attribute("phantazm.powerup.kill_all_in_radius.damage_distance_end_scaling", 0F, false);
 
+    public static final Attribute WAVE_DELAY = new Attribute("phantazm.wave_delay", 0F, false);
+
     public static final Attribute NIL = new Attribute("phantazm.nil", 0F, false);
 
     private Attributes() {
@@ -75,6 +77,7 @@ public final class Attributes {
         POWERUP_KILL_ALL_IN_RADIUS_DAMAGE_DISTANCE_START_SCALING.register();
         POWERUP_KILL_ALL_IN_RADIUS_INSTAKILL_DISTANCE_SCALING.register();
         POWERUP_KILL_ALL_IN_RADIUS_DAMAGE_DISTANCE_END_SCALING.register();
+        WAVE_DELAY.register();
 
         FIRE_APPLY_DURATION.register();
         FIRE_APPLY_DAMAGE.register();

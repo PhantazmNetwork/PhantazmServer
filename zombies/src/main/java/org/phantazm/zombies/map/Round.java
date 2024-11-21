@@ -1,10 +1,12 @@
 package org.phantazm.zombies.map;
 
 import net.minestom.server.Tickable;
+import net.minestom.server.attribute.AttributeInstance;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.PluginMessagePacket;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
+import org.phantazm.core.AttributeUtils;
 import org.phantazm.core.packet.MinestomPacketUtils;
 import org.phantazm.messaging.packet.server.RoundStartPacket;
 import org.phantazm.mob2.Mob;
@@ -218,7 +220,8 @@ public class Round implements Tickable {
         }
 
         ++waveTicks;
-        if (waveIndex < waves.size() && waveTicks > currentWave.delayTicks()) {
+        float actualWaveTicks = AttributeUtils.computeWithBase(currentWave.delayTicks(), sceneSupplier.get().map().roundHandler().waveDelayAttribute());
+        if (waveIndex < waves.size() && waveTicks > actualWaveTicks) {
             List<Mob> mobs = spawnMobs(currentWave.spawns(), sceneSupplier.get().map().objects().spawnDistributor(), true);
             currentWave.onSpawn(mobs);
 

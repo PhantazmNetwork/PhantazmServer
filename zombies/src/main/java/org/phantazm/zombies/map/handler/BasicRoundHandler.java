@@ -1,6 +1,8 @@
 package org.phantazm.zombies.map.handler;
 
+import net.minestom.server.attribute.AttributeInstance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -14,6 +16,7 @@ public class BasicRoundHandler implements RoundHandler {
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
     private final List<Round> rounds;
     private final Endless endless;
+    private final AttributeInstance waveDelayAttribute;
 
     private Round currentRound;
     private int roundIndex;
@@ -26,6 +29,7 @@ public class BasicRoundHandler implements RoundHandler {
         this.zombiesPlayers = Objects.requireNonNull(zombiesPlayers);
         this.rounds = Objects.requireNonNull(rounds);
         this.endless = Objects.requireNonNull(endless);
+        this.waveDelayAttribute = new AttributeInstance(Attributes.WAVE_DELAY, null);
 
         if (rounds.isEmpty()) {
             hasEnded = true;
@@ -129,9 +133,15 @@ public class BasicRoundHandler implements RoundHandler {
         return isEndless;
     }
 
+
     @Override
     public void enableEndless() {
         this.isEndless = true;
+    }
+
+    @Override
+    public @NotNull AttributeInstance waveDelayAttribute() {
+        return waveDelayAttribute;
     }
 
     @Override
