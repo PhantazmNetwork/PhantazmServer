@@ -1,7 +1,6 @@
 package org.phantazm.zombies.map;
 
 import net.minestom.server.Tickable;
-import net.minestom.server.attribute.AttributeInstance;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.PluginMessagePacket;
 import org.jetbrains.annotations.NotNull;

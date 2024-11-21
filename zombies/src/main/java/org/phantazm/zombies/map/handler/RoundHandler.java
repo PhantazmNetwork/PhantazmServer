@@ -5,7 +5,6 @@ import net.minestom.server.attribute.AttributeInstance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.map.Round;
-import org.w3c.dom.Attr;
 
 import java.util.Optional;
 
