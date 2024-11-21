@@ -7,6 +7,7 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.CompareCondition;
+import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.selector.Selector;
@@ -44,7 +45,7 @@ public class FindTagInSelectorTriggerFilter implements TriggerFilterComponent {
 
             if (data.allTargetsMustMatch) {
                 for (Entity target : targets) {
-                    if (!data.condition.compare(data.value, target.getTag(tag))) {
+                    if (!data.condition.compare(data.value, ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target).getTag(tag))) {
                         return false;
                     }
                 }
@@ -52,7 +53,7 @@ public class FindTagInSelectorTriggerFilter implements TriggerFilterComponent {
                 return true;
             }
             for (Entity target : targets) {
-                if (data.condition.compare(data.value, target.getTag(tag))) {
+                if (data.condition.compare(data.value, ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target).getTag(tag))) {
                     return true;
                 }
             }

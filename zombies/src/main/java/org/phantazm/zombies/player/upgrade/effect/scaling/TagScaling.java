@@ -6,6 +6,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.selector.Selector;
@@ -45,7 +46,7 @@ public class TagScaling implements ScalingComponent {
             @NotNull TriggerData triggerData) {
             return selector.select(upgrade, zombiesPlayer, triggerData)
                 .forType(Entity.class)
-                .map(entity -> entity.getTag(levelTag))
+                .map(entity -> ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), entity).getTag(levelTag))
                 .orElse(data.defaultValue);
         }
     }

@@ -6,17 +6,15 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.TagUtils;
+import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.event.player.ZombiesPlayerModifyUpgrade;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Model("zombies.upgrade.effect.count_upgrade")
@@ -50,12 +48,7 @@ public class CountUpgradeEffect implements UpgradeEffectComponent {
                 return;
             }
 
-            Optional<? extends Player> player = zombiesPlayer.getPlayer();
-            if (player.isEmpty()) {
-                return;
-            }
-
-            TagUtils.sceneLocalTags(player.get(), zombiesPlayer.getScene())
+            ZombiesTagUtils.sceneLocalTags(zombiesPlayer)
                 .updateTag(countTag, value -> zombiesPlayerModifyUpgrade.added() ? ++value : --value);
         }
     }
@@ -69,5 +62,6 @@ public class CountUpgradeEffect implements UpgradeEffectComponent {
     @DataObject
     public record Data(@NotNull Set<Key> upgradeKeys,
         boolean whitelist,
-        @NotNull String outputTag) {}
+        @NotNull String outputTag) {
+    }
 }

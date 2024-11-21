@@ -29,7 +29,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -357,19 +356,18 @@ public final class SceneManager {
     private void handleDisconnect(@NotNull PlayerView playerView) {
         PlayerViewImpl view = (PlayerViewImpl) playerView;
 
-        AtomicReference<Scene> currentSceneReference = view.currentSceneReference();
-        if (currentSceneReference.get() == null) {
-            LOGGER.warn("Disconnect event called for {} but player has no set scene!", playerView.getUUID());
-        } else {
-            synchronizeWithCurrentScene(view, scene -> {
+        Scene scene = view.currentSceneReference().getAndSet(null);
+        if (scene != null) {
+            Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
+            try {
                 Set<Player> left = unwrapMany(scene.leave(Set.of(view)), HashSet::new);
 
                 if (!left.isEmpty()) {
                     leaveEntryMap.put(view.getUUID(), new LeaveEntry(scene, left));
                 }
-
-                currentSceneReference.set(null);
-            });
+            } finally {
+                acquired.unlock();
+            }
         }
 
         viewProvider.handleDisconnect(playerView.getUUID());

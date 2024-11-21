@@ -7,6 +7,7 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Interval;
+import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.selector.Selector;
@@ -55,7 +56,7 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, target -> {
-                target.setTag(tag, true);
+                ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target).setTag(tag, true);
                 map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
             });
         }
@@ -68,7 +69,7 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
                     return true;
                 }
 
-                entity.removeTag(tag);
+                ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), entity).removeTag(tag);
                 return true;
             });
         }

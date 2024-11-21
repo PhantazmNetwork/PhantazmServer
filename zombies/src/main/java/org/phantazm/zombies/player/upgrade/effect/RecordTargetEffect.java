@@ -6,13 +6,14 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.selector.Selector;
 import org.phantazm.zombies.player.upgrade.selector.SelectorComponent;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
+import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.lang.invoke.VarHandle;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -37,7 +38,7 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
     @Override
     public @NotNull UpgradeEffect apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
         return new Internal(data, target.apply(injectionStore, zombiesPlayer),
-            queue.apply(injectionStore, zombiesPlayer), data.queueName);
+            queue.apply(injectionStore, zombiesPlayer), data.queueName, zombiesPlayer.getScene());
     }
 
     public record QueueEntry(int time,
@@ -65,16 +66,18 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
         private final Data data;
         private final Selector target;
         private final Selector queueSelector;
+        private final ZombiesScene scene;
 
         private final AtomicInteger time;
         private final Map<UUID, Reference<Entity>> targets;
 
-        private Internal(Data data, Selector target, Selector queue, String queueName) {
+        private Internal(Data data, Selector target, Selector queue, String queueName, ZombiesScene scene) {
             this.queueTag = Tag.Transient(queueName);
 
             this.data = data;
             this.target = target;
             this.queueSelector = queue;
+            this.scene = scene;
             this.time = new AtomicInteger();
             this.targets = new ConcurrentHashMap<>();
         }
@@ -95,8 +98,7 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
                 }
 
                 this.targets.put(entity.getUuid(), new WeakReference<>(entity));
-                VarHandle.storeStoreFence();
-                entity.tagHandler().updateTag(queueTag, currentQueue -> {
+                ZombiesTagUtils.sceneLocalTags(scene, entity).updateTag(queueTag, currentQueue -> {
                     if (currentQueue == null) {
                         return newEntries;
                     }
@@ -142,7 +144,7 @@ public class RecordTargetEffect implements UpgradeEffectComponent {
                     return true;
                 }
 
-                return entity.tagHandler().updateAndGetTag(queueTag, currentQueue -> {
+                return ZombiesTagUtils.sceneLocalTags(scene, entity).updateAndGetTag(queueTag, currentQueue -> {
                     if (currentQueue == null || currentQueue.isEmpty()) {
                         return null;
                     }
