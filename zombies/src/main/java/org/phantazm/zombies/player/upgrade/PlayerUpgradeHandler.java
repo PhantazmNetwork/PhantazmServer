@@ -3,6 +3,7 @@ package org.phantazm.zombies.player.upgrade;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.Tickable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.event.player.ZombiesPlayerModifyUpgrade;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -26,6 +27,10 @@ public class PlayerUpgradeHandler implements Tickable {
         this.tickables = new CopyOnWriteArrayList<>();
 
         this.zombiesPlayer = zombiesPlayer;
+    }
+
+    public @Unmodifiable Set<Key> validUpgrades() {
+        return upgradeComponents.keySet();
     }
 
     private PlayerUpgrade createNewUpgrade(Key key) {
