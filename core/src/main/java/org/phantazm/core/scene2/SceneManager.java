@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -661,10 +662,8 @@ public final class SceneManager {
      * Note that this method will <i>leave</i> any players from the scene when it has shut down, but these players will
      * not be sent anywhere. That is the responsibility of {@code shutdownCallback}, a
      * {@link CompletableFuture}-returning function. When its future is complete (exceptionally or otherwise), the scene
-     * will be fully shut down by calling {@link Scene#shutdown()}.
-     * <p>
-     * <b>WARNING</b>: Calling this method inside the thread used to tick the scene being removed may result in
-     * deadlocks.
+     * will be fully shut down by calling {@link Scene#shutdown()}. Consequently, any exception thrown in
+     * {@code shutdownCallback} will be logged and swallowed.
      *
      * @param scene            the scene to remove
      * @param shutdownCallback the callback to run with the set of all players that were previously in {@code scene}
@@ -683,7 +682,10 @@ public final class SceneManager {
 
         threadDispatcher.deletePartition(scene);
 
-        Acquired<? extends Scene> acquired = scene.getAcquirable().lock();
+        // only lock if we're the non-local thread
+        boolean shouldLock = !scene.getAcquirable().isLocal();
+
+        Acquired<? extends Scene> acquired = shouldLock ? scene.getAcquirable().lock() : null;
 
         Set<PlayerView> players;
         Set<PlayerView> leftPlayers;
@@ -707,30 +709,47 @@ public final class SceneManager {
                 }
             }
         } finally {
-            acquired.unlock();
+            if (shouldLock) acquired.unlock();
         }
 
-        boolean hasLeftPlayers = !leftPlayers.isEmpty();
 
         Set<Player> finalLeftPlayers = unwrapMany(leftPlayers, HashSet::new);
-        if (!hasLeftPlayers || shutdownCallback == null) {
-            scene.getAcquirable().sync(self -> {
-                if (hasLeftPlayers) {
-                    self.postLeave(finalLeftPlayers);
+        boolean noLeftPlayers = leftPlayers.isEmpty();
+        if (noLeftPlayers || shutdownCallback == null) {
+            acquired = null;
+            if (shouldLock) acquired = scene.getAcquirable().lock();
+
+            try {
+                if (!finalLeftPlayers.isEmpty()) {
+                    scene.postLeave(finalLeftPlayers);
                 }
 
-                self.shutdown();
-                EventDispatcher.call(new SceneShutdownEvent(self));
-            });
+                scene.shutdown();
+                EventDispatcher.call(new SceneShutdownEvent(scene));
+            } finally {
+                if (shouldLock) acquired.unlock();
+            }
 
             return;
         }
 
-        shutdownCallback.apply(players).whenComplete((ignored1, ignored2) -> scene.getAcquirable().sync(self -> {
-            self.postLeave(finalLeftPlayers);
-            self.shutdown();
-            EventDispatcher.call(new SceneShutdownEvent(self));
-        }));
+        try {
+            // sends players to a new scene
+            shutdownCallback.apply(players).join();
+        } catch (CompletionException e) {
+            LOGGER.warn("CompletionException sending players to a new scene from one that is shutting down!", e);
+        }
+
+        acquired = null;
+        if (shouldLock) acquired = scene.getAcquirable().lock();
+
+        try {
+            scene.postLeave(finalLeftPlayers);
+            scene.shutdown();
+            EventDispatcher.call(new SceneShutdownEvent(scene));
+        } finally {
+            if (shouldLock) acquired.unlock();
+        }
     }
 
     /**
