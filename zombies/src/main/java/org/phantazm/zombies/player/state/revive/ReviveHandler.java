@@ -1,9 +1,10 @@
 package org.phantazm.zombies.player.state.revive;
 
-import com.github.steanky.toolkit.collection.Wrapper;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.AttributeUtils;
 import org.phantazm.core.tick.Activable;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.event.player.ZombiesPlayerEndReviveEvent;
 import org.phantazm.zombies.event.player.ZombiesPlayerReviveEvent;
 import org.phantazm.zombies.event.player.ZombiesPlayerStartReviveEvent;
@@ -22,7 +23,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ReviveHandler implements Activable {
-    private final Wrapper<ZombiesPlayer> revivee;
+    private final ZombiesPlayer revivee;
     private final KnockedPlayerStateContext context;
     private final Collection<? extends ZombiesPlayer> zombiesPlayers;
     private final Function<? super AlivePlayerStateContext, ? extends ZombiesPlayerState> defaultStateCreator;
@@ -38,7 +39,7 @@ public class ReviveHandler implements Activable {
 
     private long ticksUntilRevive = -1;
 
-    public ReviveHandler(@NotNull Wrapper<ZombiesPlayer> revivee, @NotNull KnockedPlayerStateContext context,
+    public ReviveHandler(@NotNull ZombiesPlayer revivee, @NotNull KnockedPlayerStateContext context,
         @NotNull Collection<? extends ZombiesPlayer> zombiesPlayers,
         @NotNull Function<? super AlivePlayerStateContext, ? extends ZombiesPlayerState> defaultStateCreator,
         @NotNull Supplier<? extends ZombiesPlayerState> deathStateSupplier,
@@ -50,7 +51,7 @@ public class ReviveHandler implements Activable {
         this.deathStateSupplier = Objects.requireNonNull(deathStateSupplier);
         this.reviverPredicate = Objects.requireNonNull(reviverPredicate);
         this.deathTime = deathTime;
-        this.ticksUntilDeath = deathTime;
+        this.ticksUntilDeath = computeDeathTime(revivee, deathTime);
     }
 
     public @NotNull KnockedPlayerStateContext context() {
@@ -70,7 +71,7 @@ public class ReviveHandler implements Activable {
 
     private void broadcastReviveEnd(@NotNull ZombiesPlayer reviver, boolean isRevived) {
         reviver.getPlayer().ifPresent(reviverPlayer -> {
-            ZombiesPlayer revivee = this.revivee.get();
+            ZombiesPlayer revivee = this.revivee;
             ZombiesScene scene = revivee.getScene();
 
             revivee.getPlayer().ifPresent(reviveePlayer -> {
@@ -85,7 +86,7 @@ public class ReviveHandler implements Activable {
 
     private void broadcastReviveStart(@NotNull ZombiesPlayer reviver) {
         reviver.getPlayer().ifPresent(reviverPlayer -> {
-            ZombiesPlayer revivee = this.revivee.get();
+            ZombiesPlayer revivee = this.revivee;
 
             revivee.getPlayer().ifPresent(reviveePlayer -> {
                 revivee.getScene().broadcastEvent(new ZombiesPlayerStartReviveEvent(reviverPlayer, reviver, reviveePlayer, revivee));
@@ -102,9 +103,6 @@ public class ReviveHandler implements Activable {
                 cachedDeathState = deathStateSupplier.get();
             }
 
-            if (reviver != null) {
-                throw new OutOfMemoryError("what happen?????? MEETHED KIL FANTASM, HURT MEETHED BRANE\n\n\n\n\nmeethed go free cow now, cow maek meethed hapy :)");
-            }
             return;
         }
 
@@ -130,7 +128,8 @@ public class ReviveHandler implements Activable {
                 }
             }
             if (reviver != null) {
-                ticksUntilDeath = deathTime;
+                ticksUntilDeath = computeDeathTime(revivee, deathTime);
+
                 reviver.module().getMeta().setReviving(true);
                 ticksUntilRevive = reviver.getReviveTime();
 
@@ -146,6 +145,11 @@ public class ReviveHandler implements Activable {
         } else {
             --ticksUntilRevive;
         }
+    }
+
+    private static long computeDeathTime(ZombiesPlayer player, long baseTime) {
+        return player.getPlayer().map(value -> (long) AttributeUtils.computeWithBase(baseTime,
+            value.getAttribute(Attributes.DEATH_TICKS))).orElse(baseTime);
     }
 
     @Override

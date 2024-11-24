@@ -173,7 +173,7 @@ public class BasicZombiesPlayerSource implements ZombiesPlayer.Source {
             };
 
             ReviveHandler reviveHandler =
-                new ReviveHandler(zombiesPlayerWrapper, context, zombiesPlayers.values(), aliveStateCreator, deadStateSupplier,
+                new ReviveHandler(zombiesPlayerWrapper.get(), context, zombiesPlayers.values(), aliveStateCreator, deadStateSupplier,
                     new NearbyReviverPredicate(playerView, mapSettingsInfo.reviveRadius()), 500L);
 
             CorpseCreator.Corpse corpse =
