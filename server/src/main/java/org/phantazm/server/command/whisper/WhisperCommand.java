@@ -1,14 +1,14 @@
 package org.phantazm.server.command.whisper;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.CommandUtils;
 
 import java.util.Objects;
 
@@ -22,27 +22,20 @@ public class WhisperCommand {
         Command command = new Command("whisper", "w", "msg");
         Argument<String> target = ArgumentType.Word("target");
         target.setSuggestionCallback((sender, context, suggestion) -> {
-            String prefix = context.getOrDefault(target, "").trim().toLowerCase();
+            CommandUtils.tabComplete(suggestion, connectionManager.getOnlinePlayers(), onlinePlayer -> {
+                if (onlinePlayer == sender) return null;
 
-            for (Player player : connectionManager.getOnlinePlayers()) {
-                if (player == sender) {
-                    continue;
-                }
-
-                String username = player.getUsername();
-                if (username.toLowerCase().startsWith(prefix)) {
-                    suggestion.addEntry(new SuggestionEntry(username));
-                }
-            }
+                return onlinePlayer.getUsername();
+            }, Player::getUsername, Player::getDisplayName);
         });
-        Argument<String[]> message = ArgumentType.StringArray("message");
 
-        command.addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+        Argument<String[]> message = ArgumentType.StringArray("message");
+        command.addConditionalSyntax(CommandUtils.PLAYER_CONDITION, (sender, context) -> {
             String name = context.get(target);
             Player targetPlayer = connectionManager.getPlayer(name);
 
             if (targetPlayer == null) {
-                sender.sendMessage(Component.text(name + " is not online."));
+                sender.sendMessage(Component.text(name + " is not online!", NamedTextColor.RED));
                 return;
             }
 

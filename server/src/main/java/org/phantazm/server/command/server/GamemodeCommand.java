@@ -5,7 +5,7 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
-import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
 
 public class GamemodeCommand extends PermissionLockedCommand {
@@ -17,7 +17,7 @@ public class GamemodeCommand extends PermissionLockedCommand {
     public GamemodeCommand() {
         super("gamemode", PERMISSION);
 
-        addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+        addConditionalSyntax(CommandUtils.PLAYER_CONDITION, (sender, context) -> {
             Player player = (Player) sender;
             player.setGameMode(context.get(GAMEMODE));
         }, GAMEMODE);

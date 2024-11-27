@@ -7,9 +7,9 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
 import org.phantazm.core.guild.permission.MultipleMemberPermission;
@@ -35,31 +35,30 @@ public class PartyKickCommand {
         Command command = new Command("kick");
         Argument<String> nameArgument = ArgumentType.Word("name");
         nameArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            if (!(sender instanceof Player player)) {
-                return;
-            }
+            if (!(sender instanceof Player player)) return;
 
             Party party = partyMap.get(player.getUuid());
-            if (party == null) {
-                return;
-            }
+            if (party == null) return;
 
             PartyMember member = party.getMemberManager().getMember(player.getUuid());
             MultipleMemberPermission<PartyMember> permission = party.getKickPermission();
-            if (!permission.hasPermission(member)) {
-                return;
-            }
+            if (!permission.hasPermission(member)) return;
 
-            String prefix = context.getOrDefault(nameArgument, "").trim().toLowerCase();
-            for (PartyMember otherMember : party.getMemberManager().getMembers().values()) {
-                if (otherMember != member && permission.canExecute(member, otherMember)) {
-                    otherMember.getPlayerView().getUsernameIfCached().ifPresent(username -> {
-                        if (username.toLowerCase().startsWith(prefix)) {
-                            suggestion.addEntry(new SuggestionEntry(username));
-                        }
-                    });
-                }
-            }
+            CommandUtils.tabComplete(suggestion, party.getMemberManager().getMembers().values(), partyMember -> {
+                // don't suggest kicking oneself
+                if (partyMember == member) return null;
+
+                // don't suggest kicking members one does not have permission to kick
+                if (!permission.canExecute(member, partyMember)) return null;
+
+                // try to get the username (offline player may not have one cached)
+                return partyMember.getPlayerView().getUsernameIfCached().orElse(null);
+            }, partyMember -> {
+                return partyMember.getPlayerView().getUsernameIfCached().orElse(null);
+            }, partyMember -> {
+                // use display name for tooltip, if present
+                return partyMember.getPlayerView().getPlayer().map(Player::getDisplayName).orElse(null);
+            });
         });
 
         command.addConditionalSyntax((sender, commandString) -> {

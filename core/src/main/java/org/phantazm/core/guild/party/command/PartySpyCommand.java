@@ -4,15 +4,14 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.SpyAudience;
@@ -39,25 +38,22 @@ public class PartySpyCommand {
         Objects.requireNonNull(viewProvider);
 
         Command command = new Command("spy");
-        Argument<String> nameArgument = ArgumentType.String("name");
+        Argument<String> nameArgument = ArgumentType.Word("name");
         nameArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            String prefix = context.get(nameArgument).trim().toLowerCase();
+            if (!sender.hasPermission(PERMISSION)) return;
 
-            for (Player player : connectionManager.getOnlinePlayers()) {
-                String username = player.getUsername();
-                if (username.toLowerCase().startsWith(prefix)) {
-                    suggestion.addEntry(new SuggestionEntry(player.getUsername()));
-                }
-            }
+            CommandUtils.tabComplete(suggestion, connectionManager.getOnlinePlayers(), onlinePlayer -> {
+                // can't spy on self
+                if (sender instanceof Player player && player.getUuid().equals(onlinePlayer.getUuid())) return null;
+
+                return onlinePlayer.getUsername();
+            }, null, Player::getDisplayName);
         });
 
         command.setCondition((sender, commandString) -> {
-            if (!sender.hasPermission(PERMISSION)) {
-                return false;
-            }
-
-            return sender instanceof Player || sender instanceof ConsoleSender;
+            return sender.hasPermission(PERMISSION);
         });
+
         command.addSyntax((sender, context) -> {
             String name = context.get(nameArgument);
 

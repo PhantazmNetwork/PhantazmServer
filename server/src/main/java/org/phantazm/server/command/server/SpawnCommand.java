@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
-import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.core.scene2.lobby.Lobby;
 
@@ -17,7 +17,7 @@ public class SpawnCommand extends Command {
     public SpawnCommand() {
         super(COMMAND_NAME);
 
-        addConditionalSyntax(CommandUtils.playerSenderCondition(), ((sender, context) -> {
+        addConditionalSyntax(CommandUtils.PLAYER_CONDITION, ((sender, context) -> {
             SceneManager sceneManager = SceneManager.Global.instance();
             Player player = (Player) sender;
 

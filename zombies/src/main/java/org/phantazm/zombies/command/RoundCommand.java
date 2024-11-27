@@ -5,10 +5,11 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.CommandUtils;
+import org.phantazm.core.RangeUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.SceneManager;
@@ -24,16 +25,13 @@ public class RoundCommand extends SandboxLockedCommand {
     private static final Argument<Integer> ROUND_NUMBER = ArgumentType.Integer("round-number").min(1)
         .setSuggestionCallback((sender, context, suggestion) -> {
             PlayerView view = PlayerViewProvider.Global.instance().fromPlayer((Player) sender);
-            SceneManager.Global.instance().currentScene(view).ifPresent(scene -> {
-                if (!(scene instanceof ZombiesScene zombiesScene)) {
-                    return;
-                }
 
+            SceneManager.Global.instance().currentScene(view, ZombiesScene.class).ifPresent(zombiesScene -> {
                 int count = zombiesScene.map().roundHandler().roundCount();
-                for (int i = 0; i < count; i++) {
-                    suggestion.addEntry(
-                        new SuggestionEntry(Integer.toString(i + 1), Component.text("Round " + (i + 1))));
-                }
+
+                CommandUtils.tabComplete(suggestion, RangeUtils.intIterable(1, count + 1), null, round -> {
+                    return Component.text("Round " + round, NamedTextColor.GREEN);
+                });
             });
         });
 

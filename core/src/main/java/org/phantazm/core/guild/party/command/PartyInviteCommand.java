@@ -7,10 +7,10 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.ConnectionManager;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.guild.GuildHolder;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyCreator;
@@ -37,36 +37,22 @@ public class PartyInviteCommand {
 
         Argument<String> nameArgument = ArgumentType.Word("name");
         nameArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            String prefix = context.getOrDefault(nameArgument, "").trim().toLowerCase();
+            if (!(sender instanceof Player player))
+                return;
 
-            if (sender instanceof Player player) {
-                Party party = partyHolder.uuidToGuild().get(player.getUuid());
-                if (party != null) {
-                    for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
-                        if (party.getMemberManager().hasMember(otherPlayer.getUuid())) {
-                            continue;
-                        }
-
-                        String username = otherPlayer.getUsername();
-                        if (username.toLowerCase().startsWith(prefix)) {
-                            suggestion.addEntry(new SuggestionEntry(username));
-                        }
-                    }
-
-                    return;
-                }
+            Party party = partyHolder.uuidToGuild().get(player.getUuid());
+            if (party == null) {
+                CommandUtils.tabComplete(suggestion, connectionManager.getOnlinePlayers(), Player::getUsername,
+                    null, Player::getDisplayName);
+                return;
             }
 
-            for (Player otherPlayer : connectionManager.getOnlinePlayers()) {
-                if (otherPlayer == sender) {
-                    continue;
-                }
+            CommandUtils.tabComplete(suggestion, connectionManager.getOnlinePlayers(), onlinePlayer -> {
+                if (onlinePlayer.getUuid().equals(player.getUuid()) ||
+                    party.getMemberManager().hasMember(onlinePlayer.getUuid())) return null;
 
-                String username = otherPlayer.getUsername();
-                if (username.toLowerCase().startsWith(prefix)) {
-                    suggestion.addEntry(new SuggestionEntry(otherPlayer.getUsername()));
-                }
-            }
+                return onlinePlayer.getUsername();
+            }, null, Player::getDisplayName);
         });
 
         Command command = new Command("invite");

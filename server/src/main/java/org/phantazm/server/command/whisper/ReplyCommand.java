@@ -6,7 +6,7 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.CommandUtils;
 
 import java.util.Objects;
 
@@ -17,7 +17,7 @@ public class ReplyCommand {
 
         Argument<String[]> message = ArgumentType.StringArray("message");
         Command command = new Command("reply", "r");
-        command.addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+        command.addConditionalSyntax(CommandUtils.PLAYER_CONDITION, (sender, context) -> {
             whisperManager.getLastConverser(sender).ifPresentOrElse(target -> {
                 whisperManager.whisper(sender, target, String.join(" ", context.get(message)));
             }, () -> {

@@ -8,7 +8,7 @@ import net.minestom.server.command.builder.arguments.ArgumentEnum;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
-import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
 
 import java.util.UUID;
@@ -24,7 +24,8 @@ public class VelocityCommand extends PermissionLockedCommand {
     }
 
     public static final Permission PERMISSION = new Permission("admin.velocity");
-    private static final Argument<String> PLAYER = ArgumentType.String("player");
+
+    private static final Argument<String> PLAYER = ArgumentType.Word("player");
     private static final Argument<Type> TYPE = ArgumentType.Enum("type", Type.class)
         .setFormat(ArgumentEnum.Format.LOWER_CASED)
         .setDefaultValue(Type.HORIZONTAL);
@@ -33,7 +34,7 @@ public class VelocityCommand extends PermissionLockedCommand {
     public VelocityCommand() {
         super("velo", PERMISSION);
 
-        addConditionalSyntax(CommandUtils.playerSenderCondition(), ((sender, context) -> {
+        addConditionalSyntax(CommandUtils.PLAYER_CONDITION, ((sender, context) -> {
             Player senderPlayer = (Player) sender;
             if (senderPlayer.getUuid().equals(PERSON_WHO_SHOULDNT_USE_VELO)) {
                 senderPlayer.sendMessage(Component.text(":tr:", NamedTextColor.RED));

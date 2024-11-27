@@ -33,6 +33,7 @@ import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntFunction;
+import java.util.stream.Collectors;
 
 /**
  * SceneManager is used to fulfill requests by one or more players to join {@link Scene} objects. This class also
@@ -182,7 +183,8 @@ public final class SceneManager {
          *
          * @return the type of scene this function will join
          */
-        @NotNull Class<T> type();
+        @NotNull
+        Class<T> type();
     }
 
     /**
@@ -768,7 +770,8 @@ public final class SceneManager {
      *
      * @return the set of all valid scene types for this manager
      */
-    public @NotNull @Unmodifiable Set<Class<? extends Scene>> types() {
+    public @NotNull
+    @Unmodifiable Set<Class<? extends Scene>> types() {
         return mappedScenes.keySet();
     }
 
@@ -804,6 +807,19 @@ public final class SceneManager {
                 consumer.accept(scene);
             }
         }
+    }
+
+    /**
+     * Returns an unmodifiable set of all {@link Scene}s currently being managed by this manager. This set is not backed
+     * by a mutable collection and will not change over time; consequently, it represents a "snapshot" of the scenes in
+     * this manager, and may not be up-to-date.
+     *
+     * @return an unmodifiable set containing a snapshot of all scenes in this manager
+     */
+    public @NotNull
+    @Unmodifiable Set<? extends Scene> scenes() {
+        return mappedScenes.values().stream().flatMap(entry -> entry.scenes.stream())
+            .collect(Collectors.toUnmodifiableSet());
     }
 
     /**

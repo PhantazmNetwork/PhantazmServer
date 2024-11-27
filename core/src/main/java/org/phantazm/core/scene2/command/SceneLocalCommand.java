@@ -8,7 +8,7 @@ import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.Scene;
@@ -22,7 +22,7 @@ public abstract class SceneLocalCommand<T extends Scene> extends Command {
         @Nullable String[] aliases, @NotNull Argument<?>... arguments) {
         super(name, aliases);
 
-        addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+        addConditionalSyntax(CommandUtils.PLAYER_CONDITION, (sender, context) -> {
             Player player = (Player) sender;
             PlayerView playerView = PlayerViewProvider.Global.instance().fromPlayer(player);
             Optional<T> sceneOptional = SceneManager.Global.instance().currentScene(playerView, sceneType);

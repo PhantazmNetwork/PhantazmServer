@@ -7,12 +7,12 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.loader.Loader;
 import org.phantazm.zombies.powerup.PowerupHandler;
 import org.phantazm.zombies.powerup.PowerupUtils;
@@ -28,12 +28,10 @@ public class SpawnPowerupCommand extends SandboxLockedCommand {
     public static final Argument<Integer> ROUND = ArgumentType.Integer("round").setDefaultValue(-1);
 
     public SpawnPowerupCommand(Loader<PowerupHandler.Source> powerupLoader) {
-        super("spawn_powerup", PERMISSION, ArgumentType.String("powerup-identifier")
+        super("spawn_powerup", PERMISSION, ArgumentType.Word("powerup-identifier")
             .setSuggestionCallback((sender, context, suggestion) -> {
-                powerupLoader.anonymousData().forEach(source -> {
-                    for (Key key : source.powerups().keySet()) {
-                        suggestion.addEntry(new SuggestionEntry(key.asString()));
-                    }
+                CommandUtils.tabComplete(suggestion, powerupLoader.first().powerups().entrySet(), powerupEntry -> {
+                    return powerupEntry.getKey().asString();
                 });
             }), ROUND);
     }

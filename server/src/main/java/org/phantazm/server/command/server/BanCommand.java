@@ -19,7 +19,7 @@ public class BanCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.ban");
 
     private static final ArgumentWord PLAYER_ARGUMENT = ArgumentType.Word("player");
-    private static final Argument<String> DURATION = ArgumentType.String("duration").setDefaultValue("");
+    private static final Argument<String> DURATION = ArgumentType.Word("duration").setDefaultValue("");
     private static final Argument<String[]> REASON = ArgumentType.StringArray("reason").setDefaultValue(new String[0]);
 
     public BanCommand(@NotNull IdentitySource identitySource, @NotNull LoginValidator loginValidator) {

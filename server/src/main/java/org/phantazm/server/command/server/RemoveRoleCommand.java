@@ -19,7 +19,7 @@ public class RemoveRoleCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.remove_role");
 
     private static final ArgumentWord PLAYER_ARGUMENT = ArgumentType.Word("player");
-    private static final Argument<String> ROLE = ArgumentType.String("role");
+    private static final Argument<String> ROLE = ArgumentType.Word("role");
 
     public RemoveRoleCommand(@NotNull IdentitySource identitySource, @NotNull RoleStore roleStore,
         @NotNull PermissionHandler permissionHandler) {

@@ -13,7 +13,7 @@ public class PardonCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.pardon");
 
     private static final ArgumentWord PLAYER_ARGUMENT = ArgumentType.Word("player");
-    private static final Argument<String> REASON = ArgumentType.String("reason").setDefaultValue("");
+    private static final Argument<String> REASON = ArgumentType.Word("reason").setDefaultValue("");
 
     public PardonCommand(@NotNull IdentitySource identitySource, @NotNull LoginValidator loginValidator) {
         super("pardon", PERMISSION);

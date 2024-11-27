@@ -13,11 +13,11 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.Namespaces;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.scene2.Scene;
@@ -36,10 +36,7 @@ import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageKeys;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GamereportCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.gamereport");
@@ -51,12 +48,11 @@ public class GamereportCommand extends PermissionLockedCommand {
 
         pageFormatters = Map.of(Key.key(Namespaces.PHANTAZM, "zombies"), new ZombiesPageFormatter(config));
 
-        Argument<String> typeArgument = ArgumentType.String("type-key");
+        Argument<String> typeArgument = ArgumentType.Word("type-key");
         typeArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            for (Key key : pageFormatters.keySet()) {
-                suggestion.addEntry(
-                    new SuggestionEntry(key.asString(), Component.text(key.asString())));
-            }
+            CommandUtils.tabComplete(suggestion, pageFormatters.keySet(), null, key -> {
+                return Component.text(key.asString(), NamedTextColor.GREEN);
+            });
         });
 
         Argument<Integer> pageArgument = ArgumentType.Integer("page").setDefaultValue(1);
@@ -95,11 +91,13 @@ public class GamereportCommand extends PermissionLockedCommand {
     }
 
     private interface PageFormatter {
-        @NotNull Component page(int pageIndex, @NotNull List<? extends Scene> scenes);
+        @NotNull
+        Component page(int pageIndex, @NotNull List<? extends Scene> scenes);
 
         int itemsPerPage();
 
-        @NotNull Set<? extends Scene> scenes();
+        @NotNull
+        Set<? extends Scene> scenes();
     }
 
     private record ZombiesPageFormatter(ZombiesGamereportConfig config) implements PageFormatter {

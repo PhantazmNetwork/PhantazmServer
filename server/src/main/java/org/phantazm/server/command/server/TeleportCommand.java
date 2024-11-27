@@ -8,20 +8,20 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
-import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.command.PermissionLockedCommand;
 import org.phantazm.core.scene2.SceneManager;
 
 public class TeleportCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.teleport");
 
-    private static final Argument<String> TELEPORTING_PLAYER = ArgumentType.String("teleportingPlayer");
-    private static final Argument<String> DESTINATION_PLAYER = ArgumentType.String("destinationPlayer");
+    private static final Argument<String> TELEPORTING_PLAYER = ArgumentType.Word("teleportingPlayer");
+    private static final Argument<String> DESTINATION_PLAYER = ArgumentType.Word("destinationPlayer");
 
     public TeleportCommand() {
         super("tp", PERMISSION);
 
-        addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+        addConditionalSyntax(CommandUtils.PLAYER_CONDITION, (sender, context) -> {
             Player teleportingPlayer = MinecraftServer.getConnectionManager().getPlayer(context.get(TELEPORTING_PLAYER));
             if (teleportingPlayer == null) {
                 sender.sendMessage(Component.text(context.get(TELEPORTING_PLAYER) + " is not online!",

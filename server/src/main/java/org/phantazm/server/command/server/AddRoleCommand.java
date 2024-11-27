@@ -16,7 +16,7 @@ public class AddRoleCommand extends PermissionLockedCommand {
     public static final Permission PERMISSION = new Permission("admin.add_role");
 
     private static final ArgumentWord PLAYER_ARGUMENT = ArgumentType.Word("player");
-    private static final Argument<String> ROLE = ArgumentType.String("role");
+    private static final Argument<String> ROLE = ArgumentType.Word("role");
 
     public AddRoleCommand(@NotNull IdentitySource identitySource, @NotNull RoleStore roleStore,
         @NotNull PermissionHandler permissionHandler) {

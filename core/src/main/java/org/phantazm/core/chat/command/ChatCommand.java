@@ -5,11 +5,10 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.chat.ChatChannel;
-import org.phantazm.core.command.CommandUtils;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -44,14 +43,12 @@ public class ChatCommand extends Command {
         Objects.requireNonNull(aliasResolver);
         Objects.requireNonNull(defaultChannelNameSupplier);
 
-        Argument<String> channelNameArgument = ArgumentType.String("channel");
+        Argument<String> channelNameArgument = ArgumentType.Word("channel");
         channelNameArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            for (String channelName : channels.keySet()) {
-                suggestion.addEntry(new SuggestionEntry(channelName));
-            }
+            CommandUtils.tabComplete(suggestion, channels.keySet());
         });
 
-        addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+        addConditionalSyntax(CommandUtils.PLAYER_CONDITION, (sender, context) -> {
             Player player = (Player) sender;
 
             String channelName = context.get(channelNameArgument);

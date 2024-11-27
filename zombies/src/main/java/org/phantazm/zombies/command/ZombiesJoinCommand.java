@@ -16,6 +16,7 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.FutureUtils;
 import org.phantazm.commons.Namespaces;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.guild.GuildMember;
 import org.phantazm.core.guild.party.Party;
 import org.phantazm.core.guild.party.PartyMember;
@@ -33,6 +34,14 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class ZombiesJoinCommand extends Command {
+    private static final SuggestionEntry TRUE_ENTRY = new SuggestionEntry("true",
+        Component.text("true", NamedTextColor.GREEN));
+
+    private static final SuggestionEntry FALSE_ENTRY = new SuggestionEntry("false",
+        Component.text("false", NamedTextColor.RED));
+
+    private static final List<SuggestionEntry> BOOLEAN_ENTRIES = List.of(TRUE_ENTRY, FALSE_ENTRY);
+
     public static final Permission BYPASS_SANDBOX_RESTRICTION = new Permission("zombies.playtest.bypass_sandbox");
 
     public ZombiesJoinCommand(@NotNull ZombiesJoiner zombiesJoiner, @NotNull Map<? super UUID, ? extends Party> partyMap,
@@ -51,20 +60,21 @@ public class ZombiesJoinCommand extends Command {
 
         Object2LongMap<UUID> lastUsageTimes = new Object2LongOpenHashMap<>();
         mapKeyArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            for (Map.Entry<Key, ZombiesSceneCreator> entry : zombiesSceneLoader.data().entrySet()) {
-                suggestion.addEntry(
-                    new SuggestionEntry(entry.getKey().asString(), entry.getValue().mapInfo().settings().displayName()));
-            }
+            CommandUtils.tabComplete(suggestion, zombiesSceneLoader.data().entrySet(), zombiesSceneEntry -> {
+                return zombiesSceneEntry.getKey().asString();
+            }, null, zombiesSceneEntry -> {
+                return zombiesSceneEntry.getValue().mapInfo().settings().displayName();
+            });
         });
 
         restrictedArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            suggestion.addEntry(new SuggestionEntry("true", Component.text("true")));
-            suggestion.addEntry(new SuggestionEntry("false", Component.text("false")));
+            CommandUtils.tabComplete(suggestion, BOOLEAN_ENTRIES, SuggestionEntry::getEntry, null,
+                SuggestionEntry::getTooltip);
         });
 
         sandboxArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            suggestion.addEntry(new SuggestionEntry("true", Component.text("true")));
-            suggestion.addEntry(new SuggestionEntry("false", Component.text("false")));
+            CommandUtils.tabComplete(suggestion, BOOLEAN_ENTRIES, SuggestionEntry::getEntry, null,
+                SuggestionEntry::getTooltip);
         });
 
         addConditionalSyntax((sender, commandString) -> {

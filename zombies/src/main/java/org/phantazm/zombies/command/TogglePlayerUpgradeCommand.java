@@ -7,17 +7,16 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.scene2.SceneManager;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.PlayerUpgradeHandler;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -27,11 +26,9 @@ public class TogglePlayerUpgradeCommand extends SandboxLockedCommand {
     private final KeyParser keyParser;
 
     public TogglePlayerUpgradeCommand(@NotNull KeyParser keyParser) {
-        super("upgrade", PERMISSION, ArgumentType.String("player-upgrade")
+        super("upgrade", PERMISSION, ArgumentType.Word("player-upgrade")
             .setSuggestionCallback((sender, context, suggestion) -> {
-                if (!(sender instanceof Player player)) {
-                    return;
-                }
+                if (!(sender instanceof Player player)) return;
 
                 Optional<ZombiesScene> currentScene = SceneManager.Global.instance()
                     .currentScene(player, ZombiesScene.class);
@@ -42,20 +39,7 @@ public class TogglePlayerUpgradeCommand extends SandboxLockedCommand {
                     PlayerUpgradeHandler handler = zombiesScene.upgradeHandler(player.getUuid());
                     if (handler == null) return;
 
-                    String inputString = suggestion.getInput().toLowerCase(Locale.ROOT);
-                    int start = suggestion.getStart() - 1;
-                    if (start < 0 || start > inputString.length())
-                        return;
-
-                    inputString = inputString.substring(start).trim();
-
-                    for (Key validUpgrade : handler.validUpgrades()) {
-                        String keyString = validUpgrade.asString();
-
-                        if (inputString.isEmpty() || keyString.startsWith(inputString)) {
-                            suggestion.addEntry(new SuggestionEntry(keyString));
-                        }
-                    }
+                    CommandUtils.tabComplete(suggestion, handler.validUpgrades());
                 });
             }));
         this.keyParser = Objects.requireNonNull(keyParser);

@@ -4,7 +4,7 @@ import com.github.steanky.element.core.key.Constants;
 import com.github.steanky.element.core.key.KeyParser;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.command.builder.CommandContext;
-import net.minestom.server.command.builder.arguments.ArgumentString;
+import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
@@ -17,7 +17,7 @@ import java.util.Objects;
 public class FlagToggleCommand extends SandboxLockedCommand {
     public static final Permission PERMISSION = new Permission("zombies.playtest.flag_toggle");
 
-    private static final ArgumentString FLAG_ARGUMENT = ArgumentType.String("flag");
+    private static final Argument<String> FLAG_ARGUMENT = ArgumentType.Word("flag");
 
     private final KeyParser keyParser;
 

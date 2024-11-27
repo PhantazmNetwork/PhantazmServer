@@ -7,14 +7,15 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.permission.Permission;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.loader.Loader;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobCreator;
+import org.phantazm.mob2.MobMeta;
 import org.phantazm.mob2.MobSpawner;
 import org.phantazm.zombies.map.handler.RoundHandler;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -29,11 +30,16 @@ public class SpawnMobCommand extends SandboxLockedCommand {
     public static final Argument<Integer> ROUND = ArgumentType.Integer("round").setDefaultValue(-1);
 
     public SpawnMobCommand(Loader<MobCreator> mobLoader) {
-        super("spawnmob", PERMISSION, ArgumentType.String("mob-identifier")
+        super("spawnmob", PERMISSION, ArgumentType.Word("mob-identifier")
             .setSuggestionCallback((sender, context, suggestion) -> {
-                for (Key key : mobLoader.data().keySet()) {
-                    suggestion.addEntry(new SuggestionEntry(key.asString()));
-                }
+                CommandUtils.tabComplete(suggestion, mobLoader.data().entrySet(), mobEntry -> {
+                    return mobEntry.getKey().asString();
+                }, null, mobEntry -> {
+                    MobMeta meta = mobEntry.getValue().data().meta();
+                    if (meta == null) return null;
+
+                    return meta.customName();
+                });
             }), ROUND);
     }
 

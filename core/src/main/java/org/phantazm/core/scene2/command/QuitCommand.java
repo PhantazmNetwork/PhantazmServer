@@ -5,7 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.CoreJoinKeys;
@@ -23,7 +23,7 @@ public final class QuitCommand {
         Objects.requireNonNull(viewProvider);
 
         Command command = new Command("quit", "leave", "l", "hub");
-        command.addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+        command.addConditionalSyntax(CommandUtils.PLAYER_CONDITION, (sender, context) -> {
             Player player = (Player) sender;
             PlayerView playerView = viewProvider.fromPlayer(player);
             SceneManager.Global.instance().currentScene(playerView).ifPresent(scene -> {

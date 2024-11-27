@@ -3,10 +3,9 @@ package org.phantazm.zombies.command;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.suggestion.SuggestionEntry;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.command.CommandUtils;
+import org.phantazm.core.CommandUtils;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.player.PlayerViewProvider;
 import org.phantazm.core.scene2.Scene;
@@ -27,32 +26,27 @@ public class ZombiesRejoinCommand extends Command {
         Argument<UUID> targetGameArgument = ArgumentType.UUID("target-game").setDefaultValue(() -> null);
 
         targetGameArgument.setSuggestionCallback((sender, context, suggestion) -> {
-            Player senderPlayer = (Player) sender;
-            PlayerView playerView = viewProvider.fromPlayer(senderPlayer);
+            if (!(sender instanceof Player player)) return;
+
+            PlayerView playerView = viewProvider.fromPlayer(player);
             Set<ZombiesScene> scenes = SceneManager.Global.instance().typed(ZombiesScene.class);
 
             Optional<Scene> currentScene = SceneManager.Global.instance().currentScene(playerView);
-            for (ZombiesScene zombiesScene : scenes) {
-                if (!zombiesScene.managedPlayers().containsKey(playerView)) {
-                    continue;
-                }
 
-                if (currentScene.isPresent() && currentScene.get() == zombiesScene) {
-                    continue;
-                }
+            CommandUtils.tabComplete(suggestion, scenes, sceneEntry -> {
+                if (sceneEntry.managedPlayers().containsKey(playerView)) return null;
+                if (currentScene.isPresent() && currentScene.get() == sceneEntry) return null;
 
-                Stage stage = zombiesScene.currentStage();
-                if (stage == null || !stage.canRejoin()) {
-                    continue;
-                }
+                Stage stage = sceneEntry.currentStage();
+                if (stage == null || !stage.canRejoin()) return null;
 
-                SuggestionEntry entry =
-                    new SuggestionEntry(zombiesScene.identity().toString(), zombiesScene.mapSettingsInfo().displayName());
-                suggestion.addEntry(entry);
-            }
+                return sceneEntry.identity().toString();
+            }, null, sceneEntry -> {
+                return sceneEntry.mapSettingsInfo().displayName();
+            });
         });
 
-        addConditionalSyntax(CommandUtils.playerSenderCondition(), (sender, context) -> {
+        addConditionalSyntax(CommandUtils.PLAYER_CONDITION, (sender, context) -> {
             UUID targetGame = context.get(targetGameArgument);
 
             Player senderPlayer = (Player) sender;
