@@ -51,7 +51,8 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         tickingLevels.add(level);
 
         GunStats stats = level.stats();
-        this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats.reloadSpeed(), false, stats.maxAmmo(),
+        this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats
+            .reloadSpeed(entitySupplier.get().orElse(null)), false, stats.maxAmmo(),
             stats.maxClip(), false, 0);
     }
 
@@ -83,7 +84,9 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         if (entityOptional.isPresent()) {
             GunLoseAmmoEvent event = new GunLoseAmmoEvent(entityOptional.get(), this, state.ammo(), 1);
             zombiesScene.broadcastEvent(event);
-            ammoLoss = event.getAmmoLost();
+
+            if (event.isCancelled()) ammoLoss = 0;
+            else ammoLoss = event.getAmmoLost();
         } else {
             ammoLoss = 1;
         }
@@ -135,7 +138,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         modifyState(builder -> {
             builder.setAmmo(level.stats().maxAmmo());
             builder.setClip(level.stats().maxClip());
-            builder.setTicksSinceLastReload(level.stats().reloadSpeed());
+            builder.setTicksSinceLastReload(level.stats().reloadSpeed(entitySupplier.get().orElse(null)));
         });
         Optional<? extends Entity> entityOptional = entitySupplier.get();
         if (entityOptional.isPresent()) {
@@ -268,7 +271,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         modifyState(builder -> {
             builder.setAmmo(newLevel.stats().maxAmmo());
             builder.setClip(newLevel.stats().maxClip());
-            builder.setTicksSinceLastReload(newLevel.stats().reloadSpeed());
+            builder.setTicksSinceLastReload(newLevel.stats().reloadSpeed(entitySupplier.get().orElse(null)));
             builder.setTicksSinceLastShot(newLevel.stats().shootSpeed());
             builder.setTicksSinceLastFire(newLevel.stats().shotInterval());
         });

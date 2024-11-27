@@ -4,7 +4,12 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.phantazm.core.AttributeUtils;
+import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.shoot.handler.ShotHandler;
 
 import java.util.Objects;
@@ -27,8 +32,13 @@ public final class GunStats {
         return data.shootSpeed();
     }
 
-    public long reloadSpeed() {
-        return data.reloadSpeed();
+    public long reloadSpeed(@Nullable Entity shooter) {
+        if (!(shooter instanceof LivingEntity livingShooter)) {
+            return data.reloadSpeed;
+        }
+
+        return Math.round(AttributeUtils.computeWithBase(data.reloadSpeed(),
+            livingShooter.getAttribute(Attributes.RELOAD_DELAY)));
     }
 
     public int maxAmmo() {

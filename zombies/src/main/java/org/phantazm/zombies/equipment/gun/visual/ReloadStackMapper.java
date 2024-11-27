@@ -7,9 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.AttributeUtils;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.GunStats;
 import org.phantazm.zombies.equipment.gun.reload.ReloadTester;
@@ -45,10 +43,7 @@ public class ReloadStackMapper implements GunStackMapper {
     public @NotNull ItemStack map(@NotNull GunState state, @NotNull ItemStack intermediate) {
         if (reloadTester.isReloading(state)) {
             Player actualPlayer = player.getPlayer().orElse(null);
-            long reloadSpeed = (actualPlayer == null ? stats.reloadSpeed() :
-                (Math.round(AttributeUtils.computeWithBase(stats.reloadSpeed(),
-                    actualPlayer.getAttribute(Attributes.RELOAD_DELAY)))));
-
+            long reloadSpeed = stats.reloadSpeed(actualPlayer);
             int maxDamage = intermediate.material().registry().maxDamage();
             int damage = maxDamage - (int) (maxDamage * ((double) state.ticksSinceLastReload() / reloadSpeed));
 

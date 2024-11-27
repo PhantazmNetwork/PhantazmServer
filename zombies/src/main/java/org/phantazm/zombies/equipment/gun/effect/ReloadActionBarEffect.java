@@ -7,6 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.GunStats;
 import org.phantazm.zombies.equipment.gun.action_bar.ActionBarSender;
@@ -26,6 +27,8 @@ public class ReloadActionBarEffect implements GunEffect {
     private final ActionBarSender actionBarSender;
     private final ReloadTester reloadTester;
     private final ReloadActionBarChooser chooser;
+    private final PlayerView player;
+
     private boolean active = false;
 
     /**
@@ -39,17 +42,18 @@ public class ReloadActionBarEffect implements GunEffect {
     public ReloadActionBarEffect(@NotNull @Child("stats") GunStats stats,
         @NotNull @Child("actionBarSender") ActionBarSender actionBarSender,
         @NotNull @Child("reloadTester") ReloadTester reloadTester,
-        @NotNull @Child("reloadActionBarChooser") ReloadActionBarChooser chooser) {
+        @NotNull @Child("reloadActionBarChooser") ReloadActionBarChooser chooser, @NotNull PlayerView player) {
         this.stats = Objects.requireNonNull(stats);
         this.actionBarSender = Objects.requireNonNull(actionBarSender);
         this.reloadTester = Objects.requireNonNull(reloadTester);
         this.chooser = Objects.requireNonNull(chooser);
+        this.player = Objects.requireNonNull(player);
     }
 
     @Override
     public void apply(@NotNull GunState state) {
         if (reloadTester.isReloading(state) && state.isMainEquipment()) {
-            float progress = (float) state.ticksSinceLastReload() / stats.reloadSpeed();
+            float progress = (float) state.ticksSinceLastReload() / stats.reloadSpeed(player.getPlayer().orElse(null));
             actionBarSender.sendActionBar(chooser.choose(state, progress));
             active = true;
         }

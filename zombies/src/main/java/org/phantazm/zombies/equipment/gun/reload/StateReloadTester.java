@@ -6,9 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.phantazm.core.AttributeUtils;
 import org.phantazm.core.player.PlayerView;
-import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.gun.GunState;
 import org.phantazm.zombies.equipment.gun.GunStats;
 
@@ -48,8 +46,6 @@ public class StateReloadTester implements ReloadTester {
     @Override
     public boolean isReloading(@NotNull GunState state) {
         Player actualPlayer = player.getPlayer().orElse(null);
-        return state.ticksSinceLastReload() < (actualPlayer == null ? stats.reloadSpeed() :
-            (Math.round(AttributeUtils.computeWithBase(stats.reloadSpeed(),
-                actualPlayer.getAttribute(Attributes.RELOAD_DELAY)))));
+        return state.ticksSinceLastReload() < stats.reloadSpeed(actualPlayer);
     }
 }
