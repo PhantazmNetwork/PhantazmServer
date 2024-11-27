@@ -43,6 +43,7 @@ public class ZombiesJoinCommand extends Command {
     private static final List<SuggestionEntry> BOOLEAN_ENTRIES = List.of(TRUE_ENTRY, FALSE_ENTRY);
 
     public static final Permission BYPASS_SANDBOX_RESTRICTION = new Permission("zombies.playtest.bypass_sandbox");
+    public static final Permission TAXI_PERMISSION = new Permission("admin.taxi");
 
     public ZombiesJoinCommand(@NotNull ZombiesJoiner zombiesJoiner, @NotNull Map<? super UUID, ? extends Party> partyMap,
         @NotNull KeyParser keyParser, @NotNull Loader<ZombiesSceneCreator> zombiesSceneLoader,
@@ -202,9 +203,14 @@ public class ZombiesJoinCommand extends Command {
                 continue;
             }
 
-            if (!optional.get().hasPermission(BYPASS_SANDBOX_RESTRICTION)) {
-                bypassRestriction = false;
+            Player player = optional.get();
+            if (player.hasPermission(TAXI_PERMISSION)) {
+                // if any player has taxi: bypass the win restriction
+                bypassRestriction = true;
                 break;
+            } else if (!player.hasPermission(BYPASS_SANDBOX_RESTRICTION)) {
+                // we must continue iterating to check for players with taxi perms
+                bypassRestriction = false;
             }
         }
 
