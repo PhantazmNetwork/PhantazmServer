@@ -7,6 +7,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.*;
+import net.minestom.server.thread.Acquirable;
 import net.minestom.server.thread.Acquired;
 import net.minestom.server.thread.ThreadDispatcher;
 import net.minestom.server.thread.ThreadProvider;
@@ -440,7 +441,8 @@ public final class SceneManager {
         void updateLoginTablist(@NotNull T scene, @NotNull PlayerTablistShowEvent tablistShowEvent);
     }
 
-    private record LoginEntry<T extends InstanceScene>(LoginJoin<T> join,
+    private record LoginEntry<T extends InstanceScene>(Player player,
+        LoginJoin<T> join,
         T scene) {
         private void updateTablist(PlayerTablistShowEvent event) {
             join.updateLoginTablist(scene, event);
@@ -450,9 +452,9 @@ public final class SceneManager {
             join.postSpawn(scene);
         }
 
-        private static <T extends InstanceScene> LoginEntry<T> of(LoginJoin<T> join,
+        private static <T extends InstanceScene> LoginEntry<T> of(Player player, LoginJoin<T> join,
             JoinResult<? extends InstanceScene> result) {
-            return new LoginEntry<>(join, join.targetType().cast(result.scene));
+            return new LoginEntry<>(player, join, join.targetType().cast(result.scene));
         }
     }
 
@@ -475,7 +477,7 @@ public final class SceneManager {
             return;
         }
 
-        joinRequestMap.put(player.getUuid(), LoginEntry.of(loginJoin, result));
+        joinRequestMap.put(player.getUuid(), LoginEntry.of(player, loginJoin, result));
         loginEvent.setSpawningInstance(result.scene().instance());
         Databases.usernames().submitUsername(player.getUuid(), player.getUsername());
     }
@@ -684,10 +686,12 @@ public final class SceneManager {
 
         threadDispatcher.deletePartition(scene);
 
-        // only lock if we're the non-local thread
-        boolean shouldLock = !scene.getAcquirable().isLocal();
+        Acquirable<? extends Scene> sceneAcquirable = scene.getAcquirable();
 
-        Acquired<? extends Scene> acquired = shouldLock ? scene.getAcquirable().lock() : null;
+        // only lock if we're the non-local thread
+        boolean shouldLock = !sceneAcquirable.isLocal();
+
+        Acquired<? extends Scene> acquired = shouldLock ? sceneAcquirable.lock() : null;
 
         Set<PlayerView> players;
         Set<PlayerView> leftPlayers;
@@ -719,7 +723,7 @@ public final class SceneManager {
         boolean noLeftPlayers = leftPlayers.isEmpty();
         if (noLeftPlayers || shutdownCallback == null) {
             acquired = null;
-            if (shouldLock) acquired = scene.getAcquirable().lock();
+            if (shouldLock) acquired = sceneAcquirable.lock();
 
             try {
                 if (!finalLeftPlayers.isEmpty()) {
@@ -743,7 +747,7 @@ public final class SceneManager {
         }
 
         acquired = null;
-        if (shouldLock) acquired = scene.getAcquirable().lock();
+        if (shouldLock) acquired = sceneAcquirable.lock();
 
         try {
             scene.postLeave(finalLeftPlayers);
@@ -1244,7 +1248,50 @@ public final class SceneManager {
         });
     }
 
+    private int cleanupTick;
+
+    // normally, joinRequestMap and leaveEntryMap remove entries when necessary
+    // however, error conditions (that don't normally happen) can cause these to build up
+    // thus, every 32 ticks we check for these un-removed entries, and delete them
+    private void tickCleanup() {
+        if ((cleanupTick++ & 31) != 0) return;
+
+        joinRequestMap.values().removeIf(loginEntry -> {
+            // player left (login event without associated disconnect?)
+            if (!loginEntry.player.isOnline()) return true;
+
+            // check if the scene is shut down, and if so, remove
+            boolean[] result = new boolean[1];
+            loginEntry.scene.getAcquirable().sync(loginScene -> {
+                result[0] = loginScene.isShutdown();
+            });
+
+            return result[0];
+        });
+
+        leaveEntryMap.values().removeIf(leaveEntry -> {
+            boolean allLeft = true;
+
+            // set only has 1 element
+            for (Player player : leaveEntry.left) {
+                if (player.isOnline()) allLeft = false;
+            }
+
+            // offline player means we didn't clean up normally, remove
+            if (allLeft) return true;
+
+            boolean[] result = new boolean[1];
+            leaveEntry.scene.getAcquirable().sync(leftScene -> {
+                result[0] = leftScene.isShutdown();
+            });
+
+            return result[0];
+        });
+    }
+
     private void tick(long time) {
+        tickCleanup();
+
         threadDispatcher.updateAndAwait(time);
         threadDispatcher.refreshThreads(System.currentTimeMillis() - time);
     }
