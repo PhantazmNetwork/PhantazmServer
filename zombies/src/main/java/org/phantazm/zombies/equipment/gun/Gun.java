@@ -53,7 +53,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         GunStats stats = level.stats();
         this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats
             .reloadSpeed(entitySupplier.get().orElse(null)), false, stats.maxAmmo(),
-            stats.maxClip(), false, 0);
+            stats.maxClip(entitySupplier.get().orElse(null)), false, 0);
     }
 
     /**
@@ -137,7 +137,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
     public void refill() {
         modifyState(builder -> {
             builder.setAmmo(level.stats().maxAmmo());
-            builder.setClip(level.stats().maxClip());
+            builder.setClip(level.stats().maxClip(entitySupplier.get().orElse(null)));
             builder.setTicksSinceLastReload(level.stats().reloadSpeed(entitySupplier.get().orElse(null)));
         });
         Optional<? extends Entity> entityOptional = entitySupplier.get();
@@ -204,7 +204,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             if (level.reloadTester().isReloading(state)) {
                 builder.setTicksSinceLastReload(builder.getTicksSinceLastReload() + 1);
             } else if (!builder.isReloadComplete()) {
-                builder.setClip(Math.min(level.stats().maxClip(), getState().ammo()));
+                builder.setClip(Math.min(level.stats().maxClip(entitySupplier.get().orElse(null)), getState().ammo()));
                 builder.setReloadComplete(true);
             }
         });
@@ -268,10 +268,11 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         level = newLevel;
         tickingLevels.add(newLevel);
 
+        Entity entity = entitySupplier.get().orElse(null);
         modifyState(builder -> {
             builder.setAmmo(newLevel.stats().maxAmmo());
-            builder.setClip(newLevel.stats().maxClip());
-            builder.setTicksSinceLastReload(newLevel.stats().reloadSpeed(entitySupplier.get().orElse(null)));
+            builder.setClip(newLevel.stats().maxClip(entity));
+            builder.setTicksSinceLastReload(newLevel.stats().reloadSpeed(entity));
             builder.setTicksSinceLastShot(newLevel.stats().shootSpeed());
             builder.setTicksSinceLastFire(newLevel.stats().shotInterval());
         });

@@ -45,8 +45,13 @@ public final class GunStats {
         return data.maxAmmo();
     }
 
-    public int maxClip() {
-        return data.maxClip();
+    public int maxClip(@Nullable Entity shooter) {
+        if (!(shooter instanceof LivingEntity livingShooter)) {
+            return data.maxClip;
+        }
+
+        return Math.round(AttributeUtils.computeWithBase(data.maxClip(),
+            livingShooter.getAttribute(Attributes.MAX_CLIP)));
     }
 
     public int shots() {
