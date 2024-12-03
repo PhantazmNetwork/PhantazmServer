@@ -94,9 +94,7 @@ public final class CommandUtils {
         if (entryList == null) return;
 
         entryList.sort(SUGGESTION_ENTRY_COMPARATOR);
-        for (SuggestionEntry entry : entryList) {
-            suggestion.addEntry(entry);
-        }
+        for (SuggestionEntry entry : entryList) suggestion.addEntry(entry);
     }
 
     /**
