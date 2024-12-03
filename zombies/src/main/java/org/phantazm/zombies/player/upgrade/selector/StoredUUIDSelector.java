@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.thread.Acquired;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Target;
@@ -49,10 +50,17 @@ public class StoredUUIDSelector implements SelectorComponent {
             List<Entity> entities = new ArrayList<>(uuids.size());
             for (UUID uuid : uuids) {
                 Entity entity = Entity.getEntity(uuid);
+                if (entity == null) continue;
 
-                if (entity == null || !entity.isActive() || entity.isRemoved() ||
-                    entity.getInstance() != zombiesPlayer.getScene().instance() ||
-                    !validator.test(entity, upgrade, zombiesPlayer, triggerData)) continue;
+                Acquired<?> acquired = entity.getAcquirable().lock();
+                try {
+                    if (!entity.isActive() || entity.isRemoved() ||
+                        entity.getInstance() != zombiesPlayer.getScene().instance()) continue;
+                } finally {
+                    acquired.unlock();
+                }
+
+                if (!validator.test(entity, upgrade, zombiesPlayer, triggerData)) continue;
 
                 entities.add(entity);
             }
