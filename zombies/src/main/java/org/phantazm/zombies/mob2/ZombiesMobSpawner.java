@@ -47,5 +47,8 @@ public class ZombiesMobSpawner extends BasicMobSpawner {
             TeamsPacket.CollisionRule.NEVER);
 
         scene.broadcastEvent(new MobSetupEvent(mob));
+
+        // make sure any health increases/decreases are set appropriately
+        mob.setHealth(mob.getMaxHealth());
     }
 }
