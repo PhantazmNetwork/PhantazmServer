@@ -172,8 +172,10 @@ public class DamageOverTimeSkill implements SkillComponent {
 
         private void damageTarget(Mob self, LivingEntity target) {
             target.getAcquirable().sync(targetEntity -> {
-                float actualDamage = data.bypassArmor ? data.damageAmount :
+                float actualDamage = data.bypassArmor ?
+                    DamageUtils.computeDamageWithResistances((LivingEntity) targetEntity, data.damageType, data.damageAmount) :
                     DamageUtils.computeDamageWithArmorAndResistances(data.damageType, (LivingEntity) targetEntity, data.damageAmount);
+
                 float overflow = Math.max(0, data.minHealth - (((LivingEntity) targetEntity).getHealth() - actualDamage));
 
                 Damage damage = Damage.fromEntity(self, actualDamage - overflow);
