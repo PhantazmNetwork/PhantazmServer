@@ -18,13 +18,13 @@ import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 @Model("zombies.upgrade.effect.reflect_damage")
 @Cache
-public class ReflectDamageEffect implements UpgradeEffectComponent{
+public class ReflectDamageEffect implements UpgradeEffectComponent {
     private final Data data;
     private final SelectorComponent selectorComponent;
 
     @FactoryMethod
     public ReflectDamageEffect(@NotNull Data data,
-        @NotNull @Child("selector")SelectorComponent selectorComponent) {
+        @NotNull @Child("selector") SelectorComponent selectorComponent) {
         this.data = data;
         this.selectorComponent = selectorComponent;
     }
@@ -46,7 +46,8 @@ public class ReflectDamageEffect implements UpgradeEffectComponent{
         }
 
         @Override
-        protected void applyEvent(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData, @NotNull ZombiesPlayerDamageEvent zombiesPlayerDamageEvent) {
+        protected void applyEvent(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
+            @NotNull TriggerData triggerData, @NotNull ZombiesPlayerDamageEvent zombiesPlayerDamageEvent) {
             if (isBroadcasting) return;
 
             Damage damage = zombiesPlayerDamageEvent.damage();
@@ -56,13 +57,15 @@ public class ReflectDamageEffect implements UpgradeEffectComponent{
             Target target = selector.select(upgrade, zombiesPlayer, triggerData);
             target.forType(LivingEntity.class, livingEntity -> {
                 isBroadcasting = true;
-                livingEntity.damage(new Damage(DamageType.GENERIC, player, player, player.getPosition(), (float)(amount * data.percentageReflected)));
+                livingEntity.damage(new Damage(DamageType.GENERIC, player, player, player.getPosition(),
+                    (float) (amount * data.percentageReflected)));
                 isBroadcasting = false;
             });
 
             if (data.avoidReflectedDamage) {
-                zombiesPlayerDamageEvent.cause().setDamage(new Damage(damage.getType(), damage.getSource(), damage.getAttacker(),
-                    damage.getSourcePosition(), (float)(amount * (1 - data.percentageReflected))));
+                zombiesPlayerDamageEvent.cause().setDamage(new Damage(damage.getType(), damage.getSource(),
+                    damage.getAttacker(), damage.getSourcePosition(),
+                    (float) (amount * (1 - data.percentageReflected))));
             }
         }
     }
@@ -74,5 +77,6 @@ public class ReflectDamageEffect implements UpgradeEffectComponent{
         """)
     @DataObject
     public record Data(double percentageReflected,
-        boolean avoidReflectedDamage) {}
+        boolean avoidReflectedDamage) {
+    }
 }
