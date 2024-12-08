@@ -22,6 +22,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.proxima.bindings.minestom.controller.Controller;
@@ -32,6 +33,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiPredicate;
 
 public class Pathfinding {
+    public static final Tag<Boolean> VALID_TARGET_TAG = Tag.Boolean("phantazm.proxima.can_pathfind_to")
+        .defaultValue(true);
+
     public static final double PLAYER_PATH_EPSILON = 0.0005;
     public static final double MOB_PATH_EPSILON = 1E-6;
     public static final double PLAYER_PATH_EPSILON_DOWNWARDS = MOB_PATH_EPSILON;
@@ -139,7 +143,9 @@ public class Pathfinding {
     }
 
     public boolean isValidTarget(@NotNull Entity targetEntity) {
-        boolean entityValid = !targetEntity.isRemoved() && targetEntity.getInstance() == spaceHandler.instance();
+        boolean entityValid = !targetEntity.isRemoved() && targetEntity.getInstance() == spaceHandler.instance() &&
+            targetEntity.getTag(VALID_TARGET_TAG);
+
         if (entityValid && targetEntity instanceof Player player) {
             GameMode mode = player.getGameMode();
             return mode != GameMode.SPECTATOR;
