@@ -2,11 +2,12 @@ package org.phantazm.zombies.player.upgrade.selector;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.event.trait.EntityEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Target;
-import org.phantazm.zombies.event.trait.EntityTargetEvent;
+import org.phantazm.zombies.EventUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
@@ -36,15 +37,10 @@ public class EventSelector implements SelectorComponent {
         @Override
         public @NotNull Target select(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
-            if (data.useTarget && triggerData.raw() instanceof EntityTargetEvent event) {
-                return validator.test(event.target(), upgrade, zombiesPlayer, triggerData) ? Target.entities(event.target()) : Target.NONE;
-            }
+            if (!(triggerData.raw() instanceof EntityEvent entityEvent)) return Target.NONE;
 
-            if (triggerData.raw() instanceof EntityEvent entityEvent) {
-                return validator.test(entityEvent.getEntity(), upgrade, zombiesPlayer, triggerData) ? Target.entities(entityEvent.getEntity()) : Target.NONE;
-            }
-
-            return Target.NONE;
+            Entity target = EventUtils.extractEntity(entityEvent, data.useTarget);
+            return validator.test(target, upgrade, zombiesPlayer, triggerData) ? Target.entities(target) : Target.NONE;
         }
     }
 

@@ -6,12 +6,11 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.event.trait.EntityEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.mob2.Mob;
-import org.phantazm.zombies.event.trait.EntityTargetEvent;
+import org.phantazm.zombies.EventUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
 @Model("zombies.upgrade.filter.condition.mob_flag")
@@ -37,17 +36,7 @@ public class MobFlagCondition implements EventConditionComponent {
 
         @Override
         public boolean filter(@NotNull EntityEvent event) {
-            Entity entity;
-            if (data.useTarget && event instanceof EntityTargetEvent targetEvent) {
-                entity = targetEvent.target();
-            } else {
-                entity = event.getEntity();
-            }
-
-            if (!(entity instanceof Mob mob)) {
-                return false;
-            }
-
+            if (!(EventUtils.extractEntity(event, data.useTarget) instanceof Mob mob)) return false;
             return mob.data().tags().contains(data.flag) != data.invert;
         }
     }
