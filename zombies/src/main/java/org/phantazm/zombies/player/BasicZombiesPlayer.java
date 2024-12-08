@@ -158,6 +158,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
             setState(ZombiesPlayerStateKeys.QUIT, new QuitPlayerStateContext(false));
         }
         module.getStateSwitcher().end();
+        module.getMeta().setKeepGameAlive(false);
 
         for (Activable activable : activables) {
             activable.end();
