@@ -59,6 +59,12 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
             return;
         }
 
+        // negative damage shouldn't happen, but if we have zero damage, don't inform the client at all
+        if (event.getDamage().getAmount() <= 0) {
+            event.setCancelled(true);
+            return;
+        }
+
         if (!damageEvent.shouldKnock() && event.getDamage().getAmount() < event.getEntity().getHealth()) {
             return;
         }
