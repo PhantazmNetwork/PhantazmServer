@@ -5,16 +5,13 @@ import org.phantazm.zombies.corpse.CorpseCreator;
 
 import java.util.Optional;
 
-//TODO: rename
 public class ZombiesPlayerMeta {
 
     private CorpseCreator.Corpse corpse = null;
-
     private boolean inGame = false;
-
     private boolean isReviving = false;
-
     private int windowRepairAmount = 1;
+    private boolean keepGameAlive = false;
 
     public Optional<CorpseCreator.Corpse> getCorpse() {
         return Optional.ofNullable(corpse);
@@ -46,5 +43,13 @@ public class ZombiesPlayerMeta {
 
     public void setWindowRepairAmount(int amount) {
         this.windowRepairAmount = amount;
+    }
+
+    public boolean getKeepGameAlive() {
+        return keepGameAlive;
+    }
+
+    public void setKeepGameAlive(boolean keepGameAlive) {
+        this.keepGameAlive = keepGameAlive;
     }
 }

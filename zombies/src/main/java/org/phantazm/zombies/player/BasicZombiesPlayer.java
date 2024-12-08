@@ -181,6 +181,11 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     }
 
     @Override
+    public boolean keepGameAlive() {
+        return isAlive() || module.getMeta().getKeepGameAlive();
+    }
+
+    @Override
     public @NotNull Flaggable flags() {
         return module.flags();
     }

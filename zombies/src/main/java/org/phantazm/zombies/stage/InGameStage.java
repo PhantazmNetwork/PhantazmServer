@@ -47,18 +47,13 @@ public class InGameStage implements Stage {
 
     @Override
     public boolean shouldContinue() {
-        if (roundHandler.hasEnded()) {
+        if (roundHandler.hasEnded())
             return true;
-        }
 
-        boolean anyAlive = false;
-        for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            if (zombiesPlayer.isAlive()) {
-                anyAlive = true;
-                break;
-            }
-        }
-        return !anyAlive;
+        for (ZombiesPlayer zombiesPlayer : zombiesPlayers)
+            if (zombiesPlayer.keepGameAlive()) return false;
+
+        return true;
     }
 
     @Override

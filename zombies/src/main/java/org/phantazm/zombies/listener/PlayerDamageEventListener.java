@@ -101,15 +101,13 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
         boolean anyAlive = false;
         for (ZombiesPlayer player : super.zombiesPlayers.values()) {
-            if (player.isAlive()) {
+            if (player.keepGameAlive()) {
                 anyAlive = true;
                 break;
             }
         }
 
-        if (!anyAlive) {
-            scene.stageTransition().setCurrentStage(StageKeys.END);
-        }
+        if (!anyAlive) scene.stageTransition().setCurrentStage(StageKeys.END);
     }
 
     private Component getEntityName(@NotNull Entity entity) {
