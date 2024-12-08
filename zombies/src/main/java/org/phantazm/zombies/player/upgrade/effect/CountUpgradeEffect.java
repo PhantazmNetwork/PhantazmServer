@@ -36,7 +36,7 @@ public class CountUpgradeEffect implements UpgradeEffectComponent {
         private final Data data;
         private final Tag<Integer> countTag;
 
-        private Internal(@NotNull Data data) {
+        private Internal(Data data) {
             super(ZombiesPlayerModifyUpgrade.class);
             this.data = data;
             this.countTag = Tag.Integer(data.outputTag).defaultValue(0);
