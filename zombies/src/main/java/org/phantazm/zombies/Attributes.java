@@ -55,6 +55,8 @@ public final class Attributes {
 
     public static final Attribute DEATH_TICKS = new Attribute("phantazm.death_ticks", 0F, false);
 
+    public static final Attribute PASSIVE_UPGRADE_COST = new Attribute("phantazm.passive_upgrade_cost", 0F, false);
+
     public static final Attribute NIL = new Attribute("phantazm.nil", 0F, false);
 
     private Attributes() {
@@ -87,6 +89,7 @@ public final class Attributes {
 
         FIRE_APPLY_DURATION.register();
         FIRE_APPLY_DAMAGE.register();
+        PASSIVE_UPGRADE_COST.register();
         NIL.register();
     }
 }

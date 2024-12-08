@@ -58,10 +58,8 @@ public class StoredUUIDAliveCondition implements EventConditionComponent {
                 Entity entity = Entity.getEntity(uuid);
                 boolean isDead = entity == null || entity.isRemoved() || !entity.isActive();
 
-                if (isDead && data.allMustMatch)
-                    return false;
-                else if (!isDead && !data.allMustMatch)
-                    return true;
+                if (isDead && data.allMustMatch) return false;
+                else if (!isDead && !data.allMustMatch) return true;
             }
 
             return data.allMustMatch;
