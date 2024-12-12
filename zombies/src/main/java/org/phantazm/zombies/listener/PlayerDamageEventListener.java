@@ -18,7 +18,7 @@ import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.event.player.ZombiesPlayerDamageEvent;
-import org.phantazm.zombies.event.player.ZombiesPlayerDeathEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerKnockEvent;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -74,7 +74,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
-            ZombiesPlayerDeathEvent deathEvent = new ZombiesPlayerDeathEvent(player, zombiesPlayer, event.getDamage());
+            ZombiesPlayerKnockEvent deathEvent = new ZombiesPlayerKnockEvent(player, zombiesPlayer, event.getDamage());
             EventDispatcher.call(deathEvent);
 
             if (deathEvent.isCancelled()) {
