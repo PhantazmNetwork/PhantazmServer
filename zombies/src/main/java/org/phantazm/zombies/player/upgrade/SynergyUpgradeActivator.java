@@ -43,7 +43,7 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
         if (list == null || list.isEmpty()) return Optional.empty();
 
         int index = list.indexOf(key);
-        if (index == -1 || index >= list.size() - 1) return Optional.empty();
+        if (index < 0 || index >= list.size() - 1) return Optional.empty();
 
         return Optional.of(list.get(index + 1));
     }

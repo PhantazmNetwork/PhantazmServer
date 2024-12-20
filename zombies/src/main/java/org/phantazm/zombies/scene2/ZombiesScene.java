@@ -39,6 +39,7 @@ import org.phantazm.zombies.player.state.context.DeadPlayerStateContext;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.player.upgrade.PlayerUpgradeComponent;
 import org.phantazm.zombies.player.upgrade.PlayerUpgradeHandler;
+import org.phantazm.zombies.player.upgrade.UpgradeActivator;
 import org.phantazm.zombies.player.upgrade.UpgradeActivatorComponent;
 import org.phantazm.zombies.stage.Stage;
 import org.phantazm.zombies.stage.StageKeys;
@@ -65,6 +66,8 @@ public class ZombiesScene extends InstanceScene implements EventScene {
     private final EventNode<Event> sceneNode;
     private final TickTaskScheduler tickTaskScheduler;
     private final Scheduler scheduler;
+
+    private UpgradeActivator upgradeActivator;
 
     private final Pos spawnPos;
 
@@ -438,7 +441,14 @@ public class ZombiesScene extends InstanceScene implements EventScene {
     }
 
     public void hook() {
-        upgradeActivatorComponent.apply(InjectionStore.of(), this).hook();
+        UpgradeActivator upgradeActivator = upgradeActivatorComponent.apply(InjectionStore.of(), this);
+        upgradeActivator.hook();
+
+        this.upgradeActivator = upgradeActivator;
+    }
+
+    public @NotNull UpgradeActivator upgradeActivator() {
+        return Objects.requireNonNull(upgradeActivator, "UpgradeActivator was not initialized");
     }
 
     @SuppressWarnings("unchecked")
