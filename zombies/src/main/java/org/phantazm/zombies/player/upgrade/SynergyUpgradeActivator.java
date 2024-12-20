@@ -4,17 +4,19 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.ints.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.TagUtils;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.event.equipment.EquipmentPostAddEvent;
 import org.phantazm.core.inventory.InventoryAccess;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryObjectGroup;
+import org.phantazm.zombies.ZombiesTagUtils;
+import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.InventoryKeys;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -33,6 +35,17 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
     @Override
     public @NotNull UpgradeActivator apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesScene zombiesScene) {
         return new Internal(zombiesScene, data);
+    }
+
+    @Override
+    public @NotNull Optional<Key> nextUpgrade(@NotNull Key group, @NotNull Key key) {
+        List<Key> list = data.upgradeGroups.get(group);
+        if (list == null || list.isEmpty()) return Optional.empty();
+
+        int index = list.indexOf(key);
+        if (index == -1 || index >= list.size() - 1) return Optional.empty();
+
+        return Optional.of(list.get(index + 1));
     }
 
     private static class Internal implements UpgradeActivator {
@@ -57,14 +70,14 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
             zombiesScene.sceneNode().addListener(EquipmentPostAddEvent.class, this::handleAddEquipment);
         }
 
-        private void handleAddEquipment(EquipmentPostAddEvent event) {
-            UUID uuid = event.getPlayer().getUuid();
+        private void refresh0(ZombiesPlayer zombiesPlayer) {
+            UUID uuid = zombiesPlayer.getUUID();
             PlayerUpgradeHandler upgradeHandler = zombiesScene.upgradeHandler(uuid);
             if (upgradeHandler == null) {
                 return;
             }
 
-            InventoryAccess access = event.accessRegistry().getAccess(InventoryKeys.ALIVE_ACCESS);
+            InventoryAccess access = zombiesPlayer.module().getInventoryAccessRegistry().getAccess(InventoryKeys.ALIVE_ACCESS);
             InventoryObjectGroup group = access.groups().get(data.group);
             if (group == null) {
                 return;
@@ -91,7 +104,7 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
                         continue;
                     }
 
-                    if (synergy.requiredTag == null || TagUtils.sceneLocalTags(event.getPlayer(), zombiesScene)
+                    if (synergy.requiredTag == null || ZombiesTagUtils.sceneLocalTags(zombiesPlayer)
                         .getTag(Tag.Boolean(synergy.requiredTag).defaultValue(false))) {
                         activeSynergies.add(synergy.synergy);
                     }
@@ -107,6 +120,17 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
             for (Key active : activeSynergies) {
                 upgradeHandler.activateUpgrade(active);
             }
+        }
+
+        @Override
+        public void refresh(@NotNull ZombiesPlayer zombiesPlayer) {
+            refresh0(zombiesPlayer);
+        }
+
+        private void handleAddEquipment(EquipmentPostAddEvent event) {
+            ZombiesPlayer zombiesPlayer = zombiesScene.getPlayer(event.getPlayer().getUuid());
+            if (zombiesPlayer == null || zombiesPlayer.hasQuit()) return;
+            refresh0(zombiesPlayer);
         }
     }
 
@@ -132,12 +156,18 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
         }
     }
 
+    @Default("""
+        {
+          requiredTag=null
+        }
+        """)
     public record Synergy(@NotNull Key synergy,
         String requiredTag) {
     }
 
     @DataObject
     public record Data(@NotNull Key group,
+        @NotNull Map<Key, List<Key>> upgradeGroups,
         @NotNull Map<SynergyKey, Synergy> synergies) {
 
     }

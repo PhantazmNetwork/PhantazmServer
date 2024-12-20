@@ -3,9 +3,13 @@ package org.phantazm.zombies.player.upgrade;
 import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
+
+import java.util.Optional;
 
 @Model("zombies.upgrade.activator.none")
 @Cache
@@ -17,12 +21,25 @@ public class NoUpgradeActivator implements UpgradeActivatorComponent {
 
     }
 
-    private static final UpgradeActivator NIL = () -> {
+    private static final UpgradeActivator NIL = new UpgradeActivator() {
+        @Override
+        public void hook() {
 
+        }
+
+        @Override
+        public void refresh(@NotNull ZombiesPlayer zombiesPlayer) {
+
+        }
     };
 
     @Override
     public @NotNull UpgradeActivator apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesScene zombiesScene) {
         return NIL;
+    }
+
+    @Override
+    public @NotNull Optional<Key> nextUpgrade(@NotNull Key group, @NotNull Key key) {
+        return Optional.empty();
     }
 }
