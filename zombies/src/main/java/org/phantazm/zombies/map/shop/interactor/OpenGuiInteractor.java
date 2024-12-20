@@ -2,6 +2,7 @@ package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.InventoryType;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.gui.Gui;
@@ -18,6 +19,7 @@ import java.util.Objects;
 @Cache(false)
 public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     private final SlotDistributor slotDistributor;
+
     private final List<ClickHandlerBase<?>> unfixedItems;
     private final List<ClickHandlerBase<?>> fixedItems;
 
@@ -41,16 +43,17 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     @Override
     public void initialize(@NotNull Shop shop) {
         ShopInteractor.initialize(unfixedItems, shop);
+        ShopInteractor.initialize(fixedItems, shop);
     }
 
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
-        interaction.player().module().getPlayerView().getPlayer().ifPresent(player -> player.openInventory(buildGui()));
+        interaction.player().module().getPlayerView().getPlayer().ifPresent(player -> player.openInventory(buildGui(player)));
         return true;
     }
 
-    private Gui buildGui() {
-        Gui gui = Gui.builder(data.inventoryType, slotDistributor).withItems(unfixedItems)
+    private Gui buildGui(Player player) {
+        Gui gui = Gui.builder(data.inventoryType, slotDistributor, player).withItems(unfixedItems)
             .withTitle(data.title).build();
 
         for (ClickHandlerBase<?> fixed : fixedItems) {

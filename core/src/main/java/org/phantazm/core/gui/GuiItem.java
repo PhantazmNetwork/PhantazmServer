@@ -50,6 +50,8 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
         DOUBLE_CLICK
     }
 
+    void tick(@NotNull Gui gui, long time);
+
     /**
      * Builder for a GuiItem implementation.
      */
@@ -133,6 +135,14 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
          */
         public @NotNull GuiItem build() {
             return new GuiItem() {
+                @Override
+                public void tick(@NotNull Gui gui, long time) {
+                    if (updater != null && updater.hasUpdate(gui, time, stack)) {
+                        stack = updater.update(gui, time, stack);
+                        redraw = true;
+                    }
+                }
+
                 private boolean redraw = false;
                 private ItemStack stack = Builder.this.itemStack;
 
@@ -166,14 +176,6 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
                 public void onReplace(@NotNull Gui owner, @NotNull GuiItem newItem, int slot) {
                     for (ReplaceHandler replaceHandler : replaceHandlers) {
                         replaceHandler.onReplace(owner, newItem, slot);
-                    }
-                }
-
-                @Override
-                public void tick(long time) {
-                    if (updater != null && updater.hasUpdate(time, stack)) {
-                        stack = updater.update(time, stack);
-                        redraw = true;
                     }
                 }
             };

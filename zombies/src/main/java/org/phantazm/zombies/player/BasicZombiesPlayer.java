@@ -171,7 +171,8 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
             for (int slot = 0; slot < profile.getSlotCount(); ++slot) {
                 if (profile.hasInventoryObject(slot)) {
                     InventoryObject inventoryObject = profile.getInventoryObject(slot);
-                    inventoryObject.tick(time);
+                    if (inventoryObject instanceof Activable activable)
+                        activable.tick(time);
 
                     if (inventoryObject.shouldRedraw()) {
                         player.getInventory().setItemStack(slot, inventoryObject.getItemStack());

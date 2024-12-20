@@ -6,6 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.gui.Gui;
 
 import java.util.Objects;
 
@@ -20,12 +21,12 @@ public class StaticUpdatingItem implements UpdatingItem {
     }
 
     @Override
-    public @NotNull ItemStack update(long time, @NotNull ItemStack current) {
+    public @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current) {
         return data.item;
     }
 
     @Override
-    public boolean hasUpdate(long time, @NotNull ItemStack current) {
+    public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current) {
         return false;
     }
 

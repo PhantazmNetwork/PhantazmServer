@@ -451,6 +451,10 @@ public class ZombiesScene extends InstanceScene implements EventScene {
         return Objects.requireNonNull(upgradeActivator, "UpgradeActivator was not initialized");
     }
 
+    public @NotNull UpgradeActivatorComponent upgradeActivatorComponent() {
+        return upgradeActivatorComponent;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public @NotNull Acquirable<? extends ZombiesScene> getAcquirable() {

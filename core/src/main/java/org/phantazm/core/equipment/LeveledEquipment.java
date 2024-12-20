@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-public class LeveledEquipment<TEquipment extends Equipment & UpgradeNode> implements Equipment, Upgradable, Activable {
+public class LeveledEquipment<TEquipment extends Equipment & UpgradeNode & Activable> implements Equipment, Upgradable, Activable {
     private final Key equipmentKey;
     private final Map<Key, ? extends TEquipment> levelMap;
 

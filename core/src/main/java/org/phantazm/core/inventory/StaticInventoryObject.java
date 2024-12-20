@@ -13,11 +13,6 @@ public class StaticInventoryObject implements InventoryObject {
     }
 
     @Override
-    public void tick(long time) {
-
-    }
-
-    @Override
     public @NotNull ItemStack getItemStack() {
         return itemStack;
     }

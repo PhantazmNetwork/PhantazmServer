@@ -12,6 +12,7 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.ItemStackUtils;
+import org.phantazm.core.gui.Gui;
 import org.phantazm.core.item.UpdatingItem;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionModifierSource;
@@ -40,7 +41,7 @@ public class CostSubstitutingItem implements UpdatingItem {
     }
 
     @Override
-    public @NotNull ItemStack update(long time, @NotNull ItemStack current) {
+    public @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current) {
         int cost = cost();
         this.oldCost = cost;
         this.hasOldCost = true;
@@ -48,7 +49,7 @@ public class CostSubstitutingItem implements UpdatingItem {
     }
 
     @Override
-    public boolean hasUpdate(long time, @NotNull ItemStack current) {
+    public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current) {
         return (ticks++ % UPDATE_INTERVAL == 0 && (!hasOldCost || cost() != oldCost));
     }
 

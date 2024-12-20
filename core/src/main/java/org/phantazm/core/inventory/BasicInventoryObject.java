@@ -31,8 +31,4 @@ public class BasicInventoryObject implements InventoryObject {
         return false;
     }
 
-    @Override
-    public void tick(long time) {
-    }
-
 }

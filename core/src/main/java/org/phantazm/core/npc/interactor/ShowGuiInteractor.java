@@ -41,7 +41,7 @@ public class ShowGuiInteractor implements MonoComponent<NPCInteractor> {
         @Override
         public void interact(@NotNull Player player) {
             player.openInventory(
-                Gui.builder(data.inventoryType, new BasicSlotDistributor(data.padding)).withItems(guiItems).build());
+                Gui.builder(data.inventoryType, new BasicSlotDistributor(data.padding), player).withItems(guiItems).build());
         }
     }
 

@@ -5,6 +5,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -39,7 +40,12 @@ public class NoUpgradeActivator implements UpgradeActivatorComponent {
     }
 
     @Override
-    public @NotNull Optional<Key> nextUpgrade(@NotNull Key group, @NotNull Key key) {
+    public @NotNull Optional<Key> nextUpgrade(@NotNull Key group, @Nullable Key key) {
+        return Optional.empty();
+    }
+
+    @Override
+    public @NotNull Optional<Key> highestUpgrade(@NotNull Key group, @NotNull ZombiesPlayer zombiesPlayer) {
         return Optional.empty();
     }
 }

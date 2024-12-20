@@ -5,11 +5,12 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.inventory.InventoryObject;
+import org.phantazm.core.tick.Activable;
 
 /**
  * Represents a piece of equipment that {@link Player}s may use.
  */
-public interface Equipment extends InventoryObject, Keyed {
+public interface Equipment extends InventoryObject, Keyed, Activable {
     /**
      * Invoked when a {@link Player} changes their slot to or from the one containing this {@link Equipment}.
      *

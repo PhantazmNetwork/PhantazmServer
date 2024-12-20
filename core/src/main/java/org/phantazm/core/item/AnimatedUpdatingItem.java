@@ -6,6 +6,7 @@ import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.gui.Gui;
 
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +31,7 @@ public class AnimatedUpdatingItem implements UpdatingItem {
     }
 
     @Override
-    public @NotNull ItemStack update(long time, @NotNull ItemStack current) {
+    public @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current) {
         if (data.frames.isEmpty()) {
             return current;
         }
@@ -48,7 +49,7 @@ public class AnimatedUpdatingItem implements UpdatingItem {
     }
 
     @Override
-    public boolean hasUpdate(long time, @NotNull ItemStack current) {
+    public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current) {
         if (currentFrame == null) {
             return false;
         }

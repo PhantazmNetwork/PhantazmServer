@@ -42,18 +42,21 @@ public class PlayerUpgradeHandler implements Tickable {
         return newUpgrade;
     }
 
-    public boolean hasUpgrade(@NotNull Key key) {
+    public boolean isValidUpgrade(@NotNull Key key) {
         return upgradeComponents.containsKey(key);
     }
 
-    public void activateUpgrade(@NotNull Key key) {
+    public boolean activateUpgrade(@NotNull Key key) {
         if (!upgradeComponents.containsKey(key)) {
-            return;
+            return false;
         }
 
         if (zombiesPlayer.addActivable(upgrades.computeIfAbsent(key, this::createNewUpgrade))) {
             broadcastModifyUpgrade(key, true);
+            return true;
         }
+
+        return false;
     }
 
     public void deactivateUpgrade(@NotNull Key key) {

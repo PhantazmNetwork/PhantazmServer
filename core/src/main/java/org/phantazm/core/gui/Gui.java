@@ -23,6 +23,7 @@ public class Gui extends Inventory implements Tickable {
 
     private final Int2ObjectMap<GuiItem> items;
     private final boolean isDynamic;
+    private final Player owner;
     //cached array of items, indirectly used by the tick function, set to null whenever the map is written to
     private volatile SlottedItem[] tickItems;
 
@@ -34,10 +35,11 @@ public class Gui extends Inventory implements Tickable {
      * @param isDynamic     whether this GUI is "dynamic" (supports animated {@link GuiItem}s and updates them as
      *                      needed)
      */
-    public Gui(@NotNull InventoryType inventoryType, @NotNull Component title, boolean isDynamic) {
+    public Gui(@NotNull InventoryType inventoryType, @NotNull Component title, boolean isDynamic, @NotNull Player owner) {
         super(inventoryType, title);
         items = Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>(inventoryType.getSize() >> 2));
         this.isDynamic = isDynamic;
+        this.owner = owner;
     }
 
     /**
@@ -48,8 +50,8 @@ public class Gui extends Inventory implements Tickable {
      * @return the builder instance
      */
     public static @NotNull Builder builder(@NotNull InventoryType inventoryType,
-        @NotNull SlotDistributor slotDistributor) {
-        return new Builder(inventoryType, slotDistributor);
+        @NotNull SlotDistributor slotDistributor, @NotNull Player owner) {
+        return new Builder(inventoryType, slotDistributor, owner);
     }
 
     /**
@@ -82,6 +84,15 @@ public class Gui extends Inventory implements Tickable {
                 oldItem.onReplace(this, item, slot);
             }
         }
+    }
+
+    /**
+     * Gets the owner of ths Gui.
+     *
+     * @return the owner of this GUI
+     */
+    public @NotNull Player getOwner() {
+        return owner;
     }
 
     /**
@@ -165,7 +176,7 @@ public class Gui extends Inventory implements Tickable {
         for (SlottedItem slottedItem : tickItems) {
             GuiItem item = slottedItem.item;
 
-            item.tick(time);
+            item.tick(this, time);
             if (item.shouldRedraw()) {
                 setItemStack(slottedItem.slot, item.getItemStack());
             }
@@ -214,13 +225,15 @@ public class Gui extends Inventory implements Tickable {
         private final List<GuiItem> items;
         private final InventoryType type;
         private final SlotDistributor slotDistributor;
+        private final Player owner;
         private Component title = Component.empty();
         private boolean dynamic = false;
 
-        private Builder(@NotNull InventoryType type, @NotNull SlotDistributor slotDistributor) {
+        private Builder(@NotNull InventoryType type, @NotNull SlotDistributor slotDistributor, @NotNull Player owner) {
             this.items = new ArrayList<>();
             this.type = Objects.requireNonNull(type);
             this.slotDistributor = Objects.requireNonNull(slotDistributor);
+            this.owner = Objects.requireNonNull(owner);
         }
 
         /**
@@ -295,7 +308,7 @@ public class Gui extends Inventory implements Tickable {
 
             int[] slots = slotDistributor.distribute(width, height, items.size());
 
-            Gui gui = new Gui(type, title, dynamic);
+            Gui gui = new Gui(type, title, dynamic, owner);
             for (int i = 0; i < slots.length; i++) {
                 gui.insertItem(items.get(i), slots[i]);
             }

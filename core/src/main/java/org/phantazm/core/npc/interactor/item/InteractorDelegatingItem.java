@@ -61,6 +61,11 @@ public class InteractorDelegatingItem implements MonoComponent<GuiItem> {
         public boolean shouldRedraw() {
             return false;
         }
+
+        @Override
+        public void tick(@NotNull Gui gui, long time) {
+
+        }
     }
 
     @Default("""

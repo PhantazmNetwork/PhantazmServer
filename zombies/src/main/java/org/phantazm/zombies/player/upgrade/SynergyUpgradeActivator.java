@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.event.equipment.EquipmentPostAddEvent;
@@ -38,14 +39,33 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
     }
 
     @Override
-    public @NotNull Optional<Key> nextUpgrade(@NotNull Key group, @NotNull Key key) {
+    public @NotNull Optional<Key> nextUpgrade(@NotNull Key group, @Nullable Key key) {
         List<Key> list = data.upgradeGroups.get(group);
         if (list == null || list.isEmpty()) return Optional.empty();
+
+        if (key == null) return Optional.of(list.get(0));
 
         int index = list.indexOf(key);
         if (index < 0 || index >= list.size() - 1) return Optional.empty();
 
         return Optional.of(list.get(index + 1));
+    }
+
+    @Override
+    public @NotNull Optional<Key> highestUpgrade(@NotNull Key group, @NotNull ZombiesPlayer zombiesPlayer) {
+        List<Key> list = data.upgradeGroups.get(group);
+        if (list == null || list.isEmpty()) return Optional.empty();
+
+        ZombiesScene scene = zombiesPlayer.getScene();
+        PlayerUpgradeHandler handler = scene.upgradeHandler(zombiesPlayer.getUUID());
+        if (handler == null) return Optional.empty();
+
+        for (int i = list.size() - 1; i >= 0; i--) {
+            Key key = list.get(i);
+            if (handler.isValidUpgrade(key)) return Optional.of(key);
+        }
+
+        return Optional.empty();
     }
 
     private static class Internal implements UpgradeActivator {

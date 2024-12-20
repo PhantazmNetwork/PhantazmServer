@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Handles the replacement of a {@link GuiItem} happening in a particular slot.
  */
-@FunctionalInterface
 public interface ReplaceHandler {
     /**
      * Called when the current {@link GuiItem} is replaced by another.

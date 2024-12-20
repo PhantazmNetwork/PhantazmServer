@@ -64,9 +64,9 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     }
 
     @Override
-    public void tick(long time) {
-        if (updatingItem.hasUpdate(time, itemStack)) {
-            itemStack = updatingItem.update(time, itemStack);
+    public void tick(@NotNull Gui gui, long time) {
+        if (updatingItem.hasUpdate(gui, time, itemStack)) {
+            itemStack = updatingItem.update(gui, time, itemStack);
             redraw = true;
         }
 

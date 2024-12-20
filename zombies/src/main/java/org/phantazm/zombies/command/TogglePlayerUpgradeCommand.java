@@ -59,7 +59,7 @@ public class TogglePlayerUpgradeCommand extends SandboxLockedCommand {
         }
 
         Key key = keyParser.parseKey(upgrade);
-        if (!handler.hasUpgrade(key)) {
+        if (!handler.isValidUpgrade(key)) {
             sender.sendMessage(Component.text("Invalid upgrade " + key, NamedTextColor.RED));
             return;
         }

@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.core.tick.Activable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -87,8 +88,8 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         if (profile.hasInventoryObject(slot)) {
             old = profile.removeInventoryObject(slot);
 
-            if (access == currentAccess) {
-                old.end();
+            if (access == currentAccess && old instanceof Activable activable) {
+                activable.end();
             }
         }
 
@@ -109,8 +110,8 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         if (profile.hasInventoryObject(slot)) {
             old = profile.removeInventoryObject(slot);
 
-            if (access == this.currentAccess) {
-                old.end();
+            if (access == this.currentAccess && old instanceof Activable activable) {
+                activable.end();
                 playerView.getPlayer().ifPresent(player -> player.getInventory().setItemStack(slot, ItemStack.AIR));
             }
         }
@@ -136,7 +137,9 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     }
 
     private void onAdd(int slot, InventoryObject object) {
-        object.start();
+        if (object instanceof Activable activable)
+            activable.start();
+
         playerView.getPlayer().ifPresent(player -> {
             if (player.getHeldSlot() == slot && object instanceof Equipment equipment) {
                 equipment.setSelected(true);
@@ -169,7 +172,7 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
                         equipment.setSelected(false);
                     }
 
-                    object.end();
+                    if (object instanceof Activable activable) activable.end();
                 }
             }
 
@@ -181,7 +184,7 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
                     }
 
                     InventoryObject inventoryObject = newProfile.getInventoryObject(slot);
-                    inventoryObject.start();
+                    if (inventoryObject instanceof Activable activable) activable.start();
 
                     //don't ask for redraw when we initially set the item
                     player.getInventory().setItemStack(slot, inventoryObject.getItemStack());
