@@ -50,7 +50,7 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     }
 
     private Gui buildGui() {
-        Gui gui = Gui.builder(data.inventoryType, slotDistributor).setDynamic(false).withItems(unfixedItems)
+        Gui gui = Gui.builder(data.inventoryType, slotDistributor).withItems(unfixedItems)
             .withTitle(data.title).build();
 
         for (ClickHandlerBase<?> fixed : fixedItems) {
