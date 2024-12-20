@@ -53,6 +53,16 @@ public class Gui extends Inventory implements Tickable {
     }
 
     /**
+     * Tests if an item can be inserted into the slot without an exception being thrown.
+     *
+     * @param slot the slot to insert at
+     * @return true iff the slot is in bounds
+     */
+    public boolean canInsert(int slot) {
+        return slot >= 0 && slot < getSize();
+    }
+
+    /**
      * Inserts a {@link GuiItem} into the specified slot. Calls {@link GuiItem#onReplace(Gui, GuiItem, int)} on the
      * previous item, if any is present.
      *

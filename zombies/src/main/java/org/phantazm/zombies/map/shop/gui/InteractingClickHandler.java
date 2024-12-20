@@ -59,6 +59,11 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     }
 
     @Override
+    public int fixedSlot() {
+        return data.fixedSlot;
+    }
+
+    @Override
     public void tick(long time) {
         if (updatingItem.hasUpdate(time, itemStack)) {
             itemStack = updatingItem.update(time, itemStack);
@@ -81,13 +86,15 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
 
     @Default("""
         {
-          closeOnInteract=true
+          closeOnInteract=true,
+          fixedSlot=-1
         }
         """)
     @DataObject
     public record Data(
         @NotNull Set<ClickType> clickTypes,
         boolean blacklist,
-        boolean closeOnInteract) {
+        boolean closeOnInteract,
+        int fixedSlot) {
     }
 }

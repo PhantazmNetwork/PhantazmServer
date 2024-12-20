@@ -10,6 +10,7 @@ import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 import org.phantazm.zombies.map.shop.gui.ClickHandlerBase;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,32 +18,53 @@ import java.util.Objects;
 @Cache(false)
 public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     private final SlotDistributor slotDistributor;
-    private final List<ClickHandlerBase<?>> guiItems;
+    private final List<ClickHandlerBase<?>> unfixedItems;
+    private final List<ClickHandlerBase<?>> fixedItems;
 
     @FactoryMethod
     public OpenGuiInteractor(@NotNull Data data, @NotNull SlotDistributor slotDistributor,
-        @NotNull @Child("guiItems") List<ClickHandlerBase<?>> guiItems) {
+        @NotNull @Child("guiItems") List<ClickHandlerBase<?>> unfixedItems) {
         super(data);
         this.slotDistributor = Objects.requireNonNull(slotDistributor);
-        this.guiItems = Objects.requireNonNull(guiItems);
+
+        List<ClickHandlerBase<?>> unfixed = new ArrayList<>();
+        List<ClickHandlerBase<?>> fixed = new ArrayList<>();
+        for (ClickHandlerBase<?> item : unfixedItems) {
+            if (item.fixedSlot() == -1) unfixed.add(item);
+            else fixed.add(item);
+        }
+
+        this.unfixedItems = List.copyOf(unfixed);
+        this.fixedItems = List.copyOf(fixed);
     }
 
     @Override
     public void initialize(@NotNull Shop shop) {
-        ShopInteractor.initialize(guiItems, shop);
+        ShopInteractor.initialize(unfixedItems, shop);
     }
 
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
-        interaction.player().module().getPlayerView().getPlayer().ifPresent(player -> player.openInventory(
-            Gui.builder(data.inventoryType, slotDistributor).setDynamic(false).withItems(guiItems)
-                .withTitle(data.title).build()));
+        interaction.player().module().getPlayerView().getPlayer().ifPresent(player -> player.openInventory(buildGui()));
         return true;
+    }
+
+    private Gui buildGui() {
+        Gui gui = Gui.builder(data.inventoryType, slotDistributor).setDynamic(false).withItems(unfixedItems)
+            .withTitle(data.title).build();
+
+        for (ClickHandlerBase<?> fixed : fixedItems) {
+            int slot = fixed.fixedSlot();
+            if (gui.canInsert(slot)) gui.insertItem(fixed, slot);
+        }
+
+        return gui;
     }
 
     @Override
     public void tick(long time) {
-        ShopInteractor.tick(guiItems, time);
+        ShopInteractor.tick(unfixedItems, time);
+        ShopInteractor.tick(fixedItems, time);
     }
 
     @DataObject
