@@ -3,10 +3,13 @@ package org.phantazm.zombies.player.upgrade.effect;
 import com.github.steanky.element.core.annotation.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Target;
+import org.phantazm.core.VecUtils;
+import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
@@ -63,9 +66,16 @@ public class ReviveTargetEffect implements UpgradeEffectComponent {
                     if (currentState == null || !VALID_KEYS.contains(currentState.key()))
                         return;
 
-                    Point revivePoint = null;
+                    Point revivePoint;
                     if (currentState instanceof KnockedPlayerState knockedPlayerState) {
                         revivePoint = knockedPlayerState.getReviveHandler().context().getKnockLocation();
+                    } else {
+                        MapSettingsInfo mapSettingsInfo = scene.mapSettingsInfo();
+                        revivePoint =
+                            new Pos(VecUtils.toPoint(mapSettingsInfo.origin().add(mapSettingsInfo.spawn())), mapSettingsInfo.yaw(),
+                                mapSettingsInfo.pitch()).add(0.5, 0, 0.5);
+
+                        player.teleport(Pos.fromPoint(revivePoint));
                     }
 
                     Function<?, ? extends ZombiesPlayerState> stateFunction = scenePlayer.module().getStateFunctions()

@@ -143,8 +143,7 @@ public class Pathfinding {
     }
 
     public boolean isValidTarget(@NotNull Entity targetEntity) {
-        boolean entityValid = !targetEntity.isRemoved() && targetEntity.getInstance() == spaceHandler.instance() &&
-            targetEntity.getTag(VALID_TARGET_TAG);
+        boolean entityValid = !targetEntity.isRemoved() && targetEntity.getInstance() == spaceHandler.instance();
 
         if (entityValid && targetEntity instanceof Player player) {
             GameMode mode = player.getGameMode();

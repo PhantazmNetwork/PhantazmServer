@@ -9,6 +9,7 @@ public final class DebugUtils {
     }
 
     public static void debugMessage(@NotNull String message) {
+        System.out.println(message);
         MinecraftServer.getInstanceManager().getInstances()
             .forEach(instance -> instance.sendMessage(Component.text(message)));
     }

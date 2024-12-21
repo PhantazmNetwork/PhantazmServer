@@ -45,7 +45,8 @@ public class FindTagInSelectorTriggerFilter implements TriggerFilterComponent {
 
             if (data.allTargetsMustMatch) {
                 for (Entity target : targets) {
-                    if (!data.condition.compare(data.value, ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target).getTag(tag))) {
+                    int value = ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target).getTag(tag);
+                    if (!data.condition.compare(data.value, value)) {
                         return false;
                     }
                 }

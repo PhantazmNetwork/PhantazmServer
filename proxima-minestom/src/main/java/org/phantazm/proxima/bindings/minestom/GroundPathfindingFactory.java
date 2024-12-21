@@ -15,10 +15,15 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.TagUtils;
+import org.phantazm.core.scene2.Scene;
+import org.phantazm.core.scene2.SceneManager;
 
 import java.util.Objects;
+import java.util.Optional;
 
 @Model("proxima.path_settings.ground")
 @Cache
@@ -34,6 +39,22 @@ public class GroundPathfindingFactory implements Pathfinding.Factory {
     public @NotNull Pathfinding make(@NotNull Pathfinder pathfinder,
         @NotNull ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal, @NotNull InstanceSpaceHandler spaceHandler) {
         return new Pathfinding(pathfinder, nodeMapLocal, spaceHandler) {
+            @Override
+            public boolean isValidTarget(@NotNull Entity targetEntity) {
+                boolean superValid = super.isValidTarget(targetEntity);
+                if (!superValid) return false;
+
+                if (targetEntity instanceof Player player) {
+                    Optional<Scene> current = SceneManager.Global.instance().currentScene(player);
+                    if (current.isEmpty()) return true;
+
+                    Scene scene = current.get();
+                    return TagUtils.sceneLocalTags(player, scene).getTag(Pathfinding.VALID_TARGET_TAG);
+                }
+
+                return true;
+            }
+
             @Override
             protected float jumpHeight() {
                 return data.jumpHeight;

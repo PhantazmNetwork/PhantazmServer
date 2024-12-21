@@ -58,8 +58,8 @@ public class TemporalEffect implements UpgradeEffectComponent {
         @Override
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
-            if (data.rerunOnRepeat | data.resetTimerOnApply ? (cooldown.getAndSet(timer.getAsInt()) == 0) :
-                (cooldown.compareAndSet(0, timer.getAsInt()))) {
+            if (data.rerunOnRepeat | (data.resetTimerOnApply ? (cooldown.getAndSet(timer.getAsInt()) == 0) :
+                (cooldown.compareAndSet(0, timer.getAsInt())))) {
                 this.clearData = new ClearData(upgrade, zombiesPlayer);
                 delegate.apply(upgrade, zombiesPlayer, triggerData);
             }

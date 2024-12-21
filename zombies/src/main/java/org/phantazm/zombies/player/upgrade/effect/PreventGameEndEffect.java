@@ -48,7 +48,9 @@ public class PreventGameEndEffect implements UpgradeEffectComponent {
             @NotNull TriggerData triggerData) {
             ZombiesScene scene = zombiesPlayer.getScene();
             scene.getAcquirable().sync(ignored -> {
-                if (isInvalid(scene, zombiesPlayer)) return;
+                if (isInvalid(scene, zombiesPlayer)) {
+                    return;
+                }
 
                 // set the keep alive meta
                 // this will be cleared if the player quits
