@@ -62,7 +62,7 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
                 TagHandler handler = ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target);
 
                 if (data.value) {
-                    handler.setTag(tag, data.value);
+                    handler.setTag(tag, true);
                     map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
                 } else {
                     handler.removeTag(tag);
