@@ -39,6 +39,7 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
 
     private static final class Internal implements UpgradeEffect {
         private final Tag<Boolean> tag;
+        private final Data data;
         private final Selector selector;
 
         private final Map<UUID, Reference<Entity>> map;
@@ -46,6 +47,7 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
 
         private Internal(Data data, Selector selector) {
             this.tag = Tag.Boolean(data.tag);
+            this.data = data;
             this.selector = selector;
 
             this.map = new ConcurrentHashMap<>();
@@ -56,7 +58,7 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, target -> {
-                ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target).setTag(tag, true);
+                ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target).setTag(tag, data.value);
                 map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
             });
         }
@@ -89,10 +91,12 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
 
     @Default("""
         {
-          selector={type='zombies.upgrade.selector.self'}
+          selector={type='zombies.upgrade.selector.self'},
+          value=true
         }
         """)
     @DataObject
-    public record Data(@NotNull String tag) {
+    public record Data(@NotNull String tag,
+        boolean value) {
     }
 }
