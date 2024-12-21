@@ -1,6 +1,7 @@
 package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -13,18 +14,23 @@ import org.phantazm.zombies.stage.StageKeys;
 @Model("zombies.upgrade.effect.prevent_game_end")
 @Cache
 public class PreventGameEndEffect implements UpgradeEffectComponent {
+    private final Data data;
+
     @FactoryMethod
-    public PreventGameEndEffect() {
+    public PreventGameEndEffect(@NotNull Data data) {
+        this.data = data;
     }
 
     @Override
     public @NotNull UpgradeEffect apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
-        return new Internal();
+        return new Internal(data);
     }
 
     private static final class Internal implements UpgradeEffect {
+        private final Data data;
 
-        private Internal() {
+        private Internal(Data data) {
+            this.data = data;
         }
 
         private boolean isInvalid(ZombiesScene scene, ZombiesPlayer zombiesPlayer) {
@@ -46,7 +52,7 @@ public class PreventGameEndEffect implements UpgradeEffectComponent {
 
                 // set the keep alive meta
                 // this will be cleared if the player quits
-                zombiesPlayer.module().getMeta().setKeepGameAlive(true);
+                zombiesPlayer.module().getMeta().setKeepGameAlive(!data.removeFlag);
             });
         }
 
@@ -60,5 +66,14 @@ public class PreventGameEndEffect implements UpgradeEffectComponent {
                 zombiesPlayer.module().getMeta().setKeepGameAlive(false);
             });
         }
+    }
+
+    @Default("""
+        {
+          removeFlag=false
+        }
+        """)
+    @DataObject
+    public record Data(boolean removeFlag) {
     }
 }

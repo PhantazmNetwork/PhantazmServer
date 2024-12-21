@@ -85,14 +85,14 @@ public class CorpseCreator {
 
             @Override
             public void updateNewViewer(@NotNull Player player) {
-                super.updateNewViewer(player);
                 player.sendPacket(corpseTeamPacketCreate);
+                super.updateNewViewer(player);
             }
 
             @Override
             public void updateOldViewer(@NotNull Player player) {
-                super.updateOldViewer(player);
                 player.sendPacket(corpseTeamPacketDestroy);
+                super.updateOldViewer(player);
             }
         };
     }
