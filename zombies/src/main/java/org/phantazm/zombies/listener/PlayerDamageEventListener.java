@@ -19,6 +19,7 @@ import org.phantazm.zombies.Flags;
 import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.event.player.ZombiesPlayerDamageEvent;
 import org.phantazm.zombies.event.player.ZombiesPlayerKnockEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerPostKnockEvent;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.map.objects.MapObjects;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -75,7 +76,7 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
             ZombiesPlayerKnockEvent deathEvent = new ZombiesPlayerKnockEvent(player, zombiesPlayer, event.getDamage());
-            EventDispatcher.call(deathEvent);
+            scene.broadcastEvent(deathEvent);
 
             if (deathEvent.isCancelled()) {
                 return;
@@ -98,6 +99,9 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
         zombiesPlayer.setState(ZombiesPlayerStateKeys.KNOCKED,
             new KnockedPlayerStateContext(event.getInstance(), deathPosition, roomName, killer));
+
+        playerOptional.ifPresent(player -> scene.broadcastEvent(new ZombiesPlayerPostKnockEvent(player, zombiesPlayer)));
+
 
         boolean anyAlive = false;
         for (ZombiesPlayer player : super.zombiesPlayers.values()) {
