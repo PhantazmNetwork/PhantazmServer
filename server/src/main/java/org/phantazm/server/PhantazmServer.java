@@ -8,14 +8,10 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.player.PlayerPacketEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.extras.bungee.BungeeCordProxy;
 import net.minestom.server.extras.velocity.VelocityProxy;
-import net.minestom.server.network.packet.client.play.ClientPlayerPositionAndRotationPacket;
-import net.minestom.server.network.packet.client.play.ClientPlayerPositionPacket;
-import net.minestom.server.network.packet.client.play.ClientPlayerRotationPacket;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.Namespaces;
 import org.phantazm.core.chat.ChatConfig;
@@ -167,14 +163,6 @@ public final class PhantazmServer {
             shutdown("error during startup");
             return;
         }
-
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerPacketEvent.class, event -> {
-            if (event.getPacket() instanceof ClientPlayerPositionPacket) return;
-            if (event.getPacket() instanceof ClientPlayerPositionAndRotationPacket) return;
-            if (event.getPacket() instanceof ClientPlayerRotationPacket) return;
-
-            System.out.println(event.getPacket());
-        });
 
         Thread shutdownHook = new Thread(() -> {
             shutdown("interrupt");
