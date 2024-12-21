@@ -102,6 +102,7 @@ public class EventTrigger implements UpgradeTriggerComponent {
         ZOMBIES_PLAYER_DAMAGE(ZombiesPlayerDamageEvent.class),
         ZOMBIES_PLAYER_KNOCK(ZombiesPlayerKnockEvent.class),
         ZOMBIES_PLAYER_POST_KNOCK(ZombiesPlayerPostKnockEvent.class),
+        ZOMBIES_PLAYER_SNEAK(ZombiesPlayerSneakEvent.class),
         ZOMBIES_PLAYER_KILL_MOB(ZombiesPlayerKillMobEvent.class),
         ZOMBIES_PLAYER_MELEE_ENTITY(ZombiesPlayerMeleeEntityEvent.class),
         ZOMBIES_PLAYER_MODIFY_ATTRIBUTE(ZombiesPlayerModifyAttributeEvent.class),

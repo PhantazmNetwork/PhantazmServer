@@ -4,6 +4,7 @@ import net.minestom.server.event.player.PlayerStartSneakingEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
+import org.phantazm.zombies.event.player.ZombiesPlayerSneakEvent;
 import org.phantazm.zombies.map.handler.WindowHandler;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -25,5 +26,10 @@ public class PlayerStartSneakingListener extends ZombiesPlayerEventListener<Play
     @Override
     protected void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerStartSneakingEvent event) {
         windowHandler.handleCrouchStateChange(zombiesPlayer, true);
+
+        zombiesPlayer.getPlayer().ifPresent(player -> {
+            scene.broadcastEvent(new ZombiesPlayerSneakEvent(player, zombiesPlayer));
+        });
+
     }
 }
