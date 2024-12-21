@@ -12,6 +12,7 @@ import org.phantazm.core.tick.Activable;
 import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
+import org.phantazm.zombies.event.player.ZombiesPlayerDismountEvent;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
 import org.phantazm.zombies.player.state.context.QuitPlayerStateContext;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -35,6 +36,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
 
     private volatile Set<Activable> activables;
     private final Lock activablesLock;
+    private boolean shouldUnmount;
 
     public BasicZombiesPlayer(@NotNull ZombiesScene scene, @NotNull ZombiesPlayerModule module,
         @NotNull TickTaskScheduler taskScheduler) {
@@ -144,6 +146,15 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         if (playerOptional.isPresent()) {
             Player player = playerOptional.get();
             inventoryTick(player, time);
+
+            boolean shouldUnmount = player.getVehicleInformation().shouldUnmount();
+            if (this.shouldUnmount != shouldUnmount) {
+                this.shouldUnmount = shouldUnmount;
+
+                if (shouldUnmount) {
+                    scene.broadcastEvent(new ZombiesPlayerDismountEvent(player, this));
+                }
+            }
         }
 
         module.getStateSwitcher().tick(time);
