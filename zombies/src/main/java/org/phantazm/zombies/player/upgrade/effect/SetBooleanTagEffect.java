@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Interval;
@@ -58,8 +59,15 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, target -> {
-                ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target).setTag(tag, data.value);
-                map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
+                TagHandler handler = ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target);
+
+                if (data.value) {
+                    handler.setTag(tag, data.value);
+                    map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
+                } else {
+                    handler.removeTag(tag);
+                    map.remove(target.getUuid());
+                }
             });
         }
 
