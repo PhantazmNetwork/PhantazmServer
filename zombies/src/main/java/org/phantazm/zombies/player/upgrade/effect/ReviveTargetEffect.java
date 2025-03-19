@@ -1,6 +1,7 @@
 package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -21,34 +22,39 @@ import org.phantazm.zombies.player.upgrade.selector.SelectorComponent;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
 @Model("zombies.upgrade.effect.switch_state")
 @Cache
 public class ReviveTargetEffect implements UpgradeEffectComponent {
+    private final Data data;
     private final SelectorComponent selector;
 
 
     @FactoryMethod
-    public ReviveTargetEffect(@NotNull @Child("selector") SelectorComponent selector) {
+    public ReviveTargetEffect(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector) {
+        this.data = data;
         this.selector = selector;
     }
 
     @Override
     public @NotNull UpgradeEffect apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesPlayer zombiesPlayer) {
-        return new Internal(selector.apply(injectionStore, zombiesPlayer));
+        return new Internal(selector.apply(injectionStore, zombiesPlayer), data);
     }
 
     private static final class Internal implements UpgradeEffect {
         private final Selector selector;
+        private final Data data;
 
         private static final Set<Key> VALID_KEYS = Set.of(ZombiesPlayerStateKeys.DEAD.key(),
             ZombiesPlayerStateKeys.KNOCKED.key());
 
 
-        private Internal(Selector selector) {
+        private Internal(Selector selector, Data data) {
             this.selector = selector;
+            this.data = data;
         }
 
         @Override
@@ -71,9 +77,15 @@ public class ReviveTargetEffect implements UpgradeEffectComponent {
                         revivePoint = knockedPlayerState.getReviveHandler().context().getKnockLocation();
                     } else {
                         MapSettingsInfo mapSettingsInfo = scene.mapSettingsInfo();
-                        revivePoint =
-                            new Pos(VecUtils.toPoint(mapSettingsInfo.origin().add(mapSettingsInfo.spawn())), mapSettingsInfo.yaw(),
-                                mapSettingsInfo.pitch()).add(0.5, 0, 0.5);
+                        Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+
+                        if (playerOptional.isPresent() && data.respawnAtPlayer) {
+                            revivePoint = playerOptional.get().getPosition();
+                        } else {
+                            revivePoint =
+                                new Pos(VecUtils.toPoint(mapSettingsInfo.origin().add(mapSettingsInfo.spawn())), mapSettingsInfo.yaw(),
+                                    mapSettingsInfo.pitch()).add(0.5, 0, 0.5);
+                        }
 
                         player.teleport(Pos.fromPoint(revivePoint));
                     }
@@ -90,6 +102,11 @@ public class ReviveTargetEffect implements UpgradeEffectComponent {
     }
 
     @DataObject
-    public record Data() {
+    @Default("""
+        {
+          respawnAtPlayer=false
+        }
+        """)
+    public record Data(boolean respawnAtPlayer) {
     }
 }
