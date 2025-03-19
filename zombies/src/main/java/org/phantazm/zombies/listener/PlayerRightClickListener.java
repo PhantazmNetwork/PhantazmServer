@@ -1,10 +1,14 @@
 package org.phantazm.zombies.listener;
 
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
+import org.phantazm.zombies.event.player.ZombiesPlayerUseEquipmentEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
+
+import java.util.Optional;
 
 public class PlayerRightClickListener {
 
@@ -22,6 +26,16 @@ public class PlayerRightClickListener {
             InventoryObject object = profile.getInventoryObject(slot);
             if (!(object instanceof Equipment equipment)) {
                 return;
+            }
+
+            Optional<Player> playerOptional = player.getPlayer();
+            if (playerOptional.isPresent()) {
+                ZombiesPlayerUseEquipmentEvent event = new ZombiesPlayerUseEquipmentEvent(player, playerOptional.get(), equipment);
+                player.getScene().broadcastEvent(event);
+
+                if (event.isCancelled()) {
+                    return;
+                }
             }
 
             equipment.rightClick();

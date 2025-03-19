@@ -952,7 +952,7 @@ public final class SceneManager {
      * Calls {@code consumer} with the player's current scene. While control flow is inside the consumer, the scene is
      * guaranteed to still report that it has the player, as it is acquired for the duration of the consumer and
      * released afterward.
-     * <b>
+     * <p>
      * This method returns without calling {@code consumer} if the player is offline (in which case they have no
      * scene).
      *

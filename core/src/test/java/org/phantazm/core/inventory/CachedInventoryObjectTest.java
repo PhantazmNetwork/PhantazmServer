@@ -18,11 +18,6 @@ public class CachedInventoryObjectTest {
             private boolean initialSet = false;
 
             @Override
-            public void tick(long time) {
-                // Fetches a list of all the good conventions used in adventure API
-            }
-
-            @Override
             protected @NotNull ItemStack computeStack() {
                 if (initialSet) {
                     return itemStack2;

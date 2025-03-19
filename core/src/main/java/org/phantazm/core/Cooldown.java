@@ -35,7 +35,7 @@ public final class Cooldown {
      *
      * @param initial the initial timer
      * @return a new Cooldown instance
-     * @throws IllegalArgumentException if {@code initial} < 0
+     * @throws IllegalArgumentException if initial is less than 0
      */
     public static @NotNull Cooldown cooldown(int initial) {
         checkTimer(initial);

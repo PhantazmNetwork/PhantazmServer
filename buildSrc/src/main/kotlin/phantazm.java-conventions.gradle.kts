@@ -84,6 +84,7 @@ tasks.getByName<Test>("test") {
 }
 
 tasks.getByName<Javadoc>("javadoc") {
+    enabled = false
     (options as StandardJavadocDocletOptions).tags(
             "apiNote:a:API Note:",
             "implSpec:a:Implementation Requirements:",
