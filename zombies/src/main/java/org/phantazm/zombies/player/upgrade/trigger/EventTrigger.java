@@ -6,6 +6,7 @@ import net.minestom.server.event.EventListener;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
+import org.phantazm.zombies.event.RoundStartEvent;
 import org.phantazm.zombies.event.entity.EntityAttributeModifierRemoveEvent;
 import org.phantazm.zombies.event.entity.MobBreakWindowEvent;
 import org.phantazm.zombies.event.entity.MobDeathEvent;
@@ -115,6 +116,7 @@ public class EventTrigger implements UpgradeTriggerComponent {
         ZOMBIES_PLAYER_END_REVIVE(ZombiesPlayerEndReviveEvent.class),
         ZOMBIES_PLAYER_MODIFY_UPGRADE(ZombiesPlayerModifyUpgrade.class),
         ZOMBIES_PLAYER_USE_EQUIPMENT(ZombiesPlayerUseEquipmentEvent.class),
+        ROUND_START(RoundStartEvent.class),
         DAMAGE(DamageEvent.class),
         ENTITY_TARGET(EntityTargetEvent.class),
         LIVING_TARGET(LivingTargetEvent.class),

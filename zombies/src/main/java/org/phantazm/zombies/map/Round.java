@@ -11,6 +11,7 @@ import org.phantazm.messaging.packet.server.RoundStartPacket;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.MobData;
 import org.phantazm.zombies.ExtraNodeKeys;
+import org.phantazm.zombies.event.RoundStartEvent;
 import org.phantazm.zombies.map.action.Action;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
@@ -123,6 +124,7 @@ public class Round implements Tickable {
         for (Action<Round> action : startActions) {
             action.perform(this);
         }
+        sceneSupplier.get().broadcastEvent(new RoundStartEvent(round));
 
         if (waves.isEmpty()) {
             endRound();

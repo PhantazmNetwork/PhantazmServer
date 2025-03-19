@@ -6,8 +6,6 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.event.trait.EquipmentEvent;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
-import org.phantazm.zombies.player.upgrade.selector.Selector;
-import org.phantazm.zombies.player.upgrade.selector.SelectorComponent;
 import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 
 @Model("zombies.upgrade.filter.equipment")
