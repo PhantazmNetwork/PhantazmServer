@@ -4,6 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.Upgradable;
@@ -25,6 +26,7 @@ import java.util.function.Supplier;
  */
 public class Gun extends CachedInventoryObject implements Equipment, Upgradable {
     private final Key equipmentKey;
+    private final Tag<Integer> shotTag;
     private final Supplier<Optional<? extends Entity>> entitySupplier;
     private final GunModel model;
     private final Set<GunLevel> tickingLevels;
@@ -42,6 +44,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
     public Gun(@NotNull Key equipmentKey, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
         @NotNull GunModel model, @NotNull ZombiesScene zombiesScene) {
         this.equipmentKey = Objects.requireNonNull(equipmentKey);
+        this.shotTag = Tag.Integer(equipmentKey.asString() + "/shots_fired").defaultValue(0);
         this.entitySupplier = Objects.requireNonNull(entitySupplier);
         this.model = Objects.requireNonNull(model);
         this.tickingLevels = Collections.newSetFromMap(new IdentityHashMap<>(model.levels().size()));
@@ -56,6 +59,10 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             stats.maxClip(entitySupplier.get().orElse(null)), false, 0);
     }
 
+    public @NotNull Tag<Integer> shotTag() {
+        return this.shotTag;
+    }
+
     /**
      * Shoots the gun. A gun may fire multiple times in one shot.
      */
@@ -66,6 +73,9 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
                 state.setTicksSinceLastShot(0L);
             });
             fire();
+            this.entitySupplier.get().ifPresent(shooter -> {
+                shooter.tagHandler().updateTag(this.shotTag, shots -> shots + 1);
+            });
         }
     }
 

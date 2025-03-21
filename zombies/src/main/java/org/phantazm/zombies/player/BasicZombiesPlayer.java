@@ -33,7 +33,6 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     private final Set<ShotEffect> shotEffects;
     private final Set<ShotEffect> shotEffectView;
 
-
     private volatile Set<Activable> activables;
     private final Lock activablesLock;
     private boolean shouldUnmount;
