@@ -6,6 +6,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.core.TagUtils;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.equipment.Upgradable;
 import org.phantazm.core.inventory.CachedInventoryObject;
@@ -74,7 +75,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
             });
             fire();
             this.entitySupplier.get().ifPresent(shooter -> {
-                shooter.tagHandler().updateTag(this.shotTag, shots -> shots + 1);
+                TagUtils.sceneLocalTags(shooter, zombiesScene).updateTag(this.shotTag, shots -> shots + 1);
             });
         }
     }
