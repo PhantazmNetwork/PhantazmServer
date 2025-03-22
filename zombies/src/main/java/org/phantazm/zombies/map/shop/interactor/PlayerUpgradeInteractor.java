@@ -1,6 +1,7 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.DataObject;
+import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
@@ -12,6 +13,7 @@ import net.kyori.adventure.key.Key;
 public class PlayerUpgradeInteractor implements ShopInteractor {
     private final Data data;
 
+    @FactoryMethod
     public PlayerUpgradeInteractor(@NotNull Data data) {
         this.data = data;
     }

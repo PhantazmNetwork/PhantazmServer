@@ -12,6 +12,7 @@ public final class Tags {
     public static final Tag<Long> LAST_ENTER_BOMBED_ROOM = Tag.Long(TagUtils.uniqueTagName()).defaultValue(-1L);
     public static final Tag<Component> DAMAGE_NAME = Tag.Component(TagUtils.uniqueTagName());
     public static final Tag<Boolean> HEADSHOT_TAG = Tag.Boolean("phantazm.zombies.is_headshot");
+    public static final Tag<Boolean> USE_EQUIPMENT_WHILE_KNOCKED_TAG = Tag.Boolean("phantazm.zombies.use_equipment_while_knocked");
 
     private Tags() {
         throw new UnsupportedOperationException();

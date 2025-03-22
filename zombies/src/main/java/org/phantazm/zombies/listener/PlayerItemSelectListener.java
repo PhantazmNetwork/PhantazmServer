@@ -24,7 +24,6 @@ public class PlayerItemSelectListener extends ZombiesPlayerEventListener<PlayerC
     @Override
     protected void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull PlayerChangeHeldSlotEvent event) {
         if (!zombiesPlayer.canUseEquipment()) {
-            event.setCancelled(true);
             return;
         }
 

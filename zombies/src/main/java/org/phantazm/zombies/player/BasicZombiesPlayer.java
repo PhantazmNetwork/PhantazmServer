@@ -6,11 +6,13 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.flag.Flaggable;
+import org.phantazm.core.TagUtils;
 import org.phantazm.core.inventory.InventoryObject;
 import org.phantazm.core.inventory.InventoryProfile;
 import org.phantazm.core.tick.Activable;
 import org.phantazm.core.tick.TickTaskScheduler;
 import org.phantazm.zombies.Attributes;
+import org.phantazm.zombies.Tags;
 import org.phantazm.zombies.equipment.perk.effect.shot.ShotEffect;
 import org.phantazm.zombies.event.player.ZombiesPlayerDismountEvent;
 import org.phantazm.zombies.player.state.ZombiesPlayerStateKeys;
@@ -73,6 +75,15 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     @Override
     public boolean blockHandAnimation() {
         return blockHandAnimation.getAndSet(false);
+    }
+
+    @Override
+    public boolean canUseEquipment() {
+        if (!ZombiesPlayer.super.canUseEquipment() && isKnocked()) {
+            return getPlayer().map(player -> TagUtils.sceneLocalTags(player, scene).getTag(Tags.USE_EQUIPMENT_WHILE_KNOCKED_TAG)).orElse(false);
+        }
+
+        return true;
     }
 
     @Override

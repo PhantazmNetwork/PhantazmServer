@@ -73,7 +73,9 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
                 state.setQueuedShots(level.stats().shots() - 1);
                 state.setTicksSinceLastShot(0L);
             });
+
             fire();
+
             this.entitySupplier.get().ifPresent(shooter -> {
                 TagUtils.sceneLocalTags(shooter, zombiesScene).updateTag(this.shotTag, shots -> shots + 1);
             });
