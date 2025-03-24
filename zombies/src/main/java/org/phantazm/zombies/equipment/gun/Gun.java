@@ -45,7 +45,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
     public Gun(@NotNull Key equipmentKey, @NotNull Supplier<Optional<? extends Entity>> entitySupplier,
         @NotNull GunModel model, @NotNull ZombiesScene zombiesScene) {
         this.equipmentKey = Objects.requireNonNull(equipmentKey);
-        this.shotTag = Tag.Integer(equipmentKey.asString() + "/shots_fired").defaultValue(0);
+        this.shotTag = shotTagFromKey(equipmentKey);
         this.entitySupplier = Objects.requireNonNull(entitySupplier);
         this.model = Objects.requireNonNull(model);
         this.tickingLevels = Collections.newSetFromMap(new IdentityHashMap<>(model.levels().size()));
@@ -58,6 +58,17 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
         this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats
             .reloadSpeed(entitySupplier.get().orElse(null)), false, stats.maxAmmo(),
             stats.maxClip(entitySupplier.get().orElse(null)), false, 0);
+    }
+
+    /**
+     * Gets the shot tag for a specific equipment's key. This can be used to get the shot tag in cases where a Gun
+     * object isn't on-hand.
+     *
+     * @param equipmentKey the equipment key
+     * @return the shot tag
+     */
+    public static @NotNull Tag<Integer> shotTagFromKey(@NotNull Key equipmentKey) {
+        return Tag.Integer(equipmentKey.asString() + "/shots_fired").defaultValue(0);
     }
 
     public @NotNull Tag<Integer> shotTag() {
