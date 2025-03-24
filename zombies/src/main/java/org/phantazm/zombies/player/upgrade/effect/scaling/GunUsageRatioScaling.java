@@ -57,89 +57,84 @@ public class GunUsageRatioScaling implements ScalingComponent {
 
         @Override
         public double getMultiplier(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
-            if (triggerData.raw() instanceof GunEvent gunEvent) {
-                Optional<Player> optPlayer = zombiesPlayer.getPlayer();
-                if (optPlayer.isEmpty()) {
-                    return 1.0;
-                }
-
-                Player player = optPlayer.get();
-                Gun shotWith = gunEvent.gun();
-
-                if (!data.eligibleWeapons.contains(shotWith.key())) {
-                    return 1.0;
-                }
-
-                int shotAmount = retrieveGunShotAmount(shotWith, player, zombiesPlayer);
-                double percentage = 1.0;
-
-                // will mess up the math if not over 0 (also it shouldn't be possible to be under 0)
-                if (shotAmount <= 0) {
-                    return 1.0;
-                }
-
-                // taken from the gun with currently highest # of shots,
-                int baselineGunShots = 0;
-                Key baselineGun = shotWith.key();
-
-                if (data.onlyHotbar) {
-                    InventoryAccess access = zombiesPlayer.module().getInventoryAccessRegistry()
-                        .getAccess(InventoryKeys.ALIVE_ACCESS);
-
-                    for (InventoryObject object : access.profile().objects()) {
-                        if (!(object instanceof Gun gun)) {
-                            continue;
-                        }
-
-                        if (!data.eligibleWeapons.contains(gun.key())) {
-                            continue;
-                        }
-
-                        int currentGunShotAmount = retrieveGunShotAmount(gun, player, zombiesPlayer);
-                        if (currentGunShotAmount > baselineGunShots) {
-                            baselineGun = gun.key();
-                            baselineGunShots = currentGunShotAmount;
-                        }
-                    }
-
-                    if(baselineGun.equals(shotWith.key()) || baselineGunShots == 0) {
-                        return 1.0;
-                    }
-
-                    percentage = (double) shotAmount / baselineGunShots;
-
-                } else {
-                    for (Key definedKey : data.eligibleWeapons) {
-                        int dynamicGunShots = retrieveGunShotAmountFromDynamic(definedKey, player, zombiesPlayer);
-                        if (dynamicGunShots > baselineGunShots) {
-                            baselineGun = definedKey;
-                            baselineGunShots = dynamicGunShots;
-                        }
-                    }
-
-                    if(baselineGun.equals(shotWith.key()) || baselineGunShots == 0) {
-                        return 1.0;
-                    }
-
-                    percentage = (double) shotAmount / baselineGunShots;
-                }
-                return ScalingFormulae.computeMultiplier(data.returnZeroOutsideRange, percentage, largerNumberIsStart, largerNumber,
-                    smallerNumber, data.startMultiplier, data.endMultiplier);
+            if (!(triggerData.raw() instanceof GunEvent gunEvent)) {
+                return 1.0;
             }
-            return 1.0;
+
+            Optional<Player> optPlayer = zombiesPlayer.getPlayer();
+            if (optPlayer.isEmpty()) {
+                return 1.0;
+            }
+
+            Player player = optPlayer.get();
+            Gun shotWith = gunEvent.gun();
+
+            if (!data.eligibleWeapons.contains(shotWith.key())) {
+                return 1.0;
+            }
+
+            int shotAmount = retrieveGunShotAmount(shotWith.shotTag(), player, zombiesPlayer);
+            double percentage = 1.0;
+
+            // will mess up the math if not over 0 (also it shouldn't be possible to be under 0)
+            if (shotAmount <= 0) {
+                return 1.0;
+            }
+
+            // taken from the gun with currently highest # of shots,
+            int baselineGunShots = 0;
+            Key baselineGun = shotWith.key();
+
+            if (data.onlyHotbar) {
+                InventoryAccess access = zombiesPlayer.module().getInventoryAccessRegistry()
+                    .getAccess(InventoryKeys.ALIVE_ACCESS);
+
+                for (InventoryObject object : access.profile().objects()) {
+                    if (!(object instanceof Gun gun)) {
+                        continue;
+                    }
+
+                    if (!data.eligibleWeapons.contains(gun.key())) {
+                        continue;
+                    }
+
+                    int currentGunShotAmount = retrieveGunShotAmount(((Gun) gun).shotTag(), player, zombiesPlayer);
+                    if (currentGunShotAmount > baselineGunShots) {
+                        baselineGun = gun.key();
+                        baselineGunShots = currentGunShotAmount;
+                    }
+                }
+
+                if(baselineGun.equals(shotWith.key()) || baselineGunShots == 0) {
+                    return 1.0;
+                }
+
+                percentage = (double) shotAmount / baselineGunShots;
+
+            } else {
+                for (Key definedKey : data.eligibleWeapons) {
+                    int dynamicGunShots = retrieveGunShotAmount(Gun.shotTagFromKey(definedKey), player, zombiesPlayer);
+                    if (dynamicGunShots > baselineGunShots) {
+                        baselineGun = definedKey;
+                        baselineGunShots = dynamicGunShots;
+                    }
+                }
+
+                if(baselineGun.equals(shotWith.key()) || baselineGunShots == 0) {
+                    return 1.0;
+                }
+
+                percentage = (double) shotAmount / baselineGunShots;
+            }
+            return ScalingFormulae.computeMultiplier(data.returnZeroOutsideRange, percentage, largerNumberIsStart, largerNumber,
+                smallerNumber, data.startMultiplier, data.endMultiplier);
         }
 
-        private int retrieveGunShotAmount(Gun gun, Player player, ZombiesPlayer zombiesPlayer) {
-            Tag<Integer> gunShotTag = ((Gun) gun).shotTag();
+        private int retrieveGunShotAmount(Tag<Integer> gunShotTag, Player player, ZombiesPlayer zombiesPlayer) {
             int timesShot = TagUtils.sceneLocalTags(player, zombiesPlayer.getScene()).getTag(gunShotTag);
             return timesShot;
         }
 
-        private int retrieveGunShotAmountFromDynamic(Key key, Player player, ZombiesPlayer zombiesPlayer) {
-            Tag<Integer> dynamicGunShotTag = Gun.shotTagFromKey(key);
-            int timesShot = TagUtils.sceneLocalTags(player, zombiesPlayer.getScene()).getTag(dynamicGunShotTag);
-            return timesShot;
-        }
     }
 
     @Default("""
