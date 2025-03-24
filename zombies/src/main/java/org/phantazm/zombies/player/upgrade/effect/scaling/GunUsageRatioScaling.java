@@ -109,7 +109,6 @@ public class GunUsageRatioScaling implements ScalingComponent {
                 }
 
                 percentage = (double) shotAmount / baselineGunShots;
-
             } else {
                 for (Key definedKey : data.eligibleWeapons) {
                     int dynamicGunShots = retrieveGunShotAmount(Gun.shotTagFromKey(definedKey), player, zombiesPlayer);
