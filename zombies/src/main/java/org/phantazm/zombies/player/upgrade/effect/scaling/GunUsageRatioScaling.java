@@ -13,7 +13,6 @@ import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.TagUtils;
 import org.phantazm.core.inventory.InventoryAccess;
 import org.phantazm.core.inventory.InventoryObject;
-import org.phantazm.core.inventory.InventoryObjectGroup;
 import org.phantazm.zombies.ScalingFormulae;
 import org.phantazm.zombies.equipment.gun.Gun;
 import org.phantazm.zombies.event.trait.GunEvent;
@@ -83,7 +82,7 @@ public class GunUsageRatioScaling implements ScalingComponent {
 
             // taken from the gun with currently highest # of shots,
             int baselineGunShots = 0;
-            Key baselineGun = shotWith.key();
+            Key baselineGun = null;
 
             if (data.onlyHotbar) {
                 InventoryAccess access = zombiesPlayer.module().getInventoryAccessRegistry()
@@ -105,7 +104,7 @@ public class GunUsageRatioScaling implements ScalingComponent {
                     }
                 }
 
-                if(baselineGun.equals(shotWith.key()) || baselineGunShots == 0) {
+                if (baselineGun == null || baselineGunShots == 0) {
                     return 1.0;
                 }
 
@@ -120,7 +119,7 @@ public class GunUsageRatioScaling implements ScalingComponent {
                     }
                 }
 
-                if(baselineGun.equals(shotWith.key()) || baselineGunShots == 0) {
+                if (baselineGun == null || baselineGunShots == 0) {
                     return 1.0;
                 }
 
