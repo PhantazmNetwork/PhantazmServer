@@ -68,7 +68,7 @@ public class GunUsageRatioScaling implements ScalingComponent {
             Player player = optPlayer.get();
             Gun shotWith = gunEvent.gun();
 
-            if (data.eligibleWeapons.containsKey(shotWith.key())) {
+            if (!data.eligibleWeapons.containsKey(shotWith.key())) {
                 return 1.0;
             }
 
