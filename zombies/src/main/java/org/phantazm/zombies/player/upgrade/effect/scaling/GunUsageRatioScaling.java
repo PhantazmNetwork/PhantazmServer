@@ -68,12 +68,12 @@ public class GunUsageRatioScaling implements ScalingComponent {
             Player player = optPlayer.get();
             Gun shotWith = gunEvent.gun();
 
-            if (!data.eligibleWeapons.contains(shotWith.key())) {
+            if (data.eligibleWeapons.containsKey(shotWith.key())) {
                 return 1.0;
             }
 
             int shotAmount = retrieveGunShotAmount(shotWith.shotTag(), player, zombiesPlayer);
-            double percentage = 1.0;
+            double percentage;
 
             // taken from the gun with currently highest # of shots,
             int baselineGunShots = 0;
@@ -88,44 +88,39 @@ public class GunUsageRatioScaling implements ScalingComponent {
                         continue;
                     }
 
-                    if (!data.eligibleWeapons.contains(gun.key())) {
+                    if (!data.eligibleWeapons.containsKey(gun.key())) {
                         continue;
                     }
 
-                    int currentGunShotAmount = retrieveGunShotAmount(((Gun) gun).shotTag(), player, zombiesPlayer);
+                    int currentGunShotAmount = retrieveGunShotAmount(gun.shotTag(), player, zombiesPlayer) * data.eligibleWeapons.get(gun.key());
                     if (currentGunShotAmount > baselineGunShots) {
                         baselineGun = gun.key();
                         baselineGunShots = currentGunShotAmount;
                     }
                 }
 
-                if (baselineGun == null || baselineGunShots == 0) {
-                    return 1.0;
-                }
-
-                percentage = (double) shotAmount / baselineGunShots;
             } else {
-                for (Key definedKey : data.eligibleWeapons) {
-                    int dynamicGunShots = retrieveGunShotAmount(Gun.shotTagFromKey(definedKey), player, zombiesPlayer);
+                for (Map.Entry<Key, Integer> entry : data.eligibleWeapons.entrySet()) {
+                    int dynamicGunShots = retrieveGunShotAmount(Gun.shotTagFromKey(entry.getKey()), player, zombiesPlayer) * entry.getValue();
                     if (dynamicGunShots > baselineGunShots) {
-                        baselineGun = definedKey;
+                        baselineGun = entry.getKey();
                         baselineGunShots = dynamicGunShots;
                     }
                 }
 
-                if (baselineGun == null || baselineGunShots == 0) {
-                    return 1.0;
-                }
-
-                percentage = (double) shotAmount / baselineGunShots;
             }
+
+            if (baselineGun == null) {
+                return 1.0;
+            }
+
+            percentage = (double) shotAmount / baselineGunShots;
             return ScalingFormulae.computeMultiplier(data.returnZeroOutsideRange, percentage, largerNumberIsStart, largerNumber,
                 smallerNumber, data.startMultiplier, data.endMultiplier);
         }
 
         private int retrieveGunShotAmount(Tag<Integer> gunShotTag, Player player, ZombiesPlayer zombiesPlayer) {
-            int timesShot = TagUtils.sceneLocalTags(player, zombiesPlayer.getScene()).getTag(gunShotTag);
-            return timesShot;
+            return TagUtils.sceneLocalTags(player, zombiesPlayer.getScene()).getTag(gunShotTag);
         }
 
     }
@@ -146,6 +141,8 @@ public class GunUsageRatioScaling implements ScalingComponent {
         double endMultiplier,
         boolean returnZeroOutsideRange,
         boolean onlyHotbar,
-        @NotNull Set<Key> eligibleWeapons
+        // hacky workaround for the legacy guns system
+        // TODO: change to Set<Key> when we refactor guns
+        @NotNull Map<Key, Integer> eligibleWeapons
     ){}
 }
