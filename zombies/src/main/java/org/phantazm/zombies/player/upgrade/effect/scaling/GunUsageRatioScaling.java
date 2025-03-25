@@ -75,11 +75,6 @@ public class GunUsageRatioScaling implements ScalingComponent {
             int shotAmount = retrieveGunShotAmount(shotWith.shotTag(), player, zombiesPlayer);
             double percentage = 1.0;
 
-            // will mess up the math if not over 0 (also it shouldn't be possible to be under 0)
-            if (shotAmount <= 0) {
-                return 1.0;
-            }
-
             // taken from the gun with currently highest # of shots,
             int baselineGunShots = 0;
             Key baselineGun = null;
