@@ -107,7 +107,6 @@ public class GunUsageRatioScaling implements ScalingComponent {
                         baselineGunShots = dynamicGunShots;
                     }
                 }
-
             }
 
             if (baselineGun == null) {
@@ -144,5 +143,6 @@ public class GunUsageRatioScaling implements ScalingComponent {
         // hacky workaround for the legacy guns system
         // TODO: change to Set<Key> when we refactor guns
         @NotNull Map<Key, Integer> eligibleWeapons
-    ){}
+    ) {
+    }
 }
