@@ -113,7 +113,7 @@ public class GunUsageRatioScaling implements ScalingComponent {
                 return 1.0;
             }
 
-            percentage = (double) shotAmount / baselineGunShots;
+            percentage = (double) shotAmount * data.eligibleWeapons.get(shotWith.key()) / baselineGunShots;
             return ScalingFormulae.computeMultiplier(data.returnZeroOutsideRange, percentage, largerNumberIsStart, largerNumber,
                 smallerNumber, data.startMultiplier, data.endMultiplier);
         }
