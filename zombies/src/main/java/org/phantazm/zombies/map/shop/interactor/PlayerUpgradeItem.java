@@ -44,6 +44,7 @@ public class PlayerUpgradeItem implements UpdatingItem {
     private ItemStack computeItemStack(Gui gui, long time, ItemStack current) {
         Player owner = gui.getOwner();
         PlayerUpgradeHandler upgradeHandler = sceneSupplier.get().upgradeHandler(owner.getUuid());
+
         if (upgradeHandler.isUpgradeActive(data.upgrade)) {
             this.current = this.purchasedItem;
             return this.purchasedItem.update(gui, time, current);
