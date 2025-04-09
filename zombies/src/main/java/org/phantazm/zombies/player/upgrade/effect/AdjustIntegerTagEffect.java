@@ -19,6 +19,7 @@ import org.phantazm.zombies.player.upgrade.trigger.TriggerData;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,7 +46,6 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
         private final Selector selector;
 
         private final Map<UUID, Reference<Entity>> map;
-        private final Interval interval;
 
         private Internal(Data data, Selector selector) {
             this.data = data;
@@ -53,7 +53,6 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
             this.selector = selector;
 
             this.map = new ConcurrentHashMap<>();
-            this.interval = Interval.of(20);
         }
 
         @Override
@@ -67,6 +66,10 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
                     return data.increment < 0 ? Math.max(next, data.limit) : Math.min(next, data.limit);
                 });
 
+                if (!data.ephemeral) {
+                    return;
+                }
+
                 if (newValue != data.defaultValue) {
                     map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
                 } else {
@@ -77,31 +80,8 @@ public class AdjustIntegerTagEffect implements UpgradeEffectComponent {
 
         @Override
         public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
-            map.values().removeIf(reference -> {
-                Entity entity = reference.get();
-                if (entity == null || entity.isRemoved()) {
-                    return true;
-                }
-
-                TagHandler handler = ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), entity);
-                if (data.ephemeral && entity instanceof Player) {
-                    handler.removeTag(tag);
-                    return true;
-                }
-
-                return false;
-            });
-        }
-
-        @Override
-        public boolean needsTicking() {
-            return true;
-        }
-
-        @Override
-        public void tick() {
-            if (interval.advance()) {
-                map.values().removeIf(reference -> reference.refersTo(null));
+            if (data.ephemeral) {
+                ZombiesTagUtils.cleanTagTrackingMap(map, tag, zombiesPlayer);
             }
         }
     }
