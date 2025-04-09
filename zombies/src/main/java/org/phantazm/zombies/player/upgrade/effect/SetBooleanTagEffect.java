@@ -3,6 +3,7 @@ package org.phantazm.zombies.player.upgrade.effect;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
@@ -74,8 +75,13 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
                     return true;
                 }
 
-                ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), entity).removeTag(tag);
-                return true;
+                TagHandler handler = ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), entity);
+                if (data.ephemeral && entity instanceof Player) {
+                    handler.removeTag(tag);
+                    return true;
+                }
+
+                return false;
             });
         }
 
@@ -95,11 +101,13 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
     @Default("""
         {
           selector={type='zombies.upgrade.selector.self'},
-          value=true
+          value=true,
+          ephemeral=false
         }
         """)
     @DataObject
     public record Data(@NotNull String tag,
-        boolean value) {
+        boolean value,
+        boolean ephemeral) {
     }
 }
