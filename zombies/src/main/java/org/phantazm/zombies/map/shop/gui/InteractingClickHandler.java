@@ -69,7 +69,10 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
             itemStack = updatingItem.update(gui, time, itemStack);
             redraw = true;
         }
+    }
 
+    @Override
+    public void tick(long time) {
         clickInteractor.tick(time);
     }
 

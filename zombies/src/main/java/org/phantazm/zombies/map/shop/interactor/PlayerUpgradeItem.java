@@ -21,6 +21,7 @@ public class PlayerUpgradeItem implements UpdatingItem {
     private final Supplier<ZombiesScene> sceneSupplier;
 
     private UpdatingItem current;
+    private boolean hasUpgrade;
 
     @FactoryMethod
     public PlayerUpgradeItem(@NotNull Data data,
@@ -40,7 +41,15 @@ public class PlayerUpgradeItem implements UpdatingItem {
 
     @Override
     public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current) {
-        return this.current == null || this.current.hasUpdate(gui, time, current);
+        UpdatingItem thisCurrent = this.current;
+        return thisCurrent == null || thisCurrent.hasUpdate(gui, time, current) || hasUpgrade(gui);
+    }
+
+    private boolean hasUpgrade(Gui gui) {
+        Player owner = gui.getOwner();
+        PlayerUpgradeHandler upgradeHandler = sceneSupplier.get().upgradeHandler(owner.getUuid());
+
+        return upgradeHandler.isUpgradeActive(data.upgrade) != this.hasUpgrade;
     }
 
     private ItemStack computeItemStack(Gui gui, long time, ItemStack current) {
@@ -49,9 +58,11 @@ public class PlayerUpgradeItem implements UpdatingItem {
 
         if (upgradeHandler.isUpgradeActive(data.upgrade)) {
             this.current = this.purchasedItem;
+            this.hasUpgrade = true;
             return this.purchasedItem.update(gui, time, current);
         } else {
             this.current = this.unpurchasedItem;
+            this.hasUpgrade = false;
             return this.unpurchasedItem.update(gui, time, current);
         }
     }

@@ -44,8 +44,4 @@ public abstract class ClickHandlerBase<TData> implements GuiItem, ShopInteractor
     }
 
     public abstract int fixedSlot();
-
-    @Override
-    public void tick(long time) {
-    }
 }
