@@ -1,6 +1,7 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.InventoryType;
@@ -25,13 +26,13 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
 
     @FactoryMethod
     public OpenGuiInteractor(@NotNull Data data, @NotNull SlotDistributor slotDistributor,
-        @NotNull @Child("guiItems") List<ClickHandlerBase<?>> unfixedItems) {
+        @NotNull @Child("guiItems") List<ClickHandlerBase<?>> guiItems) {
         super(data);
         this.slotDistributor = Objects.requireNonNull(slotDistributor);
 
         List<ClickHandlerBase<?>> unfixed = new ArrayList<>();
         List<ClickHandlerBase<?>> fixed = new ArrayList<>();
-        for (ClickHandlerBase<?> item : unfixedItems) {
+        for (ClickHandlerBase<?> item : guiItems) {
             if (item.fixedSlot() == -1) unfixed.add(item);
             else fixed.add(item);
         }
@@ -53,7 +54,9 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     }
 
     private Gui buildGui(Player player) {
-        Gui gui = Gui.builder(data.inventoryType, slotDistributor, player).withItems(unfixedItems)
+        Gui gui = Gui.builder(data.inventoryType, slotDistributor, player)
+            .withItems(unfixedItems)
+            .setDynamic(data.dynamic)
             .withTitle(data.title).build();
 
         for (ClickHandlerBase<?> fixed : fixedItems) {
@@ -71,9 +74,15 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
     }
 
     @DataObject
+    @Default("""
+        {
+          dynamic=false
+        }
+        """)
     public record Data(
         @NotNull Component title,
-        @NotNull InventoryType inventoryType) {
+        @NotNull InventoryType inventoryType,
+        boolean dynamic) {
 
     }
 }
