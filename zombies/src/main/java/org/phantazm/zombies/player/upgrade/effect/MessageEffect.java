@@ -1,6 +1,7 @@
 package org.phantazm.zombies.player.upgrade.effect;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -46,6 +47,11 @@ public class MessageEffect implements UpgradeEffectComponent {
     }
 
     @DataObject
+    @Default("""
+        {
+          selector='{type=zombies.upgrade.selector.self}'
+        }
+        """)
     public record Data(@NotNull Component message) {
 
     }
