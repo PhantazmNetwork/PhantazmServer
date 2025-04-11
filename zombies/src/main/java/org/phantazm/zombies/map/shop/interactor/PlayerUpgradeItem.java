@@ -42,10 +42,10 @@ public class PlayerUpgradeItem implements UpdatingItem {
     @Override
     public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current) {
         UpdatingItem thisCurrent = this.current;
-        return thisCurrent == null || thisCurrent.hasUpdate(gui, time, current) || hasUpgrade(gui);
+        return thisCurrent == null || thisCurrent.hasUpdate(gui, time, current) || upgradeChanged(gui);
     }
 
-    private boolean hasUpgrade(Gui gui) {
+    private boolean upgradeChanged(Gui gui) {
         Player owner = gui.getOwner();
         PlayerUpgradeHandler upgradeHandler = sceneSupplier.get().upgradeHandler(owner.getUuid());
 

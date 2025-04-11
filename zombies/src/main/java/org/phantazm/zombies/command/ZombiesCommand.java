@@ -30,6 +30,7 @@ public class ZombiesCommand extends Command {
         addSubcommand(new RoundCommand());
         addSubcommand(new KillAllCommand());
         addSubcommand(new GodmodeCommand());
+        addSubcommand(new TestCommand());
         addSubcommand(new AmmoRefillCommand());
         addSubcommand(new FlagToggleCommand(keyParser));
         addSubcommand(new ZombiesRejoinCommand(joiner));
