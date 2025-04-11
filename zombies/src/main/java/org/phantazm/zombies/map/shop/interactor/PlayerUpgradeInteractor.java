@@ -22,10 +22,10 @@ public class PlayerUpgradeInteractor implements ShopInteractor {
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         ZombiesScene scene = interaction.player().getScene();
         PlayerUpgradeHandler handler = scene.upgradeHandler(interaction.player().getUUID());
-        return handler.activateUpgrade(data.equipmentKey);
+        return handler.activateUpgrade(data.upgrade);
     }
 
     @DataObject
-    public record Data(@NotNull Key equipmentKey) {
+    public record Data(@NotNull Key upgrade) {
     }
 }

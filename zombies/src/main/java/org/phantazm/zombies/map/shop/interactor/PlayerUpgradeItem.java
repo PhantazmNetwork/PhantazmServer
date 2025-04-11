@@ -18,17 +18,19 @@ public class PlayerUpgradeItem implements UpdatingItem {
     private final Data data;
     private final UpdatingItem purchasedItem;
     private final UpdatingItem unpurchasedItem;
-    private final Supplier<? extends ZombiesScene> sceneSupplier;
+    private final Supplier<ZombiesScene> sceneSupplier;
 
     private UpdatingItem current;
 
     @FactoryMethod
-    public PlayerUpgradeItem(@NotNull Data data, @NotNull @Child("purchased") UpdatingItem purchasedItem,
-        @NotNull @Child("unpurchased") UpdatingItem unpurchasedItem, @NotNull Supplier<? extends ZombiesScene> sceneSupplier) {
+    public PlayerUpgradeItem(@NotNull Data data,
+        @NotNull Supplier<ZombiesScene> sceneSupplier,
+        @NotNull @Child("purchased") UpdatingItem purchasedItem,
+        @NotNull @Child("unpurchased") UpdatingItem unpurchasedItem) {
         this.data = data;
+        this.sceneSupplier = sceneSupplier;
         this.purchasedItem = purchasedItem;
         this.unpurchasedItem = unpurchasedItem;
-        this.sceneSupplier = sceneSupplier;
     }
 
     @Override
