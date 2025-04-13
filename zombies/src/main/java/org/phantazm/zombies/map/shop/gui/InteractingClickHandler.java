@@ -64,6 +64,11 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     }
 
     @Override
+    public int page() {
+        return data.page;
+    }
+
+    @Override
     public void tick(@NotNull Gui gui, long time) {
         if (updatingItem.hasUpdate(gui, time, itemStack)) {
             itemStack = updatingItem.update(gui, time, itemStack);
@@ -74,6 +79,11 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     @Override
     public void tick(long time) {
         clickInteractor.tick(time);
+    }
+
+    @Override
+    public @NotNull SwitchDirection pageDirection() {
+        return data.switchDirection;
     }
 
     @Override
@@ -90,7 +100,9 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     @Default("""
         {
           closeOnInteract=true,
-          fixedSlot=-1
+          fixedSlot=-1,
+          page=0,
+          switchDirection='NONE'
         }
         """)
     @DataObject
@@ -98,6 +110,8 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
         @NotNull Set<ClickType> clickTypes,
         boolean blacklist,
         boolean closeOnInteract,
-        int fixedSlot) {
+        int fixedSlot,
+        int page,
+        @NotNull SwitchDirection switchDirection) {
     }
 }

@@ -13,6 +13,12 @@ import java.util.Map;
 import java.util.Objects;
 
 public abstract class ClickHandlerBase<TData> implements GuiItem, ShopInteractor {
+    public enum SwitchDirection {
+        NONE,
+        NEXT,
+        PREV
+    }
+
     protected final TData data;
     protected final Map<PlayerView, ZombiesPlayer> playerMap;
 
@@ -21,6 +27,14 @@ public abstract class ClickHandlerBase<TData> implements GuiItem, ShopInteractor
     public ClickHandlerBase(@NotNull TData data, @NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
         this.data = Objects.requireNonNull(data);
         this.playerMap = Objects.requireNonNull(playerMap);
+    }
+
+    public final TData data() {
+        return data;
+    }
+
+    public final @NotNull Map<PlayerView, ZombiesPlayer> playerMap() {
+        return playerMap;
     }
 
     @Override
@@ -44,4 +58,10 @@ public abstract class ClickHandlerBase<TData> implements GuiItem, ShopInteractor
     }
 
     public abstract int fixedSlot();
+
+    public abstract int page();
+
+    public @NotNull SwitchDirection pageDirection() {
+        return SwitchDirection.NONE;
+    }
 }
