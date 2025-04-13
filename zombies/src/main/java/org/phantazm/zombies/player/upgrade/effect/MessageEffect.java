@@ -49,7 +49,7 @@ public class MessageEffect implements UpgradeEffectComponent {
     @DataObject
     @Default("""
         {
-          selector='{type=zombies.upgrade.selector.self}'
+          selector={type='zombies.upgrade.selector.self'}
         }
         """)
     public record Data(@NotNull Component message) {

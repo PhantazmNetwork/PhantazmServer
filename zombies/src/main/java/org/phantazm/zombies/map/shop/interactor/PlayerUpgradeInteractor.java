@@ -2,7 +2,9 @@ package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
@@ -60,7 +62,13 @@ public class PlayerUpgradeInteractor implements ShopInteractor {
             return false;
         }
 
-        handler.activateUpgrade(data.upgrade);
+        if (data.isSynergy) {
+            ZombiesTagUtils.sceneLocalTags(interaction.player()).setTag(Tag.Boolean(data.upgrade.value()), true);
+            scene.upgradeActivator().refresh(interaction.player());
+        } else {
+            handler.activateUpgrade(data.upgrade);
+        }
+
         ShopInteractor.handle(eligible, interaction);
         return true;
     }
@@ -68,11 +76,13 @@ public class PlayerUpgradeInteractor implements ShopInteractor {
     @DataObject
     @Default("""
         {
-          modifierType='coin_spend.shop'
+          modifierType='coin_spend.shop',
+          isSynergy=false
         }
         """)
     public record Data(@NotNull Key upgrade,
         int cost,
-        @NotNull Key modifierType) {
+        @NotNull Key modifierType,
+        boolean isSynergy) {
     }
 }

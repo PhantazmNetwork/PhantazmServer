@@ -57,7 +57,7 @@ public class SoundEffect implements UpgradeEffectComponent {
     @DataObject
     @Default("""
         {
-          selector='{type=zombies.upgrade.selector.self}',
+          selector={type='zombies.upgrade.selector.self'},
           broadcast=false
         }
         """)
