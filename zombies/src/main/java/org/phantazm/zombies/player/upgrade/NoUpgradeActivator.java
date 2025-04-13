@@ -4,14 +4,12 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
-
-import java.util.Optional;
-import java.util.Set;
 
 @Model("zombies.upgrade.activator.none")
 @Cache
@@ -41,17 +39,12 @@ public class NoUpgradeActivator implements UpgradeActivatorComponent {
     }
 
     @Override
-    public @NotNull Optional<Key> nextUpgrade(@NotNull Key group, @Nullable Key key) {
-        return Optional.empty();
-    }
-
-    @Override
-    public @NotNull Optional<Key> highestUpgrade(@NotNull Key group, @NotNull ZombiesPlayer zombiesPlayer) {
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean hasRequirements(@NotNull Key upgrade, @NotNull Set<Key> activeUpgrades, boolean isSynergy) {
+    public boolean mayPurchase(@NotNull Key upgrade, @NotNull TagHandler handler, boolean isSynergy) {
         return true;
+    }
+
+    @Override
+    public @NotNull Tag<Boolean> purchaseTag(@NotNull Key upgrade) {
+        return Tag.Boolean(upgrade.value()).defaultValue(false);
     }
 }

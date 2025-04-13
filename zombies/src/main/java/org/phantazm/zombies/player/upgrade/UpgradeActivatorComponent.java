@@ -1,19 +1,14 @@
 package org.phantazm.zombies.player.upgrade;
 
 import net.kyori.adventure.key.Key;
+import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.DualComponent;
-import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.Optional;
-import java.util.Set;
-
 public interface UpgradeActivatorComponent extends DualComponent<ZombiesScene, UpgradeActivator> {
-    @NotNull Optional<Key> nextUpgrade(@NotNull Key group, @Nullable Key key);
+    boolean mayPurchase(@NotNull Key upgrade, @NotNull TagHandler handler, boolean isSynergy);
 
-    @NotNull Optional<Key> highestUpgrade(@NotNull Key group, @NotNull ZombiesPlayer zombiesPlayer);
-
-    boolean hasRequirements(@NotNull Key upgrade, @NotNull Set<Key> activeUpgrades, boolean isSynergy);
+    @NotNull Tag<Boolean> purchaseTag(@NotNull Key upgrade);
 }

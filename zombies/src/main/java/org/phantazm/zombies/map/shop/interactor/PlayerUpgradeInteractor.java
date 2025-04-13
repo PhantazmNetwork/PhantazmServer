@@ -3,13 +3,14 @@ package org.phantazm.zombies.map.shop.interactor;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.coin.PlayerCoins;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
-import org.phantazm.zombies.player.upgrade.PlayerUpgradeHandler;
+import org.phantazm.zombies.player.upgrade.UpgradeActivatorComponent;
 import org.phantazm.zombies.scene2.ZombiesScene;
 import net.kyori.adventure.key.Key;
 
@@ -40,16 +41,17 @@ public class PlayerUpgradeInteractor implements ShopInteractor {
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
         ZombiesScene scene = interaction.player().getScene();
-        PlayerUpgradeHandler handler = scene.upgradeHandler(interaction.player().getUUID());
+        TagHandler localTags = ZombiesTagUtils.sceneLocalTags(interaction.player());
+        UpgradeActivatorComponent activatorComponent = scene.upgradeActivatorComponent();
 
-        if (!scene.upgradeActivatorComponent().hasRequirements(data.upgrade, handler.activeUpgradeKeys(), data.isSynergy)) {
+        Tag<Boolean> purchaseTag = activatorComponent.purchaseTag(data.upgrade);
+
+        if (!activatorComponent.mayPurchase(data.upgrade, localTags, data.isSynergy)) {
             ShopInteractor.handle(notEligible, interaction);
             return false;
         }
 
-        if (handler.isUpgradeActive(data.upgrade) ||
-            (data.isSynergy && ZombiesTagUtils.sceneLocalTags(interaction.player())
-                .getTag(Tag.Boolean(data.upgrade.value() + "_purchased").defaultValue(false)))) {
+        if (localTags.getTag(purchaseTag)) {
             ShopInteractor.handle(alreadyPurchased, interaction);
             return false;
         }
@@ -64,12 +66,8 @@ public class PlayerUpgradeInteractor implements ShopInteractor {
             return false;
         }
 
-        if (data.isSynergy) {
-            ZombiesTagUtils.sceneLocalTags(interaction.player()).setTag(Tag.Boolean(data.upgrade.value() + "_purchased"), true);
-            scene.upgradeActivator().refresh(interaction.player());
-        } else {
-            handler.activateUpgrade(data.upgrade);
-        }
+        localTags.setTag(purchaseTag, true);
+        scene.upgradeActivator().refresh(interaction.player());
 
         ShopInteractor.handle(eligible, interaction);
         return true;

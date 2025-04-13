@@ -8,8 +8,8 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.ints.*;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.equipment.Equipment;
 import org.phantazm.core.event.equipment.EquipmentPostAddEvent;
@@ -35,46 +35,16 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
 
     @Override
     public @NotNull UpgradeActivator apply(@NotNull InjectionStore injectionStore, @NotNull ZombiesScene zombiesScene) {
-        return new Internal(zombiesScene, data);
+        return new Internal(zombiesScene, data, this);
     }
 
     @Override
-    public @NotNull Optional<Key> nextUpgrade(@NotNull Key group, @Nullable Key key) {
-        List<Key> list = data.upgradeGroups.get(group);
-        if (list == null || list.isEmpty()) return Optional.empty();
-
-        if (key == null) return Optional.of(list.get(0));
-
-        int index = list.indexOf(key);
-        if (index < 0 || index >= list.size() - 1) return Optional.empty();
-
-        return Optional.of(list.get(index + 1));
-    }
-
-    @Override
-    public @NotNull Optional<Key> highestUpgrade(@NotNull Key group, @NotNull ZombiesPlayer zombiesPlayer) {
-        List<Key> list = data.upgradeGroups.get(group);
-        if (list == null || list.isEmpty()) return Optional.empty();
-
-        ZombiesScene scene = zombiesPlayer.getScene();
-        PlayerUpgradeHandler handler = scene.upgradeHandler(zombiesPlayer.getUUID());
-        if (handler == null) return Optional.empty();
-
-        for (int i = list.size() - 1; i >= 0; i--) {
-            Key key = list.get(i);
-            if (handler.isValidUpgrade(key)) return Optional.of(key);
-        }
-
-        return Optional.empty();
-    }
-
-    @Override
-    public boolean hasRequirements(@NotNull Key upgrade, @NotNull Set<Key> activeUpgrades, boolean isSynergy) {
+    public boolean mayPurchase(@NotNull Key upgrade, @NotNull TagHandler handler, boolean isSynergy) {
         if (isSynergy) {
             for (Map.Entry<SynergyKey, Synergy> entry : data.synergies.entrySet()) {
                 Synergy value = entry.getValue();
                 if (value.synergy.equals(upgrade)) {
-                    return activeUpgrades.contains(value.firstUpgrade) && activeUpgrades.contains(value.secondUpgrade);
+                    return handler.getTag(purchaseTag(value.firstUpgrade)) && handler.getTag(purchaseTag(value.secondUpgrade));
                 }
             }
 
@@ -87,7 +57,7 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
             if (idx == -1) continue;
 
             for (int i = idx - 1; i >= 0; i--) {
-                if (!activeUpgrades.contains(keyList.get(i))) return false;
+                if (!handler.getTag(purchaseTag(keyList.get(i)))) return false;
             }
 
             return true;
@@ -96,21 +66,36 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
         return true;
     }
 
+    @Override
+    public @NotNull Tag<Boolean> purchaseTag(@NotNull Key upgrade) {
+        return Tag.Boolean(upgrade.value() + data.purchasedTagSuffix).defaultValue(false);
+    }
+
     private static class Internal implements UpgradeActivator {
         private final ZombiesScene zombiesScene;
         private final Data data;
-        private final Set<Key> allSynergies;
+        private final UpgradeActivatorComponent component;
 
-        private Internal(ZombiesScene zombiesScene, Data data) {
+        private final Set<Key> allSynergies;
+        private final Set<Key> allTiers;
+
+        private Internal(ZombiesScene zombiesScene, Data data, UpgradeActivatorComponent component) {
             this.zombiesScene = zombiesScene;
             this.data = data;
+            this.component = component;
 
             Set<Key> allSynergies = new HashSet<>(data.synergies.size());
             for (Synergy synergy : data.synergies.values()) {
                 allSynergies.add(synergy.synergy);
             }
 
+            Set<Key> allTiers = new HashSet<>();
+            for (Map.Entry<Key, List<Key>> entry : data.upgradeGroups.entrySet()) {
+                allTiers.addAll(entry.getValue());
+            }
+
             this.allSynergies = Set.copyOf(allSynergies);
+            this.allTiers = Set.copyOf(allTiers);
         }
 
         @Override
@@ -135,39 +120,47 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
             slots.sort(IntComparators.NATURAL_COMPARATOR);
 
             Set<Key> activeSynergies = new HashSet<>();
+            Set<Key> activeTiers = new HashSet<>();
+
+            TagHandler localTags = ZombiesTagUtils.sceneLocalTags(zombiesPlayer);
             for (int i = 0; i < slots.size() - 1; i++) {
                 InventoryObject first = access.profile().getInventoryObjectSafe(slots.getInt(i));
                 if (!(first instanceof Equipment firstEquipment)) {
                     continue;
                 }
 
+                List<Key> tiers = data.upgradeGroups.get(firstEquipment.key());
+                if (tiers == null) continue;
+
+                for (Key tier : tiers) {
+                    Tag<Boolean> purchasedTag = component.purchaseTag(tier);
+                    if (localTags.getTag(purchasedTag)) activeTiers.add(tier);
+                }
+
                 for (int j = i + 1; j < slots.size(); j++) {
                     InventoryObject second = access.profile().getInventoryObjectSafe(slots.getInt(j));
-                    if (!(second instanceof Equipment secondEquipment)) {
-                        continue;
-                    }
+                    if (!(second instanceof Equipment secondEquipment)) continue;
 
                     Synergy synergy = data.synergies.get(new SynergyKey(firstEquipment.key(), secondEquipment.key()));
-                    if (synergy == null) {
-                        continue;
-                    }
+                    if (synergy == null) continue;
 
-                    if (synergy.requiredTag == null || ZombiesTagUtils.sceneLocalTags(zombiesPlayer)
-                        .getTag(Tag.Boolean(synergy.requiredTag).defaultValue(false))) {
+                    Tag<Boolean> purchasedTag = component.purchaseTag(synergy.synergy);
+                    if (localTags.getTag(purchasedTag.defaultValue(false))) {
                         activeSynergies.add(synergy.synergy);
                     }
                 }
             }
 
             for (Key otherSynergy : allSynergies) {
-                if (!activeSynergies.contains(otherSynergy)) {
-                    upgradeHandler.deactivateUpgrade(otherSynergy);
-                }
+                if (!activeSynergies.contains(otherSynergy)) upgradeHandler.deactivateUpgrade(otherSynergy);
             }
 
-            for (Key active : activeSynergies) {
-                upgradeHandler.activateUpgrade(active);
+            for (Key otherTier : allTiers) {
+                if (!activeTiers.contains(otherTier)) upgradeHandler.deactivateUpgrade(otherTier);
             }
+
+            for (Key active : activeSynergies) upgradeHandler.activateUpgrade(active);
+            for (Key active : activeTiers) upgradeHandler.activateUpgrade(active);
         }
 
         @Override
@@ -204,21 +197,21 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
         }
     }
 
-    @Default("""
-        {
-          requiredTag=null
-        }
-        """)
     public record Synergy(@NotNull Key synergy,
-        String requiredTag,
         @NotNull Key firstUpgrade,
         @NotNull Key secondUpgrade) {
     }
 
     @DataObject
+    @Default("""
+        {
+          purchasedTagSuffix='_purchased'
+        }
+        """)
     public record Data(@NotNull Key inventoryGroup,
         @NotNull Map<Key, List<Key>> upgradeGroups,
-        @NotNull Map<SynergyKey, Synergy> synergies) {
+        @NotNull Map<SynergyKey, Synergy> synergies,
+        @NotNull String purchasedTagSuffix) {
 
     }
 }
