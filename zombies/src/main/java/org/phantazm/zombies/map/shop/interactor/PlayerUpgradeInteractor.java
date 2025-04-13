@@ -42,12 +42,14 @@ public class PlayerUpgradeInteractor implements ShopInteractor {
         ZombiesScene scene = interaction.player().getScene();
         PlayerUpgradeHandler handler = scene.upgradeHandler(interaction.player().getUUID());
 
-        if (!scene.upgradeActivatorComponent().hasRequirements(data.upgrade, handler.activeUpgradeKeys())) {
+        if (!scene.upgradeActivatorComponent().hasRequirements(data.upgrade, handler.activeUpgradeKeys(), data.isSynergy)) {
             ShopInteractor.handle(notEligible, interaction);
             return false;
         }
 
-        if (handler.isUpgradeActive(data.upgrade)) {
+        if (handler.isUpgradeActive(data.upgrade) ||
+            (data.isSynergy && ZombiesTagUtils.sceneLocalTags(interaction.player())
+                .getTag(Tag.Boolean(data.upgrade.value() + "_purchased").defaultValue(false)))) {
             ShopInteractor.handle(alreadyPurchased, interaction);
             return false;
         }
@@ -63,7 +65,7 @@ public class PlayerUpgradeInteractor implements ShopInteractor {
         }
 
         if (data.isSynergy) {
-            ZombiesTagUtils.sceneLocalTags(interaction.player()).setTag(Tag.Boolean(data.upgrade.value()), true);
+            ZombiesTagUtils.sceneLocalTags(interaction.player()).setTag(Tag.Boolean(data.upgrade.value() + "_purchased"), true);
             scene.upgradeActivator().refresh(interaction.player());
         } else {
             handler.activateUpgrade(data.upgrade);

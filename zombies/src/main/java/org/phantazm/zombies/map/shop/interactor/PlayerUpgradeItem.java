@@ -1,12 +1,15 @@
 package org.phantazm.zombies.map.shop.interactor;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.gui.Gui;
 import org.phantazm.core.item.UpdatingItem;
+import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.player.upgrade.PlayerUpgradeHandler;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
@@ -62,9 +65,11 @@ public class PlayerUpgradeItem implements UpdatingItem {
     private UpgradeState computeState(Gui gui) {
         PlayerUpgradeHandler handler = handlerFromGui(gui);
 
-        if (handler.isUpgradeActive(data.upgrade)) {
+        if (handler.isUpgradeActive(data.upgrade) ||
+            (data.isSynergy && ZombiesTagUtils.sceneLocalTags(sceneSupplier.get(), gui.getOwner())
+                .getTag(Tag.Boolean(data.upgrade.value() + "_purchased").defaultValue(false)))) {
             return UpgradeState.Purchased;
-        } else if (handler.zombiesPlayer().getScene().upgradeActivatorComponent().hasRequirements(data.upgrade, handler.activeUpgradeKeys())) {
+        } else if (handler.zombiesPlayer().getScene().upgradeActivatorComponent().hasRequirements(data.upgrade, handler.activeUpgradeKeys(), data.isSynergy)) {
             return UpgradeState.Unpurchased;
         } else {
             return UpgradeState.Ineligible;
@@ -104,7 +109,13 @@ public class PlayerUpgradeItem implements UpdatingItem {
     }
 
     @DataObject
-    public record Data(@NotNull Key upgrade) {
+    @Default("""
+        {
+          isSynergy=false
+        }
+        """)
+    public record Data(@NotNull Key upgrade,
+        boolean isSynergy) {
 
     }
 }

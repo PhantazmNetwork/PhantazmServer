@@ -69,7 +69,18 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
     }
 
     @Override
-    public boolean hasRequirements(@NotNull Key upgrade, @NotNull Set<Key> activeUpgrades) {
+    public boolean hasRequirements(@NotNull Key upgrade, @NotNull Set<Key> activeUpgrades, boolean isSynergy) {
+        if (isSynergy) {
+            for (Map.Entry<SynergyKey, Synergy> entry : data.synergies.entrySet()) {
+                Synergy value = entry.getValue();
+                if (value.synergy.equals(upgrade)) {
+                    return activeUpgrades.contains(value.firstUpgrade) && activeUpgrades.contains(value.secondUpgrade);
+                }
+            }
+
+            return true;
+        }
+
         for (Map.Entry<Key, List<Key>> entry : data.upgradeGroups.entrySet()) {
             List<Key> keyList = entry.getValue();
             int idx = keyList.indexOf(upgrade);
@@ -199,7 +210,9 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
         }
         """)
     public record Synergy(@NotNull Key synergy,
-        String requiredTag) {
+        String requiredTag,
+        @NotNull Key firstUpgrade,
+        @NotNull Key secondUpgrade) {
     }
 
     @DataObject

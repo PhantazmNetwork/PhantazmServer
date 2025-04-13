@@ -15,5 +15,5 @@ public interface UpgradeActivatorComponent extends DualComponent<ZombiesScene, U
 
     @NotNull Optional<Key> highestUpgrade(@NotNull Key group, @NotNull ZombiesPlayer zombiesPlayer);
 
-    boolean hasRequirements(@NotNull Key upgrade, @NotNull Set<Key> activeUpgrades);
+    boolean hasRequirements(@NotNull Key upgrade, @NotNull Set<Key> activeUpgrades, boolean isSynergy);
 }

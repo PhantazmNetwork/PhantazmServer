@@ -51,7 +51,7 @@ public class NoUpgradeActivator implements UpgradeActivatorComponent {
     }
 
     @Override
-    public boolean hasRequirements(@NotNull Key upgrade, @NotNull Set<Key> activeUpgrades) {
+    public boolean hasRequirements(@NotNull Key upgrade, @NotNull Set<Key> activeUpgrades, boolean isSynergy) {
         return true;
     }
 }

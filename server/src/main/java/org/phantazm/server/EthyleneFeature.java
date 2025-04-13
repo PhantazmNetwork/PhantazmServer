@@ -56,7 +56,7 @@ public final class EthyleneFeature {
 
     static void initialize(@NotNull KeyParser keyParser) {
         EthyleneFeature.keyParser = Objects.requireNonNull(keyParser);
-        yamlCodec = new YamlCodec(() -> new Load(LoadSettings.builder().build()),
+        yamlCodec = new YamlCodec(() -> new Load(LoadSettings.builder().setMaxAliasesForCollections(Integer.MAX_VALUE).build()),
             () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
         tomlCodec = new TomlCodec();
 
