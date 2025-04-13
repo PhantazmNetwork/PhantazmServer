@@ -11,6 +11,7 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Model("zombies.upgrade.activator.none")
 @Cache
@@ -47,5 +48,10 @@ public class NoUpgradeActivator implements UpgradeActivatorComponent {
     @Override
     public @NotNull Optional<Key> highestUpgrade(@NotNull Key group, @NotNull ZombiesPlayer zombiesPlayer) {
         return Optional.empty();
+    }
+
+    @Override
+    public boolean hasRequirements(@NotNull Key upgrade, @NotNull Set<Key> activeUpgrades) {
+        return true;
     }
 }

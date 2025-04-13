@@ -68,6 +68,23 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
         return Optional.empty();
     }
 
+    @Override
+    public boolean hasRequirements(@NotNull Key upgrade, @NotNull Set<Key> activeUpgrades) {
+        for (Map.Entry<Key, List<Key>> entry : data.upgradeGroups.entrySet()) {
+            List<Key> keyList = entry.getValue();
+            int idx = keyList.indexOf(upgrade);
+            if (idx == -1) continue;
+
+            for (int i = idx - 1; i >= 0; i--) {
+                if (!activeUpgrades.contains(keyList.get(i))) return false;
+            }
+
+            return true;
+        }
+
+        return true;
+    }
+
     private static class Internal implements UpgradeActivator {
         private final ZombiesScene zombiesScene;
         private final Data data;
@@ -98,7 +115,7 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
             }
 
             InventoryAccess access = zombiesPlayer.module().getInventoryAccessRegistry().getAccess(InventoryKeys.ALIVE_ACCESS);
-            InventoryObjectGroup group = access.groups().get(data.group);
+            InventoryObjectGroup group = access.groups().get(data.inventoryGroup);
             if (group == null) {
                 return;
             }
@@ -186,7 +203,7 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
     }
 
     @DataObject
-    public record Data(@NotNull Key group,
+    public record Data(@NotNull Key inventoryGroup,
         @NotNull Map<Key, List<Key>> upgradeGroups,
         @NotNull Map<SynergyKey, Synergy> synergies) {
 

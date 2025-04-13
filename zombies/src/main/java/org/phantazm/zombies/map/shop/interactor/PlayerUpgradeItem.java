@@ -16,20 +16,29 @@ import java.util.function.Supplier;
 @Cache(false)
 public class PlayerUpgradeItem implements UpdatingItem {
     private final Data data;
+    private final UpdatingItem ineligibleItem;
     private final UpdatingItem purchasedItem;
     private final UpdatingItem unpurchasedItem;
     private final Supplier<ZombiesScene> sceneSupplier;
 
     private UpdatingItem current;
-    private boolean hasUpgrade;
+    private UpgradeState lastState;
+
+    private enum UpgradeState {
+        Ineligible,
+        Unpurchased,
+        Purchased
+    }
 
     @FactoryMethod
     public PlayerUpgradeItem(@NotNull Data data,
         @NotNull Supplier<ZombiesScene> sceneSupplier,
+        @NotNull @Child("ineligible") UpdatingItem ineligibleItem,
         @NotNull @Child("purchased") UpdatingItem purchasedItem,
         @NotNull @Child("unpurchased") UpdatingItem unpurchasedItem) {
         this.data = data;
         this.sceneSupplier = sceneSupplier;
+        this.ineligibleItem = ineligibleItem;
         this.purchasedItem = purchasedItem;
         this.unpurchasedItem = unpurchasedItem;
     }
@@ -45,26 +54,45 @@ public class PlayerUpgradeItem implements UpdatingItem {
         return thisCurrent == null || thisCurrent.hasUpdate(gui, time, current) || upgradeChanged(gui);
     }
 
-    private boolean upgradeChanged(Gui gui) {
+    private PlayerUpgradeHandler handlerFromGui(Gui gui) {
         Player owner = gui.getOwner();
-        PlayerUpgradeHandler upgradeHandler = sceneSupplier.get().upgradeHandler(owner.getUuid());
+        return sceneSupplier.get().upgradeHandler(owner.getUuid());
+    }
 
-        return upgradeHandler.isUpgradeActive(data.upgrade) != this.hasUpgrade;
+    private UpgradeState computeState(Gui gui) {
+        PlayerUpgradeHandler handler = handlerFromGui(gui);
+
+        if (handler.isUpgradeActive(data.upgrade)) {
+            return UpgradeState.Purchased;
+        } else if (handler.zombiesPlayer().getScene().upgradeActivatorComponent().hasRequirements(data.upgrade, handler.activeUpgradeKeys())) {
+            return UpgradeState.Unpurchased;
+        } else {
+            return UpgradeState.Ineligible;
+        }
+    }
+
+    private boolean upgradeChanged(Gui gui) {
+        return this.lastState != computeState(gui);
     }
 
     private ItemStack computeItemStack(Gui gui, long time, ItemStack current) {
-        Player owner = gui.getOwner();
-        PlayerUpgradeHandler upgradeHandler = sceneSupplier.get().upgradeHandler(owner.getUuid());
+        UpgradeState currentState = computeState(gui);
+        this.lastState = currentState;
 
-        if (upgradeHandler.isUpgradeActive(data.upgrade)) {
-            this.current = this.purchasedItem;
-            this.hasUpgrade = true;
-            return this.purchasedItem.update(gui, time, current);
-        } else {
-            this.current = this.unpurchasedItem;
-            this.hasUpgrade = false;
-            return this.unpurchasedItem.update(gui, time, current);
-        }
+        return switch (currentState) {
+            case Ineligible -> {
+                this.current = ineligibleItem;
+                yield ineligibleItem.update(gui, time, current);
+            }
+            case Unpurchased -> {
+                this.current = unpurchasedItem;
+                yield unpurchasedItem.update(gui, time, current);
+            }
+            case Purchased -> {
+                this.current = purchasedItem;
+                yield purchasedItem.update(gui, time, current);
+            }
+        };
     }
 
     @Override

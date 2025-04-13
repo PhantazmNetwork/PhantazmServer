@@ -91,6 +91,10 @@ public class PlayerUpgradeHandler implements Tickable {
         return upgrades.entrySet().stream().filter(entry -> entry.getValue().isActivated()).collect(Collectors.toList());
     }
 
+    public @NotNull Set<Key> activeUpgradeKeys() {
+        return upgrades.keySet();
+    }
+
     public boolean isUpgradeActive(@NotNull Key key) {
         PlayerUpgrade upgrade = upgrades.get(key);
         return upgrade != null && upgrade.isActivated();
