@@ -2,7 +2,6 @@ package org.phantazm.server;
 
 import com.github.steanky.element.core.key.KeyParser;
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
-import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigPrimitive;
 import com.github.steanky.ethylene.core.collection.ConfigList;
@@ -30,11 +29,8 @@ import org.jglrxavpok.hephaistos.parser.SNBTParser;
 import org.phantazm.commons.Signatures;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.snakeyaml.engine.v2.api.Dump;
-import org.snakeyaml.engine.v2.api.DumpSettings;
-import org.snakeyaml.engine.v2.api.Load;
-import org.snakeyaml.engine.v2.api.LoadSettings;
-import org.snakeyaml.engine.v2.common.FlowStyle;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.StringReader;
 import java.nio.file.Path;
@@ -56,8 +52,14 @@ public final class EthyleneFeature {
 
     static void initialize(@NotNull KeyParser keyParser) {
         EthyleneFeature.keyParser = Objects.requireNonNull(keyParser);
-        yamlCodec = new YamlCodec(() -> new Load(LoadSettings.builder().setMaxAliasesForCollections(Integer.MAX_VALUE).build()),
-            () -> new Dump(DumpSettings.builder().setDefaultFlowStyle(FlowStyle.BLOCK).build()));
+        yamlCodec = new YamlCodec(() -> {
+            LoaderOptions loaderOptions = new LoaderOptions();
+            loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
+            // loaderOptions.setMergeOnCompose(true);
+
+            return new Yaml(loaderOptions);
+        });
+
         tomlCodec = new TomlCodec();
 
         mappingProcessorSource = Signatures.core(MappingProcessorSource.builder()).withCustomSignature(basicItemStack())

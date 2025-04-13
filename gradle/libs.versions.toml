@@ -62,6 +62,7 @@ reflections = { module = "org.reflections:reflections", version = "0.10.2" }
 sqlite = { module = "org.xerial:sqlite-jdbc", version = "3.42.0.0" }
 
 snakeyaml = { module = "org.snakeyaml:snakeyaml-engine", version = "2.3" }
+snakeyaml-original = { module = "org.yaml:snakeyaml", version = "2.4" }
 
 toml = { module = "com.electronwill.night-config:toml", version = "3.6.5" }
 

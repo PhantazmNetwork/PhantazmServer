@@ -24,7 +24,7 @@ dependencies {
     implementation(libs.ethylene.json)
     implementation(libs.ethylene.mapper)
     implementation(libs.ethylene.toml)
-    implementation(libs.ethylene.yaml)
+    implementation(libs.snakeyaml.original)
     implementation(libs.gson)
     implementation(libs.hikariCP)
     implementation(libs.proxima.core)

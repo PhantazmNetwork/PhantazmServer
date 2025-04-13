@@ -1,7 +1,6 @@
 package org.phantazm.server;
 
 import com.github.steanky.ethylene.codec.toml.TomlCodec;
-import com.github.steanky.ethylene.codec.yaml.YamlCodec;
 import com.github.steanky.ethylene.core.BasicConfigHandler;
 import com.github.steanky.ethylene.core.ConfigCodec;
 import com.github.steanky.ethylene.core.ConfigHandler;
