@@ -105,29 +105,24 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
 
         private void refresh0(ZombiesPlayer zombiesPlayer) {
             UUID uuid = zombiesPlayer.getUUID();
+
             PlayerUpgradeHandler upgradeHandler = zombiesScene.upgradeHandler(uuid);
-            if (upgradeHandler == null) {
-                return;
-            }
+            if (upgradeHandler == null) return;
 
             InventoryAccess access = zombiesPlayer.module().getInventoryAccessRegistry().getAccess(InventoryKeys.ALIVE_ACCESS);
             InventoryObjectGroup group = access.groups().get(data.inventoryGroup);
-            if (group == null) {
-                return;
-            }
+            if (group == null) return;
 
             IntList slots = new IntArrayList(group.getSlots());
             slots.sort(IntComparators.NATURAL_COMPARATOR);
 
-            Set<Key> activeSynergies = new HashSet<>();
+            Set<Key> activeSynergies = new HashSet<>(3);
             Set<Key> activeTiers = new HashSet<>();
 
             TagHandler localTags = ZombiesTagUtils.sceneLocalTags(zombiesPlayer);
-            for (int i = 0; i < slots.size() - 1; i++) {
+            for (int i = 0; i < slots.size(); i++) {
                 InventoryObject first = access.profile().getInventoryObjectSafe(slots.getInt(i));
-                if (!(first instanceof Equipment firstEquipment)) {
-                    continue;
-                }
+                if (!(first instanceof Equipment firstEquipment)) continue;
 
                 List<Key> tiers = data.upgradeGroups.get(firstEquipment.key());
                 if (tiers == null) continue;
