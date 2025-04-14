@@ -31,7 +31,7 @@ public class UpgradeEquipmentInteractor implements ShopInteractor {
     @FactoryMethod
     public UpgradeEquipmentInteractor(@NotNull Data data, @NotNull @Child("upgradePath") UpgradePath upgradePath,
         @NotNull @Child("notUpgradableInteractors") List<ShopInteractor> notUpgradableInteractors,
-        @NotNull @Child("noHeld_equipmentInteractors") List<ShopInteractor> noHeldEquipmentInteractors,
+        @NotNull @Child("noHeldEquipmentInteractors") List<ShopInteractor> noHeldEquipmentInteractors,
         @NotNull @Child("noUpgradeInteractors") List<ShopInteractor> noUpgradeInteractors,
         @NotNull @Child("upgradeInteractors") List<ShopInteractor> upgradeInteractors) {
         this.data = data;
