@@ -25,8 +25,6 @@ public class PlayerUpgradeItem implements ItemUpdater {
     private final ItemUpdater unpurchasedItem;
     private final Supplier<ZombiesScene> sceneSupplier;
 
-    private int ticks;
-
     private enum UpgradeState {
         Ineligible,
         Unpurchased,
@@ -53,8 +51,7 @@ public class PlayerUpgradeItem implements ItemUpdater {
 
     @Override
     public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot) {
-        if (((ticks++) & 3) != 0) return false;
-        else return currentUpdater(gui).hasUpdate(gui, time, current, slot);
+        return currentUpdater(gui).hasUpdate(gui, time, current, slot);
     }
 
     private ItemUpdater currentUpdater(Gui gui) {
