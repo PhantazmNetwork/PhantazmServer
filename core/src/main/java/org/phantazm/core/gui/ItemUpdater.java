@@ -13,9 +13,10 @@ public interface ItemUpdater {
      * @param gui     the gui updating this item
      * @param time    the current time
      * @param current the old item stack
+     * @param slot    the GUI slot of the item that is being updated
      * @return the new item stack
      */
-    @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current);
+    @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot);
 
     /**
      * Determines if this ItemUpdater can update the item.
@@ -23,7 +24,8 @@ public interface ItemUpdater {
      * @param gui     the gui checking to see if this item needs to be updated
      * @param time    the current time
      * @param current the current {@link ItemStack}
+     * @param slot    the GUI slot of the item that is being queried for a possible update
      * @return true if this ItemUpdater has an update, false otherwise
      */
-    boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current);
+    boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot);
 }

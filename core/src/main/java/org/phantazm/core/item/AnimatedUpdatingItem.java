@@ -7,13 +7,14 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.gui.Gui;
+import org.phantazm.core.gui.ItemUpdater;
 
 import java.util.List;
 import java.util.Objects;
 
 @Model("item.updating.animated")
 @Cache(false)
-public class AnimatedUpdatingItem implements UpdatingItem {
+public class AnimatedUpdatingItem implements ItemUpdater {
     private final Data data;
 
     private long updateTicks = 0;
@@ -31,7 +32,7 @@ public class AnimatedUpdatingItem implements UpdatingItem {
     }
 
     @Override
-    public @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current) {
+    public @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot) {
         if (data.frames.isEmpty()) {
             return current;
         }
@@ -49,7 +50,7 @@ public class AnimatedUpdatingItem implements UpdatingItem {
     }
 
     @Override
-    public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current) {
+    public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot) {
         if (currentFrame == null) {
             return false;
         }
@@ -61,11 +62,6 @@ public class AnimatedUpdatingItem implements UpdatingItem {
         }
 
         return false;
-    }
-
-    @Override
-    public @NotNull ItemStack currentItem() {
-        return currentFrame.itemStack();
     }
 
     @DataObject

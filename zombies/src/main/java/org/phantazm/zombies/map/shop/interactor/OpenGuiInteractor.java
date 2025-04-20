@@ -170,7 +170,7 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
 
         Gui gui = Gui.builder(data.inventoryType, slotDistributor, player)
             .withItems(unfixed)
-            .setDynamic(true)
+            .setDynamic(data.dynamic)
             .withTitle(data.title)
             .build();
 
@@ -179,7 +179,10 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
             if (gui.canInsert(slot)) gui.insertItem(fixedItem, slot);
         }
 
-        ticking.add(gui);
+        if (data.dynamic) {
+            ticking.add(gui);
+        }
+
         return gui;
     }
 
@@ -189,16 +192,18 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
         for (ArrayList<ClickHandlerBase<?>> handlers : unfixedItems) ShopInteractor.tick(handlers, time);
         for (ArrayList<ClickHandlerBase<?>> handlers : fixedItems) ShopInteractor.tick(handlers, time);
 
-        // do item ticks
-        ticking.removeIf(gui -> {
-            boolean isOpened = gui.getOwner().getOpenInventory() == gui;
-            if (!isOpened) {
-                return true;
-            }
+        if (data.dynamic) {
+            // do item ticks
+            ticking.removeIf(gui -> {
+                boolean isOpened = gui.getOwner().getOpenInventory() == gui;
+                if (!isOpened) {
+                    return true;
+                }
 
-            gui.tick(time);
-            return false;
-        });
+                gui.tick(time);
+                return false;
+            });
+        }
     }
 
     @DataObject

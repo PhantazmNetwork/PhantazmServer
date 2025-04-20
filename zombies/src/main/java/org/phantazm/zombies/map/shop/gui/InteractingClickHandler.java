@@ -7,7 +7,6 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.gui.Gui;
 import org.phantazm.core.gui.ItemUpdater;
-import org.phantazm.core.item.UpdatingItem;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.map.BasicPlayerInteraction;
 import org.phantazm.zombies.map.shop.InteractionTypes;
@@ -22,15 +21,15 @@ import java.util.Set;
 @Model("zombies.map.shop.gui.click_handler.interacting")
 @Cache(false)
 public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHandler.Data> {
-    private final ItemUpdater updatingItem;
+    private final ItemUpdater itemUpdater;
     private final ShopInteractor clickInteractor;
 
     @FactoryMethod
     public InteractingClickHandler(@NotNull Data data, @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
-        @NotNull @Child("updatingItem") UpdatingItem updatingItem,
+        @NotNull @Child("updatingItem") ItemUpdater ItemUpdater,
         @NotNull @Child("clickInteractor") ShopInteractor clickInteractor) {
         super(data, playerMap);
-        this.updatingItem = Objects.requireNonNull(updatingItem);
+        this.itemUpdater = Objects.requireNonNull(ItemUpdater);
         this.clickInteractor = Objects.requireNonNull(clickInteractor);
     }
 
@@ -68,8 +67,8 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     public void itemTick(@NotNull Gui gui, long time, int slot) {
         ItemStack current = gui.getItemStack(slot);
 
-        if (updatingItem.hasUpdate(gui, time, current)) {
-            gui.setItemStack(slot, updatingItem.update(gui, time, current));
+        if (itemUpdater.hasUpdate(gui, time, current, slot)) {
+            gui.setItemStack(slot, itemUpdater.update(gui, time, current, slot));
         }
     }
 

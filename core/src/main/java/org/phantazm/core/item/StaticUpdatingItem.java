@@ -7,12 +7,13 @@ import com.github.steanky.element.core.annotation.Model;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.gui.Gui;
+import org.phantazm.core.gui.ItemUpdater;
 
 import java.util.Objects;
 
 @Model("item.updating.static")
 @Cache
-public class StaticUpdatingItem implements UpdatingItem {
+public class StaticUpdatingItem implements ItemUpdater {
     private final Data data;
 
     @FactoryMethod
@@ -21,18 +22,13 @@ public class StaticUpdatingItem implements UpdatingItem {
     }
 
     @Override
-    public @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current) {
+    public @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot) {
         return data.item;
     }
 
     @Override
-    public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current) {
+    public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot) {
         return !current.equals(data.item);
-    }
-
-    @Override
-    public @NotNull ItemStack currentItem() {
-        return data.item;
     }
 
     @DataObject

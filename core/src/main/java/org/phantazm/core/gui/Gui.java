@@ -75,6 +75,12 @@ public class Gui extends Inventory implements Tickable {
         Objects.requireNonNull(item);
         safeItemInsert(slot, item.getItemStack(), true);
 
+        // non-dynamic items might need a frame to actually calculate their item
+        // (otherwise, ticking should be done later)
+        if (!isDynamic) {
+            item.itemTick(this, 0, slot);
+        }
+
         items.put(slot, item);
         tickItems = null;
 

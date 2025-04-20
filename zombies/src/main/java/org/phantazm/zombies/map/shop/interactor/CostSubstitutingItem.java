@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.ItemStackUtils;
 import org.phantazm.core.gui.Gui;
-import org.phantazm.core.item.UpdatingItem;
+import org.phantazm.core.gui.ItemUpdater;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionModifierSource;
 
@@ -21,13 +21,12 @@ import java.util.List;
 
 @Model("item.updating.cost_substituting")
 @Cache(false)
-public class CostSubstitutingItem implements UpdatingItem {
+public class CostSubstitutingItem implements ItemUpdater {
     private static final int UPDATE_INTERVAL = 10;
 
     private final Data data;
     private final TransactionModifierSource modifierSource;
 
-    private ItemStack itemStack;
     private int ticks;
 
     private boolean hasOldCost;
@@ -37,25 +36,19 @@ public class CostSubstitutingItem implements UpdatingItem {
     public CostSubstitutingItem(@NotNull Data data, @NotNull TransactionModifierSource modifierSource) {
         this.data = data;
         this.modifierSource = modifierSource;
-        this.itemStack = computeItemStack(data.cost);
     }
 
     @Override
-    public @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current) {
+    public @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot) {
         int cost = cost();
         this.oldCost = cost;
         this.hasOldCost = true;
-        return itemStack = computeItemStack(cost);
+        return computeItemStack(cost);
     }
 
     @Override
-    public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current) {
+    public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot) {
         return (ticks++ % UPDATE_INTERVAL == 0 && (!hasOldCost || cost() != oldCost));
-    }
-
-    @Override
-    public @NotNull ItemStack currentItem() {
-        return itemStack;
     }
 
     private ItemStack computeItemStack(int cost) {

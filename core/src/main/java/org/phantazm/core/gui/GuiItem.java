@@ -137,8 +137,8 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
             return new GuiItem() {
                 @Override
                 public void itemTick(@NotNull Gui gui, long time, int slot) {
-                    if (updater != null && updater.hasUpdate(gui, time, stack)) {
-                        stack = updater.update(gui, time, stack);
+                    if (updater != null && updater.hasUpdate(gui, time, stack, slot)) {
+                        stack = updater.update(gui, time, stack, slot);
                         redraw = true;
                     }
                 }
