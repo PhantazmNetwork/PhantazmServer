@@ -4,19 +4,20 @@ import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.TitlePart;
+import com.github.steanky.vector.Vec3I;
+import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
 
-@Model("zombies.map.shop.interactor.show_title")
+@Model("zombies.map.shop.interactor.spawn_powerup")
 @Cache(false)
-public class TitleInteractor extends InteractorBase<TitleInteractor.Data> {
+public class SpawnPowerupInteractor extends InteractorBase<SpawnPowerupInteractor.Data> {
     private Shop shop;
 
     @FactoryMethod
-    public TitleInteractor(@NotNull Data data) {
+    public SpawnPowerupInteractor(@NotNull Data data) {
         super(data);
     }
 
@@ -25,12 +26,8 @@ public class TitleInteractor extends InteractorBase<TitleInteractor.Data> {
         Shop shop = this.shop;
         if (shop == null) return false;
 
-        if (data.broadcast) {
-            shop.instance().sendTitlePart(data.titlePart, data.message);
-        } else {
-            interaction.player().getPlayer().ifPresent(player -> player.sendTitlePart(data.titlePart, data.message));
-        }
-
+        Point target = shop.mapOrigin().add(data.coordinate.x(), data.coordinate.y(), data.coordinate.z());
+        interaction.player().getScene().map().powerupHandler().spawnIfExists(data.powerup, target);
         return true;
     }
 
@@ -40,8 +37,7 @@ public class TitleInteractor extends InteractorBase<TitleInteractor.Data> {
     }
 
     @DataObject
-    public record Data(@NotNull Component message,
-        boolean broadcast,
-        TitlePart<Component> titlePart) {
+    public record Data(@NotNull Vec3I coordinate,
+        @NotNull Key powerup) {
     }
 }
