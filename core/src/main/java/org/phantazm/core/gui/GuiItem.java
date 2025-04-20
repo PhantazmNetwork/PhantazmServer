@@ -50,7 +50,7 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
         DOUBLE_CLICK
     }
 
-    void tick(@NotNull Gui gui, long time);
+    void itemTick(@NotNull Gui gui, long time, int slot);
 
     /**
      * Builder for a GuiItem implementation.
@@ -136,7 +136,7 @@ public interface GuiItem extends ClickHandler, RemoveHandler, ReplaceHandler, In
         public @NotNull GuiItem build() {
             return new GuiItem() {
                 @Override
-                public void tick(@NotNull Gui gui, long time) {
+                public void itemTick(@NotNull Gui gui, long time, int slot) {
                     if (updater != null && updater.hasUpdate(gui, time, stack)) {
                         stack = updater.update(gui, time, stack);
                         redraw = true;

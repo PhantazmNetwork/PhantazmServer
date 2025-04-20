@@ -63,7 +63,7 @@ public class InteractorDelegatingItem implements MonoComponent<GuiItem> {
         }
 
         @Override
-        public void tick(@NotNull Gui gui, long time) {
+        public void itemTick(@NotNull Gui gui, long time, int slot) {
 
         }
     }

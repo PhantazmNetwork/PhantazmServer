@@ -102,8 +102,8 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
             }
 
             @Override
-            public void tick(@NotNull Gui gui, long time) {
-                item.tick(gui, time);
+            public void itemTick(@NotNull Gui gui, long time, int slot) {
+                item.itemTick(gui, time, slot);
             }
 
             @Override
@@ -170,7 +170,7 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
 
         Gui gui = Gui.builder(data.inventoryType, slotDistributor, player)
             .withItems(unfixed)
-            .setDynamic(data.dynamic)
+            .setDynamic(true)
             .withTitle(data.title)
             .build();
 
@@ -179,10 +179,7 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
             if (gui.canInsert(slot)) gui.insertItem(fixedItem, slot);
         }
 
-        if (data.dynamic) {
-            ticking.add(gui);
-        }
-
+        ticking.add(gui);
         return gui;
     }
 
@@ -193,17 +190,15 @@ public class OpenGuiInteractor extends InteractorBase<OpenGuiInteractor.Data> {
         for (ArrayList<ClickHandlerBase<?>> handlers : fixedItems) ShopInteractor.tick(handlers, time);
 
         // do item ticks
-        if (data.dynamic) {
-            ticking.removeIf(gui -> {
-                boolean isOpened = gui.getOwner().getOpenInventory() == gui;
-                if (!isOpened) {
-                    return true;
-                }
+        ticking.removeIf(gui -> {
+            boolean isOpened = gui.getOwner().getOpenInventory() == gui;
+            if (!isOpened) {
+                return true;
+            }
 
-                gui.tick(time);
-                return false;
-            });
-        }
+            gui.tick(time);
+            return false;
+        });
     }
 
     @DataObject

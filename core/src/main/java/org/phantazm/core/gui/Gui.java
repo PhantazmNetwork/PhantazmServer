@@ -175,8 +175,11 @@ public class Gui extends Inventory implements Tickable {
         SlottedItem[] tickItems = getTickItems();
         for (SlottedItem slottedItem : tickItems) {
             GuiItem item = slottedItem.item;
+            item.itemTick(this, time, slottedItem.slot);
 
-            item.tick(this, time);
+            // items using the InventoryObject-style item updating framework may request a redraw here
+            // they can also just update items within `itemTick` if they please, though such changes
+            // will be overwritten if the item also requests a redraw
             if (item.shouldRedraw()) {
                 setItemStack(slottedItem.slot, item.getItemStack());
             }

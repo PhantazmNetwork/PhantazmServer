@@ -27,7 +27,7 @@ public class StaticUpdatingItem implements UpdatingItem {
 
     @Override
     public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current) {
-        return false;
+        return !current.equals(data.item);
     }
 
     @Override

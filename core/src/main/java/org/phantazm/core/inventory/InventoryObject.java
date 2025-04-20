@@ -13,8 +13,7 @@ public interface InventoryObject {
      *
      * @return The currently associated {@link ItemStack}
      */
-    @NotNull
-    ItemStack getItemStack();
+    @NotNull ItemStack getItemStack();
 
     /**
      * Checks whether this inventory object should be redrawn.

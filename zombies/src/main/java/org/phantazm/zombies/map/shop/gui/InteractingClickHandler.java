@@ -25,9 +25,6 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     private final ItemUpdater updatingItem;
     private final ShopInteractor clickInteractor;
 
-    private ItemStack itemStack;
-    private boolean redraw;
-
     @FactoryMethod
     public InteractingClickHandler(@NotNull Data data, @NotNull Map<PlayerView, ZombiesPlayer> playerMap,
         @NotNull @Child("updatingItem") UpdatingItem updatingItem,
@@ -35,7 +32,6 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
         super(data, playerMap);
         this.updatingItem = Objects.requireNonNull(updatingItem);
         this.clickInteractor = Objects.requireNonNull(clickInteractor);
-        this.itemStack = updatingItem.currentItem();
     }
 
     @Override
@@ -69,10 +65,11 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
     }
 
     @Override
-    public void tick(@NotNull Gui gui, long time) {
-        if (updatingItem.hasUpdate(gui, time, itemStack)) {
-            itemStack = updatingItem.update(gui, time, itemStack);
-            redraw = true;
+    public void itemTick(@NotNull Gui gui, long time, int slot) {
+        ItemStack current = gui.getItemStack(slot);
+
+        if (updatingItem.hasUpdate(gui, time, current)) {
+            gui.setItemStack(slot, updatingItem.update(gui, time, current));
         }
     }
 
@@ -88,13 +85,12 @@ public class InteractingClickHandler extends ClickHandlerBase<InteractingClickHa
 
     @Override
     public @NotNull ItemStack getItemStack() {
-        redraw = false;
-        return itemStack;
+        return ItemStack.AIR;
     }
 
     @Override
     public boolean shouldRedraw() {
-        return redraw;
+        return false;
     }
 
     @Default("""
