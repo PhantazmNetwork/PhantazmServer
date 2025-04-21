@@ -8,7 +8,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
-import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.EntityDamageEvent;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +46,12 @@ public class PlayerDamageEventListener extends ZombiesPlayerEventListener<Entity
 
     @Override
     protected void accept(@NotNull ZombiesScene scene, @NotNull ZombiesPlayer zombiesPlayer, @NotNull EntityDamageEvent event) {
-        if (!zombiesPlayer.canTakeDamage() || zombiesPlayer.flags().hasFlag(Flags.GODMODE)) {
+        if (scene.map().objects().module().flags().hasFlag(Flags.INVINCIBLE)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (!zombiesPlayer.canTakeDamage() || zombiesPlayer.flags().hasFlag(Flags.GODMODE) || zombiesPlayer.flags().hasFlag(Flags.INVINCIBLE)) {
             event.setCancelled(true);
             return;
         }

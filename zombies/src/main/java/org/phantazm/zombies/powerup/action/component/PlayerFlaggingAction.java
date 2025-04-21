@@ -1,6 +1,7 @@
 package org.phantazm.zombies.powerup.action.component;
 
 import com.github.steanky.element.core.annotation.*;
+import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.zombies.player.ZombiesPlayer;
@@ -29,8 +30,14 @@ public class PlayerFlaggingAction implements PowerupActionComponent {
         return new Action(data, deactivationPredicate.apply(scene));
     }
 
+    @Default("""
+        {
+          global=false
+        }
+        """)
     @DataObject
-    public record Data(@NotNull Key flag) {
+    public record Data(@NotNull Key flag,
+        boolean global) {
     }
 
     private static class Action extends PowerupActionBase {
@@ -44,12 +51,15 @@ public class PlayerFlaggingAction implements PowerupActionComponent {
         @Override
         public void activate(@NotNull Powerup powerup, @NotNull ZombiesPlayer player, long time) {
             super.activate(powerup, player, time);
-            player.flags().setFlag(data.flag);
+
+            if (data.global) player.getScene().map().objects().module().flags().setFlag(data.flag);
+            else player.flags().setFlag(data.flag);
         }
 
         @Override
         public void deactivate(@NotNull ZombiesPlayer player) {
-            player.flags().clearFlag(data.flag);
+            if (data.global) player.getScene().map().objects().module().flags().clearFlag(data.flag);
+            else player.flags().clearFlag(data.flag);
         }
     }
 }
