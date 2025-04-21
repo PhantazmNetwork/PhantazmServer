@@ -58,8 +58,8 @@ public class PlayerFlaggingAction implements PowerupActionComponent {
 
         @Override
         public void deactivate(@NotNull ZombiesPlayer player) {
-            if (data.global) player.getScene().map().objects().module().flags().clearFlag(data.flag);
-            else player.flags().clearFlag(data.flag);
+            if (data.global) player.getScene().map().objects().module().flags().unsetFlag(data.flag);
+            else player.flags().unsetFlag(data.flag);
         }
     }
 }
