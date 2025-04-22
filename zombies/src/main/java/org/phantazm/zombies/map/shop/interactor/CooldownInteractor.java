@@ -23,7 +23,7 @@ public class CooldownInteractor extends InteractorBase<CooldownInteractor.Data> 
         super(data);
         this.successInteractors = Objects.requireNonNull(successInteractors);
         this.failureInteractors = Objects.requireNonNull(failureInteractors);
-        this.cooldown = Cooldown.cooldown(0);
+        this.cooldown = Cooldown.cooldown();
     }
 
     @Override
