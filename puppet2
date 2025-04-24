@@ -102,7 +102,7 @@ config_dir="$dotfile/config"
 start_file="$dotfile/start.sh"
 
 # The code repo lives here
-src_dir="$current_directory/src"
+src_dir="$dotfile/src"
 
 # Files that must differ between server_1 and server_2 live here
 server_1_unique_dir="$current_directory/unique_1"
@@ -166,8 +166,12 @@ sync_target () {
 }
 
 tmux_init () {
-    tmux -S "$socket_1_file" new-session -d -n server -s server > /dev/null 2>&1
-    tmux -S "$socket_2_file" new-session -d -n server -s server > /dev/null 2>&1
+    # Only create a new session if there isn't one to use already
+    tmux -S "$socket_1_file" list-sessions -F#\{session_name\} | grep -qF "server" ||
+    tmux -S "$socket_1_file" new-session -d -n server -s server
+
+    tmux -S "$socket_2_file" list-sessions -F#\{session_name\} | grep -qF "server" ||
+    tmux -S "$socket_2_file" new-session -d -n server -s server
 }
 
 update_code () {
@@ -204,9 +208,16 @@ update_config () {
 # CONFIGURATION
 
 if [ ! -f "$script_config" ]; then
-    printf "%s\n" "code_branch=\"\"
+    printf "%s\n" "# Which branch of the Git repository 'code_repo' to pull from
+code_branch=\"\"
+
+# Which branch of the Git repository 'config_repo' to pull from
 config_branch=\"\"
+
+# The Git repository containing configuration files
 config_repo=\"\"
+
+# The Git repository containing the Phantazm server code
 code_repo=\"\"" > "$script_config" || die "couldn't write default config"
 
     printf "Wrote initial configuration to puppet.conf\n"
@@ -227,8 +238,13 @@ require_config "$code_repo"
 # SETUP
 
 if [ "$1" = "setup" ]; then
-    # Could detect by just checking for a non-empty CWD, but this is a better error message
-    mkdir "$dotfile" > /dev/null 2>&1 || die "server already set up"
+    contents="$( ls -A "$current_directory" )"
+
+    # Case is caught already by the next line, but run this check first so we have a better error message
+    printf "%s" "$contents" | grep -qF ".puppet" && die "setup has already been run"
+
+    # Shouldn't be running setup in directories that are already populated (except by puppet.conf)
+    [ "$contents" = "puppet.conf" ] || die "current directory should be empty"
 
     # Create all required directories
     mkdir "$server_1_dir" \
@@ -243,8 +259,7 @@ if [ "$1" = "setup" ]; then
     # Create all required files
     touch "$main_pid_file" "$fallback_pid_file" "$temp_log" "$fail" "$signal_file" || die "couldn't create all necessary files"
 
-    ( tmux -S "$socket_1_file" new-session -d -n server -s server > /dev/null 2>&1 && \
-    tmux -S "$socket_2_file" new-session -d -n server -s server > /dev/null 2>&1 ) || die "tmux error"
+    tmux_init
 
     ( ln -s "$socket_1_file" "$main_socket_link" && \
     ln -s "$socket_2_file" "$fallback_socket_link" && \
@@ -253,17 +268,19 @@ if [ "$1" = "setup" ]; then
 
     # This will replace any instances of ' with '"'"'
     escaped_signal_file=$( escape_single_quote "$signal_file" )
-    escaped_temp_log_file=$( escape_single_quote "$temp_log" )
     escaped_fail_file=$( escape_single_quote "$fail" )
 
     # $start_file launches the server, create it here
     printf "%s\n" "#!/bin/sh
 if ! java -Dfile.encoding=UTF-8 -jar server.jar; then
+    # Indicate that launching did not succeed
     printf \"FAILED\" > '$escaped_fail_file'
-    printf \"serverIP\\n\" > '$escaped_temp_log_file'
-    exit 1
+
+    # Puppet expects a line with serverIP in it to appear eventually
+    # if we didn't send it on failure, it could wait forever for us to finish
+    printf \"serverIP\\n\"
 fi
-printf \"SIGNAL\\n\" > '$escaped_signal_file'" > "$start_file"
+printf \"FINISHED\\n\" > '$escaped_signal_file'" > "$start_file"
 
     # This must be executable by the current user
     chmod 700 "$start_file"
@@ -300,7 +317,7 @@ printf \"SIGNAL\\n\" > '$escaped_signal_file'" > "$start_file"
 
         cat "$key_path" > "$ssh_key_file"
 
-        grep -qF "$hostname" "$ssh_config_file" || printf "%s\n\n" "Host Configuration
+        grep -qF "Hostname $hostname" "$ssh_config_file" || printf "%s\n\n" "Host Configuration
 Hostname $hostname
 IdentityFile=$ssh_key_file
 IdentitiesOnly yes" >> "$ssh_config_file"
@@ -345,6 +362,7 @@ This command orchestrates Phantazm servers. It allows for safely relaunching
 with updated code and/or config, without interrupting existing games.
 Valid values for OPTION:
   help: Print this message and exit
+  setup: Create necessary files
   main: Attach to the main server console
   fallback: Attach to the fallback server console
   shutdown: Shuts down the main server
@@ -415,6 +433,8 @@ exec ./start.sh | tee ''$( escape_single_quote "$temp_log" )'''" Enter
 
     # Shut down the main server, and wait for it to finish
     tmux -S "$main_socket_link" send-keys -t server orderly_shutdown Enter
+
+    # We always write FINISHED to $signal_file when start.sh is done
     ( tail -f -n +1 "$signal_file" & ) | grep -qF "FINISHED"
 
     # Switch up our symlinks so that the old main server is the new fallback, and vice-versa.
