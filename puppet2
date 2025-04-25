@@ -14,7 +14,7 @@ die () {
 }
 
 cd_or_die () {
-    cd "$1" || die "couldn't change directory"
+    cd -- "$1" || die "couldn't change directory"
 }
 
 escape_single_quote () {
@@ -26,7 +26,7 @@ require_config () {
 }
 
 require_program () {
-    which "$1" > /dev/null 2>&1 || die "no '$1' in PATH"
+    which -- "$1" > /dev/null 2>&1 || die "no '$1' in PATH"
 }
 
 running () {
@@ -38,7 +38,7 @@ running () {
 
     # this shellcheck wants use to use pgrep instead, but that's non-POSIX
     # shellcheck disable=SC2009
-    if ps -eo pid | grep -qF "$1"; then
+    if ps -eo pid | grep -qF -- "$1"; then
         printf "true"
     else
         printf "false"
@@ -50,10 +50,10 @@ await () {
     printf "" > "$3" || die "couldn't clear pid file"
 
     # waits until query-string appears in the target file
-    ( tail -f -n +1 "$1" & printf "%s" "$!" > "$3" ) | grep -qF "$2"
+    ( tail -f -n +1 -- "$1" & printf "%s" "$!" > "$3" ) | grep -qF -- "$2"
 
     # clean up the child process
-    kill "$( cat "$3" )" || die "couldn't kill background process"
+    kill -- "$( cat -- "$3" )" || die "couldn't kill background process"
 }
 
 warn () {
@@ -136,13 +136,13 @@ script_config="$current_directory/puppet.conf"
 # CONTEXTUAL HELPER FUNCTIONS
 
 promote_fallback () {
-    cat "$fallback_pid_file" > "$main_pid_file"
+    cat -- "$fallback_pid_file" > "$main_pid_file"
     printf "" > "$fallback_pid_file"
 
     # We don't need -f here, the only symlink to be resolved is the one the path points to
     # This is guaranteed because these paths are based on pwd -P, which would have already resolved other links
-    new_active=$( readlink "$fallback_socket_link" ) || die "couldn't read socket link"
-    new_server=$( readlink "$fallback_link" ) || die "couldn't read directory link"
+    new_active=$( readlink -- "$fallback_socket_link" ) || die "couldn't read socket link"
+    new_server=$( readlink -- "$fallback_link" ) || die "couldn't read directory link"
 
     if [ "$new_active" = "$socket_1_file" ]; then
         old_active="$socket_2_file"
@@ -152,26 +152,26 @@ promote_fallback () {
         old_server="$server_1_dir"
     fi
 
-    rm "$fallback_socket_link" "$main_socket_link" "$fallback_link" "$main_link" || die "couldn't remove old link(s)"
+    rm -- "$fallback_socket_link" "$main_socket_link" "$fallback_link" "$main_link" || die "couldn't remove old link(s)"
 
-    ( ln -s "$old_active" "$fallback_socket_link" && \
-    ln -s "$new_active" "$main_socket_link" && \
-    ln -s "$old_server" "$fallback_link" && \
-    ln -s "$new_server" "$main_link" ) || die "symlink error"
+    ( ln -s -- "$old_active" "$fallback_socket_link" && \
+    ln -s -- "$new_active" "$main_socket_link" && \
+    ln -s -- "$old_server" "$fallback_link" && \
+    ln -s -- "$new_server" "$main_link" ) || die "symlink error"
 }
 
 sync_target () {
-    target=$( readlink "$1" ) || die "couldn't read target link"
+    target=$( readlink -- "$1" ) || die "couldn't read target link"
 
     if [ "$target" = "$server_1_dir" ]; then
-        rsync -ac --delete "$server_1_unique_dir/" \
+        rsync -ac --delete -- "$server_1_unique_dir/" \
         "$start_file" \
         "$common_dir/" \
         "$build_dir/" \
         "$config_dir/" \
         "$1" || die "couldn't sync server_1"
     elif [ "$target" = "$server_2_dir" ]; then
-        rsync -ac --delete "$server_2_unique_dir/" \
+        rsync -ac --delete -- "$server_2_unique_dir/" \
         "$start_file" \
         "$common_dir/" \
         "$build_dir/" \
@@ -193,7 +193,7 @@ tmux_init () {
 
 update_code () {
     if [ ! -d "$src_dir/.git" ]; then
-        rm -rf "$src_dir" || die "couldn't clean src dir"
+        rm -rf -- "$src_dir" || die "couldn't clean src dir"
         git clone --recurse-submodules "$code_repo" "$src_dir" || die "couldn't clone $code_repo"
     fi
 
@@ -204,13 +204,13 @@ update_code () {
 
     ./gradlew -PskipBuild=snbt-builder,dev-launcher,velocity phantazm-server:copyJar phantazm-server:copyLibs || die "couldn't build src"
 
-    rsync -ac --delete "run/server-1/libs/" "$build_dir_libs" || die "couldn't sync build libs"
-    rsync -ac "run/server-1/server.jar" "$build_dir" || die "couldn't sync server.jar"
+    rsync -ac --delete -- "run/server-1/libs/" "$build_dir_libs" || die "couldn't sync build libs"
+    rsync -ac -- "run/server-1/server.jar" "$build_dir" || die "couldn't sync server.jar"
 }
 
 update_config () {
     if [ ! -d "$config_dir/.git" ]; then
-        rm -rf "$config_dir" || die "couldn't clean config dir"
+        rm -rf -- "$config_dir" || die "couldn't clean config dir"
         git clone "$config_repo" "$config_dir" || die "couldn't clone $config_repo"
     fi
 
@@ -258,16 +258,21 @@ if [ "$1" = "setup" ]; then
     # setup needs to run interactively
     [ -t 0 ] || die "setup must be run in an interactive terminal"
 
-    contents=$( ls -A "$current_directory" )
+    # Run some safety checks just to make sure we don't clobber a used directory by accident
+    for file in "$current_directory/"*; do
+        # If $current_directory is empty, we'll encounter the "file" '$current_directory/*' (literal '*')
+        # This file doesn't actually exist, so ignore it
+        [ -e "$file" ] || continue
 
-    # Case is caught already by the next line, but run this check first so we have a better error message
-    printf "%s\n" "$contents" | grep -qF ".puppet" && die "setup has already been run"
+        # Did we find a .puppet directory? We probably already ran setup
+        [ ".puppet" = "$file" ] && die "setup has already been run"
 
-    # Shouldn't be running setup in directories that are already populated (except by puppet.conf)
-    [ "$contents" = "puppet.conf" ] || die "current directory should be empty"
+        # 'puppet.conf' is allowed to exist because it is read by setup; anything else is bad
+        [ "puppet.conf" = "$file" ] || die "current directory should be empty"
+    done
 
     # Create all required directories
-    mkdir "$server_1_dir" \
+    mkdir -- "$server_1_dir" \
     "$server_2_dir" \
     "$server_1_unique_dir" \
     "$server_2_unique_dir" \
@@ -277,14 +282,14 @@ if [ "$1" = "setup" ]; then
     "$common_dir" || die "couldn't create all necessary directories"
 
     # Create all required files
-    touch "$main_pid_file" "$fallback_pid_file" "$temp_log" "$fail" "$signal_file" || die "couldn't create all necessary files"
+    touch -- "$main_pid_file" "$fallback_pid_file" "$temp_log" "$fail" "$signal_file" || die "couldn't create all necessary files"
 
     tmux_init
 
-    ( ln -s "$socket_1_file" "$main_socket_link" && \
-    ln -s "$socket_2_file" "$fallback_socket_link" && \
-    ln -s "$server_1_dir" "$main_link" && \
-    ln -s "$server_2_dir" "$fallback_link" ) || die "symlink error"
+    ( ln -s -- "$socket_1_file" "$main_socket_link" && \
+    ln -s -- "$socket_2_file" "$fallback_socket_link" && \
+    ln -s -- "$server_1_dir" "$main_link" && \
+    ln -s -- "$server_2_dir" "$fallback_link" ) || die "symlink error"
 
     # This will replace any instances of ' with '"'"'
     escaped_signal_file=$( escape_single_quote "$signal_file" )
@@ -328,16 +333,16 @@ printf \"FINISHED\\n\" > '$escaped_signal_file'" > "$start_file"
         ssh_config_file="$ssh_dir/config"
         ssh_key_file="$dotfile/ssh_key"
 
-        mkdir -p "$ssh_dir" || die "couldn't create .ssh"
-        touch "$ssh_config_file" "$ssh_key_file" || die "couldn't touch ssh config"
+        mkdir -p -- "$ssh_dir" || die "couldn't create .ssh"
+        touch -- "$ssh_config_file" "$ssh_key_file" || die "couldn't touch ssh config"
 
         chmod 700 "$ssh_dir"
         chmod 644 "$ssh_config_file"
         chmod 600 "$ssh_key_file"
 
-        cat "$key_path" > "$ssh_key_file"
+        cat -- "$key_path" > "$ssh_key_file"
 
-        grep -qF "Hostname $hostname" "$ssh_config_file" || printf "%s\n\n" "Host Configuration
+        grep -qF -- "Hostname $hostname" "$ssh_config_file" || printf "%s\n\n" "Host Configuration
 Hostname $hostname
 IdentityFile=$ssh_key_file
 IdentitiesOnly yes" >> "$ssh_config_file"
@@ -351,31 +356,31 @@ fi
 
 [ -d "$dotfile" ] || die "must run setup first"
 
-if [ "$1" = "main" ]; then
+if [ "main" = "$1" ]; then
     tmux_init
 
     tmux -S "$main_socket_link" attach-session -t server
     exit "$?"
-elif [ "$1" = "fallback" ]; then
+elif [ "fallback" = "$1" ]; then
     tmux_init
 
     tmux -S "$fallback_socket_link" attach-session -t server
     exit "$?"
-elif [ "$1" = "shutdown" ]; then
+elif [ "shutdown" = "$1" ]; then
     # Acquire the folder lock first, so we err if we don't have the lock
     true
-elif [ "$1" = "update-full" ]; then
+elif [ "update-full" = "$1" ]; then
     update_config
     update_code
-elif [ "$1" = "update-conf" ]; then
+elif [ "update-conf" = "$1" ]; then
     [ -d "$src_dir/.git" ] || die "source missing"
 
     update_config
-elif [ "$1" = "update-code" ]; then
+elif [ "update-code" = "$1" ]; then
     [ -d "$config_dir/.git" ] || die "config missing"
 
     update_code
-elif [ "$1" = "help" ]; then
+elif [ "help" = "$1" ]; then
     printf "%s\n" "USAGE: [OPTION]
 
 This command orchestrates Phantazm servers. It allows for safely relaunching
@@ -390,39 +395,39 @@ Valid values for OPTION:
   update-conf: Pulls configuration changes, then deploys them
   update-code: Pulls code changes, then deploys them
   status: Shows the status of the main and fallback server"
-elif [ "$1" = "status" ]; then
+elif [ "status" = "$1" ]; then
     true
 else
     die "unknown option"
 fi
 
-main_pid=$( cat "$main_pid_file" ) || die "couldn't read main pid file"
-fallback_pid=$( cat "$fallback_pid_file" ) || die "couldn't read fallback pid file"
+main_pid=$( cat -- "$main_pid_file" ) || die "couldn't read main pid file"
+fallback_pid=$( cat -- "$fallback_pid_file" ) || die "couldn't read fallback pid file"
 
 main_running=$( running "$main_pid" )
 fallback_running=$( running "$fallback_pid" )
 
-if [ "$1" = "status" ]; then
+if [ "status" = "$1" ]; then
     printf "%s\n%s\n" "Main running: $main_running" "Fallback running: $fallback_running"
     exit 0
 fi
 
 # Code below should be exclusive due to our folder lock!
-mkdir "$lock_dir" || die "an instance of this script is already running"
+mkdir -- "$lock_dir" || die "an instance of this script is already running"
 exit_hook () {
-    rmdir "$lock_dir"
+    rmdir -- "$lock_dir"
 }
 
 trap "exit_hook" EXIT
 
-if [ "$1" = "shutdown" ]; then
+if [ "shutdown" = "$1" ]; then
     tmux -S "$main_socket_link" send-keys -t server orderly_shutdown Enter
     exit "$?"
 fi
 
 tmux_init
 
-if [ "$main_running" = "false" ] && [ "$fallback_running" = "false" ]; then
+if [ "false" = "$main_running" ] && [ "false" = "$fallback_running" ]; then
     sync_target "$main_link"
 
     # Bring up the main server, record its PID
@@ -432,7 +437,7 @@ exec ./start.sh'" Enter
 
     # Clear the fallback PID file
     printf "" > "$fallback_pid_file"
-elif [ "$main_running" = "true" ] && [ "$fallback_running" = "false" ]; then
+elif [ "true" = "$main_running" ] && [ "false" = "$fallback_running" ]; then
     # Main server is running, fallback is not. Synchronize it.
     sync_target "$fallback_link"
 
@@ -449,7 +454,7 @@ exec ./start.sh | tee ''$( escape_single_quote "$temp_log" )'''" Enter
     await "$temp_log" "serverIP" "$await_pid_file"
 
     # Fallback may not be running. If it isn't, just quit and don't shut down the main server
-    [ "$( cat "$fail" )" = "FAILED" ] && die "couldn't launch fallback"
+    [ "$( cat -- "$fail" )" = "FAILED" ] && die "couldn't launch fallback"
 
     # Shut down the main server
     tmux -S "$main_socket_link" send-keys -t server orderly_shutdown Enter
@@ -459,7 +464,7 @@ exec ./start.sh | tee ''$( escape_single_quote "$temp_log" )'''" Enter
 
     # Switch up our symlinks so that the old main server is the new fallback, and vice-versa.
     promote_fallback
-elif [ "$main_running" = "false" ] && [ "$fallback_running" = "true" ]; then
+elif [ "false" = "$main_running" ] && [ "true" = "$fallback_running" ]; then
     warn "invalid state; fallback is running but main is not"
     warn "fallback will be automatically promoted to main"
 
