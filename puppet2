@@ -69,7 +69,7 @@ require_program rsync
 require_program ssh
 require_program tmux
 
-current_directory=$( pwd ) || die "can't get current directory"
+current_directory=$( pwd -P ) || die "can't get current directory"
 
 # FILE VARIABLES
 
@@ -87,6 +87,7 @@ lock_dir="$dotfile/lock"
 main_pid_file="$dotfile/main.pid"
 fallback_pid_file="$dotfile/fallback.pid"
 
+# PID file used for calls to the await function (defined above)
 await_pid_file="$dotfile/await.pid"
 
 # Real (non-symlink) tmux socket files
@@ -138,8 +139,10 @@ promote_fallback () {
     cat "$fallback_pid_file" > "$main_pid_file"
     printf "" > "$fallback_pid_file"
 
-    new_active=$( readlink -f "$fallback_socket_link" ) || die "couldn't read socket link"
-    new_server=$( readlink -f "$fallback_link" ) || die "couldn't read directory link"
+    # We don't need -f here, the only symlink to be resolved is the one the path points to
+    # This is guaranteed because these paths are based on pwd -P, which would have already resolved other links
+    new_active=$( readlink "$fallback_socket_link" ) || die "couldn't read socket link"
+    new_server=$( readlink "$fallback_link" ) || die "couldn't read directory link"
 
     if [ "$new_active" = "$socket_1_file" ]; then
         old_active="$socket_2_file"
@@ -158,7 +161,8 @@ promote_fallback () {
 }
 
 sync_target () {
-    target=$(readlink -f "$1")
+    target=$( readlink "$1" ) || die "couldn't read target link"
+
     if [ "$target" = "$server_1_dir" ]; then
         rsync -ac --delete "$server_1_unique_dir/" \
         "$start_file" \
@@ -251,10 +255,13 @@ require_config "$code_repo"
 # SETUP
 
 if [ "$1" = "setup" ]; then
-    contents="$( ls -A "$current_directory" )"
+    # setup needs to run interactively
+    [ -t 0 ] || die "setup must be run in an interactive terminal"
+
+    contents=$( ls -A "$current_directory" )
 
     # Case is caught already by the next line, but run this check first so we have a better error message
-    printf "%s" "$contents" | grep -qF ".puppet" && die "setup has already been run"
+    printf "%s\n" "$contents" | grep -qF ".puppet" && die "setup has already been run"
 
     # Shouldn't be running setup in directories that are already populated (except by puppet.conf)
     [ "$contents" = "puppet.conf" ] || die "current directory should be empty"
@@ -453,11 +460,10 @@ exec ./start.sh | tee ''$( escape_single_quote "$temp_log" )'''" Enter
     # Switch up our symlinks so that the old main server is the new fallback, and vice-versa.
     promote_fallback
 elif [ "$main_running" = "false" ] && [ "$fallback_running" = "true" ]; then
-    warn "invalid state detected; fallback is running but main is not"
-    printf "Promote fallback to main? [y/n]: "
+    warn "invalid state; fallback is running but main is not"
+    warn "fallback will be automatically promoted to main"
 
-    read -r should_promote
-    [ "$should_promote" = "y" ] && promote_fallback
+    promote_fallback
 else
     die "both main and fallback are running"
 fi
