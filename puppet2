@@ -45,6 +45,17 @@ running () {
     fi
 }
 
+await () {
+    # make sure pid file is clear
+    printf "" > "$3" || die "couldn't clear pid file"
+
+    # waits until query-string appears in the target file
+    ( tail -f -n +1 "$1" & printf "%s" "$!" > "$3" ) | grep -qF "$2"
+
+    # clean up the child process
+    kill "$( cat "$3" )" || die "couldn't kill background process"
+}
+
 warn () {
     printf "\033[33;1m[WARNING]\033[0m %s\n" "$1"
 }
@@ -73,8 +84,10 @@ server_2_dir="$dotfile/server_2"
 lock_dir="$dotfile/lock"
 
 # PID files for main and fallback servers
-main_pid_file="$dotfile/main_pid"
-fallback_pid_file="$dotfile/fallback_pid"
+main_pid_file="$dotfile/main.pid"
+fallback_pid_file="$dotfile/fallback.pid"
+
+await_pid_file="$dotfile/await.pid"
 
 # Real (non-symlink) tmux socket files
 socket_1_file="$dotfile/socket_1"
@@ -297,7 +310,7 @@ printf \"FINISHED\\n\" > '$escaped_signal_file'" > "$start_file"
             read -r key_path
 
             if [ ! -f "$key_path" ]; then
-                warn "Cannot find the file referenced by $key_path"
+                warn "couldn't find $key_path"
             else
                 break
             fi
@@ -426,16 +439,16 @@ printf \"%s\" \"\$\$\" > ''$( escape_single_quote "$fallback_pid_file" )''
 exec ./start.sh | tee ''$( escape_single_quote "$temp_log" )'''" Enter
 
     # ... and wait until it's ready before we continue
-    ( tail -f -n +1 "$temp_log" & ) | grep -qF "serverIP"
+    await "$temp_log" "serverIP" "$await_pid_file"
 
     # Fallback may not be running. If it isn't, just quit and don't shut down the main server
-    [ "$( cat "$fail" )" = "FAILED" ] && die "error launching fallback"
+    [ "$( cat "$fail" )" = "FAILED" ] && die "couldn't launch fallback"
 
-    # Shut down the main server, and wait for it to finish
+    # Shut down the main server
     tmux -S "$main_socket_link" send-keys -t server orderly_shutdown Enter
 
-    # We always write FINISHED to $signal_file when start.sh is done
-    ( tail -f -n +1 "$signal_file" & ) | grep -qF "FINISHED"
+    # Wait until the main server is shut down
+    await "$signal_file" "FINISHED" "$await_pid_file"
 
     # Switch up our symlinks so that the old main server is the new fallback, and vice-versa.
     promote_fallback
