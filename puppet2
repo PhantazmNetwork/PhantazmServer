@@ -25,10 +25,6 @@ require_config () {
     [ -n "$1" ] || die "missing required configuration"
 }
 
-require_program () {
-    which -- "$1" > /dev/null 2>&1 || die "no '$1' in PATH"
-}
-
 running () {
     if [ -z "$1" ]; then
         # no need to list processes when we don't have a PID anyway
@@ -62,13 +58,6 @@ warn () {
 
 # END HELPER FUNCTIONS
 
-# Required programs
-require_program git
-require_program java
-require_program rsync
-require_program ssh
-require_program tmux
-
 current_directory=$( pwd -P ) || die "can't get current directory"
 
 # FILE VARIABLES
@@ -84,8 +73,12 @@ server_2_dir="$dotfile/server_2"
 lock_dir="$dotfile/lock"
 
 # PID files for main and fallback servers
-main_pid_file="$dotfile/main.pid"
-fallback_pid_file="$dotfile/fallback.pid"
+first_pid_file="$dotfile/1.pid"
+second_pid_file="$dotfile/2.pid"
+
+# Symlinks to PID files for main and fallback servers
+main_pid_link="$dotfile/main.pid"
+fallback_pid_link="$dotfile/fallback.pid"
 
 # PID file used for calls to the await function (defined above)
 await_pid_file="$dotfile/await.pid"
@@ -136,28 +129,35 @@ script_config="$current_directory/puppet.conf"
 # CONTEXTUAL HELPER FUNCTIONS
 
 promote_fallback () {
-    cat -- "$fallback_pid_file" > "$main_pid_file"
-    printf "" > "$fallback_pid_file"
-
     # We don't need -f here, the only symlink to be resolved is the one the path points to
     # This is guaranteed because these paths are based on pwd -P, which would have already resolved other links
     new_active=$( readlink -- "$fallback_socket_link" ) || die "couldn't read socket link"
     new_server=$( readlink -- "$fallback_link" ) || die "couldn't read directory link"
+    new_pid=$( readlink -- "$fallback_pid_link" ) || die "couldn't read pid link"
 
     if [ "$new_active" = "$socket_1_file" ]; then
         old_active="$socket_2_file"
         old_server="$server_2_dir"
+        old_pid="$second_pid_file"
     else
         old_active="$socket_1_file"
         old_server="$server_1_dir"
+        old_pid="$first_pid_file"
     fi
 
-    rm -- "$fallback_socket_link" "$main_socket_link" "$fallback_link" "$main_link" || die "couldn't remove old link(s)"
+    rm -- "$fallback_socket_link" \
+    "$main_socket_link" \
+    "$fallback_link" \
+    "$main_link" \
+    "$main_pid_link" \
+    "$fallback_pid_link" || die "couldn't remove old link(s)"
 
     ( ln -s -- "$old_active" "$fallback_socket_link" && \
     ln -s -- "$new_active" "$main_socket_link" && \
     ln -s -- "$old_server" "$fallback_link" && \
-    ln -s -- "$new_server" "$main_link" ) || die "symlink error"
+    ln -s -- "$new_server" "$main_link" && \
+    ln -s -- "$old_pid" "$fallback_pid_link" && \
+    ln -s -- "$new_pid" "$main_pid_link" ) || die "symlink error"
 }
 
 sync_target () {
@@ -258,7 +258,7 @@ if [ "$1" = "setup" ]; then
     # setup needs to run interactively
     [ -t 0 ] || die "setup must be run in an interactive terminal"
 
-    # Run some safety checks just to make sure we don't clobber a used directory by accident
+    # Run some safety checks just to make sure we don't clobber a full directory by accident
     for file in "$current_directory/"*; do
         # If $current_directory is empty, we'll encounter the "file" '$current_directory/*' (literal '*')
         # This file doesn't actually exist, so ignore it
@@ -282,14 +282,16 @@ if [ "$1" = "setup" ]; then
     "$common_dir" || die "couldn't create all necessary directories"
 
     # Create all required files
-    touch -- "$main_pid_file" "$fallback_pid_file" "$temp_log" "$fail" "$signal_file" || die "couldn't create all necessary files"
+    touch -- "$first_pid_file" "$second_pid_file" "$temp_log" "$fail" "$signal_file" || die "couldn't create all necessary files"
 
     tmux_init
 
     ( ln -s -- "$socket_1_file" "$main_socket_link" && \
     ln -s -- "$socket_2_file" "$fallback_socket_link" && \
     ln -s -- "$server_1_dir" "$main_link" && \
-    ln -s -- "$server_2_dir" "$fallback_link" ) || die "symlink error"
+    ln -s -- "$server_2_dir" "$fallback_link" && \
+    ln -s -- "$first_pid_file" "$main_pid_link" && \
+    ln -s -- "$second_pid_file" "$fallback_pid_link" ) || die "symlink error"
 
     # This will replace any instances of ' with '"'"'
     escaped_signal_file=$( escape_single_quote "$signal_file" )
@@ -297,6 +299,20 @@ if [ "$1" = "setup" ]; then
 
     # $start_file launches the server, create it here
     printf "%s\n" "#!/bin/sh
+# Clean up whichever PID file we wrote to before exiting
+exit_hook () {
+    # Clear PID file
+    printf \"\" > \"\$1\"
+
+    # Signal that the script is exiting to anyone waiting on us
+    printf \"FINISHED\\n\" > '$escaped_signal_file'
+}
+
+trap \"exit_hook\" EXIT
+
+# Write our PID to the PID file
+printf \"%s\" \"\$\$\" > \"\$1\"
+
 if ! java -Dfile.encoding=UTF-8 -jar server.jar; then
     # Indicate that launching did not succeed
     printf \"FAILED\" > '$escaped_fail_file'
@@ -304,8 +320,7 @@ if ! java -Dfile.encoding=UTF-8 -jar server.jar; then
     # Puppet expects a line with serverIP in it to appear eventually
     # if we didn't send it on failure, it could wait forever for us to finish
     printf \"serverIP\\n\"
-fi
-printf \"FINISHED\\n\" > '$escaped_signal_file'" > "$start_file"
+fi" > "$start_file"
 
     # This must be executable by the current user
     chmod 700 "$start_file"
@@ -401,8 +416,8 @@ else
     die "unknown option"
 fi
 
-main_pid=$( cat -- "$main_pid_file" ) || die "couldn't read main pid file"
-fallback_pid=$( cat -- "$fallback_pid_file" ) || die "couldn't read fallback pid file"
+main_pid=$( cat -- "$main_pid_link" ) || die "couldn't read main pid file"
+fallback_pid=$( cat -- "$fallback_pid_link" ) || die "couldn't read fallback pid file"
 
 main_running=$( running "$main_pid" )
 fallback_running=$( running "$fallback_pid" )
@@ -428,16 +443,20 @@ fi
 tmux_init
 
 if [ "false" = "$main_running" ] && [ "false" = "$fallback_running" ]; then
+    # This is not actually necessary, since fallback isn't running and start.sh cleans its own PID files
+    # However, if the script gets SIGKILL'd, it might have failed to clean up after itself
+    printf "" > "$fallback_pid_link"
+
     sync_target "$main_link"
 
-    # Bring up the main server, record its PID
-    tmux -S "$main_socket_link" send-keys -t server "sh -c 'cd ''$( escape_single_quote "$main_link" )''
-printf \"%s\" \"\$\$\" > ''$( escape_single_quote "$main_pid_file" )''
-exec ./start.sh'" Enter
+    actual_pid_file=$( readlink -- "$main_pid_link" )
 
-    # Clear the fallback PID file
-    printf "" > "$fallback_pid_file"
+    # Bring up the main server
+    tmux -S "$main_socket_link" send-keys -t server "sh -c 'cd ''$( escape_single_quote "$main_link" )''
+exec ./start.sh ''$( escape_single_quote "$actual_pid_file" )'''" Enter
 elif [ "true" = "$main_running" ] && [ "false" = "$fallback_running" ]; then
+    printf "" > "$fallback_pid_link"
+
     # Main server is running, fallback is not. Synchronize it.
     sync_target "$fallback_link"
 
@@ -445,10 +464,11 @@ elif [ "true" = "$main_running" ] && [ "false" = "$fallback_running" ]; then
     printf "" > "$fail"
     printf "" > "$signal_file"
 
+    actual_pid_file=$( readlink -- "$fallback_pid_link" )
+
     # Start up the fallback server...
     tmux -S "$fallback_socket_link" send-keys -t server "sh -c 'cd ''$( escape_single_quote "$fallback_link" )''
-printf \"%s\" \"\$\$\" > ''$( escape_single_quote "$fallback_pid_file" )''
-exec ./start.sh | tee ''$( escape_single_quote "$temp_log" )'''" Enter
+exec ./start.sh ''$( escape_single_quote "$actual_pid_file" )'' | tee ''$( escape_single_quote "$temp_log" )'''" Enter
 
     # ... and wait until it's ready before we continue
     await "$temp_log" "serverIP" "$await_pid_file"
@@ -465,10 +485,15 @@ exec ./start.sh | tee ''$( escape_single_quote "$temp_log" )'''" Enter
     # Switch up our symlinks so that the old main server is the new fallback, and vice-versa.
     promote_fallback
 elif [ "false" = "$main_running" ] && [ "true" = "$fallback_running" ]; then
+    printf "" > "$main_pid_link"
+
     warn "invalid state; fallback is running but main is not"
     warn "fallback will be automatically promoted to main"
 
     promote_fallback
 else
+    printf "" > "$main_pid_link"
+    printf "" > "$fallback_pid_link"
+
     die "both main and fallback are running"
 fi
