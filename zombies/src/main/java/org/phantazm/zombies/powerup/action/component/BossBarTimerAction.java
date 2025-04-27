@@ -26,10 +26,7 @@ import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Model("zombies.powerup.action.boss_bar_timer")
 @Cache(false)
@@ -67,21 +64,30 @@ public class BossBarTimerAction implements PowerupActionComponent {
             this.data = data;
             this.instance = instance;
             this.predicate = new DeactivationPredicate() {
-                @Override
-                public void activate(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer, long time) {
+                private int computeTime(Powerup powerup, ZombiesPlayer zombiesPlayer) {
                     Attribute attribute = Attributes.get("phantazm.powerup.duration." + powerup.key().value());
                     Optional<Player> playerOptional;
                     if (zombiesPlayer == null || (playerOptional = zombiesPlayer.getPlayer()).isEmpty()) {
-                        Action.this.time = (int) data.duration;
+                        return (int) data.duration;
                     } else {
-                        Action.this.time = Math.round(AttributeUtils.computeWithBase(data.duration, playerOptional.get()
+                        return Math.round(AttributeUtils.computeWithBase(data.duration, playerOptional.get()
                             .getAttribute(attribute)));
                     }
                 }
 
                 @Override
+                public void activate(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer, long time) {
+                    Action.this.time = computeTime(powerup, zombiesPlayer);
+                }
+
+                @Override
                 public boolean shouldDeactivate(long time) {
                     return startTicks >= Action.this.time;
+                }
+
+                @Override
+                public @NotNull OptionalInt duration(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer) {
+                    return OptionalInt.of(computeTime(powerup, zombiesPlayer));
                 }
             };
             this.playerMap = playerMap;

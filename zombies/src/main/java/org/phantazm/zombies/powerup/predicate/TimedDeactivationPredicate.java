@@ -15,6 +15,7 @@ import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 
 @Model("zombies.powerup.deactivation_predicate.timed")
 public class TimedDeactivationPredicate implements DeactivationPredicateComponent {
@@ -44,17 +45,20 @@ public class TimedDeactivationPredicate implements DeactivationPredicateComponen
             this.data = data;
         }
 
-        @Override
-        public void activate(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer, long time) {
-            startTick = MinecraftServer.currentTick();
-
+        private int computeTime(Powerup powerup, ZombiesPlayer zombiesPlayer) {
             Attribute attribute = Attributes.get("phantazm.powerup.duration." + powerup.key().value());
             Optional<Player> playerOptional;
             if (zombiesPlayer == null || (playerOptional = zombiesPlayer.getPlayer()).isEmpty()) {
-                this.time = (int) data.time;
+                return (int) data.time;
             } else {
-                this.time = Math.round(AttributeUtils.computeWithBase(data.time, playerOptional.get().getAttribute(attribute)));
+                return Math.round(AttributeUtils.computeWithBase(data.time, playerOptional.get().getAttribute(attribute)));
             }
+        }
+
+        @Override
+        public void activate(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer, long time) {
+            startTick = MinecraftServer.currentTick();
+            this.time = computeTime(powerup, zombiesPlayer);
         }
 
         @Override
@@ -69,6 +73,11 @@ public class TimedDeactivationPredicate implements DeactivationPredicateComponen
             }
 
             return MinecraftServer.currentTick() - startTick >= currentTime;
+        }
+
+        @Override
+        public @NotNull OptionalInt duration(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer) {
+            return OptionalInt.of(computeTime(powerup, zombiesPlayer));
         }
     }
 }

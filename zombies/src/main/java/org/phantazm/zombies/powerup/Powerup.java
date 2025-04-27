@@ -5,16 +5,14 @@ import net.kyori.adventure.key.Keyed;
 import net.minestom.server.Tickable;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.powerup.predicate.PickupPredicate;
 import org.phantazm.zombies.powerup.visual.PowerupVisual;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Powerup implements Tickable, Keyed {
     private final Key type;
@@ -119,6 +117,11 @@ public class Powerup implements Tickable, Keyed {
 
     public @NotNull Point spawnLocation() {
         return spawnLocation;
+    }
+
+    public @NotNull @UnmodifiableView List<PowerupAction> activeActions() {
+        if (!active) return List.of();
+        return Collections.unmodifiableList(this.actions);
     }
 
     @Override

@@ -9,6 +9,8 @@ import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
+import java.util.OptionalInt;
+
 @Model("zombies.powerup.deactivation_predicate.immediate")
 @Cache
 public class ImmediateDeactivationPredicate implements DeactivationPredicateComponent {
@@ -33,6 +35,11 @@ public class ImmediateDeactivationPredicate implements DeactivationPredicateComp
         @Override
         public boolean shouldDeactivate(long time) {
             return true;
+        }
+
+        @Override
+        public @NotNull OptionalInt duration(@NotNull Powerup powerup, @Nullable ZombiesPlayer zombiesPlayer) {
+            return OptionalInt.empty();
         }
     }
 }
