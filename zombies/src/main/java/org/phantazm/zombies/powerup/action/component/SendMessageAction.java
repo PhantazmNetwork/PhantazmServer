@@ -8,8 +8,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.phantazm.core.ElementUtils;
 import org.phantazm.core.time.TickFormatter;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.Powerup;
@@ -18,6 +16,7 @@ import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
 import org.phantazm.zombies.scene2.ZombiesScene;
 
+import java.util.List;
 import java.util.OptionalInt;
 
 @Model("zombies.powerup.action.send_message")
@@ -40,12 +39,12 @@ public class SendMessageAction implements PowerupActionComponent {
     @Default("""
         {
           tickFormatter={type='core.tick_formatter.precision_second',decimalPlaces=1},
-          timerSource=null
+          timerSource=-1
         }
         """)
     @DataObject
     public record Data(@NotNull String format,
-        @Nullable String timerSource,
+        int timerSource,
         boolean broadcast) {
     }
 
@@ -75,18 +74,16 @@ public class SendMessageAction implements PowerupActionComponent {
             TagResolver playerPlaceholder = Placeholder.component("player", playerName);
             TagResolver timePlaceholder = null;
 
-            if (data.timerSource != null) {
-                for (PowerupAction action : powerup.activeActions()) {
-                    if (ElementUtils.findModel(action.getClass()).filter(name -> name.equals(data.timerSource)).isEmpty())
-                        continue;
+            List<PowerupAction> actions = powerup.actions();
 
-                    DeactivationPredicate deactivationPredicate = action.deactivationPredicate();
-                    OptionalInt durationOptional = deactivationPredicate.duration(powerup, player);
+            if (data.timerSource >= 0 && data.timerSource < actions.size()) {
+                PowerupAction action = actions.get(data.timerSource);
 
-                    if (durationOptional.isPresent()) {
-                        timePlaceholder = Placeholder.unparsed("time", tickFormatter.format(durationOptional.getAsInt()));
-                    }
-                }
+                DeactivationPredicate deactivationPredicate = action.deactivationPredicate();
+                OptionalInt durationOptional = deactivationPredicate.duration(powerup, player);
+
+                if (durationOptional.isPresent())
+                    timePlaceholder = Placeholder.unparsed("time", tickFormatter.format(durationOptional.getAsInt()));
             }
 
             if (timePlaceholder == null) timePlaceholder = Placeholder.unparsed("time", "");

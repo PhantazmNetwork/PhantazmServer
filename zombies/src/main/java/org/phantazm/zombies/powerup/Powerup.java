@@ -5,7 +5,7 @@ import net.kyori.adventure.key.Keyed;
 import net.minestom.server.Tickable;
 import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnmodifiableView;
+import org.jetbrains.annotations.Unmodifiable;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.powerup.action.PowerupAction;
 import org.phantazm.zombies.powerup.predicate.DeactivationPredicate;
@@ -18,6 +18,7 @@ public class Powerup implements Tickable, Keyed {
     private final Key type;
     private final List<PowerupVisual> visuals;
     private final List<PowerupAction> actions;
+    private final boolean[] activatedActions;
     private final DeactivationPredicate despawnPredicate;
     private final PickupPredicate pickupPredicate;
     private final Point spawnLocation;
@@ -30,8 +31,9 @@ public class Powerup implements Tickable, Keyed {
         @NotNull Collection<PowerupAction> actions, @NotNull DeactivationPredicate despawnPredicate,
         @NotNull PickupPredicate pickupPredicate, @NotNull Point spawnLocation) {
         this.type = Objects.requireNonNull(type);
-        this.visuals = new ArrayList<>(visuals);
-        this.actions = new ArrayList<>(actions);
+        this.visuals = List.copyOf(visuals);
+        this.actions = List.copyOf(actions);
+        this.activatedActions = new boolean[this.actions.size()];
         this.despawnPredicate = Objects.requireNonNull(despawnPredicate);
         this.pickupPredicate = Objects.requireNonNull(pickupPredicate);
         this.spawnLocation = Objects.requireNonNull(spawnLocation);
@@ -59,30 +61,24 @@ public class Powerup implements Tickable, Keyed {
     }
 
     public void activate(@NotNull ZombiesPlayer player, long time) {
-        if (active) {
-            return;
-        }
-
-        if (!pickupPredicate.canPickup(player)) {
-            return;
-        }
+        if (active || !pickupPredicate.canPickup(player)) return;
 
         boolean anyActive = false;
-        for (int i = actions.size() - 1; i >= 0; i--) {
+
+        for (int i = 0; i < actions.size(); i++) {
             PowerupAction action = actions.get(i);
             action.activate(this, player, time);
 
             if (action.deactivationPredicate().shouldDeactivate(time)) {
                 action.deactivate(player);
-                actions.remove(i);
+                activatedActions[i] = false;
             } else {
                 anyActive = true;
+                activatedActions[i] = true;
             }
         }
 
-        for (PowerupVisual visual : visuals) {
-            visual.despawn();
-        }
+        if (spawned) for (PowerupVisual visual : visuals) visual.despawn();
 
         if (anyActive) {
             active = true;
@@ -98,19 +94,15 @@ public class Powerup implements Tickable, Keyed {
                 visual.despawn();
             }
 
-            visuals.clear();
             spawned = false;
         }
 
-        if (!active) {
-            return;
+        if (!active) return;
+
+        for (int i = 0; i < actions.size(); i++) {
+            if (activatedActions[i]) actions.get(i).deactivate(activatingPlayer);
         }
 
-        for (PowerupAction action : actions) {
-            action.deactivate(activatingPlayer);
-        }
-
-        actions.clear();
         active = false;
         activatingPlayer = null;
     }
@@ -119,9 +111,8 @@ public class Powerup implements Tickable, Keyed {
         return spawnLocation;
     }
 
-    public @NotNull @UnmodifiableView List<PowerupAction> activeActions() {
-        if (!active) return List.of();
-        return Collections.unmodifiableList(this.actions);
+    public @NotNull @Unmodifiable List<PowerupAction> actions() {
+        return this.actions;
     }
 
     @Override
@@ -146,13 +137,16 @@ public class Powerup implements Tickable, Keyed {
         }
 
         boolean anyActive = false;
-        for (int i = actions.size() - 1; i >= 0; i--) {
+        for (int i = 0; i < actions.size(); i++) {
+            if (!activatedActions[i]) continue;
+
             PowerupAction action = actions.get(i);
 
             DeactivationPredicate deactivationPredicate = action.deactivationPredicate();
             if (deactivationPredicate.shouldDeactivate(time)) {
                 action.deactivate(activatingPlayer);
-                actions.remove(i);
+                activatedActions[i] = false;
+                continue;
             } else {
                 anyActive = true;
             }
