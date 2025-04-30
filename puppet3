@@ -1,0 +1,770 @@
+#!/bin/sh
+
+# This script is used to help manage a main/fallback server pair that
+# supports live updates that can occur without forcefully kicking
+# players from the server. It's designed to be (at minimum)
+# fully POSIX.1-2008 compliant, aside from requiring a few additional
+# programs, which are as follows:
+#
+# * git
+# * java
+# * tmux
+#
+# Run 'puppet help' for more info.
+#
+# STYLE
+#
+# Prefer one line conditionals like '[ ... ] && command' when
+# reasonably possible and does not cause readability concerns. Line
+# width should not exceed 70 characters, even for comments. If it is
+# necessary to break a single command across multiple lines due to
+# this restriction, each argument should be on the same line, except
+# in the case of arguments that are logically paired with each other,
+# like in case of 'sh -c command'; -c and 'command' are related and
+# should go on the same line.
+#
+# If it is necessary to split command chains, and each command is
+# suitably short, add a newline after the conditional, like this:
+#
+# long_command_that_should_be_split | another_long_command &&
+# then_run_this_other_long_command
+#
+# NOT like this:
+# long_command_that_should_be_split | another_long_command
+# && then_run_this_other_long_command
+#
+# GENERAL GUIDELINES
+#
+# Comment most things unless they are very obvious (and even then,
+# consider making a comment). Commented lines should always start with
+# a pound sign followed immediately by a space.
+#
+# Local variables (those used entirely within a function, or not meant
+# to be accessed globally) should start with an underscore.
+#
+# Commands that may fail (due to IO errors or other faulty conditions)
+# should typically exit by calling 'die' with an informative error
+# message, like this:
+#
+# command_that_may_err || die "couldn't run the command"
+#
+# Commands that take one or more file paths as an argument should use
+# -- as a separator between any flags and the files, if this is
+# supported. Or, if no flags are being used, -- should appear at the
+# beginning.
+
+# UTILITY FUNCTIONS (these do not reference global variables)
+
+die () {
+    # The first argument is optional. If it's not there, don't print
+    # anything, just exit.
+    [ -n "$1" ] && exit 1
+
+    # Print the formatted message to stderr.
+    msg "\033[31;1m[ERROR]\033[0m %s\n" "[ERROR] %s\n" "$1" 1>&2
+    exit 1
+}
+
+escape_single_quotes () {
+    # Sanitize the input string by replacing all single quotes with
+    # '"'"'. This makes the string valid for inclusion in e.g.
+    # embedded scripts, explicit calls to sh, etc.
+    printf "%s" "$1" | sed "s/'/'\"'\"'/"
+}
+
+msg () {
+    # Save the first two parameters because we need to shift them out
+    # afterwards.
+    _fmt_1="$1"
+    _fmt_2="$2"
+
+    shift 2
+
+    # Using variables in format strings is alright here, that's the
+    # entire point of this function.
+    # shellcheck disable=SC2059
+    if [ -t 0 ]; then
+        printf "$_fmt_1" "$@"
+    else
+        printf "$_fmt_2" "$@"
+    fi
+}
+
+require_non_empty () {
+    [ -n "$1" ] || die "missing required configuration"
+}
+
+resolve_dir_link () {
+    # Hacky way to resolve a symbolic link if it's a directory. Used
+    # because readlink is not specified in 2008 POSIX, though note
+    # that it does exist in later iterations of the standard.
+    #
+    # Use a subshell just to prevent changing the current directory of
+    # the calling shell.
+    _dir=$( cd -- "$1" > /dev/null || exit 1; pwd -P ) ||
+    die "couldn't resolve link at $1"
+
+    printf "%s" "$_dir"
+}
+
+safe_cd () {
+    # Die if the directory doesn't exist, no permissions, etc. Only
+    # redirect stdout to /dev/null because the user probably wants to
+    # see what the error message was.
+    cd -- "$1" > /dev/null || die "couldn't cd to $1"
+}
+
+# END UTILITY FUNCTIONS
+
+# GLOBAL VARIABLES (these are all readonly)
+
+# Pretty much everything requires our CWD, so just grab it now. The
+# result shouldn't contain any symlinks because of the -P flag.
+current_directory=$( pwd -P ) || die "couldn't get cwd"
+
+# User configuration file.
+conf_file="$current_directory/puppet.conf"
+
+# Files that differ between server_1 and server_2 live here. These
+# are needed to prevent the servers from binding to the same port.
+server_1_unique_dir="$current_directory/server_1_unique"
+server_2_unique_dir="$current_directory/server_2_unique"
+
+# Files that don't differ between server_1 and server_2 live here.
+# However, this doesn't include configuration, code, or generated
+# artifacts.
+common_dir="$current_directory/common"
+
+# All "internal" files used by Puppet live here. These do not usually
+# need to be read or written by users of this script.
+puppet_dir="$current_directory/.puppet"
+
+# These are the actual (non-symlink) server directories.
+server_1_dir="$puppet_dir/server_1"
+server_2_dir="$puppet_dir/server_2"
+
+# Symlinks to $server_1_dir and $server_2_dir, depending on which is
+# active at the time.
+main_link="$puppet_dir/main"
+fallback_link="$puppet_dir/fallback"
+
+# tmux socket files
+socket_1_file="$puppet_dir/socket_1"
+socket_2_file="$puppet_dir/socket_2"
+
+# Symlinks to $socket_1_file and $socket_2_file, depending on which
+# is active at the time.
+main_socket_link="$puppet_dir/main_socket"
+fallback_socket_link="$puppet_dir/fallback_socket"
+
+log_pipe_1="$puppet_dir/log_pipe_1"
+log_pipe_2="$puppet_dir/log_pipe_2"
+
+main_log_pipe_link="$puppet_dir/main_log_pipe_link"
+fallback_log_pipe_link="$puppet_dir/fallback_log_pipe_link"
+
+# Named pipes, used for IPC; namely, the startup script signals that
+# it has either succeeded or failed to start.
+status_pipe_1="$puppet_dir/status_pipe_1"
+status_pipe_2="$puppet_dir/status_pipe_2"
+
+# Symlinks to $status_pipe_1 and $status_pipe_2. These links should
+# always exist, though the pipes that they point to are removed once
+# the corresponding server is offline.
+main_status_pipe_link="$puppet_dir/main_status_pipe_link"
+fallback_status_pipe_link="$puppet_dir/fallback_status_pipe_link"
+
+# Source and configuration git repositories, respectively
+src_dir="$puppet_dir/src"
+config_dir="$puppet_dir/config"
+
+# The ./run/server-1 directory. This is where the build scripts place
+# most generated artifacts; e.g. libraries and the server jar.
+build_target_dir="$src_dir/run/server-1"
+
+# Libraries, produced by the Gradle build script.
+libs_dir="$build_target_dir/libs"
+
+# The built server.jar file, produced by the Gradle build script.
+server_jar="$build_target_dir/server.jar"
+
+# Used to make an exclusive lock.
+lock_dir="$puppet_dir/lock"
+
+# A small script file that's generated by this one, and used to
+# actually launch the server(s), as well as handling some IPC.
+start_file="$puppet_dir/start"
+
+# The name used for both tmux sessions and windows.
+tmux_session_name="puppet_server"
+
+# END GLOBAL VARIABLES
+
+# CONTEXTUAL FUNCTIONS
+
+bring_offline () {
+    # Send the shutdown command to the server.
+    tmux_send_keys "$1" orderly_shutdown
+
+    # This will block until the target server shuts down.
+    _status=$( cat -u -- "$2" ) ||
+    die "couldn't wait for shutdown"
+
+    # Error if there's an unexpected status code.
+    [ "$_status" = "SHUTDOWN" ] ||
+    die "couldn't recognize process status $_status"
+}
+
+bring_online () {
+    # Both of these are passed to invocations of tmux_send_keys below.
+    _escaped_cwd=$( escape_single_quotes "$current_directory" )
+    _escaped_start_file=$( escape_single_quotes "$start_file" )
+
+    # $_target_id will be either 1 or 2, depending on if $1 is
+    # $server_1_dir or $server_2_dir.
+    _target_id=$( sync_target "$1" ) || die
+
+    # Make the named pipe.
+    mkfifo -m 600 "$3"
+
+    # Start up the server. This literally types the startup command
+    # into the tmux terminal.
+    tmux_send_keys "$2" \
+    "'$_escaped_start_file' '$_escaped_cwd' $_target_id"
+
+    # cat will block here until there's some data in the pipe.
+    _status=$( cat -u -- "$3" ) ||
+    die "error launching server_$_target_id"
+
+    case "$_status" in
+        "OK")
+            rm -f -- "$3"
+        ;;
+        "ERR")
+            # Drain the status pipe; it should send us a SHUTDOWN
+            # signal next but we don't need to check for it.
+            cat -u -- "$3" 2>&1 /dev/null
+
+            # We were able to connect to the pipe, but the process
+            # reported an error launching the server, e.g. there was
+            # a compiler error.
+            die "couldn't launch server_$_target_id"
+        ;;
+        *)
+            # This indicates a bug in the starting script.
+            die "couldn't recognize status code $_status"
+        ;;
+    esac
+}
+
+promote_fallback () {
+    _new_main_dir="$1"
+
+    case "$_new_main_dir" in
+        "$server_1_dir")
+            _new_main_socket="$socket_1_file"
+            _new_main_status_pipe="$status_pipe_1"
+
+            _new_fallback_dir="$server_2_dir"
+            _new_fallback_socket="$socket_2_file"
+            _new_fallback_status_pipe="$status_pipe_2"
+        ;;
+
+        "$server_2_dir")
+            _new_main_socket="$socket_2_file"
+            _new_main_status_pipe="$status_pipe_2"
+
+            _new_fallback_dir="$server_1_dir"
+            _new_fallback_socket="$socket_1_file"
+            _new_fallback_status_pipe="$status_pipe_1"
+        ;;
+
+        *)
+            die "couldn't recognize server directory $1"
+        ;;
+    esac
+
+    # Delete all of the old symlinks...
+    rm -- "$main_link" \
+    "$fallback_link" \
+    "$main_socket_link" \
+    "$fallback_socket_link" \
+    "$main_status_pipe_link" \
+    "$fallback_status_pipe_link" ||
+    die "couldn't remove symlink(s)"
+
+    # ...and create new ones.
+    (
+    ln -s -- "$_new_main_dir" "$main_link" && \
+    ln -s -- "$_new_fallback_dir" "$fallback_link" && \
+    ln -s -- "$_new_main_socket" "$main_socket_link" && \
+    ln -s -- "$_new_fallback_socket" "$fallback_socket_link" && \
+    ln -s -- "$_new_main_status_pipe" "$main_status_pipe_link" && \
+    ln -s -- "$_new_fallback_status_pipe" "$fallback_status_pipe_link"
+    ) || die "couldn't create symlink(s)"
+}
+
+require_code () {
+   [ -d "$src_dir/.git" ] || die "src must be brought up to date"
+}
+
+require_config () {
+   [ -d "$config_dir/.git" ] || die "config must be brought up to date"
+}
+
+sync_target () {
+    _sync_internal () {
+        rsync -ac --delete -- "$1" \
+        "$server_jar" \
+        "$libs_dir/" \
+        "$common_dir/" \
+        "$config_dir/" \
+        "$2" > /dev/null || die "couldn't sync"
+    }
+
+    # The only thing that changes for different values of $1 is
+    # whether we sync from $server_1_unique_dir or
+    # $server_2_unique_dir, or exit with an error (if $1 isn't a value
+    # we're expecting).
+    case "$1" in
+        "$server_1_dir")
+            _sync_internal "$server_1_unique_dir/" "$1"
+            printf "1"
+        ;;
+
+        "$server_2_dir")
+            _sync_internal "$server_2_unique_dir/" "$1"
+            printf "2"
+        ;;
+
+        *)
+            die "invalid target $1"
+        ;;
+    esac
+}
+
+tmux_attach () {
+    tmux -S "$1" attach-session -t "$tmux_session_name"
+}
+
+tmux_init () {
+    # Creates a tmux session on the socket, if one doesn't exist
+    # already.
+    tmux -S "$1" list-sessions -F#\{session_name\} |
+    grep -qF -- "$tmux_session_name" || tmux -S "$1" \
+    new-session \
+    -d -n "$tmux_session_name" \
+    -s "$tmux_session_name"
+}
+
+tmux_send_keys () {
+    tmux -S "$1" \
+    send-keys \
+    -t "$tmux_session_name" \
+    "$2" Enter
+}
+
+update_code () {
+    if [ ! -d "$src_dir/.git" ]; then
+        rm -rf -- "$src_dir" || die "couldn't clean src dir"
+
+        git clone --recurse-submodules "$code_repo" "$src_dir" ||
+        die "couldn't clone $code_repo"
+    fi
+
+    (
+    safe_cd "$src_dir"
+
+    git checkout "$code_branch" || die "couldn't checkout $code_branch"
+    git pull --recurse-submodules || die "couldn't pull $code_branch"
+
+    ./gradlew -PskipBuild=snbt-builder,dev-launcher,velocity \
+    phantazm-server:copyJar \
+    phantazm-server:copyLibs ||
+    die "couldn't build src"
+    ) || die "couldn't update code"
+}
+
+update_config () {
+    if [ ! -d "$config_dir/.git" ]; then
+        rm -rf -- "$config_dir" || die "couldn't clean config dir"
+
+        git clone "$config_repo" "$config_dir" ||
+        die "couldn't clone $config_repo"
+    fi
+
+    (
+    safe_cd "$config_dir"
+
+    git checkout "$config_branch" ||
+    die "couldn't checkout $config_branch"
+
+    git pull || die "couldn't pull $config_branch"
+    ) || die "couldn't update config"
+}
+
+# END CONTEXTUAL FUNCTIONS
+
+# USER CONFIGURATION VARIABLES
+
+code_repo=""
+code_branch=""
+
+config_repo=""
+config_branch=""
+
+# END USER CONFIGURATION VARIABLES
+
+# SETUP
+
+if [ "$1" = "setup" ]; then
+    # Setup requires user input and so shouldn't be run
+    # non-interactively.
+    [ -t 0 ] || die "setup must be run interactively"
+
+    # Search the current directory for files that shouldn't be there.
+    # This is more of a sanity check than anything, to make sure the
+    # user doesn't accidentally clobber an already-populated
+    # directory.
+    for file in "$current_directory/"*; do
+        # If we run in an empty directory, $file will be a single
+        # '*' character, which does not actually exist. So, ignore
+        # non-existent files.
+        [ -e "$file" ] || continue
+
+        # If we find a .puppet directory, it likely means that setup
+        # has previously run. Inform the user and exit.
+        [ "$file" = "$puppet_dir" ] && die "setup has already been run"
+
+        # The directory must be empty except for the puppet.conf file.
+        if [ "$file" = "$conf_file" ]; then
+            # Sanity check: if puppet.conf is a directory then weird
+            # things will probably happen.
+            [ -f "$file" ] || die "puppet.conf must be a file"
+        else
+            # Any files other than puppet.conf aren't allowed to be
+            # in the folder.
+            die "directory must be empty"
+        fi
+    done
+
+    # We're using $conf_file as a config file, so we don't care if it
+    # can be debugged by shellcheck.
+    # shellcheck disable=SC1090
+    if [ -e "$conf_file" ]; then
+        . "$conf_file" || die "couldn't source $conf_file"
+    fi
+
+    # Fill in any missing configuration entries as needed. These
+    # aren't really validated beyond not being empty, but the user
+    # can always manually edit puppet.conf; generating the config
+    # like this is mostly a matter of convenience.
+    #
+    # Note that $conf_file is allowed to exist, and may already be
+    # populated with values. We'll recreate that file, but the old
+    # values of $code_repo, $code_branch, $conf_repo, and
+    # $conf_branch will be preserved.
+    if [ -z "$code_repo" ]; then
+        printf "Enter the code repository: "
+        read -r code_repo
+    fi
+
+    if [ -z "$code_branch" ]; then
+        printf "Enter the code branch: "
+        read -r code_branch
+    fi
+
+    if [ -z "$config_repo" ]; then
+        printf "Enter the config repository: "
+        read -r config_repo
+    fi
+
+    if [ -z "$config_branch" ]; then
+        printf "Enter the config branch: "
+        read -r config_branch
+    fi
+
+    # Make all necessary directories
+    mkdir -- "$puppet_dir" \
+    "$server_1_dir" \
+    "$server_2_dir" \
+    "$server_1_unique_dir" \
+    "$server_2_unique_dir" \
+    "$common_dir" || die "couldn't make required directories"
+
+    # Set up the initial symlinks
+    (
+    ln -s -- "$server_1_dir" "$main_link" && \
+    ln -s -- "$server_2_dir" "$fallback_link" && \
+    ln -s -- "$socket_1_file" "$main_socket_link" && \
+    ln -s -- "$socket_2_file" "$fallback_socket_link" && \
+    ln -s -- "$status_pipe_1" "$main_status_pipe_link" && \
+    ln -s -- "$status_pipe_2" "$fallback_status_pipe_link"
+    ) || die "couldn't create symlink(s)"
+
+    # Generate the config file based on the user's choices.
+    printf "%s" "#!/bin/false
+code_repo='$( escape_single_quotes "$code_repo" )'
+code_branch='$( escape_single_quotes "$code_branch" )'
+config_repo='$( escape_single_quotes "$config_repo" )'
+config_branch='$( escape_single_quotes "$config_branch" )'" \
+> "$start_file" || die "couldn't generate config file"
+
+    # Generate the starting script. Note that to allow server
+    # directories to be freely moved, this file must not contain
+    # absolute paths. Instead, relevant paths are passed into the
+    # script as arguments.
+    #
+    # The script uses two named pipes. One is used to send the output
+    # of the server to a separate process so that it may be inspected,
+    # the other is used to signal either the success or failure state.
+    # Both pipes are destroyed when the script exits, whether
+    # successful or not.
+    printf "%s" "#!/bin/sh
+write_pipe () {
+    [ -p \"\$1\" ] || return
+    printf \"%s\\n\" \"\$2\" >> \"\$1\"
+
+    [ -f \"\$1\" ] && rm -f -- \"\$1\" 2>&1 /dev/null
+}
+
+case \"\$2\" in
+    \"1\"|\"2\") ;;
+    *)
+        exit 1
+    ;;
+esac
+
+puppet_dir=\"\$1/.puppet\"
+
+server_dir=\"\$puppet_dir/server_\$2\"
+log_pipe=\"\$puppet_dir/\$log_pipe_\$2\"
+status_pipe=\"\$puppet_dir/\$status_pipe_\$2\"
+
+cd -- \"\$server_dir\" || exit 1
+mkfifo -m 600 -- \"\$log_pipe\" || exit 1
+
+exit_hook () {
+    rm -f -- \"\$log_pipe\"
+}
+
+trap \"exit_hook\" EXIT
+
+inspect_pipe () {
+    if grep -qF \"serverIP\" < \"\$log_pipe\"; then
+        write_pipe \"\$status_pipe\" \"OK\"
+    else
+        write_pipe \"\$status_pipe\" \"ERR\"
+        return
+    fi
+
+    tail -f -- \"\$log_pipe\" 2>&1 /dev/null
+}
+
+{ java -Dfile.encoding=UTF-8 -jar server.jar |
+tee -- \"\$log_pipe\" <&3 3<&- & } 3<&0
+server_pid=\"\$!\"
+
+inspect_pipe &
+inspect_pid=\"\$!\"
+
+wait \"\$server_pid\"
+write_pipe \"\$status_pipe\" \"SHUTDOWN\"
+kill \"\$inspect_pid\"
+" > "$start_file" || die "couldn't generate $start_file"
+
+    # $start_file has to be executable.
+    chmod 700 -- "$start_file" ||
+    die "couldn't set permissions on $start_file"
+
+    printf "Setup completed successfully.\n"
+    exit 0
+fi
+
+# END SETUP
+
+# Any other commands besides setup require $puppet_dir to exist first
+[ -d "$puppet_dir" ] || die "must run setup first"
+
+# Suppressed for the same reason as before. We're just loading config
+# here.
+# shellcheck disable=SC1090
+. "$conf_file" || die "couldn't source $conf_file"
+
+# At least we can error in the trivial case that the user didn't set
+# the required config at all...
+require_non_empty "$code_repo"
+require_non_empty "$code_branch"
+require_non_empty "$config_repo"
+require_non_empty "$config_branch"
+
+# Initialize both tmux servers appropriately, as we will likely need
+# to be able to connect to them.
+tmux_init "$socket_1_file"
+tmux_init "$socket_2_file"
+
+# Some commands are "exclusive" and shouldn't be run concurrently.
+# Others aren't. Handle the commands that don't care about being run
+# "simultaneously" first.
+case "$1" in
+    "main")
+        tmux_attach "$main_socket_link"
+        exit 0
+    ;;
+
+    "fallback")
+        tmux_attach "$fallback_socket_link"
+        exit 0
+    ;;
+
+    "help")
+        printf "%s\n" "USAGE: puppet [option]
+
+This script is used to orchestrate Phantazm servers. Updates can be
+deployed without requiring a hard restart and without interrupting
+existing games. Also provides utilities for attaching to the terminals
+associate with the servers.
+
+SETUP
+To set up puppet in an existing directory, run 'puppet setup' in an
+interactive terminal, and follow the setup instructions. You can run
+multiple puppet instances on the same device, even the same user, as
+long as they inhabit different directories.
+
+DEPENDENCIES
+Requires git, tmux, and java (17).
+
+COMPATIBILITY
+POSIX.1-2008 compatible, written entirely in portable shell script.
+Should run on any remotely modern POSIX-compliant machine that is also
+able to run tmux, java 17, and git.
+
+Puppet is also designed for compatibility with BusyBox 1.x.x and
+Alpine Linux 3.x.x or higher.
+
+Valid values for 'option':
+  help: print this message and exit
+  main: attaches to the main server (tmux attach-session)
+  fallback: attaches to the fallback server (tmux attach-session)
+  shutdown: shuts down the main server, without launching a fallback
+  deploy: deploys from existing code and config, without updating
+  deploy-all: updates code & config, deploys
+  deploy-conf: updates configuration, use existing src and deploy
+  deploy-code: updates src, use existing config and deploy
+  setup: set up puppet in the current directory, if empty"
+        exit 0
+    ;;
+esac
+
+# The rest of the script should be "exclusive"; it should not be run
+# concurrently in the same directory. Scripts in different
+# directories may run concurrently.
+mkdir -- "$lock_dir" ||
+die "an instance of this script is already running"
+
+# This is a false positive; the code can be run because it's in a
+# trap.
+# shellcheck disable=SC2317
+exit_hook () {
+    rmdir -- "$lock_dir"
+}
+
+trap "exit_hook" EXIT
+
+case "$1" in
+    "shutdown")
+        # Shut down main, without bringing fallback online first. This
+        # will error if $main_status_pipe_link doesn't exist (which is
+        # the case when the server is already offline).
+        bring_offline "$main_socket_link" "$main_status_pipe_link"
+        exit 0
+    ;;
+
+    "deploy")
+       # deploy requires existing code & config repositories, so make
+       # sure those exist. Don't pull them.
+       require_config
+       require_code
+    ;;
+
+    "deploy-all")
+        # Pull in the config and code repositories.
+        update_config
+        update_code
+    ;;
+
+    "deploy-conf")
+        # Pull in just the config repository, and require the code
+        # repository to exist already.
+        require_code
+        update_config
+    ;;
+
+    "deploy-code")
+        # Pull in just the code repository, and require the config
+        # repository to exist already.
+        require_config
+        update_code
+    ;;
+
+    *)
+        die "unknown command $1"
+    ;;
+esac
+
+# Note that -p here will resolve the symlink and test for the
+# existence of the file pointed at by the link, rather than the link
+# itself.
+[ -p "$main_log_pipe_link" ]
+
+# We are deliberately grabbing the result of the above condition, and
+# storing it for later reference. This is maybe a bit odd, but it
+# prevents us from needing to test multiple times.
+# shellcheck disable=SC2319
+_main_alive="$?"
+
+[ -p "$fallback_log_pipe_link" ]
+
+# Same rationale as above.
+# shellcheck disable=SC2319
+_fallback_alive="$?"
+
+# resolve_dir_link will already show an error message if it fails, so
+# we don't need to do that here.
+_main_dir=$( resolve_dir_link "$main_link" ) || die
+_fallback_dir=$( resolve_dir_link "$fallback_link" ) || die
+
+# Neither server is alive. In this case, we just want to bring up the
+# main server.
+if [ "$_main_alive" -ne 0 ] && [ "$_fallback_alive" -ne 0 ]; then
+    # This function will wait until the server comes online. If it
+    # fails, it will call 'die' as appropriate, so we don't need to
+    # do so here.
+    bring_online "$_main_dir" \
+    "$main_socket_link" \
+    "$main_status_pipe_link"
+
+    # There's nothing else to do, fallback isn't running. Exit.
+    exit 0
+fi
+
+# Main is running; fallback isn't. We need to bring up fallback, and
+# shut down main in an orderly fashion.
+if [ "$_main_alive" -eq 0 ] && [ "$_fallback_alive" -ne 0 ]; then
+    bring_online "$_fallback_dir" \
+    "$fallback_socket_link" \
+    "$fallback_status_pipe_link"
+
+    bring_offline "$main_socket_link" "$main_status_pipe_link"
+
+    # Everything went well; promote the fallback instance to the main
+    # instance by swapping out the symlinks, then exit.
+    promote_fallback "$_fallback_dir"
+    exit 0
+fi
+
+# Other states such as fallback being alive while main isn't, or
+# both being alive, are generally not permitted, and there's probably
+# some sort of state corruption going on that we can't automatically
+# fix.
+die "invalid state"
