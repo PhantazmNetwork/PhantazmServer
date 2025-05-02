@@ -53,6 +53,11 @@
 # supported. Or, if no flags are being used, -- should appear at the
 # beginning.
 #
+# Functions that don't reference global variables should go in the
+# UTILITY FUNCTIONS section. They should be alphabetically ordered by
+# name. Functions that do reference global variables should go in the
+# CONTEXTUAL FUNCTIONS section, likewise alphabetically ordered.
+#
 # KNOWN LIMITATIONS
 #
 # This script is not designed to handle paths with newlines, and so
@@ -456,14 +461,14 @@ if [ "$1" = "setup" ]; then
     # We're using $conf_file as a config file, so we don't care if it
     # can be debugged by shellcheck.
     # shellcheck disable=SC1090
-    if [ -e "$conf_file" ]; then
+    if [ -f "$conf_file" ]; then
         . "$conf_file" || die "couldn't source $conf_file"
     fi
 
     # Fill in any missing configuration entries as needed. These
-    # aren't really validated beyond not being empty, but the user
-    # can always manually edit puppet.conf; generating the config
-    # like this is mostly a matter of convenience.
+    # aren't validated, but the user can always manually edit
+    # puppet.conf; generating the config like this is mostly a matter
+    # of convenience.
     #
     # Note that $conf_file is allowed to exist, and may already be
     # populated with values. We'll recreate that file, but the old
