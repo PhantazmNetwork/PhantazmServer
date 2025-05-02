@@ -52,6 +52,11 @@
 # -- as a separator between any flags and the files, if this is
 # supported. Or, if no flags are being used, -- should appear at the
 # beginning.
+#
+# KNOWN LIMITATIONS
+#
+# This script is not designed to handle paths with newlines, and so
+# should not be run in directories where such filenames are present.
 
 # UTILITY FUNCTIONS (these do not reference global variables)
 
@@ -67,9 +72,9 @@ die () {
 
 escape_single_quotes () {
     # Sanitize the input string by replacing all single quotes with
-    # '"'"'. This makes the string valid for inclusion in e.g.
+    # '\''. This makes the string valid for inclusion in e.g.
     # embedded scripts, explicit calls to sh, etc.
-    printf "%s" "$1" | sed "s/'/'\"'\"'/"
+    printf "%s" "$1" | sed "s/'/\\''/"
 }
 
 msg () {
@@ -101,10 +106,11 @@ resolve_dir_link () {
     #
     # Use a subshell just to prevent changing the current directory of
     # the calling shell.
-    _dir=$( cd -- "$1" > /dev/null || exit 1; pwd -P ) ||
-    die "couldn't resolve link at $1"
-
-    printf "%s" "$_dir"
+    #
+    # This only works if $1 is a link to a directory, for obvious
+    # reasons.
+    ( cd -- "$1" > /dev/null || exit 1; pwd -P ) ||
+    die "couldn't resolve directory link at $1"
 }
 
 safe_cd () {
@@ -206,13 +212,10 @@ bring_offline () {
     # Send the shutdown command to the server.
     tmux_send_keys "$1" orderly_shutdown
 
-    # This will block until the target server shuts down.
-    _status=$( cat -u -- "$2" ) ||
-    die "couldn't wait for shutdown"
-
-    # Error if there's an unexpected status code.
-    [ "$_status" = "SHUTDOWN" ] ||
-    die "couldn't recognize process status $_status"
+    # Wait for the log file link to be removed.
+    while [ -p "$2" ]; do
+        sleep 1
+    done
 }
 
 bring_online () {
@@ -224,34 +227,37 @@ bring_online () {
     # $server_1_dir or $server_2_dir.
     _target_id=$( sync_target "$1" ) || die
 
-    # Make the named pipe.
-    mkfifo -m 600 "$3"
+    case "$_target_id" in
+        "1") _status_pipe="$status_pipe_1" ;;
+        "2") _status_pipe="$status_pipe_2" ;;
+
+        # This indicates a bug in the script that should be fixed.
+        *) die "unexpected target_id $_target_id" ;;
+    esac
 
     # Start up the server. This literally types the startup command
     # into the tmux terminal.
     tmux_send_keys "$2" \
     "'$_escaped_start_file' '$_escaped_cwd' $_target_id"
 
-    # cat will block here until there's some data in the pipe.
-    _status=$( cat -u -- "$3" ) ||
-    die "error launching server_$_target_id"
+    # cat will block here until there's some data in the pipe. If the
+    # startup script never sends anything, this will deadlock.
+    # Fortunately, this (should) only happen if the script was
+    # SIGKILLED at an inopportune time.
+    _status=$( cat -u -- "$_status_pipe" ) ||
+    die "couldn't launch server_$_target_id"
 
     case "$_status" in
-        "OK")
-            rm -f -- "$3"
-        ;;
+        "OK") ;;
         "ERR")
-            # Drain the status pipe; it should send us a SHUTDOWN
-            # signal next but we don't need to check for it.
-            cat -u -- "$3" 2>&1 /dev/null
-
             # We were able to connect to the pipe, but the process
             # reported an error launching the server, e.g. there was
             # a compiler error.
             die "couldn't launch server_$_target_id"
         ;;
         *)
-            # This indicates a bug in the starting script.
+            # This indicates a bug in the starting script that should
+            # be fixed.
             die "couldn't recognize status code $_status"
         ;;
     esac
@@ -264,43 +270,38 @@ promote_fallback () {
         "$server_1_dir")
             _new_main_socket="$socket_1_file"
             _new_main_status_pipe="$status_pipe_1"
+            _new_main_log_pipe="$log_pipe_1"
 
             _new_fallback_dir="$server_2_dir"
             _new_fallback_socket="$socket_2_file"
             _new_fallback_status_pipe="$status_pipe_2"
+            _new_fallback_log_pipe="$log_pipe_2"
         ;;
 
         "$server_2_dir")
             _new_main_socket="$socket_2_file"
             _new_main_status_pipe="$status_pipe_2"
+            _new_main_log_pipe="$log_pipe_2"
 
             _new_fallback_dir="$server_1_dir"
             _new_fallback_socket="$socket_1_file"
             _new_fallback_status_pipe="$status_pipe_1"
+            _new_fallback_log_pipe="$log_pipe_1"
         ;;
 
-        *)
-            die "couldn't recognize server directory $1"
-        ;;
+        *) die "couldn't recognize server directory $1" ;;
     esac
 
-    # Delete all of the old symlinks...
-    rm -- "$main_link" \
-    "$fallback_link" \
-    "$main_socket_link" \
-    "$fallback_socket_link" \
-    "$main_status_pipe_link" \
-    "$fallback_status_pipe_link" ||
-    die "couldn't remove symlink(s)"
-
-    # ...and create new ones.
+    # Update the symbolic links.
     (
-    ln -s -- "$_new_main_dir" "$main_link" && \
-    ln -s -- "$_new_fallback_dir" "$fallback_link" && \
-    ln -s -- "$_new_main_socket" "$main_socket_link" && \
-    ln -s -- "$_new_fallback_socket" "$fallback_socket_link" && \
-    ln -s -- "$_new_main_status_pipe" "$main_status_pipe_link" && \
-    ln -s -- "$_new_fallback_status_pipe" "$fallback_status_pipe_link"
+    ln -sf -- "$_new_main_dir" "$main_link" && \
+    ln -sf -- "$_new_fallback_dir" "$fallback_link" && \
+    ln -sf -- "$_new_main_socket" "$main_socket_link" && \
+    ln -sf -- "$_new_fallback_socket" "$fallback_socket_link" && \
+    ln -sf -- "$_new_main_status_pipe" "$main_status_pipe_link" && \
+    ln -sf -- "$_new_fallback_status_pipe" "$fallback_status_pipe_link" && \
+    ln -sf -- "$_new_main_log_pipe" "$main_log_pipe_link" && \
+    ln -sf -- "$_new_fallback_log_pipe" "$fallback_log_pipe_link"
     ) || die "couldn't create symlink(s)"
 }
 
@@ -337,9 +338,7 @@ sync_target () {
             printf "2"
         ;;
 
-        *)
-            die "invalid target $1"
-        ;;
+        *) die "invalid target $1" ;;
     esac
 }
 
@@ -375,13 +374,14 @@ update_code () {
     (
     safe_cd "$src_dir"
 
-    git checkout "$code_branch" || die "couldn't checkout $code_branch"
+    git checkout "$code_branch" ||
+    die "couldn't checkout $code_branch"
+
     git pull --recurse-submodules || die "couldn't pull $code_branch"
 
     ./gradlew -PskipBuild=snbt-builder,dev-launcher,velocity \
     phantazm-server:copyJar \
-    phantazm-server:copyLibs ||
-    die "couldn't build src"
+    phantazm-server:copyLibs || die "couldn't build src"
     ) || die "couldn't update code"
 }
 
@@ -484,13 +484,16 @@ if [ "$1" = "setup" ]; then
         read -r config_branch
     fi
 
-    # Make all necessary directories
+    # Make all necessary directories.
     mkdir -- "$puppet_dir" \
     "$server_1_dir" \
     "$server_2_dir" \
     "$server_1_unique_dir" \
     "$server_2_unique_dir" \
     "$common_dir" || die "couldn't make required directories"
+
+    # Set up the named pipes we use for IPC.
+    mkfifo -m 600 -- "$status_pipe_1" "$status_pipe_2"
 
     # Set up the initial symlinks
     (
@@ -499,7 +502,9 @@ if [ "$1" = "setup" ]; then
     ln -s -- "$socket_1_file" "$main_socket_link" && \
     ln -s -- "$socket_2_file" "$fallback_socket_link" && \
     ln -s -- "$status_pipe_1" "$main_status_pipe_link" && \
-    ln -s -- "$status_pipe_2" "$fallback_status_pipe_link"
+    ln -s -- "$status_pipe_2" "$fallback_status_pipe_link" && \
+    ln -s -- "$log_pipe_1" "$main_log_pipe_link" && \
+    ln -s -- "$log_pipe_2" "$fallback_log_pipe_link"
     ) || die "couldn't create symlink(s)"
 
     # Generate the config file based on the user's choices.
@@ -512,34 +517,42 @@ config_branch='$( escape_single_quotes "$config_branch" )'" \
 
     # Generate the starting script. Note that to allow server
     # directories to be freely moved, this file must not contain
-    # absolute paths. Instead, relevant paths are passed into the
-    # script as arguments.
+    # absolute paths. Instead, paths are derived from the arguments
+    # passed into the script.
     #
     # The script uses two named pipes. One is used to send the output
     # of the server to a separate process so that it may be inspected,
     # the other is used to signal either the success or failure state.
-    # Both pipes are destroyed when the script exits, whether
-    # successful or not.
+    # These are, respectively, $log_pipe and $status_pipe. $log_pipe
+    # is used only within the scope of the startup wrapper, and is
+    # deleted on exit (though its existence is used to check whether
+    # the process is online). $status_pipe is NOT created by the
+    # startup wrapper, and is used solely to enable communication
+    # between the wrapper and puppet.
     printf "%s" "#!/bin/sh
 write_pipe () {
-    [ -p \"\$1\" ] || return
-    printf \"%s\\n\" \"\$2\" >> \"\$1\"
+    printf \"%s\\n\" \"\$2\" >> \"\$1\" &
+    _write_pid=\"\$!\"
 
-    [ -f \"\$1\" ] && rm -f -- \"\$1\" 2>&1 /dev/null
+    { sleep 5; kill \"\$_write_pid\" > /dev/null 2>&1 } &
+    wait \"\$_write_pid\"
 }
-
-case \"\$2\" in
-    \"1\"|\"2\") ;;
-    *)
-        exit 1
-    ;;
-esac
 
 puppet_dir=\"\$1/.puppet\"
 
-server_dir=\"\$puppet_dir/server_\$2\"
-log_pipe=\"\$puppet_dir/\$log_pipe_\$2\"
-status_pipe=\"\$puppet_dir/\$status_pipe_\$2\"
+case \"\$2\" in
+    \"1\")
+        server_dir=\"\$puppet_dir/server_1\"
+        log_pipe=\"\$puppet_dir/log_pipe_1\"
+        status_pipe=\"\$puppet_dir/status_pipe_1\"
+    ;;
+    \"2\")
+        server_dir=\"\$puppet_dir/server_2\"
+        log_pipe=\"\$puppet_dir/log_pipe_2\"
+        status_pipe=\"\$puppet_dir/status_pipe_2\"
+    ;;
+    *) exit 1 ;;
+esac
 
 cd -- \"\$server_dir\" || exit 1
 mkfifo -m 600 -- \"\$log_pipe\" || exit 1
@@ -558,7 +571,7 @@ inspect_pipe () {
         return
     fi
 
-    tail -f -- \"\$log_pipe\" 2>&1 /dev/null
+    cat -u -- \"\$log_pipe\" > /dev/null 2>&1
 }
 
 { java -Dfile.encoding=UTF-8 -jar server.jar |
@@ -569,7 +582,6 @@ inspect_pipe &
 inspect_pid=\"\$!\"
 
 wait \"\$server_pid\"
-write_pipe \"\$status_pipe\" \"SHUTDOWN\"
 kill \"\$inspect_pid\"
 " > "$start_file" || die "couldn't generate $start_file"
 
@@ -639,8 +651,8 @@ POSIX.1-2008 compatible, written entirely in portable shell script.
 Should run on any remotely modern POSIX-compliant machine that is also
 able to run tmux, java 17, and git.
 
-Puppet is also designed for compatibility with BusyBox 1.x.x and
-Alpine Linux 3.x.x or higher.
+Puppet is also explicitly designed for compatibility with
+BusyBox 1.x.x and Alpine Linux 3.x.x.
 
 Valid values for 'option':
   help: print this message and exit
@@ -673,10 +685,7 @@ trap "exit_hook" EXIT
 
 case "$1" in
     "shutdown")
-        # Shut down main, without bringing fallback online first. This
-        # will error if $main_status_pipe_link doesn't exist (which is
-        # the case when the server is already offline).
-        bring_offline "$main_socket_link" "$main_status_pipe_link"
+        bring_offline "$main_socket_link" "$main_log_pipe_link"
         exit 0
     ;;
 
@@ -707,9 +716,7 @@ case "$1" in
         update_code
     ;;
 
-    *)
-        die "unknown command $1"
-    ;;
+    *) die "unknown command $1" ;;
 esac
 
 # Note that -p here will resolve the symlink and test for the
@@ -755,7 +762,7 @@ if [ "$_main_alive" -eq 0 ] && [ "$_fallback_alive" -ne 0 ]; then
     "$fallback_socket_link" \
     "$fallback_status_pipe_link"
 
-    bring_offline "$main_socket_link" "$main_status_pipe_link"
+    bring_offline "$main_socket_link" "$main_log_pipe_link"
 
     # Everything went well; promote the fallback instance to the main
     # instance by swapping out the symlinks, then exit.
