@@ -212,7 +212,12 @@ bring_offline () {
     # Send the shutdown command to the server.
     tmux_send_keys "$1" orderly_shutdown
 
-    # Wait for the log file link to be removed.
+    # Wait for the log file link to be removed. This
+    # indicates that the server has shut down, as it is removed only
+    # when the wrapper script exits.
+    #
+    # We wait in a loop, instead of using a FIFO, because we may end
+    # up blocking indefinitely if the server was already shut down.
     while [ -p "$2" ]; do
         sleep 1
     done
@@ -530,12 +535,27 @@ config_branch='$( escape_single_quotes "$config_branch" )'" \
     # startup wrapper, and is used solely to enable communication
     # between the wrapper and puppet.
     printf "%s" "#!/bin/sh
+#
+# Generated Puppet wrapper script; do not edit!
+#
+
 write_pipe () {
+    # Start writing to the pipe in the background, and grab the PID
+    # of this child process.
     printf \"%s\\n\" \"\$2\" >> \"\$1\" &
     _write_pid=\"\$!\"
 
+    # Start a timer. After the timer elapses, try to kill the printf
+    # command.
     { sleep 5; kill \"\$_write_pid\" > /dev/null 2>&1 } &
+    _timer_pid=\"\$!\"
+
+    # Either the write succeeded or it got killed by the timer.
     wait \"\$_write_pid\"
+
+    # Clean up the timer process to. Not strictly necessary but seems
+    # reasonable to do anyway.
+    kill \"\$_timer_pid\"
 }
 
 puppet_dir=\"\$1/.puppet\"
@@ -555,6 +575,10 @@ case \"\$2\" in
 esac
 
 cd -- \"\$server_dir\" || exit 1
+
+# This FIFO is only read/written by child processes of this wrapper
+# script. However, its existence is used to determine if we are
+# \"running\" or not, so we make sure to delete it on exit.
 mkfifo -m 600 -- \"\$log_pipe\" || exit 1
 
 exit_hook () {
@@ -564,6 +588,16 @@ exit_hook () {
 trap \"exit_hook\" EXIT
 
 inspect_pipe () {
+    # Read from the log pipe until we see the \"serverIP\" text. Then,
+    # signal \$status_pipe. If we got EOF (because the server process
+    # exited) we send ERR. Otherwise, send OK, and redirect the pipe
+    # to /dev/null, because we don't care to inspect anything that
+    # gets sent over anymore, and not reading from it at all would
+    # cause the server process to hang.
+    #
+    # To prevent deadlocks in case nobody's listening on the other
+    # end, write_pipe will wait a maximum of 5 seconds for the OK or
+    # ERR signal to go through.
     if grep -qF \"serverIP\" < \"\$log_pipe\"; then
         write_pipe \"\$status_pipe\" \"OK\"
     else
@@ -574,14 +608,22 @@ inspect_pipe () {
     cat -u -- \"\$log_pipe\" > /dev/null 2>&1
 }
 
+# Start the server as a background process. Redirect standard input so
+# that we can still type commands into the console.
 { java -Dfile.encoding=UTF-8 -jar server.jar |
 tee -- \"\$log_pipe\" <&3 3<&- & } 3<&0
 server_pid=\"\$!\"
 
+# Start listening to the server output on a background process.
 inspect_pipe &
 inspect_pid=\"\$!\"
 
+# Just wait on the server process.
 wait \"\$server_pid\"
+
+# This may or may not still be running, depending on whether cat
+# SIGPIPES, which is implementation-specific. So, we clean up after
+# ourselves.
 kill \"\$inspect_pid\"
 " > "$start_file" || die "couldn't generate $start_file"
 
