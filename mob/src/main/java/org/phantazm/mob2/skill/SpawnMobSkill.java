@@ -20,6 +20,7 @@ import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 @Model("mob.skill.spawn_mob")
 @Cache
@@ -56,12 +57,12 @@ public class SpawnMobSkill implements SkillComponent {
             return current;
         }
 
-        private TagHandler ownerTags(boolean unlimitedSpawns, boolean useLocalCount) {
+        private TagHandler ownerTags(boolean useLocalCount) {
             if (ownerTags != null) {
                 return ownerTags;
             }
 
-            return ownerTags = unlimitedSpawns ? null : (useLocalCount ? self : findRootOwner()).tagHandler();
+            return ownerTags = (useLocalCount ? self : findRootOwner()).tagHandler();
         }
     }
 
@@ -84,6 +85,8 @@ public class SpawnMobSkill implements SkillComponent {
         {
           trigger=null,
           useLocalCount=false,
+          useInstanceCount=false,
+          instanceCountKey=null,
           offset=null
         }
         """)
@@ -94,6 +97,8 @@ public class SpawnMobSkill implements SkillComponent {
         int spawnAmount,
         int maxSpawn,
         boolean useLocalCount,
+        boolean useInstanceCount,
+        @Nullable String instanceCountKey,
         @Nullable Vec3D offset) {
 
         private boolean unlimitedSpawns() {
@@ -106,6 +111,7 @@ public class SpawnMobSkill implements SkillComponent {
         private final ExtensionHolder.Key<Extension> key;
         private final SpawnCallback callback;
         private final Tag<Integer> spawnCountTag;
+        private final Tag<Integer> instanceCountTag;
 
         private Internal(Selector selector, Data data, ExtensionHolder.Key<Extension> key, SpawnCallback callback,
             Tag<Integer> spawnCountTag) {
@@ -114,6 +120,12 @@ public class SpawnMobSkill implements SkillComponent {
             this.key = key;
             this.callback = callback;
             this.spawnCountTag = spawnCountTag;
+
+            if (data.useInstanceCount && data.instanceCountKey != null) {
+                instanceCountTag = Tag.Integer(data.instanceCountKey);
+            } else {
+                instanceCountTag = null;
+            }
         }
 
         @Override
@@ -146,13 +158,8 @@ public class SpawnMobSkill implements SkillComponent {
                 return;
             }
 
-            Extension ext = self.extensions().get(key);
-            if (ext.ownerTags(data.unlimitedSpawns(), data.useLocalCount).getTag(spawnCountTag) >= data.maxSpawn) {
-                return;
-            }
-
             List<Point> spawnTargets = new ArrayList<>(points.size() * data.spawnAmount);
-            ext.ownerTags(data.unlimitedSpawns(), data.useLocalCount).updateTag(spawnCountTag, currentAmount -> {
+            UnaryOperator<Integer> tagUpdate = currentAmount -> {
                 if (currentAmount >= data.maxSpawn) {
                     return currentAmount;
                 }
@@ -167,7 +174,16 @@ public class SpawnMobSkill implements SkillComponent {
                 }
 
                 return currentAmount;
-            });
+            };
+
+            if (instanceCountTag != null) {
+                instance.tagHandler().updateTag(instanceCountTag, tagUpdate);
+            } else {
+                Extension ext = self.extensions().get(key);
+
+                if (ext.ownerTags(data.useLocalCount).getTag(spawnCountTag) >= data.maxSpawn) return;
+                ext.ownerTags(data.useLocalCount).updateTag(spawnCountTag, tagUpdate);
+            }
 
             spawnAt(self, instance, spawnTargets);
         }
@@ -196,7 +212,7 @@ public class SpawnMobSkill implements SkillComponent {
                 @Override
                 public void end(@NotNull Mob mob) {
                     Extension ext = self.extensions().get(key);
-                    ext.ownerTags(data.unlimitedSpawns(), data.useLocalCount).updateTag(spawnCountTag, value -> value - 1);
+                    ext.ownerTags(data.useLocalCount).updateTag(spawnCountTag, value -> value - 1);
                 }
             });
         }

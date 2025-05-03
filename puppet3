@@ -8,6 +8,7 @@
 #
 # * git
 # * java
+# * rsync
 # * tmux
 #
 # Run 'puppet help' for more info.
@@ -68,7 +69,7 @@
 die () {
     # The first argument is optional. If it's not there, don't print
     # anything, just exit.
-    [ -n "$1" ] && exit 1
+    [ -n "$1" ] || exit 1
 
     # Print the formatted message to stderr.
     msg "\033[31;1m[ERROR]\033[0m %s\n" "[ERROR] %s\n" "$1" 1>&2
@@ -327,7 +328,7 @@ sync_target () {
     _sync_internal () {
         rsync -ac --delete -- "$1" \
         "$server_jar" \
-        "$libs_dir/" \
+        "$libs_dir" \
         "$common_dir/" \
         "$config_dir/" \
         "$2" > /dev/null || die "couldn't sync"
@@ -359,11 +360,12 @@ tmux_attach () {
 tmux_init () {
     # Creates a tmux session on the socket, if one doesn't exist
     # already.
-    tmux -S "$1" list-sessions -F#\{session_name\} |
-    grep -qF -- "$tmux_session_name" || tmux -S "$1" \
-    new-session \
-    -d -n "$tmux_session_name" \
-    -s "$tmux_session_name"
+    if [ ! -S "$1" ] || ! tmux -S "$1" list-sessions \
+    -F#\{session_name\} | grep -qF -- "$tmux_session_name"; then
+        tmux -S "$1" new-session \
+        -d -n "$tmux_session_name" \
+        -s "$tmux_session_name"
+    fi
 }
 
 tmux_send_keys () {
@@ -505,6 +507,11 @@ if [ "$1" = "setup" ]; then
     # Set up the named pipes we use for IPC.
     mkfifo -m 600 -- "$status_pipe_1" "$status_pipe_2"
 
+    touch -- "$conf_file"
+
+    chmod 600 -- "$conf_file" ||
+    die "couldn't set permissions on $conf_file"
+
     # Set up the initial symlinks
     (
     ln -s -- "$server_1_dir" "$main_link" && \
@@ -523,7 +530,7 @@ code_repo='$( escape_single_quotes "$code_repo" )'
 code_branch='$( escape_single_quotes "$code_branch" )'
 config_repo='$( escape_single_quotes "$config_repo" )'
 config_branch='$( escape_single_quotes "$config_branch" )'" \
-> "$start_file" || die "couldn't generate config file"
+> "$conf_file" || die "couldn't generate config file"
 
     # Generate the starting script. Note that to allow server
     # directories to be freely moved, this file must not contain
@@ -552,15 +559,15 @@ write_pipe () {
 
     # Start a timer. After the timer elapses, try to kill the printf
     # command.
-    { sleep 5; kill \"\$_write_pid\" > /dev/null 2>&1 } &
+    { sleep 5; kill \"\$_write_pid\" > /dev/null 2>&1; } &
     _timer_pid=\"\$!\"
 
     # Either the write succeeded or it got killed by the timer.
     wait \"\$_write_pid\"
 
-    # Clean up the timer process to. Not strictly necessary but seems
+    # Clean up the timer process too. Not strictly necessary but seems
     # reasonable to do anyway.
-    kill \"\$_timer_pid\"
+    kill \"\$_timer_pid\" > /dev/null 2>&1
 }
 
 puppet_dir=\"\$1/.puppet\"
@@ -613,10 +620,13 @@ inspect_pipe () {
     cat -u -- \"\$log_pipe\" > /dev/null 2>&1
 }
 
+server () {
+    java -Dfile.encoding=UTF-8 -jar server.jar
+}
+
 # Start the server as a background process. Redirect standard input so
 # that we can still type commands into the console.
-{ java -Dfile.encoding=UTF-8 -jar server.jar |
-tee -- \"\$log_pipe\" <&3 3<&- & } 3<&0
+{ server | tee -- \"\$log_pipe\" <&3 3<&- & } 3<&0
 server_pid=\"\$!\"
 
 # Start listening to the server output on a background process.
@@ -691,7 +701,7 @@ multiple puppet instances on the same device, even the same user, as
 long as they inhabit different directories.
 
 DEPENDENCIES
-Requires git, tmux, and java (17).
+Requires git, tmux, rsync, and java (=17).
 
 COMPATIBILITY
 POSIX.1-2008 compatible, written entirely in portable shell script.
