@@ -85,7 +85,6 @@ public class SpawnMobSkill implements SkillComponent {
         {
           trigger=null,
           useLocalCount=false,
-          useInstanceCount=false,
           instanceCountKey=null,
           offset=null
         }
@@ -97,7 +96,6 @@ public class SpawnMobSkill implements SkillComponent {
         int spawnAmount,
         int maxSpawn,
         boolean useLocalCount,
-        boolean useInstanceCount,
         @Nullable String instanceCountKey,
         @Nullable Vec3D offset) {
 
@@ -121,7 +119,7 @@ public class SpawnMobSkill implements SkillComponent {
             this.callback = callback;
             this.spawnCountTag = spawnCountTag;
 
-            if (data.useInstanceCount && data.instanceCountKey != null) {
+            if (data.instanceCountKey != null) {
                 instanceCountTag = Tag.Integer(data.instanceCountKey);
             } else {
                 instanceCountTag = null;
@@ -205,9 +203,7 @@ public class SpawnMobSkill implements SkillComponent {
 
         private void setup(Mob self, Mob child) {
             child.setOwner(self.getUuid());
-            if (data.unlimitedSpawns()) {
-                return;
-            }
+            if (data.unlimitedSpawns()) return;
 
             child.addSkill(new Skill() {
                 private static final UnaryOperator<Integer> DECREMENT = value -> value - 1;
