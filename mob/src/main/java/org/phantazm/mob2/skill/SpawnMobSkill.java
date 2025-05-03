@@ -181,8 +181,10 @@ public class SpawnMobSkill implements SkillComponent {
             } else {
                 Extension ext = self.extensions().get(key);
 
-                if (ext.ownerTags(data.useLocalCount).getTag(spawnCountTag) >= data.maxSpawn) return;
-                ext.ownerTags(data.useLocalCount).updateTag(spawnCountTag, tagUpdate);
+                TagHandler handler = ext.ownerTags(data.useLocalCount);
+
+                if (handler.getTag(spawnCountTag) >= data.maxSpawn) return;
+                handler.updateTag(spawnCountTag, tagUpdate);
             }
 
             spawnAt(self, instance, spawnTargets);
