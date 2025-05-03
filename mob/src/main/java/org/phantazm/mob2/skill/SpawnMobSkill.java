@@ -85,7 +85,7 @@ public class SpawnMobSkill implements SkillComponent {
         {
           trigger=null,
           useLocalCount=false,
-          useInstanceCount=false,
+          useInstanceCount=true,
           instanceCountKey=null,
           offset=null
         }
