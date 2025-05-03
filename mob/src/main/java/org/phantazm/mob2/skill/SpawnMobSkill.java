@@ -85,7 +85,7 @@ public class SpawnMobSkill implements SkillComponent {
         {
           trigger=null,
           useLocalCount=false,
-          useInstanceCount=true,
+          useInstanceCount=false,
           instanceCountKey=null,
           offset=null
         }
@@ -179,18 +179,17 @@ public class SpawnMobSkill implements SkillComponent {
             if (instanceCountTag != null) {
                 instance.tagHandler().updateTag(instanceCountTag, tagUpdate);
             } else {
-                Extension ext = self.extensions().get(key);
-
-                TagHandler handler = ext.ownerTags(data.useLocalCount);
-
-                if (handler.getTag(spawnCountTag) >= data.maxSpawn) return;
-                handler.updateTag(spawnCountTag, tagUpdate);
+                self.extensions().get(key).ownerTags(data.useLocalCount).updateTag(spawnCountTag, tagUpdate);
             }
 
             spawnAt(self, instance, spawnTargets);
         }
 
         private void spawnAt(Mob self, Instance instance, Collection<? extends Point> targets) {
+            if (targets.isEmpty()) {
+                return;
+            }
+
             MobSpawner mobSpawner = self.extensions().get(BasicMobSpawner.SPAWNER_KEY);
             if (!mobSpawner.canSpawn(data.identifier)) {
                 return;
@@ -211,10 +210,18 @@ public class SpawnMobSkill implements SkillComponent {
             }
 
             child.addSkill(new Skill() {
+                private static final UnaryOperator<Integer> DECREMENT = value -> value - 1;
+
                 @Override
                 public void end(@NotNull Mob mob) {
+                    if (instanceCountTag != null) {
+                        Instance instance = mob.getInstance();
+                        if (instance != null) instance.tagHandler().updateTag(instanceCountTag, DECREMENT);
+                        return;
+                    }
+
                     Extension ext = self.extensions().get(key);
-                    ext.ownerTags(data.useLocalCount).updateTag(spawnCountTag, value -> value - 1);
+                    ext.ownerTags(data.useLocalCount).updateTag(spawnCountTag, DECREMENT);
                 }
             });
         }
