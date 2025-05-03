@@ -22,15 +22,8 @@ import java.util.List;
 @Model("item.updating.cost_substituting")
 @Cache(false)
 public class CostSubstitutingItem implements ItemUpdater {
-    private static final int UPDATE_INTERVAL = 10;
-
     private final Data data;
     private final TransactionModifierSource modifierSource;
-
-    private int ticks;
-
-    private boolean hasOldCost;
-    private int oldCost;
 
     @FactoryMethod
     public CostSubstitutingItem(@NotNull Data data, @NotNull TransactionModifierSource modifierSource) {
@@ -40,15 +33,12 @@ public class CostSubstitutingItem implements ItemUpdater {
 
     @Override
     public @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot) {
-        int cost = cost();
-        this.oldCost = cost;
-        this.hasOldCost = true;
-        return computeItemStack(cost);
+        return computeItemStack(cost());
     }
 
     @Override
     public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot) {
-        return (ticks++ % UPDATE_INTERVAL == 0 && (!hasOldCost || cost() != oldCost));
+        return !computeItemStack(cost()).equals(current);
     }
 
     private ItemStack computeItemStack(int cost) {
