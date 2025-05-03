@@ -120,7 +120,7 @@ public class SpawnMobSkill implements SkillComponent {
             this.spawnCountTag = spawnCountTag;
 
             if (data.instanceCountKey != null) {
-                instanceCountTag = Tag.Integer(data.instanceCountKey);
+                instanceCountTag = Tag.Integer(data.instanceCountKey).defaultValue(0);
             } else {
                 instanceCountTag = null;
             }
