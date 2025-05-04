@@ -61,8 +61,9 @@
 #
 # KNOWN LIMITATIONS
 #
-# This script is not designed to handle paths with newlines, and so
-# should not be run in directories where such filenames are present.
+# This script is not designed to handle paths with trailing newlines,
+# and so should not be run in directories where such filenames are
+# present.
 
 # UTILITY FUNCTIONS (these do not reference global variables)
 
@@ -122,7 +123,7 @@ resolve_dir_link () {
 safe_cd () {
     # Die if the directory doesn't exist, no permissions, etc. Only
     # redirect stdout to /dev/null because the user probably wants to
-    # see what the error message was.
+    # see what the error message was, if any.
     cd -- "$1" > /dev/null || die "couldn't cd to $1"
 }
 
@@ -222,8 +223,9 @@ bring_offline () {
     # indicates that the server has shut down, as it is removed only
     # when the wrapper script exits.
     #
-    # We wait in a loop, instead of using a FIFO, because we may end
-    # up blocking indefinitely if the server was already shut down.
+    # We wait in a loop, instead of using a FIFO and signalling,
+    # because we may end up blocking indefinitely if the server was
+    # already shut down.
     while [ -p "$2" ]; do
         sleep 1
     done
@@ -438,12 +440,12 @@ if [ "$1" = "setup" ]; then
     # This is more of a sanity check than anything, to make sure the
     # user doesn't accidentally clobber an already-populated
     # directory.
-    for file in "$current_directory/"* .*; do
+    for file in "$current_directory/"* "$current_directory/".*; do
         _basename=$( basename "$file" )
 
         # Ignore . and .. directory components, and non-existent files
-        [ "$_basename" -eq "." ] && continue
-        [ "$_basename" -eq ".." ] && continue
+        [ "$_basename" = "." ] && continue
+        [ "$_basename" = ".." ] && continue
         [ -e "$file" ] || continue
 
         # If we find a .puppet directory, it likely means that setup
@@ -614,7 +616,7 @@ inspect_pipe () {
     # To prevent deadlocks in case nobody's listening on the other
     # end, write_pipe will wait a maximum of 5 seconds for the OK or
     # ERR signal to go through.
-    if grep -qF \"serverIP\" < \"\$log_pipe\"; then
+    if grep -qF \"serverIP\" \"\$log_pipe\"; then
         write_pipe \"\$status_pipe\" \"OK\"
     else
         write_pipe \"\$status_pipe\" \"ERR\"
@@ -646,9 +648,13 @@ cat_pid=\"\$!\"
 # Wait on the server process first.
 wait \"\$server_pid\"
 
+# Kill the process that's writing to \$log_pipe.
 kill \"\$tee_pid\" > /dev/null 2>&1
+
+# Wait for the inspect_pipe function to finish whatever it's doing.
 wait \"\$inspect_pid\"
 
+# Clean up after ourselves.
 kill \"\$cat_pid\" \"\$inspect_pid\" > /dev/null 2>&1
 " > "$start_file" || die "couldn't generate $start_file"
 
@@ -662,42 +668,10 @@ fi
 
 # END SETUP
 
-# Any other commands besides setup require $puppet_dir to exist first
-[ -d "$puppet_dir" ] || die "must run setup first"
-
-# Suppressed for the same reason as before. We're just loading config
-# here.
-# shellcheck disable=SC1090
-. "$conf_file" || die "couldn't source $conf_file"
-
-# At least we can error in the trivial case that the user didn't set
-# the required config at all...
-require_non_empty "$code_repo"
-require_non_empty "$code_branch"
-require_non_empty "$config_repo"
-require_non_empty "$config_branch"
-
-# Initialize both tmux servers appropriately, as we will likely need
-# to be able to connect to them.
-tmux_init "$socket_1_file"
-tmux_init "$socket_2_file"
-
-# Some commands are "exclusive" and shouldn't be run concurrently.
-# Others aren't. Handle the commands that don't care about being run
-# "simultaneously" first.
-case "$1" in
-    "main")
-        tmux_attach "$main_socket_link"
-        exit 0
-    ;;
-
-    "fallback")
-        tmux_attach "$fallback_socket_link"
-        exit 0
-    ;;
-
-    "help")
-        printf "%s\n" "USAGE: puppet [option]
+# Help can always be run, even if the user hasn't set up Puppet in
+# the current directory yet.
+if [ "$1" = "help" ]; then
+    printf "%s\n" "USAGE: puppet [option]
 
 This script is used to orchestrate Phantazm servers. Updates can be
 deployed without requiring a hard restart and without interrupting
@@ -731,6 +705,40 @@ Valid values for 'option':
   deploy-conf: updates configuration, use existing src and deploy
   deploy-code: updates src, use existing config and deploy
   setup: set up puppet in the current directory, if empty"
+    exit 0
+fi
+
+# Any other commands besides setup require $puppet_dir to exist first
+[ -d "$puppet_dir" ] || die "must run setup first"
+
+# Suppressed for the same reason as before. We're just loading config
+# here.
+# shellcheck disable=SC1090
+. "$conf_file" || die "couldn't source $conf_file"
+
+# At least we can error in the trivial case that the user didn't set
+# the required config at all...
+require_non_empty "$code_repo"
+require_non_empty "$code_branch"
+require_non_empty "$config_repo"
+require_non_empty "$config_branch"
+
+# Initialize both tmux servers appropriately, as we will likely need
+# to be able to connect to them.
+tmux_init "$socket_1_file"
+tmux_init "$socket_2_file"
+
+# Some commands are "exclusive" and shouldn't be run concurrently.
+# Others aren't. Handle the commands that don't care about being run
+# "simultaneously" first.
+case "$1" in
+    "main")
+        tmux_attach "$main_socket_link"
+        exit 0
+    ;;
+
+    "fallback")
+        tmux_attach "$fallback_socket_link"
         exit 0
     ;;
 esac
