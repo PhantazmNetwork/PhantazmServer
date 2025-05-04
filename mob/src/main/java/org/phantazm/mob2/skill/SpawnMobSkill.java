@@ -196,12 +196,12 @@ public class SpawnMobSkill implements SkillComponent {
             for (Point point : targets) {
                 callback.accept(mobSpawner.spawn(data.identifier, instance, Pos.fromPoint(data.offset == null ? point :
                     point.add(data.offset.x(), data.offset.y(), data.offset.z())), newMob -> {
-                    setup(self, newMob);
+                    setup(self, newMob, instance.tagHandler());
                 }));
             }
         }
 
-        private void setup(Mob self, Mob child) {
+        private void setup(Mob self, Mob child, TagHandler tagHandler) {
             child.setOwner(self.getUuid());
             if (data.unlimitedSpawns()) return;
 
@@ -211,8 +211,7 @@ public class SpawnMobSkill implements SkillComponent {
                 @Override
                 public void end(@NotNull Mob mob) {
                     if (instanceCountTag != null) {
-                        Instance instance = mob.getInstance();
-                        if (instance != null) instance.tagHandler().updateTag(instanceCountTag, DECREMENT);
+                        tagHandler.updateTag(instanceCountTag, DECREMENT);
                         return;
                     }
 

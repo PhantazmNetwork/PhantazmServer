@@ -438,10 +438,12 @@ if [ "$1" = "setup" ]; then
     # This is more of a sanity check than anything, to make sure the
     # user doesn't accidentally clobber an already-populated
     # directory.
-    for file in "$current_directory/"*; do
-        # If we run in an empty directory, $file will be a single
-        # '*' character, which does not actually exist. So, ignore
-        # non-existent files.
+    for file in "$current_directory/"* .*; do
+        _basename=$( basename "$file" )
+
+        # Ignore . and .. directory components, and non-existent files
+        [ "$_basename" -eq "." ] && continue
+        [ "$_basename" -eq ".." ] && continue
         [ -e "$file" ] || continue
 
         # If we find a .puppet directory, it likely means that setup
@@ -594,10 +596,12 @@ cd -- \"\$server_dir\" || exit 1
 mkfifo -m 600 -- \"\$log_pipe\" || exit 1
 
 exit_hook () {
+    _old_exit_code=\"\$?\"
     rm -f -- \"\$log_pipe\"
+    return \"\$_old_exit_code\"
 }
 
-trap \"exit_hook\" EXIT
+trap 'exit_hook; trap - 0; exit' 0 1 2 15
 
 inspect_pipe () {
     # Read from the log pipe until we see the \"serverIP\" text. Then,
@@ -616,30 +620,36 @@ inspect_pipe () {
         write_pipe \"\$status_pipe\" \"ERR\"
         return
     fi
-
-    cat -u -- \"\$log_pipe\" > /dev/null 2>&1
 }
 
 server () {
     java -Dfile.encoding=UTF-8 -jar server.jar
 }
 
-# Start the server as a background process. Redirect standard input so
-# that we can still type commands into the console.
-{ server | tee -- \"\$log_pipe\" <&3 3<&- & } 3<&0
-server_pid=\"\$!\"
+{
+    server <&3 3<&- >&4 4>&- &
+    server_pid=\"\$!\"
+
+    tee -- \"\$log_pipe\" <&4 &
+    tee_pid=\"\$!\"
+} 3<&0 4>&1
 
 # Start listening to the server output on a background process.
 inspect_pipe &
 inspect_pid=\"\$!\"
 
-# Just wait on the server process.
+# Any more output produced by the server process should be consumed,
+# or else it would hang. So just redirect everything to /dev/null.
+cat -u -- \"\$log_pipe\" > /dev/null 2>&1 &
+cat_pid=\"\$!\"
+
+# Wait on the server process first.
 wait \"\$server_pid\"
 
-# This may or may not still be running, depending on whether cat
-# SIGPIPES, which is implementation-specific. So, we clean up after
-# ourselves.
-kill \"\$inspect_pid\"
+kill \"\$tee_pid\" > /dev/null 2>&1
+wait \"\$inspect_pid\"
+
+kill \"\$cat_pid\" \"\$inspect_pid\" > /dev/null 2>&1
 " > "$start_file" || die "couldn't generate $start_file"
 
     # $start_file has to be executable.
@@ -735,10 +745,12 @@ die "an instance of this script is already running"
 # trap.
 # shellcheck disable=SC2317
 exit_hook () {
+    _old_exit_code="$?"
     rmdir -- "$lock_dir"
+    return "$_old_exit_code"
 }
 
-trap "exit_hook" EXIT
+trap 'exit_hook; trap - 0; exit' 0 1 2 15
 
 case "$1" in
     "shutdown")
