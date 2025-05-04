@@ -255,10 +255,8 @@ bring_online () {
 
     # cat will block here until there's some data in the pipe. If the
     # startup script never sends anything, this will deadlock.
-    # Fortunately, this (should) only happen if the script was
-    # SIGKILLED at an inopportune time.
     _status=$( cat -u -- "$_status_pipe" ) ||
-    die "couldn't launch server_$_target_id"
+    die "couldn't read from pipe"
 
     case "$_status" in
         "OK") ;;
@@ -266,7 +264,12 @@ bring_online () {
             # We were able to connect to the pipe, but the process
             # reported an error launching the server, e.g. there was
             # a compiler error.
-            die "couldn't launch server_$_target_id"
+            die "failed to launch server"
+        ;;
+        "INTERRUPTED")
+            # Sent if the launcher script was interrupted, e.g.
+            # through SIGTERM or SIGINT.
+            die "launch wrapper was interrupted"
         ;;
         *)
             # This indicates a bug in the starting script that should
@@ -599,11 +602,30 @@ mkfifo -m 600 -- \"\$log_pipe\" || exit 1
 
 exit_hook () {
     _old_exit_code=\"\$?\"
+
+    # Detect abnormal termination through e.g. SIGINT, SIGQUIT. If
+    # this is the case, we MAY not have informed puppet of our
+    # impending demise. This is bad because it may be waiting for us
+    # to send a message; hence, we signal that here.
+    if [ \"\$1\" -eq 1 ]; then
+        # Let the user know that their CTRL-C (or whatever it was) was
+        # received. We want to discourage them from getting impatient
+        # and breaking out kill -9.
+        printf \"%s\\n\" \\
+        \"Please wait for a maximum of ~5 seconds...\"
+
+        write_pipe \"\$status_pipe\" \"INTERRUPTED\"
+        printf \"%s\\n\" \"Shutdown signalled.\"
+    fi
+
     rm -f -- \"\$log_pipe\"
     return \"\$_old_exit_code\"
 }
 
-trap 'exit_hook; trap - 0; exit' 0 1 2 15
+trap 'exit_hook 0' EXIT
+
+# Clear existing traps so exit doesn't cause the hook to run again.
+trap 'trap - 0; exit_hook 1; exit' HUP INT QUIT ABRT TERM
 
 inspect_pipe () {
     # Read from the log pipe until we see the \"serverIP\" text. Then,
@@ -622,14 +644,38 @@ inspect_pipe () {
         write_pipe \"\$status_pipe\" \"ERR\"
         return
     fi
+
+    # Any more output produced by the server process should be
+    # consumed, or else it would hang. So just redirect everything to
+    # /dev/null.
+    #
+    # This process will exit normally, due to cat receiving an EOF,
+    # when the process writing to \$log_pipe dies. In our case, that's
+    # a 'tee' call.
+    cat -u -- \"\$log_pipe\" > /dev/null 2>&1
 }
 
 server () {
     java -Dfile.encoding=UTF-8 -jar server.jar
 }
 
+# Run the server as a background process. Because backgrounded
+# processes have their stdin set to (an equivalent of) /dev/null by
+# default, create a copy of stdin on file descriptor 3, and redirect
+# that to the server process. Also redirect its stdout to FD 4, which
+# allows us to connect its log output to tee (which also runs in a
+# background process).
+#
+# Using tee like this is needed because not only do we want the log
+# output of the server to be written to a pipe for later consumption,
+# we want it to be written to our stdout.
+#
+# Why not simply write something like 'server | tee -- \$log_pipe'?
+# Because we need to get the process ID of the server process, not
+# just tee. We grab tee's PID too, though, because it will not exit
+# when the server does.
 {
-    server <&3 3<&- >&4 4>&- &
+    server <&3 >&4 &
     server_pid=\"\$!\"
 
     tee -- \"\$log_pipe\" <&4 &
@@ -640,22 +686,20 @@ server () {
 inspect_pipe &
 inspect_pid=\"\$!\"
 
-# Any more output produced by the server process should be consumed,
-# or else it would hang. So just redirect everything to /dev/null.
-cat -u -- \"\$log_pipe\" > /dev/null 2>&1 &
-cat_pid=\"\$!\"
-
 # Wait on the server process first.
 wait \"\$server_pid\"
 
-# Kill the process that's writing to \$log_pipe.
+# Kill tee, which is the process actually writing to \$log_pipe. Note
+# that this will cause the reader of \$log_pipe to EOF, which is what
+# is intended.
 kill \"\$tee_pid\" > /dev/null 2>&1
 
 # Wait for the inspect_pipe function to finish whatever it's doing.
+# This may be a 'cat' (if the server launched successfully) or a
+# 'grep' (if the server didn't launch and we're still waiting on the
+# log output). We also might be presently communicating with Puppet,
+# by indicating the error status.
 wait \"\$inspect_pid\"
-
-# Clean up after ourselves.
-kill \"\$cat_pid\" \"\$inspect_pid\" > /dev/null 2>&1
 " > "$start_file" || die "couldn't generate $start_file"
 
     # $start_file has to be executable.
@@ -758,7 +802,7 @@ exit_hook () {
     return "$_old_exit_code"
 }
 
-trap 'exit_hook; trap - 0; exit' 0 1 2 15
+trap 'trap - 0; exit_hook; exit' EXIT HUP INT QUIT ABRT TERM
 
 case "$1" in
     "shutdown")
