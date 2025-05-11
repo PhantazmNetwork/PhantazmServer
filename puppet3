@@ -58,12 +58,6 @@
 # UTILITY FUNCTIONS section. They should be alphabetically ordered by
 # name. Functions that do reference global variables should go in the
 # CONTEXTUAL FUNCTIONS section, likewise alphabetically ordered.
-#
-# KNOWN LIMITATIONS
-#
-# This script is not designed to handle paths with trailing newlines,
-# and so should not be run in directories where such filenames are
-# present.
 
 # UTILITY FUNCTIONS (these do not reference global variables)
 
@@ -77,11 +71,13 @@ die () {
     exit 1
 }
 
-escape_single_quotes () {
-    # Sanitize the input string by replacing all single quotes with
-    # '\''. This makes the string valid for inclusion in e.g.
-    # embedded scripts, explicit calls to sh, etc.
-    printf "%s" "$1" | sed "s/'/\\''/"
+quote () {
+    # This trick for quoting shell variables is taken from
+    # https://www.etalabs.net/sh_tricks.html. It neatly escapes any
+    # single-quotes in the input as well as surrounding the entire
+    # string with them, preventing issues that arise out of trailing
+    # newlines being stripped.
+    printf "%s\n" "$1" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/'/"
 }
 
 msg () {
@@ -106,7 +102,7 @@ require_non_empty () {
     [ -n "$1" ] || die "missing required configuration"
 }
 
-resolve_dir_link () {
+dir_target () {
     # Hacky way to resolve a symbolic link if it's a directory. Used
     # because readlink is not specified in 2008 POSIX, though note
     # that it does exist in later publications.
@@ -128,6 +124,9 @@ safe_cd () {
 }
 
 safe_rm () {
+    # Make sure the file exists first.
+    [ -e "$1" ] || return
+
     # Remove a single directory recursively, or die.
     rm -rf -- "$1" || die "couldn't remove directory"
 }
@@ -138,7 +137,17 @@ safe_rm () {
 
 # Pretty much everything requires our CWD, so just grab it now. The
 # result shouldn't contain any symlinks because of the -P flag.
-current_directory=$( pwd -P ) || die "couldn't get cwd"
+#
+# A trailing '.' is added to the output. If our CWD has trailing
+# newlines in the path, this will prevent them from being stripped.
+current_directory=$( pwd -P || exit 1; printf "." ) ||
+die "couldn't get cwd"
+
+# Remove the last two characters, one of which will be a '.', the
+# other an additional newline added by 'pwd'. This trick is used in
+# elsewhere in this script, whenever it is necessary to read a
+# filepath from the system.
+current_directory="${current_directory%??}"
 
 # User configuration file.
 conf_file="$current_directory/puppet.conf"
@@ -238,8 +247,10 @@ bring_offline () {
 
 bring_online () {
     # Both of these are passed to invocations of tmux_send_keys below.
-    _escaped_cwd=$( escape_single_quotes "$current_directory" )
-    _escaped_start_file=$( escape_single_quotes "$start_file" )
+    # Note that we do not have to worry about trailing newlines for
+    # calls to quote, because they always end with a single-quote.
+    _escaped_cwd=$( quote "$current_directory" )
+    _escaped_start_file=$( quote "$start_file" )
 
     # $_target_id will be either 1 or 2, depending on if $1 is
     # $server_dir_1 or $server_dir_2.
@@ -250,7 +261,7 @@ bring_online () {
     # Start up the server. This literally types the startup command
     # into the tmux terminal.
     tmux_send_keys "$2" \
-    "'$_escaped_start_file' '$_escaped_cwd' $_target_id"
+    "$_escaped_start_file $_escaped_cwd $_target_id"
 
     # cat will block here until there's some data in the pipe. If the
     # startup script never sends anything, this will deadlock.
@@ -308,7 +319,7 @@ promote_fallback () {
     eval "_new_fallback_log_pipe=\"\$log_pipe_$_fallback_id\""
 
     # Update the symbolic links. All of the _new_* variables are
-    # assigned in 'eval'.
+    # assigned in 'eval' calls above.
     # shellcheck disable=SC2154
     (
     ln -sf -- "$_new_main_dir" "$main_link" && \
@@ -316,7 +327,8 @@ promote_fallback () {
     ln -sf -- "$_new_main_socket" "$main_socket_link" && \
     ln -sf -- "$_new_fallback_socket" "$fallback_socket_link" && \
     ln -sf -- "$_new_main_status_pipe" "$main_status_pipe_link" && \
-    ln -sf -- "$_new_fallback_status_pipe" "$fallback_status_pipe_link" && \
+    ln -sf -- "$_new_fallback_status_pipe" \
+    "$fallback_status_pipe_link" && \
     ln -sf -- "$_new_main_log_pipe" "$main_log_pipe_link" && \
     ln -sf -- "$_new_fallback_log_pipe" "$fallback_log_pipe_link"
     ) || die "couldn't create symlink(s)"
@@ -397,6 +409,8 @@ update_config () {
         die "couldn't clone $config_repo"
     fi
 
+    # Use a subshell here so that 'safe_cd' doesn't change our current
+    # directory.
     (
     safe_cd "$config_dir"
 
@@ -417,8 +431,6 @@ update_src () {
         die "couldn't clone $src_repo"
     fi
 
-    # Use a subshell here so that 'safe_cd' doesn't change our current
-    # directory.
     (
     safe_cd "$src_dir"
 
@@ -427,7 +439,8 @@ update_src () {
 
     git pull --recurse-submodules || die "couldn't pull $src_branch"
 
-    ./gradlew -PskipBuild=snbt-builder,dev-launcher,velocity \
+    ./gradlew --no-daemon \
+    -PskipBuild=snbt-builder,dev-launcher,velocity \
     phantazm-server:copyJar \
     phantazm-server:copyLibs || die "couldn't build src"
     ) || die "couldn't update src"
@@ -467,7 +480,10 @@ if [ "$1" = "setup" ]; then
     # user doesn't accidentally clobber an already-populated
     # directory.
     for file in "$current_directory/".* "$current_directory/"*; do
-        _basename=$( basename "$file" )
+        _basename=$( basename "$file" || exit 1; printf "." ) ||
+        die "couldn't get basename of $file"
+
+        _basename="${_basename%??}"
 
         # Ignore . and .. directory components, and non-existent files
         [ "$_basename" = "." ] && continue
@@ -552,10 +568,10 @@ if [ "$1" = "setup" ]; then
 
     # Generate the config file based on the user's choices.
     printf "%s" "#!/bin/false
-src_repo='$( escape_single_quotes "$src_repo" )'
-src_branch='$( escape_single_quotes "$src_branch" )'
-config_repo='$( escape_single_quotes "$config_repo" )'
-config_branch='$( escape_single_quotes "$config_branch" )'" \
+src_repo=$( quote "$src_repo" )
+src_branch=$( quote "$src_branch" )
+config_repo=$( quote "$config_repo" )
+config_branch=$( quote "$config_branch" )" \
 > "$conf_file" || die "couldn't generate config file"
 
     # Generate the starting script. Note that to allow server
@@ -769,7 +785,7 @@ Valid values for <option>:
 -r: If <option> is one of deploy-all, deploy-conf, or deploy-src,
   deletes and re-clones the configuration and/or source repository.
   Otherwise does nothing. This is mainly useful if one of the git
-  repository URLs defined in puppet.conf was updated."
+  repository URLs defined in puppet.conf were updated."
     exit 0
 fi
 
@@ -878,10 +894,16 @@ _main_alive="$?"
 # shellcheck disable=SC2319
 _fallback_alive="$?"
 
-# resolve_dir_link will already show an error message if it fails, so
-# we don't need to do that here.
-_main_dir=$( resolve_dir_link "$main_link" ) || die
-_fallback_dir=$( resolve_dir_link "$fallback_link" ) || die
+# dir_target will already show an error message if it fails, so we
+# don't need to do that here.
+_main_dir=$( dir_target "$main_link" || exit 1; printf "." ) || die
+_fallback_dir=$(
+    dir_target "$fallback_link" || exit 1
+    printf "."
+) || die
+
+_main_dir="${_main_dir%??}"
+_fallback_dir="${_fallback_dir%??}"
 
 # Neither server is alive. In this case, we just want to bring up the
 # main server.
