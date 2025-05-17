@@ -144,7 +144,7 @@ current_directory=$( pwd -P || exit 1; printf "." ) ||
 die "couldn't get cwd"
 
 # Remove the last two characters, one of which will be a '.', the
-# other an additional newline added by 'pwd'. This trick is used in
+# other an additional newline added by 'pwd'. This trick is used
 # elsewhere in this script, whenever it is necessary to read a
 # filepath from the system.
 current_directory="${current_directory%??}"
@@ -470,6 +470,10 @@ esac
 
 # SETUP
 
+# All files we make should be readable and writeable by ourselves, but
+# not executable, and not readable, writable, or executable to others.
+umask 077
+
 if [ "$1" = "setup" ]; then
     # Setup requires user input and so shouldn't be run
     # non-interactively.
@@ -549,11 +553,6 @@ if [ "$1" = "setup" ]; then
     # Set up the named pipes we use for IPC.
     mkfifo -m 600 -- "$status_pipe_1" "$status_pipe_2"
 
-    touch -- "$conf_file"
-
-    chmod 600 -- "$conf_file" ||
-    die "couldn't set permissions on $conf_file"
-
     # Set up the initial symlinks
     (
     ln -s -- "$server_dir_1" "$main_link" && \
@@ -566,7 +565,8 @@ if [ "$1" = "setup" ]; then
     ln -s -- "$log_pipe_2" "$fallback_log_pipe_link"
     ) || die "couldn't create symlink(s)"
 
-    # Generate the config file based on the user's choices.
+    # Generate the config file based on the user's choices. Will have
+    # rw------- perms, as per 'umask' above.
     printf "%s" "#!/bin/false
 src_repo=$( quote "$src_repo" )
 src_branch=$( quote "$src_branch" )
@@ -621,9 +621,12 @@ case \"\$2\" in
     *) exit 1 ;;
 esac
 
-server_dir=\"\$puppet_dir/server_\$1\"
-log_pipe=\"\$puppet_dir/log_pipe_\$1\"
-status_pipe=\"\$puppet_dir/status_pipe_\$1\"
+# Files we create should also be rw-------
+umask 077
+
+server_dir=\"\$puppet_dir/server_\$2\"
+log_pipe=\"\$puppet_dir/log_pipe_\$2\"
+status_pipe=\"\$puppet_dir/status_pipe_\$2\"
 
 cd -- \"\$server_dir\" || exit 1
 
@@ -894,7 +897,7 @@ _main_alive="$?"
 # shellcheck disable=SC2319
 _fallback_alive="$?"
 
-# dir_target will already show an error message if it fails, so we
+# 'dir_target' will already show an error message if it fails, so we
 # don't need to do that here.
 _main_dir=$( dir_target "$main_link" || exit 1; printf "." ) || die
 _fallback_dir=$(
@@ -909,8 +912,8 @@ _fallback_dir="${_fallback_dir%??}"
 # main server.
 if [ "$_main_alive" -ne 0 ] && [ "$_fallback_alive" -ne 0 ]; then
     # This function will wait until the server comes online. If it
-    # fails, it will call 'die' as appropriate, so we don't need to
-    # do so here.
+    # fails, it will call 'die' as appropriate, so we don't need to do
+    # so here.
     bring_online "$_main_dir" \
     "$main_socket_link" \
     "$main_status_pipe_link"
