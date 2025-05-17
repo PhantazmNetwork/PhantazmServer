@@ -263,20 +263,49 @@ bring_online () {
     tmux_send_keys "$2" \
     "$_escaped_start_file $_escaped_cwd $_target_id"
 
-    # cat will block here until there's some data in the pipe. If the
-    # startup script never sends anything, this will deadlock.
+    # Print a warning message that the wrapper script hasn't sent us
+    # a signal in a while. This could mean that the server is taking
+    # particularly long to launch, or it could mean that the wrapper
+    # failed to start at all. This is a perfectly "safe" condition in
+    # the sense that it is well-tolerated but it does require manual
+    # intervention.
+    (
+    sleep 30
+    printf "Server has taken more than 30 seconds to launch. It may \
+be deadlocked. Press CTRL-C to safely stop waiting for it.\n"
+    ) &
+
+    _warning_pid="$!"
+
+    # cat will block here until there's some data in the pipe.
     #
     # Also, _status_pipe is assigned but it's through an 'eval'.
     # shellcheck disable=SC2154
     _status=$( cat -u -- "$_status_pipe" ) ||
     die "couldn't read from pipe"
 
+    # We got an actual signal. Just kill the subshell that wants to
+    # warn us about the server taking too long.
+    #
+    # Yes, there's a race condition here, but the only real
+    # consequence is a seemingly-spurious error message, that could
+    # plausibly have happened anyway (since the server could finish
+    # launching at any time after 30 seconds, too).
+    kill "$_warning_pid" > /dev/null 2>&1
+
+    # Handle the status code we got from the wrapper script.
     case "$_status" in
-        "OK") ;;
+        "OK")
+            # Everything is fine, the server appears to have launched
+            # correctly.
+            #
+            # In the case of a bug, it may of course crash at any time
+            # after this status is reported.
+        ;;
         "ERR")
             # We were able to connect to the pipe, but the process
             # reported an error launching the server, e.g. there was
-            # a compiler error.
+            # a configuration error.
             die "failed to launch server"
         ;;
         "INTERRUPTED")
@@ -341,7 +370,8 @@ require_code () {
 }
 
 require_config () {
-   [ -d "$config_dir/.git" ] || die "config must be brought up to date"
+   [ -d "$config_dir/.git" ] ||
+   die "config must be brought up to date"
 }
 
 sync_target () {
