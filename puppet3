@@ -626,7 +626,8 @@ config_branch=$( quote "$config_branch" )" \
     # between the wrapper and puppet.
     printf "%s" "#!/bin/sh
 #
-# Generated Puppet wrapper script; do not edit!
+# Generated Puppet wrapper script. Only created during setup, so
+# changes to this file will be persistent.
 #
 
 write_pipe () {
