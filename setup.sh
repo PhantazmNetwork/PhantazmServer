@@ -1,7 +1,7 @@
 #!/bin/sh
 
 log_file="$(pwd)/setup_log.txt"
-echo "" > "${log_file}"
+printf "" > "${log_file}"
 
 log_error() {
   printf "\033[31;1m[ERROR]\033[0m %s\n" "$1"
@@ -104,7 +104,7 @@ dl_to_if_not_exists() {
   target_dir="$3"
   output_dir="$4"
 
-  if [ ! -d "${target_dir}/${output_dir}" ]; then
+  if [ ! -e "${target_dir}/${output_dir}" ]; then
     mkdir -p "./tmp"
 
     log_info "Downloading world file ${filename}..."
