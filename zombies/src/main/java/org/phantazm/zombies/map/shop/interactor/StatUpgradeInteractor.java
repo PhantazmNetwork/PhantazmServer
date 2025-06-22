@@ -14,6 +14,8 @@ import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.player.ZombiesPlayer;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Model("zombies.map.shop.interactor.stat_upgrade")
@@ -45,6 +47,7 @@ public class StatUpgradeInteractor extends InteractorBase<StatUpgradeInteractor.
         private final ZombiesPlayer zombiesPlayer;
         private final Object sync;
         private final Attribute attribute;
+        private final Set<UUID> ids;
 
         private boolean ended;
 
@@ -55,6 +58,7 @@ public class StatUpgradeInteractor extends InteractorBase<StatUpgradeInteractor.
             this.sync = new Object();
 
             this.attribute = Attributes.get(data.attribute);
+            this.ids = new HashSet<>();
         }
 
         @Override
@@ -66,18 +70,30 @@ public class StatUpgradeInteractor extends InteractorBase<StatUpgradeInteractor.
 
                 zombiesPlayer.getPlayer().ifPresent(player -> {
                     AttributeInstance instance = player.getAttribute(this.attribute);
-                    instance.removeModifier(uuid);
 
                     UUID id = UUID.randomUUID();
                     String idString = id.toString();
                     instance.addModifier(new AttributeModifier(id, idString, data.amount, data.operation));
+
+                    ids.add(id);
                 });
             }
         }
 
         @Override
         public void end() {
-            this.ended = true;
+            if (this.ended) return;
+
+            synchronized (sync) {
+                if (this.ended) return;
+                zombiesPlayer.getPlayer().ifPresent(player -> {
+                    AttributeInstance instance = player.getAttribute(this.attribute);
+                    for (UUID id : this.ids) instance.removeModifier(id);
+                    this.ids.clear();
+                });
+
+                this.ended = true;
+            }
         }
 
         private void upgrade() {
