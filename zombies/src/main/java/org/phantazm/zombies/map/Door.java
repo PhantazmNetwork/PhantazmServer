@@ -70,7 +70,7 @@ public class Door extends BoundedBase {
         if (regions.isEmpty()) {
             LOGGER.warn("Door has no regions, enclosing bounds and center set to map origin");
 
-            enclosing = Bounds3I.immutable(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ(), 1, 1, 1);
+            this.enclosing = Bounds3I.immutable(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ(), 1, 1, 1);
             this.regions = List.of();
         } else {
             Bounds3I[] regionArray = doorInfo.regions().toArray(Bounds3I[]::new);
@@ -78,7 +78,7 @@ public class Door extends BoundedBase {
                 regionArray[i] = regionArray[i].shift(mapOrigin.blockX(), mapOrigin.blockY(), mapOrigin.blockZ());
             }
 
-            enclosing = Bounds3I.enclosingImmutable(regionArray);
+            this.enclosing = Bounds3I.enclosingImmutable(regionArray);
             this.regions = List.of(regionArray);
         }
 
@@ -207,15 +207,11 @@ public class Door extends BoundedBase {
 
     public void failOpen(@Nullable ZombiesPlayer zombiesPlayer) {
         synchronized (sync) {
-            if (isOpen) {
-                return;
-            }
+            if (isOpen) return;
 
             this.lastInteractor = zombiesPlayer;
-
-            for (Action<Door> failOpenAction : failOpenActions) {
+            for (Action<Door> failOpenAction : failOpenActions)
                 failOpenAction.perform(this);
-            }
         }
     }
 
@@ -226,9 +222,7 @@ public class Door extends BoundedBase {
      */
     public boolean close(@Nullable ZombiesPlayer interactor) {
         synchronized (sync) {
-            if (!isOpen) {
-                return false;
-            }
+            if (!isOpen) return false;
 
             this.lastInteractor = interactor;
             isOpen = false;

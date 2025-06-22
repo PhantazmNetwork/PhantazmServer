@@ -4,6 +4,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.TagUtils;
@@ -127,6 +128,17 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     }
 
     @Override
+    public @Nullable Activable getActivable(@NotNull Activable example) {
+        Set<Activable> setSnapshot = this.activables;
+
+        for (Activable activable : setSnapshot) {
+            if (activable.equals(example)) return activable;
+        }
+
+        return null;
+    }
+
+    @Override
     public @NotNull @UnmodifiableView Set<ShotEffect> shotEffects() {
         return shotEffectView;
     }
@@ -144,10 +156,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     @Override
     public void start() {
         module.getStateSwitcher().start();
-
-        for (Activable activable : activables) {
-            activable.start();
-        }
+        for (Activable activable : activables) activable.start();
     }
 
     @Override
@@ -181,9 +190,7 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         module.getStateSwitcher().end();
         module.getMeta().setKeepGameAlive(false);
 
-        for (Activable activable : activables) {
-            activable.end();
-        }
+        for (Activable activable : activables) activable.end();
     }
 
     private void inventoryTick(Player player, long time) {

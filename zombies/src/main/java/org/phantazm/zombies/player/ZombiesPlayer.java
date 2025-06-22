@@ -9,6 +9,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.scoreboard.BelowNameTag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.commons.flag.Flaggable;
 import org.phantazm.core.equipment.Equipment;
@@ -53,7 +54,11 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
 
     boolean removeActivable(@NotNull Activable activable);
 
-    @NotNull @UnmodifiableView Set<ShotEffect> shotEffects();
+    @Nullable Activable getActivable(@NotNull Activable example);
+
+    @NotNull
+    @UnmodifiableView
+    Set<ShotEffect> shotEffects();
 
     void addShotEffect(@NotNull ShotEffect effect);
 
