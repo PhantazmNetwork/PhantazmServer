@@ -2,28 +2,31 @@ package org.phantazm.mob2.condition;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
-import net.kyori.adventure.key.Key;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
-@Model("mob.skill.condition.flag")
+@Model("mob.skill.condition.boolean_tag")
 @Cache
-public class FlagCondition implements SkillConditionComponent {
+public class BooleanTagCondition implements SkillConditionComponent {
     private final Data data;
+    private final Tag<Boolean> tag;
     private final SelectorComponent selector;
 
     @FactoryMethod
-    public FlagCondition(@NotNull Data data,
+    public BooleanTagCondition(@NotNull Data data,
         @NotNull @Child("selector") SelectorComponent selector) {
         this.data = data;
+        this.tag = Tag.Boolean(data.tag).defaultValue(false);
         this.selector = selector;
     }
 
     @Override
     public @NotNull SkillCondition get() {
-        return new Internal(data, selector.get());
+        return new Internal(tag, data.blacklist, selector.get());
     }
 
     @Default("""
@@ -33,17 +36,18 @@ public class FlagCondition implements SkillConditionComponent {
         }
         """)
     @DataObject
-    public record Data(@NotNull Key flag,
+    public record Data(@NotNull String tag,
         boolean blacklist) {
     }
 
-    private record Internal(Data data,
+    private record Internal(Tag<Boolean> tag,
+        boolean blacklist,
         Selector selector) implements SkillCondition {
 
         @Override
         public boolean test(@NotNull Mob mob) {
-            return selector.select(mob).forType(Mob.class)
-                .map(sample -> (sample.data().tags().contains(data.flag) != data.blacklist))
+            return selector.select(mob).forType(Entity.class)
+                .map(sample -> sample.getTag(this.tag))
                 .orElse(false);
         }
     }
