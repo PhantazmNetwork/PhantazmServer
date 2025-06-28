@@ -31,7 +31,7 @@ public class BooleanTagCondition implements SkillConditionComponent {
 
     @Default("""
         {
-          selector='mob.selector.self',
+          selector={type='mob.selector.self'},
           blacklist=false
         }
         """)
