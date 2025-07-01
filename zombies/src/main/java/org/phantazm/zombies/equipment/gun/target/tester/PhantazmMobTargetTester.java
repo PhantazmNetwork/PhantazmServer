@@ -35,7 +35,7 @@ public class PhantazmMobTargetTester implements TargetTester {
 
                 boolean isForceSelected = selectEvent.isForceSelected();
 
-                if (target instanceof Mob mob && mob.data().extra().getBooleanOrDefault("force_deselect", false))
+                if (target instanceof Mob mob && mob.data().extra().getBooleanOrDefault("forceDeselect", false))
                     return isForceSelected;
 
                 return isForceSelected || round.hasMob(target.getUuid());
