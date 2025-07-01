@@ -2,31 +2,29 @@ package org.phantazm.mob2.condition;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
-@Model("mob.skill.condition.boolean_tag")
+@Model("mob.skill.condition.flag")
 @Cache
-public class BooleanTagCondition implements SkillConditionComponent {
+public class FlagCondition implements SkillConditionComponent {
     private final Data data;
-    private final Tag<Boolean> tag;
     private final SelectorComponent selector;
 
     @FactoryMethod
-    public BooleanTagCondition(@NotNull Data data,
+    public FlagCondition(@NotNull Data data,
         @NotNull @Child("selector") SelectorComponent selector) {
         this.data = data;
-        this.tag = Tag.Boolean(data.tag).defaultValue(false);
         this.selector = selector;
     }
 
     @Override
     public @NotNull SkillCondition get() {
-        return new Internal(tag, data.blacklist, selector.get());
+        return new Internal(data.flag, data.blacklist, selector.get());
     }
 
     @Default("""
@@ -36,18 +34,19 @@ public class BooleanTagCondition implements SkillConditionComponent {
         }
         """)
     @DataObject
-    public record Data(@NotNull String tag,
+    public record Data(@NotNull Key flag,
         boolean blacklist) {
     }
 
-    private record Internal(Tag<Boolean> tag,
+    private record Internal(Key flag,
         boolean blacklist,
         Selector selector) implements SkillCondition {
 
         @Override
         public boolean test(@NotNull Mob mob) {
             for (Entity target : selector.select(mob).targets()) {
-                if (target.getTag(this.tag) != blacklist) return false;
+                if (!(target instanceof Mob targetMob)) continue;
+                if (targetMob.data().tags().contains(flag) != blacklist) return false;
             }
 
             return true;
