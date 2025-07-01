@@ -3,7 +3,6 @@ package org.phantazm.mob2.skill;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.potion.Potion;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,13 +38,11 @@ public class ApplyBooleanTagSkill implements SkillComponent {
     @Default("""
         {
           trigger=null,
-          remove=false
         }
         """)
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        @NotNull Potion potion,
         @NotNull String tag) {
     }
 
