@@ -29,6 +29,7 @@ import java.util.*;
  * An entity with navigation capabilities based on the Proxima library.
  */
 public class ProximaEntity extends LivingEntity {
+    private static final long TARGET_VALIDITY_CHECK_INTERVAL_MS = 500;
     private static final double NODE_REACH_DISTANCE_SQ = 0.2;
     private static final double NODE_DEVIATION_DISTANCE_SQ = 2.5;
     private static final double ENTITY_LOOK_DISTANCE_SQ = 100;
@@ -49,6 +50,8 @@ public class ProximaEntity extends LivingEntity {
     private double lastX;
     private double lastY;
     private double lastZ;
+
+    private long lastTargetValidityCheck;
 
     private int removalAnimationDelay = 1000;
 
@@ -93,6 +96,8 @@ public class ProximaEntity extends LivingEntity {
         lastX = 0;
         lastY = 0;
         lastZ = 0;
+
+        lastTargetValidityCheck = 0;
     }
 
     private void destroyPath() {
@@ -109,62 +114,33 @@ public class ProximaEntity extends LivingEntity {
     }
 
     public void setDestination(@Nullable PathTarget destination) {
-        if (pathfinding == null) {
-            return;
-        }
-
-        if (destination == null && this.destination != null) {
-            destroyPath();
-            return;
-        }
-
-        if (this.destination == destination) {
-            return;
-        }
+        if (pathfinding == null || this.destination == destination) return;
 
         destroyPath();
+        if (destination == null) return;
+
         pathfinding.target = null;
         this.destination = destination;
     }
 
     public <T extends Entity> void setDestination(@Nullable T targetEntity) {
-        if (pathfinding == null) {
-            return;
-        }
-
-        if (pathfinding.target == targetEntity) {
-            return;
-        }
-
-        if (targetEntity == null || targetEntity.isRemoved()) {
-            destroyPath();
-            return;
-        }
+        if (pathfinding == null || pathfinding.target == targetEntity) return;
 
         destroyPath();
-        pathfinding.target = targetEntity;
-        this.destination = PathTarget.resolving(() -> {
-            if (!pathfinding.isValidTarget(targetEntity)) {
-                return null;
-            }
+        if (targetEntity == null || targetEntity.isRemoved() || !pathfinding.isValidTarget(targetEntity)) return;
 
-            return VecUtils.toDouble(targetEntity.getPosition());
-        }, pathfinding.positionResolverForTarget(targetEntity), pathfinding.targetChangePredicate(targetEntity));
+        pathfinding.target = targetEntity;
+        this.destination = PathTarget.resolving(() -> VecUtils.toDouble(targetEntity.getPosition()),
+            pathfinding.positionResolverForTarget(targetEntity), pathfinding.targetChangePredicate(targetEntity));
     }
 
     public @Nullable Entity getTargetEntity() {
-        if (pathfinding == null) {
-            return null;
-        }
-
+        if (pathfinding == null) return null;
         return pathfinding.target;
     }
 
     public void attack(@NotNull Entity target, boolean swingHand) {
-        if (swingHand) {
-            swingMainHand();
-        }
-
+        if (swingHand) swingMainHand();
         EventDispatcher.call(new EntityAttackEvent(this, target));
     }
 
@@ -219,6 +195,14 @@ public class ProximaEntity extends LivingEntity {
         return !isDead() && getInstance() != null && pathfinding != null;
     }
 
+    private boolean checkTargetValidity(long time, Entity entity) {
+        if ((time - this.lastTargetValidityCheck) < TARGET_VALIDITY_CHECK_INTERVAL_MS) return true;
+
+        this.lastTargetValidityCheck = time;
+        return pathfinding.isValidTarget(entity);
+    }
+
+
     protected void navigatorTick(long time) {
         if (!canNavigate()) {
             return;
@@ -226,7 +210,7 @@ public class ProximaEntity extends LivingEntity {
 
         Navigator navigator = pathfinding.getNavigator(getBoundingBox());
 
-        if (pathfinding.target != null && !pathfinding.isValidTarget(pathfinding.target)) {
+        if (pathfinding.target != null && !checkTargetValidity(time, pathfinding.target)) {
             destroyPath();
             return;
         }

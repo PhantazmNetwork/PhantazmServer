@@ -18,9 +18,8 @@ public class CollectionGoalGroup implements GoalGroup {
 
     public CollectionGoalGroup(@NotNull Collection<ProximaGoal> goals) {
         this.goals = goals.toArray(ProximaGoal[]::new);
-        for (ProximaGoal goal : this.goals) {
-            Objects.requireNonNull(goal, "entity AI goal");
-        }
+
+        for (ProximaGoal goal : this.goals) Objects.requireNonNull(goal);
     }
 
     @Override
@@ -32,25 +31,24 @@ public class CollectionGoalGroup implements GoalGroup {
             this.activeGoal = activeGoal = null;
         }
 
+        // Search all previous goals up until the currently enabled one. If any want to be activated, end the current
+        // one, and start the new one that requested activation. This has the effect that goals earlier in the list have
+        // priority over later ones.
+        //
+        // activeGoal will be null here when it wants to end (shouldEnd returns true). If this is the case, we simply
+        // activate the first goal in the list that wants to start.
         for (ProximaGoal goal : goals) {
-            if (goal == activeGoal) {
-                break;
-            }
+            if (goal == activeGoal) break;
+            if (!goal.shouldStart()) continue;
 
-            if (goal.shouldStart()) {
-                if (activeGoal != null) {
-                    activeGoal.end();
-                }
+            if (activeGoal != null) activeGoal.end();
 
-                this.activeGoal = activeGoal = goal;
-                activeGoal.start();
-                break;
-            }
+            this.activeGoal = activeGoal = goal;
+            activeGoal.start();
+            break;
         }
 
-        if (activeGoal != null) {
-            activeGoal.tick(time);
-        }
+        if (activeGoal != null) activeGoal.tick(time);
     }
 
     @Override

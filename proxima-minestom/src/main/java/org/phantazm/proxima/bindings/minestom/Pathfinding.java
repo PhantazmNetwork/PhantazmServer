@@ -39,6 +39,7 @@ public class Pathfinding {
     public static final double PLAYER_PATH_EPSILON = 0.0005;
     public static final double MOB_PATH_EPSILON = 1E-6;
     public static final double PLAYER_PATH_EPSILON_DOWNWARDS = MOB_PATH_EPSILON;
+
     protected final Pathfinder pathfinder;
     protected final ThreadLocal<Vec3I2ObjectMap<Node>> nodeMapLocal;
     protected final InstanceSpaceHandler spaceHandler;

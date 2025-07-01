@@ -46,7 +46,7 @@ public class GroundPathfindingFactory implements Pathfinding.Factory {
 
                 if (targetEntity instanceof Player player) {
                     Optional<Scene> current = SceneManager.Global.instance().currentScene(player);
-                    if (current.isEmpty()) return true;
+                    if (current.isEmpty()) return false;
 
                     Scene scene = current.get();
                     return TagUtils.sceneLocalTags(player, scene).getTag(Pathfinding.VALID_TARGET_TAG);
