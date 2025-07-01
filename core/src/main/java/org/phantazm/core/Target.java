@@ -136,7 +136,7 @@ public sealed interface Target
     /**
      * Overload for {@link Target#entities(Entity...)}.
      *
-     * @return a targe with a single entity
+     * @return a target with a single entity
      */
     static @NotNull Target entities(@NotNull Entity entity) {
         Objects.requireNonNull(entity);
@@ -272,7 +272,8 @@ public sealed interface Target
     Collection<? extends @NotNull Entity> targets();
 
     @NotNull
-    @Unmodifiable <T extends Entity> Collection<T> targets(@NotNull Class<T> type);
+    @Unmodifiable
+    <T extends Entity> Collection<T> targets(@NotNull Class<T> type);
 
     @NotNull
     @Unmodifiable
