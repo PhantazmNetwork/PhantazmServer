@@ -121,7 +121,7 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
 
             TagHandler localTags = ZombiesTagUtils.sceneLocalTags(zombiesPlayer);
             for (int i = 0; i < slots.size(); i++) {
-                InventoryObject first = access.profile().getInventoryObjectSafe(slots.getInt(i));
+                InventoryObject first = access.profile().getInventoryObject(slots.getInt(i));
                 if (!(first instanceof Equipment firstEquipment)) continue;
 
                 List<Key> tiers = data.upgradeGroups.get(firstEquipment.key());
@@ -133,7 +133,7 @@ public class SynergyUpgradeActivator implements UpgradeActivatorComponent {
                 }
 
                 for (int j = i + 1; j < slots.size(); j++) {
-                    InventoryObject second = access.profile().getInventoryObjectSafe(slots.getInt(j));
+                    InventoryObject second = access.profile().getInventoryObject(slots.getInt(j));
                     if (!(second instanceof Equipment secondEquipment)) continue;
 
                     Synergy synergy = data.synergies.get(new SynergyKey(firstEquipment.key(), secondEquipment.key()));

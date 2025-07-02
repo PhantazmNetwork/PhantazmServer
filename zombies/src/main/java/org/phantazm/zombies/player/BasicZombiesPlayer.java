@@ -197,14 +197,12 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
         module.getInventoryAccessRegistry().getCurrentAccess().ifPresent(inventoryAccess -> {
             InventoryProfile profile = inventoryAccess.profile();
             for (int slot = 0; slot < profile.getSlotCount(); ++slot) {
-                if (profile.hasInventoryObject(slot)) {
-                    InventoryObject inventoryObject = profile.getInventoryObject(slot);
-                    if (inventoryObject instanceof Activable activable)
-                        activable.tick(time);
+                InventoryObject inventoryObject = profile.getInventoryObject(slot);
+                if (inventoryObject == null) continue;
+                if (inventoryObject instanceof Activable activable) activable.tick(time);
 
-                    if (inventoryObject.shouldRedraw()) {
-                        player.getInventory().setItemStack(slot, inventoryObject.getItemStack());
-                    }
+                if (inventoryObject.shouldRedraw()) {
+                    player.getInventory().setItemStack(slot, inventoryObject.getItemStack());
                 }
             }
         });

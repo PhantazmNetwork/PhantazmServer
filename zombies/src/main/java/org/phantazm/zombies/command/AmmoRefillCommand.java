@@ -34,10 +34,6 @@ public class AmmoRefillCommand extends SandboxLockedCommand {
 
         InventoryProfile profile = accessOptional.get().profile();
         for (int i = 0; i < profile.getSlotCount(); i++) {
-            if (!profile.hasInventoryObject(i)) {
-                continue;
-            }
-
             InventoryObject object = profile.getInventoryObject(i);
             if (object instanceof Gun gun) {
                 gun.refill();

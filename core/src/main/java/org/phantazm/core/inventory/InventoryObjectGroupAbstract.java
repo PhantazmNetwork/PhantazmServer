@@ -1,5 +1,6 @@
 package org.phantazm.core.inventory;
 
+import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
@@ -64,15 +65,10 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
 
     @Override
     public boolean isFull() {
-        for (int slot : slots) {
-            if (!profile.hasInventoryObject(slot)) {
-                return false;
-            }
-
-            InventoryObject object = profile.getInventoryObject(slot);
-            if (object.equals(defaultObject())) {
-                return false;
-            }
+        IntIterator intIterator = slots.intIterator();
+        while (intIterator.hasNext()) {
+            int slot = intIterator.nextInt();
+            if (Objects.equals(profile.getInventoryObject(slot), defaultObject())) return false;
         }
 
         return true;
@@ -80,18 +76,7 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
 
     @Override
     public boolean isEmpty() {
-        for (int slot : slots) {
-            if (profile.hasInventoryObject(slot)) {
-                InventoryObject object = profile.getInventoryObject(slot);
-
-                InventoryObject defaultObject = defaultObject();
-                if (!object.equals(defaultObject)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
+        return !isFull();
     }
 
     @Override

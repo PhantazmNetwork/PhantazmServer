@@ -97,9 +97,7 @@ public class DamageOverTimeSkill implements SkillComponent {
         protected void useOnTarget(@NotNull Target target, @NotNull Mob mob) {
             Extension ext = mob.extensions().get(key);
             mob.getAcquirable().sync(ignored -> {
-                target.forType(LivingEntity.class, livingEntity -> {
-                    addDamageTarget(livingEntity, ext);
-                });
+                target.forType(LivingEntity.class, livingEntity -> addDamageTarget(livingEntity, ext));
             });
         }
 

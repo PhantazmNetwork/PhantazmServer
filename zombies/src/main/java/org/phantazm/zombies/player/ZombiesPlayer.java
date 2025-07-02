@@ -84,11 +84,9 @@ public interface ZombiesPlayer extends Activable, Flaggable.Source, Audience {
         return module().getInventoryAccessRegistry().getCurrentAccess().map(inventoryAccess -> {
             int slot = player.getHeldSlot();
             InventoryProfile profile = inventoryAccess.profile();
-            if (profile.hasInventoryObject(slot)) {
-                InventoryObject object = profile.getInventoryObject(slot);
-                if (object instanceof Equipment equipment) {
-                    return equipment;
-                }
+            InventoryObject object = profile.getInventoryObject(slot);
+            if (object instanceof Equipment equipment) {
+                return equipment;
             }
 
             return null;

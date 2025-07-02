@@ -3,56 +3,17 @@ package org.phantazm.core.inventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
+import java.util.function.UnaryOperator;
 
-/**
- * A profile of an inventory.
- */
 public interface InventoryProfile {
+    @Nullable InventoryObject getInventoryObject(int slot);
 
-    /**
-     * Checks whether the profile has an {@link InventoryObject} in a slot
-     *
-     * @param slot The slot to check
-     * @return Whether the profile has an {@link InventoryObject}
-     */
-    boolean hasInventoryObject(int slot);
+    @Nullable InventoryObject setInventoryObject(int slot, @Nullable InventoryObject object);
 
-    /**
-     * Gets the {@link InventoryObject} within a certain slot. This should be checked first with
-     * {@link #hasInventoryObject(int)}.
-     *
-     * @param slot The slot to get the {@link InventoryObject} from
-     * @return The {@link InventoryObject}
-     * @throws IllegalArgumentException If no {@link InventoryObject} exists in the slot
-     * @deprecated calls to hasInventoryObject(int) and getInventoryObject(int) are subject to race conditions
-     */
-    @Deprecated
-    @NotNull InventoryObject getInventoryObject(int slot);
+    boolean compareAndSet(int slot, @Nullable InventoryObject witness, @Nullable InventoryObject insert);
 
-    InventoryObject getInventoryObjectSafe(int slot);
+    @Nullable InventoryObject getAndUpdate(int slot, UnaryOperator<InventoryObject> operator);
 
-    /**
-     * Sets the {@link InventoryObject} within a certain slot.
-     *
-     * @param slot   The slot to put the {@link InventoryObject} into
-     * @param object The {@link InventoryObject} to put in, or null to remove the inventory object
-     * @throws IllegalStateException If an {@link InventoryObject} is in the current slot
-     */
-    @Nullable InventoryObject setInventoryObject(int slot, @NotNull InventoryObject object);
-
-    /**
-     * Removes the {@link InventoryObject} within a certain slot.
-     *
-     * @param slot The slot to remove an {@link InventoryObject} from
-     */
-    @NotNull InventoryObject removeInventoryObject(int slot);
-
-    /**
-     * Gets the number of slots this profile holds.
-     *
-     * @return The number of slots this profile holds
-     */
     int getSlotCount();
 
     @NotNull Iterable<? extends InventoryObject> objects();

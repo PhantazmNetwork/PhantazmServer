@@ -1,8 +1,11 @@
 package org.phantazm.core.inventory;
 
+import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 public class BasicInventoryObjectGroup extends InventoryObjectGroupAbstract {
     private final InventoryObject defaultObject;
@@ -19,24 +22,14 @@ public class BasicInventoryObjectGroup extends InventoryObjectGroupAbstract {
 
     @Override
     public int pushInventoryObject(@NotNull InventoryObject toPush) {
-        InventoryProfile profile = getProfile();
-        for (int slot : getSlots()) {
-            if (defaultObject != null) {
-                if (!profile.hasInventoryObject(slot)) {
-                    profile.setInventoryObject(slot, toPush);
-                    return slot;
-                }
+        Objects.requireNonNull(toPush);
 
-                InventoryObject existingObject = profile.getInventoryObject(slot);
-                if (existingObject.equals(defaultObject)) {
-                    profile.removeInventoryObject(slot);
-                    profile.setInventoryObject(slot, toPush);
-                    return slot;
-                }
-            } else if (!profile.hasInventoryObject(slot)) {
-                profile.setInventoryObject(slot, toPush);
-                return slot;
-            }
+        InventoryProfile profile = getProfile();
+        IntIterator intIterator = getSlots().intIterator();
+
+        while (intIterator.hasNext()) {
+            int slot = intIterator.nextInt();
+            if (profile.compareAndSet(slot, defaultObject, toPush)) return slot;
         }
 
         throw new IllegalStateException("All slots are full");
@@ -45,20 +38,14 @@ public class BasicInventoryObjectGroup extends InventoryObjectGroupAbstract {
     @Override
     public @NotNull InventoryObject popInventoryObject() {
         InventoryProfile profile = getProfile();
+
         for (int i = getSlots().size(); i >= 0; i--) {
-            if (profile.hasInventoryObject(i)) {
-                InventoryObject object = profile.getInventoryObject(i);
+            InventoryObject popped = profile.getAndUpdate(i, existing -> {
+                if (existing == null || existing.equals(defaultObject)) return existing;
+                else return null;
+            });
 
-                if (!object.equals(defaultObject)) {
-                    profile.removeInventoryObject(i);
-
-                    if (defaultObject != null) {
-                        profile.setInventoryObject(i, defaultObject);
-                    }
-
-                    return object;
-                }
-            }
+            if (popped != null && !popped.equals(defaultObject)) return popped;
         }
 
         throw new IllegalStateException("All slots are empty");

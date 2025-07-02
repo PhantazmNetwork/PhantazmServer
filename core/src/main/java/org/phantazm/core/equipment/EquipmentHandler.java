@@ -1,6 +1,7 @@
 package org.phantazm.core.equipment;
 
 import com.github.steanky.toolkit.collection.Wrapper;
+import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
@@ -41,18 +42,21 @@ public class EquipmentHandler {
 
     public boolean hasEquipment(@NotNull Key equipmentGroup, @NotNull Key equipmentKey) {
         Wrapper<Boolean> result = Wrapper.of(false);
+
         accessRegistry.getCurrentAccess().ifPresent(access -> {
             InventoryObjectGroup group = access.groups().get(equipmentGroup);
-            if (group != null) {
-                InventoryProfile profile = group.getProfile();
-                for (int slot : group.getSlots()) {
-                    if (profile.hasInventoryObject(slot)) {
-                        InventoryObject object = profile.getInventoryObject(slot);
-                        if (object instanceof Equipment equipment && equipment.key().equals(equipmentKey)) {
-                            result.set(true);
-                            return;
-                        }
-                    }
+            if (group == null) return;
+
+            InventoryProfile profile = group.getProfile();
+            IntIterator intIterator = group.getSlots().intIterator();
+            while (intIterator.hasNext()) {
+                int slot = intIterator.nextInt();
+                InventoryObject object = profile.getInventoryObject(slot);
+                if (object == null) continue;
+
+                if (object instanceof Equipment equipment && equipment.key().equals(equipmentKey)) {
+                    result.set(true);
+                    return;
                 }
             }
         });
@@ -82,12 +86,14 @@ public class EquipmentHandler {
 
         InventoryProfile profile = access.profile();
         List<Equipment> equipmentList = new ArrayList<>(slots.size());
-        for (int slot : slots) {
-            if (profile.hasInventoryObject(slot)) {
-                InventoryObject object = profile.getInventoryObject(slot);
-                if (object instanceof Equipment equipment) {
-                    equipmentList.add(equipment);
-                }
+        IntIterator intIterator = slots.intIterator();
+
+        while (intIterator.hasNext()) {
+            int slot = intIterator.nextInt();
+            InventoryObject object = profile.getInventoryObject(slot);
+
+            if (object instanceof Equipment equipment) {
+                equipmentList.add(equipment);
             }
         }
 
@@ -104,10 +110,10 @@ public class EquipmentHandler {
 
             InventoryProfile profile = access.profile();
             IntSet slots = group.getSlots();
-            for (int slot : slots) {
-                if (!profile.hasInventoryObject(slot)) {
-                    profile.setInventoryObject(slot, defaultObject);
-                }
+            IntIterator intIterator = slots.intIterator();
+
+            while (intIterator.hasNext()) {
+                profile.setInventoryObject(intIterator.nextInt(), defaultObject);
             }
         });
     }
@@ -115,7 +121,6 @@ public class EquipmentHandler {
     public @NotNull Result addOrReplaceEquipment(Key groupKey, Key equipmentKey, boolean allowReplace, int specificSlot,
         boolean allowDuplicate, @NotNull Supplier<? extends Optional<? extends Equipment>> equipmentSupplier,
         @Nullable Player player) {
-        // TODO: adding equipment when player is null should still add the equipment to the registry
         if (player == null) {
             return Result.FAILED;
         }
@@ -159,7 +164,8 @@ public class EquipmentHandler {
             }
 
             InventoryProfile profile = group.getProfile();
-            if (!profile.hasInventoryObject(specificSlot)) {
+            InventoryObject currentObject = profile.getInventoryObject(specificSlot);
+            if (currentObject == null) {
                 if (callEvent(equipment, player, groupKey)) {
                     return Result.CANCELLED;
                 }
@@ -169,7 +175,6 @@ public class EquipmentHandler {
                 return Result.ADDED;
             }
 
-            InventoryObject currentObject = profile.getInventoryObject(specificSlot);
             if (allowReplace || group.defaultObject() == currentObject) {
                 if (callEvent(equipment, player, groupKey)) {
                     return Result.CANCELLED;

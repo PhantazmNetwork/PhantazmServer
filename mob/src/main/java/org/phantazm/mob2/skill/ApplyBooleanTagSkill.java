@@ -71,7 +71,6 @@ public class ApplyBooleanTagSkill implements SkillComponent {
         @Override
         public void end(@NotNull Mob mob) {
             for (Reference<Entity> reference : targets) {
-                if (reference.refersTo(null)) continue;
                 Entity entity = reference.get();
                 if (entity == null) continue;
 

@@ -64,10 +64,6 @@ public class PlayerAttackEntityListener extends ZombiesPlayerEventListener<Entit
         profileSwitcher.getCurrentAccess().ifPresent(inventoryAccess -> {
             InventoryProfile profile = inventoryAccess.profile();
             int heldSlot = player.getHeldSlot();
-            if (!profile.hasInventoryObject(heldSlot)) {
-                handleNoEquipmentAttack(zombiesPlayer, player, target);
-                return;
-            }
 
             InventoryObject object = profile.getInventoryObject(heldSlot);
             if (!(object instanceof Equipment equipment)) {

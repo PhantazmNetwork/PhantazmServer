@@ -51,9 +51,7 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
                 throw new IllegalArgumentException("No matching inventory access found");
             }
 
-            if (newAccess == currentAccess) {
-                return;
-            }
+            if (newAccess == currentAccess) return;
 
             this.currentAccess = newAccess;
             applyTo(newAccess, oldAccess);
@@ -84,19 +82,16 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     public @Nullable InventoryObject replaceObject(@NotNull InventoryAccess access, int slot,
         @NotNull InventoryObject newObject) {
         InventoryProfile profile = access.profile();
-        InventoryObject old = null;
-        if (profile.hasInventoryObject(slot)) {
-            old = profile.removeInventoryObject(slot);
 
-            if (access == currentAccess && old instanceof Activable activable) {
-                activable.end();
+        InventoryObject old = profile.setInventoryObject(slot, newObject);
+        synchronized (sync) {
+            if (access == currentAccess) {
+                if (old instanceof Activable activable) {
+                    activable.end();
+                }
+
+                onAdd(slot, newObject);
             }
-        }
-
-        profile.setInventoryObject(slot, newObject);
-
-        if (access == currentAccess) {
-            onAdd(slot, newObject);
         }
 
         return old;
@@ -106,11 +101,11 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     public @Nullable InventoryObject removeObject(@NotNull InventoryAccess access, int slot) {
         InventoryProfile profile = access.profile();
 
-        InventoryObject old = null;
-        if (profile.hasInventoryObject(slot)) {
-            old = profile.removeInventoryObject(slot);
+        InventoryObject old = profile.setInventoryObject(slot, null);
+        if (old == null) return null;
 
-            if (access == this.currentAccess && old instanceof Activable activable) {
+        synchronized (sync) {
+            if (access == currentAccess && old instanceof Activable activable) {
                 activable.end();
                 playerView.getPlayer().ifPresent(player -> player.getInventory().setItemStack(slot, ItemStack.AIR));
             }
@@ -124,8 +119,11 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
         InventoryObjectGroup group = getGroup(access, groupKey);
 
         int slot = group.pushInventoryObject(object);
-        if (access == currentAccess) {
-            onAdd(slot, object);
+
+        synchronized (sync) {
+            if (access == currentAccess) {
+                onAdd(slot, object);
+            }
         }
     }
 
@@ -137,8 +135,7 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
     }
 
     private void onAdd(int slot, InventoryObject object) {
-        if (object instanceof Activable activable)
-            activable.start();
+        if (object instanceof Activable activable) activable.start();
 
         playerView.getPlayer().ifPresent(player -> {
             if (player.getHeldSlot() == slot && object instanceof Equipment equipment) {
@@ -163,11 +160,9 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
             if (oldAccess != null) {
                 InventoryProfile oldProfile = oldAccess.profile();
                 for (int slot = 0; slot < oldProfile.getSlotCount(); slot++) {
-                    if (!oldProfile.hasInventoryObject(slot)) {
-                        continue;
-                    }
-
                     InventoryObject object = oldProfile.getInventoryObject(slot);
+                    if (object == null) continue;
+
                     if (slot == player.getHeldSlot() && object instanceof Equipment equipment) {
                         equipment.setSelected(false);
                     }
@@ -179,11 +174,8 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
             if (newAccess != null) {
                 InventoryProfile newProfile = newAccess.profile();
                 for (int slot = 0; slot < newProfile.getSlotCount(); slot++) {
-                    if (!newProfile.hasInventoryObject(slot)) {
-                        continue;
-                    }
-
                     InventoryObject inventoryObject = newProfile.getInventoryObject(slot);
+                    if (inventoryObject == null) continue;
                     if (inventoryObject instanceof Activable activable) activable.start();
 
                     //don't ask for redraw when we initially set the item
