@@ -29,7 +29,13 @@ public class BasicInventoryObjectGroup extends InventoryObjectGroupAbstract {
 
         while (intIterator.hasNext()) {
             int slot = intIterator.nextInt();
-            if (profile.compareAndSet(slot, defaultObject, toPush)) return slot;
+
+            InventoryObject old = profile.getAndUpdate(slot, current -> {
+                if (current == null || current.equals(defaultObject)) return toPush;
+                else return current;
+            });
+
+            if (old == null || old.equals(defaultObject)) return slot;
         }
 
         throw new IllegalStateException("All slots are full");

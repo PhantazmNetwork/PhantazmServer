@@ -68,7 +68,9 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
         IntIterator intIterator = slots.intIterator();
         while (intIterator.hasNext()) {
             int slot = intIterator.nextInt();
-            if (Objects.equals(profile.getInventoryObject(slot), defaultObject())) return false;
+            InventoryObject object = profile.getInventoryObject(slot);
+
+            if (object == null || object.equals(defaultObject())) return false;
         }
 
         return true;

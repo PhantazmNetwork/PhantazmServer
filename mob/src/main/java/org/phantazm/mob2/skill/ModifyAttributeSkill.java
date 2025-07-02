@@ -19,16 +19,18 @@ import org.phantazm.mob2.Trigger;
 import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Model("mob.skill.attribute_modifying")
 @Cache
 public class ModifyAttributeSkill implements SkillComponent {
+    private static final Map<String, UUID> NAMED_ATTRIBUTES = new ConcurrentHashMap<>();
+
     private final Data data;
     private final SelectorComponent selector;
+
+    private final UUID uuid;
 
     private static class Extension {
         private final List<Pair<LivingEntity, CancellableState<Entity>>> affectedEntities = new ArrayList<>();
@@ -38,17 +40,20 @@ public class ModifyAttributeSkill implements SkillComponent {
     public ModifyAttributeSkill(@NotNull Data data, @NotNull @Child("selector") SelectorComponent selector) {
         this.data = Objects.requireNonNull(data);
         this.selector = Objects.requireNonNull(selector);
+
+        this.uuid = data.shareKey == null ? null : NAMED_ATTRIBUTES.computeIfAbsent(data.shareKey, ignored -> UUID.randomUUID());
     }
 
     @Override
     public @NotNull Skill get() {
-        return new Internal(data, ExtensionHolder.requestKey(Extension.class), selector.get());
+        return new Internal(data, ExtensionHolder.requestKey(Extension.class), selector.get(), this.uuid);
     }
 
     @Default("""
         {
           trigger=null,
-          stage=null
+          stage=null,
+          shareKey=null
         }
         """)
     @DataObject
@@ -56,7 +61,8 @@ public class ModifyAttributeSkill implements SkillComponent {
         @NotNull String attribute,
         float amount,
         @NotNull AttributeOperation attributeOperation,
-        @Nullable Key stage) {
+        @Nullable Key stage,
+        @Nullable String shareKey) {
     }
 
     private static final class Internal implements Skill {
@@ -67,10 +73,10 @@ public class ModifyAttributeSkill implements SkillComponent {
         private final Attribute attribute;
         private final Selector selector;
 
-        private Internal(Data data, ExtensionHolder.Key<Extension> key, Selector selector) {
+        private Internal(Data data, ExtensionHolder.Key<Extension> key, Selector selector, UUID uuid) {
             this.data = data;
             this.key = key;
-            this.uuid = UUID.randomUUID();
+            this.uuid = uuid == null ? UUID.randomUUID() : uuid;
             this.uuidString = this.uuid.toString();
             this.attribute = Attribute.fromKey(data.attribute);
             this.selector = selector;

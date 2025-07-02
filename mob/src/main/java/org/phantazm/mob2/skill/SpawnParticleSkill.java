@@ -41,7 +41,8 @@ public class SpawnParticleSkill implements SkillComponent {
 
     @Default("""
         {
-          trigger=null
+          trigger=null,
+          bounds={origin={x=0,y=1,z=0},lengths={x=0,y=0,z=0}}
         }
         """)
     @DataObject

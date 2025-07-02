@@ -113,7 +113,7 @@ public class EquipmentHandler {
             IntIterator intIterator = slots.intIterator();
 
             while (intIterator.hasNext()) {
-                profile.setInventoryObject(intIterator.nextInt(), defaultObject);
+                profile.compareAndSet(intIterator.nextInt(), null, defaultObject);
             }
         });
     }

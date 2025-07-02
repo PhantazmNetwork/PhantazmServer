@@ -141,6 +141,8 @@ public class BasicInventoryAccessRegistry implements InventoryAccessRegistry {
             if (player.getHeldSlot() == slot && object instanceof Equipment equipment) {
                 equipment.setSelected(true);
             }
+
+            player.getInventory().setItemStack(slot, object.getItemStack());
         });
     }
 

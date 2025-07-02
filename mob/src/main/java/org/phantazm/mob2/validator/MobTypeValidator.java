@@ -30,7 +30,8 @@ public class MobTypeValidator implements ValidatorComponent {
     @Default("""
         {
           types=[],
-          tags=[]
+          tags=[],
+          blacklist=false
         }
         """)
     @DataObject
@@ -47,8 +48,8 @@ public class MobTypeValidator implements ValidatorComponent {
                 return false;
             }
 
-            return data.blacklist != data.types.contains(entityAsMob.data().key()) &&
-                data.blacklist != data.tags.stream().anyMatch(tag -> entityAsMob.data().tags().contains(tag));
+            return (data.types.isEmpty() || data.blacklist != data.types.contains(entityAsMob.data().key())) &&
+                (data.tags.isEmpty() || data.blacklist != data.tags.stream().anyMatch(tag -> entityAsMob.data().tags().contains(tag)));
         }
     }
 }
