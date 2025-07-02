@@ -105,10 +105,7 @@ public class Round implements Tickable {
     }
 
     public void startRound() {
-        if (isActive) {
-            return;
-        }
-
+        if (isActive) return;
         isActive = true;
 
         for (ZombiesPlayer zombiesPlayer : sceneSupplier.get().managedPlayers().values()) {
@@ -127,7 +124,11 @@ public class Round implements Tickable {
         sceneSupplier.get().broadcastEvent(new RoundStartEvent(round));
 
         if (waves.isEmpty()) {
-            endRound();
+            for (Mob carryover : spawnedMobs.values()) {
+                carryover.scheduler().scheduleNextTick(carryover::kill);
+            }
+
+            spawnedMobs.clear();
             return;
         }
 
@@ -145,9 +146,7 @@ public class Round implements Tickable {
     }
 
     public void endRound() {
-        if (!isActive) {
-            return;
-        }
+        if (!isActive) return;
 
         isActive = false;
         for (Action<Round> action : endActions) {
@@ -159,15 +158,26 @@ public class Round implements Tickable {
         totalMobCount = 0;
 
         Iterator<Mob> spawnedIterator = spawnedMobs.values().iterator();
+        List<Mob> preserved = null;
         while (spawnedIterator.hasNext()) {
             do {
                 Mob mob = spawnedIterator.next();
                 spawnedIterator.remove();
-                mob.scheduler().scheduleNextTick(mob::kill);
+
+                if (mob.data().extra().getBooleanOrDefault(ExtraNodeKeys.KILL_AFTER_ROUND, true)) {
+                    mob.kill();
+                } else {
+                    if (preserved == null) preserved = new ArrayList<>();
+                    preserved.add(mob);
+                }
             }
             while (spawnedIterator.hasNext());
 
             spawnedIterator = spawnedMobs.values().iterator();
+        }
+
+        if (preserved != null) {
+            for (Mob mob : preserved) spawnedMobs.put(mob.getUuid(), mob);
         }
     }
 
@@ -211,10 +221,7 @@ public class Round implements Tickable {
 
     @Override
     public void tick(long time) {
-        if (!isActive) {
-            return;
-        }
-
+        if (!isActive) return;
         if (totalMobCount == 0) {
             endRound();
             return;

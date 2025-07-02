@@ -2,6 +2,7 @@ package org.phantazm.zombies.map.handler;
 
 import net.minestom.server.attribute.AttributeInstance;
 import org.jetbrains.annotations.NotNull;
+import org.phantazm.mob2.Mob;
 import org.phantazm.zombies.Attributes;
 import org.phantazm.zombies.endless.Endless;
 import org.phantazm.zombies.map.Round;
@@ -41,19 +42,12 @@ public class BasicRoundHandler implements RoundHandler {
         boolean hasEnded = this.hasEnded;
         Round currentRound = this.currentRound;
 
-        if (currentRound == null || hasEnded) {
-            return;
-        }
-
+        if (currentRound == null || hasEnded) return;
         currentRound.tick(time);
-        if (currentRound.isActive()) {
-            return;
-        }
 
+        if (currentRound.isActive()) return;
         for (ZombiesPlayer zombiesPlayer : zombiesPlayers) {
-            if (zombiesPlayer.hasQuit()) {
-                continue;
-            }
+            if (zombiesPlayer.hasQuit()) continue;
 
             zombiesPlayer.module().getStats()
                 .setRoundsSurvived(zombiesPlayer.module().getStats().getRoundsSurvived() + 1);
@@ -67,15 +61,18 @@ public class BasicRoundHandler implements RoundHandler {
             return;
         }
 
+        Round oldRound = currentRound;
         if (nextIndex < rounds.size()) {
             currentRound = rounds.get(nextIndex);
             currentRound.startRound();
 
+            handleCarryoverMobs(oldRound, currentRound);
             this.currentRound = currentRound;
         } else if (isEndless) {
             currentRound = endless.generateRound(nextIndex);
             currentRound.startRound();
 
+            handleCarryoverMobs(oldRound, currentRound);
             this.currentRound = currentRound;
         } else {
             this.hasEnded = true;
@@ -108,8 +105,11 @@ public class BasicRoundHandler implements RoundHandler {
         }
 
         this.roundIndex = roundIndex;
+        Round oldRound = currentRound;
         currentRound = roundIndex < rounds.size() ? rounds.get(roundIndex) : endless.generateRound(roundIndex);
         currentRound.startRound();
+
+        if (oldRound != null) handleCarryoverMobs(oldRound, currentRound);
     }
 
     @Override
@@ -147,5 +147,9 @@ public class BasicRoundHandler implements RoundHandler {
     @Override
     public @NotNull Optional<Endless> endless() {
         return isEndless ? Optional.of(endless) : Optional.empty();
+    }
+
+    private void handleCarryoverMobs(Round oldRound, Round newRound) {
+        for (Mob mob : oldRound.getSpawnedMobs()) newRound.addMob(mob);
     }
 }
