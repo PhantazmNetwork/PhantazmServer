@@ -56,7 +56,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
         GunStats stats = level.stats();
         this.state = new GunState(stats.shootSpeed(), stats.shotInterval(), stats
-            .reloadSpeed(entitySupplier.get().orElse(null)), false, stats.maxAmmo(),
+            .reloadSpeed(entitySupplier.get().orElse(null)), false, stats.maxAmmo(entitySupplier.get().orElse(null)),
             stats.maxClip(entitySupplier.get().orElse(null)), false, 0);
     }
 
@@ -160,7 +160,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
      */
     public void refill() {
         modifyState(builder -> {
-            builder.setAmmo(level.stats().maxAmmo());
+            builder.setAmmo(level.stats().maxAmmo(entitySupplier.get().orElse(null)));
             builder.setClip(level.stats().maxClip(entitySupplier.get().orElse(null)));
             builder.setTicksSinceLastReload(level.stats().reloadSpeed(entitySupplier.get().orElse(null)));
         });
@@ -294,7 +294,7 @@ public class Gun extends CachedInventoryObject implements Equipment, Upgradable 
 
         Entity entity = entitySupplier.get().orElse(null);
         modifyState(builder -> {
-            builder.setAmmo(newLevel.stats().maxAmmo());
+            builder.setAmmo(newLevel.stats().maxAmmo(entity));
             builder.setClip(newLevel.stats().maxClip(entity));
             builder.setTicksSinceLastReload(newLevel.stats().reloadSpeed(entity));
             builder.setTicksSinceLastShot(newLevel.stats().shootSpeed());

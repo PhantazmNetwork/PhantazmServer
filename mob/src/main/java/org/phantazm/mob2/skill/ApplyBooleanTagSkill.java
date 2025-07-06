@@ -77,6 +77,11 @@ public class ApplyBooleanTagSkill implements SkillComponent {
         }
 
         @Override
+        public void init(@NotNull Mob mob) {
+            mob.extensions().set(key, new Extension());
+        }
+
+        @Override
         public void end(@NotNull Mob mob) {
             Extension ext = mob.extensions().get(key);
             for (Reference<Entity> reference : ext.targets) {

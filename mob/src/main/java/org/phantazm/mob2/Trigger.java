@@ -28,6 +28,11 @@ public enum Trigger {
     ATTACK,
 
     /**
+     * Trigger that activates whenever an entity kills another entity.
+     */
+    KILL,
+
+    /**
      * Trigger that activates when a player interacts with (right-clicks) this entity.
      */
     INTERACT,

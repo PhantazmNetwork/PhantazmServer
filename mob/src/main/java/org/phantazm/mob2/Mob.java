@@ -8,6 +8,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.instance.Instance;
@@ -338,6 +339,9 @@ public class Mob extends ProximaEntity {
 
         if (canUseSkills()) {
             useIfPresent(Trigger.ATTACK);
+
+            if (target instanceof LivingEntity livingEntity && livingEntity.getHealth() <= 0)
+                useIfPresent(Trigger.KILL);
         }
     }
 

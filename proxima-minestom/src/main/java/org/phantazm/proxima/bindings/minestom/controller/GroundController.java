@@ -269,7 +269,7 @@ public class GroundController implements Controller {
 
         @Override
         public boolean test(LivingEntity candidate) {
-            if (candidate != entity && !(candidate instanceof Player) &&
+            if (candidate != entity && candidate.hasPhysics() && !(candidate instanceof Player) &&
                 candidate.getBoundingBox().intersectEntity(candidate.getPosition(), entity)) {
                 count++;
                 iterations++;

@@ -28,28 +28,29 @@ public class GunFullPredicate extends PredicateBase<GunFullPredicate.Data> {
         if (data.onlyHeld) {
             interaction.player().getHeldEquipment().ifPresent(equipment -> {
                 if (equipment instanceof Gun gun && (!data.matchKey || equipment.key().equals(data.equipmentKey))) {
-                    result.set(gun.getState().ammo() >= gun.getLevel().stats().maxAmmo());
+                    result.set(gun.getState().ammo() >= gun.getLevel().stats().maxAmmo(interaction.player().getPlayer().orElse(null)));
                 }
             });
-        }
-        else {
+        } else {
             interaction.player().module().getEquipmentHandler().accessRegistry().getCurrentAccess()
-                    .ifPresent(access -> {
-                        for (InventoryObject object : access.profile().objects()) {
-                            if (object instanceof Gun gun && (!data.matchKey || gun.key().equals(data.equipmentKey))) {
-                                if (gun.getState().ammo() < gun.getLevel().stats().maxAmmo()) {
-                                    result.set(false);
-                                }
+                .ifPresent(access -> {
+                    for (InventoryObject object : access.profile().objects()) {
+                        if (object instanceof Gun gun && (!data.matchKey || gun.key().equals(data.equipmentKey))) {
+                            if (gun.getState().ammo() < gun.getLevel().stats().maxAmmo(interaction.player().getPlayer().orElse(null))) {
+                                result.set(false);
                             }
                         }
-                    });
+                    }
+                });
         }
 
         return result.get();
     }
 
     @DataObject
-    public record Data(@NotNull Key equipmentKey, boolean onlyHeld, boolean matchKey) {
+    public record Data(@NotNull Key equipmentKey,
+        boolean onlyHeld,
+        boolean matchKey) {
     }
 
 }

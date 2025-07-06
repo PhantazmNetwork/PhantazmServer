@@ -47,7 +47,7 @@ public class BooleanTagCondition implements SkillConditionComponent {
         @Override
         public boolean test(@NotNull Mob mob) {
             for (Entity target : selector.select(mob).targets()) {
-                if (target.getTag(this.tag) != blacklist) return false;
+                if (target.getTag(this.tag) == blacklist) return false;
             }
 
             return true;

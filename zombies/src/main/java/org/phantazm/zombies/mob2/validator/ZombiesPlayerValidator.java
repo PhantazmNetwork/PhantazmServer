@@ -7,6 +7,7 @@ import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.core.player.PlayerView;
@@ -40,26 +41,21 @@ public class ZombiesPlayerValidator implements ValidatorComponent {
 
         @Override
         public boolean valid(@NotNull Mob mob, @NotNull Entity entity) {
-            if (!(entity instanceof Player)) {
-                return false;
-            }
+            if (!(entity instanceof Player actualPlayer)) return false;
+
+            GameMode gameMode = actualPlayer.getGameMode();
+            if (!gameMode.canTakeDamage()) return false;
 
             ZombiesScene scene = mob.extensions().get(ZombiesMobSpawner.SCENE_KEY);
             ZombiesPlayer player = scene.map().objects().module().playerMap().get(PlayerView.lookup(entity.getUuid()));
-            if (player == null) {
-                return false;
-            }
+            if (player == null) return false;
 
             ZombiesPlayerState state = player.module().getStateSwitcher().getState();
-            if (state == null) {
-                return false;
-            }
+            if (state == null) return false;
 
             Key currentState = state.key();
-            if (data.blacklist) {
-                return !data.states.contains(currentState);
-            }
-
+            if (data.blacklist) return !data.states.contains(currentState);
+           
             return data.states.contains(currentState);
         }
     }

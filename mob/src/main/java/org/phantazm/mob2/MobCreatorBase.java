@@ -154,14 +154,10 @@ public class MobCreatorBase implements MobCreator {
     }
 
     protected void setGoals(@NotNull Mob mob) {
-        for (GoalApplier applier : goalAppliers) {
-            applier.apply(mob);
-        }
+        for (GoalApplier applier : goalAppliers) applier.apply(mob);
     }
 
     protected void setTeam(@NotNull Mob mob) {
-        if (!data.showNameTag()) {
-            mob.setNameTagVisibility(TeamsPacket.NameTagVisibility.NEVER);
-        }
+        if (!data.showNameTag()) mob.setNameTagVisibility(TeamsPacket.NameTagVisibility.NEVER);
     }
 }

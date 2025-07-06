@@ -49,8 +49,6 @@ public class StatUpgradeInteractor extends InteractorBase<StatUpgradeInteractor.
         private final Attribute attribute;
         private final Set<UUID> ids;
 
-        private boolean ended;
-
         private Effect(Data data, UUID uuid, ZombiesPlayer zombiesPlayer) {
             this.data = data;
             this.uuid = uuid;
@@ -63,11 +61,9 @@ public class StatUpgradeInteractor extends InteractorBase<StatUpgradeInteractor.
 
         @Override
         public void start() {
-            if (data.amount == 0 || ended) return;
+            if (data.amount == 0) return;
 
             synchronized (sync) {
-                if (ended) return;
-
                 zombiesPlayer.getPlayer().ifPresent(player -> {
                     AttributeInstance instance = player.getAttribute(this.attribute);
 
@@ -82,23 +78,16 @@ public class StatUpgradeInteractor extends InteractorBase<StatUpgradeInteractor.
 
         @Override
         public void end() {
-            if (this.ended) return;
-
             synchronized (sync) {
-                if (this.ended) return;
                 zombiesPlayer.getPlayer().ifPresent(player -> {
                     AttributeInstance instance = player.getAttribute(this.attribute);
                     for (UUID id : this.ids) instance.removeModifier(id);
                     this.ids.clear();
                 });
-
-                this.ended = true;
             }
         }
 
         private void upgrade() {
-            if (ended) return;
-
             // this just applies the attribute again, with synchronization to prevent race conditions
             start();
         }

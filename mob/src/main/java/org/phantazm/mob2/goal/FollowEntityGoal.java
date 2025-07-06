@@ -2,7 +2,6 @@ package org.phantazm.mob2.goal;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.proxima.path.PathTarget;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.mob2.Mob;
@@ -48,27 +47,25 @@ public class FollowEntityGoal implements GoalCreator {
 
         @Override
         public boolean shouldStart() {
-            return !self.isDead();
+            if (self.isDead()) return false;
+
+            refreshTargetIfReady();
+            return target != null;
+        }
+
+        private void refreshTargetIfReady() {
+            if (ticksSinceTargetChosen >= data.retargetInterval) refreshTarget();
+            else ++ticksSinceTargetChosen;
         }
 
         @Override
         public boolean shouldEnd() {
-            return self.isDead();
+            return self.isDead() || target == null;
         }
 
         @Override
         public void tick(long time) {
-            if (target != null && target.isRemoved()) {
-                target = null;
-                refreshTarget();
-                return;
-            }
-
-            if (ticksSinceTargetChosen >= data.retargetInterval()) {
-                refreshTarget();
-            } else {
-                ++ticksSinceTargetChosen;
-            }
+            refreshTargetIfReady();
         }
 
         private void refreshTarget() {
@@ -80,13 +77,7 @@ public class FollowEntityGoal implements GoalCreator {
             if (newTargetOptional.isPresent()) {
                 Entity newTarget = newTargetOptional.get();
                 self.setDestination(newTarget);
-                return;
-            }
-
-            Optional<? extends Point> optionalPoint = target.location();
-            if (optionalPoint.isPresent()) {
-                Point point = optionalPoint.get();
-                self.setDestination(PathTarget.coordinate(point.blockX(), point.blockY(), point.blockZ()));
+                this.target = newTarget;
                 return;
             }
 

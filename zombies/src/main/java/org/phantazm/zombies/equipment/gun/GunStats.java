@@ -41,8 +41,13 @@ public final class GunStats {
             livingShooter.getAttribute(Attributes.RELOAD_DELAY)));
     }
 
-    public int maxAmmo() {
-        return data.maxAmmo();
+    public int maxAmmo(@Nullable Entity shooter) {
+        if (!(shooter instanceof LivingEntity livingShooter)) {
+            return data.maxAmmo;
+        }
+
+        return Math.round(AttributeUtils.computeWithBase(data.maxAmmo,
+            livingShooter.getAttribute(Attributes.MAX_AMMO)));
     }
 
     public int maxClip(@Nullable Entity shooter) {

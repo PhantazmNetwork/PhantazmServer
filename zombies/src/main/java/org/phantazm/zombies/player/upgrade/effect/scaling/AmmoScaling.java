@@ -5,7 +5,6 @@ import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
 import com.github.steanky.ethylene.mapper.annotation.Default;
-import net.minestom.server.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.ScalingFormulae;
@@ -49,7 +48,7 @@ public class AmmoScaling implements ScalingComponent {
         public double getMultiplier(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer, @NotNull TriggerData triggerData) {
             if (triggerData.raw() instanceof GunEvent gunEvent) {
                 Gun gun = gunEvent.gun();
-                int maxAmmo = gun.getLevel().stats().maxAmmo();
+                int maxAmmo = gun.getLevel().stats().maxAmmo(zombiesPlayer.getPlayer().orElse(null));
                 int currentAmmo = gun.getState().ammo();
 
                 double percentage = (double) currentAmmo / maxAmmo;
@@ -75,5 +74,6 @@ public class AmmoScaling implements ScalingComponent {
         double startMultiplier,
         double endMultiplier,
         boolean returnZeroOutsideRange
-    ){}
+    ) {
+    }
 }

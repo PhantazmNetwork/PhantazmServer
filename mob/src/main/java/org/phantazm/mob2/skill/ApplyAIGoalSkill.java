@@ -2,6 +2,7 @@ package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.phantazm.commons.ExtensionHolder;
@@ -49,7 +50,8 @@ public class ApplyAIGoalSkill implements SkillComponent {
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
-        int group) {
+        int group,
+        @NotNull String appliedTag) {
     }
 
     private static class Extension {
@@ -66,12 +68,14 @@ public class ApplyAIGoalSkill implements SkillComponent {
 
     private static class Internal extends TargetedSkill {
         private final ExtensionHolder.Key<Extension> key;
+        private final Tag<Boolean> applied;
         private final Data data;
         private final GoalCreator goalCreator;
 
         private Internal(ExtensionHolder.Key<Extension> key, Selector selector, GoalCreator goalCreator, Data data) {
             super(selector);
             this.key = key;
+            this.applied = Tag.Boolean(data.appliedTag).defaultValue(false);
             this.data = data;
             this.goalCreator = goalCreator;
         }
@@ -87,10 +91,12 @@ public class ApplyAIGoalSkill implements SkillComponent {
             target.forType(Mob.class, targetMob -> {
                 List<GoalGroup> goalGroups = targetMob.goalGroups();
                 if (data.group < 0 || data.group >= goalGroups.size()) return;
+                if (targetMob.tagHandler().getAndUpdateTag(applied, ignored -> true)) return;
+
                 ProximaGoal goal = goalCreator.create(targetMob);
                 goalGroups.get(data.group).addGoal(0, goal);
 
-                ext.entries.add(new Extension.Entry(new WeakReference<>(mob), new WeakReference<>(goal)));
+                ext.entries.add(new Extension.Entry(new WeakReference<>(targetMob), new WeakReference<>(goal)));
             });
         }
 
@@ -101,6 +107,7 @@ public class ApplyAIGoalSkill implements SkillComponent {
                 Mob entryMob = entry.mob.get();
                 ProximaGoal entryGoal = entry.goal.get();
 
+                if (entryMob != null) entryMob.tagHandler().removeTag(applied);
                 if (entryMob == null || entryGoal == null) continue;
 
                 List<GoalGroup> goalGroups = entryMob.goalGroups();

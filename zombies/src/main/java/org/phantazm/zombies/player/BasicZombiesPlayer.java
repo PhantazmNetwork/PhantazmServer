@@ -90,21 +90,21 @@ public class BasicZombiesPlayer implements ZombiesPlayer, ForwardingAudience {
     @Override
     public boolean addActivable(@NotNull Activable activable) {
         activablesLock.lock();
-        boolean result;
+        boolean added;
         try {
             Set<Activable> mutableActivables = new HashSet<>(activables);
-            result = mutableActivables.add(activable);
+            added = mutableActivables.add(activable);
 
             this.activables = mutableActivables;
         } finally {
             activablesLock.unlock();
         }
 
-        if (!hasQuit()) {
+        if (!hasQuit() && added) {
             activable.start();
         }
 
-        return result;
+        return added;
     }
 
     @Override
