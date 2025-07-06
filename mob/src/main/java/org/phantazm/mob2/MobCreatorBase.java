@@ -117,6 +117,8 @@ public class MobCreatorBase implements MobCreator {
             return;
         }
 
+        mob.setHasPhysics(dataMeta.hasPhysics());
+
         EntityMeta meta = mob.getEntityMeta();
 
         meta.setCustomName(dataMeta.customName());
