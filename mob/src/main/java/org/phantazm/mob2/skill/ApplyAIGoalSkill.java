@@ -45,12 +45,14 @@ public class ApplyAIGoalSkill implements SkillComponent {
         {
           trigger=null,
           group=0,
+          index=0
         }
         """)
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
         int group,
+        int index,
         @NotNull String appliedTag) {
     }
 
@@ -94,7 +96,7 @@ public class ApplyAIGoalSkill implements SkillComponent {
                 if (targetMob.tagHandler().getAndUpdateTag(applied, ignored -> true)) return;
 
                 ProximaGoal goal = goalCreator.create(targetMob);
-                goalGroups.get(data.group).addGoal(0, goal);
+                goalGroups.get(data.group).addGoal(data.index, goal);
 
                 ext.entries.add(new Extension.Entry(new WeakReference<>(targetMob), new WeakReference<>(goal)));
             });

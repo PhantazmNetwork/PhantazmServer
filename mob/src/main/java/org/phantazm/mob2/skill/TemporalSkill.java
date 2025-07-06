@@ -25,7 +25,7 @@ public class TemporalSkill implements SkillComponent {
     private final SkillComponent delegate;
 
     private static class Extension {
-        private int startTicks = -1;
+        private int ticksSinceStart = -1;
         private int actualDelay = -1;
     }
 
@@ -86,14 +86,12 @@ public class TemporalSkill implements SkillComponent {
             Extension ext = mob.extensions().get(key);
             Acquired<? extends Entity> acquired = mob.getAcquirable().lock();
             try {
-                int oldStartTime = ext.startTicks;
-                if (oldStartTime >= 0) {
-                    if (oldStartTime < ext.actualDelay) {
-                        endDelegate = true;
-                    }
+                int oldStartTicks = ext.ticksSinceStart;
+                if (oldStartTicks >= 0 && oldStartTicks >= ext.actualDelay) {
+                    endDelegate = true;
                 }
 
-                ext.startTicks = 0;
+                ext.ticksSinceStart = 0;
                 ext.actualDelay = MathUtils.randomInterval(data.minDuration, data.maxDuration);
             } finally {
                 acquired.unlock();
@@ -113,18 +111,18 @@ public class TemporalSkill implements SkillComponent {
             }
 
             Extension ext = mob.extensions().get(key);
-            if (ext.startTicks < 0) {
+            if (ext.ticksSinceStart < 0) {
                 return;
             }
 
-            if (ext.startTicks >= ext.actualDelay) {
+            if (ext.ticksSinceStart >= ext.actualDelay) {
                 delegate.end(mob);
 
-                ext.startTicks = -1;
+                ext.ticksSinceStart = -1;
                 ext.actualDelay = -1;
             }
 
-            ext.startTicks++;
+            ext.ticksSinceStart++;
         }
 
         @Override
@@ -139,10 +137,10 @@ public class TemporalSkill implements SkillComponent {
             Extension ext = mob.extensions().get(key);
             Acquired<? extends Entity> acquired = mob.getAcquirable().lock();
             try {
-                if (ext.startTicks < 0 || ext.actualDelay < 0) {
+                if (ext.ticksSinceStart < 0 || ext.actualDelay < 0) {
                     end = true;
                 } else {
-                    int ticksRemaining = ext.actualDelay - ext.startTicks;
+                    int ticksRemaining = ext.actualDelay - ext.ticksSinceStart;
                     if (ticksRemaining <= 0 || data.endImmediately) {
                         end = true;
                     } else {
