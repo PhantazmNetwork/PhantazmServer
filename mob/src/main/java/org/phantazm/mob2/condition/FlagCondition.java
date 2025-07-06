@@ -46,7 +46,7 @@ public class FlagCondition implements SkillConditionComponent {
         public boolean test(@NotNull Mob mob) {
             for (Entity target : selector.select(mob).targets()) {
                 if (!(target instanceof Mob targetMob)) continue;
-                if (targetMob.data().tags().contains(flag) != blacklist) return false;
+                if (targetMob.data().tags().contains(flag) == blacklist) return false;
             }
 
             return true;
