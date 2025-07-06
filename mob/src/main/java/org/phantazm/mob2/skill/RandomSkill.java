@@ -64,13 +64,8 @@ public class RandomSkill implements SkillComponent {
 
         @Override
         public void use(@NotNull Mob mob) {
-            if (data.chance <= 0) {
-                return;
-            }
-
-            if (data.chance >= 1 || random.nextDouble() < data.chance) {
-                delegate.use(mob);
-            }
+            if (data.chance <= 0) return;
+            if (data.chance >= 1 || random.nextDouble() < data.chance) delegate.use(mob);
         }
 
         @Override

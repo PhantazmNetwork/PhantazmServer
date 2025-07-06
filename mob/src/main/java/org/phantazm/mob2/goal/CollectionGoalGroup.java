@@ -1,63 +1,85 @@
 package org.phantazm.mob2.goal;
 
-import com.github.steanky.toolkit.collection.Containers;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.UnmodifiableView;
 import org.phantazm.proxima.bindings.minestom.goal.GoalGroup;
 import org.phantazm.proxima.bindings.minestom.goal.ProximaGoal;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CollectionGoalGroup implements GoalGroup {
-    private final ProximaGoal[] goals;
-
-    private ProximaGoal activeGoal;
+    private final List<ProximaGoal> goals;
+    private volatile ProximaGoal active;
 
     public CollectionGoalGroup(@NotNull Collection<ProximaGoal> goals) {
-        this.goals = goals.toArray(ProximaGoal[]::new);
-
-        for (ProximaGoal goal : this.goals) Objects.requireNonNull(goal);
+        this.goals = new CopyOnWriteArrayList<>(goals);
     }
 
     @Override
     public void tick(long time) {
-        ProximaGoal activeGoal = this.activeGoal;
+        ProximaGoal active = this.active;
 
-        if (activeGoal != null && activeGoal.shouldEnd()) {
-            activeGoal.end();
-            this.activeGoal = activeGoal = null;
+        // current active goal requested termination
+        if (active != null && active.shouldEnd()) {
+            active.end();
+            this.active = active = null;
         }
 
-        // Search all previous goals up until the currently enabled one. If any want to be activated, end the current
-        // one, and start the new one that requested activation. This has the effect that goals earlier in the list have
-        // priority over later ones.
-        //
-        // activeGoal will be null here when it wants to end (shouldEnd returns true). If this is the case, we simply
-        // activate the first goal in the list that wants to start.
+        boolean foundActive = false;
         for (ProximaGoal goal : goals) {
-            if (goal == activeGoal) break;
+            if (goal == active) {
+                foundActive = true;
+                break;
+            }
+
             if (!goal.shouldStart()) continue;
 
-            if (activeGoal != null) activeGoal.end();
+            if (active != null) active.end();
 
-            this.activeGoal = activeGoal = goal;
-            activeGoal.start();
-            break;
+            goal.start();
+            goal.tick(time);
+            this.active = goal;
+            return;
         }
 
-        if (activeGoal != null) activeGoal.tick(time);
+        if (active != null) {
+            if (!foundActive) {
+                // end any active goal that's not in the goals list anymore
+                // this happens if the active goal is removed using removeGoal
+                active.end();
+                this.active = null;
+            } else active.tick(time);
+        }
     }
 
     @Override
     public @NotNull Optional<ProximaGoal> currentGoal() {
-        return Optional.ofNullable(activeGoal);
+        return Optional.ofNullable(this.active);
     }
 
     @Override
-    public @NotNull @Unmodifiable List<ProximaGoal> goals() {
-        return Containers.arrayView(goals);
+    public @NotNull @UnmodifiableView List<ProximaGoal> goals() {
+        return Collections.unmodifiableList(this.goals);
+    }
+
+    @Override
+    public void addGoal(int index, @NotNull ProximaGoal goal) {
+        this.goals.add(index, goal);
+    }
+
+    @Override
+    public void addGoal(@NotNull ProximaGoal goal) {
+        this.goals.add(goal);
+    }
+
+    @Override
+    public @NotNull ProximaGoal removeGoal(int index) {
+        return this.goals.remove(index);
+    }
+
+    @Override
+    public boolean removeGoal(@NotNull ProximaGoal goal) {
+        return this.goals.remove(goal);
     }
 }
