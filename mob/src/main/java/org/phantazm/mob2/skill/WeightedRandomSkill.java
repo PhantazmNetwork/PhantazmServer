@@ -166,7 +166,7 @@ public class WeightedRandomSkill implements SkillComponent {
             for (DelegateEntry entry : delegates) {
                 sum += entry.weight;
 
-                if (choice < sum) {
+                if (choice <= sum) {
                     entry.delegate.use(mob);
                     return;
                 }
