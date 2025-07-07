@@ -37,13 +37,13 @@ public class DialogueSkill implements SkillComponent {
     @Default("""
         {
           trigger=null,
-          allowedRepetitions=0
+          uniqueMessages=0
         }
         """)
     @DataObject
     public record Data(@Nullable Trigger trigger,
         double baseChance,
-        int allowedRepetitions,
+        int uniqueMessages,
         @NotNull List<DialogueEntry> dialogue) {
     }
 
@@ -97,10 +97,10 @@ public class DialogueSkill implements SkillComponent {
 
             // if negative: repetition checking disabled
             // if 0: (dialogue length - 1) repetitions allowed
-            // if positive: repetition length is the minimum of allowedRepetitions and (dialogue length - 1)
-            if (data.allowedRepetitions < 0) len = -1;
-            else if (data.allowedRepetitions == 0) len = data.dialogue.size() - 1;
-            else len = Math.min(data.dialogue.size() - 1, data.allowedRepetitions);
+            // if positive: repetition length is the minimum of uniqueMessages and (dialogue length - 1)
+            if (data.uniqueMessages < 0) len = -1;
+            else if (data.uniqueMessages == 0) len = data.dialogue.size() - 1;
+            else len = Math.min(data.dialogue.size() - 1, data.uniqueMessages);
 
             mob.extensions().set(key, new Extension(len));
         }
