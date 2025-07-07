@@ -95,11 +95,11 @@ public class DialogueSkill implements SkillComponent {
         public void init(@NotNull Mob mob) {
             int len;
 
-            // if negative: repetition checking disabled
-            // if 0: (dialogue length - 1) repetitions allowed
+            // if negative: (dialogue length - 1) repetitions allowed
+            // if 0: repetition checking disabled
             // if positive: repetition length is the minimum of uniqueMessages and (dialogue length - 1)
-            if (data.uniqueMessages < 0) len = -1;
-            else if (data.uniqueMessages == 0) len = data.dialogue.size() - 1;
+            if (data.uniqueMessages < 0) len = data.dialogue.size() - 1;
+            else if (data.uniqueMessages == 0) len = -1;
             else len = Math.min(data.dialogue.size() - 1, data.uniqueMessages);
 
             mob.extensions().set(key, new Extension(len));
