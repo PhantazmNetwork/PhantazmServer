@@ -60,7 +60,7 @@ public class DialogueSkill implements SkillComponent {
 
         private Extension(int len) {
             this.maxLen = len;
-            this.lastMessages = new IntArrayList(len);
+            this.lastMessages = len >= 0 ? new IntArrayList(len) : null;
         }
     }
 
