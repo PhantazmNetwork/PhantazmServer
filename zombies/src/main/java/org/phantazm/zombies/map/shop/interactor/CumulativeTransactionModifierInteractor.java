@@ -45,6 +45,7 @@ public class CumulativeTransactionModifierInteractor implements ShopInteractor {
           displayName='',
           priority=0,
           target='SCENE'
+        }
         """)
     @DataObject
     public record Data(
