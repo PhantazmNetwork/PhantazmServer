@@ -8,6 +8,7 @@ import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.scene2.Scene;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 import org.phantazm.zombies.map.shop.Shop;
@@ -23,7 +24,8 @@ public class StringTagPredicate extends PredicateBase<StringTagPredicate.Data> {
     public StringTagPredicate(@NotNull Data data) {
         super(data);
 
-        this.tag = Tag.String(data.tag);
+        if (data.initialValue == null) this.tag = Tag.String(data.tag);
+        else this.tag = Tag.String(data.tag).defaultValue(data.initialValue);
     }
 
     @Override
@@ -36,12 +38,14 @@ public class StringTagPredicate extends PredicateBase<StringTagPredicate.Data> {
 
     @Default("""
         {
-          onScene=true
+          onScene=true,
+          initialValue=null
         }
         """)
     @DataObject
     public record Data(@NotNull String tag,
         boolean onScene,
-        @NotNull String value) {
+        @NotNull String value,
+        @Nullable String initialValue) {
     }
 }

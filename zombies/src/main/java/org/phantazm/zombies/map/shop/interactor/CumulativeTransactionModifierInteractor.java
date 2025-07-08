@@ -27,16 +27,24 @@ public class CumulativeTransactionModifierInteractor implements ShopInteractor {
 
     @Override
     public boolean handleInteraction(@NotNull PlayerInteraction interaction) {
+        TransactionModifierSource modifierSource = data.target == Target.SCENE ? this.modifierSource :
+            interaction.player().module().playerTransactionModifiers();
+
         modifierSource.addModifier(data.modifierGroup,
             Transaction.modifier(data.displayName, data.modifierAction, data.amount, data.priority));
         return true;
     }
 
+    public enum Target {
+        PLAYER,
+        SCENE
+    }
+
     @Default("""
         {
           displayName='',
-          priority=0
-        }
+          priority=0,
+          target='SCENE'
         """)
     @DataObject
     public record Data(
@@ -44,6 +52,7 @@ public class CumulativeTransactionModifierInteractor implements ShopInteractor {
         @NotNull Component displayName,
         @NotNull Transaction.Modifier.Action modifierAction,
         double amount,
-        int priority) {
+        int priority,
+        @NotNull Target target) {
     }
 }
