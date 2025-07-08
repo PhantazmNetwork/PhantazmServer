@@ -127,7 +127,7 @@ public class DialogueSkill implements SkillComponent {
 
         // should only be called when dialogue.size() > 1
         private int rollDialog(Extension ext) {
-            int roll = (int) Math.rint(Math.random() * cap);
+            int roll = (int) Math.floor(Math.random() * cap);
             int newCap = cap;
 
             boolean repetitionCheckEnabled = ext.maxLen > 0;
@@ -146,7 +146,7 @@ public class DialogueSkill implements SkillComponent {
                 DialogueEntry entry = this.dialogue.get(i);
                 sum += entry.weight;
 
-                if (adjustedRoll <= sum) {
+                if (adjustedRoll < sum) {
                     if (repetitionCheckEnabled) {
                         if (!ext.lastMessages.isEmpty() && ext.lastMessages.size() >= ext.maxLen)
                             ext.lastMessages.removeInt(ext.lastMessages.size() - 1);
