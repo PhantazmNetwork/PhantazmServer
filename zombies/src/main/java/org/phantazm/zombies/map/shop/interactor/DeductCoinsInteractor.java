@@ -1,5 +1,6 @@
 package org.phantazm.zombies.map.shop.interactor;
 
+import com.github.steanky.element.core.annotation.Cache;
 import com.github.steanky.element.core.annotation.DataObject;
 import com.github.steanky.element.core.annotation.FactoryMethod;
 import com.github.steanky.element.core.annotation.Model;
@@ -11,6 +12,7 @@ import org.phantazm.zombies.coin.TransactionResult;
 import org.phantazm.zombies.map.shop.PlayerInteraction;
 
 @Model("zombies.map.shop.interactor.deduct_coins")
+@Cache
 public class DeductCoinsInteractor extends InteractorBase<DeductCoinsInteractor.Data> {
     @FactoryMethod
     public DeductCoinsInteractor(@NotNull Data data) {

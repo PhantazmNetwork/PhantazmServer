@@ -14,31 +14,34 @@ import org.jetbrains.annotations.Nullable;
 import org.phantazm.core.ItemStackUtils;
 import org.phantazm.core.gui.Gui;
 import org.phantazm.core.gui.ItemUpdater;
+import org.phantazm.core.player.PlayerView;
 import org.phantazm.zombies.coin.Transaction;
 import org.phantazm.zombies.coin.TransactionModifierSource;
+import org.phantazm.zombies.player.ZombiesPlayer;
 
 import java.util.List;
+import java.util.Map;
 
 @Model("item.updating.cost_substituting")
 @Cache(false)
 public class CostSubstitutingItem implements ItemUpdater {
     private final Data data;
-    private final TransactionModifierSource modifierSource;
+    private final Map<PlayerView, ZombiesPlayer> playerMap;
 
     @FactoryMethod
-    public CostSubstitutingItem(@NotNull Data data, @NotNull TransactionModifierSource modifierSource) {
+    public CostSubstitutingItem(@NotNull Data data, @NotNull Map<PlayerView, ZombiesPlayer> playerMap) {
         this.data = data;
-        this.modifierSource = modifierSource;
+        this.playerMap = playerMap;
     }
 
     @Override
     public @NotNull ItemStack update(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot) {
-        return computeItemStack(cost());
+        return computeItemStack(cost(gui));
     }
 
     @Override
     public boolean hasUpdate(@NotNull Gui gui, long time, @NotNull ItemStack current, int slot) {
-        return !computeItemStack(cost()).equals(current);
+        return !computeItemStack(cost(gui)).equals(current);
     }
 
     private ItemStack computeItemStack(int cost) {
@@ -46,7 +49,11 @@ public class CostSubstitutingItem implements ItemUpdater {
             Placeholder.unparsed("cost", Integer.toString(cost)));
     }
 
-    private int cost() {
+    private int cost(Gui gui) {
+        ZombiesPlayer zombiesPlayer = playerMap.get(PlayerView.lookup(gui.getOwner().getUuid()));
+        if (zombiesPlayer == null) return data.cost;
+        TransactionModifierSource modifierSource = zombiesPlayer.module().compositeTransactionModifiers();
+
         int cost = data.cost;
         for (Transaction.Modifier modifier : modifierSource.modifiers(data.modifier)) {
             cost = modifier.modify(cost);
