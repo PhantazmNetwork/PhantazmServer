@@ -49,7 +49,9 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
      *
      * @return a read-only view of the players currently in this scene
      */
-    @NotNull @UnmodifiableView Set<@NotNull PlayerView> playersView();
+    @NotNull
+    @UnmodifiableView
+    Set<@NotNull PlayerView> playersView();
 
     /**
      * Determines if this Scene contains the given player or not.
@@ -250,6 +252,14 @@ public interface Scene extends Tickable, Acquirable.Source<Scene>, PacketGroupin
     default @NotNull Optional<SceneManager.Key<?>> getDefaultJoinKey() {
         return Optional.empty();
     }
+
+    /**
+     * Tags stored on this scene. These go away when the scene shuts down, and are not typically associated with a
+     * specific player. For that, see {@link Scene#playerTags(PlayerView)} or similar methods.
+     *
+     * @return the tag handler containing tags stored on this scene
+     */
+    @NotNull TagHandler sceneTags();
 
     /**
      * Gets a {@link TagHandler} for a certain player present in this scene. This should not be cleared until the scene

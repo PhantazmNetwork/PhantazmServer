@@ -30,6 +30,7 @@ public abstract class SceneAbstract implements Scene, IdentifiableScene, JoinTog
     private final Acquirable<Scene> acquirable = Acquirable.of(this);
 
     private final int timeout;
+    private final TagHandler sceneTags;
     private final UUID identity;
 
     protected final Set<PlayerView> scenePlayers;
@@ -48,6 +49,7 @@ public abstract class SceneAbstract implements Scene, IdentifiableScene, JoinTog
      */
     public SceneAbstract(int timeout) {
         this.timeout = timeout;
+        this.sceneTags = TagHandler.newHandler();
         this.identity = UUID.randomUUID();
         this.joinable = true;
 
@@ -109,6 +111,11 @@ public abstract class SceneAbstract implements Scene, IdentifiableScene, JoinTog
      */
     protected void timeout() {
         SceneManager.Global.instance().removeScene(this);
+    }
+
+    @Override
+    public final @NotNull TagHandler sceneTags() {
+        return sceneTags;
     }
 
     @Override
