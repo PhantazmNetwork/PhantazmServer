@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import it.unimi.dsi.fastutil.ints.*;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +15,7 @@ import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
@@ -109,20 +111,24 @@ public class DialogueSkill implements SkillComponent {
         public void use(@NotNull Mob mob) {
             if (dialogue.isEmpty() || Math.random() > data.baseChance) return;
 
-            selector.select(mob).forType(Player.class, player -> handlePlayer(player, mob));
+            Collection<Player> players = selector.select(mob).targets(Player.class);
+            handlePlayers(players, mob);
         }
 
-        private void handlePlayer(Player player, Mob mob) {
+        private void handlePlayers(Collection<Player> players, Mob mob) {
+            if (players.isEmpty()) return;
             int size = dialogue.size();
+
+            PacketGroupingAudience targetAudience = PacketGroupingAudience.of(players);
 
             // simple case, there is only one message
             if (size == 1) {
-                player.sendMessage(dialogue.get(0).message);
+                targetAudience.sendMessage(dialogue.get(0).message);
                 return;
             }
 
             int index = rollDialog(mob.extensions().get(key));
-            player.sendMessage(dialogue.get(index).message);
+            targetAudience.sendMessage(dialogue.get(index).message);
         }
 
         // should only be called when dialogue.size() > 1

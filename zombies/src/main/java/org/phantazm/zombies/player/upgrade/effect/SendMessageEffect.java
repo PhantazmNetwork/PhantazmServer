@@ -39,9 +39,7 @@ public class SendMessageEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             Collection<Player> players = selector.select(upgrade, zombiesPlayer, triggerData).targets(Player.class);
-            if (players.isEmpty()) {
-                return;
-            }
+            if (players.isEmpty()) return;
 
             PacketGroupingAudience.of(players).sendMessage(component);
         }
