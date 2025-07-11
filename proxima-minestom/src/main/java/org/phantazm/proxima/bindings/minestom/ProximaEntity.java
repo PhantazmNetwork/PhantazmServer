@@ -215,7 +215,8 @@ public class ProximaEntity extends LivingEntity {
             return;
         }
 
-        if (pathfinding.target != null && getDistanceSquared(pathfinding.target) < ENTITY_LOOK_DISTANCE_SQ) {
+        if (pathfinding.target != null && pathfinding.target.getInstance() == getInstance() &&
+            getDistanceSquared(pathfinding.target) < ENTITY_LOOK_DISTANCE_SQ) {
             lookAt(pathfinding.target);
         }
 
