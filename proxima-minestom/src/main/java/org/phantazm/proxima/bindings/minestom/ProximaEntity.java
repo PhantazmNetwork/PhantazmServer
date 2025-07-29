@@ -80,10 +80,7 @@ public class ProximaEntity extends LivingEntity {
     }
 
     private void resetPath() {
-        if (pathfinding == null) {
-            return;
-        }
-
+        if (pathfinding == null) return;
         pathfinding.cancel();
 
         currentPath = null;
@@ -101,9 +98,7 @@ public class ProximaEntity extends LivingEntity {
     }
 
     private void destroyPath() {
-        if (pathfinding == null) {
-            return;
-        }
+        if (pathfinding == null) return;
 
         resetPath();
         this.destination = null;

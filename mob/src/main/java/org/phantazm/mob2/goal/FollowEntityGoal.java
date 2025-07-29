@@ -47,7 +47,7 @@ public class FollowEntityGoal implements GoalCreator {
 
         @Override
         public boolean shouldStart() {
-            if (self.isDead()) return false;
+            if (self.isDead() || self.isRemoved()) return false;
 
             refreshTargetIfReady();
             return target != null;
