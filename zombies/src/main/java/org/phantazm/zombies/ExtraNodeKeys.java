@@ -12,6 +12,7 @@ public final class ExtraNodeKeys {
     public static final String BYPASS_ENDLESS_SCALING = "bypassEndlessScaling";
     public static final String PART_OF_ROUND = "partOfRound";
     public static final String KILL_AFTER_ROUND = "killAfterRound";
+    public static final String RESIST_BOMBING_DEBUFF = "resistBombingDebuff";
 
     public static final String ENDLESS_HEALTH_SCALING = "endlessHealthScaling";
     public static final String ENDLESS_DAMAGE_SCALING = "endlessDamageScaling";

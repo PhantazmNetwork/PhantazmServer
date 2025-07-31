@@ -11,6 +11,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.attribute.Attribute;
 import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.coordinate.Point;
@@ -19,6 +20,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.entity.state.CancellableState;
+import net.minestom.server.event.EventListener;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
@@ -30,10 +32,10 @@ import org.phantazm.core.VecUtils;
 import org.phantazm.core.particle.ParticleWrapper;
 import org.phantazm.core.player.PlayerView;
 import org.phantazm.core.tick.TickableTask;
-import org.phantazm.zombies.Attributes;
-import org.phantazm.zombies.Flags;
-import org.phantazm.zombies.Stages;
-import org.phantazm.zombies.Tags;
+import org.phantazm.mob2.Mob;
+import org.phantazm.mob2.skill.Skill;
+import org.phantazm.zombies.*;
+import org.phantazm.zombies.event.entity.MobSetupEvent;
 import org.phantazm.zombies.map.Room;
 import org.phantazm.zombies.map.Round;
 import org.phantazm.zombies.map.action.Action;
@@ -118,16 +120,83 @@ public class SelectBombedRoom implements Action<Round> {
         MapObjects objects = supplier.get();
         Room room = targetRoom(objects);
 
-        if (room == null) {
-            return;
-        }
+        if (room == null) return;
 
         TagResolver roomPlaceholder = Placeholder.component("room", room.getRoomInfo().displayName());
         if (data.warningFormatMessage != null) {
             instance.sendMessage(MiniMessage.miniMessage().deserialize(data.warningFormatMessage, roomPlaceholder));
         }
 
+        EventListener<MobSetupEvent> mobSetupListener = new EventListener<>() {
+            @Override
+            public @NotNull Class<MobSetupEvent> eventType() {
+                return MobSetupEvent.class;
+            }
+
+            @Override
+            public @NotNull Result run(@NotNull MobSetupEvent event) {
+                Mob target = event.target();
+                if (target.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_BOMBING_DEBUFF, false))
+                    return Result.EXPIRED;
+
+                UUID modifierUUID = UUID.randomUUID();
+                AttributeModifier half = new AttributeModifier(modifierUUID,
+                    modifierUUID.toString(), -0.5, AttributeOperation.MULTIPLY_TOTAL);
+
+                ZombiesScene zombiesScene = sceneSupplier.get();
+
+                target.addSkill(new Skill() {
+                    private boolean inBombedRoom;
+                    private int tick;
+
+                    private void applyModifiers(Mob mob) {
+                        if (inBombedRoom) return;
+                        this.inBombedRoom = true;
+
+                        mob.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(half);
+                        mob.getAttribute(Attribute.MAX_HEALTH).addModifier(half);
+                        mob.getAttribute(Attribute.ATTACK_DAMAGE).addModifier(half);
+                        mob.getAttribute(Attribute.ARMOR).addModifier(half);
+                        mob.getAttribute(Attribute.ARMOR_TOUGHNESS).addModifier(half);
+                    }
+
+                    private void clearModifiers(Mob mob) {
+                        if (!inBombedRoom) return;
+                        this.inBombedRoom = false;
+
+                        mob.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(modifierUUID);
+                        mob.getAttribute(Attribute.MAX_HEALTH).removeModifier(modifierUUID);
+                        mob.getAttribute(Attribute.ATTACK_DAMAGE).removeModifier(modifierUUID);
+                        mob.getAttribute(Attribute.ARMOR).removeModifier(modifierUUID);
+                        mob.getAttribute(Attribute.ARMOR_TOUGHNESS).removeModifier(modifierUUID);
+                    }
+
+                    @Override
+                    public void tick(@NotNull Mob mob) {
+                        if (tick++ % 5 != 0) return;
+                        Optional<Room> roomOptional = zombiesScene.map().objects()
+                            .roomTracker().atPoint(mob.getPosition().add(0, 0.5, 0));
+                        if (roomOptional.isEmpty()) return;
+
+                        Room room = roomOptional.get();
+                        if (room.flags().hasFlag(Flags.BOMBED_ROOM)) applyModifiers(mob);
+                        else clearModifiers(mob);
+                    }
+
+                    @Override
+                    public boolean needsTicking() {
+                        return true;
+                    }
+                });
+
+                return Result.SUCCESS;
+            }
+        };
+
+
         int startRoundIndex = objects.module().roundHandlerSupplier().get().currentRoundIndex();
+        if (data.debuffMobs && startRoundIndex >= data.minDebuffRound)
+            sceneSupplier.get().sceneNode().addListener(mobSetupListener);
 
         Damage bombDamage = new Damage(DamageType.GENERIC, null, null, null, data.damage);
         bombDamage.setTag(Tags.DAMAGE_NAME, data.bombingDamageName);
@@ -172,6 +241,7 @@ public class SelectBombedRoom implements Action<Round> {
                 }
 
                 states.clear();
+                sceneSupplier.get().sceneNode().removeListener(mobSetupListener);
             }
 
             @Override
@@ -362,7 +432,9 @@ public class SelectBombedRoom implements Action<Round> {
           damageDelay=100L,
           effectDelay=50L,
           exemptRooms=[],
-          disablingModifiers=[]
+          disablingModifiers=[],
+          debuffMobs=false,
+          minDebuffRound=20
         }
         """)
     @DataObject
@@ -383,6 +455,8 @@ public class SelectBombedRoom implements Action<Round> {
         @Nullable Key specificRoom,
         @NotNull List<Key> exemptRooms,
         @NotNull List<Modifier> modifiers,
-        @NotNull List<Key> disablingModifiers) {
+        @NotNull List<Key> disablingModifiers,
+        boolean debuffMobs,
+        int minDebuffRound) {
     }
 }
