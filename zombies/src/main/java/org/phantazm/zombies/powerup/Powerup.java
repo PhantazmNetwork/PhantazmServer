@@ -61,7 +61,7 @@ public class Powerup implements Tickable, Keyed {
     }
 
     public void activate(@NotNull ZombiesPlayer player, long time) {
-        if (active || !pickupPredicate.canPickup(player)) return;
+        if (active || !pickupPredicate.canPickup(player, this)) return;
 
         boolean anyActive = false;
 

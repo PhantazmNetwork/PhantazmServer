@@ -12,7 +12,7 @@ import java.util.Optional;
 @Model("zombies.powerup.pickup_predicate.missing_health")
 @Cache
 public class PlayerHealthPredicate implements PickupPredicateComponent {
-    private static final PickupPredicate INSTANCE = zombiesPlayer -> {
+    private static final PickupPredicate INSTANCE = (zombiesPlayer, powerup) -> {
         Optional<Player> playerOptional = zombiesPlayer.getPlayer();
         if (playerOptional.isEmpty()) {
             return false;

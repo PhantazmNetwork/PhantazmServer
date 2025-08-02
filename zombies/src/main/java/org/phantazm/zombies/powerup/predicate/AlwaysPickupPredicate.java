@@ -9,7 +9,7 @@ import org.phantazm.zombies.scene2.ZombiesScene;
 @Model("zombies.powerup.pickup_predicate.always")
 @Cache
 public class AlwaysPickupPredicate implements PickupPredicateComponent {
-    public static final PickupPredicate INSTANCE = zombiesPlayer -> true;
+    public static final PickupPredicate INSTANCE = (zombiesPlayer, powerup) -> true;
 
     @FactoryMethod
     public AlwaysPickupPredicate() {
