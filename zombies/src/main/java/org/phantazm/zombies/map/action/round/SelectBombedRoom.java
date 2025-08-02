@@ -115,6 +115,12 @@ public class SelectBombedRoom implements Action<Round> {
         return candidateRooms.get(random.nextInt(candidateRooms.size()));
     }
 
+    private static final Key FALLEN_GROUNDS = Key.key("phantazm:fallen_grounds");
+
+    private boolean debuffMobs() {
+        return data.debuffMobs || sceneSupplier.get().mapSettingsInfo().id().equals(FALLEN_GROUNDS);
+    }
+
     @Override
     public void perform(@NotNull Round round) {
         MapObjects objects = supplier.get();
@@ -137,11 +143,15 @@ public class SelectBombedRoom implements Action<Round> {
             public @NotNull Result run(@NotNull MobSetupEvent event) {
                 Mob target = event.target();
                 if (target.data().extra().getBooleanOrDefault(ExtraNodeKeys.RESIST_BOMBING_DEBUFF, false))
-                    return Result.EXPIRED;
+                    return Result.SUCCESS;
 
                 UUID modifierUUID = UUID.randomUUID();
+                UUID otherUUID = UUID.randomUUID();
                 AttributeModifier half = new AttributeModifier(modifierUUID,
                     modifierUUID.toString(), -0.5, AttributeOperation.MULTIPLY_TOTAL);
+
+                AttributeModifier other = new AttributeModifier(modifierUUID,
+                    modifierUUID.toString(), -0.1, AttributeOperation.MULTIPLY_TOTAL);
 
                 ZombiesScene zombiesScene = sceneSupplier.get();
 
@@ -153,8 +163,7 @@ public class SelectBombedRoom implements Action<Round> {
                         if (inBombedRoom) return;
                         this.inBombedRoom = true;
 
-                        mob.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(half);
-                        mob.getAttribute(Attribute.MAX_HEALTH).addModifier(half);
+                        mob.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(other);
                         mob.getAttribute(Attribute.ATTACK_DAMAGE).addModifier(half);
                         mob.getAttribute(Attribute.ARMOR).addModifier(half);
                         mob.getAttribute(Attribute.ARMOR_TOUGHNESS).addModifier(half);
@@ -164,8 +173,7 @@ public class SelectBombedRoom implements Action<Round> {
                         if (!inBombedRoom) return;
                         this.inBombedRoom = false;
 
-                        mob.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(modifierUUID);
-                        mob.getAttribute(Attribute.MAX_HEALTH).removeModifier(modifierUUID);
+                        mob.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(otherUUID);
                         mob.getAttribute(Attribute.ATTACK_DAMAGE).removeModifier(modifierUUID);
                         mob.getAttribute(Attribute.ARMOR).removeModifier(modifierUUID);
                         mob.getAttribute(Attribute.ARMOR_TOUGHNESS).removeModifier(modifierUUID);
@@ -193,9 +201,8 @@ public class SelectBombedRoom implements Action<Round> {
             }
         };
 
-
         int startRoundIndex = objects.module().roundHandlerSupplier().get().currentRoundIndex();
-        if (data.debuffMobs && startRoundIndex >= data.minDebuffRound)
+        if (debuffMobs() && startRoundIndex >= data.minDebuffRound)
             sceneSupplier.get().sceneNode().addListener(mobSetupListener);
 
         Damage bombDamage = new Damage(DamageType.GENERIC, null, null, null, data.damage);
