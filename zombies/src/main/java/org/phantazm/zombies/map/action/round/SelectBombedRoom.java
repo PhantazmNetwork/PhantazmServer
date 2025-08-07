@@ -152,12 +152,12 @@ public class SelectBombedRoom implements Action<Round> {
                 ZombiesScene zombiesScene = sceneSupplier.get();
 
                 target.addSkill(new Skill() {
-                    private boolean inBombedRoom;
+                    private boolean effectsApplied;
                     private int tick;
 
                     private void applyModifiers(Mob mob) {
-                        if (inBombedRoom) return;
-                        this.inBombedRoom = true;
+                        if (effectsApplied) return;
+                        this.effectsApplied = true;
 
                         mob.getAttribute(Attribute.ATTACK_DAMAGE).addModifier(half);
                         mob.getAttribute(Attribute.ARMOR).addModifier(half);
@@ -165,8 +165,8 @@ public class SelectBombedRoom implements Action<Round> {
                     }
 
                     private void clearModifiers(Mob mob) {
-                        if (!inBombedRoom) return;
-                        this.inBombedRoom = false;
+                        if (!effectsApplied) return;
+                        this.effectsApplied = false;
 
                         mob.getAttribute(Attribute.ATTACK_DAMAGE).removeModifier(modifierUUID);
                         mob.getAttribute(Attribute.ARMOR).removeModifier(modifierUUID);
@@ -303,7 +303,8 @@ public class SelectBombedRoom implements Action<Round> {
                 }
 
                 for (ZombiesPlayer zombiesPlayer : playerMap.values()) {
-                    if (!zombiesPlayer.canDoGenericActions() || zombiesPlayer.flags().hasFlag(Flags.GODMODE)) {
+                    if (!zombiesPlayer.canDoGenericActions() || zombiesPlayer.flags().hasFlag(Flags.GODMODE) ||
+                        zombiesPlayer.flags().hasFlag(Flags.BOMBING_IMMUNE)) {
                         removeStateFor(zombiesPlayer, false);
                         continue;
                     }
