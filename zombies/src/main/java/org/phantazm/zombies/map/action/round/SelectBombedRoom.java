@@ -146,12 +146,8 @@ public class SelectBombedRoom implements Action<Round> {
                     return Result.SUCCESS;
 
                 UUID modifierUUID = UUID.randomUUID();
-                UUID otherUUID = UUID.randomUUID();
                 AttributeModifier half = new AttributeModifier(modifierUUID,
                     modifierUUID.toString(), -0.5, AttributeOperation.MULTIPLY_TOTAL);
-
-                AttributeModifier other = new AttributeModifier(modifierUUID,
-                    modifierUUID.toString(), -0.1, AttributeOperation.MULTIPLY_TOTAL);
 
                 ZombiesScene zombiesScene = sceneSupplier.get();
 
@@ -163,7 +159,6 @@ public class SelectBombedRoom implements Action<Round> {
                         if (inBombedRoom) return;
                         this.inBombedRoom = true;
 
-                        mob.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(other);
                         mob.getAttribute(Attribute.ATTACK_DAMAGE).addModifier(half);
                         mob.getAttribute(Attribute.ARMOR).addModifier(half);
                         mob.getAttribute(Attribute.ARMOR_TOUGHNESS).addModifier(half);
@@ -173,7 +168,6 @@ public class SelectBombedRoom implements Action<Round> {
                         if (!inBombedRoom) return;
                         this.inBombedRoom = false;
 
-                        mob.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(otherUUID);
                         mob.getAttribute(Attribute.ATTACK_DAMAGE).removeModifier(modifierUUID);
                         mob.getAttribute(Attribute.ARMOR).removeModifier(modifierUUID);
                         mob.getAttribute(Attribute.ARMOR_TOUGHNESS).removeModifier(modifierUUID);
