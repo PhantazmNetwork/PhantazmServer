@@ -10,7 +10,7 @@ import org.phantazm.zombies.scene2.ZombiesScene;
 
 @Model("zombies.powerup.pickup_predicate.exclusive")
 @Cache
-public class EffectInactivePredicate implements PickupPredicateComponent {
+public class ExclusivePickupPredicate implements PickupPredicateComponent {
     private static final PickupPredicate INSTANCE = (zombiesPlayer, powerup) -> {
         Wrapper<Boolean> wrapper = Wrapper.of(true);
         zombiesPlayer.getScene().getAcquirable().sync(zombiesScene -> {
@@ -28,7 +28,7 @@ public class EffectInactivePredicate implements PickupPredicateComponent {
     };
 
     @FactoryMethod
-    public EffectInactivePredicate() {
+    public ExclusivePickupPredicate() {
     }
 
     @Override
