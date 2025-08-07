@@ -33,27 +33,24 @@ public final class GunStats {
     }
 
     public long reloadSpeed(@Nullable Entity shooter) {
-        if (!(shooter instanceof LivingEntity livingShooter)) {
-            return data.reloadSpeed;
-        }
+        if (!(shooter instanceof LivingEntity livingShooter)) return data.reloadSpeed;
 
         return Math.round(AttributeUtils.computeWithBase(data.reloadSpeed(),
             livingShooter.getAttribute(Attributes.RELOAD_DELAY)));
     }
 
     public int maxAmmo(@Nullable Entity shooter) {
-        if (!(shooter instanceof LivingEntity livingShooter)) {
-            return data.maxAmmo;
-        }
+        if (!(shooter instanceof LivingEntity livingShooter)) return data.maxAmmo;
 
-        return Math.round(AttributeUtils.computeWithBase(data.maxAmmo,
-            livingShooter.getAttribute(Attributes.MAX_AMMO)));
+        double base = AttributeUtils.computeWithBase(data.maxAmmo,
+            livingShooter.getAttribute(Attributes.MAX_AMMO));
+        double withClip = livingShooter.getAttributeValue(Attributes.MAX_AMMO_AS_CLIP_MULTIPLIER) * data.maxClip;
+
+        return (int) Math.round(base + withClip);
     }
 
     public int maxClip(@Nullable Entity shooter) {
-        if (!(shooter instanceof LivingEntity livingShooter)) {
-            return data.maxClip;
-        }
+        if (!(shooter instanceof LivingEntity livingShooter)) return data.maxClip;
 
         return Math.round(AttributeUtils.computeWithBase(data.maxClip(),
             livingShooter.getAttribute(Attributes.MAX_CLIP)));

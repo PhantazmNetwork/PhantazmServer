@@ -22,6 +22,8 @@ public final class Attributes {
 
     public static final Attribute MAX_CLIP = new Attribute("phantazm.max_clip", 0F, false);
 
+    public static final Attribute MAX_AMMO_AS_CLIP_MULTIPLIER = new Attribute("phantazm.max_ammo_as_clip_multiplier", 0F, false);
+
     public static final Attribute MAX_AMMO = new Attribute("phantazm.max_ammo", 0F, false);
 
     public static final Attribute ATTACK_SPEED_MULTIPLIER =
@@ -77,6 +79,7 @@ public final class Attributes {
         BULLET_PENETRATION.register();
         RELOAD_DELAY.register();
         MAX_CLIP.register();
+        MAX_AMMO_AS_CLIP_MULTIPLIER.register();
         MAX_AMMO.register();
         ATTACK_SPEED_MULTIPLIER.register();
         HEADSHOT_DAMAGE_RECEIVED.register();
