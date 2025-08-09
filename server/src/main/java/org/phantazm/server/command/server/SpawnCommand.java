@@ -24,6 +24,9 @@ public class SpawnCommand extends Command {
             sceneManager.synchronizeWithCurrentScene(player, currentScene -> {
                 if (currentScene instanceof Lobby lobby) {
                     player.teleport(lobby.getSpawnPoint());
+                    sender.sendMessage(Component.text(
+                        "Sent back to spawn!",
+                        NamedTextColor.GREEN));
                 } else {
                     sender.sendMessage(Component.text(
                         "You can only use this command in the lobby!",
