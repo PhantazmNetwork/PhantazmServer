@@ -147,7 +147,7 @@ public class SelectBombedRoom implements Action<Round> {
 
                 UUID modifierUUID = UUID.randomUUID();
                 AttributeModifier half = new AttributeModifier(modifierUUID,
-                    modifierUUID.toString(), -0.5, AttributeOperation.MULTIPLY_TOTAL);
+                    modifierUUID.toString(), -0.3, AttributeOperation.MULTIPLY_TOTAL);
 
                 ZombiesScene zombiesScene = sceneSupplier.get();
 
