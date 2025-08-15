@@ -20,4 +20,4 @@ USER root
 RUN apk --no-cache add git curl unzip
 USER container
 
-FROM mariadb:11.2.2 AS mariadb
+FROM mariadb:12.0.2 AS mariadb
