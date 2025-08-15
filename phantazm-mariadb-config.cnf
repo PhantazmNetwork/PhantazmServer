@@ -1,5 +1,0 @@
-[mariadb]
-host-cache-size = 0
-
-[mysqld]
-bind-address = 0.0.0.0

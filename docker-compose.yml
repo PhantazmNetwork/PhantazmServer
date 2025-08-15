@@ -22,8 +22,11 @@ services:
     hostname: 'server'
     user: '${PHANTAZM_UID}:${PHANTAZM_GID}'
     depends_on:
-      - 'db'
-      - 'proxy'
+      db:
+        condition: service_healthy
+        required: true
+      proxy:
+        condition: service_started
     working_dir: '/server'
     volumes:
       - './:/server'
@@ -86,7 +89,11 @@ services:
       MARIADB_DATABASE: phantazm_db
     volumes:
       - 'db:/var/lib/mysql'
-      - './phantazm-mariadb-config.cnf:/etc/mysql/conf.d/phantazm-mariadb-config.cnf'
+    healthcheck:
+      test: 'mariadb-admin ping -h 127.0.0.1 -u phantazm --password=secret'
+      interval: 1s
+      timeout: 20s
+      retries: 30
 networks:
   standard:
     name: phantazm-standard
