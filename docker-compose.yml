@@ -84,7 +84,7 @@ services:
       MARIADB_PASSWORD: secret
       MARIADB_ROOT_PASSWORD: secret
       MARIADB_DATABASE: phantazm_db
-    command: --bind-address 0.0.0.0
+    command: --bind-address=0.0.0.0
     volumes:
       - 'db:/var/lib/mysql'
 networks:
