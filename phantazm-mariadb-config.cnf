@@ -1,0 +1,8 @@
+[mariadb]
+host-cache-size = 0
+skip-name-resolve
+bind-address = 0.0.0.0
+
+[mysqld]
+# The amazing docs don't specify whether this goes in the [mariadb] group or here, so... use both...
+bind-address = 0.0.0.0

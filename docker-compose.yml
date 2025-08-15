@@ -86,6 +86,7 @@ services:
       MARIADB_DATABASE: phantazm_db
     volumes:
       - 'db:/var/lib/mysql'
+      - './phantazm-mariadb-config.cnf:/etc/mysql/conf.d/phantazm-mariadb-config.cnf'
 networks:
   standard:
     name: phantazm-standard
