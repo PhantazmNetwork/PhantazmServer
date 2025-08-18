@@ -64,7 +64,7 @@ All three may be launched at once by running `java -jar dev-launcher.jar` in the
 IntelliJ run configuration `Launch Phantazm`.
 
 By default, launching this way will attempt to download the Minecraft world files we use on our official server. If you
-are not developing for our network, you can disable this by adding a file named `.override.env` in the root directory of
+are not developing for our network, you can disable this by adding a file named `.env` in the root directory of
 the project, and adding the line `PHANTAZM_AUTO_DL_WORLDS='false'`.
 
 In addition to the files included in this repository, to properly run Phantazm you will need access to a Git repository
@@ -73,7 +73,7 @@ developing for our network or not, you must specify a configuration repository. 
 run `java -jar dev-launcher.jar` (or `Launch Phantazm`), the setup script will prompt you to enter a URL, which will be
 appended
 automatically to
-your `.override.env` file. An example of such a URL is below:
+your `.env` file. An example of such a URL is below:
 
 ```
 https://steanky:[token-redacted]@github.com/PhantazmNetwork/Configuration
@@ -92,10 +92,10 @@ necessary for you, run the `id` command. This will output some text like the fol
 uid=1000(steank) gid=1000(steank)
 ```
 
-Make note of your current user name (the one that owns all the project files; in this example it is `steank`, and it
+Make note of your current username (the one that owns all the project files; in this example it is `steank`, and it
 should be whichever user you used to clone this repository in the first place) and its
 corresponding `uid` and `gid`. _If `uid` and `gid` are both 1000, you do not need to do anything else._ However, if one
-differs, you will need to add some additional configuration to `.override.env`:
+differs, you will need to add some additional configuration to `.env`:
 
 ```
 # This example assumes your UID and GID are 1001
@@ -124,7 +124,7 @@ or run the `Debug Phantazm` configuration in IntelliJ, and set breakpoints as us
 
 You can also run the command `java -jar dev-launcher.jar -d` to launch in debug mode from the console. From there, you
 may attach an external debugger to port `5005`, as you would normally. The debug port can be configured by setting
-the `PHANTAZM_DB_PORT_HOST` environment variable in your `.override.env`.
+the `PHANTAZM_DB_PORT_HOST` environment variable in your `.env`.
 
 ### Configuration
 

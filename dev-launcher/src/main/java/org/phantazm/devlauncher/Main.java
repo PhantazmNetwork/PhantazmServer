@@ -52,7 +52,7 @@ public class Main {
     };
 
     private static final String[] DOCKER_COMPOSE_UP_NODEBUG = new String[]{
-        "docker", "compose", "up", "-d"
+        "docker", "compose", "--profile", "nodebug", "up", "-d"
     };
 
     private static final String[] DOCKER_COMPOSE_UP_DEBUG = new String[]{
@@ -68,7 +68,7 @@ public class Main {
     };
 
     private static final String[] DOCKER_COMPOSE_DOWN_NODEBUG = new String[]{
-        "docker", "compose", "down"
+        "docker", "compose", "--profile", "nodebug", "down"
     };
 
     private static final String[] DOCKER_COMPOSE_DOWN_DEBUG = new String[]{
@@ -221,7 +221,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        Files.newOutputStream(Path.of(".override.env"), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+        Files.newOutputStream(Path.of(".env"), StandardOpenOption.CREATE, StandardOpenOption.APPEND)
             .close();
 
         boolean debug = isDebug(args);

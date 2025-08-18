@@ -1,26 +1,27 @@
+# shouldn't be changed, dev-launcher.jar expects this value
+name: "phantazm"
 services:
   server: &server
     build:
       context: '.'
       target: 'server_base'
       args: &build_args
-        uid: '${PHANTAZM_UID}'
-        gid: '${PHANTAZM_GID}'
+        uid: '${PHANTAZM_UID:-1000}'
+        gid: '${PHANTAZM_GID:-1000}'
     networks:
       - 'standard'
-    env_file:
-      - '.override.env'
     environment: &shared_environment
       # Pass in many of our environment variables
-      PHANTAZM_AUTO_DL_WORLDS: '${PHANTAZM_AUTO_DL_WORLDS}'
-      PHANTAZM_IS_DOCKER_CONTAINER: '${PHANTAZM_IS_DOCKER_CONTAINER}'
-      PHANTAZM_SERVER_JVM_ARGS: '${PHANTAZM_SERVER_JVM_ARGS}'
-      PHANTAZM_SERVER_ARGS: '${PHANTAZM_SERVER_ARGS}'
-      PHANTAZM_SERVER_FILE: '${PHANTAZM_SERVER_FILE}'
+      PHANTAZM_AUTO_DL_WORLDS: '${PHANTAZM_AUTO_DL_WORLDS:-true}'
+      PHANTAZM_CONF_REPO_URL: '${PHANTAZM_CONF_REPO_URL}'
+      PHANTAZM_IS_DOCKER_CONTAINER: '${PHANTAZM_IS_DOCKER_CONTAINER:-true}'
+      PHANTAZM_SERVER_JVM_ARGS: '${PHANTAZM_SERVER_JVM_ARGS:--Dfile.encoding=UTF-8 -jar}'
+      PHANTAZM_SERVER_ARGS: '${PHANTAZM_SERVER_ARGS:-unsafe}'
+      PHANTAZM_SERVER_FILE: '${PHANTAZM_SERVER_FILE:-server.jar}'
     profiles:
       - 'nodebug'
     hostname: 'server'
-    user: '${PHANTAZM_UID}:${PHANTAZM_GID}'
+    user: '${PHANTAZM_UID:-1000}:${PHANTAZM_GID:-1000}'
     depends_on:
       db:
         condition: service_healthy
@@ -36,11 +37,11 @@ services:
     <<: *server
     environment:
       <<: *shared_environment
-      PHANTAZM_SERVER_JVM_ARGS: '-Dfile.encoding=UTF-8 -Dminestom.packet-queue-size=-1 -Dminestom.keep-alive-kick=-1 -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:${PHANTAZM_DEBUG_PORT_CONTAINER} -jar'
+      PHANTAZM_SERVER_JVM_ARGS: '-Dfile.encoding=UTF-8 -Dminestom.packet-queue-size=-1 -Dminestom.keep-alive-kick=-1 -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:${PHANTAZM_DEBUG_PORT_CONTAINER:-5005} -jar'
     profiles:
       - 'debug'
     ports:
-      - '${PHANTAZM_DEBUG_PORT_HOST}:${PHANTAZM_DEBUG_PORT_CONTAINER}'
+      - '${PHANTAZM_DEBUG_PORT_HOST:-5005}:${PHANTAZM_DEBUG_PORT_CONTAINER:-5005}'
   proxy:
     build:
       context: '.'
@@ -48,10 +49,8 @@ services:
       args: *build_args
     networks:
       - 'standard'
-    env_file:
-      - '.override.env'
     hostname: 'proxy'
-    user: '${PHANTAZM_UID}:${PHANTAZM_GID}'
+    user: '${PHANTAZM_UID:-1000}:${PHANTAZM_GID:-1000}'
     command: 'sh -c "java \
     -Xms512M \
     -Xmx512M \
@@ -65,7 +64,7 @@ services:
     velocity.jar"'
     working_dir: '/velocity'
     ports:
-      - '${PHANTAZM_PROXY_PORT_HOST}:${PHANTAZM_PROXY_PORT_CONTAINER}'
+      - '${PHANTAZM_PROXY_PORT_HOST:-25565}:${PHANTAZM_PROXY_PORT_CONTAINER:-25565}'
     volumes:
       - './defaultRunData/velocity:/velocity'
   db:
@@ -75,11 +74,9 @@ services:
     restart: 'always'
     networks:
       - 'standard'
-    env_file:
-      - '.override.env'
     hostname: 'db'
     ports:
-      - '${PHANTAZM_DB_PORT_HOST}:${PHANTAZM_DB_PORT_CONTAINER}'
+      - '${PHANTAZM_DB_PORT_HOST:-3306}:${PHANTAZM_DB_PORT_CONTAINER:-3306}'
     environment:
       # Include full credentials, this build should only ever be used for local development and debugging!
       MARIADB_USER: phantazm
@@ -98,4 +95,4 @@ networks:
     name: phantazm-standard
     external: false
 volumes:
-  db:
+  db: { }

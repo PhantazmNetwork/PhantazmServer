@@ -134,7 +134,7 @@ if [ ! -d "./run/server-1/.git" ]; then
   if [ -n "${PHANTAZM_CONF_REPO_URL}" ]; then
     log_info "Cloning into configuration repository as defined by PHANTAZM_CONF_REPO_URL."
     if ! clone_repository "${PHANTAZM_CONF_REPO_URL}"; then
-      log_error "Check that your .override.env file is configured correctly!"
+      log_error "Check that your .env file is configured correctly!"
       exit 1
     fi
   else
@@ -143,7 +143,7 @@ have to provide one. It looks like this:\n\nhttps://[git-username]:[git-password
 For example, if you are connecting the GitHub repository PhantazmNetwork/Configuration and your\nusername is steanky, \
 your configuration repository would look like this:\n\n\
 https://steanky:[access-token-redacted]@github.com/PhantazmNetwork/Configuration\n\nYou can also define the repository \
-by setting the PHANTAZM_CONF_REPO_URL environment variable in\n.override.env.\n\n"
+by setting the PHANTAZM_CONF_REPO_URL environment variable in\n.env.\n\n"
 
     # Keep asking for the repository URL until we clone successfully.
     while true ; do
@@ -157,14 +157,14 @@ to quit.\n"
       fi
 
       if clone_repository "${repository_url}"; then
-        if ! echo "PHANTAZM_CONF_REPO_URL='${repository_url}'" >> ".override.env"; then
-          log_error "Cloned the repository successfully, but failed to update .override.env. To ensure that the next \
-build succeeds, please add the line PHANTAZM_CONF_REPO_URL='[your-repository-url]' to .override.env. If such a file \
-does not exist in the root directory of the project, create it."
+        if ! echo "PHANTAZM_CONF_REPO_URL='${repository_url}'" >> ".env"; then
+          log_error "Cloned the repository successfully, but failed to update .env. To ensure that the next build \
+          succeeds, please add the line PHANTAZM_CONF_REPO_URL='[your-repository-url]' to .env. If such a file does \
+          not exist in the root directory of the project, create it."
           exit 1
         fi
 
-        log_info "Successfully cloned repository and updated .override.env!"
+        log_info "Successfully cloned repository and updated .env!"
         break
       fi
     done
