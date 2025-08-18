@@ -50,7 +50,6 @@ services:
       - 'standard'
     env_file:
       - '.override.env'
-    environment: *shared_environment
     hostname: 'proxy'
     user: '${PHANTAZM_UID}:${PHANTAZM_GID}'
     command: 'sh -c "java \
