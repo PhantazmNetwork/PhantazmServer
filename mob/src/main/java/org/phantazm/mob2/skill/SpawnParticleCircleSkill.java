@@ -2,7 +2,6 @@ package org.phantazm.mob2.skill;
 
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
-import com.github.steanky.vector.Bounds3D;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +14,6 @@ import org.phantazm.mob2.selector.Selector;
 import org.phantazm.mob2.selector.SelectorComponent;
 
 import java.util.Objects;
-import java.util.Random;
 
 @Model("mob.skill.spawn_particle_circle")
 @Cache
@@ -30,6 +28,10 @@ public class SpawnParticleCircleSkill implements SkillComponent {
         this.data = Objects.requireNonNull(data);
         this.particle = Objects.requireNonNull(particle);
         this.selector = Objects.requireNonNull(selector);
+
+        if(this.data.density == 0.0) {
+            throw new IllegalArgumentException("Density is zero in a spawn_particle_circle invocation.");
+        }
     }
 
     @Override
@@ -41,14 +43,16 @@ public class SpawnParticleCircleSkill implements SkillComponent {
         {
           trigger=null,
           heightOffset=0.0,
-          radius=0.0
+          radius=0.0,
+          density=1.0
         }
         """)
     @DataObject
     public record Data(
         @Nullable Trigger trigger,
         double heightOffset,
-        double radius) {
+        double radius,
+        double density) {
     }
 
     private static class Internal extends TargetedSkill {
@@ -72,15 +76,15 @@ public class SpawnParticleCircleSkill implements SkillComponent {
                 // position = all selected centers?
                 // these must all be cast to integer due to how Bresenham's algorithm works, i.e. the points are based
                 // on integers as this was originally intended for a grid of pixels; x10 accounts for 0.x of an axis
-                int xCenter = (int) Math.floor(position.x() * 10); // part of center
-                int zCenter = (int) Math.floor(position.z() * 10); // part of center
+                int xCenter = (int) Math.floor(position.x() * data.density); // part of center
+                int zCenter = (int) Math.floor(position.z() * data.density); // part of center
                 double y = position.y() + data.heightOffset; // just to make the circle airborne, shouldn't be modified
 
                 double decision = 3 - (2 * data.radius);
                 int x = 0;
                 // z represents iterations
                 // allow only 1 decimal place for the sake of easy implementation?
-                int z = (int) Math.floor(data.radius * 10);
+                int z = (int) Math.floor(data.radius * data.density);
 
                 while(z >= x) {
                     if(decision > 0) {
@@ -97,14 +101,14 @@ public class SpawnParticleCircleSkill implements SkillComponent {
         }
 
         private void drawAllOctets(double y, int xCenter, int zCenter, int x, int z, Instance instance, ParticleWrapper particle) {
-            particle.sendTo(instance, (double)(xCenter + x)/10, y, (double)(zCenter + z)/10);
-            particle.sendTo(instance, (double)(xCenter - x)/10, y, (double)(zCenter + z)/10);
-            particle.sendTo(instance, (double)(xCenter + x)/10, y, (double)(zCenter - z)/10);
-            particle.sendTo(instance, (double)(xCenter - x)/10, y, (double)(zCenter - z)/10);
-            particle.sendTo(instance, (double)(xCenter + z)/10, y, (double)(zCenter + x)/10);
-            particle.sendTo(instance, (double)(xCenter - z)/10, y, (double)(zCenter + x)/10);
-            particle.sendTo(instance, (double)(xCenter + z)/10, y, (double)(zCenter - x)/10);
-            particle.sendTo(instance, (double)(xCenter - z)/10, y, (double)(zCenter - x)/10);
+            particle.sendTo(instance, (double)(xCenter + x)/data.density, y, (double)(zCenter + z)/data.density);
+            particle.sendTo(instance, (double)(xCenter - x)/data.density, y, (double)(zCenter + z)/data.density);
+            particle.sendTo(instance, (double)(xCenter + x)/data.density, y, (double)(zCenter - z)/data.density);
+            particle.sendTo(instance, (double)(xCenter - x)/data.density, y, (double)(zCenter - z)/data.density);
+            particle.sendTo(instance, (double)(xCenter + z)/data.density, y, (double)(zCenter + x)/data.density);
+            particle.sendTo(instance, (double)(xCenter - z)/data.density, y, (double)(zCenter + x)/data.density);
+            particle.sendTo(instance, (double)(xCenter + z)/data.density, y, (double)(zCenter - x)/data.density);
+            particle.sendTo(instance, (double)(xCenter - z)/data.density, y, (double)(zCenter - x)/data.density);
         }
 
         @Override
