@@ -143,7 +143,7 @@ have to provide one. It looks like this:\n\nhttps://[git-username]:[git-password
 For example, if you are connecting the GitHub repository PhantazmNetwork/Configuration and your\nusername is steanky, \
 your configuration repository would look like this:\n\n\
 https://steanky:[access-token-redacted]@github.com/PhantazmNetwork/Configuration\n\nYou can also define the repository \
-by setting the PHANTAZM_CONF_REPO_URL environment variable in\n.env.\n\n"
+by setting the PHANTAZM_CONF_REPO_URL environment variable in .env.\n\n"
 
     # Keep asking for the repository URL until we clone successfully.
     while true ; do

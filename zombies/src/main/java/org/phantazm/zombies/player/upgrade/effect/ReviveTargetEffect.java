@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.core.Target;
 import org.phantazm.core.VecUtils;
+import org.phantazm.zombies.event.player.ZombiesPlayerReviveEvent;
+import org.phantazm.zombies.event.player.ZombiesPlayerStartReviveEvent;
 import org.phantazm.zombies.map.MapSettingsInfo;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.state.ZombiesPlayerState;
@@ -58,16 +60,18 @@ public class ReviveTargetEffect implements UpgradeEffectComponent {
         }
 
         @Override
-        public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
+        public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer selfZombiesPlayer,
             @NotNull TriggerData triggerData) {
-            ZombiesScene scene = zombiesPlayer.getScene();
-            Target targets = selector.select(upgrade, zombiesPlayer, triggerData);
+            ZombiesScene scene = selfZombiesPlayer.getScene();
+            Target targets = selector.select(upgrade, selfZombiesPlayer, triggerData);
+
+            Optional<Player> selfOptional = selfZombiesPlayer.getPlayer();
 
             scene.getAcquirable().sync(ignored -> {
-                targets.forType(Player.class, player -> {
-                    ZombiesPlayer scenePlayer = scene.getPlayer(player.getUuid());
+                targets.forType(Player.class, targetPlayer -> {
+                    ZombiesPlayer targetZombiesPlayer = scene.getPlayer(targetPlayer.getUuid());
 
-                    ZombiesPlayerState currentState = scenePlayer.module().getStateSwitcher().getState();
+                    ZombiesPlayerState currentState = targetZombiesPlayer.module().getStateSwitcher().getState();
 
                     if (currentState == null || !VALID_KEYS.contains(currentState.key()))
                         return;
@@ -77,7 +81,7 @@ public class ReviveTargetEffect implements UpgradeEffectComponent {
                         revivePoint = knockedPlayerState.getReviveHandler().context().getKnockLocation();
                     } else {
                         MapSettingsInfo mapSettingsInfo = scene.mapSettingsInfo();
-                        Optional<Player> playerOptional = zombiesPlayer.getPlayer();
+                        Optional<Player> playerOptional = selfZombiesPlayer.getPlayer();
 
                         if (playerOptional.isPresent() && data.respawnAtPlayer) {
                             revivePoint = playerOptional.get().getPosition();
@@ -87,14 +91,27 @@ public class ReviveTargetEffect implements UpgradeEffectComponent {
                                     mapSettingsInfo.pitch()).add(0.5, 0, 0.5);
                         }
 
-                        player.teleport(Pos.fromPoint(revivePoint));
+                        targetPlayer.teleport(Pos.fromPoint(revivePoint));
                     }
 
-                    Function<?, ? extends ZombiesPlayerState> stateFunction = scenePlayer.module().getStateFunctions()
+                    Function<?, ? extends ZombiesPlayerState> stateFunction = targetZombiesPlayer.module().getStateFunctions()
                         .get(ZombiesPlayerStateKeys.ALIVE);
                     if (stateFunction == null) return;
 
-                    scenePlayer.setState(ZombiesPlayerStateKeys.ALIVE, AlivePlayerStateContext.revive(zombiesPlayer
+                    if (selfOptional.isPresent()) {
+                        Player selfPlayer = selfOptional.get();
+
+                        ZombiesPlayerStartReviveEvent startReviveEvent = new ZombiesPlayerStartReviveEvent(selfPlayer,
+                            selfZombiesPlayer, targetPlayer, targetZombiesPlayer);
+
+                        ZombiesPlayerReviveEvent event = new ZombiesPlayerReviveEvent(selfPlayer, selfZombiesPlayer,
+                            targetPlayer, targetZombiesPlayer);
+
+                        scene.broadcastEvent(startReviveEvent);
+                        scene.broadcastEvent(event);
+                    }
+
+                    targetZombiesPlayer.setState(ZombiesPlayerStateKeys.ALIVE, AlivePlayerStateContext.revive(selfZombiesPlayer
                         .module().getPlayerView().getDisplayNameIfCached().orElse(null), revivePoint));
                 });
             });
