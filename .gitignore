@@ -9,3 +9,4 @@ docker-compose.override.yml
 /tmp
 .env
 setup_log.txt
+devlaunch.sh
