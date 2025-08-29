@@ -3,12 +3,9 @@ package org.phantazm.zombies.player.upgrade.effect;
 import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.Player;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
-import org.phantazm.core.Interval;
 import org.phantazm.zombies.ZombiesTagUtils;
 import org.phantazm.zombies.player.ZombiesPlayer;
 import org.phantazm.zombies.player.upgrade.PlayerUpgrade;
@@ -60,11 +57,9 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, target -> {
                 ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target).setTag(tag, data.value);
 
-                if (!data.ephemeral) {
-                    return;
+                if (data.ephemeral) {
+                    map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
                 }
-
-                map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
             });
         }
 
