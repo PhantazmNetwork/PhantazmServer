@@ -4,6 +4,7 @@ import com.github.steanky.element.core.annotation.*;
 import com.github.steanky.ethylene.mapper.annotation.Default;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.tag.Tag;
+import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.phantazm.commons.InjectionStore;
 import org.phantazm.zombies.ZombiesTagUtils;
@@ -44,7 +45,7 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
         private final Map<UUID, Reference<Entity>> map;
 
         private Internal(Data data, Selector selector) {
-            this.tag = Tag.Boolean(data.tag);
+            this.tag = Tag.Boolean(data.tag).defaultValue(false);
             this.data = data;
             this.selector = selector;
 
@@ -55,19 +56,18 @@ public class SetBooleanTagEffect implements UpgradeEffectComponent {
         public void apply(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer,
             @NotNull TriggerData triggerData) {
             selector.select(upgrade, zombiesPlayer, triggerData).forType(Entity.class, target -> {
-                ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target).setTag(tag, data.value);
+                TagHandler handler = ZombiesTagUtils.sceneLocalTags(zombiesPlayer.getScene(), target);
 
-                if (data.ephemeral) {
-                    map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
-                }
+                if (!data.value) handler.removeTag(tag);
+                else handler.setTag(tag, true);
+
+                if (data.ephemeral && data.value) map.putIfAbsent(target.getUuid(), new WeakReference<>(target));
             });
         }
 
         @Override
         public void clear(@NotNull PlayerUpgrade upgrade, @NotNull ZombiesPlayer zombiesPlayer) {
-            if (data.ephemeral) {
-                ZombiesTagUtils.cleanTagTrackingMap(map, tag, zombiesPlayer);
-            }
+            if (data.ephemeral && data.value) ZombiesTagUtils.cleanTagTrackingMap(map, tag, zombiesPlayer);
         }
     }
 
