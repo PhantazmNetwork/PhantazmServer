@@ -78,7 +78,14 @@ public abstract class InventoryObjectGroupAbstract implements InventoryObjectGro
 
     @Override
     public boolean isEmpty() {
-        return !isFull();
+        IntIterator intIterator = slots.intIterator();
+        while (intIterator.hasNext()) {
+            int slot = intIterator.nextInt();
+            InventoryObject object = profile.getInventoryObject(slot);
+            if (object != null) return false;
+        }
+
+        return true;
     }
 
     @Override

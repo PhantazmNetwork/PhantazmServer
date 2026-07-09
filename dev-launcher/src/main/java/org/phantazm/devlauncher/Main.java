@@ -212,11 +212,14 @@ public class Main {
         }
 
         String[] gradlewArgs = argBuilder == null ? DEFAULT_GRADLE_ARGS : argBuilder.toArray(String[]::new);
-        String[] finalArgs = new String[gradlewArgs.length + 1];
+        String[] finalArgs = new String[gradlewArgs.length + 2];
 
         String osName = System.getProperty("os.name");
+        String javaHome = System.getProperty("java.home");
+
         finalArgs[0] = Path.of(".", osName.toLowerCase().startsWith("windows") ? "gradlew.bat" : "gradlew").toString();
         System.arraycopy(gradlewArgs, 0, finalArgs, 1, gradlewArgs.length);
+        finalArgs[finalArgs.length - 1] = "-Dorg.gradle.java.home=" + javaHome;
         return finalArgs;
     }
 
